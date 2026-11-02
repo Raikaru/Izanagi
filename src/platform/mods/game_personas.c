@@ -3,9 +3,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-enum { BANK_METADATA, BANK_GROWTH, BANK_MODEL, BANK_CANDIDATES, BANK_NAMES, BANK_COUNT };
+enum { BANK_METADATA, BANK_GROWTH, BANK_MODEL, BANK_CANDIDATES, BANK_NAMES, BANK_AFFINITY, BANK_COUNT };
 static const uint32_t bank_stride[BANK_COUNT] = {
-    P4_PERSONA_METADATA_SIZE, P4_PERSONA_GROWTH_SIZE, P4_PERSONA_MODEL_SIZE, P4_PERSONA_CANDIDATES_SIZE, P4_PERSONA_NAME_SIZE
+    P4_PERSONA_METADATA_SIZE, P4_PERSONA_GROWTH_SIZE, P4_PERSONA_MODEL_SIZE, P4_PERSONA_CANDIDATES_SIZE, P4_PERSONA_NAME_SIZE,
+    P4_PERSONA_AFFINITY_SIZE
 };
 typedef struct PersonaRow {
     P4GamePersonaView view;
@@ -148,19 +149,21 @@ static int span_role(const P4GameTableInputSpan *span, P4GameTableInputKind kind
 int p4_game_personas_seal(P4GamePersonas *personas,
     const P4GameTableInputSpan *metadata, const P4GameTableInputSpan *growth,
     const P4GameTableInputSpan *model, const P4GameTableInputSpan *candidates,
-    const P4GameTableInputSpan *original_names, const P4GameText *names, uint32_t revision)
+    const P4GameTableInputSpan *original_names, const P4GameTableInputSpan *affinity,
+    const P4GameText *names, uint32_t revision)
 {
-    const P4GameTableInputSpan *spans[BANK_COUNT] = {metadata, growth, model, candidates, original_names};
+    const P4GameTableInputSpan *spans[BANK_COUNT] = {metadata, growth, model, candidates, original_names, affinity};
     if (!personas || !revision) return P4_TABLE_INVALID;
     if (personas->semantic_revision)
         return personas->semantic_revision == revision && personas->names == names &&
             !memcmp(personas->spans, spans, sizeof spans) ? P4_TABLE_OK : P4_TABLE_CONFLICT;
-    if (personas->count || metadata || growth || model || candidates || original_names) {
+    if (personas->count || metadata || growth || model || candidates || original_names || affinity) {
         if (!span_role(metadata, P4_TABLE_INPUT_PERSONA, 0) || !span_role(growth, P4_TABLE_INPUT_PERSONA, 1) ||
             !span_role(candidates, P4_TABLE_INPUT_PERSONA, 5) ||
             p4_game_table_input_span_owner(metadata) != p4_game_table_input_span_owner(growth) ||
             p4_game_table_input_span_owner(metadata) != p4_game_table_input_span_owner(candidates) ||
-            !span_role(model, P4_TABLE_INPUT_MODEL, 2) || !span_role(original_names, P4_TABLE_INPUT_MSG, 3))
+            !span_role(model, P4_TABLE_INPUT_MODEL, 2) || !span_role(original_names, P4_TABLE_INPUT_MSG, 3) ||
+            !span_role(affinity, P4_TABLE_INPUT_UNIT, 2))
             return P4_TABLE_INVALID;
         for (unsigned bank = 0; bank < BANK_COUNT; ++bank)
             if (p4_game_table_input_span_size(spans[bank]) != (size_t)P4_PERSONA_RETAIL_ROWS * bank_stride[bank])
@@ -194,26 +197,27 @@ static int same_bytes(const P4GameTableInputSpan *span, const uint8_t *bytes, si
         !memcmp(p4_game_table_input_span_bytes(span), bytes, size);
 }
 int p4_game_personas_validate_original(const P4GamePersonas *personas,
-    const uint8_t *metadata, size_t metadata_size, const uint8_t *growth, size_t affinity_size,
-    const uint8_t *model, size_t model_size, const uint8_t *candidates, size_t ai_size,
-    const uint8_t *original_names, size_t original_names_size)
+    const uint8_t *metadata, size_t metadata_size, const uint8_t *growth, size_t growth_size,
+    const uint8_t *model, size_t model_size, const uint8_t *candidates, size_t candidates_size,
+    const uint8_t *original_names, size_t original_names_size, const uint8_t *affinity, size_t affinity_size)
 {
     if (!personas || !personas->semantic_revision) return P4_TABLE_NOT_READY;
     if (!personas->spans[BANK_METADATA]) return P4_TABLE_OK;
     return same_bytes(personas->spans[BANK_METADATA], metadata, metadata_size) &&
-        same_bytes(personas->spans[BANK_GROWTH], growth, affinity_size) &&
+        same_bytes(personas->spans[BANK_GROWTH], growth, growth_size) &&
         same_bytes(personas->spans[BANK_MODEL], model, model_size) &&
-        same_bytes(personas->spans[BANK_CANDIDATES], candidates, ai_size) &&
-        same_bytes(personas->spans[BANK_NAMES], original_names, original_names_size) ?
+        same_bytes(personas->spans[BANK_CANDIDATES], candidates, candidates_size) &&
+        same_bytes(personas->spans[BANK_NAMES], original_names, original_names_size) &&
+        same_bytes(personas->spans[BANK_AFFINITY], affinity, affinity_size) ?
         P4_TABLE_OK : P4_TABLE_CONFLICT;
 }
 int p4_game_personas_materialize(P4GamePersonas *personas,
-    const uint8_t *metadata, size_t metadata_size, const uint8_t *growth, size_t affinity_size,
-    const uint8_t *model, size_t model_size, const uint8_t *candidates, size_t ai_size,
-    const uint8_t *original_names, size_t original_names_size)
+    const uint8_t *metadata, size_t metadata_size, const uint8_t *growth, size_t growth_size,
+    const uint8_t *model, size_t model_size, const uint8_t *candidates, size_t candidates_size,
+    const uint8_t *original_names, size_t original_names_size, const uint8_t *affinity, size_t affinity_size)
 {
-    int result = p4_game_personas_validate_original(personas, metadata, metadata_size, growth, affinity_size,
-        model, model_size, candidates, ai_size, original_names, original_names_size);
+    int result = p4_game_personas_validate_original(personas, metadata, metadata_size, growth, growth_size,
+        model, model_size, candidates, candidates_size, original_names, original_names_size, affinity, affinity_size);
     if (result || personas->revision) return result;
     if (!personas->count) { personas->revision = personas->semantic_revision; return P4_TABLE_OK; }
     if (!personas->allocator.allocate) return P4_TABLE_NOT_FOUND;
@@ -225,7 +229,7 @@ int p4_game_personas_materialize(P4GamePersonas *personas,
         return P4_TABLE_INVALID;
     }
     memset(arena, 0, personas->bytes);
-    const uint8_t *original[BANK_COUNT] = {metadata, growth, model, candidates, original_names};
+    const uint8_t *original[BANK_COUNT] = {metadata, growth, model, candidates, original_names, affinity};
     for (unsigned bank = 0; bank < BANK_COUNT; ++bank)
         memcpy(arena + bank_offset(personas, bank), original[bank], (size_t)P4_PERSONA_RETAIL_ROWS * bank_stride[bank]);
     for (size_t i = 0; i < personas->count; ++i) {
@@ -241,6 +245,7 @@ int p4_game_personas_materialize(P4GamePersonas *personas,
         memcpy(arena + bank_offset(personas, BANK_MODEL) + row->id * P4_PERSONA_MODEL_SIZE, row->model, P4_PERSONA_MODEL_SIZE);
         memcpy(arena + bank_offset(personas, BANK_CANDIDATES) + row->id * P4_PERSONA_CANDIDATES_SIZE, row->candidates, P4_PERSONA_CANDIDATES_SIZE);
         memcpy(arena + bank_offset(personas, BANK_NAMES) + row->id * P4_PERSONA_NAME_SIZE, name.bytes, name.size);
+        memcpy(arena + bank_offset(personas, BANK_AFFINITY) + row->id * P4_PERSONA_AFFINITY_SIZE, row->affinity, P4_PERSONA_AFFINITY_SIZE);
     }
     personas->arena = arena;
     personas->guest = guest;
@@ -279,3 +284,4 @@ uint32_t p4_game_personas_growth(const P4GamePersonas *personas) { return bank_g
 uint32_t p4_game_personas_model(const P4GamePersonas *personas) { return bank_guest(personas, BANK_MODEL); }
 uint32_t p4_game_personas_candidates(const P4GamePersonas *personas) { return bank_guest(personas, BANK_CANDIDATES); }
 uint32_t p4_game_personas_names(const P4GamePersonas *personas) { return bank_guest(personas, BANK_NAMES); }
+uint32_t p4_game_personas_affinity(const P4GamePersonas *personas) { return bank_guest(personas, BANK_AFFINITY); }

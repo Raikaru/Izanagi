@@ -16,6 +16,7 @@
 #include <math.h>
 #include <string.h>
 
+#include "p4pc/crt.h"
 #include "p4pc/gmem.h"
 #include "p4pc/capture_state.h"
 #ifdef P4_MOD_GAME_BINDINGS
@@ -233,6 +234,6 @@ void p4pc_newgame_gate_frame(unsigned frame)
         fprintf(stderr, "p4pc: new-game gate %s at flip %u: field %d room %d (want %d:%d), date index %d (want %d/%d = %d), frame MAD %.4f%% (limit %s)\n", ok ? "PASS" : "FAIL",
                 frame, field, room, wantField, wantRoom, date, wantMonth, wantDay, wantMonth < 0 ? -1 : calDayOfYearFromMonthDay(wantMonth, wantDay), mad, max != NULL ? max : "none");
         fflush(stderr);
-        exit(ok ? 0 : 1);
+        p4pc_exit(ok ? 0 : 1);
     }
 }

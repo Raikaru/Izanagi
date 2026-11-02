@@ -24,6 +24,7 @@
 #include "p4pc/guest.h"
 #include "p4pc/image.h"
 #include "p4pc/crt.h"
+#include "p4pc/hostmath.h"
 #include "p4pc/os.h"
 #include "p4pc/tables.h"
 #include "p4pc/lockstep.h"
@@ -48,7 +49,7 @@ int p4pc_on_normal_exit(void (*callback)(void))
     normal_exit_observer=callback;
     return 0;
 }
-static void notify_normal_exit(void)
+void p4pc_notify_normal_exit(void)
 {
     if(normal_exit_observer)normal_exit_observer();
 }
@@ -74,7 +75,7 @@ void func_0043dc60(int code) {
         }
     }
     fprintf(stderr, "p4pc: game exited with code %d\n", code);
-    if(code==0)notify_normal_exit();
+    if(code==0)p4pc_notify_normal_exit();
     exit(code);
 }
 
@@ -108,7 +109,7 @@ static void game_main(void) {
 
 static void game_entry(void) {
     game_main();
-    notify_normal_exit();
+    p4pc_notify_normal_exit();
     exit(0);
 }
 
@@ -130,6 +131,6 @@ void p4pc_start(int argc, char **argv) {
     (void)argc;
     (void)argv;
     game_main();
-    notify_normal_exit();
+    p4pc_notify_normal_exit();
 }
 #endif

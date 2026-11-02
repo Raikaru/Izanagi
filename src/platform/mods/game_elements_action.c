@@ -3,6 +3,7 @@
 #include "p4pc/game_skills.h"
 #include "p4pc/game_items.h"
 #include "p4pc/gmem.h"
+#include <stdio.h>
 
 static uint16_t le16(const uint8_t *bytes)
 {
@@ -155,6 +156,16 @@ static int resolve_action(const P4GameTables *tables, const P4GameSkills *skills
         if (runtime) {
             result = p4_game_tables_runtime_use_row(tables, P4_TABLE_SOURCE_ACTION, binding);
             if (result) return result;
+            /* One diagnostic line per authored leaf a battle action actually
+             * resolves (mod-witness evidence); retail leaves never print. */
+            static uint8_t reported[32];
+            const uint32_t leaf = binding->element_id;
+            if (leaf >= P4_ELEMENT_RETAIL_COUNT && leaf < 256u && !(reported[leaf >> 3] & (1u << (leaf & 7u)))) {
+                reported[leaf >> 3] |= (uint8_t)(1u << (leaf & 7u));
+                fprintf(stderr, "p4pc: element leaf %u resolves %s %u\n", (unsigned)leaf,
+                    kind == P4_ACTION_ELEMENT_WEAPON ? "weapon" : kind == P4_ACTION_ELEMENT_SKILL ? "skill" : "enemy attack",
+                    (unsigned)source);
+            }
         }
         declared.valid = 1; declared.element_id = binding->element_id; declared.channel_id = binding->channel_id;
     }

@@ -53,10 +53,14 @@ int p4_resources_draw(uint32_t token, float x, float y, float depth, uint32_t rg
     P4Sky2Vertex vertices[4] = {{0}};
     const float u = (float)image->width / (float)image->texture_width;
     const float v = (float)image->height / (float)image->texture_height;
+    /* Native sprites (0046B380) write screen z = D_008872F8 - depth: the Z
+     * scale minus the caller's sprite depth, larger = nearer. The same
+     * convention keeps an authored image at its caller's depth. */
+    const float z = P4_GDATA(float, 0x008872F8u) - depth;
     for (unsigned i = 0; i < 4; ++i) {
         vertices[i].x = x + ((i & 1u) ? width : 0.0f);
         vertices[i].y = y + ((i & 2u) ? height : 0.0f);
-        vertices[i].z = depth; vertices[i].recipZ = 1.0f;
+        vertices[i].z = z; vertices[i].recipZ = 1.0f;
         vertices[i].u = (i & 1u) ? u : 0.0f;
         vertices[i].v = (i & 2u) ? v : 0.0f;
         vertices[i].r = (float)(rgba & 255u);

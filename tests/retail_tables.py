@@ -56,6 +56,13 @@ def battle_files(iso, names):
         return {name: container.file("BATTLE/" + name) for name in names}
 
 
+def data_file(iso, path):
+    """The bytes of DATA.CVM <path> (for example INIT/ITEMTBL.BIN) of the disc image."""
+    with open(iso, "rb") as handle:
+        lba, _ = Volume(handle, 0).find("DATA.CVM")
+        return Volume(handle, lba * SECTOR + CVM_HEADER).file(path)
+
+
 def blocks(packed):
     """The size-prefixed, 16-byte aligned blocks of a packed battle table."""
     result, offset = [], 0

@@ -385,6 +385,30 @@ set_tests_properties(collection_kanji_reunion_0606 PROPERTIES SKIP_RETURN_CODE 7
 add_test(NAME collection_school_0607 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 30000 6:6,6/7 playthrough0606postkanji night_sleep_to_school.walk)
 set_tests_properties(collection_school_0607 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
 
+# Independent June collection cards card2-slot10/-slot11/-slot12/-slot13: each sleeps
+# (or goes out) from its anchor and follows the automatic story, free nights and school
+# days to a native save: 06/20 (through the 06/17-06/18 camping trip), 06/21 (the next
+# anchor's date), 06/23, 06/24.
+add_test(NAME collection_camping_0620 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 50000 6:6,6/20 playthrough0615evening collection0615_to_school0620.walk)
+set_tests_properties(collection_camping_0620 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
+add_test(NAME collection_evening_0621 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 30000 7:2,6/21 playthrough0619home collection0619_to_home0621.walk)
+set_tests_properties(collection_evening_0621 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
+add_test(NAME collection_evening_0623 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 45000 7:2,6/23 playthrough0621evening collection0621_to_home0623.walk)
+set_tests_properties(collection_evening_0623 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
+add_test(NAME collection_junes_0624 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 30000 7:2,6/24 playthrough0623evening collection0623_to_home0624.walk)
+set_tests_properties(collection_junes_0624 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
+# The same anchor through 06/25's information search on Rise (grandmother, Chie, the
+# photographer, the Risette fan, the photographer again) into the TV and a save at the
+# Entrance.
+add_test(NAME collection_rise_search_0625 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 32000 20:1,6/25 playthrough0623evening collection0623_to_rise_tv0625.walk)
+set_tests_properties(collection_rise_search_0625 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
+
+# Independent card2-slot14, June 25 at the TV-world Entrance: travel to Marukyu
+# Striptease and enter from the stage to 1F's arrival (step 41). Not its floors, Shadow
+# Rise or a save.
+add_test(NAME collection_marukyu_entry_0625 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/completed_walk_gate.sh" $<TARGET_FILE:p4pc> 10000 42:0,6/25 playthrough0625tv collection0625_tv_to_marukyu1f.walk)
+set_tests_properties(collection_marukyu_entry_0625 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600)
+
 # Pristine Marukyu 11F collection anchor: Rise cleanup and its following event
 # must survive the retail-layout allocator's post-release model writes, then
 # reach Teddie's first fresh protagonist COMMAND. This is not Teddie defeat.
@@ -395,13 +419,36 @@ set_tests_properties(marukyu_allocator PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl
 add_test(NAME collection_school_story_0627 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 30000 7:2,6/27 playthrough0626postmarukyu collection0626_to_school0627.walk)
 set_tests_properties(collection_school_story_0627 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
 
+# Independent post-Marukyu card2-slot16 again: 06/27 home, then the school days, free nights
+# and evenings of 06/28-07/07 to the 07/08 home save (the next card's date).
+add_test(NAME collection_evening_0708 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 80000 7:2,7/8 playthrough0626postmarukyu collection0626_to_home0708.walk)
+set_tests_properties(collection_evening_0708 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
+
 # Independent collection card3-slot01, before the July school story.
 add_test(NAME collection_school_0709 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 30000 6:6,7/9 playthrough0708evening collection0708_to_school0709.walk)
 set_tests_properties(collection_school_0709 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
 
+# Independent collection card3-slot02: July 9 evening through 07/11 and the school days,
+# free nights and evenings of 07/12-07/17 to the 07/18 home save (the next card's date).
+add_test(NAME collection_evening_0718 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 90000 7:2,7/18 playthrough0709evening collection0709_to_home0718.walk)
+set_tests_properties(collection_evening_0718 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
+
 # Independent collection card3-slot03, July final-exam week through the home save.
 add_test(NAME collection_final_exams_0724 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 30000 7:2,7/24 playthrough0718exameve collection0718_to_exams0719.walk)
 set_tests_properties(collection_final_exams_0724 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
+
+# Independent summer-break cards card3-slot04 (07/26 evening: 07/27 Junes, home, then the
+# automatic days to the 08/01 home save, the next card's date) and card3-slot05 (08/01
+# daytime: out, nights, 08/02 and 08/03's days, home), each with a native save.
+add_test(NAME collection_evening_0801 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 40000 7:2,8/1 playthrough0726evening collection0726_to_home0801.walk)
+set_tests_properties(collection_evening_0801 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
+add_test(NAME collection_evening_0803 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 30000 7:2,8/3 playthrough0801home collection0801_to_home0803.walk)
+set_tests_properties(collection_evening_0803 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
+
+# Independent card3-slot06, August 3 at the TV-world Entrance: Rise's Chase the boy,
+# the Void Quest title screen and Chapter 1's arrival (step 61). Not its floors or Mitsuo.
+add_test(NAME collection_voidquest_entry_0803 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/completed_walk_gate.sh" $<TARGET_FILE:p4pc> 8000 43:0,8/3 playthrough0803tv collection0803_tv_to_voidquest1f.walk)
+set_tests_properties(collection_voidquest_entry_0803 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600)
 
 # Pristine card3-slot07: Mitsuo introduction and fresh protagonist command only.
 add_test(NAME collection_voidquest_opening_0803 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/voidquest_opening_gate.sh" $<TARGET_FILE:p4pc>)
@@ -415,9 +462,22 @@ set_tests_properties(collection_summer_break_0814 PROPERTIES SKIP_RETURN_CODE 77
 add_test(NAME collection_summer_festival_0822 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 40000 7:2,8/22 playthrough0814festival collection0814_to_festival0822.walk)
 set_tests_properties(collection_summer_festival_0822 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
 
+# Independent collection card3-slot10: August 30 evening through 09/01 and the 09/02-09/06
+# school days to the 09/07 home save (the next card's date).
+add_test(NAME collection_evening_0907 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 60000 7:2,9/7 playthrough0830evening collection0830_to_home0907.walk)
+set_tests_properties(collection_evening_0907 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
+
 # Independent collection card3-slot11: school trip through September 11 home save.
 add_test(NAME collection_school_trip_0911 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 45000 7:2,9/11 playthrough0907trip collection0907_to_schooltrip0911.walk)
 set_tests_properties(collection_school_trip_0911 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
+
+# Independent September cards card3-slot12 (09/11 daytime: school days 09/12-09/14,
+# 09/15 evening, the next anchor's date) and card3-slot13 (09/15 evening: 09/16 Junes,
+# 09/17 school, 09/18 evening); native home saves, no Naoto claim.
+add_test(NAME collection_evening_0915 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 40000 7:2,9/15 playthrough0911home collection0911_to_home0915.walk)
+set_tests_properties(collection_evening_0915 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
+add_test(NAME collection_evening_0918 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 30000 7:2,9/18 playthrough0915evening collection0915_to_home0918.walk)
+set_tests_properties(collection_evening_0918 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
 
 # Independent collection card3-slot14: real Rise travel to Secret Laboratory exterior.
 add_test(NAME collection_secretlab_entrance_0918 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/secretlab_entrance_gate.sh" $<TARGET_FILE:p4pc>)
@@ -431,9 +491,24 @@ set_tests_properties(collection_shadow_naoto_opening_0918 PROPERTIES SKIP_RETURN
 add_test(NAME collection_return_1006 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 30000 7:2,10/6 playthrough1005evening collection1005_to_return1006.walk)
 set_tests_properties(collection_return_1006 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
 
+# Independent collection card4-slot01: October 6 evening through 10/07's free night,
+# 10/08 school and 10/09 to the 10/10 home save (the next anchor's date).
+add_test(NAME collection_evening_1010 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 30000 7:2,10/10 playthrough1006evening collection1006_to_home1010.walk)
+set_tests_properties(collection_evening_1010 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
+
 # Independent collection card4-slot02: both exam blocks through classroom native save.
 add_test(NAME collection_midterms_1020 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 50000 6:6,10/20 playthrough1010midterms collection1010_to_midterms1020.walk)
 set_tests_properties(collection_midterms_1020 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
+
+# Independent October cards card4-slot03 (after school 10/20: 10/21's classroom save),
+# card4-slot04 (after school 10/21: 10/22-10/25 to the 10/26 home save) and card4-slot05
+# (10/26 evening: 10/27, 10/28 home save); each later leg reaches the next card's date.
+add_test(NAME collection_school_1021 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 30000 6:6,10/21 playthrough1020school collection1020_to_school1021.walk)
+set_tests_properties(collection_school_1021 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
+add_test(NAME collection_evening_1026 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 50000 7:2,10/26 playthrough1021school collection1021_to_home1026.walk)
+set_tests_properties(collection_evening_1026 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
+add_test(NAME collection_evening_1028 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 30000 7:2,10/28 playthrough1026evening collection1026_to_home1028.walk)
+set_tests_properties(collection_evening_1028 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
 
 # Independent collection card4-slot06: first school festival day and home save.
 add_test(NAME collection_culture_festival_1029 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 30000 7:2,10/29 playthrough1028festival collection1028_to_festival1029.walk)
@@ -442,6 +517,11 @@ set_tests_properties(collection_culture_festival_1029 PROPERTIES SKIP_RETURN_COD
 # Independent collection card4-slot07: remaining festival story through classroom save.
 add_test(NAME collection_culture_festival_1101 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 50000 6:6,11/1 playthrough1029festival collection1029_to_festival1101.walk)
 set_tests_properties(collection_culture_festival_1101 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
+
+# Independent card4-slot07 again: the remaining festival story, home, 11/02-11/03 and
+# 11/04's after-school classroom save (the next card's date).
+add_test(NAME collection_school_1104 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 70000 6:6,11/4 playthrough1029festival collection1029_to_school1104.walk)
+set_tests_properties(collection_school_1104 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
 
 # Independent card4-slot08: abduction investigation, Fool9 and live Heaven entrance.
 add_test(NAME collection_heaven_entrance_1106 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/completed_walk_gate.sh" $<TARGET_FILE:p4pc> 60000 28:1,11/6 playthrough1104school collection1104_to_heaven1106.walk)
@@ -455,6 +535,11 @@ set_tests_properties(collection_kunino_sagiri_opening_1106 PROPERTIES SKIP_RETUR
 add_test(NAME collection_return_1121 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 30000 7:2,11/21 playthrough1120evening collection1120_to_return1121.walk)
 set_tests_properties(collection_return_1121 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
 
+# Independent post-rescue card4-slot10 again: 11/21 home, then 11/22-12/01's school days,
+# free nights and automatic days to the 12/02 home save (the next card's date).
+add_test(NAME collection_evening_1202 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 60000 7:2,12/2 playthrough1120evening collection1120_to_home1202.walk)
+set_tests_properties(collection_evening_1202 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
+
 # Both hospital branches use the same requested MAX18657, never a later substitute.
 # Completed bad ending has no field; GameClearDraw resets the new-cycle date to index9.
 add_test(NAME collection_hospital_bad_1203 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/completed_walk_gate.sh" $<TARGET_FILE:p4pc> 45000 "-1:-1,4/10" playthrough1202max18657 collection1202_max18657_to_hospital_bad.walk)
@@ -464,6 +549,16 @@ set_tests_properties(collection_hospital_bad_1203 PROPERTIES SKIP_RETURN_CODE 77
 add_test(NAME collection_hospital_continue_1203 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 60000 7:2,12/3 playthrough1202max18657 collection1202_max18657_to_hospital_continue.walk)
 set_tests_properties(collection_hospital_continue_1203 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
 
+# Independent card4-slot12, December 3 evening after sparing Namatame: December 4's
+# Junes deduction and hospital questions to the home save. Not the 12/05 clue search.
+add_test(NAME collection_deduction_1204 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 45000 7:2,12/4 playthrough1203evening collection1203_to_home1204.walk)
+set_tests_properties(collection_deduction_1204 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
+
+# Independent card4-slot15: December 6 evening through 12/07's home save;
+# no Magatsu Inaba traversal claim.
+add_test(NAME collection_evening_1207 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 35000 7:2,12/7 playthrough1206evening collection1206_to_home1207.walk)
+set_tests_properties(collection_evening_1207 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
+
 # Independent card4-slot16: final Magatsu field and first Adachi COMMAND, not victory.
 add_test(NAME collection_adachi_opening_1223 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/completed_walk_gate.sh" $<TARGET_FILE:p4pc> 30000 246:3,12/23 playthrough1223magatsu collection1223_magatsu_to_adachi.walk)
 set_tests_properties(collection_adachi_opening_1223 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600)
@@ -471,6 +566,12 @@ set_tests_properties(collection_adachi_opening_1223 PROPERTIES SKIP_RETURN_CODE 
 # Independent post-Magatsu card5-slot01: Christmas through the farewell world map.
 add_test(NAME collection_departure_calendar_0320 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/completed_walk_gate.sh" $<TARGET_FILE:p4pc> 30000 1:1,3/20 playthrough1224evening collection1224_to_departure0320.walk)
 set_tests_properties(collection_departure_calendar_0320 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600)
+
+# Independent card5-slot02, March 20 in the shopping district: go home through the farewell
+# map, play the departure, the normal ending and its credits, and save the new-cycle data
+# over the card (native Save OK; the cleared-game state has no field, calendar index 9).
+add_test(NAME collection_normal_ending_0320 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 50000 "-1:-1,4/10" playthrough0320farewell collection0320_to_normal_ending.walk)
+set_tests_properties(collection_normal_ending_0320 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
 
 # Independent last-day card5-slot05: Rise's destination and live exterior control.
 add_test(NAME collection_yomotsu_entrance_0320 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/completed_walk_gate.sh" $<TARGET_FILE:p4pc> 12000 30:2,3/20 playthrough0320tv collection0320_tv_to_yomotsu_entrance.walk)
@@ -483,6 +584,11 @@ set_tests_properties(collection_izanami_opening_0320 PROPERTIES SKIP_RETURN_CODE
 # Requested untouched CBS18506: native Margaret defeat, post-event Heaven10 control.
 add_test(NAME collection_margaret_0320 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/completed_walk_gate.sh" $<TARGET_FILE:p4pc> 15000 28:2,3/20 playthrough0320margaret18506 collection0320_cbs18506_margaret_victory.walk)
 set_tests_properties(collection_margaret_0320 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600)
+
+# Independent true-ending clear data card5-slot07: LOAD GAME starts the new cycle
+# (difficulty, name entry, opening) to 04/11's living room and its native save.
+add_test(NAME collection_new_cycle_0411 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 50000 7:2,4/11 playthrough0410newcycle collection0410_newcycle_to_home0411.walk)
+set_tests_properties(collection_new_cycle_0411 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
 
 # Rakukaja's ally-target group extends through byte +0x3C. Exercise that path
 # rather than only Zio's enemy target, with the native dream-state input recipe.

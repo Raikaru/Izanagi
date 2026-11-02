@@ -36,11 +36,13 @@ _Noreturn void p4_package_boot_runtime_failed(const char *reason)
     fprintf(stderr, "unexpected intercepted native refusal: %s\n", reason);
     abort();
 }
-/* Enemy-family facts: retail banks published; the staged snapshot may declare
- * added enemies that the element coverage must answer. */
-static uint32_t declared_enemies = 336;
+/* Enemy- and persona-family facts: retail banks published; the staged
+ * snapshots may declare added enemies and personas that the element coverage
+ * must answer. */
+static uint32_t declared_enemies = 336, declared_personas = 256;
 uint32_t p4_game_enemies_native_limit(void) { return 336; }
 uint32_t p4_game_enemies_native_declared_limit(void) { return declared_enemies; }
+uint32_t p4_game_personas_native_declared_limit(void) { return declared_personas; }
 typedef uint8_t u8;
 typedef uint16_t u16;
 typedef uint32_t u32;
@@ -358,13 +360,13 @@ static P4GameTables *native_graph(int complete, int roster)
     base_row(tables, P4_ENTITY_PERSONA, 20, 99, complete ? 19 : 1, P4_CHANNEL_DAMAGE, 100, 100);
     /* Each enemy row's initial selector (id2 = id) and every persona record
      * 1..255 answers the requirement. */
-    for (uint32_t enemy = 0; (roster & 1) && enemy < P4_ENEMY_RETAIL_COUNT + (roster >> 2); ++enemy) {
+    for (uint32_t enemy = 0; (roster & 1) && enemy < P4_ENEMY_RETAIL_COUNT + ((roster >> 2) & 1); ++enemy) {
         char key[P4_TABLE_KEY_SIZE];
         snprintf(key, sizeof key, "test:native-enemy-row-%u", (unsigned)enemy);
         profile_alias(tables, P4_ENTITY_ENEMY, enemy, enemy, 7, key);
         if (enemy != 1) base_row(tables, P4_ENTITY_ENEMY, enemy, 7, 19, P4_CHANNEL_DAMAGE, 100, 100);
     }
-    for (uint32_t persona = 1; (roster & 2) && persona < P4_PERSONA_RETAIL_COUNT; ++persona) {
+    for (uint32_t persona = 1; (roster & 2) && persona < P4_PERSONA_RETAIL_COUNT + ((roster >> 3) & 1); ++persona) {
         if (persona == 20) continue;
         char key[P4_TABLE_KEY_SIZE];
         snprintf(key, sizeof key, "test:native-persona-row-%u", (unsigned)persona);
@@ -405,23 +407,24 @@ static void native_publication(void)
     detach(); p4_game_tables_destroy(incomplete);
     /* Declared aliases alone are not enough: an enemy row whose initial
      * selector, or a persona record, has no alias would refuse mid-battle or
-     * in the compendium, so prepare refuses first. An added enemy the staged
-     * enemy snapshot declares needs its own alias too (roster 3 covers only
-     * the retail rows; roster 7 adds enemy 336). */
-    for (int roster = 0; roster < 4; ++roster) {
-        declared_enemies = roster >= 3 ? 337 : 336;
-        P4GameTables *uncovered = native_graph(1, roster < 3 ? roster : 3);
+     * in the compendium, so prepare refuses first. An added enemy or persona
+     * the staged snapshots declare needs its own alias too (roster 3 covers
+     * only the retail rows; roster bit 4 adds enemy 336, bit 8 persona 256). */
+    for (int roster = 0; roster < 6; ++roster) {
+        declared_enemies = roster == 3 || roster == 5 ? 337 : 336;
+        declared_personas = roster == 4 || roster == 5 ? 257 : 256;
+        P4GameTables *uncovered = native_graph(1, roster < 3 ? roster : roster == 3 ? 3 : roster == 4 ? 7 : 11);
         assert(p4_game_elements_boot_stage(uncovered, inputs.skills, NULL) == P4_TABLE_OK); consumers(uncovered);
         assert(p4_game_tables_battle_complete() == P4_TABLE_NOT_READY);
         assert(consumer_prepares == 1 && !consumer_commits && !p4_game_elements_active());
         assert(!p4_game_elements_prepared_snapshot());
         detach(); p4_game_tables_destroy(uncovered);
     }
-    P4GameTables *added = native_graph(1, 7);
+    P4GameTables *added = native_graph(1, 15);
     assert(p4_game_elements_boot_stage(added, inputs.skills, NULL) == P4_TABLE_OK); consumers(added);
     assert(p4_game_tables_battle_complete() == P4_TABLE_OK && p4_game_elements_active() == added);
     detach(); p4_game_tables_destroy(added);
-    declared_enemies = 336;
+    declared_enemies = 336; declared_personas = 256;
     P4GameTables *tables = native_graph(1, 3);
     assert(p4_game_elements_boot_stage(tables, inputs.skills, NULL) == P4_TABLE_OK);
     assert(!p4_game_elements_prepared_snapshot());

@@ -1,4 +1,4 @@
-/* Real Core/VFS original inputs, CPU seal and guest materialization of the five
+/* Real Core/VFS original inputs, CPU seal and guest materialization of the six
  * persona banks. Synthetic banks do not prove native battle/model/AI behavior. */
 #include "p4pc/game_personas.h"
 #include "p4pc/game_table_inputs.h"
@@ -13,13 +13,13 @@ static int fail_allocate, use_status;
 static struct Fixture {
     P4GamePersonas *personas, *empty;
     P4GameText *names;
-    P4GameTableInput *persona, *model, *message;
+    P4GameTableInput *persona, *model, *message, *unit;
     const char *mode;
     unsigned published;
 } fixture;
 static uint8_t metadata[RETAIL * P4_PERSONA_METADATA_SIZE], growth[RETAIL * P4_PERSONA_GROWTH_SIZE];
 static uint8_t model[RETAIL * P4_PERSONA_MODEL_SIZE], candidates[RETAIL * P4_PERSONA_CANDIDATES_SIZE];
-static uint8_t names[RETAIL * P4_PERSONA_NAME_SIZE];
+static uint8_t names[RETAIL * P4_PERSONA_NAME_SIZE], affinity[RETAIL * P4_PERSONA_AFFINITY_SIZE];
 static void *allocate(void *user, uint32_t size, uint32_t *guest)
 {
     (void)user;
@@ -70,6 +70,7 @@ static P4GamePersonaDesc persona(uint32_t id, uint32_t model_source, const char 
     memset(row.growth, seed + 11, sizeof row.growth);
     memset(row.model, seed + 21, sizeof row.model);
     memset(row.candidates, seed + 31, sizeof row.candidates);
+    memset(row.affinity, seed + 41, sizeof row.affinity);
     return row;
 }
 static void release_inputs(void)
@@ -77,7 +78,8 @@ static void release_inputs(void)
     p4_game_table_input_destroy(fixture.persona);
     p4_game_table_input_destroy(fixture.model);
     p4_game_table_input_destroy(fixture.message);
-    fixture.persona = fixture.model = fixture.message = NULL;
+    p4_game_table_input_destroy(fixture.unit);
+    fixture.persona = fixture.model = fixture.message = fixture.unit = NULL;
 }
 static int prepare(void *user)
 {
@@ -85,46 +87,52 @@ static int prepare(void *user)
     assert(!p4_game_table_input_prepare(P4_TABLE_INPUT_PERSONA, 1048576, &fixture.persona, NULL));
     assert(!p4_game_table_input_prepare(P4_TABLE_INPUT_MODEL, 1048576, &fixture.model, NULL));
     assert(!p4_game_table_input_prepare(P4_TABLE_INPUT_MSG, 1048576, &fixture.message, NULL));
+    assert(!p4_game_table_input_prepare(P4_TABLE_INPUT_UNIT, 1048576, &fixture.unit, NULL));
     assert(!p4_game_table_input_seal(fixture.persona) && !p4_game_table_input_seal(fixture.model));
-    assert(!p4_game_table_input_seal(fixture.message));
+    assert(!p4_game_table_input_seal(fixture.message) && !p4_game_table_input_seal(fixture.unit));
     const P4GameTableInputSpan *persona0 = p4_game_table_input_span(fixture.persona, 0);
     const P4GameTableInputSpan *persona1 = p4_game_table_input_span(fixture.persona, 1);
     const P4GameTableInputSpan *model2 = p4_game_table_input_span(fixture.model, 2);
     const P4GameTableInputSpan *persona5 = p4_game_table_input_span(fixture.persona, 5);
     const P4GameTableInputSpan *msg3 = p4_game_table_input_span(fixture.message, 3);
+    const P4GameTableInputSpan *unit2 = p4_game_table_input_span(fixture.unit, 2);
     P4GamePersonas *personas = fixture.personas;
     if (strcmp(fixture.mode, "valid")) {
-        assert(p4_game_personas_seal(personas, persona0, persona1, model2, persona5, msg3, fixture.names, 8) == P4_TABLE_INVALID);
-        assert(p4_game_personas_seal(fixture.empty, persona0, persona1, model2, persona5, msg3, NULL, 8) == P4_TABLE_INVALID);
+        assert(p4_game_personas_seal(personas, persona0, persona1, model2, persona5, msg3, unit2, fixture.names, 8) == P4_TABLE_INVALID);
+        assert(p4_game_personas_seal(fixture.empty, persona0, persona1, model2, persona5, msg3, unit2, NULL, 8) == P4_TABLE_INVALID);
         assert(!allocations && !p4_game_personas_semantic_revision(personas));
         return -1; /* The real Core transaction must roll back, never publish. */
     }
     /* Every bank is its own retail pointer slot, never a neighbouring block. */
-    assert(p4_game_personas_seal(personas, persona1, persona0, model2, persona5, msg3, fixture.names, 8) == P4_TABLE_INVALID);
-    assert(p4_game_personas_seal(personas, persona0, persona1, p4_game_table_input_span(fixture.model, 0), persona5, msg3,
+    assert(p4_game_personas_seal(personas, persona1, persona0, model2, persona5, msg3, unit2, fixture.names, 8) == P4_TABLE_INVALID);
+    assert(p4_game_personas_seal(personas, persona0, persona1, p4_game_table_input_span(fixture.model, 0), persona5, msg3, unit2,
         fixture.names, 8) == P4_TABLE_INVALID);
-    assert(p4_game_personas_seal(personas, persona0, persona1, model2, p4_game_table_input_span(fixture.persona, 4), msg3,
+    assert(p4_game_personas_seal(personas, persona0, persona1, model2, p4_game_table_input_span(fixture.persona, 4), msg3, unit2,
         fixture.names, 8) == P4_TABLE_INVALID);
-    assert(p4_game_personas_seal(personas, persona0, persona1, model2, persona5, p4_game_table_input_span(fixture.message, 1),
+    assert(p4_game_personas_seal(personas, persona0, persona1, model2, persona5, p4_game_table_input_span(fixture.message, 1), unit2,
         fixture.names, 8) == P4_TABLE_INVALID);
-    assert(p4_game_personas_seal(personas, persona0, persona1, model2, persona5, NULL, fixture.names, 8) == P4_TABLE_INVALID);
+    assert(p4_game_personas_seal(personas, persona0, persona1, model2, persona5, NULL, unit2, fixture.names, 8) == P4_TABLE_INVALID);
+    /* UNIT2 is the persona affinity bank; UNIT0/UNIT1 are the enemy banks. */
+    assert(p4_game_personas_seal(personas, persona0, persona1, model2, persona5, msg3,
+        p4_game_table_input_span(fixture.unit, 1), fixture.names, 8) == P4_TABLE_INVALID);
+    assert(p4_game_personas_seal(personas, persona0, persona1, model2, persona5, msg3, NULL, fixture.names, 8) == P4_TABLE_INVALID);
     /* PERSONA0, PERSONA1 and PERSONA5 are one sealed PERSONA.TBL, not two loads. */
     P4GameTableInput *other_unit = NULL;
     assert(!p4_game_table_input_prepare(P4_TABLE_INPUT_PERSONA, 1048576, &other_unit, NULL));
     assert(!p4_game_table_input_seal(other_unit));
-    assert(p4_game_personas_seal(personas, persona0, p4_game_table_input_span(other_unit, 1), model2, persona5, msg3,
+    assert(p4_game_personas_seal(personas, persona0, p4_game_table_input_span(other_unit, 1), model2, persona5, msg3, unit2,
         fixture.names, 8) == P4_TABLE_INVALID);
     p4_game_table_input_destroy(other_unit);
     P4TextProfile message = {P4_TEXT_ENCODING_US_NATIVE, P4_TEXT_FONT_US_NATIVE};
     P4TextProfile raw = {P4_TEXT_ENCODING_US_RAW_NATIVE, P4_TEXT_FONT_US_NATIVE};
     P4GameText *text = p4_game_tables_text_create(NULL, &message);
     assert(text && !p4_game_tables_text_seal(text, 1));
-    assert(p4_game_personas_seal(personas, persona0, persona1, model2, persona5, msg3, text, 8) == P4_TABLE_INVALID);
+    assert(p4_game_personas_seal(personas, persona0, persona1, model2, persona5, msg3, unit2, text, 8) == P4_TABLE_INVALID);
     p4_game_tables_text_destroy(text);
     text = p4_game_tables_text_create(NULL, &raw);
     assert(text);
-    assert(p4_game_personas_seal(personas, persona0, persona1, model2, persona5, msg3, text, 8) == P4_TABLE_NOT_READY);
-    assert(p4_game_personas_seal(personas, persona0, persona1, model2, persona5, msg3, NULL, 8) == P4_TABLE_NOT_READY);
+    assert(p4_game_personas_seal(personas, persona0, persona1, model2, persona5, msg3, unit2, text, 8) == P4_TABLE_NOT_READY);
+    assert(p4_game_personas_seal(personas, persona0, persona1, model2, persona5, msg3, unit2, NULL, 8) == P4_TABLE_NOT_READY);
     p4_game_tables_text_destroy(text);
     /* The MSG3 stride is 17 bytes including NUL. */
     text = p4_game_tables_text_create(NULL, &raw);
@@ -133,14 +141,14 @@ static int prepare(void *user)
     P4GamePersonas *other = p4_game_personas_create(NULL);
     P4GamePersonaDesc row = persona(RETAIL, 1, "test:long-name");
     assert(other && !p4_game_personas_register(other, "test", &row));
-    assert(p4_game_personas_seal(other, persona0, persona1, model2, persona5, msg3, text, 8) == P4_TABLE_INVALID);
+    assert(p4_game_personas_seal(other, persona0, persona1, model2, persona5, msg3, unit2, text, 8) == P4_TABLE_INVALID);
     p4_game_personas_destroy(other);
     p4_game_tables_text_destroy(text);
     /* Dense IDs: no zero row is ever invented between retail and added rows. */
     other = p4_game_personas_create(NULL);
     row = persona(RETAIL + 1u, 1, "test:sparse");
     assert(other && !p4_game_personas_register(other, "test", &row));
-    assert(p4_game_personas_seal(other, persona0, persona1, model2, persona5, msg3, fixture.names, 8) == P4_TABLE_INVALID);
+    assert(p4_game_personas_seal(other, persona0, persona1, model2, persona5, msg3, unit2, fixture.names, 8) == P4_TABLE_INVALID);
     p4_game_personas_destroy(other);
     other = p4_game_personas_create(NULL);
     for (uint32_t id = RETAIL; id < RETAIL + 4u; ++id) {
@@ -149,16 +157,16 @@ static int prepare(void *user)
         row = persona(id, 1, key);
         assert(other && !p4_game_personas_register(other, "test", &row));
     }
-    assert(p4_game_personas_seal(other, persona0, persona1, model2, persona5, msg3, fixture.names, 8) == P4_TABLE_NOT_FOUND);
+    assert(p4_game_personas_seal(other, persona0, persona1, model2, persona5, msg3, unit2, fixture.names, 8) == P4_TABLE_NOT_FOUND);
     assert(!p4_game_personas_semantic_revision(other) && !p4_game_personas_find(other, RETAIL));
     p4_game_personas_destroy(other);
     /* An empty snapshot needs no names and keeps the retail domain. */
-    assert(!p4_game_personas_seal(fixture.empty, persona0, persona1, model2, persona5, msg3, NULL, 8));
+    assert(!p4_game_personas_seal(fixture.empty, persona0, persona1, model2, persona5, msg3, unit2, NULL, 8));
     assert(!p4_game_personas_validate_runtime_sources(fixture.empty));
-    assert(!p4_game_personas_seal(personas, persona0, persona1, model2, persona5, msg3, fixture.names, 8));
-    assert(!p4_game_personas_seal(personas, persona0, persona1, model2, persona5, msg3, fixture.names, 8));
-    assert(p4_game_personas_seal(personas, persona0, persona1, model2, persona5, msg3, fixture.names, 9) == P4_TABLE_CONFLICT);
-    assert(p4_game_personas_seal(personas, persona0, persona1, model2, persona5, msg3, NULL, 8) == P4_TABLE_CONFLICT);
+    assert(!p4_game_personas_seal(personas, persona0, persona1, model2, persona5, msg3, unit2, fixture.names, 8));
+    assert(!p4_game_personas_seal(personas, persona0, persona1, model2, persona5, msg3, unit2, fixture.names, 8));
+    assert(p4_game_personas_seal(personas, persona0, persona1, model2, persona5, msg3, unit2, fixture.names, 9) == P4_TABLE_CONFLICT);
+    assert(p4_game_personas_seal(personas, persona0, persona1, model2, persona5, msg3, unit2, NULL, 8) == P4_TABLE_CONFLICT);
     row = persona(RETAIL + 3u, 1, "test:late");
     assert(p4_game_personas_register(personas, "test", &row) == P4_TABLE_FROZEN);
     assert(p4_game_personas_bind_runtime_use(personas, original_use, authored_use, &fixture) == P4_TABLE_FROZEN);
@@ -186,17 +194,18 @@ static void rollback(void *user) { assert(!user); release_inputs(); }
 static int materialize(P4GamePersonas *personas)
 {
     return p4_game_personas_materialize(personas, metadata, sizeof metadata, growth, sizeof growth,
-        model, sizeof model, candidates, sizeof candidates, names, sizeof names);
+        model, sizeof model, candidates, sizeof candidates, names, sizeof names, affinity, sizeof affinity);
 }
 static void check_guest(void)
 {
     P4GamePersonas *personas = fixture.personas;
-    const uint32_t bases[5] = {p4_game_personas_metadata(personas), p4_game_personas_growth(personas),
-        p4_game_personas_model(personas), p4_game_personas_candidates(personas), p4_game_personas_names(personas)};
-    const uint8_t *retail[5] = {metadata, growth, model, candidates, names};
-    const size_t strides[5] = {P4_PERSONA_METADATA_SIZE, P4_PERSONA_GROWTH_SIZE, P4_PERSONA_MODEL_SIZE,
-        P4_PERSONA_CANDIDATES_SIZE, P4_PERSONA_NAME_SIZE};
-    for (unsigned bank = 0; bank < 5; ++bank) {
+    const uint32_t bases[6] = {p4_game_personas_metadata(personas), p4_game_personas_growth(personas),
+        p4_game_personas_model(personas), p4_game_personas_candidates(personas), p4_game_personas_names(personas),
+        p4_game_personas_affinity(personas)};
+    const uint8_t *retail[6] = {metadata, growth, model, candidates, names, affinity};
+    const size_t strides[6] = {P4_PERSONA_METADATA_SIZE, P4_PERSONA_GROWTH_SIZE, P4_PERSONA_MODEL_SIZE,
+        P4_PERSONA_CANDIDATES_SIZE, P4_PERSONA_NAME_SIZE, P4_PERSONA_AFFINITY_SIZE};
+    for (unsigned bank = 0; bank < 6; ++bank) {
         assert(bases[bank] && !(bases[bank] & 15u));
         assert(!memcmp(P4_G2H(bases[bank]), retail[bank], RETAIL * strides[bank]));
     }
@@ -205,6 +214,8 @@ static void check_guest(void)
         const uint8_t *added[4] = {row->metadata, row->growth, row->model, row->candidates};
         for (unsigned bank = 0; bank < 4; ++bank)
             assert(!memcmp((const uint8_t *)P4_G2H(bases[bank]) + row->id * strides[bank], added[bank], strides[bank]));
+        assert(!memcmp((const uint8_t *)P4_G2H(bases[5]) + row->id * P4_PERSONA_AFFINITY_SIZE, row->affinity,
+            P4_PERSONA_AFFINITY_SIZE));
         const char *name = (const char *)P4_G2H(bases[4]) + row->id * P4_PERSONA_NAME_SIZE;
         const size_t length = i == 1 ? 1u : P4_PERSONA_NAME_SIZE - 1u;
         assert(strlen(name) == length && name[0] == 'A' + (char)(row->id % 26u));
@@ -279,22 +290,24 @@ int main(int argc, char **argv)
         assert(!result && fixture.published == 1 && !allocations);
         memset(metadata, 0x55, sizeof metadata); memset(growth, 0x41, sizeof growth);
         memset(model, 0x4d, sizeof model); memset(candidates, 0xa1, sizeof candidates); memset(names, 0x4e, sizeof names);
+        memset(affinity, 0xa7, sizeof affinity);
         /* Empty snapshots verify the loaded banks and allocate nothing. */
         assert(!materialize(fixture.empty) && !allocations && p4_game_personas_revision(fixture.empty) == 8);
         assert(!p4_game_personas_metadata(fixture.empty) && !p4_game_personas_names(fixture.empty));
         assert(!p4_game_personas_runtime_use(fixture.empty, 10) && original_uses == 1);
         assert(p4_game_personas_runtime_use(fixture.empty, RETAIL) == P4_TABLE_NOT_FOUND);
         /* Loaded banks that differ from the sealed source refuse before allocating. */
-        uint8_t *banks[5] = {metadata, growth, model, candidates, names};
-        const size_t last[5] = {sizeof metadata - 1, sizeof growth - 1, sizeof model - 1,
-            sizeof candidates - 1, sizeof names - 1};
-        for (unsigned bank = 0; bank < 5; ++bank) {
+        uint8_t *banks[6] = {metadata, growth, model, candidates, names, affinity};
+        const size_t last[6] = {sizeof metadata - 1, sizeof growth - 1, sizeof model - 1,
+            sizeof candidates - 1, sizeof names - 1, sizeof affinity - 1};
+        for (unsigned bank = 0; bank < 6; ++bank) {
             banks[bank][last[bank]] ^= 1;
             assert(materialize(fixture.personas) == P4_TABLE_CONFLICT);
             banks[bank][last[bank]] ^= 1;
         }
         assert(p4_game_personas_materialize(fixture.personas, metadata, sizeof metadata - 1, growth,
-            sizeof growth, model, sizeof model, candidates, sizeof candidates, names, sizeof names) == P4_TABLE_CONFLICT);
+            sizeof growth, model, sizeof model, candidates, sizeof candidates, names, sizeof names,
+            affinity, sizeof affinity) == P4_TABLE_CONFLICT);
         assert(!allocations && !p4_game_personas_revision(fixture.personas));
         fail_allocate = 1;
         assert(materialize(fixture.personas) == P4_TABLE_NOMEM);

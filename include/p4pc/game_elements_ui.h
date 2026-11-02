@@ -18,7 +18,8 @@
  * UINT32_MAX is a legal ID. A legacy projection lets the static persona panel
  * read its actual seven-word native snapshot for ONLY the exact native pair of
  * that selector (0..6 = Phys, Fire, Ice, Elec, Wind damage; Light, Dark KO),
- * at native and semantic profile 0. An authored side row always wins. */
+ * at persona native profile 0 (any semantic profile ID, as battle's natural
+ * route). An authored side row always wins. */
 typedef struct P4GameElementUiColumn {
     uint32_t element_id, component, channel_id;
     uint32_t marker_valid, marker_component, marker_channel_id;

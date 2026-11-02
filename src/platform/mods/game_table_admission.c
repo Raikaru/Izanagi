@@ -91,7 +91,7 @@ static int prepare(void *user, const char *table, const char *path, uint32_t row
         const int owned = skill ? kind == P4_TABLE_INPUT_SKILL || kind == P4_TABLE_INPUT_EFFECT ||
             kind == P4_TABLE_INPUT_MSG : enemy ? kind == P4_TABLE_INPUT_UNIT || kind == P4_TABLE_INPUT_MODEL ||
             kind == P4_TABLE_INPUT_AICALC || kind == P4_TABLE_INPUT_MSG : kind == P4_TABLE_INPUT_PERSONA ||
-            kind == P4_TABLE_INPUT_MODEL || kind == P4_TABLE_INPUT_MSG;
+            kind == P4_TABLE_INPUT_MODEL || kind == P4_TABLE_INPUT_MSG || kind == P4_TABLE_INPUT_UNIT;
         if (owned && !strcmp(path, p4_game_table_input_label(kind))) { input = staged_inputs[i]; break; }
     }
     if (!input) return P4_TABLE_NOT_FOUND;

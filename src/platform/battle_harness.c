@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "p4pc/crt.h"
 #include "p4pc/gmem.h"
 #include "p4pc/capture_state.h"
 #include "p4pc/battle_sim.h"
@@ -169,7 +170,7 @@ void p4pc_battle_harness_frame(unsigned frame)
                 int ok = st >= 7 && lit >= 0.5;
                 fprintf(stderr, "p4pc: battle gate %s: btlMain state %d (need %s), %.3f of the captured frame lit (need 0.5+)\n", ok ? "PASS" : "FAIL", (int)st, "7+", lit);
                 fflush(stderr);
-                exit(ok ? 0 : 1);
+                p4pc_exit(ok ? 0 : 1);
             }
         }
         {   /* every change of the pad edge word the game sees, so a scripted press can be told from one the game ignored */

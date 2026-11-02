@@ -264,8 +264,9 @@ static int record(Parser *parser)
             !hex_bytes(take(node, "metadata"), value.metadata, sizeof value.metadata) ||
             !hex_bytes(take(node, "growth"), value.growth, sizeof value.growth) ||
             !hex_bytes(take(node, "model"), value.model, sizeof value.model) ||
-            !hex_bytes(take(node, "candidates"), value.candidates, sizeof value.candidates))
-            return fail(parser, "Invalid persona fields or exact14/70/88/4-byte little-endian rows");
+            !hex_bytes(take(node, "candidates"), value.candidates, sizeof value.candidates) ||
+            !hex_bytes(take(node, "affinity"), value.affinity, sizeof value.affinity))
+            return fail(parser, "Invalid persona fields or exact14/70/88/4/32-byte little-endian rows");
         if (!all_used(node)) return fail(parser, "Unknown persona attribute");
         P4GamePersonas *personas = p4_game_tables_builder_personas(target->builder);
         if (!personas) return fail(parser, "Persona family is unavailable or already sealed");

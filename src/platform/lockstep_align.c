@@ -2,7 +2,9 @@
  * No environment opt-in means no allocation, I/O, guest writes or barriers. */
 #include "p4pc/lockstep_align_runtime.h"
 #include "p4pc/battle_live.h"
+#include "p4pc/lockstep_disc.h"
 #include "p4pc/lockstep_align_input.h"
+#include "p4pc/crt.h"
 #include "p4pc/guest.h"
 #include <SDL3/SDL.h>
 #include <stdlib.h>
@@ -71,6 +73,8 @@ int p4pc_align_init(const char *directory, FILE *replay) {
     if (!SDL_CreateDirectory(path)) align_fail(SDL_GetError());
     const char *source=getenv("P4PC_LOCKSTEP_ALIGNMENT_REPLAY");
     if (source) snprintf(sAlign->replay_directory,sizeof sAlign->replay_directory,"%s",source);
+    if (p4pc_lockstep_disc_open(sAlign->directory) && !battle_anchor)
+        align_fail("the disc replay holds reads only after a battle qualification anchor");
     snprintf(path,sizeof path,"%s/port-trace.bin",sAlign->directory);
     sAlign->trace=align_open(path,"wb");
     if (fwrite("P4ALTR2\n",1,8,sAlign->trace)!=8) align_fail("writing trace header");
@@ -166,7 +170,7 @@ void p4pc_align_pad_read(void) { if (sAlign) sAlign->pads++; }
 const uint8_t *p4pc_align_replay_pad(const P4WalkHost *host) {
     const uint8_t *row=p4la_source_pad(&sAlign->input,p4la_word(host,P4LS_GAME_FRAME));
     if (!row) {
-        if (sAlign->input.eof) { if (p4_battle_live_lockstep_eof()) exit(4); exit(0); }
+        if (sAlign->input.eof) { if (p4_battle_live_lockstep_eof()) exit(4); p4pc_exit(0); }
         align_fail(sAlign->input.error);
     }
     return row;
@@ -174,7 +178,7 @@ const uint8_t *p4pc_align_replay_pad(const P4WalkHost *host) {
 const uint8_t *p4pc_align_replay_frame(const P4WalkHost *host) {
     const int outcome=p4la_source_frame(&sAlign->input,p4la_word(host,P4LS_GAME_FRAME));
     if (outcome<0) align_fail(sAlign->input.error);
-    if (outcome==3) { if (p4_battle_live_lockstep_eof()) exit(4); exit(0); }
+    if (outcome==3) { if (p4_battle_live_lockstep_eof()) exit(4); p4pc_exit(0); }
     return sAlign->input.presented;
 }
 void p4pc_align_meta(FILE *record, uint32_t frame, const uint32_t marker[8]) {
@@ -269,8 +273,11 @@ void p4pc_align_boundary(const P4WalkHost *host, const uint32_t marker[8]) {
     if (!status) align_fail("boundary equality/proof failed; no state was resynchronized");
     snprintf(path,sizeof path,"%s/port-after.ram",folder); align_dump(path);
     p4la_accept(&sAlign->tracker,marker);
-    if (status==6u) p4pc_align_battle_guard=1;
-    if (status==4u) { if (p4_battle_live_lockstep_boundary()) exit(4); exit(0); }
+    if (status==6u) {
+        p4pc_align_battle_guard=1;
+        p4pc_lockstep_disc_activate(p4la_word(host,P4LS_GAME_FRAME));
+    }
+    if (status==4u) { if (p4_battle_live_lockstep_boundary()) exit(4); p4pc_exit(0); }
     if (status==5u) exit(4);
     if (status!=1u && status!=2u && status!=6u) align_fail("unknown boundary response");
     uint32_t locked[8];

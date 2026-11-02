@@ -139,7 +139,7 @@ static _Noreturn void recover(const P4PackageProvider *provider,const char *reas
     }
     p4_package_boot_health_recorded();
     if(restart){
-        if(!p4_os_request_restart(detail))exit(EXIT_SUCCESS);
+        if(!p4_os_request_restart(detail))p4pc_exit(EXIT_SUCCESS);
         message("Persona 4 restart unavailable","Your recovery settings were saved, but this platform could not schedule a fresh process. Quit and start the game again manually.");
     }
     /* No fake rollback/early destructor: native work may still retain these

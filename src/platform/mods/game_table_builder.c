@@ -132,7 +132,8 @@ P4GamePersonas *p4_game_tables_builder_personas(P4GameTablesDefinitionBuilder *b
         b->sealing = 1;
         return NULL;
     }
-    b->input_mask |= (1u << P4_TABLE_INPUT_PERSONA) | (1u << P4_TABLE_INPUT_MODEL) | (1u << P4_TABLE_INPUT_MSG);
+    b->input_mask |= (1u << P4_TABLE_INPUT_PERSONA) | (1u << P4_TABLE_INPUT_MODEL) | (1u << P4_TABLE_INPUT_MSG) |
+        (1u << P4_TABLE_INPUT_UNIT);
     return b->personas;
 }
 P4GameText *p4_game_tables_builder_text(P4GameTablesDefinitionBuilder *b, uint32_t role)
@@ -203,9 +204,11 @@ int p4_game_tables_builder_seal(P4GameTablesDefinitionBuilder *b,
         const P4GameTableInput *persona = p4_game_tables_builder_input(b, P4_TABLE_INPUT_PERSONA);
         const P4GameTableInput *model = p4_game_tables_builder_input(b, P4_TABLE_INPUT_MODEL);
         const P4GameTableInput *msg = p4_game_tables_builder_input(b, P4_TABLE_INPUT_MSG);
+        const P4GameTableInput *unit = p4_game_tables_builder_input(b, P4_TABLE_INPUT_UNIT);
         result = p4_game_personas_seal(b->personas, p4_game_table_input_span(persona, 0),
             p4_game_table_input_span(persona, 1), p4_game_table_input_span(model, 2),
-            p4_game_table_input_span(persona, 5), p4_game_table_input_span(msg, 3), b->names, b->registry_revision);
+            p4_game_table_input_span(persona, 5), p4_game_table_input_span(msg, 3),
+            p4_game_table_input_span(unit, 2), b->names, b->registry_revision);
     }
     if (!result) result = p4_game_table_sources_seal(b->sources);
     if (!result && p4_game_table_native_uses_prepare(b->inputs, b->input_count, b->sources, &b->native_uses))

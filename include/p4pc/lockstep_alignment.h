@@ -325,9 +325,30 @@ static inline int p4la_battle_entry(const P4AlignTracker *t, const P4WalkHost *h
         p4la_word(h,P4LS_GAME_FRAME)-t->effect_changed>=P4LA_QUIET_UPDATES &&
         p4la_collision_transition_done(h) && p4la_first_action(h);
 }
+/* The animation state behind a model layer's mirrored time: its RtAnimInterpolator's
+ * currentTime and pNextFrame, the per-node interpolated keyframes after the 0x4c-byte
+ * header, and the HAnim pose matrices (pad lanes excluded). */
+static inline int p4la_layer_animation_word(const P4WalkHost *h, uint32_t layer, uint32_t a) {
+    const uint32_t hierarchy=p4la_word(h,layer+0x20u);
+    if (!p4la_address(hierarchy,0x24u)) return 0;
+    const uint32_t interp=p4la_word(h,hierarchy+0x20u);
+    if (p4la_address(interp,0x4cu)) {
+        const uint32_t size=p4la_word(h,interp+0x24u), nodes=p4la_word(h,interp+0x2cu);
+        if (a==interp+4u || a==interp+8u) return 1;
+        if (size>=8u && size<=0x100u && !(size&3u) && nodes && nodes<=256u &&
+            a>=interp+0x4cu && a<interp+0x4cu+nodes*size)
+            return !(a&3u) && p4la_address(interp,0x4cu+nodes*size);
+    }
+    const uint32_t matrices=p4la_word(h,hierarchy+8u), nodes=p4la_word(h,hierarchy+4u);
+    if (nodes && nodes<=256u && a>=matrices && a<matrices+nodes*0x40u && p4la_address(matrices,nodes*0x40u)) {
+        const uint32_t lane=((a-matrices)&0x3fu)>>2;
+        return !(a&3u) && lane!=7u && lane!=11u && lane!=15u;
+    }
+    return 0;
+}
 /* Words a battle-qualification response may write on the native participant:
- * the shared effect bank, a battle unit's model-layer time/previous_time, or a
- * battle action's state timer (the load-wait clocks). */
+ * the shared effect bank, a battle unit's model-layer time/previous_time and the
+ * animation state behind it, or a battle action's state timer (the load-wait clocks). */
 static inline int p4la_battle_patch_word(const P4WalkHost *h, uint32_t a) {
     if (a>=P4LA_EFFECT_BANK && a<P4LA_EFFECT_BANK+16u) return !(a&3u);
     const uint32_t context=p4la_word(h,0x0076449cu);
@@ -340,6 +361,7 @@ static inline int p4la_battle_patch_word(const P4WalkHost *h, uint32_t a) {
             for (unsigned l=0;model && l<2;l++) {
                 const uint32_t layer=model+0xecu+l*0xa4u;
                 if (a==layer+0xcu || a==layer+0x14u) return p4la_address(layer,0xa4u);
+                if (p4la_address(layer,0xa4u) && p4la_layer_animation_word(h,layer,a)) return 1;
             }
         }
     }

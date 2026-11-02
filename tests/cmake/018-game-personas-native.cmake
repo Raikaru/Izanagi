@@ -1,5 +1,6 @@
-# Actual persona staging, shared packed observer, completion relocation and restore
-# over real synthetic input spans in guest memory; no gameplay claim.
+# Actual persona staging, shared packed observer, completion relocation and restore,
+# added compendium rows and the REQUIRED persona save block over real synthetic
+# input spans in guest memory; no gameplay claim.
 get_target_property(_p4_persona_native_sources game_table_sources_test SOURCES)
 list(REMOVE_ITEM _p4_persona_native_sources game_table_sources_test.c "${CMAKE_CURRENT_SOURCE_DIR}/game_table_sources_test.c")
 add_executable(game_personas_native_test game_personas_native_test.c ${_p4_persona_native_sources}
@@ -7,6 +8,7 @@ add_executable(game_personas_native_test game_personas_native_test.c ${_p4_perso
   "${CMAKE_SOURCE_DIR}/src/platform/mods/game_skills_native.c"
   "${CMAKE_SOURCE_DIR}/src/platform/mods/game_enemies_native.c"
   "${CMAKE_SOURCE_DIR}/src/platform/mods/game_personas_native.c"
+  "${CMAKE_SOURCE_DIR}/src/platform/mods/game_personas_save.c"
   "${CMAKE_SOURCE_DIR}/src/platform/mods/game_tables_packed.c"
   "${CMAKE_SOURCE_DIR}/src/platform/mods/game_table_admission.c"
   "${CMAKE_SOURCE_DIR}/src/platform/mods/game_table_extents.c")

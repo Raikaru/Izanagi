@@ -37,6 +37,7 @@
 #include "p4pc/os.h"
 #include "p4pc/guest.h"
 #include "p4pc/platform.h"
+#include "p4pc/frame_alarm_seam.h"
 #ifdef P4_MOD_GAME_BINDINGS
 #include "p4pc/mod_entry.h"
 #endif
@@ -391,6 +392,8 @@ void p4pc_poll_devices(void) {
     if (kt_virtual_clock())
         kt_virtual_ns += 1000u;
     kt_service_timers();
+    if (p4pc_frame_alarm_seam)
+        p4pc_frame_alarm_seam->poll();
     kt_leave();
 }
 
@@ -1113,12 +1116,23 @@ int32_t p4pc_set_alarm(uint32_t us, uint32_t (*handler)(int32_t, void *), void *
     return kt_set_alarm_at(kt_now_ns() + (uint64_t)us * 1000u, handler, arg);
 }
 
-int32_t p4pc_set_next_frame_alarm(uint32_t (*handler)(int32_t, void *), void *arg) {
+/* Lockstep disc replay only (src/platform/lockstep_disc.c); NULL in every other run. */
+const P4FrameAlarmSeam *p4pc_frame_alarm_seam;
+
+int32_t p4pc_set_frame_boundary_alarm(uint32_t (*handler)(int32_t, void *), void *arg) {
     kt_enter();
     return kt_set_alarm_at(kt_vsync_next_ns, handler, arg);
 }
 
+int32_t p4pc_set_next_frame_alarm(uint32_t (*handler)(int32_t, void *), void *arg) {
+    if (p4pc_frame_alarm_seam)
+        return p4pc_frame_alarm_seam->set(handler, arg);
+    return p4pc_set_frame_boundary_alarm(handler, arg);
+}
+
 int32_t p4pc_cancel_alarm(int32_t id) {
+    if (p4pc_frame_alarm_seam)
+        p4pc_frame_alarm_seam->cancel(id);
     if (id < 1 || id > KT_MAX_ALARMS || !kt_alarms[id].used)
         return -1;
     kt_alarms[id].used = 0;

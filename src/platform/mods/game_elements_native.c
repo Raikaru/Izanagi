@@ -4,6 +4,7 @@
 #include "p4pc/game_items.h"
 #include "p4pc/gmem.h"
 #include "p4pc/game_enemies_native.h"
+#include "p4pc/game_personas_native.h"
 #include "p4pc/package_boot.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -269,13 +270,15 @@ static int prepare_complete(void *user)
      * defender or the compendium can present. Each must answer the battle
      * requirement before publication (declared aliases' pairs were checked
      * above), so a mid-battle missing alias is limited to an undeclared
-     * AI-scripted enemy id2 form. Added enemies the staged enemy snapshot
-     * declares are covered the same way. */
+     * AI-scripted enemy id2 form. Added enemies and personas the staged
+     * snapshots declare are covered the same way (an added persona reaches a
+     * party defender through fusion or Shuffle Time). */
     const uint32_t enemies = p4_game_enemies_native_declared_limit();
     for (uint32_t enemy = 0; !result && count && enemy < enemies; ++enemy)
         if (!p4_game_tables_find_affinity_alias(staged.tables, P4_ENTITY_ENEMY, enemy, enemy))
             result = P4_TABLE_NOT_READY;
-    for (uint32_t persona = 1; !result && count && persona < P4_PERSONA_RETAIL_COUNT; ++persona)
+    const uint32_t personas = p4_game_personas_native_declared_limit();
+    for (uint32_t persona = 1; !result && count && persona < personas; ++persona)
         if (!p4_game_tables_find_affinity_alias(staged.tables, P4_ENTITY_PERSONA, persona, 0))
             result = P4_TABLE_NOT_READY;
     if (result) {

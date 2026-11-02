@@ -152,16 +152,16 @@ static void enemies(void)
 static int persona_xml(P4GameTablesDefinitionBuilder *builder, const char *id, const char *metadata,
     const char *extra, char *error, size_t error_size)
 {
-    uint8_t growth[70] = {1}, model[88] = {2}, candidates[4] = {3};
-    char growth_hex[141], model_hex[177], candidates_hex[9], bytes[1024];
+    uint8_t growth[70] = {1}, model[88] = {2}, candidates[4] = {3}, affinity[32] = {4};
+    char growth_hex[141], model_hex[177], candidates_hex[9], affinity_hex[65], bytes[1100];
     hex(growth_hex, growth, sizeof growth); hex(model_hex, model, sizeof model);
-    hex(candidates_hex, candidates, sizeof candidates);
+    hex(candidates_hex, candidates, sizeof candidates); hex(affinity_hex, affinity, sizeof affinity);
     P4GameTableXmlTarget target = candidate(builder);
     int length = snprintf(bytes, sizeof bytes, "<p4-tables schema=\"1\">"
         "<persona id=\"%s\" model-source=\"255\" key=\"xml:persona\" metadata=\"%s\" growth=\"%s\" "
-        "model=\"%s\" candidates=\"%s\"%s/>"
+        "model=\"%s\" candidates=\"%s\" affinity=\"%s\"%s/>"
         "<string table=\"2\" id=\"256\" role=\"0\" bytes=\"4964656e7469747900\"/>"
-        "</p4-tables>", id, metadata, growth_hex, model_hex, candidates_hex, extra);
+        "</p4-tables>", id, metadata, growth_hex, model_hex, candidates_hex, affinity_hex, extra);
     assert(length > 0 && (size_t)length < sizeof bytes);
     return p4_game_tables_source_xml(&target, (const uint8_t *)bytes, (size_t)length, error, error_size);
 }
@@ -172,7 +172,8 @@ static void personas(void)
     hex(metadata_hex, metadata, sizeof metadata);
     P4GameTablesDefinitionBuilder builder;
     assert(!persona_xml(&builder, "256", metadata_hex, "", error, sizeof error) && !*error);
-    const uint32_t inputs = (1u << P4_TABLE_INPUT_PERSONA) | (1u << P4_TABLE_INPUT_MODEL) | (1u << P4_TABLE_INPUT_MSG);
+    const uint32_t inputs = (1u << P4_TABLE_INPUT_PERSONA) | (1u << P4_TABLE_INPUT_MODEL) | (1u << P4_TABLE_INPUT_MSG) |
+        (1u << P4_TABLE_INPUT_UNIT);
     assert(p4_game_personas_count(builder.personas) == 1 && !p4_game_personas_at(builder.personas, 0));
     assert((builder.input_mask & inputs) == inputs && !builder.input_count);
     assert(!p4_game_personas_semantic_revision(builder.personas) && p4_game_tables_text_count(builder.names) == 1);

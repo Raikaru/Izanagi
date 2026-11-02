@@ -1,5 +1,7 @@
 #include "p4pc/battle_prepare.h"
 #include "p4pc/battle_sim.h"
+#include "p4pc/game_table_extents.h"
+#include "p4pc/gmem.h"
 #include <limits.h>
 #include <string.h>
 
@@ -101,7 +103,9 @@ int p4_battle_prepare_decode(const uint8_t *bytes, size_t size, P4BattlePreparat
         const uint32_t mask = p4_prepare_word(persona + 88);
         if (owner < 1 || owner > 10 || (owner == 1 ? slot > 11 : slot != 0) || mode > 2 ||
             mask & ~31u || persona[79] || !zero(persona + 92, 20)) REJECT("preparation_persona_identity_mode_or_reserved");
-        if ((mode || id != UINT32_MAX) && (!id || id > 255)) REJECT("preparation_persona_id_range");
+        /* Schema only: native records hold a 16-bit persona ID and UINT32_MAX
+         * means no assertion. The active catalog bounds it at native apply. */
+        if ((mode || id != UINT32_MAX) && (!id || id > UINT16_MAX)) REJECT("preparation_persona_id_range");
         for (uint32_t j = 0; j < i; j++) {
             const uint8_t *previous = result.personas + j * P4_PREPARE_PERSONA_BYTES;
             if (p4_prepare_word(previous) == owner && p4_prepare_word(previous + 4) == slot)
@@ -158,4 +162,12 @@ int p4_battle_prepare_decode(const uint8_t *bytes, size_t size, P4BattlePreparat
     return 1;
 #undef REJECT
 #undef WORD
+}
+
+int p4_battle_prepare_persona_catalogued(uint32_t id)
+{
+    uint32_t metadata, rows;
+    if (!p4_game_table_extent_rows(0x7644c4, 14, &metadata, &rows) || id >= rows) return 0;
+    const uint8_t level = P4_G8(metadata + id * 14 + 3);
+    return level && level <= 99;
 }

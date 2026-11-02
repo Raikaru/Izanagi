@@ -7,6 +7,7 @@
 #include "lockstep_draw.h"
 #include "p4pc/lockstep_format.h"
 #include "p4pc/lockstep_align_runtime.h"
+#include "p4pc/crt.h"
 #include "p4pc/guest.h"
 #include "p4pc/os.h"
 #include "p4pc/platform.h"
@@ -62,7 +63,7 @@ static void read_record(uint8_t record[P4LS_RECORD_SIZE], uint32_t kind) {
     if (!n && feof(sReplay)) {
         if (sReplayLastKind==P4LS_PAD) fail("replay ended before the frame was presented");
         if (p4_battle_live_lockstep_eof()) exit(4);
-        exit(0);
+        p4pc_exit(0);
     }
     if (n!=P4LS_RECORD_SIZE) fail("truncated replay record");
     if ((p4ls_get(record)&255u)!=kind || p4ls_get(record+4)!=word(NULL,P4LS_GAME_FRAME)) {
@@ -281,7 +282,7 @@ void p4pc_lockstep_presented(void) {
             fprintf(stderr, "p4pc: lockstep facing check PASS\n");
         }
         if (p4_battle_live_lockstep_stop()) exit(4);
-        exit(0);
+        p4pc_exit(0);
     }
 }
 void p4pc_lockstep_pace(void) {

@@ -1604,7 +1604,7 @@ One line per address: `<addr>  <owner>  <what it replaces>`. Claim an address he
 003329e0  PortTables  scoped material-dialogue allocation appends rows beyond the complete180c work; existing3329b0 destructor owns all bytes
 002cb6c0  PortTables  scoped purchase-row new-ID icons use the actual primitive queue and authored resource pins; retail banked glyphs unchanged
 00230d30  PortTables  scoped weapon attachment uses explicit final right/left native model identities for new equipment; exact retail lookup/path/free ownership retained
-002308a0  PortTables  scoped expanded Chie gear resolves its explicit physical model before unchanged native costume/calendar selection
+002308a0  PortTables  scoped expanded Chie gear resolves its explicit physical model before unchanged native costume/calendar selection; persona model kinds 3 (battle) and 11 (facility) name an added persona's model source
 0012e7c0  PortTables  Camp inventory enumeration appends declared kind3+ items in task-owned rows; exact retail300..5ff quantity sequence retained
 0012e9d0  PortTables  scoped Camp inventory list/detail draw reads original or appended rows without moving animation fields
 0013b9f0  PortTables  scoped Camp inventory group scans share the expanded row base; original flag grouping/wrap preserved
@@ -1666,5 +1666,33 @@ One line per address: `<addr>  <owner>  <what it replaces>`. Claim an address he
 0010f3d0  PortTables  saved knowledge bitmap set limited to retail enemies (mirror_fixes)
 0010f420  PortTables  saved knowledge bitmap test limited to retail enemies (mirror_fixes)
 0010f460  PortTables  saved collection bits limited to retail enemies (mirror_fixes)
-0019b550  PortTables  enemy model-load packet uses an added enemy's declared retail model source (mirror_fixes)
+0019b550  PortTables  enemy and persona model-load packet uses an added enemy's or persona's declared retail model source (mirror_fixes)
 00219130  PortTables  Analyze view table row follows an added enemy's model source (mirror_fixes)
+00109220  PortTables  persona MSG3 name row bound follows the published persona banks (mirror_fixes)
+00109280  PortTables  persona PERSONA0 arcana bound follows the published persona banks (mirror_fixes)
+00109510  PortTables  persona learnable-skill bound follows the published persona banks (mirror_fixes)
+001097c0  PortTables  persona skill-slot bound follows the published persona banks (mirror_fixes)
+00109870  PortTables  persona skill-slot bound follows the published persona banks (mirror_fixes)
+0010b190  PortTables  persona roster insertion bound follows the published persona banks (mirror_fixes)
+0010be60  PortTables  persona growth delta bound follows the published persona banks (mirror_fixes)
+0010c5a0  PortTables  persona level-up apply bound follows the published persona banks (mirror_fixes)
+0010c750  PortTables  persona base-stat bound follows the published persona banks (mirror_fixes)
+0010cad0  PortTables  datPersonaInit bound follows the published persona banks (mirror_fixes)
+0011d1f0  PortTables  persona status portrait path (pst_%03x) uses an added persona's declared retail model source (mirror_fixes)
+0010fc80  PortTables  compendium clear also clears added personas' rows (mirror_fixes)
+0010fcb0  PortTables  compendium lookup uses the persona's own row, added personas included (mirror_fixes)
+0010fd40  PortTables  compendium registration writes the persona's own row (mirror_fixes)
+0010fde0  PortTables  compendium resolve/seed uses the persona's own row (mirror_fixes)
+0010ffa0  PortTables  register-all covers every persona the published banks hold (mirror_fixes)
+00110140  PortTables  compendium completion counts added personas (mirror_fixes)
+002e4090  PortTables  compendium list scans every persona the published banks hold (mirror_fixes)
+002e4610  PortTables  persona-list work sized for every persona the published banks hold (mirror_fixes)
+002e5960  PortTables  persona-list clear covers the sized work (mirror_fixes)
+002e68b0  PortTables  persona-list sort scratch covers IDs up to 511 (mirror_fixes)
+002e6c90  PortTables  persona-list sort scratch covers IDs up to 511 (mirror_fixes)
+00310700  PortTables  compendium snapshot appends added personas' rows (mirror_fixes)
+00310850  PortTables  compendium snapshot restore covers added personas' rows (mirror_fixes)
+003130e0  PortTables  normal-fusion result scan (at-least) also visits added personas (override)
+003133b0  PortTables  normal-fusion result scan (at-most) also visits added personas (override)
+0036ee60  PortTables  shuffle-time persona pools include added personas (mirror_fixes)
+0036c7e0  PortTables  persona card image of an added persona is its model source's (mirror_fixes)

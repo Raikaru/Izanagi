@@ -1,3 +1,5 @@
+/* Normal-fusion result scan: retail IDs below 0xC0, then added personas. */
+#include "p4pc/game_personas_native.h"
 s32 fclFuseLowestCandidateAtMost(u32 arg0, s32 arg1, u16 *arg2)
 {
     extern u8 *DAT_007644c4;
@@ -8,7 +10,8 @@ s32 fclFuseLowestCandidateAtMost(u32 arg0, s32 arg1, u16 *arg2)
     s32 atMostPick = 0;
     s32 slot;
 
-    for (slot = 0; (slot & 0xFFFF) < 0xC0; slot = (slot + 1) & 0xFFFF) {
+    for (slot = 0; p4_game_personas_native_fusion_candidate((u32)(slot & 0xFFFF));
+         slot = (s32)p4_game_personas_native_fusion_next((u32)slot)) {
         s32 id = slot & 0xFFFF;
         s32 off = (u16)slot * 0xE;
         u8 *rec = iGpffffb3d4 + off;

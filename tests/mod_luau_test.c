@@ -13,6 +13,7 @@
 #include "vfs.h"
 #include "../src/platform/memcard/mod_save_internal.h"
 #ifdef P4_MOD_NATIVE_RECOVERY
+#include "p4pc/crt.h"
 #include "failure_native.h"
 #include "../src/platform/config/p4cfg.h"
 #include "p4pc/mods.h"
@@ -574,6 +575,13 @@ static int managed_witness(int argc, char **argv)
     CHECK(p4_package_reads_unobserve(managed_read, NULL) == 0);
     P4PackageMemoryUsage memory = p4_packages_memory_usage();
     CHECK(memory.resident == 0 && memory.reserved == 0);
+    if (!strcmp(argv[1], "--managed-exit-normal") || !strcmp(argv[1], "--managed-exit-failure")) {
+        /* Deliberate automation completion before the title, as harnesses and
+         * gates end: only code 0 is a normal exit for startup health. */
+        printf("managed deliberate exit: %s\n", failures ? "FAIL" : "PASS");
+        fflush(stdout);
+        p4pc_exit(failures ? 1 : !strcmp(argv[1], "--managed-exit-normal") ? 0 : 3);
+    }
     p4_package_boot_clean_exit(); /* Normal host-fixture completion, not a fake title frame. */
     printf("managed %s: %s\n", empty || !strcmp(argv[1], "--managed-preflight") ? "pre-code refusal" : "fresh-entry recovery",
            failures ? "FAIL" : "PASS");
@@ -604,7 +612,8 @@ int main(int argc, char **argv)
     #ifdef P4_MOD_NATIVE_RECOVERY
     if (argc == 3 && (!strcmp(argv[1], "--managed-preflight") || !strcmp(argv[1], "--managed-runtime") ||
                       !strcmp(argv[1], "--managed-callback") || !strcmp(argv[1], "--managed-hook") ||
-                      !strcmp(argv[1], "--managed-empty")))
+                      !strcmp(argv[1], "--managed-empty") || !strcmp(argv[1], "--managed-exit-normal") ||
+                      !strcmp(argv[1], "--managed-exit-failure")))
         return p4t_on_guest_stack(managed_witness, argc, argv);
     #endif
     return p4t_on_guest_stack(witness, argc, argv);

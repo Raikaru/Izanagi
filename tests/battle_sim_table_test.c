@@ -153,6 +153,13 @@ static void check_preparation_wire(void)
     bytes = make_preparation(request, 1, 1, 0, 0);
     uint8_t *persona = request + 160 + 171112 + 64;
     ACCEPT();
+    /* The parser bound is schema-only: added persona IDs pass, up to the 16-bit
+     * native record field; the catalog check happens at native apply. */
+    put_word(persona + 8, 256); ACCEPT(); put_word(persona + 8, 511); ACCEPT();
+    put_word(persona + 8, UINT16_MAX); ACCEPT();
+    put_word(persona + 8, UINT16_MAX + 1u); REJECT();
+    put_word(persona + 8, UINT32_MAX); REJECT(); /* Only preserve mode may omit the ID. */
+    put_word(persona + 8, 1);
     put_word(persona + 88, 3); REJECT(); put_word(persona + 88, 7);
     put_word(persona + 16, 0); REJECT(); put_word(persona + 16, UINT32_MAX);
     persona[69] = 1; REJECT(); persona[69] = 0;
@@ -212,7 +219,8 @@ int main(void)
 {
     check_save_images();
     check_preparation_wire();
-    if (p4t_guest_map(0x00764000u, 0x2000) != 0 || p4t_guest_map(0x01000000u, 0x1000) != 0) return 77;
+    if (p4t_guest_map(0x00764000u, 0x2000) != 0 || p4t_guest_map(0x01000000u, 0x1000) != 0 ||
+        p4t_guest_map(0x01200000u, 0x2000) != 0) return 77;
     const uint32_t slot = P4_GPADDR(0xb414), base = 0x007f17b0u;
     P4_G32(slot) = base;
     P4_GPDATA(uint32_t, 0xb438) = 8;
@@ -229,6 +237,23 @@ int main(void)
     assert(!admits_enemy(0x160, 0x160, 0x170));
     /* ...and by the published bank extent. */
     assert(!admits_enemy(0x158, 0x160, 0x158));
-    puts("battle_sim_table: canonical saves, bounded preparation wire and extent/limit-bounded encounters PASS");
+    /* Persona catalog: populated metadata rows exist past every extent below,
+     * so only the published extent can reject them. */
+    const uint32_t persona_slot = 0x007644c4u, persona_base = 0x01200000u;
+    uint8_t *metadata = P4_G2H(persona_base);
+    for (uint32_t row = 0; row < 0x2000 / 14; row++) metadata[row * 14 + 3] = (uint8_t)(row ? 1 : 0);
+    P4_G32(persona_slot) = persona_base;
+    p4_game_table_extent_note(persona_slot, persona_base, 256 * 14); /* Retail. */
+    assert(p4_battle_prepare_persona_catalogued(255));
+    assert(!p4_battle_prepare_persona_catalogued(256) && !p4_battle_prepare_persona_catalogued(511));
+    p4_game_table_extent_note(persona_slot, persona_base, 512 * 14); /* Expanded. */
+    assert(p4_battle_prepare_persona_catalogued(256) && p4_battle_prepare_persona_catalogued(511));
+    assert(!p4_battle_prepare_persona_catalogued(512)); /* Past the published extent. */
+    assert(!p4_battle_prepare_persona_catalogued(0)); /* Unpopulated level. */
+    metadata[300 * 14 + 3] = 100;
+    assert(!p4_battle_prepare_persona_catalogued(300));
+    P4_G32(persona_slot) = persona_base + 14;
+    assert(!p4_battle_prepare_persona_catalogued(256)); /* Slot moved without publishing. */
+    puts("battle_sim_table: canonical saves, bounded preparation wire, extent/limit-bounded encounters and persona catalog PASS");
     return 0;
 }

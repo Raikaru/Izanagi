@@ -4,6 +4,7 @@
 #include "p4pc/battle_sim.h"
 #include "p4pc/battle_events.h"
 #include "p4pc/content_digest.h"
+#include "p4pc/crt.h"
 #include "p4pc/gmem.h"
 #include "p4pc/mod_fidelity.h"
 #include "p4pc/platform.h"
@@ -694,7 +695,7 @@ static int publish(const char *outcome, const char *cause, const uint32_t *conte
 static void finish(const char *outcome, const char *cause, int code, const uint32_t *context)
 {
     if (publish(outcome, cause, context)) { bad("result_publication"); exit(4); }
-    exit(code);
+    p4pc_exit(code);
 }
 void p4_battle_live_before_present(void)
 {

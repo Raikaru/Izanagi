@@ -2,6 +2,7 @@
 #define _POSIX_C_SOURCE 200809L
 #include "p4pc/battle_sim.h"
 #include "p4pc/battle_live.h"
+#include "p4pc/crt.h"
 #include "p4pc/gmem.h"
 #include "p4pc/platform.h"
 #include "p4pc/mod_fidelity.h"
@@ -336,7 +337,7 @@ static void prepare_finish(const char *outcome, const char *cause, int code)
     const int write_error = ferror(file);
     const int close_error = fclose(file);
     if (write_error || close_error) { fprintf(stderr, "p4pc: cannot finish preparation receipt\n"); exit(5); }
-    exit(code);
+    p4pc_exit(code);
 }
 static size_t party_json(char *out, size_t cap)
 {
@@ -567,7 +568,7 @@ static void finish(const char *outcome, const char *cause, int code)
     if (session.trace && fclose(session.trace)) failed = 1;
     if (failed || rename(path, session.result)) { error("cannot publish complete result"); exit(4); }
     fprintf(stderr, "p4pc: battle-sim: %s after %u native updates (%s)\n", outcome, session.updates, cause);
-    exit(code);
+    p4pc_exit(code);
 }
 static int boot_ready(void)
 {

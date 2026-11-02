@@ -273,21 +273,61 @@ verifies all five loaded banks against the sealed bytes, then copies the retail
 prefix plus added rows into private guest banks; an empty snapshot allocates
 nothing.
 
-The persona compiler applies the same contract to the five persona-indexed
+The persona compiler applies the same contract to the six persona-indexed
 banks: PERSONA0 metadata (14 bytes), PERSONA1 growth (70), MODEL2 battle model
-parameters (88), PERSONA5 replacement candidates (4) and MSG3 names (17), each
-exactly 256 retail rows. Added IDs are dense from 256 up to at most 511, since
+parameters (88), PERSONA5 replacement candidates (4), MSG3 names (17) and UNIT2
+affinity (32: sixteen words read by `datPersonaRunSkillSlot` and
+`datPersonaGetSkillSlot`), each exactly 256 retail rows. Added IDs are dense from 256 up to at most 511, since
 fusion recipe material selectors are signed 10-bit and the name and list APIs
 signed16. Each row names a retail `model-source` and needs a `P4_TEXT_PERSONA`
 name of at most 17 bytes including the NUL. The party-growth, EXP-curve and
 shuffle-pair blocks are not indexed by an added persona's ID and stay retail.
 The native persona owner follows the enemy owner below exactly: the shared
-packed observer records PERSONA, MODEL and MSG loads, the `persona` completion
-participant verifies, materializes and relocates the five banks with their
+packed observer records PERSONA, MODEL, MSG and UNIT loads, the `persona` completion
+participant verifies, materializes and relocates the six banks with their
 extents, `p4_game_personas_native_limit()` answers one past the highest added
-ID (256 otherwise) and session end restores the latest loaded bases. The native
-`<256` persona consumers, names, model source, fusion and the compendium do not
-yet admit added personas.
+ID (256 otherwise) and session end restores the latest loaded bases. The
+datPersona bank asserts (name row `0x00109220`, arcana, learnset, skill slots,
+stock insertion, growth, level-up, base stats and `datPersonaInit`) compare
+against that limit, so names come from the relocated MSG3 bank;
+`p4_game_personas_native_model()` gives the model source for every persona
+presentation file keyed by ID: the status portrait `camp/persona/pst_%03x.tmx`
+(`0x0011D1F0`), the genus-2 battle model packet (`0x0019B550`), the battle
+(`ps%03X`) and facility (`fp%03X`, Velvet Room) model names (`0x002308A0`) and
+the Shuffle Time card below, while the scene resource ID keeps the persona's
+own 10-bit ID.
+
+The compendium caches 256 retail rows of 48 bytes in the save block at
+`0x007981CC` (save tag 16). `p4_game_personas_native_compendium()` returns that
+row for retail IDs (and for every ID without expansion) and a port-owned row
+for an added ID; lookup, registration, resolve/seed, register-all, completion
+percentage (numerator and denominator), the compendium list (`yListSlotRefresh`
+kind 2, its work allocation, clear and sort scratch) and the New Game+
+snapshot (`0x00310700`/`0x00310850`, added rows appended after the claimed-slot
+words at 0x3004) all go through it, and New Game's clear empties the added
+rows. The REQUIRED save block `p4pc/persona-compendium` stores the added rows
+and pins, by ledger reference, the ID of every added persona the save uses
+(registered row, active stock slot or the saved staged record): a package that
+now assigns another ID
+fails the load instead of reinterpreting records, and a save without the block
+loads an empty added compendium. Normal fusion's result scans (the
+`0x003130E0`/`0x003133B0` overrides) visit the retail IDs below 0xC0, then the
+added IDs, so an added persona whose metadata arcana, flags and level qualify
+is a fusion result exactly as a retail one; the 23 fusion gates and special
+recipes stay retail. Shuffle Time's persona pools (`0x0036EE60`) scan every ID
+below the limit with the retail flag and level rules, and a persona card's
+image (`0x0036C7E0`) is its model source's card.
+
+`mod_persona_game` (registered only with `P4PC_MOD_WITNESS_TESTS`, run under
+`P4PC_MOD_WITNESS=1`) derives a private package from the user's own disc: one
+added persona, ID 256, with Omoikane's rows and name, its level one lower and
+Omoikane as model source. From the 4/22 Velvet Room checkpoint the existing
+walk fuses Izanagi with Apsaras, which now yields the added persona, assigns it
+and saves (the save carries `p4pc/persona-compendium` pinning ID 256); the next
+checkpoint reloads that save, fights on 4F and saves again. The Linux x64 run
+of this change (on `88c6b735`) passed both legs, the fusion presenting persona
+256 with model 172. It is a mod-witness run, never a retail comparison or
+reference.
 
 The native enemy owner stages a snapshot with added rows before raw table
 exposure. The battle packed loader at `0x00193840` has one shared observer for
@@ -332,6 +372,24 @@ and reloads that save into the 4/21 school walk. The Linux x64 run at
 passed both legs. It is a mod-witness run, never a retail comparison or
 reference.
 
+`mod_element_game` (same registration and mode) is the expanded-element
+end-to-end witness. From the user's own disc it derives the Physical Split
+development baseline: Slash, Strike and Pierce leaves 19..21 with synthetic
+icon art, the nine-column `[element-ui]` layout, an alias plus three side rows
+copying the decoded retail Phys word for every retail enemy and persona
+record, damage bindings for every single-character weapon (Yu, Yosuke and
+Teddie Slash; Chie and Kanji Strike; Yukiko and Naoto Pierce) and the design's
+skill samples (Cleave Slash, Bash Strike, Skewer and Black Spot Pierce). It
+plays the castle 5F training walk from the 4/20 checkpoint, saves (the save
+requires the package) and reloads into the 4/21 school walk; the element action
+route prints one `element leaf N resolves weapon|skill I` line per authored leaf
+a battle action uses. A third, menu-harness leg captures the hero's Camp skill
+list and persona panel from the new-game state into the work directory. The
+first Linux x64 run passed both walk legs with Slash (Yu's weapon 39) and
+Strike (Chie's weapon 112); its persona-panel capture shows the nine columns
+(three authored icons, then fire..dark) matching the retail seven-column
+values. Analyze and the battle skill row are not captured.
+
 The table service owns the battle-bank extent registry
 (`p4pc/game_table_extents.h`), built and active in every session. Every bank
 slot writer publishes the slot's exact byte extent in the same step as its
@@ -365,7 +423,8 @@ other; displays never widen the battle requirement. When that requirement is
 non-empty, prepare also refuses unless every enemy row the staged enemy
 snapshot declares (retail 0..335 plus added enemies) has an alias for its
 initial selector (datUnitInit `0x00231AF0` sets id2 = id) and every persona
-record 1..255 (datPersonaInitAllRecords `0x0010FFA0`) has a persona alias, so
+record 1..255 (datPersonaInitAllRecords `0x0010FFA0`) plus every added persona
+the staged persona snapshot declares has a persona alias, so
 a missing alias can only surface mid-battle for an undeclared AI-scripted
 enemy id2 form, which is still refused at runtime. Enemy status metadata
 (`p4_game_elements_enemy_metadata_flags`) is read for any ID below
@@ -463,7 +522,7 @@ Each row binds to the explicit source handle, and a failed candidate is discarde
 | `item` | `id`, `key`, exact 68-byte `metadata` hex and icon reference; optional requirement ID/quantity pairs and model IDs |
 | `category` | `id`, `key`, `filter-a`, `filter-b`, `stock-policy`, icon reference; optional all-or-none action owner/key/revision |
 | `enemy` | `id`, `model-source`, `key`, exact 60-byte `metadata`, 32-byte `affinity`, 232-byte `model` and 164-byte `ai` hex |
-| `persona` | `id`, `model-source`, `key`, exact 14-byte `metadata`, 70-byte `growth`, 88-byte `model` and 4-byte `candidates` hex |
+| `persona` | `id`, `model-source`, `key`, exact 14-byte `metadata`, 70-byte `growth`, 88-byte `model`, 4-byte `candidates` and 32-byte `affinity` hex |
 | `string` | `table`, `id`, `role`, `bytes` (game-encoded hex including final NUL) |
 
 The builder seals exact family inputs and ownership together without guest
@@ -736,8 +795,9 @@ above). Components are `damage`, `instant-ko` or `status`; channels are exact
 registered keys. A marker needs both `marker-component = instant-ko` and
 `marker-channel`. `legacy-primary`/`legacy-marker` (`phys`, `fire`, `ice`,
 `elec`, `wind`, `light-ko`, `dark-ko`) let the static persona panel read the
-actual seven-word native snapshot for exactly that selector's native pair at
-profile 0; an authored side row always wins. A damaging-Light layout declares
+actual seven-word native snapshot for exactly that selector's native pair (the
+persona's native profile 0, whatever its semantic profile ID); an authored side
+row always wins. A damaging-Light layout declares
 its damage primary plus a KO marker, and only the marker may use `light-ko`.
 Unknown fields, a second layout owner, or a layout without an expanded
 element cohort refuse that provider before raw exposure. An expanded cohort

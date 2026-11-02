@@ -121,14 +121,16 @@ static int prepare_pair(const P4GameTables *tables, const P4ElementDesc *desc, u
 }
 /* Every declared alias must answer every displayed pair before publication:
  * an exact side row, the canonical natural retail route for an enemy, or an
- * explicitly authorized native snapshot word for a profile-0 persona. */
+ * explicitly authorized native snapshot word for a persona. Like battle's
+ * natural route, that word does not depend on the alias's semantic profile ID;
+ * persona native profile is always 0. */
 static int pair_covered(const P4GameTables *tables, const P4AffinityProfileAlias *alias,
     const P4GameActionElement *pair, uint32_t legacy)
 {
     if (p4_game_tables_find_affinity(tables, alias->entity_kind, alias->entity_id,
             alias->profile_id, pair->element_id, pair->channel_id)) return 1;
     if (alias->entity_kind == P4_ENTITY_PERSONA)
-        return legacy && !alias->native_profile && !alias->profile_id;
+        return legacy && !alias->native_profile;
     return p4_game_elements_profile_natural_pair(tables, pair->element_id, pair->channel_id, pair->component) > 0;
 }
 static int prepare_coverage(const P4GameElementUi *ui, const P4GameTables *tables)
@@ -374,8 +376,7 @@ int p4_game_elements_ui_persona_snapshot_use(const P4GameElementUi *ui, uint32_t
         }
     }
     const P4GameElementUiColumn *source = &ui->columns[index];
-    if (!(marker ? source->legacy_marker_valid : source->legacy_primary_valid) ||
-        (alias && alias->profile_id)) return P4_TABLE_NOT_FOUND;
+    if (!(marker ? source->legacy_marker_valid : source->legacy_primary_valid)) return P4_TABLE_NOT_FOUND;
     if (!native_words) return P4_TABLE_NOT_READY;
     /* The exact native pair of this selector was validated at layout. */
     *value = native_words[marker ? source->legacy_marker_selector : source->legacy_primary_selector];

@@ -42,10 +42,13 @@ const P4ResourceImage *p4_resources_find(const P4Resources *resources, const cha
 const P4ResourceImage *p4_resources_query(uint32_t token);
 /* Immediate native Im2D image: authored logical pixels (640x448 game
  * coordinates) times explicit axis scales, nearest sampling, RGBA (R low).
- * Inherits the native layout, depth, Sky/FRAME/CLAMP policy; restores only the
- * three changed RenderState cells AND their written/unwritten bits. Caller
- * holds the generation/pin through the call. No foreign queue, per-image
- * host/guest allocation or image copy; the renderer keeps its normal caches. */
+ * depth is the native sprite depth (screen z = Z scale at 0x008872F8 minus
+ * depth, as 0046B380 writes it), so the image sits where the caller's native
+ * sprite would. Inherits the native layout, Sky/FRAME/CLAMP policy; restores
+ * only the three changed RenderState cells AND their written/unwritten bits.
+ * Caller holds the generation/pin through the call. No foreign queue,
+ * per-image host/guest allocation or image copy; the renderer keeps its
+ * normal caches. */
 int p4_resources_draw(uint32_t token, float x, float y, float depth, uint32_t rgba,
     float scale_x, float scale_y);
 /* Snapshots/menu tasks/queued draws pin before borrowing a token. Retire drops

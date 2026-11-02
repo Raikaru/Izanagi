@@ -45,6 +45,8 @@ static void check_draw(uint32_t token, const uint8_t *pixels, unsigned scale_x, 
     assert(p4gl_gs_clamp_get(&clamp_x, &clamp_y));
     p4gl_glClearColor(0, 0, 0, 0);
     p4gl_glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    /* The retail Z scale (0x477FFF00) the native sprite depth is measured from. */
+    P4_GDATA(float, 0x008872F8u) = 65535.0f;
     assert(p4_resources_draw(token, 16, 32, 69, 0xffffffffu,
         (float)scale_x, (float)scale_y) == P4_RESOURCE_OK);
     assert(p4gl_render_state_written() == written);

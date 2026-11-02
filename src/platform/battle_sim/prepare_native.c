@@ -207,8 +207,7 @@ const char *p4_battle_prepare_apply(const P4BattlePreparation *view)
                 return "source_persona_id_assertion";
         } else {
             const uint32_t id = p4_prepare_word(request + 8);
-            if (id >= metadata_rows || !P4_G8(metadata + id * 14 + 3) || P4_G8(metadata + id * 14 + 3) > 99)
-                return "prepared_persona_not_populated_native_metadata";
+            if (!p4_battle_prepare_persona_catalogued(id)) return "prepared_persona_not_populated_native_metadata";
             memset(record, 0, 48);
             datPersonaInitRecord(record, (uint16_t)id);
             put_half(record, 1);

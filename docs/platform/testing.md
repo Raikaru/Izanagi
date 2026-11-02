@@ -472,6 +472,8 @@ continuous playthrough.
 Summer and later collection legs can begin after an unqualified boss. Preserve the
 pristine collection identity in each registration; do not replace it with an unrelated
 post-fight card while claiming combat continuity.
+The [playthrough coverage map](playthrough_coverage.md) indexes every collection leg by
+date, dungeon and boss, and lists the segments no pinned card covers yet.
 The Secret Laboratory entrance gate requires Rise's native destination selection,
 live exterior step 80 and restored player control. It does not cover the laboratory
 floors or Shadow Naoto.

@@ -1,0 +1,74 @@
+# Independent pristine collection card2-slot10, 06/15 evening.
+# Sleep to 06/16's evening, its free night (the futon) and the 06/17-06/18 camping trip
+# (pretend to eat the food rather than Eat it, which needs more Courage), then 06/19 to
+# 06/20's after-school control in Class 2-2; save there.
+timeout:20000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+waitstate16:0x00797b7a==75
+walk:314,-360,25
+face:100
+wait:20
+press:cross
+wait:40
+timeout:60000
+skipmsg
+waitfield:7:2
+waitstate16:0x00797b7a==76
+waitcontrol:on
+waitmsg:closed
+walk:314,-360,25
+face:100
+wait:20
+press:cross
+wait:40
+timeout:60000
+waitfield:7:3
+waitstate16:0x00797b7a==76
+waitcontrol:on
+wait:30
+press:down:200
+wait:30
+press:cross
+wait:40
+# Sleep; 06/17's camp cooking: any answer to Yosuke, then pretend to eat and discard it
+# (Eat it needs more Courage and repeats the question).
+choose:1
+waitchoice
+choose:1
+waitchoice
+choose:3
+timeout:60000
+skipmsg
+waitfield:7:2
+waitstate16:0x00797b7a==78
+waitcontrol:on
+timeout:60000
+walk:314,-360,25
+face:100
+wait:20
+press:cross
+wait:40
+skipmsg
+waitfield:6:6
+waitstate16:0x00797b7a==80
+waitcontrol:on
+waitmsg:closed
+timeout:6000
+walk:-360,600,70
+press:cross
+wait:600
+press:cross
+wait:600
+press:left:12
+wait:400
+press:cross
+wait:1500
+press:cross
+wait:600
+log

@@ -31,6 +31,10 @@ extern "C" {
 /* No allocation, guest mutation, progression calls or RNG. Returned views borrow
  * the immutable request bytes. Native semantic/catalog checks follow boot. */
 int p4_battle_prepare_decode(const uint8_t *bytes, size_t size, P4BattlePreparation *view, const char **reason);
+/* Active-catalog persona bound for native preparation: 1 when id lies below
+ * the published persona-metadata extent (0x7644c4, 14-byte rows: 256 retail,
+ * the committed expanded catalog's otherwise) and its native level is 1..99. */
+int p4_battle_prepare_persona_catalogued(uint32_t id);
 /* Called once after native restore and real field/step readiness. Returns a
  * stable failure reason or NULL. No source files are modified. */
 const char *p4_battle_prepare_apply(const P4BattlePreparation *view);

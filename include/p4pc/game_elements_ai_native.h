@@ -159,7 +159,10 @@ typedef void (*P4GameAiVmShadowFn)(void *scratch, uint32_t opcode, uint32_t coun
 int p4_game_elements_ai_native_script_check(uint32_t header_guest, int32_t procedure);
 /* Actual native consumption, not sealing/loading/byte verification. */
 int p4_game_elements_ai_native_script_use(uint32_t header_guest);
-int p4_game_elements_ai_native_record(uint32_t index, const uint8_t **row);
+/* The AICALC record's guest address: translated callers hold guest pointers
+ * in 32-bit locals on the 64-bit port, so no host pointer is written through
+ * their address. */
+int p4_game_elements_ai_native_record(uint32_t index, uint32_t *row_guest);
 int p4_game_elements_ai_native_source_record(void *source_action, const uint8_t **row);
 int p4_game_elements_ai_native_preview_command(void *source_action, uint32_t command,
     P4GameAiCandidate *candidate);

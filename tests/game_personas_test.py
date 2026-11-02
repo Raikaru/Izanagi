@@ -23,16 +23,18 @@ def main():
     driver = sys.argv[1:separator]
     if not driver:
         raise SystemExit("supply native driver before --driver-end")
-    for mode in ("valid", "bad-metadata", "bad-names"):
+    for mode in ("valid", "bad-metadata", "bad-names", "bad-affinity"):
         with tempfile.TemporaryDirectory(prefix="p4-personas-inputs-") as temporary:
             root = Path(temporary)
             metadata = bytes([0x55]) * (PERSONAS * 14 - (mode == "bad-metadata"))
             names = bytes([0x4E]) * (PERSONAS * 17 - (mode == "bad-names"))
+            affinity = bytes([0xA7]) * (PERSONAS * 32 - (mode == "bad-affinity"))
             banks = {
                 "BATTLE/PERSONA.TBL": packed((metadata, bytes([0x41]) * (PERSONAS * 70), bytes(16), bytes(16),
                                               bytes(16), bytes([0xA1]) * (PERSONAS * 4))),
                 "BATTLE/MODEL.TBL": packed((bytes(16), bytes(16), bytes([0x4D]) * (PERSONAS * 88))),
                 "BATTLE/MSG.TBL": packed((bytes(16), bytes(16), bytes(16), names, bytes(16))),
+                "BATTLE/UNIT.TBL": packed((bytes(16), bytes(16), affinity)),
             }
             image = root / "fixture.iso"
             image.write_bytes(disc({"BTL": banks}))

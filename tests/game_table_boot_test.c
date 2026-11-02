@@ -2,6 +2,7 @@
 #include "p4pc/game_table_extents.h"
 #include "p4pc/game_tables_native.h"
 #include "p4pc/game_elements.h"
+#include "p4pc/game_personas_save.h"
 #include "p4pc/packages.h"
 #include "package_boot_internal.h"
 #include "p4pc/package_memory.h"
@@ -70,6 +71,9 @@ int p4_game_personas_boot_stage(P4GamePersonas *personas)
 { (void)personas; fputs("Unrequested persona raw-hook stage\n", stderr); abort(); }
 int p4_game_personas_boot_unstage(P4GamePersonas *personas)
 { (void)personas; fputs("Unowned persona raw-hook rollback\n", stderr); abort(); }
+int p4_game_personas_save_register(const P4GamePersonas *personas, const P4GameTableSources *sources)
+{ (void)personas; (void)sources; fputs("Unrequested persona save block\n", stderr); abort(); }
+int p4_game_personas_save_unregister(void) { return P4_TABLE_OK; } /* Nothing registered here. */
 int p4_game_elements_boot_stage(const P4GameTables *tables, const P4GameSkills *skills, const P4GameItems *items)
 { (void)tables; (void)skills; (void)items; fputs("Element stage continued after required family refusal\n", stderr); abort(); }
 static void observed(const P4PackageFileOrigin *origin, const void *bytes, size_t size, uint64_t offset, void *user)

@@ -5,6 +5,7 @@
 #include "p4pc/packs.h"
 #include "p4pc/packages.h"
 #include "p4pc/os.h"
+#include "p4pc/crt.h"
 #include "../config/p4cfg.h"
 #include <ctype.h>
 #include <stdint.h>
@@ -664,7 +665,7 @@ static int restart_adjust(void *unused, const char *key, int direction)
     if (!strcmp(key, "later")) return p4_settings_page_back();
     if (strcmp(key, "restart")) return 0;
     if (!p4_os_request_restart("The enabled package selection or load order changed."))
-        exit(EXIT_SUCCESS); /* Registered OS tail runs after ordinary teardown. */
+        p4pc_exit(EXIT_SUCCESS); /* Registered OS tail runs after ordinary teardown. */
     restartManual = 1;
     ++revision;
     p4_settings_message("Settings saved. Quit and start the game again.");

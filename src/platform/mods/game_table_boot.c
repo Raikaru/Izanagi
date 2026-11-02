@@ -5,6 +5,7 @@
 #include "p4pc/game_table_inputs_use.h"
 #include "p4pc/game_table_manifest.h"
 #include "p4pc/game_items_save.h"
+#include "p4pc/game_personas_save.h"
 #include "p4pc/game_table_admission.h"
 #include "p4pc/packages.h"
 #include "p4pc/package_memory.h"
@@ -81,6 +82,8 @@ static int destroy(void)
     result = p4_game_tables_items_save_unregister(boot.item_save);
     if (result) return result;
     boot.item_save = NULL;
+    result = p4_game_personas_save_unregister();
+    if (result) return result;
     result = p4_game_tables_builder_destroy(&boot.builder);
     if (result) return result;
     for (size_t i = 0; i < boot.count; ++i) p4_package_file_plan_release(boot.definitions[i].plan);
@@ -304,6 +307,8 @@ static int finalize_prepare(void *unused)
     }
     if (!result && boot.builder.items)
         result = p4_game_tables_items_save_register(boot.builder.items, boot.builder.sources, &boot.item_save);
+    if (!result && boot.builder.personas)
+        result = p4_game_personas_save_register(boot.builder.personas, boot.builder.sources);
     if (result) fprintf(stderr, "p4pc: pre-raw table hook staging refused: %s\n", p4_game_tables_error(result));
     return result ? -1 : 0;
 }

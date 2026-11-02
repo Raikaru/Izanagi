@@ -54,8 +54,8 @@ cp -R "$root/examples/mods/p4pc.example" "$stage/$name/examples/mods/"
 ffver=$(sed -n 's/^FFMPEG_VER=//p' "$root/ci/win32/build_deps.sh")
 ffsha=$(sed -n 's/^FFMPEG_SHA=//p' "$root/ci/win32/build_deps.sh")
 sdlver=$(sed -n 's/^SDL_VER=//p' "$root/ci/win32/build_deps.sh")
-sub() { sed "s|@BUILDLINE@|commit $sha|g; s|@VERSION@|$version|g; s|@ARCH@|$arch|g; s|@EXE@|$exe|g; s|@FFMPEG_VER@|$ffver|g; s|@FFMPEG_SHA@|$ffsha|g; s|@SDL_VER@|$sdlver|g; s|@APPDATA@|%APPDATA%\\\\p4pc\\\\Persona4\\\\|g"; }
-sub < "$root/packaging/README_win.txt" | sed 's/$/\r/' > "$stage/$name/README.txt"
+sub() { sed "s|@BUILDLINE@|commit $sha|g; s|@VERSION@|$version|g; s|@SHA@|$version|g; s|@ARCH@|$arch|g; s|@EXE@|$exe|g; s|@FFMPEG_VER@|$ffver|g; s|@FFMPEG_SHA@|$ffsha|g; s|@SDL_VER@|$sdlver|g; s|@APPDATA@|%APPDATA%\\\\p4pc\\\\Persona4\\\\|g"; }
+sub < "$root/packaging/README_win.txt" | awk '{ if ($0 == "@BUILDTYPE@") print "64-bit player build."; else if ($0 != "@UNLANDED@") print }' | sed 's/$/\r/' > "$stage/$name/README.txt"
 sub < "$root/packaging/NOTICES_win.txt" | sed 's/$/\r/' > "$stage/$name/THIRD_PARTY_NOTICES.txt"
 cp "$root/LICENSE" "$stage/$name/licenses/p4pc-MIT.txt"
 cp "$root/NOTICE" "$stage/$name/licenses/NOTICE.txt"

@@ -195,7 +195,7 @@ int p4_game_elements_ai_native_script_use(uint32_t header)
     }
     return P4_TABLE_OK;
 }
-int p4_game_elements_ai_native_record(uint32_t index, const uint8_t **out)
+int p4_game_elements_ai_native_record(uint32_t index, uint32_t *out)
 {
     if (!out) return P4_TABLE_INVALID;
     if (!active || !active->bank_native_base) return P4_TABLE_NOT_READY;
@@ -206,7 +206,7 @@ int p4_game_elements_ai_native_record(uint32_t index, const uint8_t **out)
         if (result) return result < 0 ? result : P4_TABLE_INVALID;
         active->bank_source_used = 1u;
     }
-    *out = (const uint8_t *)P4_G2H(active->bank_native_base + index * P4_GAME_AI_RECORD_BYTES);
+    *out = active->bank_native_base + index * P4_GAME_AI_RECORD_BYTES;
     return P4_TABLE_OK;
 }
 int p4_game_elements_ai_native_source_record(void *source, const uint8_t **out)
@@ -226,7 +226,7 @@ int p4_game_elements_ai_native_source_use(void *source)
     if (!p4_ai_native_carrier(source)) return P4_TABLE_INVALID;
     uint32_t unit = P4_G32(P4_H2G(source) + 0x30u);
     if (!guest_span(unit, 0xa68u)) return P4_TABLE_INVALID;
-    const uint8_t *row;
+    uint32_t row;
     return p4_game_elements_ai_native_record(P4_G16(unit + 0xa4u), &row);
 }
 uint32_t p4_game_elements_ai_native_action_size(void)

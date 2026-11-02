@@ -91,12 +91,14 @@ static P4GameTables *tables_for(const Scenario *scenario)
         assert(p4_game_tables_element(tables, "phys.split", &pierce) == P4_TABLE_OK);
     }
     alias(tables, P4_ENTITY_ENEMY, 1, 1, 10, "phys.split:enemy-one");
-    alias(tables, P4_ENTITY_PERSONA, 30, 0, 0, "phys.split:persona-thirty");
+    /* A persona's semantic profile ID is free (the E2E package uses 0x1000+p);
+     * its legacy columns still read the native snapshot at native profile 0. */
+    alias(tables, P4_ENTITY_PERSONA, 30, 0, 0x101eu, "phys.split:persona-thirty");
     if (scenario->enemy_slash_row) row(tables, P4_ENTITY_ENEMY, 1, 10, SLASH, P4_CHANNEL_DAMAGE, P4_AFF_WEAK | 125u);
-    if (scenario->persona_slash_row) row(tables, P4_ENTITY_PERSONA, 30, 0, SLASH, P4_CHANNEL_DAMAGE, 100);
+    if (scenario->persona_slash_row) row(tables, P4_ENTITY_PERSONA, 30, 0x101eu, SLASH, P4_CHANNEL_DAMAGE, 100);
     if (scenario->light_damage_rows) {
         row(tables, P4_ENTITY_ENEMY, 1, 10, 6, P4_CHANNEL_DAMAGE, P4_AFF_RESIST | 50u);
-        row(tables, P4_ENTITY_PERSONA, 30, 0, 6, P4_CHANNEL_DAMAGE, 100);
+        row(tables, P4_ENTITY_PERSONA, 30, 0x101eu, 6, P4_CHANNEL_DAMAGE, 100);
     }
     assert(p4_game_tables_freeze(tables, 1) == P4_TABLE_OK);
     return tables;

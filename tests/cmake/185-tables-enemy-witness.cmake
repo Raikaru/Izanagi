@@ -19,10 +19,14 @@ if(P4PC_MOD_WITNESS_TESTS)
     if(_p4_enemy_suffix STREQUAL "64w")
       set(_p4_enemy_runner "${P4_MOD_WINE}")
     endif()
-    add_test(NAME mod_enemy_game${_p4_enemy_suffix} COMMAND "${P4_PYTHON}"
-      "${CMAKE_CURRENT_SOURCE_DIR}/mod_enemy_game_test.py"
-      --out "${CMAKE_BINARY_DIR}/mod-enemy-witness${_p4_enemy_suffix}"
-      --driver ${_p4_enemy_runner} "$<TARGET_FILE:${_p4_enemy_target}>")
+    # The p4pc iteration's add_test already registers the 64-bit twin
+    # (000-registration.cmake); this iteration only sets its properties.
+    if(NOT TEST mod_enemy_game${_p4_enemy_suffix})
+      add_test(NAME mod_enemy_game${_p4_enemy_suffix} COMMAND "${P4_PYTHON}"
+        "${CMAKE_CURRENT_SOURCE_DIR}/mod_enemy_game_test.py"
+        --out "${CMAKE_BINARY_DIR}/mod-enemy-witness${_p4_enemy_suffix}"
+        --driver ${_p4_enemy_runner} "$<TARGET_FILE:${_p4_enemy_target}>")
+    endif()
     set_tests_properties(mod_enemy_game${_p4_enemy_suffix} PROPERTIES
       LABELS "mod-witness" TIMEOUT 5400 SKIP_RETURN_CODE 77
       ENVIRONMENT "P4PC_MODS=1;P4PC_PACKS=0;P4PC_INPUT=script;P4PC_MOD_WITNESS=1")

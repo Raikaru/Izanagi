@@ -135,6 +135,24 @@ class ManagedMods(unittest.TestCase):
         self.assertIn("good_reads=1 bad_reads=0 mods=1 mask=0 raw=good", output)
         self.assertIn("managed fresh-entry recovery: PASS", output)
 
+    def test_deliberate_code0_exit_before_title_is_not_an_unclean_startup(self):
+        self.ini.write_text("; unrelated player settings survive\n[mods]\nenabled=mod.good\n"
+                            "[unrelated]\nkeep=untouched\n", encoding="utf-8")
+        for _ in range(3):  # The third start is refused if either earlier exit counted as unclean.
+            result, output = self.invoke("--managed-exit-normal")
+            self.assertEqual(result.returncode, 0, output)
+            self.assertIn("managed deliberate exit: PASS", output)
+            self.assertNotIn("Two unclean startups", output)
+            saved = self.saved()
+            self.assertEqual(saved["mods"]["boot_pending"], "0")
+            self.assertEqual(saved["mods"]["boot_early_crashes"], "0")
+        result, output = self.invoke("--managed-exit-failure")
+        self.assertEqual(result.returncode, 3, output)
+        self.assertIn("managed deliberate exit: PASS", output)
+        saved = self.saved()
+        self.assertEqual(saved["mods"]["boot_pending"], "1")
+        self.assertEqual(saved["mods"]["boot_early_crashes"], "0")
+
 
 if __name__ == "__main__":
     print("mod loader recovery witnesses: mod_witness=true reference_eligible=false", flush=True)

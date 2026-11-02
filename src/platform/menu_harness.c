@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include "p4pc/crt.h"
 #include "p4pc/os.h"
 #include "p4pc/save_import.h"
 #include "p4pc/gmem.h"
@@ -632,7 +633,7 @@ static void scriptStep(unsigned frame)
                 sCampSeen ? "opened" : "never opened", sShots, sShotsDark, sShotsFailed, !sCheckUsed ? "unused" : sCheckOk ? "ok" : "FAILED", ok ? "PASS" : "FAIL");
         if (getenv("P4PC_MENU_EXIT") != NULL) {
             fflush(stderr);
-            exit(ok ? 0 : 1);
+            p4pc_exit(ok ? 0 : 1);
         }
         return;
     }
@@ -970,7 +971,7 @@ void p4pc_menu_harness_frame(unsigned frame)
             fprintf(stderr, "p4pc: camp gate %s: camp task %p state %d, %.3f of the captured frame lit (need 0.3+)\n", ok ? "PASS" : "FAIL",
                     (const void *)camp, camp != NULL ? (int)*(const uint32_t *)camp : -1, lit);
             fflush(stderr);
-            exit(ok ? 0 : 1);
+            p4pc_exit(ok ? 0 : 1);
         }
     }
 }

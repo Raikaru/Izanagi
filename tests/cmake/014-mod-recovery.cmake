@@ -24,6 +24,8 @@ if(P4PC_MOD_WITNESS_TESTS)
       "${CMAKE_SOURCE_DIR}/src/platform/mods/failure_native.c"
       "${CMAKE_SOURCE_DIR}/src/platform/mods/failure_config.c"
       "${CMAKE_SOURCE_DIR}/src/platform/mods/mods_config.c"
+      "${CMAKE_SOURCE_DIR}/src/platform/mods/packs.c"
+      "${CMAKE_SOURCE_DIR}/src/platform/mods/packs_config.c"
       "${CMAKE_SOURCE_DIR}/src/platform/mods/boot_health.c"
       "${CMAKE_SOURCE_DIR}/src/platform/mods/package_boot.c"
       "${CMAKE_SOURCE_DIR}/src/crt.c"

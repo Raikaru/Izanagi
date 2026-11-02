@@ -16,6 +16,9 @@
 #define P4_PERSONA_MODEL_SIZE 88u
 #define P4_PERSONA_CANDIDATES_SIZE 4u
 #define P4_PERSONA_NAME_SIZE 17u
+/* UNIT2 at 0x007644C8: sixteen u16 affinity words per persona, read by
+ * datPersonaRunSkillSlot 0x001097C0 and datPersonaGetSkillSlot 0x00109870. */
+#define P4_PERSONA_AFFINITY_SIZE 32u
 /* Public added persona IDs are 256..511: fusion recipe material selectors are
  * signed 10-bit and name/list APIs signed16, so every carrier stays exact. */
 #define P4_PERSONA_MAX_ID 511u
@@ -29,6 +32,7 @@ typedef struct P4GamePersonaDesc {
     uint8_t growth[P4_PERSONA_GROWTH_SIZE];
     uint8_t model[P4_PERSONA_MODEL_SIZE];
     uint8_t candidates[P4_PERSONA_CANDIDATES_SIZE];
+    uint8_t affinity[P4_PERSONA_AFFINITY_SIZE];
 } P4GamePersonaDesc;
 typedef struct P4GamePersonaView {
     P4GamePersonaDesc desc;
@@ -58,7 +62,7 @@ int p4_game_personas_register(P4GamePersonas *personas, const char *owner, const
 int p4_game_personas_native_admit(const P4GamePersonas *personas);
 struct P4GameTableInputSpan;
 /* CPU-only immutable seal against the actual producer-owned spans (PERSONA0,
- * PERSONA1, MODEL2, PERSONA5 and MSG3), each exactly 256 retail rows. Added IDs
+ * PERSONA1, MODEL2, PERSONA5, MSG3 and UNIT2), each exactly 256 retail rows. Added IDs
  * must be dense from 256 (no zero row is ever invented between them), name a
  * retail model_source, and have a P4_TEXT_PERSONA name of at most 17 bytes
  * including NUL in the sealed text view. Same revision and exact inputs are
@@ -69,9 +73,10 @@ int p4_game_personas_seal(P4GamePersonas *personas,
     const struct P4GameTableInputSpan *model,
     const struct P4GameTableInputSpan *candidates,
     const struct P4GameTableInputSpan *original_names,
+    const struct P4GameTableInputSpan *affinity,
     const P4GameText *names, uint32_t revision);
 uint32_t p4_game_personas_semantic_revision(const P4GamePersonas *personas);
-/* Actual runtime phase only: verify all five loaded banks against the sealed
+/* Actual runtime phase only: verify all six loaded banks against the sealed
  * source bytes, then allocate/copy (retail prefix plus authored rows). Failure
  * leaves the definitions sealed and every game pointer unchanged; repeated
  * calls verify the same bytes without another allocation. Empty snapshots
@@ -81,13 +86,15 @@ int p4_game_personas_materialize(P4GamePersonas *personas,
     const uint8_t *growth, size_t growth_size,
     const uint8_t *model, size_t model_size,
     const uint8_t *candidates, size_t candidates_size,
-    const uint8_t *original_names, size_t original_names_size);
+    const uint8_t *original_names, size_t original_names_size,
+    const uint8_t *affinity, size_t affinity_size);
 int p4_game_personas_validate_original(const P4GamePersonas *personas,
     const uint8_t *metadata, size_t metadata_size,
     const uint8_t *growth, size_t growth_size,
     const uint8_t *model, size_t model_size,
     const uint8_t *candidates, size_t candidates_size,
-    const uint8_t *original_names, size_t original_names_size);
+    const uint8_t *original_names, size_t original_names_size,
+    const uint8_t *affinity, size_t affinity_size);
 uint32_t p4_game_personas_revision(const P4GamePersonas *personas);
 size_t p4_game_personas_count(const P4GamePersonas *personas);
 /* One past the highest valid persona ID: 256 without added rows. */
@@ -97,13 +104,14 @@ const P4GamePersonaView *p4_game_personas_find(const P4GamePersonas *personas, u
 /* Model resource ID for a persona: the ID itself for retail rows, the declared
  * model_source for added rows; NOT_FOUND beyond the sealed domain. */
 int p4_game_personas_model_source(const P4GamePersonas *personas, uint32_t id, uint32_t *model_id);
-/* Guest bases for one atomic game-thread publication of all five slots; zero
+/* Guest bases for one atomic game-thread publication of all six slots; zero
  * before materialization or for an empty snapshot. */
 uint32_t p4_game_personas_metadata(const P4GamePersonas *personas);
 uint32_t p4_game_personas_growth(const P4GamePersonas *personas);
 uint32_t p4_game_personas_model(const P4GamePersonas *personas);
 uint32_t p4_game_personas_candidates(const P4GamePersonas *personas);
 uint32_t p4_game_personas_names(const P4GamePersonas *personas);
+uint32_t p4_game_personas_affinity(const P4GamePersonas *personas);
 
 /* Stage the CPU-sealed snapshot before native raw-table exposure. Added rows
  * register the `persona` completion participant, which materializes and

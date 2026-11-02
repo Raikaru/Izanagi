@@ -61,6 +61,10 @@ With packages requested, startup records a pending marker before loading the gam
 image or preparing optional packages. The real interactive `titleDrawProc` state9
 is its stable milestone, independent of scripted input or elapsed time. Genuine
 normal game returns/code0 exits and explicit window-close intent also clear it.
+Engine automation completions (menu, battle and new-game gates, lockstep and
+battle-sim results) and restart requests leave through `p4pc_exit`
+(`include/p4pc/crt.h`), so their code 0 is that same normal exit and a
+harness that bypasses the title is not counted as a crash.
 Fatal/nonzero exits and actual process death do not. Two consecutive unclean
 pre-stable startups offer the same safe mode before another optional preparation;
 quitting that offer retains the threshold. An empty/refused optional batch clears
@@ -84,6 +88,9 @@ around the health state machine, including safe-mode notice and selector
 preservation. It is not a native-dialog, actual title-frame, restart, gameplay or
 retail bit-identity receipt. MOD_WITNESS custody and fidelity refusals remain
 independent of this startup health metadata.
+The opt-in MOD_WITNESS `mod_loader_recovery` fixture registers the production
+observer and leaves through `p4pc_exit`: three consecutive code-0 pre-title
+exits keep the marker clear, while a nonzero exit leaves it pending.
 
 
 

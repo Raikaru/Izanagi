@@ -8,7 +8,7 @@ target_sources(p4port PRIVATE src/platform/mods/game_skills.c src/platform/mods/
   src/platform/mods/game_items_save.c src/platform/mods/game_table_sources.c
   src/platform/mods/game_table_refs.c src/platform/mods/game_table_inputs_use.c)
 target_sources(p4port PRIVATE src/platform/mods/game_skills_native.c src/platform/mods/game_enemies_native.c
-  src/platform/mods/game_personas_native.c src/platform/mods/game_tables_packed.c)
+  src/platform/mods/game_personas_native.c src/platform/mods/game_personas_save.c src/platform/mods/game_tables_packed.c)
 target_sources(p4port PRIVATE src/platform/mods/game_elements_native.c
   src/platform/mods/game_elements_affinity.c src/platform/mods/game_elements_action.c
   src/platform/mods/game_elements_route.c)

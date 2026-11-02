@@ -171,7 +171,8 @@ def validate_persona(persona, location, classification):
     owner = integer(persona["owner"], location + ".owner", 1, 10)
     integer(persona["slot"], location + ".slot", maximum=11 if owner == 1 else 0)
     if "persona_id" in persona:
-        integer(persona["persona_id"], location + ".persona_id", maximum=0xFFFFFFFE)
+        # Wire schema only (the native record's 16-bit ID); the active catalog bounds it natively.
+        integer(persona["persona_id"], location + ".persona_id", 1, 0xFFFF)
     if classification == "source_attested" and mode != "preserve_source":
         raise ScenarioError(location + ".mode: source_attested permits source preservation only; growth/exact overrides require synthetic_lab")
     if mode == "preserve_source":

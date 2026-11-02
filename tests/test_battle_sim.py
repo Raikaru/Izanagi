@@ -833,6 +833,17 @@ class BattleSimTest(unittest.TestCase):
             definition["party"]["personas"] = [persona]
             with self.subTest(classification=classification, persona=persona), self.assertRaises(sim.ScenarioError):
                 sim.validate_definition(definition)
+        for persona_id, valid in ((0, False), (256, True), (511, True), (0xFFFF, True), (0x10000, False)):
+            definition = self.definition("synthetic_lab")
+            persona = copy.deepcopy(exact)
+            persona["persona_id"] = persona_id
+            definition["party"]["personas"] = [persona]
+            with self.subTest(persona_id=persona_id):
+                if valid:
+                    sim.validate_definition(definition)
+                else:
+                    with self.assertRaisesRegex(sim.ScenarioError, "persona_id"):
+                        sim.validate_definition(definition)
 
     def test_preparation_freezes_once_before_all_seed_workers(self):
         definition = self.declarative()

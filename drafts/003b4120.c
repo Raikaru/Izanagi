@@ -1,0 +1,56 @@
+/* SPDX-License-Identifier: LicenseRef-reconstructed */
+/* 0x003b4120 func_003b4120 src/promoted/code1_003b.c - romwright draft, unreviewed */
+
+void FUN_003b4120(int *param_1,int param_2,int param_3)
+
+{
+  int iVar1;
+  unsigned int *puVar2;
+  unsigned int *puVar3;
+  unsigned int *puVar4;
+  unsigned int *puVar5;
+  int iVar6;
+  int uStack_20;
+  unsigned int uStack_1c;
+  unsigned int uStack_18;
+  unsigned int uStack_14;
+  unsigned int uStack_10;
+  unsigned int uStack_c;
+  unsigned int uStack_8;
+  unsigned int uStack_4;
+  
+  iVar1 = param_1[1];
+  if (iVar1 != 8) {
+    puVar5 = (unsigned int *)*param_1;
+    iVar6 = 0;
+    if (0 < param_2) {
+      do {
+        puVar4 = (unsigned int *)((int)puVar5 + iVar1);
+        puVar3 = (unsigned int *)((int)puVar4 + iVar1);
+        iVar6 = iVar6 + 1;
+        puVar2 = (unsigned int *)((int)puVar3 + iVar1);
+        *puVar5 = *(unsigned int *)(param_3 + 0x90);
+        puVar5[1] = *(unsigned int *)(param_3 + 0x94);
+        puVar5 = (unsigned int *)((int)puVar2 + iVar1);
+        *puVar4 = *(unsigned int *)(param_3 + 0x98);
+        puVar4[1] = *(unsigned int *)(param_3 + 0x9c);
+        *puVar3 = *(unsigned int *)(param_3 + 0xa0);
+        puVar3[1] = *(unsigned int *)(param_3 + 0xa4);
+        *puVar2 = *(unsigned int *)(param_3 + 0xa8);
+        puVar2[1] = *(unsigned int *)(param_3 + 0xac);
+      } while (iVar6 < param_2);
+    }
+  }
+  else {
+    uStack_20 = *(unsigned int *)(param_3 + 0x90);
+    uStack_1c = *(unsigned int *)(param_3 + 0x94);
+    uStack_18 = *(unsigned int *)(param_3 + 0x98);
+    uStack_14 = *(unsigned int *)(param_3 + 0x9c);
+    uStack_10 = *(unsigned int *)(param_3 + 0xa0);
+    uStack_c = *(unsigned int *)(param_3 + 0xa4);
+    uStack_8 = *(unsigned int *)(param_3 + 0xa8);
+    uStack_4 = *(unsigned int *)(param_3 + 0xac);
+    FUN_003a4ab0(*param_1,param_1[1] * param_2 * 4,&uStack_20);
+  }
+  return;
+}

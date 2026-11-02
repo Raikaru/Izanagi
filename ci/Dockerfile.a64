@@ -1,0 +1,23 @@
+# The AArch64 run environment for the 64-bit build (docs/port64.md 7): the arm64 libraries (SDL3, FFmpeg, Mesa's llvmpipe) and qemu-user, on top of the CI image. The
+# AArch64 objects are cross-compiled by the image's clang (--target=aarch64-linux-gnu, -DP4_PORT64_ARCH=aarch64) and run under qemu-aarch64; the libraries are Debian's
+# multiarch ones, so the build's sysroot and the run's are the same files.
+# Build against a private candidate without moving the shared base tag:
+#   docker build --label org.opencontainers.image.revision=$P4PC_ACCEPTED_SHA --build-arg P4PC_BASE_IMAGE=p4pc-ci-candidate -t p4pc-ci-a64-candidate -f ci/Dockerfile.a64 ci/
+ARG P4PC_BASE_IMAGE=localhost/p4pc-ci:latest
+FROM ${P4PC_BASE_IMAGE}
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN dpkg --add-architecture arm64 \
+ && apt-get update \
+ && apt-get install -y --no-install-recommends \
+      qemu-user libc6:arm64 libstdc++6:arm64 \
+      libsdl3-dev:arm64 libsdl3-0:arm64 \
+      libavcodec-dev:arm64 libavutil-dev:arm64 libswscale-dev:arm64 \
+      libgl1-mesa-dri:arm64 libglx-mesa0:arm64 libegl-mesa0:arm64 libgl1:arm64 libegl1:arm64 libgles2:arm64 \
+      gcc-aarch64-linux-gnu libc6-dev-arm64-cross gdb-multiarch \
+ && rm -rf /var/lib/apt/lists/*
+
+# C++ adapters use the same AArch64 GCC sysroot as the existing clang profile.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends g++-aarch64-linux-gnu \
+ && rm -rf /var/lib/apt/lists/*

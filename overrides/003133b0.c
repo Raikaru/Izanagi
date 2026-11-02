@@ -1,0 +1,89 @@
+s32 fclFuseLowestCandidateAtMost(u32 arg0, s32 arg1, u16 *arg2)
+{
+    extern u8 *DAT_007644c4;
+    u16 *input = arg2;
+    s32 target = (s32)(arg0 & 0xFF);
+    s32 maxArcana = arg1 & 0xFF;
+    s32 firstPick = 0;
+    s32 atMostPick = 0;
+    s32 slot;
+
+    for (slot = 0; (slot & 0xFFFF) < 0xC0; slot = (slot + 1) & 0xFFFF) {
+        s32 id = slot & 0xFFFF;
+        s32 off = (u16)slot * 0xE;
+        u8 *rec = iGpffffb3d4 + off;
+        u16 flags;
+        s32 eligible = 1;
+        s32 k;
+        s32 bestRec;
+        s32 arcana;
+        s32 inInput;
+
+        if (target != rec[2]) {
+            continue;
+        }
+        flags = *(u16 *)rec;
+        if (flags & 3) {
+            continue;
+        }
+        for (k = 0; k < 0x17; k++) {
+            u8 *ent = D_006420A0 + k * 8;
+            s16 tag;
+
+            if (id != *(s16 *)(ent + 4)) {
+                continue;
+            }
+            tag = *(s16 *)(ent + 6);
+            if (tag & 1) {
+                if (datGetFlag(*(s32 *)ent) != 0) {
+                    continue;
+                }
+                eligible = 0;
+                break;
+            } else if (tag & 2) {
+                eligible = 0;
+                if (datGetFlag(*(s32 *)ent) != 1) {
+                    continue;
+                }
+                eligible = 1;
+                break;
+            }
+        }
+        if (eligible == 0) {
+            continue;
+        }
+
+        bestRec = firstPick & 0xFFFF;
+        if (bestRec == 0 || (s32)iGpffffb3d4[bestRec * 0xE + 3] < (s32)rec[3]) {
+            firstPick = slot;
+        }
+
+        arcana = rec[3];
+        if (arcana > maxArcana) {
+            continue;
+        }
+        inInput = 0;
+        for (k = 0; k < 0xC; k++) {
+            if (id == input[k]) {
+                inInput = 1;
+                break;
+            }
+        }
+        if (!inInput && ((atMostPick & 0xFFFF) == 0 ||
+                         (s32)DAT_007644c4[(atMostPick & 0xFFFF) * 0xE + 3] < arcana)) {
+            atMostPick = slot;
+        }
+    }
+
+    if (firstPick == 0) {
+        kAssertFail(D_00642F30, 0x43A);
+    }
+    if ((atMostPick & 0xFFFF) == 0) {
+        s32 cand = firstPick & 0xFFFF;
+
+        if ((s32)DAT_007644c4[cand * 0xE + 3] < maxArcana) {
+            atMostPick = cand;
+        }
+    }
+    return atMostPick;
+}

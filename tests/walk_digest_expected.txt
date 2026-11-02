@@ -1,0 +1,22 @@
+walk digest flip 1000 16e1b005 (0 samples)
+walk digest flip 1500 3d823b7c (11 samples)
+walk digest flip 2000 edb436f8 (56 samples)
+walk digest flip 2500 4f94c7f8 (56 samples)
+walk digest flip 3000 902358f8 (56 samples)
+walk digest flip 3500 f7cdfb3a (74 samples)
+walk digest flip 4000 d82f685c (124 samples)
+walk digest flip 4500 91256ba2 (174 samples)
+battle driver: flip 4721 btlMain state -2 -> 2
+battle driver: flip 4722 btlMain state 2 -> 3
+battle driver: flip 4733 btlMain state 3 -> 5
+battle driver: flip 4739 btlMain state 5 -> 6
+battle driver: flip 4773 btlMain state 6 -> 7
+walk digest flip 5000 c1c40fe9 (195 samples)
+battle driver: flip 5011 btlMain state 7 -> 8
+walk digest flip 5500 c63b09a9 (195 samples)
+walk digest flip 6000 23b78869 (195 samples)
+battle driver: flip 6285 btlMain state 8 -> 13
+battle driver: flip 6329 btlMain state 13 -> 14
+battle driver: flip 6330 btlMain state 14 -> 15
+battle driver: flip 6333 btlMain state 15 -> 17
+walk digest flip 6500 c0ac1a29 (195 samples)

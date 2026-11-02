@@ -1,0 +1,21 @@
+# Independent pristine card5-slot06: Path 9 portal to Izanami's first COMMAND.
+# This does not join the separate entrance leg into Paths 1-8 traversal,
+# defeat either boss phase, or establish the true ending.
+timeout:30000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+waitfield:30:1
+waitstep:149
+waitstate16:0x00797b7a==353
+push:0,-10000,300
+press:cross
+# Proceed? Yes.
+choose:1
+skiptask:battle
+waitbtl:menu
+log

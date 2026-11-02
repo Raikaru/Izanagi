@@ -1,0 +1,67 @@
+# Tests that run no game or port executable (python and shell checks of tools and sources: the add_test wrapper in the registration prelude records them) have no
+# i386 or 64-bit build to belong to, so they take the label port64 and run with the x64 build.
+# Reference metadata/checker regression tests; no retail files are needed.
+add_test(NAME doc_links COMMAND "${P4_PYTHON}" "${CMAKE_SOURCE_DIR}/tools/check_doc_links.py")
+add_test(NAME ref_guard COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/ref_guard_test.py")
+add_test(NAME scale_diff COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/scale_diff_test.py")
+add_test(NAME title_edges COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/title_edges_test.py")
+add_test(NAME cutin_edges COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/cutin_edges_test.py")
+add_test(NAME disc_contract COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/disc_contract_test.py")
+# Auto-init must instrument the custom rewritten mirror compiler.
+add_test(NAME unit64_auto_init COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/unit64_auto_init_test.py")
+add_test(NAME field_entry_witness COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/field_entry_test.py")
+# Real-play captures follow procedure timers or camera/player state, not a fragile absolute flip.
+add_test(NAME event_scene_capture COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/event_scene_capture_test.py")
+add_test(NAME package_runtime_provenance COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/package_runtime_provenance_test.py")
+# PC-side shell code calls only tools that Git for Windows ships (no grep, flock, pgrep ...).
+add_test(NAME windows_tool_lint COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/windows_tool_lint_test.py")
+set_tests_properties(windows_tool_lint PROPERTIES LABELS "tools;port64" TIMEOUT 60)
+if(CMAKE_CXX_COMPILER_LOADED AND CMAKE_SYSTEM_NAME STREQUAL "Linux" AND NOT CMAKE_CROSSCOMPILING)
+  set(P4_ADAPTER_GRAPH_COFF_ARGS)
+  if(TARGET p4pc64w)
+    list(APPEND P4_ADAPTER_GRAPH_COFF_ARGS --coff)
+  endif()
+  add_test(NAME host_adapter_graph COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/host_adapter_graph_test.py"
+    --cmake "${CMAKE_COMMAND}" --cc "${CMAKE_C_COMPILER}" ${P4_ADAPTER_GRAPH_COFF_ARGS})
+  set_tests_properties(host_adapter_graph PROPERTIES LABELS "tools;port64" TIMEOUT 180 ENVIRONMENT "P4PC_INPUT=script")
+endif()
+add_test(NAME profile_report COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/profile_report_test.py")
+add_test(NAME crt_guard COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/crt_guard_test.py"
+  --clang "${CMAKE_C_COMPILER}" --nm "${P4_CRT_NM}" --objdump "${P4_CRT_OBJDUMP}")
+add_test(NAME printf_rewrite COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/printf_rewrite_test.py")
+add_test(NAME fn_word_rewrite COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/fn_word_rewrite_test.py")
+
+# EE 64-bit integer results live entirely in $v0, never a $v0:$v1 pair.
+if(TARGET ovdiff)
+  add_test(NAME ovdiff_ee_abi COMMAND $<TARGET_FILE:ovdiff> --selftest-abi)
+  set_tests_properties(ovdiff_ee_abi PROPERTIES ENVIRONMENT "P4_MIPSDIFF_DIR=${CMAKE_SOURCE_DIR}/tools/mipsdiff")
+  add_test(NAME ovdiff_ee_lanes COMMAND $<TARGET_FILE:ovdiff> --selftest-lanes)
+  set_tests_properties(ovdiff_ee_lanes PROPERTIES SKIP_RETURN_CODE 77)
+  add_test(NAME ovdiff_synthetic_words COMMAND $<TARGET_FILE:ovdiff> --selftest-synthetic-words)
+  add_test(NAME mipsdiff_replay_oracle COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/mipsdiff_replay_test.py" $<TARGET_FILE:ovdiff>)
+  set_tests_properties(mipsdiff_replay_oracle PROPERTIES SKIP_RETURN_CODE 77)
+  add_test(NAME mipsdiff_windows COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/mipsdiff_window_test.py" $<TARGET_FILE:ovdiff>)
+  set_tests_properties(mipsdiff_windows PROPERTIES SKIP_RETURN_CODE 77)
+endif()
+if(TARGET ovdiff64)
+  add_test(NAME ovdiff_ee_abi64 COMMAND $<TARGET_FILE:ovdiff64> --selftest-abi)
+  set_tests_properties(ovdiff_ee_abi64 PROPERTIES SKIP_RETURN_CODE 77 LABELS port64 ENVIRONMENT "P4_MIPSDIFF_DIR=${CMAKE_SOURCE_DIR}/tools/mipsdiff")
+  add_test(NAME ovdiff_ee_lanes64 COMMAND $<TARGET_FILE:ovdiff64> --selftest-lanes)
+  set_tests_properties(ovdiff_ee_lanes64 PROPERTIES SKIP_RETURN_CODE 77 LABELS port64)
+  add_test(NAME ovdiff_synthetic_words64 COMMAND $<TARGET_FILE:ovdiff64> --selftest-synthetic-words)
+  set_tests_properties(ovdiff_synthetic_words64 PROPERTIES LABELS port64)
+  add_test(NAME mipsdiff_replay_oracle64 COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/mipsdiff_replay_test.py" $<TARGET_FILE:ovdiff64>)
+  set_tests_properties(mipsdiff_replay_oracle64 PROPERTIES SKIP_RETURN_CODE 77 LABELS port64)
+  add_test(NAME mipsdiff_windows64 COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/mipsdiff_window_test.py" $<TARGET_FILE:ovdiff64>)
+  set_tests_properties(mipsdiff_windows64 PROPERTIES SKIP_RETURN_CODE 77 LABELS port64)
+endif()
+add_test(NAME asm_worklist COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/asm_worklist_test.py")
+set_tests_properties(asm_worklist PROPERTIES LABELS port64)
+add_test(NAME mipsdiff_sigs COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/mipsdiff_sigs_test.py")
+set_tests_properties(mipsdiff_sigs PROPERTIES LABELS port64)
+
+get_property(P4_PLAIN_TESTS GLOBAL PROPERTY P4_PLAIN_TESTS)
+foreach(t IN LISTS P4_PLAIN_TESTS)
+  set_property(TEST ${t} APPEND PROPERTY LABELS port64)
+endforeach()
+

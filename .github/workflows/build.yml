@@ -1,0 +1,133 @@
+# Builds, tests and packages the port in the p4pc-ci image (ci/Dockerfile). No game data is used or available here:
+# the build reads config/retail_fnptr_words.txt, and the tests that need the disc skip.
+# A pushed tag v* also attaches the Windows x64 zip and the Linux x86_64 AppImage to its GitHub release.
+name: build
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  IMAGE: p4pc-ci
+
+jobs:
+  test:
+    name: Build and test (Linux, Windows)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    steps:
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          df -h /
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - uses: docker/setup-buildx-action@v3
+      - name: CI image
+        uses: docker/build-push-action@v6
+        with:
+          context: ci
+          tags: ${{ env.IMAGE }}
+          load: true
+          cache-from: type=gha,scope=p4pc-ci
+          cache-to: type=gha,scope=p4pc-ci,mode=max
+      - uses: actions/cache@v4
+        with:
+          path: .ccache
+          key: ccache-test-${{ github.sha }}
+          restore-keys: ccache-test-
+      - name: Configure, build everything, run the tests that need no game files
+        run: |
+          docker run --rm -v "$PWD:/src" -v "$PWD/.ccache:/ccache" -w /src "$IMAGE" sh -euc '
+            git config --global --add safe.directory "*"
+            cmake -S . -B build -G Ninja \
+              -DCMAKE_C_COMPILER=/opt/llvm-mingw/bin/clang \
+              -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+              -DP4_PORT64=ON -DP4_PORT64_LINK=ON -DP4_PORT64_OPT=O2 -DP4_PORT64W_OPT=O2 -DP4_CENSUS_CHECK=ON
+            cmake --build build -- -k 0
+            sh tools/ci_tests.sh build
+          '
+
+  package:
+    name: Package ${{ matrix.target }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: windows-x64
+            script: tools/package_win.sh
+          - target: linux-x86_64
+            script: tools/package_linux.sh
+    steps:
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          df -h /
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+      - uses: docker/setup-buildx-action@v3
+      - name: CI image
+        uses: docker/build-push-action@v6
+        with:
+          context: ci
+          tags: ${{ env.IMAGE }}
+          load: true
+          cache-from: type=gha,scope=p4pc-ci
+          cache-to: type=gha,scope=p4pc-ci,mode=max
+      - uses: actions/cache@v4
+        with:
+          path: .ccache
+          key: ccache-${{ matrix.target }}-${{ github.sha }}
+          restore-keys: ccache-${{ matrix.target }}-
+      - name: Build and package
+        env:
+          SCRIPT: ${{ matrix.script }}
+        run: |
+          docker run --rm -v "$PWD:/src" -v "$PWD/.ccache:/ccache" -w /src -e SCRIPT "$IMAGE" sh -euc '
+            git config --global --add safe.directory "*"
+            sh "$SCRIPT" --out dist
+          '
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p4pc-${{ matrix.target }}
+          path: dist/*
+          if-no-files-found: error
+
+  release:
+    name: Attach packages to the release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [test, package]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Create or update the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          ls -l dist
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist/* --clobber --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create "$TAG" dist/* --repo "$GITHUB_REPOSITORY" --title "$TAG" --generate-notes
+          fi

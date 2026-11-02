@@ -1,0 +1,32 @@
+# Strict game/CRI allowlist. Each entry is an identical byte operation or a
+# compiler ABI operation; no host ordering, parser, formatter, locale or libm.
+# Byte counts/lengths are bounded by the 32-bit guest address space. The game
+# passes valid buffers; memcpy/strcpy/strncpy/strcat require nonoverlap, as their
+# retail SDK API contracts do. Pointer results are adapted back to guest words.
+# Host-only adapters additionally require reviewed (host symbol, calling function)
+# pairs in config/crt_host_adapters.json; guest-result flows stay on this strict list.
+# EE-width source aliases do not revoke these byte-domain equivalences: the
+# compiler may still emit native memcpy/memset for aggregate operations.
+# EE counts widen to native size_t only at a reviewed direct-call seam; callbacks
+# use the explicit uint32_t entries and the separate indirect-ABI guard.
+memcpy   Copies exactly n bytes between nonoverlapping valid ranges, returns destination; no typed arithmetic, padding interpretation, locale or ordering choice.
+memmove  Copies exactly n bytes as through temporary storage, including overlap, returns destination; byte result is fully specified.
+memset   Stores the low unsigned byte exactly n times and returns destination; same byte conversion and count in retail.
+strlen   Counts bytes before the first NUL; all valid guest strings fit uint32 and LP64/LLP64 cannot change that count.
+strcpy   Copies through the first NUL between nonoverlapping valid strings and returns destination; no character conversion or locale.
+strncpy  Copies at most n source bytes, pads the remaining destination with zero, and returns destination; no signed-byte comparisons.
+strcat   Appends source through its NUL to a nonoverlapping valid destination string and returns destination; all lengths fit guest uint32.
+strncat  Boundary func_00442a80 appends at most n bytes and terminates, returning destination; valid nonoverlapping guest strings/counts fit uint32, so host size_t/long and byte signedness cannot change bytes or result.
+strstr   Boundary func_00443010 returns the first exact byte substring (haystack for an empty needle), or NULL; valid guest C strings are bounded, locale is irrelevant, and returned pointers stay within the original haystack.
+__memcpy_chk Bionic capacity-checked memcpy has identical bytes/result on valid nonoverlapping extents; the strict CRI RPC caller explicitly rejects ssize/rsize above sizeof(S.buf) before either copy.
+__strcpy_chk Bionic capacity-checked strcpy preserves the same valid nonoverlapping NUL copy; sjuni_err's only callers supply fixed 11-byte error codes, which fit its 64-byte buffer.
+__strcat_chk Bionic capacity-checked strcat has identical bounded valid output; sjuni_err appends only its two fixed messages, at most 43 bytes including NUL after the error code, into 64 bytes.
+__strlen_chk Bionic bounded strlen returns the same first-NUL count on valid strings; the strict SJ error buffer is terminated within 43 of 64 bytes, and native shader/gate strings remain native. Guest lengths fit uint32.
+__divdi3 Compiler ABI signed 64-bit integer quotient, not host long; valid generated C divide operands have the same truncation-toward-zero result.
+__udivdi3 Compiler ABI unsigned 64-bit integer quotient, not host long; exact binary integer operation.
+__moddi3 Compiler ABI signed 64-bit remainder, not host long; the movie ring uses positive initialized byte/chunk capacities as divisors, with the same exact truncating integer remainder on every target.
+__stack_chk_fail Compiler-generated fatal stack-corruption handler; no successful execution returns a value or writes guest state.
+___chkstk_ms Compiler-generated MinGW stack probe; touches native stack pages only, never allocates guest memory or returns a game value.
+__chkstk_ms Same MinGW native stack probe after 32-bit COFF decoration normalization.
+_alloca Compiler ABI native-stack allocation; native stack pointer is not stored as a guest heap allocation.
+_GLOBAL_OFFSET_TABLE_ ELF position-independent linkage anchor, not a CRT computation or a guest address.

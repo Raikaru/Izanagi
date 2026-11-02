@@ -1,0 +1,59 @@
+Izanagi
+Copyright (c) 2026 Izanagi contributors
+
+Izanagi is an unofficial PC port of Shin Megami Tensei: Persona 4 (USA,
+SLUS-21782). It is not affiliated with or endorsed by Atlus or SEGA. Persona,
+Shin Megami Tensei and Atlus are trademarks of their owners. This repository
+and its release packages contain no game data: players supply their own disc
+image (docs/bring_your_own_iso.md).
+
+What the MIT licence covers
+---------------------------
+The original code of this repository (the platform layer in src/platform, the
+renderer in src/render, the movie player in src/movie, the loader, include/p4pc,
+the tools, tests, CMake files and documentation) is licensed under the MIT
+licence in LICENSE, except where a file or the list below says otherwise.
+
+No licence for reconstructed code (SPDX: LicenseRef-reconstructed)
+------------------------------------------------------------------
+Code reconstructed from the retail game is not licensed by the Izanagi
+contributors, because it is not theirs to license. That is code decompiled or
+translated from the retail executable, from its statically linked middleware
+(CRI, RenderWare) or from its runtime libraries. The text of this carve-out is
+LICENSES/LicenseRef-reconstructed.txt. It applies to:
+
+  overrides/                     decompiled replacements for retail functions
+  drafts/                        unreviewed machine decompilations of retail functions
+  src/cri/                       CRI middleware functions translated from the retail asm
+  src/platform/ee_libm.c         the retail float libm cores (fdlibm), translated
+  src/platform/ee_dlibm.c        the retail double libm cores (fdlibm), translated
+  src/platform/ps2_fpbit.c       the retail soft-float cores (GCC fp-bit), translated
+  src/platform/ee_heap.c         the retail newlib allocator (dlmalloc), translated
+  src/platform/rw_rtanim.c       RenderWare RtAnim functions, translated
+  src/platform/rw_rtanim_record.c
+  src/platform/rw_skytran.c      the RenderWare sky driver's VU0 multiplies, translated
+
+These files carry an SPDX-License-Identifier: LicenseRef-reconstructed line,
+except overrides/: the build splices those files byte for byte into the decomp
+mirror, whose edits config/mirror_contracts.json pins, so REUSE.toml marks
+them instead. The same applies to any other code in this repository that
+reproduces or translates code of the retail executable, wherever it lives.
+
+The decompilation itself, Raikaru/Persona4-Decompilation, is a separate
+repository used as the decomp/ submodule. It has its own terms, and it is not
+covered by this repository's licence.
+
+Third-party code with its own licence
+-------------------------------------
+THIRD_PARTY.md lists every third-party component, its licence and where its
+licence text is. These notices are kept as their licences require:
+
+  - fdlibm (Sun Microsystems): third_party/licenses/fdlibm-Sun.txt, for the
+    libm cores that src/platform/ee_libm.c and ee_dlibm.c translate.
+  - newlib (University of California, Berkeley; AT&T): the BSD and AT&T
+    notices in src/platform/ee_printf.c, ee_scanf.c, ee_strtod.c, ee_dtoa.c
+    and ee_decimal.c.
+  - recvx-decomp (AshfordFamily, MIT): third_party/licenses/recvx-decomp-MIT.txt,
+    for the CRI headers that the decomp provides.
+  - sky2hook (tge-was-taken): reused with the author's permission,
+    third_party/licenses/sky2hook-permission.txt.

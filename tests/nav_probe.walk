@@ -1,0 +1,6 @@
+# Title confirmation, then a field query that must wait for scene publication.
+press:cross:3
+wait:1
+navprobe
+press:circle:3
+wait:100

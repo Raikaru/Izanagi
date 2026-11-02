@@ -1,0 +1,8 @@
+/* Retail 0043c6a0: absolute value of a 32-bit integer (libmc2). */
+int func_0043c6a0(int param_1)
+{
+    if (param_1 < 0) {
+        param_1 = -param_1;
+    }
+    return param_1;
+}

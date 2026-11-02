@@ -1,0 +1,32 @@
+# Independent pristine card5-slot01, December24 evening after Magatsu's story.
+# Cover Christmas and the PS2 calendar's automatic jump to March20's world map.
+# This does not certify Adachi/Ameno-sagiri, farewell visits or an ending.
+timeout:30000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+waitstate16:0x00797b7a==267
+walk:314,-360,25
+face:100
+wait:20
+press:cross
+wait:40
+# Sleep; reassure Nanako; keep the promise; Call me Senpai anyway.
+waitchoice
+choose:1
+waitchoice
+choose:1
+waitchoice
+choose:1
+waitchoice
+choose:2
+# The world map owns L map, not a field-root player controller.
+skiptask:L map
+waitstate16:0x00797b7a==353
+waitmsg:closed
+waittask:symbol pos
+log

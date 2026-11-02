@@ -1,0 +1,44 @@
+# Units removed from config/units.txt. Format: <unit> <reason>.
+src/rw/basky.c PS2 sky2 driver (RenderWare PS2 sky backend); not part of the core port.
+src/rw/baskytran.c PS2 sky2 driver (RenderWare PS2 sky backend); not part of the core port.
+src/rw/p2core.c PS2 RenderWare P2 core; the port uses the plcore/core/world path.
+src/rw/skinskycommon.c PS2 sky2 driver (RenderWare PS2 sky backend); not part of the core port.
+src/rw/skyblit.c PS2 sky2 driver (RenderWare PS2 sky backend); not part of the core port.
+src/rw/skyconv.c PS2 sky2 driver (RenderWare PS2 sky backend); not part of the core port.
+src/rw/skyinst.c PS2 sky2 driver (RenderWare PS2 sky backend); not part of the core port.
+src/rw/rwplcore.c duplicate definition of RwFreeListCreate; src/renderware/plcore/bamemory.c kept as the owner
+src/renderware/plcore/baplcore.c duplicate definitions of RwEngine*, ourGlobals, _rwMsbBit; src/renderware/core/badevice.c kept as the owner (its RwEngineInit is the retail 0x003e8c60 body and calls _rwFreeListEnable)
+# Re-excluded after the VU0-only un-exclusion (build11): still fail to compile.
+src/cri/libadxe/adx_fsvr.c header ../../../cri/mwlib/ee/lib/libadxe/adx_fsvr.h is not in the tree
+# PortAsmC batch 2 (enable candidates that fail or duplicate an owner).
+src/cri/libadxe/dvci.c header ../../../cri/mwlib/ee/lib/libadxe/dvci.h is not in the tree
+src/cri/libadxe/htci.c header ../../../cri/mwlib/ee/lib/libadxe/htci.h is not in the tree
+src/cri/libadxe/sj_mem.c header ../../../cri/mwlib/ee/lib/libadxe/sj_mem.h is not in the tree
+src/cri/libadxe/sj_rbf.c header ../../../cri/mwlib/ee/lib/libadxe/sj_rbf.h is not in the tree
+src/cri/libadxe/adx_bsc.c header ../../../cri/mwlib/ee/lib/libadxe/adx_bsc.h is not in the tree
+src/rw/badevice.c duplicate definitions of RwEngine*, ourGlobals, _rwMsbBit; renderware/core/badevice.c is the owner
+src/cri/adx_bwav.c superseded by linked src/cri/re4/adx_bwav.c: every function it defines is defined there
+src/cri/adx_crs.c superseded by linked src/cri/re4/adx_crs.c: every function it defines is defined there
+src/cri/adx_dcd5.c superseded by linked src/cri/re4/adx_dcd5.c: every function it defines is defined there
+src/cri/adx_errs.c superseded by linked src/cri/re4/adx_errs.c: every function it defines is defined there
+src/cri/adx_fcch.c superseded by linked src/cri/re4/adx_fcch.c: every function it defines is defined there
+src/cri/adx_fini.c superseded by linked src/cri/re4/adx_fini.c: every function it defines is defined there
+src/cri/adx_rnaa.c superseded by linked src/cri/re4/adx_rnaa.c: every function it defines is defined there
+src/cri/cftfx.c superseded by linked src/cri/re4/cftfx.c: every function it defines is defined there
+src/cri/libadxe/adx_fsvr.c superseded by linked src/cri/re4/adx_fsvr.c: every function it defines is defined there
+src/cri/lsc_crs.c superseded by linked src/cri/re4/lsc_crs.c: every function it defines is defined there
+src/cri/sfd_con.c superseded by linked src/cri/re4/sfd_con.c: every function it defines is defined there
+src/cri/sj_utl.c superseded by linked src/cri/re4/sj_utl.c: every function it defines is defined there
+src/cri/libadxe/sj_mem.c superseded by linked src/cri/re4/sj_mem.c: every function it defines is defined there
+src/cri/libadxe/sj_rbf.c superseded by linked src/cri/re4/sj_rbf.c: every function it defines is defined there
+src/cri/re4/adx_sjd_dca0.c superseded by linked src/cri/re4/adx_sjd.c: every function it defines is defined there (duplicate link of ADXSJD_SetInSj)
+src/cri/re4/adx_sjd_dcf0.c superseded by linked src/cri/re4/adx_sjd.c: every function it defines is defined there (duplicate link of ADXSJD_TermSupply, ADXSJD_SetMaxDecSmpl)
+src/cri/re4/adx_dcd.c unplaced data: references __float_nan; retail ADX_GetCoefficient (0x004C54E8) has no load of it, so this unit is not the retail version; retail functions are translated instead
+src/cri/re4/adx_sugc.c GameCube SDK setup: registers device "GCD" with gcCiGetInterface, but retail PS2 setup (0x004D32F8) registers "CDV" (dvci getter 0x004E5A08) and "MFS" (0x004E9E50); retail function is translated instead
+src/cri/re4/sfd_mpv_1a5e8.c alternate inactive software-decoder SFMPV_Init source; production movies use native FFmpeg and config/inactive_movie_decoder.json also removes its reconstructed sfd_mpv.c counterpart
+
+src/promoted/code1_003c_cw119.c alternate copy of code1_003c.c; port-owned func_003cc370 and func_003c95a0 (src/render, src/platform) are also defined here
+src/promoted/code1_003d_cw119.c alternate copy of a compiled promoted unit; not enabled (duplicate owner risk)
+src/promoted/code1_003e_cw119.c alternate copy of a compiled promoted unit; not enabled (duplicate owner risk)
+src/promoted/code1_0039_cw119.c alternate copy of a compiled promoted unit; not enabled (duplicate owner risk)
+src/cri/re4/sj_uni.c models a flat-buffer joint whose bodies are dead-stripped in the reference game; retail SJUNI (0x004EEB20..0x004EF700) is the chunk-chain joint translated in src/cri/sj_uni.c

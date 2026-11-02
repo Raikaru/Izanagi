@@ -1,0 +1,52 @@
+version = 1
+
+# Machine-readable licensing (https://reuse.software). NOTICE explains the terms.
+
+[[annotations]]
+path = "**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 Izanagi contributors"
+SPDX-License-Identifier = "MIT"
+
+# Reconstructed from the retail game: no licence granted (LICENSES/LicenseRef-reconstructed.txt).
+# overrides/ has no per-file headers: the build splices those files byte for byte into the decomp mirror.
+[[annotations]]
+path = [
+  "overrides/**",
+  "drafts/**",
+  "src/cri/**",
+  "src/platform/ee_libm.c",
+  "src/platform/ee_dlibm.c",
+  "src/platform/ps2_fpbit.c",
+  "src/platform/ee_heap.c",
+  "src/platform/rw_rtanim.c",
+  "src/platform/rw_rtanim_record.c",
+  "src/platform/rw_skytran.c",
+]
+precedence = "override"
+SPDX-FileCopyrightText = "NOASSERTION"
+SPDX-License-Identifier = "LicenseRef-reconstructed"
+
+[[annotations]]
+path = "third_party/luau/**"
+precedence = "override"
+SPDX-FileCopyrightText = "2019-2026 Roblox Corporation; 1994-2019 Lua.org, PUC-Rio"
+SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = "third_party/miniz/**"
+precedence = "override"
+SPDX-FileCopyrightText = "2013-2014 RAD Game Tools and Valve Software; 2010-2014 Rich Geldreich and Tenacious Software LLC"
+SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = "third_party/lodepng/**"
+precedence = "override"
+SPDX-FileCopyrightText = "2005-2026 Lode Vandevenne"
+SPDX-License-Identifier = "Zlib"
+
+[[annotations]]
+path = "third_party/yxml/**"
+precedence = "override"
+SPDX-FileCopyrightText = "2013-2014 Yoran Heling"
+SPDX-License-Identifier = "MIT"

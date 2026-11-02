@@ -1,0 +1,46 @@
+# From a daytime home checkpoint: confirm going out, choose Junes, gather the team, enter the TV, and save.
+timeout:12000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+press:square
+wait:600
+choose:2
+# The next live question is "Go out until evening?"; confirm it before steering the custom town map.
+choose:1
+wait:1200
+press:up
+wait:30
+press:up
+wait:30
+press:cross
+skipfield:9:4
+skipmsg
+wait:60
+walk:-300,0,60
+push:-500,0,12
+press:cross
+choose:1
+timeout:40000
+# Confirm the situation is the repeating first answer; Enter the TV is the third.
+choose:3
+skipfield:20:1
+skipmsg
+walk:-455,387,60
+push:-700,620,12
+wait:30
+press:cross
+wait:600
+press:cross
+wait:600
+press:left:12
+wait:400
+press:cross
+wait:1500
+press:cross
+wait:600
+log

@@ -1,0 +1,100 @@
+# Retail functions that a compiled decomp function implements under another name.
+# Lines: 0xADDR name  # evidence. gen_port makes the retail symbol (call or table slot) the named native.
+# Evidence kinds: E-code = the retail inner function and the decomp function reference the same
+# error-string codes (E2004090231...), so they are the same function; vtbl = same slot in the retail
+# SJ_IF table.
+0x004ED600 SJMEM_Create  # sj_mem retail lock wrapper + inner; E-codes none agree with re4/sj_mem.c
+0x004ED710 SJMEM_Destroy  # sj_mem retail lock wrapper + inner; E-codes 231/232 agree with re4/sj_mem.c
+0x004ED7C8 SJMEM_GetUuid  # sj_mem retail lock wrapper + inner; E-codes 233/234 agree with re4/sj_mem.c
+0x004ED858 SJMEM_EntryErrFunc  # sj_mem retail lock wrapper + inner; E-codes 235/236 agree with re4/sj_mem.c
+0x004ED908 SJMEM_Reset  # sj_mem retail lock wrapper + inner; E-codes 237/238 agree with re4/sj_mem.c
+0x004ED9E8 SJMEM_GetChunk  # sj_mem retail lock wrapper + inner; E-codes 241/242 agree with re4/sj_mem.c
+0x004EDB28 SJMEM_PutChunk  # sj_mem retail lock wrapper + inner; E-codes 243/244 agree with re4/sj_mem.c
+0x004EDC18 SJMEM_UngetChunk  # sj_mem retail lock wrapper + inner; E-codes 245/246 agree with re4/sj_mem.c
+0x004EDD68 SJMEM_IsGetChunk  # sj_mem retail lock wrapper + inner; E-codes 247/248 agree with re4/sj_mem.c
+0x004EDF18 SJRBF_Init  # sj_rbf retail lock wrapper + inner; E-codes none agree with re4/sj_rbf.c; retail also counts SJ init levels (0x004ED3E8/0x004ED420), not modelled
+0x004EDF98 SJRBF_Finish  # sj_rbf retail lock wrapper + inner; E-codes none agree with re4/sj_rbf.c; retail also counts SJ init levels (0x004ED3E8/0x004ED420), not modelled
+0x004EE140 SJRBF_Destroy  # sj_rbf retail lock wrapper + inner; E-codes 201/202 agree with re4/sj_rbf.c
+0x004EE210 SJRBF_Reset  # sj_rbf retail lock wrapper + inner; E-codes 207/208 agree with re4/sj_rbf.c
+0x004EE310 SJRBF_GetChunk  # sj_rbf retail lock wrapper + inner; E-codes 211/212/219 agree with re4/sj_rbf.c
+0x004EE510 SJRBF_PutChunk  # sj_rbf retail lock wrapper + inner; E-codes 213/214 agree with re4/sj_rbf.c
+0x004EE6E0 SJRBF_UngetChunk  # sj_rbf retail lock wrapper + inner; E-codes 215/216/220 agree with re4/sj_rbf.c
+0x004EE910 SJRBF_IsGetChunk  # sj_rbf retail lock wrapper + inner; E-codes 217/218 agree with re4/sj_rbf.c
+0x004F0A60 SVM_SetCbSvr  # retail wrapper of 0x004F0AC8 (first free slot, 6 per type, error 1051001); the 4th argument (slot name) is dropped by the decomp model
+0x004F0B88 SVM_DelCbSvr  # retail wrapper of 0x004F0BC8 (clears one slot, error 1051002)
+0x004125D0 RxPipelineNodeGetInitData  # returns node->initializationData (node + 0x20); p2define.c (now a unit) is the retail code
+0x004EEB20 SJUNI_Init  # retail SJUNI_Init wrapper (SJ level count, lock, 0x004EEB50, unlock): src/cri/sj_uni.c
+0x004EEBA0 SJUNI_Finish  # retail SJUNI_Finish wrapper: src/cri/sj_uni.c
+0x004EEC20 SJUNI_Create  # retail SJUNI_Create(mode, work, wksize) wrapper of 0x004EEC78: src/cri/sj_uni.c
+0x004F0C78 SVM_SetCbSvrId  # retail SVM_SetCbSvrId(svtype, id, func, obj, name): same checks and error texts 1071201/1071202/2100801 as re4/svm.c; the name argument is dropped by the decomp model
+0x004F0DE8 SVM_SetCbGotoSvrBorder  # retail stores {func, obj} at 8*svtype of the border table (0x00925e20); re4 SVM_GotoSvrBorder (0x004F0E40) reads the same table in its own storage
+0x004CA720 ADXT_Init  # retail ADX library init: same module order as re4/adx_inis.c ADXT_Init (crs, lock, SJUNI, SJRBF, SJMEM, ADXERR, ADXSTM, ADXSJD, ADXF, RNA, LSC, SVM, error callbacks, clear handle table, register the 2/1, 4 and 5 server callbacks, default 60 Hz). Retail has no ADXM_IsSetupThrd test: it always registers the threaded callbacks, so ADXM_IsSetupThrd must read 1.
+0x004D5440 ADXT_SetDefSvrFreq  # retail wrapper (lock, 0x004d5470 stores the frequency in the two words at 0x00724e6c/0x00724e70, unlock); re4/adx_tlk.c stores it in adxt_def_svrfreq and adxt_last_svrfreq the same way
+0x004E17A0 cvFsAddDev  # retail cvFsAddDev: same error texts (cvFsAddDev #1..#3) and the same table add + EntryErrFunc(cvFsCallUsrErrFn, 0) as re4/cri_cvfs.c; the retail third argument is unused
+0x004E1AD8 cvFsSetDefDev  # retail cvFsSetDefDev: same error texts (#1, #2) and logic as re4/cri_cvfs.c
+0x004E2E28 cvFsEntryErrFunc  # retail stores {func, obj} in the user error words (NULL clears both), as re4/cri_cvfs.c; the device error callback 0x004e1578 is the native cvFsCallUsrErrFn
+0x004CE858 ADXSJD_ExecHndl  # retail ADXSJD_ExecHndl = re4/adx_sjd.c ADXSJD_ExecHndl (the decomp's adx_sjd.c holds INCLUDE_ASM at this address)
+0x004D1CE8 ADXSTM_Destroy  # retail wrapper (empty ADX lock pair around the inner 0x004d1d18, which re4/adx_stmc.c marks as ADXSTM_Destroy)
+0x004D2038 ADXSTM_Seek  # retail wrapper of the inner 0x004d2080: pos = n clamped to the sector count (+0x14), returns pos, as re4 ADXSTM_Seek
+0x004D20A0 ADXSTM_Tell  # retail wrapper of the inner 0x004d20d8: pos (+0x58) when a file is open (+8), else 0, as re4 ADXSTM_Tell
+0x004D23A8 ADXSTM_SetEos  # retail wrapper of the inner 0x004d23e8: eos sector = n, or the sector count (+0x14) when n < 0, as re4 ADXSTM_SetEos
+0x004D2C30 ADXSTM_SetBufSize  # retail wrapper of the inner 0x004d2c88: +0x1c = a1, +0x18 = a2, returns 1, as re4 ADXSTM_SetBufSize (rd_min, rd_max)
+0x004D1C58 ADXSTM_Create  # retail wrapper (empty ADX lock pair) of the inner 0x004d1ca0: mode < 256 takes a real-time slot (0x004d1ab0), else a normal one (0x004d1b88), as re4 ADXSTM_Create (sj, mode)
+0x004D1FF8 ADXSTM_GetStat  # retail wrapper of the inner 0x004d2030: the stream state byte (+1), as re4 ADXSTM_GetStat
+0x004D2348 ADXSTM_EntryEosFunc  # retail wrapper of the inner 0x004d2398: +0x38 = function, +0x3c = object, as re4 ADXSTM_EntryEosFunc
+0x004C7260 func_004c7260  # retail guest history/counters/index at 0x007165f8/0x007166f8/0x00716718, not RE4 adxf_SetCmdHstry's private host statics; explicit on both ABIs, whether the SDK object is compiled or excluded
+0x004C8B48 ADXF_CloseAll  # retail empty-lock wrapper around 004c8b70: close every used retail ADXF handle
+0x004C9D48 ADXT_ExecFsSvr  # retail wrapper (empty lock pair) around 0x004c9d70, the file-server pass: the same re-entry guard and phases as re4 ADXT_ExecFsSvr once a mirror fix adds the CD request pump 0x004e4190 first and last (retail phases 2 and 8)
+0x004E2240 cvFsStopTr  # retail cvFsStopTr: handle NULL -> "cvFsStopTr #1:handle error", missing slot 0x28 -> "#2:vtbl error", else slot(hn[1]); same texts and order as re4/cri_cvfs.c
+0x004E2690 cvFsGetSctLen  # retail cvFsGetSctLen: slot 0x30, texts "#1:handle error" / "#2:vtbl error", returns 0 on error; as re4/cri_cvfs.c
+0x004E2750 cvFsGetNumTr  # retail cvFsGetNumTr: slot 0x38, texts "#1:handle error" / "#2:vtbl error", returns 0 on error; as re4/cri_cvfs.c
+0x004E2360 cvFsGetFileSize  # retail cvFsGetFileSize: split name, "#1:illegal file name" for NULL or an empty path, "#3:device not found" and then the unchecked slot 0x08 read, "#4:vtbl error"; as re4/cri_cvfs.c (including that it carries on after #3)
+0x004D4308 ADXT_Stop  # retail wrapper of the inner 0x004d4338: error text, optional stop hook (0x00724e7c, set only by the AHX/PL2 attach), file release, LSC stop and SJ reset in mode 4, then the common stop 0x004d4268; re4 ADXT_Stop has the same steps
+0x004D43F8 ADXT_GetStat  # retail wrapper of the inner 0x004d4430 (re4/adx_tlk.c marker): state byte, -1 and the error text for NULL
+0x004D4B48 adxt_GetNumSmpl  # retail wrapper of the inner 0x004d4b80 (re4/adx_tlk.c marker): total samples once the header is known (stat >= 2), else 0
+0x004D4BD0 adxt_GetSfreq  # retail empty-lock wrapper calls the sample-rate getter at 004d4c08; retail error identity and inner call to 004ced90
+0x004D4C58 adxt_GetNumChan  # retail empty-lock wrapper calls the channel-count getter at 004d4c90
+0x004D4CE0 adxt_GetHdrLen  # retail empty-lock wrapper calls the header-byte getter at 004d4d18
+0x004D4D68 adxt_GetFmtBps  # retail empty-lock wrapper calls the sample-width getter at 004d4da0
+0x004D4DF0 ADXT_SetOutPan  # retail wrapper of the inner 0x004d4e40: the default pan and the 15/-15 stereo rule as re4 ADXT_SetOutPan; retail reads the stream default only while ainf_sw (+0xad) is 1, which ADXT_Create sets (mirror fix)
+0x004D4F58 ADXT_GetOutPan  # retail wrapper of the inner 0x004d4fa0 (marker): outpan[ch], 0 and the error text for NULL
+0x004D5110 ADXT_SetOutVol  # retail wrapper of the inner 0x004d5150: outvol, plus the stream default volume while ainf_sw is 1, to the renderer; as re4 ADXT_SetOutVol
+0x004D51C0 ADXT_GetOutVol  # retail wrapper of the inner 0x004d51f8 (marker): outvol, 0 and the error text for NULL
+0x004D5488 ADXT_SetSvrFreq  # retail wrapper of the inner 0x004d54c8 (marker): svrfreq (+0x38) and the last-frequency word 0x00724e70
+0x004D5B30 ADXT_ExecServer  # retail wrapper of the inner 0x004d5b58: same phase counter and order (ADXSJD server, the used handles, the renderer server) as re4 ADXT_ExecServer; retail runs the renderer server a second time when the last server frequency (0x00724e70) is below 51 Hz, the default of 60 Hz never does
+0x004D6050 ADXT_Pause  # retail wrapper of the inner 0x004d6090: same pause switch, renderer play switch, vsync rebase and time position as re4 ADXT_Pause (checked against the asm)
+0x004D61C0 ADXT_GetStatPause  # retail wrapper of the inner 0x004d61f8 (marker): the pause byte (+0x72), 0 and the error text for NULL
+0x004D47C8 ADXT_GetTime  # retail ADXT_GetTime (the symbol adxt_GetTime): vsync-based time position with the 60 ms resync and the sample-time mode, checked against re4 ADXT_GetTime instruction by instruction
+0x004D5DC8 ADXT_SetLpFlg  # retail wrapper of the inner 0x004d5e08: loop switch (+0x6c); retail also derives the stream window word +0xc4 from the header, a field no compiled code reads (re4's handle has padding there)
+0x004D3FA8 adxt_start_sjd  # retail 0x004d3fa8: reset the output joints, set the decoder input joint, start the decoder, status 1, counters cleared, vsync base, AMP start; the same stores as the re4 static (made external by a mirror fix)
+0x004D6968 ADXT_InsertSilence  # retail adxt_InsertSilence: nch * 18 byte blocks, (nsmpl / 32) of them, written in two chunks around the ring wrap, returns the samples inserted; instruction-for-instruction the re4 body
+0x004C5DC8 ADX_DecodeInfoAinf  # retail 0x004c5dc8 is the AINF block reader that PortAudio's src/cri/adx_hdr.c defines under the decomp name; the retail-address name used by src/cri/adxt_start.c and the ADXT callers resolved to a trap stub
+0x003E1FF0 RwResourcesAllocateResEntry  # retail asm takes (owner, ownerRef, size, destroyNotify), allocates size + 0x18 from the res heap at arena + 0xC (func_003e45f0), links the entry into the arena list at +0x24 and counts the size at +4, and on exhaustion purges the oldest entries and reports {1, func_003df590(0xC, size)}: the decomp baresour.c function
+0x004C6D10 ADXF_Init  # SDK initialization used by the PC file path
+0x004C6DE8 ADXF_Finish  # SDK close/reset
+0x004C8B70 ADXF_CloseAll  # inner of the existing 0x004c8b48 wrapper
+0x004C9398 ADXF_ExecServer  # SDK ADXF server wrapper
+0x004C93C0 ADXF_ExecServer  # SDK ADXF server core
+0x004C8708 func_004c8770  # range-open wrapper; outer ADXF lock pair is empty in retail
+0x004C8908 func_004c8950  # AFS-open wrapper, same empty outer lock pair
+0x004D2A20 ADXSTM_ExecServer  # retail controller server wrapper; recovered 004c7230 is a separate no-op hook
+0x004D2A48 ADXSTM_ExecServer  # test-and-set guarded pass over the 40 controllers
+0x004D2840 ADXSTMF_ExecHndl  # deferred bind/release/read state machine
+0x004D2AC8 cvFsExecServer  # locked CVFS server pump wrapper
+0x004D2AF0 cvFsExecServer  # inner tail jump to 004e2298
+0x004F9A58 SVM_Unlock  # retail 004f9a58 is only the no-argument tail to SVM_Unlock (004f0620); reuse the existing native void implementation
+0x004F9A70 func_004e4190  # retail 004f9a70 is only the no-argument tail to the existing SRD_ExecServer request pump (004e4190)
+0x00513380 sfadxt_IsDecoded  # one ADXT_GetStat on live a0 and full s32 result for status neither 0 nor 1 (retail unsigned >= 2); exact mirror row exports the existing ADXT-only helper, with no RE4 SFD layout access
+0x00512D90 func_00512d90  # retail raw-layout silence callback; not the RE4 SFD counter layout
+0x00512EA8 func_00512ea8  # raw-layout audio-header channel/frequency lookup
+0x00513DC8 func_00513dc8  # retail SEE work +0x36b0, seek flag in driver work +0x40
+0x00517840 func_00517840  # retail file-header validity and mux version at +0x78/+0x7c/+0x80
+0x00512730 func_00512730  # raw SJ free-chunk method wrapper, void(pointer,int,pointer)
+0x00512760 func_00512760  # raw SJ split/put/unget wrapper, preserving zero-length unget
+0x005127E8 func_005127e8  # raw-layout SFD terminal copy callback and 100 KiB clamp
+0x005128A0 func_005128a0  # raw-layout SFD audio alignment callback, timer at +0xd30
+0x00512B90 func_00512b90  # raw SFD-to-ADXT silence insertion, preserving all three live arguments
+0x00512BB0 func_00512bb0  # raw-layout SFD header exclusion and next-callback transition
+0x00512C70 func_00512c70  # retail returns a frame pointer, not the SDK helper's byte count
+0x00517AD0 func_00517ad0  # raw per-handle/global error records; the i386 SDK library error lives in private host BSS
+0x00517B40 func_00517b40  # retain the first error, call the application with its live context and current code

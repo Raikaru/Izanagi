@@ -1,0 +1,121 @@
+# Private gate references; bytes stay outside git. Format: SHA256, two spaces, basename.rgb.
+# Existing filename/hash pairs are immutable. Append a NEW name for a cutover and switch its gate in the same commit.
+01c07544a3fd4993cdf9b18971f36a261ec6735d67733da118a849d61e0e967a  field.rgb
+1227a6a3fe864821692d1ecf1df494748f92ec6cea8143d60b6b9be34282cf8e  newgame_field.rgb
+73b75a343f28b8eda392d1d228ce6db12b3dca54beae3b14ea75c44f1c25ecd1  p4-arcana-rankup-sparkles.rgb
+0f46cbad683bec014f12851a6665e21f3b7cbe545510c259e7cdb125853c2caf  p4-battle-floor-a.rgb
+6b0abdcb20a8f64c601b49036f856e63773538cc8b873ab4a2c109d8314d7188  p4-fogbattle.rgb
+bdddc3519a925fc09708e08708d514d548109699c549a0544c9cb1449204409c  p4-near-fog.rgb
+dcdb9c03f7ef2f484b77346dd4d378e42eb31976aee9fc790aaed8d8f7ffdcb3  p4-near-fog-story.rgb
+1b194df2e547d13306ec93eea947e5e4dafb454f4dd6fcde28733bf18d1d20e3  p4-rain.rgb
+4d865314c54f0ab5c9b19e3860e4de9e4e4ff7a6011ef5685e0a37de97c3ca67  p4-riverbank-vignette.rgb
+72d9a522d3541703cc9cb40f27467d94498e6cd20c4021f1620bb541ffbbe44b  p4-save-butterfly-glow.rgb
+0b20deb70431cb2d59696c0137f6b4fcd231fb7d87e8ecc1caf54a3a96187262  p4-shadow-haze.rgb
+fd98ec3392aca7bb380812ff6a6e891c23f8d1ab184b104523519b8119f029e9  p4-sky-black-tint.rgb
+fefbe5ff315e695edec6a96e8eb73017054d971f4d58e000a6dd015bdcc2fe24  p4-tv-world-enter.rgb
+f17518a0be7a45536bda96cd1beaef8325ba609c9c47cb2c59dc3e833d3b2097  p4-velvet-windows-blurry.rgb
+f85c42a10a27ec55425a8046a662b8122917a7bd350180411f8b739195aac780  systems_club.rgb
+53d7af35af1404b3fd420a260f8f30e70245ea1b16fbdcf36363399055bca966  systems_compendium.rgb
+634516cd67659ceacb14eb9ae98640d8ca20986f36cd018e2c971b1085f969da  systems_daidara.rgb
+adee4394bbb5c1af754dc0158cbef7fd84abb3fdf8b6b80e43f2f3280f25a6d8  systems_entrance.rgb
+dc74908f827ebb44fdb6c295caa8e6dedcf709946321e904cc5b65e72d77e5cc  systems_fusion.rgb
+ec3fd11dd3ec59044d81a7e0d21cbdf8ebba64592d8aca2d3c6ea08056896588  systems_game1f_faced.rgb
+a3474e84a602cc5fb82c765fb4da01f9b7c041b9600ec818a591f59e25275328  systems_game1f.rgb
+d5f232b07aeb78949d67cba19e1de814faa6473a6c70b92f97e6f9190c484a4c  systems_heaven1f_faced.rgb
+02c48442738c26d3f5ba3f790a50d4bb42031bf7d975e07878a3ee6586d1adb9  systems_heaven1f.rgb
+f49abff16f72f77a158324685652ee5a583408f17ea853fdccd0968c142979b8  systems_minimap_faced.rgb
+dd0079fc179311de8be020eb98d5e15ac26b903611bcaa37ec0f2284c7fa948f  systems_minimap_gs.rgb
+7d094a558f50b684e2e915262d5a0cfb7eb3c251242c75ead6f985b58439ba05  systems_minimap.rgb
+25ddf04d2449011caa0663f5d2c5b8858cfd167e67c704755b3e874476962123  systems_seats.rgb
+0319d6caab9591c15164d5d1d398fc621214ecb5c73794b9d8349dc34e303a9b  systems_shiroku.rgb
+6ed2a1bc49f6f4be5052b2327d3f5ffbb95c08e496be0d193d27dd0de9a18a3d  title.rgb
+1b505faef873b2a329f1b7564d0a1f82b63fb271dc3c816bb55d501a897c4e2e  systems_minimap_async.rgb
+622bd33536fff215649a5a83c447ca63ad323bd5acd7c620c7cac32ede83390b  p4-near-fog-corpus.rgb
+# Native regression after measured CRI/SPU-DMA/disc/MC timing, qualified 2af69d18 Win64/NVIDIA.
+# Apollo card_apollo; apollo_club_1f.txt SHA256 71cfd2c1f18668ad82610da5d4b0b8db314eb0aee071258e116ca042c6791274; seed 0x17de; flip 8299.
+# Same layout/UI/map; shifted party animation age. Old async/GS refs retained; independent retail-region proof: renderer_port.md 11.2.
+aa1499a3ff026d660480f529aeab9ec929c628e9ed803277b7f0a9b94038b474  systems_minimap_retailio.rgb
+# Optional widescreen native port-frame regressions; all 4:3 retail pins above remain unchanged.
+# 16:9, scale1, 853x448 RGB; captured from 13379099 on Linux llvmpipe ES3.2.
+bb9444fef847afbb32e871f3d10b3b41648e263aaf30a2faa42152d14ebaf4d3  port-wide-battle-16-9.rgb
+4c15d20c47836981bf686cb80e22d0bd0aaaa77f56bf634db74f63b77c40e8d1  port-wide-dialogue-16-9.rgb
+e51c2dff21811cc197c902a37edc29ef32308db546fe9775820f201a33783f9a  port-wide-field-16-9.rgb
+# Native x64 port frames: ES3.2 NVIDIA610.88, RTX4080Laptop, source c6045aead84c.
+# Fresh hidden/script/dummy captures; same853x448 and phases. Old Mesa pins retained.
+3988969f0ca16c1ea7655c1180281025881f0b42736f72a432e1ad0672076d43  port-wide-field-16-9-nvidia-rtx4080.rgb
+a34e5871c31ed0db0351df4260603a2411bc6da3bc7578532ccd8c03974a53a8  port-wide-battle-16-9-nvidia-rtx4080.rgb
+efb67879f15294476ae488c03d6adc2866ffe37942c28437ae9fcd320160ab92  port-wide-dialogue-16-9-nvidia-rtx4080.rgb
+# Physical-resolution port-frame regressions; existing native/retail references remain unchanged.
+# f1f1bffa, Mesa25.0.7 llvmpipe ES3.2: title400/field7:2/butterfly8:2/fog532 capture1700.
+# Dimensions respectively1920x1080,1366x768,2560x1440,3840x2160; fixture controls live in100-scenes.cmake.
+4400edd09e6a796c5f9f768abbc08d8d2af81c80e5439b48e328d25d451938ab  p4-resolution-title1080.rgb
+63b424b626aeb1b57acb2395dc03baa0920c8b92ca283310c24714d368d5decf  p4-resolution-field1366.rgb
+f1d56e3d62965abfcad2eff43acbdb3bb9f6d4719a4215720c2bd56a44b9804b  p4-resolution-butterfly1440.rgb
+3491a121d7b0662d9b25ea8915064787cab829be7158158d65bd8165069cab0f  p4-resolution-fog4k.rgb
+# f1f1bffa, RTX4080Laptop/NVIDIA610.88 ES3.2; title400/draw4,1277x954 presenter.
+# Native-cell edge witnesses at1366x768 and1277x954; every tested top/left-bar pixel is black.
+4965b000f0249eb3fd5f65688161b87539727adafa98e2bbef6a0141692b0a4f  p4-resolution-title1366-cells.rgb
+aa6764f73c8ff128ad6f41fe029f9a86bceef8f11320a2c5ade3dda78d255cf3  p4-resolution-title1277-cells.rgb
+# Full-canvas port frames, source87da386b; 16:9=853x448,21:9=1120x448.
+# Title400/all draws; real all-out6660/Shuffle9160, legacy clock and4-frame game warmup.
+# Exact renderer guards in CMake keep Mesa25/LLVM19 and RTX4080/NVIDIA610.88 separate.
+414fee91c78b70e138294df3a337e46708852249f3fd9c86479653a439255712  port-wide-title-cover-16-9-llvmpipe19.rgb
+4adf65c9a8b22e288dd7015ff8b0207c6e9f6da4c6a1aa99081ab1fd720c7702  port-wide-allout-full-16-9-llvmpipe19.rgb
+dc54ae056b3b29e6528c92363b11302d252b3bb060d0d0e0307bf8622a2ddb50  port-wide-shuffle-full-16-9-llvmpipe19.rgb
+6253e4ac42972e286dea7e66494a4fbd345b0d00de5667341edaf686d04af49c  port-wide-title-cover-16-9-nvidia-rtx4080.rgb
+7298e9682ad417c0991692c0cb9fa181501d27064c8c9f3035d7721da4e01ece  port-wide-allout-full-16-9-nvidia-rtx4080.rgb
+8f3a79d67ae510a3367c82e912c16bfa9a595d6914262f29a8946f375d3bc1a7  port-wide-shuffle-full-16-9-nvidia-rtx4080.rgb
+ca90b5ca1ae2d4bc19393259b26d1dabafea582c0591ce7f76d9b1553cdd1057  port-wide-title-cover-21-9-llvmpipe19.rgb
+3bccf908021d86bd1501957c79daeda6c3da3303435b6c675f60479f9c1bd057  port-wide-allout-full-21-9-llvmpipe19.rgb
+a91123684085d2959e08fd4e89f24101578303ed1776dd9b347d8ef9807c5332  port-wide-shuffle-full-21-9-llvmpipe19.rgb
+f4dbf80d05318936eb5498532ee3aa2cb5f6a3d732d1bb9739b8c4075d7d4836  port-wide-title-cover-21-9-nvidia-rtx4080.rgb
+657d8098314b4a68b705f0346685d0a541a9d15f1b9f18ed69313aa3f49cab82  port-wide-allout-full-21-9-nvidia-rtx4080.rgb
+2ea306512d7816cf03c3fc59907564f48fe6b5e7f8d368432f01d0e88452ef29  port-wide-shuffle-full-21-9-nvidia-rtx4080.rgb
+940a70ac9af86a77103f398b5ada69bd336e35b23ba70c99fe6275a773b76fee  port-wide-allout-masked-16-9-llvmpipe19.rgb
+c3c5e046ff5b14654037e0f43f430e81ddda50f917f7e298dbdba261920f9818  port-wide-allout-masked-16-9-nvidia-rtx4080.rgb
+2dac83e9933620bb665b91dbf7011b093725dbada9f724fe87404b517a82f8f1  port-wide-allout-masked-21-9-llvmpipe19.rgb
+67bf3021fec5641f2529103d0b8f17ee254b293f5851c03367df30d5746cd49c  port-wide-allout-masked-21-9-nvidia-rtx4080.rgb
+# Independent intro6640 / cast-eye6180 port frames; one4-frame draw window per process.
+# Mesa source50aa9430; Windows e5efb5a9; same X-only model-layer policy.
+# These preserve every earlier immutable reference, including settled portrait-mask frames.
+7ee6cd7dce43291b643791451e7d97951963fb3d6215dfa697ebe4aabfc61084  port-wide-cast-eyes-16-9-llvmpipe19.rgb
+3af25a3362dfb71a6cfc041e7a7bb356dae92b622f9275e11027ee4a6adefb67  port-wide-allout-intro-16-9-llvmpipe19.rgb
+15c95833cd8b745a7224e8bbbf684813a7618fd5345a213bd283eb232f42ba9c  port-wide-cast-eyes-21-9-llvmpipe19.rgb
+af2341c11c9e3f27ccb6551e31a961a35b14c2a0b47699e92b23a0ec75e6b338  port-wide-allout-intro-21-9-llvmpipe19.rgb
+7a8c59636136a253075239d9e4ac6865d4ddff3a9916a887a0b2156e9391286f  port-wide-cast-eyes-16-9-nvidia-rtx4080.rgb
+59fadbe5cf3cd12c3f164427f3a019b83f6a1dfdad35926defaf70265bd98775  port-wide-allout-intro-16-9-nvidia-rtx4080.rgb
+f8cebb469491327111546b924fd29ec7db530f547c12d5d2c3699de9fa3e53f7  port-wide-cast-eyes-21-9-nvidia-rtx4080.rgb
+9fcc7d6341385084d7b54c48cb675bd29a5f36e0d2c6574f1b562544267f6b77  port-wide-allout-intro-21-9-nvidia-rtx4080.rgb
+# Tight 4:3 x64 port-frame witnesses; all retail pins/limits above stay unchanged.
+# NVIDIA610.88/RTX4080Laptop, accepted242544c8 (fafe6e0d changes docs/signatures only).
+# Original scene controls/clock/history retained; fog532/1700, state-registered events, viewer600.
+adc44b8758259d629151ff7a32003ebb096f410b191ccc4faa3bd1aeca8e8422  port-scene-fog-battle-nvidia-rtx4080.rgb
+98085e53840dae8faf531e5aba2a706effe3d8d54e305e52ca74df5c51213208  port-scene-field-nvidia-rtx4080.rgb
+6ff723a8e9c7da50f0f1d50266b58b184f2cbe43a6a610ccdd7db570bc38b16b  port-scene-sky-black-tint-nvidia-rtx4080.rgb
+afe0f9548c458e69abbd291f06329463502c9cc32f4a73927b93f3e7fa5fc3d5  port-scene-save-butterfly-glow-nvidia-rtx4080.rgb
+4b13443c9dddc9ddf7e2a49e2c712ebee7f278f31e9faf206831368a70b30719  port-scene-near-fog-nvidia-rtx4080.rgb
+08e52524f4dbae7f2bb4324b0cb1850a0df702332883969df0965ca8bef2a2f8  port-scene-velvet-windows-blurry-nvidia-rtx4080.rgb
+4b7dc87be414d97c84aae23a45648e59748f0c4e876a826fe64d2f31e581d8e9  port-scene-riverbank-vignette-nvidia-rtx4080.rgb
+2fd883822741cd39df2af163162fe56fab50a1b032ce297d3ec001e7fd59225f  port-scene-rain-nvidia-rtx4080.rgb
+37fe8c972dee660723be794800a3ef3e85b62133221807f0c3126563c2326390  port-scene-arcana-rankup-sparkles-nvidia-rtx4080.rgb
+f5c3d3833b03b60dfac727f7d980c24024a74244bc2aa94c9f4f08afa2224937  port-scene-tv-world-enter-nvidia-rtx4080.rgb
+28fa2ad08ba5b00979c93703238251e1aa6e97a4de9b3c6bab7fa6fd29085db7  port-scene-shadow-haze-nvidia-rtx4080.rgb
+f5d198510941c34da2ef94df5daa8da09f21453db2eab56ce6d571855dbbbd55  port-scene-tv-entrance-nvidia-rtx4080.rgb
+# Same original controls, fafe6e0d Linux x64/Mesa25.0.7, exact llvmpipeLLVM19 renderer.
+80472b8dd5d063ff3a8d1b287d39014fcbbc6eb3a995707bae66c85678b025da  port-scene-fog-battle-llvmpipe19.rgb
+1e850fa5cd2a7243067095ab1f44500a0b44d7358fb13506d585820cdd457394  port-scene-field-llvmpipe19.rgb
+df18653183f2ecf35d549ebd17f14252da74938377466427bb449cf28cce7130  port-scene-sky-black-tint-llvmpipe19.rgb
+7d5065316b672f9223794bc2ce029631da7b6bdf75151d14de9769df3858d39d  port-scene-save-butterfly-glow-llvmpipe19.rgb
+d62cc38bd1847ff0b5968f63cad4a025dd5c650d162c0bb2d90e5d5239659d73  port-scene-near-fog-llvmpipe19.rgb
+97030b097768e74fa44f35bd5e5bcb35181c5c19220b83054a945ab4a8b0893c  port-scene-velvet-windows-blurry-llvmpipe19.rgb
+f056464825c04c98ca96621f0d99d8c843b0e34ccc4719dde4b8b83bb901b64f  port-scene-riverbank-vignette-llvmpipe19.rgb
+b6a919b427abe3ae9825c19419bd51b0f9abd85933a440f395b46137d28e858f  port-scene-rain-llvmpipe19.rgb
+57c8d9d84f195fead28bf87953d1bb3380e8415fd74310476daa7cb798ba66d3  port-scene-arcana-rankup-sparkles-llvmpipe19.rgb
+ff89100d2a8118d3f54eac3c09eb92218cc8039601dd0131808d91aae836b25c  port-scene-tv-world-enter-llvmpipe19.rgb
+ee78a9276996f5bd7da526a42302a16e71d417401050e93620c0ca188b4d487a  port-scene-shadow-haze-llvmpipe19.rgb
+8f0b3948397a33fc536963c1d8f696d7634be6238fb2abb0f7ea275abd934d5d  port-scene-tv-entrance-llvmpipe19.rgb
+# Shuffle9160 after the sky VU0 vector multiplies moved the effect-RNG draws; NVIDIA610.88/RTX4080Laptop and Mesa llvmpipeLLVM19.
+3ba0d895924146545b0c954b444d919f2c9a602da68473a8753e28a0e98e557a  port-wide-shuffle-full-vu0-16-9-nvidia-rtx4080.rgb
+43155b917c007517cddfd9e6f8783ae81ec59c96f98f46dfc6e8cfaab968f8fe  port-wide-shuffle-full-vu0-21-9-nvidia-rtx4080.rgb
+0ef138952b81eb372da36db904011f2015066443ef4dd27197d37c5471628dbc  port-wide-shuffle-full-vu0-16-9-llvmpipe19.rgb
+13cb733b68a47040b49ca9809f72f75f6d2b884e0a10268375963305bab902a4  port-wide-shuffle-full-vu0-21-9-llvmpipe19.rgb

@@ -1,0 +1,41 @@
+# From story0519tv: discover the Bathhouse changing area, return to the Entrance and save.
+timeout:20000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+walk:93,470,50
+push:93,580,8
+wait:20
+press:cross
+wait:600
+press:cross
+skipmsg
+wait:300
+waitfield:24:1
+waitstep:20
+# Stop before the south exit plane, face its CHECK and return to the Entrance.
+walk:0,1490,40
+push:0,1800,12
+press:cross
+skipfield:20:1
+skipmsg
+# Save at the Entrance butterfly with the new destination unlocked.
+timeout:6000
+walk:-455,387,60
+push:-700,620,12
+wait:30
+press:cross
+wait:600
+press:cross
+wait:600
+press:left:12
+wait:400
+press:cross
+wait:1500
+press:cross
+wait:600
+log

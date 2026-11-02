@@ -1,0 +1,24 @@
+# Independent pristine card5-slot05: native Rise travel to Ashihara-Nakatsu.
+# This covers Yomotsu's exterior entrance, not Paths 1-9 or Izanami's defeat.
+timeout:30000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+waitfield:20:1
+waitstate16:0x00797b7a==353
+walk:-187,470,50
+push:-187,580,8
+wait:20
+press:cross
+# The last-day destination's first visible answer is Search for Izanami.
+choose:1
+skipmsg
+waitfield:30:2
+waitstep:140
+waitcontrol:on
+waitmsg:closed
+log

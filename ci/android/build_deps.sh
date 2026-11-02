@@ -40,7 +40,7 @@ mkdir -p "$work"
 work=$(cd "$work" && pwd)
 
 fetch() { # url sha file
-  if [ ! -f "$dl/$3" ]; then curl -fsSL -o "$dl/$3.part" "$1" && mv "$dl/$3.part" "$dl/$3"; fi
+  if [ ! -f "$dl/$3" ]; then curl -fsSL --retry 6 --retry-all-errors --retry-delay 10 -o "$dl/$3.part" "$1" && mv "$dl/$3.part" "$dl/$3"; fi
   echo "$2  $dl/$3" | sha256sum -c - >/dev/null || { echo "build_deps: checksum mismatch for $3" >&2; exit 1; }
 }
 

@@ -13,7 +13,7 @@ ln -sf org.p4pc.game.svg "$app/.DirIcon"
 chmod +x "$app/AppRun" "$app/usr/bin/p4pc"
 cache=$stage/downloads
 mkdir -p "$cache"
-fetch() { [ -f "$cache/$2" ] || curl -fL --retry 3 "$1" -o "$cache/$2"; }
+fetch() { [ -f "$cache/$2" ] || curl -fL --retry 6 --retry-all-errors --retry-delay 10 "$1" -o "$cache/$2"; }
 case $arch in
   x86_64) runtime_sha=617aa77314d57c8b8e4fae9c3f0b35af7b30d5529cb69e98f64f92510ed98a46 ;;
   aarch64) runtime_sha=9a72a744d221576c9347ec074243acc5c3c7568896b12714e0e82e9f0bf47900 ;;

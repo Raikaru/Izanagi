@@ -19,6 +19,8 @@ concurrency:
 
 env:
   IMAGE: p4pc-ci
+  # docker/build-push-action would upload a build-record artifact per build; the release job wants only the packages.
+  DOCKER_BUILD_RECORD_UPLOAD: false
 
 jobs:
   image:
@@ -140,6 +142,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: dist
+          pattern: p4pc-*
           merge-multiple: true
       - name: Create or update the release
         env:

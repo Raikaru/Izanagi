@@ -132,7 +132,7 @@ remain observers, including in the viewer.
 Raw `sceCdRead` and the ADXF/ROFS window reads are the only users of `p4pc_set_next_frame_alarm`. Its seam,
 `p4pc_frame_alarm_seam`, stays NULL except in a lockstep battle qualification run with
 `P4PC_LOCKSTEP_DISC_REPLAY`. There, after the anchor, it holds each read until the frame
-at which retail observed it complete ([lockstep disc replay](../lockstep.md#in-battle-disc-replay)).
+at which retail observed it complete (lockstep disc replay (private documentation)).
 The disc implementation files themselves are unchanged.
 
 ## Wrapper and size ABI

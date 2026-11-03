@@ -7,6 +7,12 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from contextlib import ExitStack
+
+try:  # managed scratch for standalone runs, where a repository provides it; otherwise TMPDIR
+    import gate_local
+except ImportError:
+    gate_local = None
 
 
 def main():
@@ -22,15 +28,22 @@ def main():
     elf = str(Path(elf).resolve())
     cases = (("full", "0,-32768,2000,0"), ("rim", "0,-32075,2000,0"), ("dpad", "0,0,0,1"))
     case_timeout = float(os.environ.get("P4PC_GATE_TIMEOUT", "1500")) / len(cases)
-    with tempfile.TemporaryDirectory(prefix="p4pc_pad_field_") as scratch:
+    data = Path(elf).parent.parent
+    local = gate_local.scratch(data) if gate_local else None
+    with ExitStack() as managed, tempfile.TemporaryDirectory(prefix="p4pc_pad_field_", dir=local.tmp if local else None) as scratch:
         retained_root = os.environ.get("P4PC_SCENE_ARTIFACTS") if not os.environ.get("P4PC_PAD_GATE_OUT") else None
+        if local and not retained_root and not os.environ.get("P4PC_PAD_GATE_OUT"):
+            retained_root = str(local.gates)
         if retained_root:
             Path(retained_root).mkdir(parents=True, exist_ok=True)
             root = Path(tempfile.mkdtemp(prefix="pad_field.", dir=retained_root)).resolve()
         else:
             root = Path(os.environ.get("P4PC_PAD_GATE_OUT", scratch)).resolve()
+        check_storage = managed.enter_context(local.workspace(root)) if local else None
         try:
             for name, values in cases:
+                if check_storage is not None:
+                    check_storage()
                 work = root / name
                 work.mkdir(parents=True, exist_ok=True)
                 shutil.copytree(seed, work / "card" / "mc0", dirs_exist_ok=True)

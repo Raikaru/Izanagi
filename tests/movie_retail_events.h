@@ -1,5 +1,5 @@
 /* What the game's movie task observes of the player on retail, per movie, measured in PCSX2 with
- * the PCSX2 trace tooling's movie trace (not in this repository) and reduced by its movie_events.py.
+ * the PCSX2 trace tooling's movie trace (not in the public repository) and reduced by its movie_events.py.
  * movie_task_smoke compares the port's run with these rows. Columns: movie table index, start-up ticks seen
  * before state 3 (informational), updates from state 3 to the first frame (retail varies with the disc:
  * 20.2 and 18.7 measured; the port uses 20 and the test accepts 18..21), frame number when the task enters

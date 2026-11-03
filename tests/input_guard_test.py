@@ -10,7 +10,7 @@ import unittest
 HERE = Path(__file__).resolve().parent
 GUARD = HERE / "input_guard.sh"
 # Sourced helpers and standalone coroutine comparisons do not launch an SDL game/viewer.
-NON_GAME_SCRIPTS = {"input_guard.sh", "artifacts.sh", "port64_task.sh"}
+NON_GAME_SCRIPTS = {"input_guard.sh", "artifacts.sh", "artifacts_local.sh", "port64_task.sh"}
 
 
 class InputGuardTests(unittest.TestCase):

@@ -315,7 +315,7 @@ The whole difference was `fn_for_sig` (guest.c), which every indirect call throu
 ### 2.16 Cutover: 64-bit as the default build
 
 This section records the change as it was made in the project's private CI. Its land-check, nightly, remote and
-local runner scripts are not part of this repository; the public build and tests are [BUILDING.md](../BUILDING.md)
+local runner scripts are not part of the public repository; the public build and tests are [BUILDING.md](../BUILDING.md)
 and `.github/workflows/build.yml`.
 
 **Decision (the user, 2026-10-20): 64-bit is the default product; i386 stays as the nightly reference build (not dropped).** Executed in one change (tools and CI only, no game code):

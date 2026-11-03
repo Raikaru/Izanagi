@@ -38,7 +38,7 @@ mapping. Other player keys are:
 Input defaults and axis invariants are in [input](input.md#player-controls).
 
 The `[lockstep]` template uses `hotkey=F9` and `interval=60`; its directory is supplied
-by the lockstep launcher (private retail-comparison tooling, not part of this repository), not
+by the lockstep launcher (private retail-comparison tooling, not part of the public repository), not
 normal player startup.
 
 ## Optional-package recovery

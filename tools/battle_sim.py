@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Admitted, deterministic native battle batches. Never resolves combat in Python."""
 import argparse
-import contextlib
 from collections import Counter
+import contextlib
 from concurrent.futures import ThreadPoolExecutor
 import hashlib
 import json
@@ -23,6 +23,7 @@ CENSORED = {"action_limit", "update_limit"}
 ERRORS = {"engine_error", "policy_error"}
 POLICIES = {"tape": 0, "greedy": 1, "cautious": 2, "typical": 3, "walk": 4}
 WALK_PLAN_MAX = 16384
+LOCAL_GATES = Path(__file__).with_name("local_gates.py")   # machine-wide admission (admitted_case)
 # p4_game_table_catalog_identity's retail value; expanded catalogs hash their content.
 RETAIL_TABLE_CATALOG = hashlib.sha256(b"p4pc-table-catalog-v1:retail").hexdigest()
 
@@ -792,8 +793,18 @@ def markdown(report):
 
 
 def admitted_case(wait, rendered=False):
-    # No machine-wide admission here: a case starts as soon as a batch worker is free.
-    return contextlib.nullcontext()
+    # Machine-wide admission belongs to local_gates.py beside this file, where a repository has it; never bypass it on
+    # platforms it does not support. Without it a case starts as soon as a batch worker is free.
+    if not LOCAL_GATES.is_file():
+        return contextlib.nullcontext()
+    from local_gates import Machine
+    try:
+        machine = Machine(priority="study")
+    except AttributeError as exc:
+        if os.name != "nt":
+            raise ScenarioError("local CPU admission is unavailable on this host; use the accepted PC remote broker") from exc
+        raise
+    return machine.case(wait, cpu=not rendered)
 
 
 def worker_environment(runtime_environment, profile):

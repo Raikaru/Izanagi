@@ -132,7 +132,7 @@ remain observers, including in the viewer.
 Raw `sceCdRead` and the ADXF/ROFS window reads are the only users of `p4pc_set_next_frame_alarm`. Its seam,
 `p4pc_frame_alarm_seam`, stays NULL except in a lockstep battle qualification run with
 `P4PC_LOCKSTEP_DISC_REPLAY`. There, after the anchor, it holds each read until the frame
-at which retail observed it complete (lockstep disc replay (private documentation)).
+at which retail observed it complete (the in-battle disc replay of lockstep, the private retail-comparison tooling).
 The disc implementation files themselves are unchanged.
 
 ## Wrapper and size ABI
@@ -169,7 +169,7 @@ backend (`00429358`) when `00731c70 == 1`; the other branch deliberately sign-ex
   words and 22 live resource lists. A selected capture also emits a `capture:true` snapshot,
   possibly during loading; that neither marks readiness nor suppresses the later entry.
 - Read-only retail trace correlation is done with the private PCSX2 trace tooling, which is
-  not part of this repository. It measures evidence; it does not select or implement a port
+  not part of the public repository. It measures evidence; it does not select or implement a port
   timing policy.
 
 Developer field/battle harnesses wait for logo work state 4, when both title-loader children

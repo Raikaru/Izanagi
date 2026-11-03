@@ -79,6 +79,8 @@
  *                        buff:M      the acting character's own buff levels match a datCalcHasBuffMask bit of M: 0x1/0x2 attack up/down,
  *                                    0x4/0x8, 0x10/0x20 the next two stats, 0x40/0x80 defense up/down (0x80: Marakunda), 0x100/0x200
  *                                    the fifth; any selected bit matches (stat levels only: 0x1..0x200)
+ *                        nobuff:M    no bit of M matches the acting character's own buff levels (re-apply a -kaja once it lapses)
+ *                        foebuff:M   a living enemy's buff levels match a bit of M (Dekaja after its Heat Riser): the first is the bound enemy
  *                        afflicted:M a living party member's ailments have a bit of mask M (0x4: fear after Evil Smile): the first in party
  *                                    order is the bound ally (Me Patra or Amrita cure every ally at once)
  *                        enemy:ID    a living enemy with that native ID is in the fight (e.g. Escape from the rare unit 138)
@@ -197,7 +199,7 @@ int p4walk_dungeon_digest(const P4WalkHost *host, uint32_t frame, uint32_t every
 #define P4WALK_KEY_SKILL 0x80000000u               /* key flag: skill:ID, the native skill ID in the low 16 bits */
 #define P4WALK_KEY_ITEM 0x40000000u                /* key flag: item:ID, the native item ID in the low 16 bits */
 enum { P4WALK_RULE_DEAD = 1, P4WALK_RULE_HP_BELOW, P4WALK_RULE_SP_BELOW, P4WALK_RULE_CHARGE, P4WALK_RULE_STATUS, P4WALK_RULE_BUFF,
-       P4WALK_RULE_AFFLICTED, P4WALK_RULE_ENEMY, P4WALK_RULE_WEAK, P4WALK_RULE_HITS };
+       P4WALK_RULE_AFFLICTED, P4WALK_RULE_ENEMY, P4WALK_RULE_WEAK, P4WALK_RULE_HITS, P4WALK_RULE_NOBUFF, P4WALK_RULE_FOEBUFF };
 typedef struct {
     int kind;                                   /* P4WALK_RULE_* */
     uint32_t value;                             /* hp<N/sp<N: N; charge/enemy: the enemy ID; status/afflicted/buff: the mask; weak/hits: E */

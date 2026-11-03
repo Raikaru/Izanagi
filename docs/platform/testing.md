@@ -470,9 +470,10 @@ native tasks/menus, not estimated disc duration.
   (a living enemy with Power/Mind Charge), `status:MASK` (the actor's own ailments, e.g.
   `0x8` silence), `afflicted:MASK` (the first living member, in party order, whose ailments
   match, e.g. `0x4` fear before Ghastly Wail; bound), `enemy:ID` (a living enemy with that
-  ID is in the fight, e.g. Escape from the rare unit 138) and `buff:MASK` (the actor's own
+  ID is in the fight, e.g. Escape from the rare unit 138), `buff:MASK` (the actor's own
   stat levels with `datCalcHasBuffMask`'s stat bits, any matching; `0x80` is defense
-  down after Marakunda). A bound ally steers
+  down after Marakunda), `nobuff:MASK` (none of them matches: re-apply a lapsed -kaja) and
+  `foebuff:MASK` (a living enemy's levels match; bound, e.g. Dekaja). A bound ally steers
   the rule's TARGET confirmations as `targetN=` does for enemies, including downed
   allies for a revive; an ally absent from a party target list fails the walk, while a
   pane without party candidates (a macro's fallback to Attack) confirms as usual. Each

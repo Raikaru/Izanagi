@@ -8,16 +8,34 @@
 #           (tests/story_gate.sh --make-save on the packaged exe; P4PC_TURBO=1: the virtual clock, every frame drawn on the GPU)
 #   load    the save of that run loaded through the title, and the game is where it was saved (field 7 room 2 on 04/15)
 #   P4PC_ISO=<your disc image> sh tools/package_smoke.sh <package.zip> [work dir]      (default work: <zip folder>/<name>-smoke)
-# Runs under Git Bash on Windows. Nothing retail is copied: the settings file names your own disc image.
+# Runs under Git Bash on Windows. Nothing retail is copied: the settings file names your own disc image. A repository may
+# redefine smoke_begin, smoke_check and smoke_launch (below) in tools/package_smoke_local.sh: defaults, managed work trees, admission.
 set -eu
 # the git-bash sh this runs under has sed and awk but no grep on its PATH: lines <file> <extended regex>, has <file> <extended regex>
 lines() { awk -v re="$2" '$0 ~ re' "$1"; }
 has() { awk -v re="$2" 'BEGIN { r = 1 } $0 ~ re { r = 0; exit } END { exit r }' "$1"; }
 root=$(cd "$(dirname "$0")/.." && pwd)
-zip=${1:?usage: P4PC_ISO=<disc image> sh tools/package_smoke.sh <package.zip> [work dir]}
-iso=${P4PC_ISO:?set P4PC_ISO to your own Persona 4 (USA) disc image}
+# smoke_begin <args>: sets zip (the package), work (the work folder) and iso (the disc image)
+smoke_begin() {
+  zip=${1:?usage: P4PC_ISO=<disc image> sh tools/package_smoke.sh <package.zip> [work dir]}
+  iso=${P4PC_ISO:?set P4PC_ISO to your own Persona 4 (USA) disc image}
+  work=$(cygpath -am "${2:-$(dirname "$zip")/$(basename "$zip" .zip)-smoke}")
+}
+# smoke_check: before every run
+smoke_check() { :; }
+# smoke_launch <elapsed file> <command...>: runs the command and writes its run time in whole seconds to the file
+smoke_launch() {
+  launch_elapsed=$1; shift
+  launch_start=$(date +%s)
+  "$@" && launch_rc=0 || launch_rc=$?
+  echo $(( $(date +%s) - launch_start )) > "$launch_elapsed"
+  return $launch_rc
+}
+if [ -f "$root/tools/package_smoke_local.sh" ]; then
+  . "$root/tools/package_smoke_local.sh"
+fi
+smoke_begin "$@"
 name=$(basename "$zip" .zip)
-work=$(cygpath -am "${2:-$(dirname "$zip")/$name-smoke}")
 mkdir -p "$work/tmp"
 export TMPDIR="$work/tmp" TMP="$work/tmp" TEMP="$work/tmp"
 rm -rf "$work/$name"
@@ -33,10 +51,11 @@ ok=1
 # run <tag> <timeout> <env...>: the exe from the package folder, run directory $work/<tag>, log boot.log
 run() {
   tag=$1; to=$2; shift 2
+  smoke_check
   rm -rf "$work/$tag"; mkdir -p "$work/$tag"
-  start=$(date +%s)
-  ( cd "$work/$tag" && env P4PC_CONFIG="$ini" P4PC_HIDDEN_WINDOW=1 SDL_AUDIODRIVER=dummy "$@" P4PC_INPUT=script timeout "$to" "$pkg/$exe" > boot.log 2>&1 ) && rc=0 || rc=$?
-  secs=$(( $(date +%s) - start ))
+  ( cd "$work/$tag" && smoke_launch "$work/$tag/elapsed.txt" \
+      env P4PC_CONFIG="$ini" P4PC_HIDDEN_WINDOW=1 SDL_AUDIODRIVER=dummy "$@" P4PC_INPUT=script timeout "$to" "$pkg/$exe" > boot.log 2>&1 ) && rc=0 || rc=$?
+  secs=$(cat "$work/$tag/elapsed.txt")
   echo "smoke: $tag: exit $rc in ${secs}s ($(wc -l < "$work/$tag/boot.log") log lines)"
   eval "${tag}_rc=$rc ${tag}_secs=$secs"
 }

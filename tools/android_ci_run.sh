@@ -10,6 +10,10 @@
 set -eu
 src=/lane/src
 build=${1:-/lane/build}
+# A repository may add modes in tools/android_ci_local.sh, sourced here with src and build set.
+if [ -f "$src/tools/android_ci_local.sh" ]; then
+  . "$src/tools/android_ci_local.sh"
+fi
 abi=${P4PC_ANDROID_ABI:-x86}
 cache=/android-cache
 . "$src/tools/build_cache.sh"

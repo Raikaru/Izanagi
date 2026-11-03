@@ -412,10 +412,19 @@ class BattleSimTest(unittest.TestCase):
         self.assertEqual(self.admissions, 0)
 
     def test_default_admission_is_immediate(self):
-        with sim.admitted_case(7) as admitted:
-            self.assertIsNone(admitted)
-        with sim.admitted_case(-1, rendered=True):
-            pass
+        with mock.patch.object(sim, "LOCAL_GATES", Path(__file__).with_name("absent_local_gates.py")):
+            with sim.admitted_case(7) as admitted:
+                self.assertIsNone(admitted)
+            with sim.admitted_case(-1, rendered=True):
+                pass
+
+    def test_exact_admission_api(self):
+        machine = mock.Mock()
+        with mock.patch.dict(sys.modules, {"local_gates": mock.Mock(Machine=machine)}), \
+                mock.patch.object(sim, "LOCAL_GATES", Path(__file__)):
+            sim.admitted_case(7)
+            machine.assert_called_once_with(priority="study")
+            machine.return_value.case.assert_called_once_with(7, cpu=True)
 
     def test_unresolved_are_not_silently_removed(self):
         rows = [{"run_index": i, "seeds": sim.derive_seeds("0" * 32, i),

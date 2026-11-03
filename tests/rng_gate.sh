@@ -1,5 +1,5 @@
 #!/bin/sh
-# Determinism against retail (PCSX2) values, recorded with p4hook --call-trace 003b6f00 / 003b7060 (PCSX2 trace tooling, not in this repository):
+# Determinism against retail (PCSX2) values, recorded with p4hook --call-trace 003b6f00 / 003b7060 (PCSX2 trace tooling, not in the public repository):
 #   boot   from boot: the generator's second boot seed is 0x14bc (RpRandomSeed(*(u32 *)0x10000000), TIMER0 stands still in the port) and the seed's mixing
 #          leaves draw 311 = 6b0c7ac3 and draw 620 = 0d656b36. With the old timer value 0 the whole stream differed from the second seed on.
 #   floor  from the Apollo save (the card in <ELF dir>/saves/card_apollo, as systems_gate.sh): LOAD GAME, Goho-M, the Entrance, the Marukyu club, "Start from 1F"

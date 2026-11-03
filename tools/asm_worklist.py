@@ -17,7 +17,7 @@ Excluded from the list: addresses claimed in overrides/CLAIMS.md, addresses with
 overrides/<addr>.c file, and sky2 units (PortGL).
 
 --coverage FILE (repeatable): retail block coverage merged from PCSX2 hook runs of the real game by retail_coverage.py
-(part of the private PCSX2 trace tooling, which is not in this repository; put it on PYTHONPATH). Rows gain a Retail
+(part of the private PCSX2 trace tooling: pcsx2_trace/ beside this file, or on PYTHONPATH). Rows gain a Retail
 column (the function's entry count in retail, "-" when it never ran), the summary counts executed rows, and a section
 lists every trap stub that ran in retail, whether or not the static walk reaches it: those are the ground-truth gaps.
 
@@ -622,10 +622,12 @@ def main():
     # Retail coverage: function start -> entry count, for every function with an executed block.
     cov_labels, executed = [], {}
     if a.coverage:
+        sys.path.insert(0, str(Path(__file__).resolve().parent / "pcsx2_trace"))
         try:
             import retail_coverage as rcov
         except ImportError:
-            sys.exit("asm_worklist: --coverage needs retail_coverage.py from the PCSX2 trace tooling on PYTHONPATH")
+            sys.exit("asm_worklist: --coverage needs retail_coverage.py of the PCSX2 trace tooling "
+                     "(pcsx2_trace/ beside this file, or on PYTHONPATH)")
         blocks = {}
         for path in a.coverage:
             data = rcov.load(path)

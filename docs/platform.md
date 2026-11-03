@@ -35,7 +35,7 @@ Related contracts: [audio](audio.md), [renderer](renderer_port.md), [port compil
 Measurements and receipts in these documents were often produced with the project's private
 tooling: its land queue and remote/local runners, the nightly jobs, lockstep and the PCSX2
 trace tooling. Those scripts, hosts and the evidence paths they name (`<scratch>`, `<host>`,
-`<private data>`) are not part of this repository. Build and test with [BUILDING.md](../BUILDING.md).
+`<private data>`) are not part of the public repository. Build and test with [BUILDING.md](../BUILDING.md).
 
 ## Shared native digests
 

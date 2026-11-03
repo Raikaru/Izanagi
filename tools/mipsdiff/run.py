@@ -77,7 +77,7 @@ def find_asm(addr):
     global _asm_index
     if _asm_index is None:
         _asm_index = {}
-        for f in glob.glob(ASM_ROOT + "/*/*.s"):
+        for f in glob.glob(ASM_ROOT + "/*/*.s") + glob.glob(os.path.join(HERE, "asm_extra", "*.s")):
             with open(f, encoding="utf8", errors="replace") as fh:
                 t = fh.read()
             m = re.search(r"/\* \w+ ([0-9A-F]{8}) ", t)

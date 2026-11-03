@@ -20,10 +20,17 @@ import sys
 import zlib
 from pathlib import Path
 
+try:  # a repository's capture store: cold residency, junction-aware link checks, managed decode scratch
+    import capture_store
+except ImportError:
+    capture_store = None
+
 
 def capture_path(path):
-    """A recorded .png name also finds its lossless .jxl archive."""
+    """A recorded .png name also finds its lossless .jxl archive (and, with a capture store, its cold copy)."""
     path = os.fspath(path)
+    if capture_store is not None:
+        return capture_store.capture_path(path)
     if not os.path.exists(path) and path.lower().endswith(".png") and os.path.isfile(path[:-4] + ".jxl"):
         return path[:-4] + ".jxl"
     return path
@@ -102,12 +109,14 @@ def copy_capture(source, destination):
     logical = Path(destination)
     suffix = logical.suffix if source.suffix.lower() == ".png" and logical.suffix.lower() == ".png" else source.suffix.lower()
     destination = logical.with_suffix(suffix)
-    if any(path.is_symlink() for path in (logical, destination, *destination.parents)):
-        raise ValueError("retained capture copies must not modify link inputs")
+    link = capture_store.is_link if capture_store is not None else (lambda path: Path(path).is_symlink())
+    if any(link(path) for path in (logical, destination, *destination.parents)) or \
+            (capture_store is not None and capture_store.read_only(destination)):
+        raise ValueError("retained capture copies must not modify retail/link inputs")
     if source.suffix.lower() not in (".png", ".jxl"):
         raise ValueError("not a PNG/JXL capture: %s" % source)
     metadata, target_metadata = Path(str(source) + ".json"), Path(str(destination) + ".json")
-    if metadata.is_symlink() or target_metadata.is_symlink():
+    if link(metadata) or link(target_metadata):
         raise ValueError("capture verification metadata must not be a link")
     destination.parent.mkdir(parents=True, exist_ok=True)
     try:
@@ -135,7 +144,8 @@ def copy_capture(source, destination):
 
 
 def materialize_capture(path, root=None):
-    """Return a viewer-readable PNG; a JXL archive is decoded below root (default: a new temporary directory)."""
+    """Return a viewer-readable PNG; a JXL archive is decoded below root (default: a new temporary directory). A capture
+    store decodes into its managed scratch instead, and root may then be its scratch policy."""
     source = capture_path(path)
     if not source.lower().endswith((".png", ".jxl")):
         raise ValueError("not a PNG/JXL capture: %s" % source)
@@ -143,6 +153,8 @@ def materialize_capture(path, root=None):
         raise FileNotFoundError(source)
     if not source.lower().endswith(".jxl"):
         return os.path.abspath(source)
+    if capture_store is not None:
+        return capture_store.materialize(source, root, capture_png_bytes)
     import tempfile
     data = capture_png_bytes(source)
     if root is not None:

@@ -233,6 +233,24 @@ static void affinities(void)
     CHECK(p4walk_battle_rule_select(&hits, 1, &view, &ally, &enemy) == 0 && enemy == 7);
     view.actor = 6;
     CHECK(p4walk_battle_rule_select(&hits, 1, &view, &ally, &enemy) == -1);                 /* the rule is Chie's */
+
+    /* nobuff:M re-applies a lapsed -kaja; foebuff:M binds the first enemy with a matching raised stat (Dekaja). */
+    P4WalkBattleRule lapse, strip;
+    CHECK(p4walk_battle_rule_parse("nobuff:0x41=circle,down,cross,skill:219,cross", &lapse) && lapse.kind == P4WALK_RULE_NOBUFF);
+    CHECK(p4walk_battle_rule_parse("foebuff:0x55@1=circle,down,cross,skill:224,cross", &strip) && strip.kind == P4WALK_RULE_FOEBUFF);
+    CHECK(!p4walk_battle_rule_parse("nobuff:0=cross", &scratch) && !p4walk_battle_rule_parse("foebuff:0x400=cross", &scratch));
+    view.actor = 6;
+    CHECK(p4walk_battle_rule_select(&lapse, 1, &view, &ally, &enemy) == 0 && ally == 0 && enemy == 0);
+    party[1].buffs[0] = 0x01;                                             /* Kanji's attack +1 */
+    CHECK(p4walk_battle_rule_select(&lapse, 1, &view, &ally, &enemy) == -1);
+    party[1].buffs[0] = 0xE0;                                             /* attack 0, agility... index 1 at -1: not a raise */
+    CHECK(p4walk_battle_rule_select(&lapse, 1, &view, &ally, &enemy) == 0);
+    view.actor = 1;
+    CHECK(p4walk_battle_rule_select(&strip, 1, &view, &ally, &enemy) == -1);
+    foes[2].buffs[1] = 0x10;                                              /* 220's defense (index 3, high nibble) +1 */
+    CHECK(p4walk_battle_rule_select(&strip, 1, &view, &ally, &enemy) == 0 && enemy == 220);
+    foes[2].hp = 0;
+    CHECK(p4walk_battle_rule_select(&strip, 1, &view, &ally, &enemy) == -1);
 }
 
 static void walk_lines(void)

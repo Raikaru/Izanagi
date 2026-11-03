@@ -97,7 +97,7 @@ Unavailable/non-monotonic counters emit an error, never a wall-time CPU fallback
 CPU time excludes sleeping/descheduling but includes the actual game-thread
 work between those boundaries; it does not include work on other OS threads.
 
-The study driver `mod_guard_timing.py` (private tooling, not part of this repository)
+The study driver `mod_guard_timing.py` (private tooling, not part of the public repository)
 consumes two actual same-source game builds, OFF/ON
 for BOTH `P4PC_MOD_SUPPORT` and `P4PC_LUAU`. It checks actual ELF/PE machine ABI,
 CMake source/options and binary/cache hashes; other build-option changes are

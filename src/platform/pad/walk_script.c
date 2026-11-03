@@ -260,6 +260,12 @@ int p4walk_battle_rule_parse(const char *text, P4WalkBattleRule *out) {
     } else if (n > 5 && !strncmp(text, "buff:", 5)) {
         if (!rule_number(text + 5, cond, 0, 1, 0x3FFu, &out->value)) return 0;
         out->kind = P4WALK_RULE_BUFF;
+    } else if (n > 7 && !strncmp(text, "nobuff:", 7)) {
+        if (!rule_number(text + 7, cond, 0, 1, 0x3FFu, &out->value)) return 0;
+        out->kind = P4WALK_RULE_NOBUFF;
+    } else if (n > 8 && !strncmp(text, "foebuff:", 8)) {
+        if (!rule_number(text + 8, cond, 0, 1, 0x3FFu, &out->value)) return 0;
+        out->kind = P4WALK_RULE_FOEBUFF;
     } else if (n > 10 && !strncmp(text, "afflicted:", 10)) {
         if (!rule_number(text + 10, cond, 0, 1, 0xFFFFFFFFu, &out->value)) return 0;
         out->kind = P4WALK_RULE_AFFLICTED;
@@ -342,6 +348,13 @@ int p4walk_battle_rule_select(const P4WalkBattleRule *rules, int count, const P4
             continue;
         case P4WALK_RULE_BUFF:
             if (self && rule_buff_match(self, rule->value)) return r;
+            continue;
+        case P4WALK_RULE_NOBUFF:
+            if (self && !rule_buff_match(self, rule->value)) return r;
+            continue;
+        case P4WALK_RULE_FOEBUFF:
+            for (int i = 0; i < v->enemy_count; i++)
+                if (v->enemies[i].hp && rule_buff_match(&v->enemies[i], rule->value)) { *enemy = v->enemies[i].id; return r; }
             continue;
         case P4WALK_RULE_WEAK:
         case P4WALK_RULE_HITS:

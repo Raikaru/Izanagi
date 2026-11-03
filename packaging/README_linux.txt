@@ -7,6 +7,7 @@ your own Persona 4 (USA) PlayStation 2 disc. Nothing is downloaded and nothing i
 sent anywhere.
 
 Build: @BUILDLINE@
+@UNLANDED@
 
 Starting
 --------

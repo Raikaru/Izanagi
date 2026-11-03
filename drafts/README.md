@@ -8,7 +8,7 @@ Unreviewed machine drafts of the retail functions listed as `asm-only` in `docs/
 - `INDEX.md`: address, name, unit, line count of the file, and flags.
   Flags: `M` = the draft contains `halt_baddata` or `Bad instruction`; `W` = the draft contains `in_vf`.
 
-They were made with romwright, a private decompiler that is not part of this repository, per address batch of 16.
+They were made with romwright, a private decompiler that is not part of the public repository, per address batch of 16.
 
 Each file is the output for one address. These are drafts, not matches: they have no prototype from the
 decomp and have not been checked against the asm.

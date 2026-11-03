@@ -6,7 +6,9 @@ It contains NO game data. You need your own copy of the game: a disc image (.iso
 your own Persona 4 (USA) PlayStation 2 disc. Normal game launches do not download
 game data or upload anything.
 
+@BUILDTYPE@
 Build: @BUILDLINE@
+@UNLANDED@
 
 Starting
 --------
@@ -28,6 +30,7 @@ Controls (defaults; rebind in Config -> Controls)
   L1 / R1          Q / E      L2 / R2         1 / 3
   L3 / R3          Left Shift / Right Shift
   Fullscreen       F11 or Alt+Enter
+@LOCKSTEP_KEY@
 
 Gamepad: any controller SDL knows (Xbox, PlayStation, Switch Pro ...) works when
 plugged in before or during the game. South button = Cross, East = Circle,
@@ -76,6 +79,7 @@ its counter is restored from the mod save sidecar when you load.
 
 This is a test build
 --------------------
+@BUGREPORT@
 Parts of the game are not finished and some things will look or sound wrong. Please
 note what you were doing, the game's day and place, and send p4pc.log and your save
 folder with a report. Never attach your disc image, its program file (SLUS_217.82)

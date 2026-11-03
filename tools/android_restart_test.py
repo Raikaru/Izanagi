@@ -16,13 +16,22 @@ import uuid
 
 import android_prog as device
 
+POLICY = Path(__file__).resolve().parents[1] / "config" / "land_policy.json"
+
+
+def default_lock():
+    """The shared phone lock: the land policy's, where a repository has one; otherwise one in the temporary folder."""
+    if POLICY.is_file():
+        return json.loads(POLICY.read_text(encoding="utf-8"))["phone"]["lock"]
+    return os.path.join(tempfile.gettempdir(), "p4pc-phone.lock")
+
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--serial", required=True)
     parser.add_argument("--out", required=True)
     parser.add_argument("--iso-uri", help="debug app's own persisted URI; default its staged media ISO")
-    parser.add_argument("--lock", default=os.path.join(tempfile.gettempdir(), "p4pc-phone.lock"))
+    parser.add_argument("--lock", default=default_lock())
     args = parser.parse_args()
     # Refuse an old runner before any adb command or package lifecycle operation.
     if device.PKG != "org.p4pc.game.debug":

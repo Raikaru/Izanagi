@@ -2,7 +2,8 @@
 
 The Windows-side scripts run under Git Bash, whose /usr/bin has no grep (nor pgrep, pkill, lsof,
 flock, xz or zstd). Text that runs elsewhere is exempt: heredoc bodies and quoted command strings,
-and the scripts that only ever run on a Linux host or in a container.
+and the scripts that only ever run on a Linux host or in a container. The private repository's own
+scripts are listed in windows_tool_lint_private.py.
 """
 from pathlib import Path
 import re
@@ -11,12 +12,19 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 MISSING_ON_WINDOWS = ("grep", "egrep", "fgrep", "pgrep", "pkill", "lsof", "flock", "xz", "zstd")
 HOST_ONLY = {
-    "android_ci_run.sh", "appimage_build.sh", "appimage_smoke.sh", "build_cache.sh", "ci_tests.sh", "ios_check.sh", "package_linux.sh",
-    "package_macos.sh", "package_runtime_provenance.sh", "package_win.sh",
+    "android_ci_run.sh", "appimage_build.sh", "appimage_smoke.sh", "build_cache.sh", "ci_tests.sh", "ios_check.sh",
+    "package_linux.sh", "package_macos.sh", "package_runtime_provenance.sh", "package_win.sh",
 }
 PC = {
     "luau_profiles.sh", "package_smoke.sh", "ref_guard.sh",
 }
+try:
+    import windows_tool_lint_private as private
+except ImportError:
+    private = None
+if private is not None:
+    HOST_ONLY |= private.HOST_ONLY
+    PC |= private.PC
 COMMAND = re.compile(r"(?:^|[|;&(!`{]|\$\(|\bthen\b|\bdo\b|\belse\b|\bexec\b|\btimeout\s+\S+)\s*(%s)\b"
                      % "|".join(map(re.escape, MISSING_ON_WINDOWS)))
 HEREDOC = re.compile(r"<<-?\s*(['\"]?)(\w+)\1")

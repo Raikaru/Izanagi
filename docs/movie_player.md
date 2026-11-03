@@ -31,7 +31,7 @@ and the status must stay 1 or 2 until the movie ends.
 
 ## 2. Retail traces
 
-The retail traces come from the private PCSX2 trace tooling (not part of this repository).
+The retail traces come from the private PCSX2 trace tooling (not part of the public repository).
 Its `trace.py movie [--index N]` boots the ISO in PCSX2 (it resumes the emulator if it
 pauses itself), waits for the movie task, and samples its work block over PINE as fast as PINE answers
 (about 1 ms), writing one line per change: task state, movie index, start-up tick, `playerStatus`,

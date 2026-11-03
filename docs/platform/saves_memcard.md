@@ -264,7 +264,7 @@ Harness `P4PC_SAVE_SEED=DIR` copies pristine input into card 0 under an isolated
 `P4PC_SAVE_DIR`; `P4PC_SAVE_OUT` retains an output checkpoint. Retail saves, captures,
 card images and canonical checkpoint bytes remain private and are never committed.
 
-The project's private gate runner (not part of this repository) provisions the collection
+The project's private gate runner (not part of the public repository) provisions the collection
 checkpoints from an index of private save folders. It checks the pinned payload digest,
 copies each slot to an isolated per-attempt slot 0, and checks both source and
 copy again after the game exits. The two import witnesses similarly use a

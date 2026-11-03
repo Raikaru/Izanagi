@@ -15,7 +15,7 @@
 #include "p4pc/mod_bindings.h"
 #include "platform/mods/failure_native.h"
 #include "p4pc/content.h"
-#if defined(_WIN32) || (defined(__linux__) && !defined(__ANDROID__))
+#if defined(_WIN32) || (defined(__linux__) && !defined(__ANDROID__)) || defined(__APPLE__)
 #include "platform/config/p4iso.h"
 #define P4PC_PLAYER_DISC 1
 #endif

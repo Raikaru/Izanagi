@@ -42,7 +42,18 @@
  *                      `first`/`firstN` precedence is unchanged, and charge Guard takes priority over both first and repeat inputs. Unlisted IDs use `plan`.
  *                      Cross every 24 frames at any other moment, except in Shuffle Time (the task `battle_shuffle`):
  *                      a flipped card cannot be flipped again, so every 45 frames the driver alternates a cursor move (right along the row, down at
- *                      its end) with Cross. Units are walker frames.
+ *                      its end) with Cross. Units are walker frames. In the results phase (battle state 16) a level-up that offers a ninth skill
+ *                      asks which to forget, and its Yes/No defaults to No, so Cross alone would loop: while that task (shdPersonaSkillSelectSeq)
+ *                      reads input the driver declines the offer instead, Left to the offered skill (list slot 8), Cross, then Yes. A known skill
+ *                      is never forgotten (the battle simulator's result_prompt.c makes the same choice).
+ *                      A key may be skill:ID (native skill ID, decimal or hex) with the acting character's Skill list open, or item:ID (native
+ *                      item ID 0x301..0x3FF) with the Item list open: it presses Down or Up (the shorter way around the wrapping list; Down on a
+ *                      tie) from the row the list opens on to that entry, 14 frames apart, then the next key follows (e.g.
+ *                      circle,down,cross,skill:195,cross). btlSelectionRefreshList (00207140) builds the lists: the character's current persona
+ *                      skills in record order that are active (ID below 0x1B8 with skill-table flags01 bit 2), and the held items (D_0079757A
+ *                      count) in ID order whose granted skill (item metadata +0x24) is active. With the cursor-memory option (flag 60) a list
+ *                      opens on its remembered row (action +0x3F0: pair 1 Skill, pair 2 Item), row 0 when that is past the list's end
+ *                      (btlSelectionUpdateWindow 00202D20). An entry missing from the list fails the walk. Reads only; the cursor still moves by pad input.
  *                      Optional persona=modal gives shdPersonaStatusDraw Cross priority over its underlying card grid; the legacy cadence is the default.
  *                      Optional guard=ID (native enemy ID, decimal or hex) replaces a fresh command with Circle/Up/Cross while a living matching enemy
  *                      has native Power/Mind Charge active. It never interrupts an armed macro or consumes a character's first plan.
@@ -54,6 +65,37 @@
  *                      Fresh Right input follows the game's target list until it matches; all-target skills may confirm when the enemy is included.
  *                      Dead/absent/unreachable targets fail the walk instead of confirming another enemy. No game state is written; omitted bindings are unchanged.
  *                      Remove/rebind the option before ally-targeted healing or after that enemy dies. Guard overrides do not use target bindings.
+ *   battlerule:COND[@ID,ID]=KEYS  appends an ordered conditional rule to the active battle: driver (up to 16; the next battle: line or
+ *                      battle:off clears them). At each fresh command after a charge Guard (guard=ID) has not claimed it, the first rule whose
+ *                      condition holds for the acting character supplies the command's buttons instead of first/plan; otherwise those stay
+ *                      the character's default. Like Guard, a rule does not consume a character's first plan. @ID,ID limits the rule
+ *                      to those native character IDs 1..8. Conditions read native unit records only (DatUnit HP +8, SP +0xA, ailments `bad`
+ *                      +0xC (datCalcChkBadStatus), charge flags +0x14, signed buff-level nibbles +0x1C):
+ *                        dead        a party member is down (HP 0): the first in party order is the bound ally (a Revival Bead, a revive skill)
+ *                        hp<N        a living party member has HP below N: the lowest (party order breaks ties) is the bound ally
+ *                        sp<N        the acting character's own SP is below N (an SP item before a skill macro would fail)
+ *                        charge:ID   a living enemy with that native ID has Power/Mind Charge (DatUnit +0x14 & 0xC0000)
+ *                        status:M    the acting character's own ailments have a bit of mask M (0x8: silence after Foolish Whisper)
+ *                        buff:M      the acting character's own buff levels match a datCalcHasBuffMask bit of M: 0x1/0x2 attack up/down,
+ *                                    0x4/0x8, 0x10/0x20 the next two stats, 0x40/0x80 defense up/down (0x80: Marakunda), 0x100/0x200
+ *                                    the fifth; any selected bit matches (stat levels only: 0x1..0x200)
+ *                        afflicted:M a living party member's ailments have a bit of mask M (0x4: fear after Evil Smile): the first in party
+ *                                    order is the bound ally (Me Patra or Amrita cure every ally at once)
+ *                        enemy:ID    a living enemy with that native ID is in the fight (e.g. Escape from the rare unit 138)
+ *                        weak:E      a living enemy is weak to element E (0 physical, 1 fire, 2 ice, 3 elec, 4 wind, 5 almighty, 6 light,
+ *                                    7 dark): the first in the enemy list is the bound enemy
+ *                        hits:E      a living enemy takes element E at full strength (not resisted, nulled, repelled or absorbed): the
+ *                                    first such enemy is the bound enemy
+ *                      Element affinities are datCalcGetAffinity's (0023A6B0) for enemies: the affinity row (iGpffffb3c8, by DatUnit
+ *                      id2), the enemy's resist/null/repel/absorb passives (its skill row), Guard removing a weakness, and the Break and
+ *                      Wall buff levels, so a Wall or a Break changes the answer the turn it lands.
+ *                      A bound ally steers the rule's TARGET confirmations like targetN= does for enemies: fresh Right input until the cursor
+ *                      is on that ally (an all-ally skill confirms at once); an ally missing from a party target list fails the walk. A pane
+ *                      without party candidates (the macro fell back to Attack) confirms as usual. A bound enemy steers them the same way.
+ *                      Rules without a bound unit keep
+ *                      targetN= enemy bindings. The walker notes each rule it applies. A rule whose skill:/item: key names an entry
+ *                      missing from the acting character's list (a spent Revival Bead, a skill not learned) does not apply, so a later
+ *                      rule can name a fallback (dead@1 with item:0x30F, then dead@1 with item:0x310).
  *   waittask:NAME[:off] wait until the engine task NAME exists (:off: is gone), e.g. Y_FclShopMainProc for the shop menu (the same in retail and the port)
  *   skiptask:NAME[:off][:BUTTON] press BUTTON (default Cross) every 24 frames until task NAME exists (:off: is gone);
  *                      stops before pressing through its menu. E.g. skiptask:cmpMain:triangle opens camp after party-gather finishes.
@@ -141,5 +183,70 @@ void p4walk_checks_frame(const P4WalkHost *host, uint32_t frame);
 int p4walk_player(const P4WalkHost *host, float *x, float *z, float *fx, float *fz);
 /* The guest address of the matrix p4walk_player reads (the `rotate pc` task's model), 0 when there is none. */
 uint32_t p4walk_player_matrix(const P4WalkHost *host);
+/* Cross-target dungeon digest (the port's P4PC_DUNGEON_DIGEST, tests/dungeon_digest_gate.sh). Call once per frame with a caller-owned rolling hash
+ * (start 2166136261): every frame it folds the player's matrix and the game's additive random generator into *roll; when frame % every == 0 it
+ * writes one row "dungeon digest flip N ..." into line and returns 1. Each component is a separate FNV-1a hash of guest data (never of a pointer
+ * word): field ids, dungeon step and floor seed, the floor's cell grid, the additive generator, RpRandom's Mersenne Twister, the player's
+ * matrix, the floor's units (ids and model matrices) and the battle state, so the first differing row of two targets names the flip and the
+ * kind of state that split. */
+int p4walk_dungeon_digest(const P4WalkHost *host, uint32_t frame, uint32_t every, uint32_t *roll, char *line, size_t n);
+
+/* battlerule: (above), exposed so its selection is a testable pure function of a battle snapshot. */
+#define P4WALK_BATTLE_RULE_MAX 16
+#define P4WALK_BATTLE_KEYS_MAX 32
+#define P4WALK_KEY_SKILL 0x80000000u               /* key flag: skill:ID, the native skill ID in the low 16 bits */
+#define P4WALK_KEY_ITEM 0x40000000u                /* key flag: item:ID, the native item ID in the low 16 bits */
+enum { P4WALK_RULE_DEAD = 1, P4WALK_RULE_HP_BELOW, P4WALK_RULE_SP_BELOW, P4WALK_RULE_CHARGE, P4WALK_RULE_STATUS, P4WALK_RULE_BUFF,
+       P4WALK_RULE_AFFLICTED, P4WALK_RULE_ENEMY, P4WALK_RULE_WEAK, P4WALK_RULE_HITS };
+typedef struct {
+    int kind;                                   /* P4WALK_RULE_* */
+    uint32_t value;                             /* hp<N/sp<N: N; charge/enemy: the enemy ID; status/afflicted/buff: the mask; weak/hits: E */
+    uint32_t actors;                            /* bit ID-1 per native character that may use the rule; 0: every one */
+    unsigned keys[P4WALK_BATTLE_KEYS_MAX];      /* 1 << P4WalkButton per press */
+    int key_count;
+} P4WalkBattleRule;
+typedef struct {
+    uint32_t id;                                /* native character or enemy ID */
+    uint32_t hp;                                /* DatUnit +8, u16 */
+    uint32_t sp;                                /* DatUnit +0xA, u16 */
+    uint32_t bad;                               /* DatUnit +0xC: ailments (datCalcChkBadStatus: 0x4 fear, 0x8 silence) */
+    uint32_t status;                            /* DatUnit +0x14: charge flags (0xC0000 Power/Mind Charge) */
+    uint8_t buffs[8];                           /* DatUnit +0x1C: signed nibbles, index 2k low and 2k+1 high, values above 7 minus 15 */
+    uint16_t weak, block, resist;               /* enemies: bit E per element 0..7 of datCalcGetAffinity's weak, null/repel/absorb
+                                                 * and resist flags (p4walk_enemy_affinity) */
+} P4WalkBattleUnit;
+typedef struct {
+    uint32_t actor;                             /* the acting character's native ID */
+    const P4WalkBattleUnit *party;              /* the party chain, in its order */
+    int party_count;
+    const P4WalkBattleUnit *enemies;
+    int enemy_count;
+    uint32_t unusable;                          /* bit r: rule r names a skill:/item: entry missing from the actor's list (skipped) */
+} P4WalkBattleView;
+/* Parses "COND[@ID,ID]=KEYS"; 1 on success, 0 on a malformed rule. */
+int p4walk_battle_rule_parse(const char *text, P4WalkBattleRule *out);
+/* The index of the first rule that applies to view->actor, or -1. *ally gets the bound ally's native ID and *enemy the bound enemy's
+ * (0: none). */
+int p4walk_battle_rule_select(const P4WalkBattleRule *rules, int count, const P4WalkBattleView *view, uint32_t *ally, uint32_t *enemy);
+/* datCalcGetAffinity (0023A6B0) for an enemy element: `raw` is its affinity-row halfword, `passives` the resist (1), null (2), repel (4)
+ * and absorb (8) passives it holds for that element, then Guard, a Break and a Wall. Flags: 0x8000000 weak, 0x1000000 null, 0x2000000
+ * repel, 0x4000000 absorb, 0x10000000 resist; the low halfword is the damage percent. */
+uint32_t p4walk_enemy_affinity(unsigned raw, unsigned passives, int guarding, int broken, int walled);
+/* skill:ID / item:ID navigation: the signed Down (+) / Up (-) presses from row `cursor` of a wrapping list of `count` IDs to `id`, the shorter way
+ * (Down on a tie). 1 on success; 0 when `id` is not listed or `cursor` is outside the list. */
+int p4walk_battle_list_moves(const uint16_t *list, int count, int cursor, unsigned id, int *moves);
+/* The results screen's skill-offer prompt (shdPersonaSkillSelectSeq), as the battle driver reads it. */
+typedef struct {
+    int32_t state;                              /* skill-replace task state (work +8) */
+    int32_t list_active;                        /* panel accepts list input (flags & 0x800) */
+    int32_t list_cursor;                        /* -1 inactive, 0..7 known skills, 8 the offered skill */
+    int32_t pending;                            /* offered skills still queued */
+    int32_t replacement_pending;                /* the chosen row is the offered skill itself */
+    int32_t row_waiting;                        /* a message text row waits for input */
+    int32_t choice_active;                      /* the Yes/No choice polls input */
+    int32_t choice_cursor;                      /* 0 Yes, 1 No */
+} P4WalkSkillPrompt;
+/* The P4W_* buttons that decline the offer (pick the offered skill, answer Yes), 0 to wait. A known skill is never forgotten. */
+unsigned p4walk_skill_prompt_buttons(const P4WalkSkillPrompt *prompt);
 
 #endif

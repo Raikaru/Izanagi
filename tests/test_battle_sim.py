@@ -35,7 +35,7 @@ def fake_preparation(args):
     mode = source[4:].decode("ascii")
     attempt = int(request_file.parent.name.split("-")[-1])
     assert os.environ["P4PC_INPUT"] == "script" and os.environ["P4PC_PACKS"] == "0"
-    assert Path(os.environ["P4PC_SAVE_DIR"]) == Path.cwd()
+    assert Path(os.environ["P4PC_SAVE_DIR"]).resolve() == Path.cwd().resolve()   # (macOS's temporary directory is under the /var symlink)
     if mode == "prep_crash" or (mode == "prep_retry" and attempt == 1):
         print("fake preparation crash retained", file=sys.stderr, flush=True)
         return 9
@@ -85,7 +85,7 @@ def fake_worker():
     assert os.environ["P4PC_RESOLUTION"] == "640x448"
     assert os.environ["P4PC_WINDOW_W"] == "640" and os.environ["P4PC_WINDOW_H"] == "448"
     assert os.environ["P4PC_VSYNC"] == "off" and os.environ["P4PC_CONFIG"] == "none"
-    assert Path(os.environ["P4PC_SAVE_DIR"]) == Path.cwd()
+    assert Path(os.environ["P4PC_SAVE_DIR"]).resolve() == Path.cwd().resolve()
     assert os.environ["P4PC_INPUT"] == "script" and os.environ["P4PC_PACKS"] == "0"
     assert not any(key in os.environ for key in ("P4PC_BOARD_SEED", "P4PC_WALK_SCRIPT", "P4PC_START_BATTLE", "P4PC_LOCKSTEP_DIR"))
     header = struct.unpack("<8s14I", entry.read_bytes()[:64])
@@ -249,6 +249,50 @@ class BattleSimTest(unittest.TestCase):
         self.assertEqual(fields[9:], (0, 100, 0, 1, 50, seeds["effect"]))
         self.assertEqual(binary[64:64 + len(image)], image)
         self.assertEqual(struct.unpack("<III", binary[64 + len(image):]), (3, 0x4000, 2))
+
+    def walk_policy(self, plan="battle:plan=circle,cross,cross;guard=261\nbattlerule:dead@1=circle,down,down,down,cross,cross,cross\n"):
+        self.scenario["policy"] = {"kind": "walk", "version": 1, "plan": plan}
+        return plan
+
+    def test_walk_policy_plan_is_battle_lines_only(self):
+        self.walk_policy()
+        sim.validate_scenario(self.scenario)
+        changes = [(lambda p: p.pop("plan"), "policy.plan: required"),
+                   (lambda p: p.update(plan=""), "expected 1..16384"),
+                   (lambda p: p.update(plan="b" * 16385), "expected 1..16384"),
+                   (lambda p: p.update(plan="battle:plan=cross\twait:1"), "printable ASCII"),
+                   (lambda p: p.update(plan="battle:plan=cross\nwalk:0,0"), "line 2"),
+                   (lambda p: p.update(plan="battle:"), "line 1"),
+                   (lambda p: p.update(tape=[{"update": 1, "buttons": 1, "hold": 1}]), "policy.tape: only valid"),
+                   (lambda p: p.update(kind="greedy"), "only valid with, the walk policy")]
+        for change, message in changes:
+            with self.subTest(message=message):
+                value = copy.deepcopy(self.scenario)
+                change(value["policy"])
+                with self.assertRaisesRegex(sim.ScenarioError, message):
+                    sim.validate_scenario(value)
+
+    def test_walk_entry_carries_plan_bytes_in_place_of_tape(self):
+        plan = self.walk_policy()
+        image = self.image.read_bytes()
+        binary = sim.compile_entry(self.scenario, image, sim.derive_seeds(self.scenario["master_seed"], 0))
+        fields = struct.unpack("<8s14I", binary[:64])
+        self.assertEqual((fields[7], fields[8], fields[11]), (len(plan), len(image), 4))
+        self.assertEqual(binary[64 + len(image):], plan.encode("ascii"))
+
+    def test_walk_result_carries_its_plan_identity_only(self):
+        base = {"schema": 1, "outcome": "win", "party_policy": {"id": 4, "name": "walk-battle-rules-v1", "latency_updates": 1,
+                                                               "party_control": "native_direct_commands",
+                                                               "knowledge": "walker_battle_rules_native_unit_records"}}
+        with self.assertRaisesRegex(sim.ScenarioError, "plan_sha256"):
+            sim.validate_result(copy.deepcopy(base))
+        walk = copy.deepcopy(base)
+        walk["party_policy"]["plan_sha256"] = "a" * 64
+        sim.validate_result(walk)
+        named = copy.deepcopy(walk)
+        named["party_policy"]["id"] = 1
+        with self.assertRaisesRegex(sim.ScenarioError, "plan_sha256"):
+            sim.validate_result(named)
 
     def test_wilson_and_percentiles(self):
         self.assertIsNone(sim.wilson(0, 0))

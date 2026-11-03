@@ -55,13 +55,21 @@ wmemmove wmemset wprintf wscanf _Exit aligned_alloc strerror_s strtok_s
 for _name in "acos acosh asin asinh atan atan2 atanh cbrt ceil copysign cos cosh erf erfc exp exp2 expm1 fabs fdim floor fma fmax fmin fmod frexp hypot ilogb ldexp lgamma llrint llround log log10 log1p log2 logb lrint lround modf nan nearbyint nextafter nexttoward pow remainder remquo rint round scalbln scalbn sin sinh sqrt tan tanh tgamma trunc".split():
     C_FUNCTIONS.update((_name + "f", _name + "l"))
 C_FUNCTIONS.update("stderr stdin stdout errno __errno_location __errno _errno".split())
+C_FUNCTIONS.update("__error __stderrp __stdinp __stdoutp".split())   # Darwin's errno and standard streams
+
+# Mach-O objects (--macho): every C name carries a leading underscore, as on i686 COFF.
+MACHO = False
+RELOCATION_RE = re.compile(r"\b(?:R_[A-Z0-9_]+|IMAGE_REL_[A-Z0-9_]+|ARM64_RELOC_[A-Z0-9_]+|X86_64_RELOC_[A-Z0-9_]+)\s+(\S+)")
+# `objdump --macho -r` rows, every relocation entry as stored (`address pcrel length extern type scattered symbol`; arm64 prints a pointer's
+# length as `?( 3)`): the generic `-r` listing hides some x86_64 X86_64_RELOC_UNSIGNED entries of a data section (gen_port.MACHO_RELOC_RE).
+MACHO_RELOCATION_RE = re.compile(r"^[0-9a-fA-F]+\s+(?:True|False)\s+(?:\?\(\s*\d+\)|\S+)\s+True\s+\S+\s+(?:True|False)\s+(\S+)")
 
 
 def normalize(raw, coff32=False):
     name = raw.split("@", 1)[0]
     if name.startswith("__imp_"):
         name = name[6:]
-    if coff32 and name.startswith("_"):
+    if (coff32 or MACHO) and name.startswith("_"):
         name = name[1:]
     return name
 
@@ -90,26 +98,29 @@ def object_symbols(objects, nm, coff32=False):
 
 
 def relocation_callers(obj, wanted, objdump, coff32=False):
-    out = subprocess.run([objdump, "-dr", str(obj)], text=True,
+    # Mach-O: the assembler's section-start label (ltmp0) can sit at a function's address; --show-all-symbols prints the
+    # function's own label too, and local labels never name a caller.
+    out = subprocess.run([objdump, "-dr", *(["--show-all-symbols"] if MACHO else []), str(obj)], text=True,
                          capture_output=True, check=True).stdout
     found = {name: set() for name in wanted}
     caller = "<section relocation>"
     for line in out.splitlines():
         label = re.match(r"^[0-9a-fA-F]+ <(.+)>:$", line.strip())
         if label:
-            caller = normalize(label[1], coff32)
+            if not (MACHO and label[1].startswith(("l", "L"))):
+                caller = normalize(label[1], coff32)
             continue
-        relocation = re.search(r"\b(?:R_[A-Z0-9_]+|IMAGE_REL_[A-Z0-9_]+)\s+(\S+)", line)
+        relocation = RELOCATION_RE.search(line)
         if relocation:
             name = re.sub(r"[+-](?:0x)?[0-9a-fA-F]+$", "", relocation[1])
             name = normalize(name, coff32)
             if name in found:
                 found[name].add(caller)
     # -dr omits non-code sections (function-pointer tables, for example).
-    out = subprocess.run([objdump, "-r", str(obj)], text=True,
+    out = subprocess.run([objdump, *(["--macho"] if MACHO else []), "-r", str(obj)], text=True,
                          capture_output=True, check=True).stdout
     for line in out.splitlines():
-        relocation = re.search(r"\b(?:R_[A-Z0-9_]+|IMAGE_REL_[A-Z0-9_]+)\s+(\S+)", line)
+        relocation = MACHO_RELOCATION_RE.match(line.strip()) if MACHO else RELOCATION_RE.search(line)
         if relocation:
             name = normalize(re.sub(r"[+-](?:0x)?[0-9a-fA-F]+$", "", relocation[1]), coff32)
             if name in found and not found[name]:
@@ -306,8 +317,9 @@ def host_exports(paths, nm, coff32):
     names = set()
     for path in paths:
         dynamic = not str(path).endswith(".a")
-        out = subprocess.run([nm, "-P", "-g", "--defined-only",
-                              *(["-D"] if dynamic else []), str(path)],
+        # Mach-O dylibs list their exports without -D; libSystem's .tbd stub carries its re-exported libraries inline
+        extra = (["--add-inlinedinfo"] if str(path).endswith(".tbd") else []) if MACHO else (["-D"] if dynamic else [])
+        out = subprocess.run([nm, "-P", "-g", "--defined-only", *extra, str(path)],
                              text=True, capture_output=True, check=True).stdout
         for line in out.splitlines():
             parts = line.split()
@@ -327,6 +339,7 @@ def main(argv=None):
     parser.add_argument("--nm", default="llvm-nm")
     parser.add_argument("--objdump", default="llvm-objdump")
     parser.add_argument("--coff32", action="store_true")
+    parser.add_argument("--macho", action="store_true", help="Mach-O objects and libraries (macOS)")
     parser.add_argument("--host-lib", action="append", default=[])
     parser.add_argument("--host-name", action="append", default=[])
     parser.add_argument("--pic", action="store_true", help=argparse.SUPPRESS)
@@ -336,6 +349,8 @@ def main(argv=None):
     parser.add_argument("--compile-commands", type=Path)
     parser.add_argument("--compile-target", action="append", default=[])
     args = parser.parse_args(argv)
+    global MACHO
+    MACHO = args.macho
     read_objects = lambda path: [Path(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
     objects = read_objects(args.objects_file) if args.objects_file else []
     definitions = read_objects(args.definitions_file) if args.definitions_file else []

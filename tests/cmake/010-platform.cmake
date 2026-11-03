@@ -36,10 +36,12 @@ target_link_libraries(game_table_extents_test m)
 add_test(NAME game_table_extents COMMAND game_table_extents_test)
 set_tests_properties(game_table_extents PROPERTIES SKIP_RETURN_CODE 77)
 
-# Canonical saves, preparation wire and extent-bounded encounter start.
+# Canonical saves, preparation wire, extent-bounded encounter start and the
+# post-battle skill-offer decline input.
 add_executable(battle_sim_table_test battle_sim_table_test.c
   "${CMAKE_SOURCE_DIR}/src/platform/battle_sim/entry.c"
   "${CMAKE_SOURCE_DIR}/src/platform/battle_sim/prepare.c"
+  "${CMAKE_SOURCE_DIR}/src/platform/battle_sim/result_prompt.c"
   "${CMAKE_SOURCE_DIR}/src/platform/mods/game_table_extents.c" ${P4_GUEST_TEST_SRC})
 target_include_directories(battle_sim_table_test PRIVATE "${CMAKE_SOURCE_DIR}/include")
 target_compile_definitions(battle_sim_table_test PRIVATE ${P4_PORT_DEFINES})

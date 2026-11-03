@@ -1,10 +1,11 @@
-/* Exercises canonical saves, the bounded preparation wire and encounter start
- * over the table service's extents, with no retail assets or simulated combat.
- * Any accidental native launch is an immediate test abort. */
+/* Exercises canonical saves, the bounded preparation wire, encounter start
+ * over the table service's extents and the post-battle skill-offer input, with
+ * no retail assets or simulated combat. Any accidental native launch aborts. */
 #include "guest_test.h"
 #include "p4pc/battle_sim.h"
 #include "p4pc/game_table_extents.h"
 #include "p4pc/battle_prepare.h"
+#include "../src/platform/pad/pad_sdl.h"
 #undef NDEBUG
 #include <assert.h>
 #include <setjmp.h>
@@ -215,10 +216,47 @@ static int admits_enemy(uint32_t enemy, uint32_t limit, uint32_t bank_rows)
     return admitted;
 }
 
+/* The post-battle skill-offer prompt from its states seen in a stalled retail
+ * results flow: the list must reach the pending skill (slot 8) before Cross, and
+ * the Yes/No (default No) is answered Yes only for that skill. */
+static void check_skill_prompt(void)
+{
+    P4BattleSkillPrompt p = {0};
+    p.state = 1; assert(p4_battle_skill_prompt_buttons(&p) == 0);
+    p.row_waiting = 1; assert(p4_battle_skill_prompt_buttons(&p) == P4PC_PAD_CROSS);
+    memset(&p, 0, sizeof p);
+    p.state = 2; p.pending = 7; p.list_cursor = 0;
+    assert(p4_battle_skill_prompt_buttons(&p) == 0); /* Panel not accepting input yet. */
+    p.list_active = 1;
+    p.row_waiting = 1; /* A periodic Cross here would forget known skill 0. */
+    assert(p4_battle_skill_prompt_buttons(&p) == P4PC_PAD_LEFT);
+    p.list_cursor = 5; assert(p4_battle_skill_prompt_buttons(&p) == P4PC_PAD_LEFT);
+    p.list_cursor = -1; assert(p4_battle_skill_prompt_buttons(&p) == 0);
+    p.list_cursor = 8; assert(p4_battle_skill_prompt_buttons(&p) == P4PC_PAD_CROSS);
+    p.pending = 0; assert(p4_battle_skill_prompt_buttons(&p) == 0);
+    memset(&p, 0, sizeof p);
+    p.state = 3; p.replacement_pending = 1;
+    assert(p4_battle_skill_prompt_buttons(&p) == 0); /* Opening the window. */
+    p.row_waiting = 1; assert(p4_battle_skill_prompt_buttons(&p) == P4PC_PAD_CROSS);
+    p.row_waiting = 0; p.choice_active = 1; p.choice_cursor = 1;
+    assert(p4_battle_skill_prompt_buttons(&p) == P4PC_PAD_UP);
+    p.choice_cursor = 0; assert(p4_battle_skill_prompt_buttons(&p) == P4PC_PAD_CROSS);
+    p.replacement_pending = 0; /* A known skill was chosen: answer No, never forget it. */
+    assert(p4_battle_skill_prompt_buttons(&p) == P4PC_PAD_DOWN);
+    p.choice_cursor = 1; assert(p4_battle_skill_prompt_buttons(&p) == P4PC_PAD_CROSS);
+    memset(&p, 0, sizeof p);
+    p.state = 6; p.row_waiting = 1; assert(p4_battle_skill_prompt_buttons(&p) == P4PC_PAD_CROSS);
+    for (int32_t state = 4; state <= 8; state++) {
+        if (state == 6) continue;
+        p.state = state; assert(p4_battle_skill_prompt_buttons(&p) == 0);
+    }
+}
+
 int main(void)
 {
     check_save_images();
     check_preparation_wire();
+    check_skill_prompt();
     if (p4t_guest_map(0x00764000u, 0x2000) != 0 || p4t_guest_map(0x01000000u, 0x1000) != 0 ||
         p4t_guest_map(0x01200000u, 0x2000) != 0) return 77;
     const uint32_t slot = P4_GPADDR(0xb414), base = 0x007f17b0u;

@@ -24,7 +24,7 @@ class GuardTest(unittest.TestCase):
         profiles = (("i386-linux-gnu", False), ("x86_64-linux-gnu", False),
                     ("i686-w64-mingw32", True), ("x86_64-w64-mingw32", False),
                     ("aarch64-linux-gnu", False), ("aarch64-linux-android", False),
-                    ("x86_64-linux-android", False))
+                    ("x86_64-linux-android", False), ("arm64-apple-macos12.0", False), ("x86_64-apple-macos12.0", False))
         source = """
 extern void *memcpy(void *, const void *, __SIZE_TYPE__);
 extern int strcmp(const char *, const char *);
@@ -52,11 +52,14 @@ unsigned long long retail_runtime_alias(void) { return fptodp(1.0f); }
         renames = {"strcmp": "func_004426e8", "fstat": "func_00421f98", "kill": "func_00421fb8",
                    "memcpy": "func_0043f810"}
         with tempfile.TemporaryDirectory(prefix="p4crt-guard-") as directory:
-            root = Path(directory)
+            root = Path(directory).resolve()   # (the guard reports resolved paths; macOS's temporary directory is under the /var symlink)
             src = root / "build/gen/p4pc_tables64.c"
             src.parent.mkdir(parents=True)
             src.write_text(source, encoding="utf-8")
             for triple, coff32 in profiles:
+                # Mach-O (macOS, --macho): C names carry an underscore, and a section-start label can share a function's address
+                crt_guard.MACHO = "-apple-" in triple
+                self.addCleanup(setattr, crt_guard, "MACHO", False)
                 with self.subTest(profile=triple):
                     obj = root / "build/CMakeFiles/p4pc64.dir/gen" / (triple + ".o")
                     obj.parent.mkdir(parents=True, exist_ok=True)

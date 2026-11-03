@@ -3481,16 +3481,24 @@ def generate_mirror(a):
 class Tools:
     """How the target's objects and libraries are read. Linux i386 is ELF with C names as symbols.
     The Windows build (--coff) is i686 COFF: cdecl names carry a leading underscore, and the
-    Win32 imports (`__imp__name`, stdcall `_name@N`) belong to the host by definition."""
+    Win32 imports (`__imp__name`, stdcall `_name@N`) belong to the host by definition. macOS
+    (--macho) is Mach-O: every C name carries a leading underscore. An asm label there names the
+    symbol as written, so labels are spelled with the prefix (the rewriter's Mach-O pass for the
+    mirror and overrides, P4_ASM_LABEL in port code); a reference without one is an error."""
     coff = False
+    macho = False
     arm64 = False   # the objects are AArch64 ELF (--arm64): thunks are a branch, `%function`, the GNU assembler's comment character being `@`
     us = "_"        # the symbol prefix of C names in COFF objects: i686 has one, x86_64 does not (--coff64)
     nm = "nm"
     objdump = "objdump"
+    raw_undefined = set()   # Mach-O: symbols the objects reference without the C prefix (an asm label spelled for ELF)
 
 
 def target_name(raw):
     """The C name of an object symbol, or None for a symbol that never needs a placement."""
+    if Tools.macho:
+        name = raw.split("@", 1)[0]   # (an x86_64 GOT reference prints as `_name@GOTPCREL`)
+        return name[1:] if name.startswith("_") else name
     if not Tools.coff:
         return raw
     if raw.startswith("__imp_") or "@" in raw or raw.startswith("."):
@@ -3510,6 +3518,8 @@ def nm_symbols(objs):
             name, kind = target_name(parts[0]), parts[1]
             if name is None:
                 continue
+            if Tools.macho and kind in ("U", "w") and not parts[0].startswith("_"):
+                Tools.raw_undefined.add(parts[0])
             if kind in ("U", "w"):
                 undefined.add(name)
             else:
@@ -3528,23 +3538,47 @@ def project_symbols(paths, host):
 # read, address taken, GOT entry) needs a real placement.
 # (x86_64 COFF has one PC-relative relocation for calls and data alike, IMAGE_REL_AMD64_REL32; a 64-bit mirror reaches no retail data by
 # symbol -- that is an error below -- so what it references through one is a function.)
-CALL_RELOCS = {"R_386_PC32", "R_386_PLT32", "IMAGE_REL_I386_REL32", "R_X86_64_PLT32", "IMAGE_REL_AMD64_REL32", "R_AARCH64_CALL26", "R_AARCH64_JUMP26"}
-RELOC_RE = re.compile(r"^[0-9a-fA-F]+\s+(R_386_\w+|R_X86_64_\w+|R_AARCH64_\w+|IMAGE_REL_I386_\w+|IMAGE_REL_AMD64_\w+)\s+(\S+?)(?:[+-]0x[0-9a-fA-F]+)?$")
+CALL_RELOCS = {"R_386_PC32", "R_386_PLT32", "IMAGE_REL_I386_REL32", "R_X86_64_PLT32", "IMAGE_REL_AMD64_REL32", "R_AARCH64_CALL26", "R_AARCH64_JUMP26",
+               "ARM64_RELOC_BRANCH26", "X86_64_RELOC_BRANCH"}
+RELOC_RE = re.compile(r"^[0-9a-fA-F]+\s+(R_386_\w+|R_X86_64_\w+|R_AARCH64_\w+|IMAGE_REL_I386_\w+|IMAGE_REL_AMD64_\w+|ARM64_RELOC_\w+|X86_64_RELOC_\w+)"
+                      r"\s+(\S+?)(?:[+-]0x[0-9a-fA-F]+)?$")
+# Mach-O objects are read with `objdump --macho -r`, every relocation entry as stored: the generic `-r` listing hides some x86_64
+# X86_64_RELOC_UNSIGNED entries of a data section (thousands of the tables object's function-table pointers, LLVM 21 and 23).
+# A row is `address pcrel length extern type scattered symbol`; only an external entry names a symbol.
+MACHO_RELOC_RE = re.compile(r"^[0-9a-fA-F]+\s+(?:True|False)\s+(?:\?\(\s*\d+\)|\S+)\s+(True|False)\s+(\S+)\s+(?:True|False)\s+(\S+)")
+MACHO_RELOC_TYPES = {
+    "x86_64": {"UNSIGND": "X86_64_RELOC_UNSIGNED", "SIGNED": "X86_64_RELOC_SIGNED", "BRANCH": "X86_64_RELOC_BRANCH",
+               "GOT_LD": "X86_64_RELOC_GOT_LOAD", "GOT": "X86_64_RELOC_GOT", "SUB": "X86_64_RELOC_SUBTRACTOR", "SIGNED1": "X86_64_RELOC_SIGNED_1",
+               "SIGNED2": "X86_64_RELOC_SIGNED_2", "SIGNED4": "X86_64_RELOC_SIGNED_4", "TLV": "X86_64_RELOC_TLV"},
+    "arm64": {"UNSIGND": "ARM64_RELOC_UNSIGNED", "SUB": "ARM64_RELOC_SUBTRACTOR", "BR26": "ARM64_RELOC_BRANCH26", "PAGE21": "ARM64_RELOC_PAGE21",
+              "PAGOF12": "ARM64_RELOC_PAGEOFF12", "GOTLDP": "ARM64_RELOC_GOT_LOAD_PAGE21", "GOTLDPOF": "ARM64_RELOC_GOT_LOAD_PAGEOFF12",
+              "PTRTGOT": "ARM64_RELOC_POINTER_TO_GOT", "TLVLDP": "ARM64_RELOC_TLVP_LOAD_PAGE21", "TLVLDPOF": "ARM64_RELOC_TLVP_LOAD_PAGEOFF12",
+              "ADDEND": "ARM64_RELOC_ADDEND"},
+}
 
 
 def reloc_kinds(objs, names):
-    """name -> set of relocation types that reference it, from `objdump -r`."""
+    """name -> set of relocation types that reference it, from `objdump -r` (`--macho -r` for Mach-O)."""
     kinds = {}
+    types = MACHO_RELOC_TYPES["arm64" if Tools.arm64 else "x86_64"]
     for chunk_start in range(0, len(objs), 400):
         chunk = [str(o) for o in objs[chunk_start:chunk_start + 400]]
-        out = subprocess.run([Tools.objdump, "-r", *chunk], capture_output=True, text=True, check=True).stdout
+        out = subprocess.run([Tools.objdump, *(["--macho"] if Tools.macho else []), "-r", *chunk],
+                             capture_output=True, text=True, check=True).stdout
         for line in out.splitlines():
-            m = RELOC_RE.match(line.strip())
-            if not m:
-                continue
-            name = target_name(m[2])
+            if Tools.macho:
+                m = MACHO_RELOC_RE.match(line.strip())
+                if not m or m[1] != "True":
+                    continue
+                kind, raw = types.get(m[2], m[2]), m[3]
+            else:
+                m = RELOC_RE.match(line.strip())
+                if not m:
+                    continue
+                kind, raw = m[1], m[2]
+            name = target_name(raw)
             if name in names:
-                kinds.setdefault(name, set()).add(m[1])
+                kinds.setdefault(name, set()).add(kind)
     return kinds
 
 
@@ -3581,13 +3615,15 @@ def place_undefined(name, reloc_types, syms):
 def host_names(paths):
     """Names the host libraries export. The port never stubs these. Linux: the dynamic symbols
     of the shared libraries. Windows: the symbols the UCRT/mingw-w64 libraries, the compiler
-    runtime and the SDL3/FFmpeg import libraries define."""
+    runtime and the SDL3/FFmpeg import libraries define. macOS: the exports of the dylibs and of
+    the SDK's libSystem text stub, with the libraries it re-exports (libc, libm, the compiler runtime)."""
     names = set()
     for path in paths:
         if not Path(path).is_file():
             die(f"host library for the i386 link not found at {path}")
-        if Tools.coff:
-            out = subprocess.run([Tools.nm, "-P", "-g", "--defined-only", path],
+        if Tools.coff or Tools.macho:
+            inlined = ["--add-inlinedinfo"] if path.endswith(".tbd") else []
+            out = subprocess.run([Tools.nm, "-P", "-g", "--defined-only", *inlined, path],
                                  capture_output=True, text=True, check=True).stdout
             for line in out.splitlines():
                 if line.strip() and not line.endswith(":"):
@@ -3738,6 +3774,7 @@ def cmd_tables(a):
     Tools.coff, Tools.nm, Tools.objdump, Tools.pic = a.coff or a.coff64, a.nm, a.objdump, a.pic
     Tools.us = "" if a.coff64 else "_"
     Tools.arm64 = a.arm64
+    Tools.macho = a.macho
     syms = read_symbols(decomp)
     port = read_port_symbols()
     clash = sorted(set(port) & set(syms))
@@ -3813,6 +3850,9 @@ def cmd_tables(a):
     # time. The exception is a name the decomp places as data at a retail address that the code
     # reads rather than calls; that one stays the decomp's.
     unresolved = undefined - defined
+    if Tools.raw_undefined:
+        die("Mach-O objects reference symbols without the C prefix (an asm label spelled for ELF: use P4_ASM_LABEL in port code; the "
+            "rewriter adds it in the mirror): " + ", ".join(sorted(Tools.raw_undefined)[:20]))
     # Renamed CRT operations bind to retail, except byte operations whose host
     # semantics are explicitly reviewed in the same authoritative allowlist.
     # LLVM can emit those byte helpers after source-level EE aliases have run.
@@ -4041,11 +4081,11 @@ def cmd_tables(a):
     for name in sorted(natives | hosts):
         lines.append(f"void {name}();")
     lines.append("")
-    up = Tools.us if Tools.coff else ""  # i686 COFF prefixes cdecl symbols with an underscore
+    up = Tools.us if Tools.coff else "_" if Tools.macho else ""  # i686 COFF and Mach-O prefix C symbols with an underscore
     for name in sorted(data):
         # A PIC shared object must not export them: an exported absolute symbol is resolved at load time and Android's linker adds the load
         # base to it (the guest address becomes a host address in the library); hidden, the link resolves every use to the constant.
-        hide = f".hidden {name}\\n" if Tools.pic and not Tools.coff else ""
+        hide = f".hidden {name}\\n" if Tools.pic and not Tools.coff and not Tools.macho else ""
         lines.append(f'__asm__(".globl {up}{name}\\n{hide}.set {up}{name}, 0x{data[name]:08x}\\n");')
     lines.append("")
     if a.ptr64:
@@ -4065,11 +4105,19 @@ def cmd_tables(a):
                          f'return p4pc_trap_args("{name}", 0x{traps[name]:08x}, __builtin_return_address(0), a); }}')
     lines.append("")
     # A real thunk, not `.set`: GAS would leave an alias of a symbol defined in another object undefined.
+    def macho_thunk(symbol, target, hidden):
+        # Mach-O: no .type/.size; a private extern stays within the executable
+        hide = f".private_extern {symbol}\\n" if hidden else ""
+        if Tools.arm64:
+            return f'__asm__(".text\\n.p2align 2\\n.globl {symbol}\\n{hide}{symbol}:\\n\\tb {target}\\n");'
+        return f'__asm__(".text\\n.globl {symbol}\\n{hide}{symbol}:\\n\\tjmp {target}\\n");'
     def thunk(name, target, hidden):
         if Tools.coff:
             u = Tools.us
             return (f'__asm__(".text\\n.globl {u}{name}\\n.def {u}{name}\\n.scl 2\\n.type 32\\n.endef\\n'
                     f'{u}{name}:\\n\\tjmp {u}{target}\\n");')
+        if Tools.macho:
+            return macho_thunk(f"_{name}", f"_{target}", hidden)
         hide = f".hidden {name}\\n" if hidden else ""
         if Tools.arm64:
             return f'__asm__("{hide}.globl {name}\\n.type {name},%function\\n{name}:\\n\\tb {target}\\n");'
@@ -4129,7 +4177,7 @@ def cmd_tables(a):
     # (declared as data under another name: a name's own prototype may be in a header this file includes)
     lines.append("/* Functions with no retail address, by symbol. */")
     for i, (name, _) in enumerate(host_rows):
-        lines.append(f'extern char p4hf{i}[] __asm__("{name}");')
+        lines.append(f'extern char p4hf{i}[] __asm__("{up}{name}");')
     lines.append("const p4pc_hostfn_t p4pc_hostfn_table[] = {")
     for i, (name, sg) in enumerate(host_rows):
         lines.append(f"    {{ (void *)p4hf{i}, {sg} }},")
@@ -4181,6 +4229,8 @@ def main():
                    "a linker symbol, so a reference to it is an error")
     t.add_argument("--host-name", action="append", help="a host function that no --host-lib exports: bionic's libc_nonshared.a supplies atexit, at_quick_exit and pthread_atfork statically")
     t.add_argument("--arm64", action="store_true", help="the objects are AArch64 ELF: host thunks branch, the type directive is %%function")
+    t.add_argument("--macho", action="store_true", help="the objects are Mach-O (macOS): C names carry an underscore, asm labels get thunks, "
+                   "host names come from dylibs and the SDK's .tbd stubs; with --arm64 for Apple silicon")
     t.add_argument("--pic", action="store_true", help="the objects are position independent (the Android shared library): host thunks go through the PLT")
     t.add_argument("--nm", default="nm", help="nm for the target objects and host libraries")
     t.add_argument("--objdump", default="objdump", help="objdump for the target objects")

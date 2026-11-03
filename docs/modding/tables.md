@@ -388,7 +388,8 @@ list and persona panel from the new-game state into the work directory. The
 first Linux x64 run passed both walk legs with Slash (Yu's weapon 39) and
 Strike (Chie's weapon 112); its persona-panel capture shows the nine columns
 (three authored icons, then fire..dark) matching the retail seven-column
-values. Analyze and the battle skill row are not captured.
+values. The witness does not capture Analyze or the battle skill row; the
+manual battle-harness captures of those are listed under Element presentation.
 
 The table service owns the battle-bank extent registry
 (`p4pc/game_table_extents.h`), built and active in every session. Every bank
@@ -833,7 +834,12 @@ Consumers, all scalar and fail-closed:
 
 Seven columns keep the retail 51/37 spacing; eight or nine fit the same
 236-pixel span, horizontally scaling native glyphs, with authored headers in
-26x20 and skill icons in 24x24 boxes. Markers use the shared MESSAGE geometry
+26x20 and skill icons in 24x24 boxes. Authored art receives exactly the colour
+the native glyph at that site would: the persona panel's header tint, each skill
+row's tone, and Analyze's known (0x24,0x4C,0x00) or unknown (0x70,0x70,0x70)
+header tint. The colour multiplies the image, so draw white glyph art on a
+transparent background, as the retail atlases do; coloured art comes out dark
+on Analyze. Markers use the shared MESSAGE geometry
 API at half size. Retail-leaf skills keep the original 0x00114cb0/0x0013ac30
 art unless their claimed descriptor declares authored art. Retail draws
 `datCalcSkillElement(NULL, skill)`; lists without an actor keep that skill's
@@ -849,8 +855,14 @@ ends. Tokens and draw handles are never saved.
 
 The `game_elements_ui` fixture covers layout validation, CPU alias coverage,
 the art set, exact image checks, real token pins/release and the marker
-stream over the real registry and token service (mocked raster backend). No
-battle, menu, viewport or platform capture has qualified this route.
+stream over the real registry and token service (mocked raster backend).
+Manual Linux x64 captures with the Physical Split development package, through
+the menu and battle harnesses, match this section at all five sites: the persona
+panel, the Camp list and its selected-row descriptor, the battle skill row, and
+Analyze before and after a Slash hit teaches the first column. Only the Camp
+list and persona panel are automated in `mod_element_game`. These are
+mod-witness evidence, not retail references. No other platform or viewport has
+been captured.
 
 ## Qualification and availability
 

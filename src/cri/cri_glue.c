@@ -9,6 +9,8 @@
 #include <math.h>
 #include <stdint.h>
 
+#include "p4pc/os.h"
+
 extern int32_t func_0042ba20(void);
 extern int32_t func_0042ba70(void);
 
@@ -55,7 +57,7 @@ void ADXM_WaitVsync(void)
  * with the constant 0x40c90fda: 6.2831855f is 0x40c90fdb, which made 1 pair in 20000 differ. ovdiff -Q checks the pair against the retail code. With
  * a = sqrt(2) - cos(2 pi cutoff / sfreq) and k = sqrt(2) - 1:
  *   b = (a - sqrt((a + k)(a - k))) / k, c1 = 2b * 4096, c2 = -b^2 * 4096. */
-extern float p4c_retail_cosf(float x) __asm__("func_0044b610");
+extern float p4c_retail_cosf(float x) P4_ASM_LABEL("func_0044b610");
 
 void ADX_GetCoefficient(int32_t cutoff, int32_t sfreq, int16_t *c1, int16_t *c2)
 {

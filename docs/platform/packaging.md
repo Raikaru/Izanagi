@@ -99,10 +99,21 @@ Reselect the ISO through the picker if Android revoked its old URI permission.
 Verify restored saves and settings in the release. Future same-key release updates
 retain data without the bridge. Never silently uninstall on a signature mismatch.
 
+## macOS
+
+`sh tools/package_macos.sh [--deps DIR] [--build DIR] [--out DIR]` runs on a Mac and packages that Mac's
+architecture: `p4pc-macos-arm64-<version>.zip` on Apple silicon, `p4pc-macos-x86_64-<version>.zip` on Intel.
+Each holds `Persona 4 PC.app` (the 64-bit player as `Contents/MacOS/p4pc`; SDL3, the LGPL-only FFmpeg and
+ANGLE in `Contents/Frameworks`, found through the run path `@executable_path/../Frameworks`), `README.txt`,
+`THIRD_PARTY_NOTICES.txt`, `licenses/` (with Chromium's notice file for ANGLE) and the Luau source. It checks
+every Mach-O's load commands, runs the FFmpeg licence check against the bundled dylibs, signs ad hoc and verifies
+the signature. There is no Developer ID: the README tells players how to get past Gatekeeper the first time.
+Settings, saves and logs are in `~/Library/Application Support/p4pc/Persona4/`. Details: [macOS](macos.md).
+
 ## Native crash logs
 
-Linux and Android handle SIGSEGV, SIGBUS, SIGILL, SIGFPE and SIGABRT. A crash writes
-`p4pc-crash.log` beside the existing log: Linux's `p4pc.log`, Android's `boot.log`
+Linux, macOS and Android handle SIGSEGV, SIGBUS, SIGILL, SIGFPE and SIGABRT. A crash writes
+`p4pc-crash.log` beside the existing log: Linux's and macOS's `p4pc.log`, Android's `boot.log`
 in the app's internal files directory. It records signal/code, fault address,
 registers, instruction/module offset, a native stack and the same guest address /
 coroutine guard-page note as Windows. Android additionally writes tag `p4pc` to

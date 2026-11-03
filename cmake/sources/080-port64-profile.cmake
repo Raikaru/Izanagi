@@ -35,6 +35,34 @@ if(P4_ANDROID64)
   # Match the whole triple: older CMake regex engines re-anchor ^ at each remaining suffix.
   string(REGEX REPLACE "^[a-z0-9_]+-(.+)$" "i686-\\1" P4_X32_TRIPLE "${P4_X64_TRIPLE}")
   set(P4_PORT64_ENV "${CMAKE_COMMAND}" -E env "P4_PORT64_TARGET=${P4_X64_TARGET_STRING}" P4_PORT64_PIC=1 "P4_PORT32_TARGET=--target=${P4_X32_TRIPLE}")
+elseif(P4_APPLE)
+  # macOS: the host's own architecture for the deployment target, against the SDK CMake found (the decomp's headers need nothing else). Mach-O:
+  # C names carry a leading underscore (--macho), the code is position independent, `long double` is the x87 one on x86_64 and a plain double on
+  # arm64 (include/p4pc/eefloat.h takes the integer path there), and a va_list is a pointer on arm64 as on i386. tools/port64/unit64.py derives
+  # the rest from the Apple triple: the symbol prefix of its asm labels, and the i386 layout oracle, compiled for i686-apple-macos against the
+  # same SDK (whose i386 headers are the x86_64 ones).
+  if(P4_PORT64_ARCH STREQUAL "aarch64")
+    set(P4_X64_TRIPLE arm64-apple-macos${CMAKE_OSX_DEPLOYMENT_TARGET})
+  else()
+    set(P4_X64_TRIPLE x86_64-apple-macos${CMAKE_OSX_DEPLOYMENT_TARGET})
+  endif()
+  # (-fno-blocks: clang turns Apple's block extension on by default, and the SDK then declares block types the rewriter has no rule for.
+  # -fno-stack-protector: so is stack protection, which the Linux and Windows builds do not have; its guard is a host data reference from
+  # every decomp function, outside the reviewed CRT boundary.)
+  set(P4_X64_TARGET_FLAGS --target=${P4_X64_TRIPLE} -isysroot "${CMAKE_OSX_SYSROOT}" -fsigned-char -ffp-contract=off -D_FORTIFY_SOURCE=0
+    -fno-blocks -fno-stack-protector)
+  # The run paths: the app bundle's Frameworks (tools/package_macos.sh), then the build prefix, for the build tree's own runs.
+  set(P4_X64_LINK_FLAGS --target=${P4_X64_TRIPLE} -isysroot "${CMAKE_OSX_SYSROOT}" "-Wl,-rpath,@executable_path/../Frameworks"
+    "-Wl,-rpath,${P4_MACOS_PREFIX}/lib" -Wl,-headerpad_max_install_names)
+  set(P4_X64_LIBDIR)
+  set(P4_X64_LIBDIR2)
+  set(P4_X64_EXTRA_FLAGS)
+  set(P4_X64_GEN_TOOLS --macho --nm "${P4_CRT_NM}" --objdump "${P4_CRT_OBJDUMP}")
+  if(P4_PORT64_ARCH STREQUAL "aarch64")
+    list(APPEND P4_X64_GEN_TOOLS --arm64)
+  endif()
+  string(JOIN " " P4_X64_TARGET_STRING ${P4_X64_TARGET_FLAGS})
+  set(P4_PORT64_ENV "${CMAKE_COMMAND}" -E env "P4_PORT64_TARGET=${P4_X64_TARGET_STRING}")
 elseif(P4_PORT64_ARCH STREQUAL "aarch64")
   set(P4_X64_TRIPLE aarch64-linux-gnu)
   set(P4_X64_SYSROOT_FLAGS --gcc-install-dir=/usr/lib/gcc-cross/aarch64-linux-gnu/14 -isystem/usr/aarch64-linux-gnu/include -isystem/usr/include/aarch64-linux-gnu)
@@ -54,7 +82,7 @@ else()
   set(P4_X64_LIBDIR2 /lib/x86_64-linux-gnu)
   set(P4_PORT64_ENV)
 endif()
-if(P4_ANDROID64)
+if(P4_ANDROID64 OR P4_APPLE)
   # (P4_X64_GEN_TOOLS is set above)
 elseif(P4_PORT64_ARCH STREQUAL "aarch64")
   set(P4_X64_GEN_TOOLS --arm64 --nm /usr/bin/llvm-nm --objdump /usr/bin/llvm-objdump)   # GNU objdump cannot read AArch64 relocations on an x86 host
@@ -65,9 +93,10 @@ endif()
 # The rewriter's rule counts per unit are a contract (tools/port64/unit64.py report --census-baseline; docs/port64.md): the build of the 64-bit mirror fails when a
 # unit's counts differ from the baseline file (a rule that stops firing, fires elsewhere or a different number of times: the decomp, a pin or the rewriter changed
 # under it), and `unit64.py report --census-refresh <file>` rewrites the baseline for a diff that has been reviewed. One baseline per target (x86_64 Linux:
-# config/port64_census.txt, x86_64 Windows: config/port64w_census.txt, AArch64: config/port64a64_census.txt, Android: config/port64android_<arch>_census.txt), and a
-# compiler of a major the baseline has no section for fails it too (the layout oracle is the compiler's own record dump, so a few counts depend on the major: the file
-# holds the full baseline of the CI compiler and patches for other majors, tools/port64/unit64.py). -DP4_CENSUS_CHECK=OFF (a warning at every configure) is for experiments.
+# config/port64_census.txt, x86_64 Windows: config/port64w_census.txt, AArch64: config/port64a64_census.txt, Android: config/port64android_<arch>_census.txt,
+# macOS: config/port64macos_<arch>_census.txt), and a compiler of a major the baseline has no section for fails it too (the layout oracle is the compiler's own
+# record dump, so a few counts depend on the major: the file holds the full baseline of the CI compiler and patches for other majors, tools/port64/unit64.py).
+# -DP4_CENSUS_CHECK=OFF (a warning at every configure) is for experiments.
 option(P4_CENSUS_CHECK "fail the 64-bit mirror build when the rewriter's per-unit rule counts differ from the baseline" ON)
 function(p4_census_check var unitsdir baseline units)
   set(${var} "" PARENT_SCOPE)
@@ -97,12 +126,14 @@ if(P4_ANDROID64)
   else()
     set(P4_CENSUS_BASELINE "${CMAKE_SOURCE_DIR}/config/port64android_${ANDROID_ABI}_census.txt")
   endif()
+elseif(P4_APPLE)
+  set(P4_CENSUS_BASELINE "${CMAKE_SOURCE_DIR}/config/port64macos_${P4_PORT64_ARCH}_census.txt")
 elseif(P4_PORT64_ARCH STREQUAL "x86_64")
   set(P4_CENSUS_BASELINE "${CMAKE_SOURCE_DIR}/config/port64_census.txt")
 elseif(P4_PORT64_ARCH STREQUAL "aarch64")
   set(P4_CENSUS_BASELINE "${CMAKE_SOURCE_DIR}/config/port64a64_census.txt")
 endif()
-if(P4_PORT64 AND NOT P4_WIN32 AND ((CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "x86_64|AMD64") OR P4_ANDROID64))
+if(P4_PORT64 AND NOT P4_WIN32 AND ((CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "x86_64|AMD64") OR P4_ANDROID64 OR P4_APPLE))
   execute_process(COMMAND "${CMAKE_C_COMPILER}" ${P4_X64_TARGET_FLAGS} -fsyntax-only -x c "${CMAKE_SOURCE_DIR}/include/p4pc/guest.h"
     RESULT_VARIABLE P4_X64_PROBE OUTPUT_QUIET ERROR_QUIET)
   if(P4_X64_PROBE EQUAL 0)

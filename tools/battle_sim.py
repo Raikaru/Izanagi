@@ -21,7 +21,8 @@ OUTCOMES = {"win", "defeat", "escape", "scripted_conclusion", "action_limit",
             "update_limit", "engine_error", "policy_error"}
 CENSORED = {"action_limit", "update_limit"}
 ERRORS = {"engine_error", "policy_error"}
-POLICIES = {"tape": 0, "greedy": 1, "cautious": 2, "typical": 3}
+POLICIES = {"tape": 0, "greedy": 1, "cautious": 2, "typical": 3, "walk": 4}
+WALK_PLAN_MAX = 16384
 # p4_game_table_catalog_identity's retail value; expanded catalogs hash their content.
 RETAIL_TABLE_CATALOG = hashlib.sha256(b"p4pc-table-catalog-v1:retail").hexdigest()
 
@@ -322,6 +323,18 @@ def validate_definition(definition):
     return definition
 
 
+def validate_walk_plan(plan):
+    """The walk policy's plan: battle:/battlerule: lines only (no field-walking line), printable ASCII, bounded."""
+    if not isinstance(plan, str) or not plan or len(plan) > WALK_PLAN_MAX:
+        raise ScenarioError("policy.plan: expected 1..%d characters" % WALK_PLAN_MAX)
+    if any(ch != "\n" and not " " <= ch <= "~" for ch in plan):
+        raise ScenarioError("policy.plan: expected printable ASCII lines")
+    for number, line in enumerate(plan.split("\n"), 1):
+        if line and not (line.startswith("battle:") and len(line) > 7 or line.startswith("battlerule:") and len(line) > 11):
+            raise ScenarioError("policy.plan line %d: expected a battle: or battlerule: line" % number)
+    return plan
+
+
 def validate_scenario(value):
     object_fields(value, "scenario", ("schema", "entry", "encounter_id", "policy", "master_seed", "seed_start", "n", "options"), ("label", "runtime"))
     if type(value["schema"]) is not int or value["schema"] != SCHEMA:
@@ -352,15 +365,19 @@ def validate_scenario(value):
         if key in entry and not isinstance(entry[key], dict):
             raise ScenarioError("entry.%s: expected object" % key)
     policy = value["policy"]
-    object_fields(policy, "policy", ("kind", "version"), ("tape",))
+    object_fields(policy, "policy", ("kind", "version"), ("tape", "plan"))
     if not isinstance(policy["kind"], str) or policy["kind"] not in POLICIES:
-        raise ScenarioError("policy.kind: expected tape, greedy, cautious or typical")
+        raise ScenarioError("policy.kind: expected tape, greedy, cautious, typical or walk")
     if policy["version"] != 1 or type(policy["version"]) is not int:
         raise ScenarioError("policy.version: expected 1")
     if policy["kind"] == "tape" and "tape" not in policy:
         raise ScenarioError("policy.tape: required for tape policy")
     if policy["kind"] != "tape" and "tape" in policy:
         raise ScenarioError("policy.tape: only valid for tape policy")
+    if (policy["kind"] == "walk") != ("plan" in policy):
+        raise ScenarioError("policy.plan: required for, and only valid with, the walk policy")
+    if policy["kind"] == "walk":
+        validate_walk_plan(policy["plan"])
     options = value["options"]
     object_fields(options, "options", ("update_limit", "bootstrap_limit", "action_limit", "latency_updates", "fill_resources"), ("timeout_seconds",))
     for key in ("update_limit", "bootstrap_limit", "action_limit"):
@@ -488,11 +505,15 @@ def compile_entry(scenario, save_image, seeds, *, rendered=False):
     """Compile the native schema-1 envelope. Native owns save legality/checksums."""
     options, policy = scenario["options"], scenario["policy"]
     tape = policy.get("tape", [])
+    plan = policy["plan"].encode("ascii") if policy["kind"] == "walk" else b""
     flags = (0 if rendered else 1) | (4 if options["fill_resources"] else 0)
+    # The walk policy's +32 is the plan's byte count; its text follows the (empty) RNG block.
     header = struct.pack("<8s14I", b"P4BSIM01", 64, flags, scenario["encounter_id"],
-                         seeds["additive"], seeds["mt"], options["update_limit"], len(tape),
+                         seeds["additive"], seeds["mt"], options["update_limit"], len(plan) if plan else len(tape),
                          len(save_image), 0, options["bootstrap_limit"], POLICIES[policy["kind"]],
                          options["latency_updates"], options["action_limit"], seeds["effect"])
+    if plan:
+        return header + save_image + plan
     return header + save_image + b"".join(struct.pack("<III", row["update"], row["buttons"], row["hold"]) for row in tape)
 
 
@@ -556,11 +577,14 @@ def validate_result(value):
                 raise ScenarioError(where + ": retail identity and expanded flag disagree")
     if "party_policy" in value:
         policy = value["party_policy"]
-        object_fields(policy, "worker result.party_policy", ("id", "name", "latency_updates", "party_control", "knowledge"))
-        integer(policy["id"], "worker result.party_policy.id", maximum=3)
+        object_fields(policy, "worker result.party_policy", ("id", "name", "latency_updates", "party_control", "knowledge"), ("plan_sha256",))
+        integer(policy["id"], "worker result.party_policy.id", maximum=4)
         integer(policy["latency_updates"], "worker result.party_policy.latency_updates")
         for key in ("name", "party_control", "knowledge"):
             text(policy[key], "worker result.party_policy." + key)
+        if (policy["id"] == POLICIES["walk"]) != ("plan_sha256" in policy) or (
+                "plan_sha256" in policy and re.fullmatch(r"[0-9a-f]{64}", str(policy["plan_sha256"])) is None):
+            raise ScenarioError("worker result.party_policy.plan_sha256: required lowercase SHA-256 for the walk policy only")
     if "entry_observations" in value:
         observations = value["entry_observations"]
         object_fields(observations, "worker result.entry_observations", ("first_protagonist_command",))
@@ -980,8 +1004,10 @@ def run_case(scenario, save_image, worker, output, run_index, identity, *, admis
                         raise ScenarioError("worker result encounter identity mismatch")
                     policy = candidate.get("party_policy")
                     if policy is not None and (policy["id"] != POLICIES[scenario["policy"]["kind"]] or
-                                               policy["latency_updates"] != scenario["options"]["latency_updates"]):
-                        raise ScenarioError("worker result party policy identity/latency mismatch")
+                                               policy["latency_updates"] != scenario["options"]["latency_updates"] or
+                                               policy.get("plan_sha256") != (digest(scenario["policy"]["plan"].encode("ascii"))
+                                                                             if scenario["policy"]["kind"] == "walk" else None)):
+                        raise ScenarioError("worker result party policy identity/latency/plan mismatch")
                     native_rng = candidate.get("rng")
                     if isinstance(native_rng, dict):
                         for name in ("additive", "mt", "effect"):
@@ -1093,7 +1119,8 @@ def run_batch(scenario, base, worker, output, jobs=1, *, resume=False, admission
                                     for key in ("definition_sha256", "request_sha256", "classification")}}
     else:
         identity = {**identity, "entry_sha256": digest(save_image)}
-    if 64 + len(save_image) + 12 * len(scenario["policy"].get("tape", [])) > 8 * 1024 * 1024:
+    plan_bytes = len(scenario["policy"]["plan"]) if scenario["policy"]["kind"] == "walk" else 0
+    if 64 + len(save_image) + 12 * len(scenario["policy"].get("tape", [])) + plan_bytes > 8 * 1024 * 1024:
         raise ScenarioError("battle ENTRY exceeds native 8 MiB request limit; no seed workers launched")
     indices = [run_index] if run_index is not None else range(scenario["seed_start"], scenario["seed_start"] + scenario["n"])
     rows, pending = [], []

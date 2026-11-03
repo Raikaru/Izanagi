@@ -53,6 +53,26 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Android")
   set(P4_OS_SRC "${CMAKE_SOURCE_DIR}/src/platform/os/os_posix.c")
   set(P4_PS2RAM_LINK_FLAGS)
   set(P4_PS2RAM_SRC)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+  # macOS (docs/platform/macos.md): a 64-bit-only host (arm64 or x86_64, the machine's own), so a build directory builds only the 64-bit
+  # model, like an AArch64 Linux one (P4_PORT64_ARCH, from the host). Compiled with the pinned clang of ci/macos/build_deps.sh against
+  # the SDK CMake found; Mach-O code is position independent on both architectures. _FORTIFY_SOURCE=0: the SDK turns it on for optimised
+  # builds, which would route the game's memcpy/strcpy through the checked __*_chk entry points instead of the reviewed byte seams.
+  set(P4_WIN32 FALSE)
+  set(P4_APPLE TRUE)
+  if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(arm64|aarch64)$")
+    set(P4_PORT64_ARCH "aarch64" CACHE STRING "architecture of the 64-bit build: x86_64 or aarch64 (cross; tests run under qemu-user)")
+  else()
+    set(P4_PORT64_ARCH "x86_64" CACHE STRING "architecture of the 64-bit build: x86_64 or aarch64 (cross; tests run under qemu-user)")
+  endif()
+  set(P4_TARGET_FLAGS -DP4_PC=1 -ffp-contract=off -D_FILE_OFFSET_BITS=64 -D_FORTIFY_SOURCE=0)
+  # Mach-O has no undefined weak symbols: kernel_thread.c's weak kwlnTaskDumpAll, absent from the platform unit tests, stays a lookup at
+  # load time that finds nothing (NULL), as it is on ELF; where the decomp defines it the link binds it as usual.
+  set(P4_TARGET_LINK_FLAGS -Wl,-U,_kwlnTaskDumpAll)
+  set(P4_PORT_DEFINES _FILE_OFFSET_BITS=64)
+  set(P4_OS_SRC "${CMAKE_SOURCE_DIR}/src/platform/os/os_posix.c")
+  set(P4_PS2RAM_LINK_FLAGS)
+  set(P4_PS2RAM_SRC)
 else()
   set(P4_WIN32 FALSE)
   set(P4_TARGET_FLAGS --target=i386-linux-gnu -m32 -DP4_PC=1 -mfpmath=sse -msse2 -ffp-contract=off
@@ -79,7 +99,7 @@ option(P4PC_EGL_NATIVE "Create the GL ES context with the port's EGL on a CAMeta
 if(P4PC_EGL_NATIVE OR CMAKE_SYSTEM_NAME STREQUAL "iOS")
   list(APPEND P4_PORT_DEFINES P4PC_GL_VIA_EGL=1)
 endif()
-if(P4_PORT64_ARCH STREQUAL "aarch64" AND NOT P4_ANDROID)
+if(P4_PORT64_ARCH STREQUAL "aarch64" AND NOT P4_ANDROID AND NOT P4_APPLE)
   # an AArch64 build directory builds only the 64-bit targets (P4_PORT64_ARCH below): the i386 flags (-m32, SSE) are not for them
   set(P4_TARGET_FLAGS -DP4_PC=1 -ffp-contract=off -D_FILE_OFFSET_BITS=64)
 endif()
@@ -109,7 +129,7 @@ if(P4_AUTO_INIT)
   add_compile_options(-ftrivial-auto-var-init=${P4_AUTO_INIT} -Wuninitialized -Wsometimes-uninitialized)
   set(P4_AUTO_INIT_ARGS "--auto-init=${P4_AUTO_INIT}")
 endif()
-if(P4_PORT64_ARCH STREQUAL "aarch64" AND NOT P4_ANDROID)
+if(P4_PORT64_ARCH STREQUAL "aarch64" AND NOT P4_ANDROID AND NOT P4_APPLE)
   set(P4_TARGET_LINK_FLAGS)   # (the i386 -m32 would turn an aarch64 link into a 32-bit ARM one)
 endif()
 add_link_options(${P4_TARGET_LINK_FLAGS})

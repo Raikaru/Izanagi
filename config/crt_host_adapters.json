@@ -4,6 +4,8 @@
     "src/cri/adxi_rpc.c": {
       "reason": "Native sound-backend diagnostics only: fprintf/stderr results are ignored; guest transport and sample counters do not read formatted bytes or stream status. Opt-in PROF spans use the host clock, thread identity and environment only for ignored diagnostic records; no timing, parser or stream result enters RPC buffers or guest state. The common span helper restores native errno and Windows LastError on every initialized/active return, including outside the logging window. Diagnostic caller pairs include actual Win64, Linux ELF64 and Linux i386 time64 clock boundaries observed in batch24210; no unexercised ABI closure is inferred.",
       "calls": {
+        "__error": ["func_004258b0", "p4adxi_pump", "p4pc_prof_span_begin"],
+        "__stderrp": ["func_004258b0", "p4adxi_pump", "rna_cmd", "sj_cmd", "sjx_cmd"],
         "GetCurrentThreadId": ["func_004258b0", "p4adxi_pump"],
         "GetLastError": ["func_004258b0", "p4adxi_pump", "p4pc_prof_span_begin"],
         "QueryPerformanceCounter": ["func_004258b0", "p4adxi_pump", "p4pc_prof_span_begin"],
@@ -51,6 +53,7 @@
     "src/crt.c": {
       "reason": "Host process startup/shutdown, opt-in FPU diagnostics and environment selection before guest entry; no host pointer, formatter result or comparison magnitude enters game state.",
       "calls": {
+        "__stderrp": ["func_0043dc60", "game_main", "p4pc_kernel_pre_init", "p4pc_start"],
         "__acrt_iob_func": [
           "func_0043dc60",
           "game_main",
@@ -91,6 +94,8 @@
     "src/image.c": {
       "reason": "Host image loading and trap diagnostics: successful file reads copy the user-selected ELF bytes verbatim into RAM; bounded retail segment offsets fit signed 32-bit long. The loader's stream-status and errno calls only retry interrupted transfers or reject EOF/I/O errors; they do not calculate guest CRT values. I/O/error text controls host admission or fatal diagnostics, not a game parser or computed game value. errno access and strerror remain the same fatal loader diagnostics when inlined into fail_read or p4pc_load_image. Win32 fail_why obtains only the native stderr stream through __acrt_iob_func, and p4pc_load_image's compiler-emitted fwrite is the inlined fixed map_ee_regs diagnostic to that stream. Trap configuration compares only equality with the external environment literal 1; no strcmp magnitude or guest value is consumed.",
       "calls": {
+        "__error": ["fail", "read_at"],
+        "__stderrp": ["fail", "fail_why", "p4pc_load_image", "p4pc_trap_args", "report_traps"],
         "__errno": ["fail_read", "p4pc_load_image", "read_at"],
         "__acrt_iob_func": [
           "fail",
@@ -184,6 +189,8 @@
     "src/movie/adx_dec.c": {
       "reason": "Native FFmpeg decoder object, PCM/input queues and mutex storage; allocation addresses remain in native P4Adx fields and are never guest addresses. Guest-facing audio consumes decoded sample bytes, not CRT pointer ordering. Opt-in PROF span clocks/thread IDs/environment bounds feed only ignored host stderr records, never decoded PCM, guest state or decoder decisions; native errno and Windows LastError are restored on all initialized/active helper exits. Diagnostic caller pairs include actual Win64, Linux ELF64 and Linux i386 time64 clock boundaries observed in batch24210, not inferred permissions for other ABIs.",
       "calls": {
+        "__error": ["p4pc_prof_span_begin", "p4pc_prof_span_end"],
+        "__stderrp": ["p4pc_prof_span_end"],
         "GetCurrentThreadId": ["p4pc_prof_span_end"],
         "GetLastError": ["p4pc_prof_span_begin", "p4pc_prof_span_end"],
         "QueryPerformanceCounter": ["p4pc_prof_span_begin", "p4pc_prof_span_end"],
@@ -506,6 +513,7 @@
     "src/render/p4gl_atomic.c": {
       "reason": "Native mesh/index/range/scratch arrays and ignored GL diagnostics. Guest lights/textures are read by address; host allocations populate native mesh caches and never guest allocation slots. Bionic strlen/snprintf-family helpers operate on the same valid native shader/cache names and native diagnostic buffers; no result enters guest fields.",
       "calls": {
+        "__stderrp": ["p4gl_atomic_draw"],
         "__vsnprintf_chk": ["_ZL8snprintfPcU17pass_object_size1mPKcz"],
         "__acrt_iob_func": [
           "p4gl_atomic_draw"
@@ -548,6 +556,7 @@
     "src/render/p4gl_camera.c": {
       "reason": "Ignored native renderer diagnostics and fatal unsupported-camera handling only; no formatted bytes/counts become guest camera values.",
       "calls": {
+        "__stderrp": ["p4gl_aspect_camera_begin", "p4gl_aspect_camera_end", "p4gl_camera_object_matrix", "p4gl_camera_projection"],
         "__acrt_iob_func": [
           "p4gl_aspect_camera_begin",
           "p4gl_aspect_camera_end",
@@ -577,6 +586,7 @@
     "src/render/p4gl_context.c": {
       "reason": "Native SDL/context, presentation, capture paths and host-only renderer settings. Parsers affect presentation controls, not guest numeric fields. resolutionAdjust uses strcmp and compiler-emitted bcmp/memcmp only for equality against fixed resolution strings, so comparison magnitude is never observed. Capture storage and formatter results remain native; guest RAM is read only for requested dumps. Android internal-storage lookup selects only the host PNG capture directory, and its error path prints/exits on the host. Bionic's pass_object_size formatter retains those same native destinations. Retained ELF32 pattern-init memset sites in p4gl_context_present fill only inlined captureFrame path[512]/dpath[512] and captureWindow path[600] native stack buffers with 0xff before bounded formatting and host file/PNG output. The no-device early return also causes O2 to outline captureWindow, swapWindow and p4gl_api_explicit: captureWindow frees only capturePixels' host malloc storage and formats a native path; PNG failure diagnostics/exit, SDL swap/error queries and API environment selection remain the same host boundaries.",
       "calls": {
+        "__stderrp": ["applySettings", "capturePixels", "captureWindow", "context_recover", "p4gl_context_open", "p4gl_context_present", "setSwapInterval"],
         "SDL_GetAndroidInternalStoragePath": ["writeCapturePng"],
         "__vsnprintf_chk": ["_ZL8snprintfPcU17pass_object_size1mPKcz"],
         "__acrt_iob_func": [
@@ -675,6 +685,10 @@
         ],
         "SDL_MinimizeWindow": [
           "p4gl_context_present"
+        ],
+        "SDL_ResetHint": [
+          "p4gl_api_set_attributes_desktop",
+          "p4gl_context_open"
         ],
         "SDL_RestoreWindow": [
           "p4gl_context_present"
@@ -802,6 +816,7 @@
     "src/render/p4gl_device.c": {
       "reason": "Native GL-device fatal diagnostics only; stream counts do not return to game state.",
       "calls": {
+        "__stderrp": ["p4gl_std_unassigned"],
         "__acrt_iob_func": [
           "p4gl_std_unassigned"
         ],
@@ -819,6 +834,7 @@
     "src/render/p4gl_gl.c": {
       "reason": "Native GL capability strings, shader configuration and host diagnostics. sscanf reads driver version or bounded host gate-file tokens; no retail input uses this parser. Bionic checked strchr/strlen read the same bounded native gate-file strings, and its snprintf wrapper writes only native shader diagnostics. Pattern-init memset in p4gl_gl_compile_shader fills native GLchar log[1024]; the same bounded stack buffer goes to GetShaderInfoLog. Compiler-emitted bcmp compares native cached GL state for equality, never exposing its magnitude to guest state. Observed232164a4 Win64 draw/buffer/clear/copy/blit/flush/readback/error wrapper fprintf calls record opt-in elapsed API time only; stream results never control GL calls, return values or pixels. The5913dc4a Linux ELF64 fopen64 boundary in p4gl_gl_load opens only that operator-selected diagnostic CSV.",
       "calls": {
+        "__stderrp": ["p4gl_gate_limit", "p4gl_gl_compile_shader", "p4gl_gl_load", "p4gl_gl_stats_report", "probe_edge_rule", "probe_output_rounding", "xBlitFramebuffer", "xClear", "xCopyTexSubImage2D", "xDrawArrays", "xDrawArraysInstanced", "xDrawElements", "xTexImage2D", "xTexSubImage2D"],
         "__strchr_chk": ["p4gl_gate_limit"],
         "__vsnprintf_chk": ["_ZL8snprintfPcU17pass_object_size1mPKcz"],
         "__acrt_iob_func": [
@@ -955,6 +971,7 @@
     "src/render/p4gl_im2d.c": {
       "reason": "Native vertex/index/shader assembly storage and diagnostic strings only. Layout-stack diagnostics/abort enforce a port-only scope invariant; no result returns to game state. floorf is exact finite-binary32 floor for native cell recognition (not an approximate transcendental); it writes only native CellCandidate bounds. No host allocation pointer or formatter output is written into guest vertices. Bionic checked strlen and pass_object_size formatting are the same native shader/diagnostic operations, not game formatting.",
       "calls": {
+        "__stderrp": ["cell_build", "func_0040c0f0", "func_0040d0a0", "im2d_draw", "link_program", "p4gl_layout_begin", "p4gl_layout_end", "p4gl_layout_push", "p4gl_layout_queue_begin", "p4gl_movie_draw", "p4gl_texture_bind_sampler", "p4gl_title_photo_draw"],
         "__vsnprintf_chk": ["_ZL8snprintfPcU17pass_object_size1mPKcz"],
         "__acrt_iob_func": [
           "cell_build",
@@ -1050,6 +1067,7 @@
     "src/render/p4gl_im3d.c": {
       "reason": "Native clip/line/index arrays and ignored renderer diagnostics; their addresses remain native caches.",
       "calls": {
+        "__stderrp": ["draw_common", "p4gl_clip_draw_triangles", "p4gl_im3d_draw", "p4gl_im3d_transform"],
         "__acrt_iob_func": [
           "draw_common",
           "p4gl_clip_draw_triangles",
@@ -1089,6 +1107,7 @@
     "src/render/p4gl_native.c": {
       "reason": "Native texture decode/palette/swizzle scratch; data is uploaded/copied into separately owned raster storage, never exposed as a guest allocation address. Pattern-init memset in func_003fd940 fills only native palette[256*4] with 0xff; retained ELF32 disassembly proves the 1024-byte stack span subsequently passed to p4gl_nativetex_decode.",
       "calls": {
+        "__stderrp": ["func_003fd940", "rasterFail"],
         "__acrt_iob_func": [
           "func_003fd940",
           "rasterFail"
@@ -1139,6 +1158,7 @@
     "src/render/p4gl_profile.c": {
       "reason": "Opt-in native GPU timestamp-query diagnostics only. calloc/free own the host GpuTrace/query-bank bookkeeping, never guest allocation slots; strcmp compares a driver extension name with a fixed native literal. SDL counters, native uint64 counter division (__udivdi3 on i386) and resolved GL entry points are observer inputs only. atexit registers a host-only CSV tail receipt which makes no GL calls. stdio accesses an operator-selected native CSV file or ignored stderr diagnostics; no pointer, clock, formatted text or return value is written into guest state. Entries name actual optimized ELF32/ELF64/COFF64 object callers, including inlined clock/status helpers; fopen64 in p4gl_profile_init is observed in5913dc4a Linux ELF64.",
       "calls": {
+        "__stderrp": ["p4gl_profile_init"],
         "SDL_GL_GetProcAddress": ["p4gl_profile_init"],
         "SDL_GetPerformanceCounter": ["p4gl_profile_frame_end", "p4gl_profile_now_ns", "p4gl_profile_touch"],
         "SDL_GetPerformanceFrequency": ["p4gl_profile_frame_end", "p4gl_profile_now_ns", "p4gl_profile_touch"],
@@ -1162,6 +1182,7 @@
     "src/render/p4gl_ptank.c": {
       "reason": "Native expanded quad/index arrays and ignored diagnostics only. Rotation uses retail float sinf/cosf; no host transcendental or allocation address contributes to guest state.",
       "calls": {
+        "__stderrp": ["p4gl_ptank_draw"],
         "__acrt_iob_func": [
           "p4gl_ptank_draw"
         ],
@@ -1182,6 +1203,7 @@
     "src/render/p4gl_raster.c": {
       "reason": "Host calloc/malloc allocate temporary blank/RGBA upload bytes only. Guest palette and cpPixels allocations use p4pc_heap_calloc; P4_H2G stores those guest pointers, never the temporary host buffers.",
       "calls": {
+        "__stderrp": ["func_003f98a0", "targetPrepare", "uploadRaster"],
         "__acrt_iob_func": [
           "func_003f98a0",
           "targetPrepare",
@@ -1214,6 +1236,7 @@
     "src/render/p4gl_readback.c": {
       "reason": "Host capture/reference-image storage and file I/O only; readback/comparison results are native diagnostics, not guest game inputs.",
       "calls": {
+        "__stderrp": ["p4gl_readback_configure_checked", "p4gl_readback_rgba", "p4gl_readback_target_create", "p4gl_reference_mad"],
         "__acrt_iob_func": [
           "p4gl_readback_configure_checked",
           "p4gl_readback_rgba",
@@ -1266,6 +1289,7 @@
     "src/render/p4gl_state.c": {
       "reason": "Native draw logging, capture controls and host-authored environment ranges only. String/parser/formatter results select or describe native diagnostics, never retail parser results. Bionic's pass_object_size snprintf helper writes that same native draw-log buffer through checked vsnprintf. Pattern-init memset in p4gl_drawlog fills only native line[1024] with 0xff; retained ELF32 disassembly shows the same stack buffer passed to bounded snprintf and the native draw-line logger.",
       "calls": {
+        "__stderrp": ["p4gl_drawlog", "p4gl_gs_alpha_apply", "p4gl_gs_log_draw"],
         "__vsnprintf_chk": ["_ZL8snprintfPcU17pass_object_size1mPKcz"],
         "__acrt_iob_func": [
           "p4gl_drawlog",
@@ -1317,6 +1341,7 @@
     "src/render/p4gl_yuv.c": {
       "reason": "Ignored native YUV-renderer diagnostics only.",
       "calls": {
+        "__stderrp": ["p4gl_raster_set_yuv420"],
         "__acrt_iob_func": [
           "p4gl_raster_set_yuv420"
         ],
@@ -1380,6 +1405,7 @@
     "src/loader.c": {
       "reason": "Host bootstrap diagnostics only; the user-selected retail image and explicit command-line arguments are external inputs, not computed CRT game values. UCRT FILE access supplies those diagnostic streams; compiler-emitted __main performs native process constructor initialization, not a game CRT computation. Retained ELF32 pattern-init disassembly proves both main memset sites fill only the native elf[1100] executable-path stack buffer with 0xff; the no-argument branch passes that same span to bounded p4iso_prepare before host image loading, never to guest RAM.",
       "calls": {
+        "__stderrp": ["main"],
         "__acrt_iob_func": ["main"],
         "__main": ["main"],
         "fprintf": ["main", "p4pc_main"],
@@ -1390,6 +1416,7 @@
     "src/viewer/p4pc_viewer.c": {
       "reason": "Standalone developer model-viewer frontend: host capture names, diagnostics and native draw-window/MAD controls only. Numeric values entering guest fields, dates, player/camera coordinates or guest-frame counts use the retail parsers; the synthetic camera's radius uses retail sqrtf. AArch64 frame_camera zeroes its native Bounds stack object and inlines f32_at as three four-byte copies from the guest camera view window into native stack floats. Host malloc is restricted to native input/capture scratch; bytes may be copied into guest allocations, never host pointers. Explicit main pairs cover the same operations when i386 inlines viewer_main. UCRT FILE access serves those same diagnostics, and compiler-emitted __main initializes the native process constructors. UCRT atoi/atof are only the existing native draw-window and MAD controls; fopen opens the same host viewer input as glibc fopen64.",
       "calls": {
+        "__stderrp": ["main", "make_ptank", "viewer_main", "write_frame"],
         "__acrt_iob_func": ["main", "make_ptank", "viewer_main", "write_frame"],
         "__main": ["main"],
         "__vsnprintf_chk": ["_ZL8snprintfPcU17pass_object_size1mPKcz"],

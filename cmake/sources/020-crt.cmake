@@ -1,7 +1,12 @@
 # Inspect actual object references, not source spellings or the final executable's
-# merged host/game imports. LLVM tools understand every ELF/COFF target we build.
-find_program(P4_CRT_NM NAMES llvm-nm nm REQUIRED)
-find_program(P4_CRT_OBJDUMP NAMES llvm-objdump objdump REQUIRED)
+# merged host/game imports. LLVM tools understand every ELF/COFF/Mach-O target we build.
+# macOS: the LLVM tools beside the pinned clang (ci/macos/build_deps.sh) come first, not Xcode's.
+set(_p4_crt_tool_hints)
+if(APPLE)
+  get_filename_component(_p4_crt_tool_hints "${CMAKE_C_COMPILER}" DIRECTORY)
+endif()
+find_program(P4_CRT_NM NAMES llvm-nm nm HINTS ${_p4_crt_tool_hints} REQUIRED)
+find_program(P4_CRT_OBJDUMP NAMES llvm-objdump objdump HINTS ${_p4_crt_tool_hints} REQUIRED)
 add_custom_target(p4crt ALL)
 function(p4_crt_guard profile objects definitions)
   set(object_file "${P4_GEN}/crt-${profile}-objects.txt")
@@ -35,7 +40,11 @@ endfunction()
 # Bootstrap/viewer sources belong to executable targets rather than p4port.
 # Audit their actual compile-command objects after compilation and before link.
 function(p4_crt_entry target definitions)
-  target_link_options(${target} PRIVATE "LINKER:-Map,${P4_GEN}/crt-link-${target}.map")
+  if(APPLE)
+    target_link_options(${target} PRIVATE "LINKER:-map,${P4_GEN}/crt-link-${target}.map")   # (ld64's spelling)
+  else()
+    target_link_options(${target} PRIVATE "LINKER:-Map,${P4_GEN}/crt-link-${target}.map")
+  endif()
   add_custom_command(TARGET ${target} PRE_LINK
     COMMAND "${P4_PYTHON}" "${CMAKE_SOURCE_DIR}/tools/crt_guard.py"
       --compile-commands "${CMAKE_BINARY_DIR}/compile_commands.json" --compile-target "${target}"

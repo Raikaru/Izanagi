@@ -403,11 +403,17 @@ set_tests_properties(collection_junes_0624 PROPERTIES SKIP_RETURN_CODE 77 LABELS
 add_test(NAME collection_rise_search_0625 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 32000 20:1,6/25 playthrough0623evening collection0623_to_rise_tv0625.walk)
 set_tests_properties(collection_rise_search_0625 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
 
-# Independent card2-slot14, June 25 at the TV-world Entrance: travel to Marukyu
-# Striptease and enter from the stage to 1F's arrival (step 41). Not its floors, Shadow
-# Rise or a save.
-add_test(NAME collection_marukyu_entry_0625 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/completed_walk_gate.sh" $<TARGET_FILE:p4pc> 10000 42:0,6/25 playthrough0625tv collection0625_tv_to_marukyu1f.walk)
-set_tests_properties(collection_marukyu_entry_0625 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600)
+# Independent card2-slot14, June 25 at the TV-world Entrance: travel to Marukyu Striptease,
+# enter from the stage and cross the generated 1F and 2F to the fixed 3F (62:2, step 43).
+# Yu is alone; every encounter is escaped (Guard while Teddie searches for the exit). Not
+# Shadow Rise or a save. A cross-target pair (tests/dungeon_digest_gate.sh): the dungeon
+# digest must equal the recording both Windows x64 and Linux x64 made, and
+# tools/land_game_split.py runs the P4PC_GATE_TARGET=windows twin on the PC and the
+# =linux twin on the laptop.
+add_test(NAME collection_marukyu_entry_0625 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/dungeon_digest_gate.sh" $<TARGET_FILE:p4pc> 30000 62:2,6/25 playthrough0625tv collection0625_tv_to_marukyu3f.walk)
+set_tests_properties(collection_marukyu_entry_0625 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_TARGET=windows")
+add_test(NAME collection_marukyu_entry_0625_linux COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/dungeon_digest_gate.sh" $<TARGET_FILE:p4pc> 30000 62:2,6/25 playthrough0625tv collection0625_tv_to_marukyu3f.walk)
+set_tests_properties(collection_marukyu_entry_0625_linux PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_TARGET=linux")
 
 # Pristine Marukyu 11F collection anchor: Rise cleanup and its following event
 # must survive the retail-layout allocator's post-release model writes, then
@@ -445,10 +451,13 @@ set_tests_properties(collection_evening_0801 PROPERTIES SKIP_RETURN_CODE 77 LABE
 add_test(NAME collection_evening_0803 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 30000 7:2,8/3 playthrough0801home collection0801_to_home0803.walk)
 set_tests_properties(collection_evening_0803 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
 
-# Independent card3-slot06, August 3 at the TV-world Entrance: Rise's Chase the boy,
-# the Void Quest title screen and Chapter 1's arrival (step 61). Not its floors or Mitsuo.
-add_test(NAME collection_voidquest_entry_0803 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/completed_walk_gate.sh" $<TARGET_FILE:p4pc> 8000 43:0,8/3 playthrough0803tv collection0803_tv_to_voidquest1f.walk)
-set_tests_properties(collection_voidquest_entry_0803 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600)
+# Independent card3-slot06, August 3 at the TV-world Entrance: Rise's Chase the boy, the
+# Void Quest title screen, Chapter 1's arrival (step 61) and its generated floor to
+# Chapter 2's arrival (step 62). Not Mitsuo. The same cross-target pair as Marukyu's.
+add_test(NAME collection_voidquest_entry_0803 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/dungeon_digest_gate.sh" $<TARGET_FILE:p4pc> 12000 43:0,8/3 playthrough0803tv collection0803_tv_to_voidquest2f.walk)
+set_tests_properties(collection_voidquest_entry_0803 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_TARGET=windows")
+add_test(NAME collection_voidquest_entry_0803_linux COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/dungeon_digest_gate.sh" $<TARGET_FILE:p4pc> 12000 43:0,8/3 playthrough0803tv collection0803_tv_to_voidquest2f.walk)
+set_tests_properties(collection_voidquest_entry_0803_linux PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_TARGET=linux")
 
 # Pristine card3-slot07: Mitsuo introduction and fresh protagonist command only.
 add_test(NAME collection_voidquest_opening_0803 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/voidquest_opening_gate.sh" $<TARGET_FILE:p4pc>)
@@ -554,6 +563,17 @@ set_tests_properties(collection_hospital_continue_1203 PROPERTIES SKIP_RETURN_CO
 add_test(NAME collection_deduction_1204 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 45000 7:2,12/4 playthrough1203evening collection1203_to_home1204.walk)
 set_tests_properties(collection_deduction_1204 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
 
+# Independent card4-slot13, December 4 evening: 12/05's information search (every
+# townsperson asked both questions), the meeting at Aiya, naming Adachi, questioning him and
+# the 12/05 home save.
+add_test(NAME collection_culprit_1205 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 42000 7:2,12/5 playthrough1204evening collection1204_to_culprit1205.walk)
+set_tests_properties(collection_culprit_1205 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
+
+# Independent card4-slot14, December 5 mid-search: the shopping woman's last answer, Aiya,
+# naming Adachi, then 12/06's story to the home save.
+add_test(NAME collection_adachi_1206 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 46000 7:2,12/6 playthrough1205shopping collection1205_to_home1206.walk)
+set_tests_properties(collection_adachi_1206 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
+
 # Independent card4-slot15: December 6 evening through 12/07's home save;
 # no Magatsu Inaba traversal claim.
 add_test(NAME collection_evening_1207 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 35000 7:2,12/7 playthrough1206evening collection1206_to_home1207.walk)
@@ -562,6 +582,11 @@ set_tests_properties(collection_evening_1207 PROPERTIES SKIP_RETURN_CODE 77 LABE
 # Independent card4-slot16: final Magatsu field and first Adachi COMMAND, not victory.
 add_test(NAME collection_adachi_opening_1223 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/completed_walk_gate.sh" $<TARGET_FILE:p4pc> 30000 246:3,12/23 playthrough1223magatsu collection1223_magatsu_to_adachi.walk)
 set_tests_properties(collection_adachi_opening_1223 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600)
+
+# Independent card4-slot16: Yu's Persona switch in camp, Adachi defeated by walker battle rules (skills and
+# items by native ID), the Ameno-sagiri reveal and its first COMMAND. Not Ameno-sagiri's defeat.
+add_test(NAME collection_adachi_victory_1223 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/completed_walk_gate.sh" $<TARGET_FILE:p4pc> 48000 246:2,12/23 playthrough1223magatsu collection1223_adachi_to_ameno.walk)
+set_tests_properties(collection_adachi_victory_1223 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600)
 
 # Independent post-Magatsu card5-slot01: Christmas through the farewell world map.
 add_test(NAME collection_departure_calendar_0320 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/completed_walk_gate.sh" $<TARGET_FILE:p4pc> 30000 1:1,3/20 playthrough1224evening collection1224_to_departure0320.walk)
@@ -572,6 +597,17 @@ set_tests_properties(collection_departure_calendar_0320 PROPERTIES SKIP_RETURN_C
 # over the card (native Save OK; the cleared-game state has no field, calendar index 9).
 add_test(NAME collection_normal_ending_0320 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 50000 "-1:-1,4/10" playthrough0320farewell collection0320_to_normal_ending.walk)
 set_tests_properties(collection_normal_ending_0320 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
+
+# The same card through the true-ending trigger: refuse to go home at the Junes elevator, the
+# food court discussion, Dojima at the riverbed, the Velvet Room and the gas-station attendant,
+# then the TV and an Entrance save (card5-slot05's state).
+add_test(NAME collection_true_trigger_0320 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 40000 20:1,3/20 playthrough0320farewell collection0320_farewell_to_true_tv.walk)
+set_tests_properties(collection_true_trigger_0320 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
+
+# Independent card5-slot04, after Dojima and the Velvet Room: the attendant's questions and
+# Izanami's reveal, then the TV and an Entrance save.
+add_test(NAME collection_attendant_0320 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 20000 20:1,3/20 playthrough0320shopping3 collection0320_attendant_to_tv.walk)
+set_tests_properties(collection_attendant_0320 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
 
 # Independent last-day card5-slot05: Rise's destination and live exterior control.
 add_test(NAME collection_yomotsu_entrance_0320 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/completed_walk_gate.sh" $<TARGET_FILE:p4pc> 12000 30:2,3/20 playthrough0320tv collection0320_tv_to_yomotsu_entrance.walk)

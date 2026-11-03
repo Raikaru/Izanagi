@@ -30,3 +30,5 @@ ___chkstk_ms Compiler-generated MinGW stack probe; touches native stack pages on
 __chkstk_ms Same MinGW native stack probe after 32-bit COFF decoration normalization.
 _alloca Compiler ABI native-stack allocation; native stack pointer is not stored as a guest heap allocation.
 _GLOBAL_OFFSET_TABLE_ ELF position-independent linkage anchor, not a CRT computation or a guest address.
+bzero    Darwin zeroing entry point: LLVM lowers memset(p, 0, n) to it on Apple arm64; stores exactly n zero bytes and returns nothing, the byte result memset gives.
+__bzero  The same Darwin zeroing entry point under the name LLVM calls on Apple x86_64; stores exactly n zero bytes, no result.

@@ -10,6 +10,8 @@
 #include "p4pc/battle_prepare.h"
 #include "p4pc/content_digest.h"
 #include "p4pc/game_table_extents.h"
+#include "p4pc/walk_script.h"
+#include "../pad/pad_sdl.h"
 #include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -51,6 +53,10 @@ static struct {
     uint32_t context_before[5], context_after[5], prepared_size;
     uint64_t prepare_rng_entry, prepare_rng_exit;
     char request_hash[65], source_hash[65], prepared_hash[65];
+    uint32_t prompt_ready, skill_offers_declined;
+    P4Walk *walk;                  /* policy 4: the ENTRY's battle:/battlerule: plan on the walker's battle driver */
+    uint32_t walk_frame;
+    char plan_hash[65];
 } session;
 
 extern void *kwlnTaskGetTaskByName(const void *name);
@@ -73,8 +79,6 @@ extern void RpRandomSeed(int32_t seed, void *unused);
 extern void RpRandomSeedMT(int32_t seed);
 extern void effMiscRandInit(void *state, uint32_t seed);
 extern uint32_t p4pc_rng_draws;
-extern void p4pc_pad_inject(unsigned bits, unsigned frames);
-extern void p4pc_pad_autopress_set_clock(uint32_t (*clock)(void));
 
 static uint32_t le32(const void *pointer)
 {
@@ -104,6 +108,61 @@ static int error(const char *message)
     session.input_error = message;
     fprintf(stderr, "p4pc: battle-sim: %s\n", message);
     return -1;
+}
+static void finish(const char *outcome, const char *cause, int code);
+
+/* Policy 4: a walker battle plan (include/p4pc/walk_script.h) drives the party through the same
+ * battle driver as gate walks. Only battle:/battlerule: lines, printable ASCII; the worker appends
+ * the waits that keep the driver running until the battle task ends. Inputs come from ENTRY only. */
+#define WALK_POLICY 4u
+#define WALK_PLAN_MAX 16384u
+static uint32_t sim_walk_read32(void *user, uint32_t address)
+{
+    (void)user;
+    return address >= 0x00100000u && address <= 0x01FFFFFCu ? *(volatile uint32_t *)P4_G2H(address) : 0;
+}
+static void sim_walk_note(void *user, const char *message)
+{
+    (void)user;
+    fprintf(stderr, "p4pc: battle-sim walk: %s\n", message);
+}
+static int walk_plan(const char *text, uint32_t size)
+{
+    char *script = malloc((size_t)size + 96);
+    if (!script) return error("cannot allocate walk battle plan");
+    for (uint32_t i = 0; i < size; i++)
+        if (text[i] != '\n' && (text[i] < 0x20 || text[i] > 0x7e)) { free(script); return error("walk battle plan is not printable ASCII"); }
+    for (uint32_t start = 0; start < size;) {
+        uint32_t stop = start;
+        while (stop < size && text[stop] != '\n') stop++;
+        const size_t len = stop - start;
+        if (len && !(len > 7 && !memcmp(text + start, "battle:", 7)) && !(len > 11 && !memcmp(text + start, "battlerule:", 11))) {
+            free(script);
+            return error("walk battle plan line is not battle: or battlerule:");
+        }
+        start = stop + 1;
+    }
+    memcpy(script, text, size);
+    snprintf(script + size, 96, "\ntimeout:%u\nwaittask:battle\nwaittask:battle:off\n", session.limit);
+    char reason[160];
+    session.walk = p4walk_parse(script, reason, sizeof reason);
+    free(script);
+    if (!session.walk) return error("invalid walk battle plan");
+    p4_content_digest(text, size, session.plan_hash);
+    return 0;
+}
+static void walk_plan_update(void)
+{
+    static const uint16_t pad[P4W_BUTTON_COUNT] = {
+        P4PC_PAD_UP, P4PC_PAD_DOWN, P4PC_PAD_LEFT, P4PC_PAD_RIGHT, P4PC_PAD_CROSS, P4PC_PAD_CIRCLE, P4PC_PAD_TRIANGLE, P4PC_PAD_SQUARE,
+        P4PC_PAD_START, P4PC_PAD_SELECT, P4PC_PAD_L1, P4PC_PAD_R1, P4PC_PAD_L2, P4PC_PAD_R2, P4PC_PAD_L3, P4PC_PAD_R3,
+    };
+    static const P4WalkHost host = {sim_walk_read32, sim_walk_note, NULL, NULL, NULL};
+    const uint32_t mask = p4walk_frame(session.walk, &host, ++session.walk_frame);
+    if (p4walk_status(session.walk) == P4WALK_FAILED) finish("policy_error", "walk_battle_plan_failed", 4);
+    unsigned bits = 0;
+    for (int b = 0; b < P4W_BUTTON_COUNT; b++) if (mask & (1u << b)) bits |= pad[b];
+    p4pc_pad_inject(bits, 1);
 }
 static int read_entry(const char *path)
 {
@@ -147,11 +206,16 @@ static int read_entry(const char *path)
     session.latency = le32(h + 52);
     session.action_limit = le32(h + 56);
     session.effect_seed = le32(h + 60);
-    const uint64_t expected = 64u + (uint64_t)session.save_size + session.rng_size + (uint64_t)session.tape_count * 12;
+    /* Policy 4 carries a walker battle plan: +32 is its byte count, the text follows the RNG block. */
+    const uint64_t payload = session.policy == WALK_POLICY ? (uint64_t)session.tape_count : (uint64_t)session.tape_count * 12;
+    const uint64_t expected = 64u + (uint64_t)session.save_size + session.rng_size + payload;
     if (session.flags & ~7u || session.encounter > 65535u || !session.limit || !session.boot_limit ||
-        !session.action_limit || session.policy > 3 || expected != (uint64_t)length ||
+        !session.action_limit || session.policy > WALK_POLICY || expected != (uint64_t)length ||
         session.rng_size != ((session.flags & 2) ? RNG_WORDS * 4u : 0u)) return error("invalid BattleEntry counts/flags/limits");
-    if (session.policy && session.tape_count) return error("named party policy cannot compete with a controller tape");
+    if (session.policy && session.policy != WALK_POLICY && session.tape_count)
+        return error("named party policy cannot compete with a controller tape");
+    if (session.policy == WALK_POLICY && (!session.tape_count || session.tape_count > WALK_PLAN_MAX))
+        return error("invalid walk battle plan size");
     session.save = session.entry + 64;
     session.rng = session.save + session.save_size;
     session.tape = session.rng + session.rng_size;
@@ -161,6 +225,7 @@ static int read_entry(const char *path)
         if (front >= 31 || back >= 31 || (front + 31 - back) % 31 != 3 || le32(session.rng + 2628) >= 624)
             return error("invalid captured RNG cursor");
     }
+    if (session.policy == WALK_POLICY) return walk_plan((const char *)session.tape, session.tape_count);
     uint32_t end = 0;
     for (uint32_t i = 0; i < session.tape_count; i++) {
         const uint8_t *r = session.tape + i * 12;
@@ -528,11 +593,17 @@ static void finish(const char *outcome, const char *cause, int code)
         for (unsigned i = 0; i < sizeof catalog; i++) fprintf(f, "%02x", catalog[i]);
         fputs("\"},", f);
     }
-    static const char *policy_names[] = {"controller-tape-v1", "greedy-weakness-v1", "cautious-healer-v1", "typical-player-v1"};
-    fprintf(f, "\"party_policy\":{\"id\":%u,\"name\":\"%s\",\"latency_updates\":%u,\"party_control\":\"%s\",\"knowledge\":\"%s\"},",
+    fprintf(f, "\"result_prompt_capability\":\"%s\",\"result_prompts\":{\"skill_offers_declined\":%u},",
+            session.policy ? "periodic_cross_native_skill_offer_decline_v1" : "controller_tape", session.skill_offers_declined);
+    static const char *policy_names[] = {"controller-tape-v1", "greedy-weakness-v1", "cautious-healer-v1", "typical-player-v1", "walk-battle-rules-v1"};
+    static const char *policy_knowledge[] = {"controller_tape", "observed_damage_weakness_only", "observed_damage_weakness_only",
+                                             "observed_damage_weakness_only", "walker_battle_rules_native_unit_records"};
+    fprintf(f, "\"party_policy\":{\"id\":%u,\"name\":\"%s\",\"latency_updates\":%u,\"party_control\":\"%s\",\"knowledge\":\"%s\"",
             session.policy, policy_names[session.policy], session.latency,
-            session.policy ? "native_direct_commands" : "source_tactics",
-            session.policy ? "observed_damage_weakness_only" : "controller_tape");
+            session.policy ? "native_direct_commands" : "source_tactics", policy_knowledge[session.policy]);
+    /* Each plan is its own cohort; its delay= option, not latency_updates, times the walker's input. */
+    if (session.policy == WALK_POLICY) fprintf(f, ",\"plan_sha256\":\"%s\"", session.plan_hash);
+    fputs("},", f);
     fputs("\"entry_observations\":{\"first_protagonist_command\":{\"boundary\":\"native_input_ready\",\"observed\":", f);
     if (session.first_command_seen)
         fprintf(f, "1,\"update\":%u,\"party\":[%s]}},", session.first_command_update, session.first_command_party);
@@ -702,6 +773,76 @@ static void prepare_before_update(void)
     session.prepare_complete = 1;
     prepare_finish("prepared", "native_save_build_image_complete", 0);
 }
+/* Retail addresses of the post-battle skill-offer prompt's owners. */
+#define MESSAGE_WINDOW_CURRENT 0x00882f60u /* NmMesWindowRecord returned by nmMesWindowCurrent */
+#define MESSAGE_WINDOW_SLOTS 0x00881808u   /* ItfMesWindowSlot[], 0x20 stride, window at +0 */
+/* The skill-replace task (0011f5a0) is created as "shdPersonaSkillSelectSeq";
+ * kwlnTaskCreate keeps 23 characters but sums all 24, so kwlnTaskGetTaskByName
+ * finds it under neither name. Walk the three scheduler lists (sdkTask.c) and
+ * match the stored 0x18-byte name instead. */
+static uint32_t skill_select_task(void)
+{
+    static const char stored[0x18] = "shdPersonaSkillSelectSe";
+    static const uint16_t heads[3] = {0xb9ec, 0xba04, 0xb9f8};
+    for (unsigned list = 0; list < 3; list++) {
+        uint32_t node = GP(heads[list]);
+        for (unsigned n = 0; node; n++) {
+            if (n == 4096 || !guest_range(node, 0x40)) {
+                session.observation_error = "result_task_list_invalid";
+                return 0;
+            }
+            if (!memcmp(P4_G2H(node), stored, sizeof stored)) return node;
+            node = P4_G32(node + 0x3c); /* listNext */
+        }
+    }
+    return 0;
+}
+/* Battle result phase 16 waits for the result task, which waits for every
+ * persona level-up. With eight skills, a level-up asks which skill to forget;
+ * the named policies' periodic Cross would re-select forever (the Yes/No
+ * defaults to No) or, racing the list, forget a known skill. While that task
+ * reads input (states 0-3 and 6) the session owns input and declines the
+ * offer through the real UI. Returns 1 when it owns input this update. */
+static int result_skill_prompt(void)
+{
+    const uint32_t battle = GP(0xb3ac);
+    if (!battle || !guest_range(battle, 0x300) || P4_G32(battle + 0x2fc) != 16) return 0;
+    const uint32_t task = skill_select_task();
+    if (!task) return 0;
+    const uint32_t work = guest_range(task, 0x3c) ? P4_G32(task + 0x38) : 0;
+    const uint32_t parent = work && guest_range(work, 0x10) ? P4_G32(work + 0xc) : 0;
+    const uint32_t panel = parent && guest_range(parent, 0x3c) ? P4_G32(parent + 0x38) : 0;
+    if (!panel || !guest_range(panel, 0x538)) {
+        session.observation_error = "result_skill_prompt_layout";
+        return 1;
+    }
+    const int32_t state = (int32_t)P4_G32(work + 8);
+    if (state < 0 || (state > 3 && state != 6)) return 0;
+    if (session.updates < session.prompt_ready) return 1;
+    P4BattleSkillPrompt prompt = {0};
+    prompt.state = state;
+    prompt.list_active = (P4_G32(panel + 0x534) & 0x800) != 0;
+    prompt.list_cursor = (int8_t)P4_G8(panel + 0x88);           /* ShdSkillState at +0x84 */
+    prompt.pending = P4_G16(panel + 0x8c + 0x224);               /* ShdSkillPool.pendingCount */
+    prompt.replacement_pending = P4_G16(work + 6) == P4_G16(panel + 0x8c + 0x66); /* pending[0].id */
+    const int32_t handle = (int32_t)P4_G32(MESSAGE_WINDOW_CURRENT);
+    const int8_t window_state = (int8_t)P4_G8(MESSAGE_WINDOW_CURRENT + 4); /* 1 text, 2 choice/close */
+    if ((window_state == 1 || window_state == 2) && handle >= 0 && handle < 0x100) {
+        const uint32_t window = P4_G32(MESSAGE_WINDOW_SLOTS + (uint32_t)handle * 0x20);
+        if (window && guest_range(window, 0x50)) {
+            prompt.row_waiting = (int8_t)P4_G8(window + 0x24) == 1;  /* ItfMesRow.state */
+            prompt.choice_active = (int16_t)P4_G16(window + 0x48) == 2 && (int16_t)P4_G16(window + 0x4e) == 2;
+            prompt.choice_cursor = (int16_t)P4_G16(window + 0x4a);
+        }
+    }
+    const unsigned bits = p4_battle_skill_prompt_buttons(&prompt);
+    if (!bits) return 1;
+    if (state == 3 && prompt.choice_active && prompt.replacement_pending && bits == P4PC_PAD_CROSS)
+        session.skill_offers_declined++;
+    p4pc_pad_inject(bits, 1);
+    session.prompt_ready = session.updates + 4; /* release so the next press is a new edge */
+    return 1;
+}
 void p4_battle_sim_before_update(void)
 {
     if (p4_battle_live_active) { p4_battle_live_before_update(); return; }
@@ -737,14 +878,17 @@ void p4_battle_sim_before_update(void)
         const P4BattleObserver observer = {NULL, admission_event, cost_event, hit_event, command_event, NULL};
         session.observer_token = p4_battle_observer_add(&observer);
         if (!session.observer_token) finish("engine_error", "native_observer_registration", 4);
-        if (!p4_battle_policy_begin(session.policy, session.latency))
+        /* The walk policy sets Direct Commands like the named policies but owns input through the walker. */
+        if (!p4_battle_policy_begin(session.policy == WALK_POLICY ? 0 : session.policy, session.latency))
             finish("policy_error", p4_battle_policy_error(), 4);
         p4pc_pad_autopress_set_clock(p4_battle_sim_update_count);
         if (!observe("entry", 1)) finish("engine_error", "entry_observation", 4);
         if (!p4_battle_encounter_start(session.encounter)) finish("engine_error", "invalid_encounter", 4);
     }
     if (session.updates >= session.limit) finish("update_limit", "completed_native_update_limit", 3);
+    if (session.policy && result_skill_prompt()) return;
     p4_battle_policy_before_update();
+    if (session.walk) { walk_plan_update(); return; }
     if (session.tape_index < session.tape_count) {
         const uint8_t *record = session.tape + session.tape_index * 12;
         if (le32(record) == session.updates) {

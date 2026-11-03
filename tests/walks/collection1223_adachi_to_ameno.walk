@@ -1,0 +1,62 @@
+# Independent pristine card4-slot16, Magatsu Inaba's final fixed field: Adachi's defeat.
+# The camp menu sets Yu's Persona to roster slot 1 (ID 2: Ziodyne, Repel Elec); the walker's battle rules
+# then fight Adachi: Balm of Life for any downed member, Yukiko's Me Patra on fear (Ghastly Wail), a Bead
+# Chain under 250 HP, Guard while Adachi is charged, otherwise Ziodyne (Yu, Kanji), Agidyne (Yukiko) and
+# Bufudyne (Teddie). Skills and items are chosen by native ID, not cursor history.
+# Ends at Ameno-sagiri's first COMMAND; it does not certify earlier floors or Ameno-sagiri's defeat.
+timeout:30000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+waitfield:29:2
+waitstep:129
+waitstate16:0x00797b7a==266
+press:triangle
+wait:100
+press:down
+wait:20
+press:down
+wait:20
+press:down
+wait:20
+press:cross
+wait:600
+press:cross
+wait:600
+press:down
+wait:20
+press:cross
+wait:100
+press:circle
+wait:70
+press:circle
+wait:70
+press:circle
+wait:70
+press:circle
+wait:70
+waitstate16:0x00797f8e==2
+waitfield:29:2
+log
+# Route the bent approach, stopping before Adachi's interaction blocks the path.
+plan:on
+walk:0,2800,80
+push:0,2000,25
+press:cross
+battle:plan1=circle,down,cross,skill:41,cross,cross,circle,circle,circle,cross,cross;plan6=circle,down,cross,skill:41,cross,cross,circle,circle,circle,cross,cross;plan4=circle,down,cross,skill:3,cross,cross,circle,circle,circle,cross,cross;plan8=circle,down,cross,skill:28,cross,cross,circle,circle,circle,cross,cross;plan=circle,cross,cross;skip=0;delay=40;guard=265
+battlerule:dead@1,4,6,8=circle,down,down,down,cross,item:0x310,cross,cross,circle,circle,circle,cross,cross
+battlerule:afflicted:0x4@4=circle,down,cross,skill:200,cross,cross,circle,circle,circle,cross,cross
+battlerule:hp<250@1,4,6,8=circle,down,down,down,cross,item:0x30A,cross,cross,circle,circle,circle,cross,cross
+timeout:40000
+skiptask:battle
+waittask:battle:off
+log
+battle:off
+timeout:30000
+skiptask:battle
+waitbtl:menu
+log

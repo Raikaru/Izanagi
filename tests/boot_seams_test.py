@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Actual TIMER0/libpad boot seams, without the game, SDL devices or lockstep transport."""
 import os
+import sys
 from pathlib import Path
 import shutil
 import subprocess
@@ -21,7 +22,7 @@ class BootSeamsTest(unittest.TestCase):
                             "-I" + str(ROOT / "include"), "-include", str(ROOT / "include/p4pc/compat.h"),
                             *("-I" + str(ROOT / item) for item in include),
                             str(ROOT / "tests" / fixture), str(ROOT / source),
-                            "-Wl,--gc-sections", "-o", binary], check=True)
+                            "-Wl,-dead_strip" if sys.platform == "darwin" else "-Wl,--gc-sections", "-o", binary], check=True)
             subprocess.run([binary], check=True)
 
     def test_timer0_boot_progression(self):

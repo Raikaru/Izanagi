@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 MISSING_ON_WINDOWS = ("grep", "egrep", "fgrep", "pgrep", "pkill", "lsof", "flock", "xz", "zstd")
 HOST_ONLY = {
     "android_ci_run.sh", "appimage_build.sh", "appimage_smoke.sh", "build_cache.sh", "ci_tests.sh", "ios_check.sh", "package_linux.sh",
-    "package_runtime_provenance.sh", "package_win.sh",
+    "package_macos.sh", "package_runtime_provenance.sh", "package_win.sh",
 }
 PC = {
     "luau_profiles.sh", "package_smoke.sh", "ref_guard.sh",

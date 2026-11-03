@@ -22,11 +22,23 @@ sys.path.insert(0, os.path.join(HERE, ".."))
 import gptr_rewrite as gr  # noqa: E402
 import build_cache
 
-# the i386 oracle of the layout assertions; P4_PORT32_TARGET overrides the target (the Android build: --target=i686-linux-android24, whose headers the NDK has)
-T32 = shlex.split(os.environ.get("P4_PORT32_TARGET", "--target=i386-linux-gnu")) + ["-m32", "-malign-double", "-mfpmath=sse", "-msse2"]
 # the 64-bit target the units are rewritten and compiled for; P4_PORT64_TARGET overrides it (other architectures: M7), e.g.
 #   "--target=aarch64-linux-gnu --gcc-install-dir=/usr/lib/gcc-cross/aarch64-linux-gnu/14 -isystem /usr/aarch64-linux-gnu/include -fsigned-char"
 T64 = shlex.split(os.environ.get("P4_PORT64_TARGET", "--target=x86_64-linux-gnu"))
+
+
+def default_t32(t64):
+    """The i386 layout oracle's target for the 64-bit target `t64`: i386 Linux, or for an Apple target i686 macOS against the same SDK (its i386
+    headers are the x86_64 ones; the oracle is only compiled to its record layouts, never linked) without Apple's blocks, as the 64-bit side."""
+    if gr.symbol_prefix(t64):
+        sysroot = next((t64[i:i + 2] for i, f in enumerate(t64) if f == "-isysroot"), [])
+        return ["--target=i686-apple-macos10.13", *sysroot, "-fno-blocks"]
+    return ["--target=i386-linux-gnu"]
+
+
+# the i386 oracle of the layout assertions; P4_PORT32_TARGET overrides the target (the Android build: --target=i686-linux-android24, whose headers the NDK has)
+T32 = (shlex.split(os.environ["P4_PORT32_TARGET"]) if os.environ.get("P4_PORT32_TARGET") else default_t32(T64)) + \
+    ["-m32", "-malign-double", "-mfpmath=sse", "-msse2"]
 # the diagnostics that mean an integer stands for a pointer or the reverse: none may be left in the rewritten mirror
 PTRINT_ERRORS = ["-Werror=pointer-to-int-cast", "-Werror=int-to-pointer-cast", "-Werror=int-conversion",
                  "-Werror=void-pointer-to-int-cast", "-Werror=int-to-void-pointer-cast"]

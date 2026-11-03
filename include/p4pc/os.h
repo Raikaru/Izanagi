@@ -61,6 +61,20 @@ int p4_os_file_identity(FILE *stream, P4OSFileIdentity *out);
     __asm__(".globl " P4_ASM_STR(__USER_LABEL_PREFIX__) #name "\n.set " P4_ASM_STR(__USER_LABEL_PREFIX__) \
             #name ", " #addr "\n")
 
+/* Binds a declaration to the C symbol `name` (a string literal), as `__asm__(name)` does on ELF and x86_64 COFF. Mach-O takes an asm label
+ * as the symbol exactly as written and spells C names with an underscore, so there the label gets it. */
+#ifdef __APPLE__
+#define P4_ASM_LABEL(name) __asm__("_" name)
+#else
+#define P4_ASM_LABEL(name) __asm__(name)
+#endif
+
+#ifdef __APPLE__
+/* macOS: the path of the library `name` that ships with the program, into out[capacity]: the app bundle's Contents/Frameworks, else the
+ * executable's own directory (a build tree). 0 when the file is there, -1 otherwise. */
+int p4_os_runtime_library(const char *name, char *out, size_t capacity);
+#endif
+
 /* Monotonic clock, nanoseconds. */
 uint64_t p4_os_now_ns(void);
 /* Current thread's real CPU consumption, not wall/virtual time. Returns 0 on

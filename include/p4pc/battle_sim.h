@@ -31,4 +31,18 @@ void p4_battle_policy_target(uint32_t action);
 void p4_battle_policy_before_update(void);
 const char *p4_battle_policy_error(void);
 void p4_battle_sim_command_ready(uint32_t action);
+/* Post-battle skill-offer prompt, read from the live shdPersonaSkillSelectSeq
+ * task, its persona panel and the current message window. */
+typedef struct P4BattleSkillPrompt {
+    int32_t state;               /* skill-replace task state (work +0x08) */
+    int32_t list_active;         /* panel accepts list input (flags & 0x800) */
+    int32_t list_cursor;         /* -1 inactive, 0..7 known skills, 8 the pending skill */
+    int32_t pending;             /* offered skills still queued */
+    int32_t replacement_pending; /* the chosen row is the offered skill itself */
+    int32_t row_waiting;         /* a message text row waits for input */
+    int32_t choice_active;       /* the two-entry Yes/No choice polls input */
+    int32_t choice_cursor;       /* 0 Yes, 1 No */
+} P4BattleSkillPrompt;
+/* P4PC_PAD_* bits that decline the offer through the native UI, or 0 to wait. */
+unsigned p4_battle_skill_prompt_buttons(const P4BattleSkillPrompt *prompt);
 #endif

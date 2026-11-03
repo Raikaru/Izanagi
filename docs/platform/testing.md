@@ -459,6 +459,55 @@ native tasks/menus, not estimated disc duration.
   absent or unreachable IDs fail loudly, with no fallback or game-state write.
   Remove or rebind the option before ally-targeted healing or after the enemy dies;
   charge Guard bypasses target bindings. Omitted bindings preserve existing input.
+- `battlerule:COND[@ID,ID]=KEYS` lines after a `battle:` line add up to sixteen ordered
+  rules to its driver; the next `battle:` (or `battle:off`) clears them. At each fresh
+  command that charge Guard did not claim, the first rule whose condition holds for the
+  acting character supplies the buttons; otherwise its `first`/`plan` default stands.
+  Rules, like Guard, do not consume first plans. Conditions read native unit records
+  (DatUnit HP `+8`, SP `+0xA`, ailments `bad` `+0xC`, charge flags `+0x14`, buff-level
+  nibbles `+0x1C`): `dead` (a downed party member; the first in party order is bound), `hp<N` (the lowest living
+  member under N HP, party order breaking ties), `sp<N` (the actor's own SP), `charge:ID`
+  (a living enemy with Power/Mind Charge), `status:MASK` (the actor's own ailments, e.g.
+  `0x8` silence), `afflicted:MASK` (the first living member, in party order, whose ailments
+  match, e.g. `0x4` fear before Ghastly Wail; bound), `enemy:ID` (a living enemy with that
+  ID is in the fight, e.g. Escape from the rare unit 138) and `buff:MASK` (the actor's own
+  stat levels with `datCalcHasBuffMask`'s stat bits, any matching; `0x80` is defense
+  down after Marakunda). A bound ally steers
+  the rule's TARGET confirmations as `targetN=` does for enemies, including downed
+  allies for a revive; an ally absent from a party target list fails the walk, while a
+  pane without party candidates (a macro's fallback to Attack) confirms as usual. Each
+  applied rule is noted in the boot log. `p4walk_battle_rule_select` is a pure function
+  over the snapshot; `walk_battle_rules_test` covers parsing, order, filters, ties,
+  buff decoding and binding choices.
+- `weak:E` and `hits:E` rules (E: 0 physical, 1 fire, 2 ice, 3 elec, 4 wind, 5 almighty,
+  6 light, 7 dark) bind an enemy instead of an ally: the first living enemy weak to E, or
+  the first that takes E at full strength (not resisted, nulled, repelled or absorbed).
+  The bound enemy steers TARGET confirmations like `targetN=`. Affinities are
+  `datCalcGetAffinity`'s (0023A6B0) for enemies, read from the native tables: the affinity
+  row (`iGpffffb3c8` by DatUnit `id2`), the enemy's resist/null/repel/absorb passives (its
+  skill row in `iGpffffb3c4`), Guard removing a weakness, and the Break and Wall buff
+  levels, so a Wall or Break counts the turn it lands. `p4walk_enemy_affinity` is the pure
+  combination; `walk_battle_rules_test` covers it with the boss and shadow rows.
+- A battle key may be `skill:ID` (a native skill ID) once the acting character's Skill
+  list is open, or `item:ID` (a native item ID, 0x301–0x3FF) once the Item list is open,
+  e.g. `circle,down,cross,skill:195,cross`: the driver presses Down or Up, the shorter
+  way around the wrapping list, from the row the list opens on to that entry.
+  `btlSelectionRefreshList` (00207140) builds the lists: the current persona's active
+  skills in record order, and the held items (`D_0079757A` counts) in ID order whose
+  granted skill (item metadata `+0x24`) is active. A list opens on its remembered row
+  (action `+0x3F0`, pair 1 Skill, pair 2 Item) when the cursor-memory option (flag 60)
+  is on, and on row 0 when that row is past the end (`btlSelectionUpdateWindow`). A
+  character can therefore heal, revive and attack with different skills or items in one
+  fight without depending on cursor history. An unlisted entry fails the walk, except in a
+  rule: a rule naming an entry the actor's list lacks (a spent Revival Bead, a skill not
+  learned) does not apply, so a later rule can name the fallback.
+  `p4walk_battle_list_moves` is covered by `walk_battle_rules_test`.
+- In the results phase (battle state 16) a persona level-up with eight skills asks which
+  one to forget, and its Yes/No defaults to No, so the driver's periodic Cross would loop.
+  While `shdPersonaSkillSelectSeq` reads input the driver declines the offer through the
+  real list and Yes/No (Left to the offered skill in slot 8, Cross, Yes), the same choice
+  as the battle simulator's `result_prompt.c`; a known skill is never forgotten.
+  `p4walk_skill_prompt_buttons` is covered by `walk_battle_rules_test`.
 
 Save-anchored story legs start from the nearest pristine collection checkpoint before
 the content, or a private input-produced descendant with recorded provenance. Keep
@@ -514,10 +563,15 @@ index 9. The registration's `-1:-1,4/10` is that non-field cleared-game state,
 not an April10 story-coverage claim.
 
 Magatsu's independent final-field card covers the collision-routed approach to
-Adachi and his first party COMMAND, not the preceding floors, his defeat or
-Ameno-sagiri. A separate post-Magatsu evening card covers Christmas and the
-PS2 calendar's automatic jump to March20. That leg stops on the native world
-map (`L map` and its symbol task, no active event); it does not select a
+Adachi and his first party COMMAND, not the preceding floors. From the same card,
+`collection_adachi_victory_1223` switches Yu to his slot-1 Persona in camp and
+defeats Adachi with `battle:` and `battlerule:` lines: a Balm of Life for any downed
+member, Yukiko's Me Patra on fear (`afflicted:0x4`, before Ghastly Wail), a Bead
+Chain under 250 HP, Guard while Adachi is charged, otherwise Ziodyne, Agidyne and
+Bufudyne, every skill and item chosen by native ID. It stops at Ameno-sagiri's first
+COMMAND, without claiming its defeat. A separate post-Magatsu evening card covers
+Christmas and the PS2 calendar's automatic jump to March20. That leg stops on the
+native world map (`L map` and its symbol task, no active event); it does not select a
 farewell destination or establish an ending.
 
 The last-day TV collection leg selects Rise's actual Search for Izanami answer

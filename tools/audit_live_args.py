@@ -442,7 +442,7 @@ def c_calls(text):
         else re.sub(r"[^\n]", " ", m.group(0)), text)
     alias = {}
     for m in re.finditer(r"(?m)^[ \t]*(?:extern[ \t]+)?[A-Za-z_][\w \t*]*?[ \t*](\w+)\s*"
-                         r"\([^;{}]*\)\s*__asm__\(\"(\w+)\"\)", alias_text):
+                         r"\([^;{}]*\)\s*(?:__asm__|P4_ASM_LABEL)\(\"(\w+)\"\)", alias_text):
         alias[m.group(1)] = m.group(2)
     calls = collections.defaultdict(list)
     depth = 0

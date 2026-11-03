@@ -2,6 +2,7 @@
  * p4hook (guest memory through pcsx2-hook) and the port (guest memory is the host's) use the same file. */
 #include "p4pc/walk_script.h"
 #include "p4pc/guest.h"
+#include "p4pc/hostmath.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -22,7 +23,7 @@ static const uint32_t kTaskLists[TASK_LISTS] = {0x00764adcu, 0x00764af4u, 0x0076
 #define STUCK_FRAMES 150
 #define STUCK_PROGRESS 3.0f
 
-typedef enum { C_WALK, C_FACE, C_PRESS, C_WAIT, C_WAITFIELD, C_WAITSTEP, C_WAITSTATE, C_WAITCONTROL, C_WAITMSG, C_SKIPMSG, C_SKIPFOR, C_SKIPFIELD, C_SKIPEVTMSG, C_WAITCHOICE, C_CHOOSE, C_AUTOSKIP, C_BATTLESKIP, C_PLAN, C_BATTLE, C_WAITBTL, C_WAITTASK, C_SKIPTASK, C_NAVPROBE, C_NAVDUMP, C_LOG, C_PUSH, C_EXIT } Kind;
+typedef enum { C_WALK, C_FACE, C_PRESS, C_WAIT, C_WAITFIELD, C_WAITSTEP, C_WAITSTATE, C_WAITCONTROL, C_WAITMSG, C_SKIPMSG, C_SKIPFOR, C_SKIPFIELD, C_SKIPEVTMSG, C_WAITCHOICE, C_CHOOSE, C_AUTOSKIP, C_BATTLESKIP, C_PLAN, C_BATTLE, C_BATTLERULE, C_WAITBTL, C_WAITTASK, C_SKIPTASK, C_NAVPROBE, C_NAVDUMP, C_LOG, C_PUSH, C_EXIT } Kind;
 
 typedef struct {
     Kind kind;
@@ -39,6 +40,7 @@ typedef struct {
 #define BTL_PARTY_MAX 8
 #define BATTLE_CONTEXT 0x0076449Cu         /* gp-0x4C54: iGpffffb3ac, the battle context (btlTaskCreate) */
 #define BTL_CMD_STATE 8
+#define BTL_RESULT_STATE 16       /* battle phase 16: the result task, which waits for every persona level-up */
 #define BTL_ACTION_COMMAND 5u     /* retail action table: COMMAND (001a1450 / 001a17d0), not AI/STANDBY */
 #define BTL_ACTION_TARGET 6u      /* TARGET (001a1c80 / 001a1ea0) confirms to action 15, cancels to COMMAND */
 #define BTL_ACTION_ALL_OUT_PROMPT 30u /* Yes/No before a requested COMMAND turn: Circle declines */
@@ -70,6 +72,14 @@ typedef struct {
     int shuffle_step;
     int persona_modal;                    /* explicit result-input profile; legacy card cadence stays unchanged */
     uint8_t commanded[BTL_PARTY_MAX];      /* the wheel remembers a character's last command inside a fight */
+    P4WalkBattleRule rules[P4WALK_BATTLE_RULE_MAX]; /* battlerule: lines, in order; cleared with the driver */
+    int nrules;
+    int cur_rule;                          /* the rule supplying the armed command's buttons, -1 for first/plan/guard */
+    uint32_t cur_ally;                     /* its bound ally's native ID, 0 for none */
+    uint32_t cur_enemy;                    /* its bound enemy's native ID (weak:/hits:), 0 for none */
+    int nav_left;                          /* skill:ID presses still due at the current step, -1 before they are counted */
+    unsigned nav_key;                      /* their button: 1 << P4W_DOWN or 1 << P4W_UP */
+    uint32_t prompt_at;                    /* the next results-screen skill-offer press is due */
 } BattleDriver;
 
 struct NavMap;
@@ -121,6 +131,14 @@ static const char *kButtons[P4W_BUTTON_COUNT] = {"up", "down", "left", "right", 
                                                  "start", "select", "l1", "r1", "l2", "r2", "l3", "r3"};
 
 static uint32_t parse_num(const char *s, char **end) { return (uint32_t)strtoul(s, end, 0); }
+/* Host strtof rounds by the thread's float mode, and the Windows CRT follows MXCSR's round-toward-zero where glibc rounds to nearest (about half of the
+ * decimal fractions then parse one ulp apart): a script's numbers parse in round-to-nearest, the same value on every target. */
+static float parse_float(const char *s, char **end) {
+    const unsigned csr = p4pc_fpu_host_enter();
+    const float v = strtof(s, end);
+    p4pc_fpu_host_leave(csr);
+    return v;
+}
 
 static int battle_plan(const char *s, size_t len, unsigned *out, int *n) {
     *n = 0;
@@ -128,6 +146,20 @@ static int battle_plan(const char *s, size_t len, unsigned *out, int *n) {
         const char *c = memchr(s, ',', len);
         size_t k = c ? (size_t)(c - s) : len;
         int i;
+        int item = k > 5 && !strncmp(s, "item:", 5);
+        if (item || (k > 6 && !strncmp(s, "skill:", 6))) {   /* skill:ID / item:ID: navigate the open Skill or Item list to that entry */
+            size_t at = item ? 5 : 6;
+            char num[16], *end;
+            if (k - at >= sizeof num || *n >= BTL_PLAN_MAX) return 0;
+            memcpy(num, s + at, k - at);
+            num[k - at] = 0;
+            unsigned long id = strtoul(num, &end, 0);
+            if (*end || (item ? id <= 0x300u || id >= 0x400u : !id || id >= 0x1B8u)) return 0;
+            out[(*n)++] = (item ? P4WALK_KEY_ITEM : P4WALK_KEY_SKILL) | (unsigned)id;
+            s += k + (c ? 1 : 0);
+            len -= k + (c ? 1 : 0);
+            continue;
+        }
         for (i = 0; i < P4W_BUTTON_COUNT; i++)
             if (strlen(kButtons[i]) == k && !strncmp(kButtons[i], s, k)) break;
         if (i == P4W_BUTTON_COUNT || *n >= BTL_PLAN_MAX) return 0;
@@ -143,6 +175,7 @@ static int battle_parse(const char *s, BattleDriver *d) {
     memset(d, 0, sizeof *d);
     d->delay = 20;
     d->seen = -2;
+    d->cur_rule = -1;
     if (!strcmp(s, "off")) return 1;
     d->on = 1;
     d->first_len = -1;
@@ -194,6 +227,168 @@ static int battle_parse(const char *s, BattleDriver *d) {
     return 1;
 }
 
+/* A rule's numeric field: digits from the first character (no sign or space), within [lo, hi], ending exactly at `end`. */
+static int rule_number(const char *s, const char *end, int base, unsigned long lo, unsigned long hi, uint32_t *out) {
+    char *stop;
+    if (s >= end || *s < '0' || *s > '9') return 0;
+    unsigned long v = strtoul(s, &stop, base);
+    if (stop != end || v < lo || v > hi) return 0;
+    *out = (uint32_t)v;
+    return 1;
+}
+
+int p4walk_battle_rule_parse(const char *text, P4WalkBattleRule *out) {
+    memset(out, 0, sizeof *out);
+    const char *eq = strchr(text, '=');
+    if (!eq || !eq[1]) return 0;
+    const char *at = memchr(text, '@', (size_t)(eq - text));
+    const char *cond = at ? at : eq;
+    size_t n = (size_t)(cond - text);
+    if (n == 4 && !strncmp(text, "dead", 4)) out->kind = P4WALK_RULE_DEAD;
+    else if (n > 3 && !strncmp(text, "hp<", 3)) {
+        if (!rule_number(text + 3, cond, 10, 1, 0xFFFFu, &out->value)) return 0;
+        out->kind = P4WALK_RULE_HP_BELOW;
+    } else if (n > 3 && !strncmp(text, "sp<", 3)) {
+        if (!rule_number(text + 3, cond, 10, 1, 0xFFFFu, &out->value)) return 0;
+        out->kind = P4WALK_RULE_SP_BELOW;
+    } else if (n > 7 && !strncmp(text, "charge:", 7)) {
+        if (!rule_number(text + 7, cond, 0, 1, 0xFFFFu, &out->value)) return 0;
+        out->kind = P4WALK_RULE_CHARGE;
+    } else if (n > 7 && !strncmp(text, "status:", 7)) {
+        if (!rule_number(text + 7, cond, 0, 1, 0xFFFFFFFFu, &out->value)) return 0;
+        out->kind = P4WALK_RULE_STATUS;
+    } else if (n > 5 && !strncmp(text, "buff:", 5)) {
+        if (!rule_number(text + 5, cond, 0, 1, 0x3FFu, &out->value)) return 0;
+        out->kind = P4WALK_RULE_BUFF;
+    } else if (n > 10 && !strncmp(text, "afflicted:", 10)) {
+        if (!rule_number(text + 10, cond, 0, 1, 0xFFFFFFFFu, &out->value)) return 0;
+        out->kind = P4WALK_RULE_AFFLICTED;
+    } else if (n > 6 && !strncmp(text, "enemy:", 6)) {
+        if (!rule_number(text + 6, cond, 0, 1, 0xFFFFu, &out->value)) return 0;
+        out->kind = P4WALK_RULE_ENEMY;
+    } else if (n > 5 && (!strncmp(text, "weak:", 5) || !strncmp(text, "hits:", 5))) {
+        if (!rule_number(text + 5, cond, 10, 0, 7, &out->value)) return 0;
+        out->kind = text[0] == 'w' ? P4WALK_RULE_WEAK : P4WALK_RULE_HITS;
+    } else return 0;
+    if (at) {
+        const char *p = at + 1;
+        for (;;) {
+            const char *comma = memchr(p, ',', (size_t)(eq - p));
+            const char *end = comma ? comma : eq;
+            uint32_t id;
+            if (!rule_number(p, end, 10, 1, BTL_PARTY_MAX, &id)) return 0;
+            out->actors |= 1u << (id - 1u);
+            if (!comma) break;
+            p = comma + 1;
+        }
+    }
+    return battle_plan(eq + 1, strlen(eq + 1), out->keys, &out->key_count) && out->key_count > 0;
+}
+
+/* datCalcGetBuffLevel: index i's signed nibble at DatUnit +0x1C + i/2 (odd indices high), values above 7 minus 15. */
+static int rule_buff_level(const P4WalkBattleUnit *u, unsigned index) {
+    int v = (u->buffs[index >> 1] >> ((index & 1u) * 4u)) & 0xF;
+    return v > 7 ? v - 15 : v;
+}
+
+/* datCalcHasBuffMask's stat bits: 2i selects stat i raised, 2i+1 lowered (0x80: defense down); any selected bit matches. */
+static int rule_buff_match(const P4WalkBattleUnit *u, uint32_t mask) {
+    for (unsigned stat = 0; stat < 5; stat++) {
+        int level = rule_buff_level(u, stat);
+        if (((mask >> (2u * stat)) & 1u) && level > 0) return 1;
+        if (((mask >> (2u * stat + 1u)) & 1u) && level < 0) return 1;
+    }
+    return 0;
+}
+
+int p4walk_battle_rule_select(const P4WalkBattleRule *rules, int count, const P4WalkBattleView *v, uint32_t *ally, uint32_t *enemy) {
+    *ally = 0;
+    *enemy = 0;
+    if (v->actor < 1 || v->actor > BTL_PARTY_MAX) return -1;
+    const P4WalkBattleUnit *self = NULL;
+    for (int i = 0; i < v->party_count; i++)
+        if (v->party[i].id == v->actor) { self = &v->party[i]; break; }
+    for (int r = 0; r < count; r++) {
+        const P4WalkBattleRule *rule = &rules[r];
+        if (rule->actors && !(rule->actors & (1u << (v->actor - 1u)))) continue;
+        if (v->unusable & (1u << r)) continue;
+        int best = -1;
+        switch (rule->kind) {
+        case P4WALK_RULE_DEAD:
+            for (int i = 0; i < v->party_count && best < 0; i++)
+                if (!v->party[i].hp) best = i;
+            break;
+        case P4WALK_RULE_HP_BELOW:
+            for (int i = 0; i < v->party_count; i++)
+                if (v->party[i].hp && v->party[i].hp < rule->value && (best < 0 || v->party[i].hp < v->party[best].hp)) best = i;
+            break;
+        case P4WALK_RULE_AFFLICTED:
+            for (int i = 0; i < v->party_count && best < 0; i++)
+                if (v->party[i].hp && (v->party[i].bad & rule->value)) best = i;
+            break;
+        case P4WALK_RULE_SP_BELOW:
+            if (self && self->sp < rule->value) return r;
+            continue;
+        case P4WALK_RULE_CHARGE:
+            for (int i = 0; i < v->enemy_count; i++)
+                if (v->enemies[i].id == rule->value && v->enemies[i].hp && (v->enemies[i].status & 0xC0000u)) return r;
+            continue;
+        case P4WALK_RULE_ENEMY:
+            for (int i = 0; i < v->enemy_count; i++)
+                if (v->enemies[i].id == rule->value && v->enemies[i].hp) return r;
+            continue;
+        case P4WALK_RULE_STATUS:
+            if (self && (self->bad & rule->value)) return r;
+            continue;
+        case P4WALK_RULE_BUFF:
+            if (self && rule_buff_match(self, rule->value)) return r;
+            continue;
+        case P4WALK_RULE_WEAK:
+        case P4WALK_RULE_HITS:
+            for (int i = 0; i < v->enemy_count; i++) {
+                const P4WalkBattleUnit *e = &v->enemies[i];
+                unsigned bit = 1u << rule->value;
+                if (!e->hp) continue;
+                if (rule->kind == P4WALK_RULE_WEAK ? (e->weak & bit) != 0 : !((e->block | e->resist) & bit)) { *enemy = e->id; return r; }
+            }
+            continue;
+        default:
+            continue;
+        }
+        if (best >= 0) { *ally = v->party[best].id; return r; }
+    }
+    return -1;
+}
+
+uint32_t p4walk_enemy_affinity(unsigned raw, unsigned passives, int guarding, int broken, int walled) {
+    uint32_t affinity = ((uint32_t)(raw & 0xFF00u) << 16) | ((raw & 0xFFu) * 5u);
+    if (!(affinity & 0xFFFFu)) {
+        if (affinity & 0x8000000u) affinity |= 0x7Du;
+        else if (affinity & 0x27000000u) affinity |= 100u;
+        else if (affinity & 0x10000000u) affinity |= 0x32u;
+    }
+    if (guarding && (affinity & 0x8000000u)) affinity = (affinity & 0xF7FF0000u) | 100u;
+    if ((passives & 1u) && !(affinity & 0x7000000u)) affinity = (((affinity & 0xF7FFFFFFu) | 0x10000000u) & 0xFFFF0000u) | 0x32u;
+    if ((passives & 2u) && !(affinity & 0x6000000u)) affinity = (((affinity & 0xE7FFFFFFu) | 0x1000000u) & 0xFFFF0000u) | 0x64u;
+    if ((passives & 4u) && !(affinity & 0x4000000u)) affinity = (((affinity & 0xE6FFFFFFu) | 0x2000000u) & 0xFFFF0000u) | 0x64u;
+    if (passives & 8u) affinity = (((affinity & 0xE4FFFFFFu) | 0x4000000u) & 0xFFFF0000u) | 0x64u;
+    if (broken && (affinity & 0x17000000u)) affinity = (affinity & 0xE8FF0000u) | 100u;
+    if (walled && ((affinity & 0x8000000u) || !(affinity & 0xFF000000u)))
+        affinity = (((affinity & 0xFFFFFFu) | 0x10000000u) & 0xFFFF0000u) | 0x32u;
+    return affinity;
+}
+
+int p4walk_battle_list_moves(const uint16_t *list, int count, int cursor, unsigned id, int *moves) {
+    if (count <= 0 || cursor < 0 || cursor >= count) return 0;
+    for (int i = 0; i < count; i++) {
+        if (list[i] != id) continue;
+        int down = (i - cursor + count) % count;
+        *moves = down <= count - down ? down : down - count;
+        return 1;
+    }
+    return 0;
+}
+
 P4Walk *p4walk_parse(const char *text, char *err, size_t errsz) {
     P4Walk *w = calloc(1, sizeof *w);
     w->autoskip = 1;
@@ -232,19 +427,19 @@ P4Walk *p4walk_parse(const char *text, char *err, size_t errsz) {
             if (s[5] == 'g') c->value = 0x10000u;                    /* walk:goal: live upstairs quad, or a fixed field's placed marker */
             if (s[5] == 'e') c->value = 0x10001u;                    /* walk:entry: live downstairs quad */
             if (unit && *e == ':') c->value = parse_num(e + 1, &e);
-            if (*e == ',') c->c = strtof(e + 1, &e);
+            if (*e == ',') c->c = parse_float(e + 1, &e);
             if (*e || c->c <= 0) goto bad;
         } else if (!strncmp(s, "walk:", 5)) {
             c->kind = C_WALK;
-            c->a = strtof(s + 5, &e);
+            c->a = parse_float(s + 5, &e);
             if (*e != ',') goto bad;
-            c->b = strtof(e + 1, &e);
+            c->b = parse_float(e + 1, &e);
             c->c = 40.0f;
-            if (*e == ',') c->c = strtof(e + 1, &e);
+            if (*e == ',') c->c = parse_float(e + 1, &e);
             if (*e || c->c <= 0) goto bad;
         } else if (!strncmp(s, "face:", 5)) {
             c->kind = C_FACE;
-            c->a = strtof(s + 5, &e);
+            c->a = parse_float(s + 5, &e);
             if (*e) goto bad;
         } else if (!strncmp(s, "press:", 6)) {
             c->kind = C_PRESS;
@@ -255,11 +450,11 @@ P4Walk *p4walk_parse(const char *text, char *err, size_t errsz) {
                 if (strlen(kButtons[i]) == bl && !strncmp(kButtons[i], s + 6, bl)) c->button = i;
             if (c->button < 0) goto bad;
             c->a = 3;
-            if (colon) { c->a = strtof(colon + 1, &e); if (*e) goto bad; }
+            if (colon) { c->a = parse_float(colon + 1, &e); if (*e) goto bad; }
             if (c->a < 3) c->a = 3;
         } else if (!strncmp(s, "wait:", 5)) {
             c->kind = C_WAIT;
-            c->a = strtof(s + 5, &e);
+            c->a = parse_float(s + 5, &e);
             if (*e) goto bad;
         } else if (!strncmp(s, "waitfield:", 10)) {
             c->kind = C_WAITFIELD;
@@ -311,15 +506,15 @@ P4Walk *p4walk_parse(const char *text, char *err, size_t errsz) {
             else goto bad;
         } else if (!strncmp(s, "skip:", 5)) {
             c->kind = C_SKIPFOR;
-            c->a = strtof(s + 5, &e);
+            c->a = parse_float(s + 5, &e);
             if (*e || c->a <= 0) goto bad;
         } else if (!strncmp(s, "push:", 5)) {
             c->kind = C_PUSH;
-            c->a = strtof(s + 5, &e);
+            c->a = parse_float(s + 5, &e);
             if (*e != ',') goto bad;
-            c->b = strtof(e + 1, &e);
+            c->b = parse_float(e + 1, &e);
             if (*e != ',') goto bad;
-            c->c = strtof(e + 1, &e);                      /* frames */
+            c->c = parse_float(e + 1, &e);                      /* frames */
             if (*e || c->c <= 0) goto bad;
         } else if (!strcmp(s, "log")) {
             c->kind = C_LOG;
@@ -369,6 +564,10 @@ P4Walk *p4walk_parse(const char *text, char *err, size_t errsz) {
             BattleDriver probe;
             c->kind = C_BATTLE;
             if (!battle_parse(s + 7, &probe)) goto bad;
+        } else if (!strncmp(s, "battlerule:", 11)) {
+            P4WalkBattleRule probe;
+            c->kind = C_BATTLERULE;
+            if (!p4walk_battle_rule_parse(s + 11, &probe)) goto bad;
         } else if (!strncmp(s, "battleskip:", 11)) {
             c->kind = C_BATTLESKIP;
             if (!strcmp(s + 11, "on")) c->on = 1;
@@ -527,6 +726,67 @@ int p4walk_player(const P4WalkHost *h, float *x, float *z, float *fx, float *fz)
     if (l > 1e-4f) { ax /= l; az /= l; }
     *fx = ax;
     *fz = az;
+    return 1;
+}
+
+/* ---- Cross-target dungeon digest (include/p4pc/walk_script.h) -------------------------------------------------------------------------------------------
+ * Guest data only: link and matrix words are followed, never hashed, because a 64-bit host's heap blocks need not sit at the same guest addresses on
+ * every target. A matrix is its rows, position and flags, not RwMatrix's three pad words: the game leaves those uninitialised (btlUnitUpdateAll,
+ * 0019c0d0, builds each unit's matrix on the stack and sets only rows, position and flags, as retail does, then copies all 64 bytes), so they hold
+ * each host's stack garbage, and the VU0 routines carry such w lanes on. The grid is the dungeon floor's generated layout: the placed cells of
+ * read_grid below (outside a generated floor that area holds other data, which is left out). The additive generator is the one LOG reports (its slot
+ * in the engine block at 0x008872E0: base, front, back; 31 state words), RpRandom's Mersenne Twister is the array the walk digest hashes. */
+static uint32_t fnv_word(uint32_t hash, uint32_t v) {
+    for (int b = 0; b < 4; b++) hash = (hash ^ ((v >> (8 * b)) & 0xFFu)) * 16777619u;
+    return hash;
+}
+
+static uint32_t fnv_words(const P4WalkHost *h, uint32_t hash, uint32_t addr, uint32_t words) {
+    for (uint32_t k = 0; addr && k < words; k++) hash = fnv_word(hash, h->read32(h->user, addr + 4u * k));
+    return hash;
+}
+
+static uint32_t fnv_matrix(const P4WalkHost *h, uint32_t hash, uint32_t m) {
+    for (uint32_t k = 0; m && k < 16; k++)
+        if (k != 7 && k != 11 && k != 15) hash = fnv_word(hash, h->read32(h->user, m + 4u * k));
+    return hash;
+}
+
+static uint32_t digest_rng(const P4WalkHost *h, uint32_t hash) {
+    uint32_t blk = 0x008872E0u + h->read32(h->user, RNG_SLOT_INDEX), base = h->read32(h->user, blk);
+    if (!base) return fnv_word(hash, 0);
+    hash = fnv_word(hash, h->read32(h->user, blk + 4) - base);
+    hash = fnv_word(hash, h->read32(h->user, blk + 8) - base);
+    return fnv_words(h, hash, base, 31);
+}
+
+int p4walk_dungeon_digest(const P4WalkHost *h, uint32_t frame, uint32_t every, uint32_t *roll, char *line, size_t n) {
+    uint32_t player = p4walk_player_matrix(h);
+    *roll = digest_rng(h, fnv_matrix(h, *roll, player));
+    if (!every || frame % every != 0) return 0;
+    const uint32_t seed0 = 2166136261u;
+    uint32_t root = h->read32(h->user, FIELD_ROOT_HANDLE), work = root ? h->read32(h->user, root + TASK_WORK) : 0;
+    uint32_t ids = work ? h->read32(h->user, work + 0x18) : 0xFFFFFFFFu;
+    uint32_t step_task = h->read32(h->user, 0x00764334u), step_work = step_task ? h->read32(h->user, step_task + TASK_WORK) : 0;
+    uint32_t grid = seed0;
+    for (uint32_t r = 0; r < 24; r++)
+        for (uint32_t c = 0; c < 16; c++) {
+            uint32_t a = FIELD_ROOT_HANDLE + 0x54u + r * 0x100u + c * 0x10u, w0 = h->read32(h->user, a);
+            if ((w0 & 0xFFu) != 1u || (w0 >> 28) != 3u) continue;          /* read_grid's placed piece */
+            grid = fnv_word(fnv_word(grid, r << 8 | c), w0);
+            grid = fnv_words(h, grid, a + 4u, 2);
+        }
+    uint32_t units = seed0, nunits = 0;
+    uint32_t obj = h->read32(h->user, SCENE_OBJECT), mgr = obj ? h->read32(h->user, obj + 8) : 0;
+    for (uint32_t p = mgr ? h->read32(h->user, mgr + 4u) : 0; p && nunits < 64; p = h->read32(h->user, p + 0x138), nunits++) {
+        units = fnv_word(units, h->read32(h->user, p) & 0xFFFFu);
+        units = fnv_matrix(h, units, h->read32(h->user, p + 0x164));
+    }
+    uint32_t ctx = task_node(h, "battle") ? h->read32(h->user, BATTLE_CONTEXT) : 0;
+    snprintf(line, n, "dungeon digest flip %u field %u:%u step %d seed %08x grid %08x rng %08x mt %08x player %08x units %u:%08x battle %d roll %08x",
+             frame, ids & 0xFFFFu, ids >> 16, step_work ? (int32_t)h->read32(h->user, step_work + 4) : -1, h->read32(h->user, 0x00764330u), grid,
+             digest_rng(h, seed0), fnv_words(h, seed0, 0x00885A90u, 0x270u), fnv_matrix(h, seed0, player), nunits, units,
+             ctx ? (int32_t)h->read32(h->user, ctx + 0x2FC) : -1, *roll);
     return 1;
 }
 
@@ -815,6 +1075,25 @@ static int plan_step(const P4WalkHost *h, float px, float pz, float tx, float tz
     *wz = cz;
     *metric = metric0;
     return 1;
+}
+
+/* face:DEG's direction (sin, cos) from basic IEEE operations only: the hosts' sinf/cosf differ in the last place between glibc and the Windows CRT for
+ * about one input in eighty (whole degrees -360..360: 16 in the EE mode, face:11 and face:101 among them, 14 others in round-to-nearest), and a script
+ * must turn the player the same way on every target. fmod is exact; the quadrant's remainder is at most 45 degrees, where the series to x^11 is far
+ * below a float ulp. */
+static void face_dir(float deg, float *s, float *c) {
+    double d = fmod((double)deg, 360.0);
+    if (d < 0.0) d += 360.0;
+    int q = (int)((d + 45.0) / 90.0);
+    double x = (d - 90.0 * (double)q) * (3.14159265358979323846 / 180.0), x2 = x * x;
+    double sn = x * (1.0 - x2 / 6.0 * (1.0 - x2 / 20.0 * (1.0 - x2 / 42.0 * (1.0 - x2 / 72.0 * (1.0 - x2 / 110.0)))));
+    double cs = 1.0 - x2 / 2.0 * (1.0 - x2 / 12.0 * (1.0 - x2 / 30.0 * (1.0 - x2 / 56.0 * (1.0 - x2 / 90.0))));
+    switch (q & 3) {
+    case 0: *s = (float)sn; *c = (float)cs; break;
+    case 1: *s = (float)cs; *c = (float)-sn; break;
+    case 2: *s = (float)-sn; *c = (float)-cs; break;
+    default: *s = (float)-cs; *c = (float)sn; break;
+    }
 }
 
 /* The d-pad directions that move the player along the world vector (dx, dz) as seen by the camera. */
@@ -1230,11 +1509,14 @@ static int battle_enemy_charged(const P4WalkHost *h, uint32_t context, unsigned 
 }
 
 /* TARGET owns a list of action pointers, not unit pointers. Use its live
- * candidates and cursor; formation/screen order is not the array's order. */
-static int battle_bound_target(const P4WalkHost *h, uint32_t actor, unsigned id) {
+ * candidates and cursor; formation/screen order is not the array's order.
+ * An enemy or a living ally must have HP; a revive's ally must be down (HP 0).
+ * A rule's ally binding does not apply to a pane without party candidates
+ * (its macro fell back to an enemy-targeted command): that pane confirms as is. */
+static int battle_bound_target(const P4WalkHost *h, uint32_t actor, unsigned id, int ally, int down) {
     uint32_t cursor = h->read32(h->user, actor + 0xD0);
     unsigned count = cursor & 0xFFFFu, selected = cursor >> 16;
-    int found = 0, selected_match = 0;
+    int found = 0, selected_match = 0, allies = 0;
     if (count > 12 || selected >= count) return -1;
     for (unsigned n = 0; n < count; n++) {
         uint32_t a = h->read32(h->user, actor + 0x98 + n * 4);
@@ -1244,12 +1526,14 @@ static int battle_bound_target(const P4WalkHost *h, uint32_t actor, unsigned id)
         uint32_t data = h->read32(h->user, u + 0xA64);
         if (data <= 0x100000u || data >= 0x02000000u) continue;
         uint32_t identity = h->read32(h->user, data);
-        if (!(identity & 4u) || (identity >> 16) != id ||
-            !(h->read32(h->user, data + 8) & 0xFFFFu) ||
-            (h->read32(h->user, data + 0xC) & 0x80000u)) continue;
+        int hp = (h->read32(h->user, data + 8) & 0xFFFFu) != 0, enemy = (identity & 4u) != 0;
+        allies += !enemy;
+        if (enemy == (ally != 0) || (identity >> 16) != id) continue;
+        if (down ? hp : (!hp || (h->read32(h->user, data + 0xC) & 0x80000u))) continue;
         found = 1;
         if (n == selected) selected_match = 1;
     }
+    if (ally && !allies) return 1;
     if (!found) return -1;
     /* Retail TARGET copies every candidate for target classes 1 and 2. */
     uint32_t table = h->read32(h->user, 0x007644A8u);
@@ -1257,6 +1541,194 @@ static int battle_bound_target(const P4WalkHost *h, uint32_t actor, unsigned id)
     unsigned mode = table > 0x100000u && table < 0x02000000u ?
         h->read32(h->user, table + skill * 0x28u + 8) & 0xFFu : 0;
     return selected_match || mode == 1 || mode == 2;
+}
+
+#define BTL_ENEMY_MAX 32
+static uint32_t read8(const P4WalkHost *h, uint32_t a) { return (h->read32(h->user, a & ~3u) >> ((a & 3u) * 8u)) & 0xFFu; }
+static uint32_t read16(const P4WalkHost *h, uint32_t a) { return (h->read32(h->user, a & ~3u) >> ((a & 2u) * 8u)) & 0xFFFFu; }
+#define ENEMY_TABLE_PTR 0x007644B4u        /* iGpffffb3c4: 0x3C-byte enemy rows by DatUnit id, skills u16[8] at +0xE */
+#define AFFINITY_TABLE_PTR 0x007644B8u     /* iGpffffb3c8: 0x20-byte affinity rows (u16 per element) by DatUnit id2 */
+
+/* datCalcGetAffinity's inputs per element 0..7 (physical, fire, ice, elec, wind, almighty, light, dark): the passive skill IDs for resist,
+ * null, repel and absorb (0: none), and the Break and Wall buff indices (-1: none). */
+static const uint16_t kAffinityPassives[8][4] = {
+    {0x1B8, 0x1B9, 0x1BA, 0x1BB}, {0x1BC, 0x1BD, 0x1BE, 0x1BF}, {0x1C0, 0x1C1, 0x1C2, 0x1C3}, {0x1C4, 0x1C5, 0x1C6, 0x1C7},
+    {0x1C8, 0x1C9, 0x1CA, 0x1CB}, {0, 0, 0, 0}, {0x1CC, 0x1CD, 0x1CE, 0}, {0x1CF, 0x1D0, 0x1D1, 0}};
+static const int8_t kAffinityBreak[8] = {-1, 8, 9, 11, 10, -1, -1, -1};
+static const int8_t kAffinityWall[8] = {-1, 12, 13, 14, 15, -1, -1, -1};
+
+/* One unit record (DatUnit: identity +0, id2 +4, HP +8, ailments +0xC, charge flags +0x14, buff levels +0x1C) into a rule snapshot, with an
+ * enemy's element affinities; 0 if the pointer is not one. */
+static int battle_unit(const P4WalkHost *h, uint32_t unit, int want_enemy, P4WalkBattleUnit *out) {
+    if (unit <= 0x100000u || unit >= 0x02000000u) return 0;
+    uint32_t data = h->read32(h->user, unit + 0xA64);
+    if (data <= 0x100000u || data >= 0x02000000u) return 0;
+    uint32_t identity = h->read32(h->user, data);
+    if (((identity & 4u) != 0) != (want_enemy != 0)) return 0;
+    memset(out, 0, sizeof *out);
+    out->id = identity >> 16;
+    out->hp = h->read32(h->user, data + 8) & 0xFFFFu;
+    out->sp = h->read32(h->user, data + 8) >> 16;
+    out->bad = h->read32(h->user, data + 0xC);
+    out->status = h->read32(h->user, data + 0x14);
+    for (unsigned k = 0; k < 2; k++) {
+        uint32_t word = h->read32(h->user, data + 0x1C + k * 4u);
+        for (unsigned b = 0; b < 4; b++) out->buffs[k * 4u + b] = (uint8_t)(word >> (8u * b));
+    }
+    uint32_t rows = h->read32(h->user, AFFINITY_TABLE_PTR), meta = h->read32(h->user, ENEMY_TABLE_PTR);
+    if (want_enemy && rows && meta) {
+        unsigned id2 = h->read32(h->user, data + 4) & 0xFFFFu, skills[8];
+        for (unsigned s = 0; s < 8; s++) skills[s] = read16(h, meta + out->id * 0x3Cu + 0xEu + s * 2u);
+        int guarding = (identity & 0x200u) != 0;
+        for (unsigned e = 0; e < 8; e++) {
+            unsigned passives = 0;
+            for (unsigned s = 0; s < 8; s++) {
+                for (unsigned p = 0; p < 4; p++)
+                    if (kAffinityPassives[e][p] && skills[s] == kAffinityPassives[e][p]) passives |= 1u << p;
+                if (e != 5 && skills[s] == 0x1DB) passives |= 2u;   /* nulls every element but almighty */
+            }
+            int broken = kAffinityBreak[e] >= 0 && rule_buff_level(out, (unsigned)kAffinityBreak[e]) > 0;
+            int walled = kAffinityWall[e] >= 0 && rule_buff_level(out, (unsigned)kAffinityWall[e]) > 0;
+            uint32_t a = p4walk_enemy_affinity(read16(h, rows + id2 * 0x20u + e * 2u), passives, guarding, broken, walled);
+            if (a & 0x8000000u) out->weak |= (uint16_t)(1u << e);
+            if (a & 0x7000000u) out->block |= (uint16_t)(1u << e);
+            if (a & 0x10000000u) out->resist |= (uint16_t)(1u << e);
+        }
+    }
+    return 1;
+}
+
+/* The battlerule: snapshot: the party chain (context +0x178, next +0xA6C) and the enemy action list (+0x174, next +0x450). */
+static void battle_view(const P4WalkHost *h, uint32_t context, P4WalkBattleUnit *party, int *np, P4WalkBattleUnit *enemies, int *ne) {
+    *np = *ne = 0;
+    uint32_t u = h->read32(h->user, context + 0x178);
+    for (int n = 0; n < BTL_PARTY_MAX && u > 0x100000u && u < 0x02000000u; n++, u = h->read32(h->user, u + 0xA6C))
+        if (battle_unit(h, u, 0, &party[*np])) ++*np;
+    uint32_t a = h->read32(h->user, context + 0x174);
+    for (int n = 0; n < BTL_ENEMY_MAX && a > 0x100000u && a < 0x02000000u; n++, a = h->read32(h->user, a + 0x450))
+        if (*ne < BTL_ENEMY_MAX && battle_unit(h, h->read32(h->user, a + 0x30), 1, &enemies[*ne])) ++*ne;
+}
+
+#define SKILL_TABLE_PTR 0x007644A8u        /* gp-0x4C48: iGpffffb3b8, 0x28-byte DatSkillEntry rows (flags01 at +1) */
+#define ITEM_TABLE_PTR 0x007642A0u         /* the item metadata pointer slot (datEntryAt): 0x44-byte rows, granted skill at +0x24 */
+#define ITEM_COUNTS 0x0079757Au            /* D_0079757A: datItemCount's byte per item ID */
+#define HERO_PERSONA_SLOT 0x00797F88u      /* D_00797F88: the hero's active roster slot (datPersonaGetRecord) */
+#define HERO_ROSTER 0x00797F8Cu            /* datPersonaRosterSlot: 0x30-byte records */
+#define PARTY_SLOTS 0x00796E50u            /* DatPartySlot[ID - 2], 0x88 bytes, persona record at +0x54 */
+#define FLAG_WORDS 0x0079B1CCu             /* D_00797560 +0x3C6C: datGetFlag's words */
+
+static int skill_active(const P4WalkHost *h, uint32_t table, unsigned id) {
+    return id && id < 0x1B8u && ((h->read32(h->user, table + id * 0x28u) >> 8) & 2u);
+}
+
+/* The actor's Skill or Item list as btlSelectionRefreshList (00207140) builds it: its count, with the character ID in *pc. */
+static int battle_list(const P4WalkHost *h, uint32_t actor, int items, uint16_t list[256], unsigned *pc) {
+    uint32_t unit = h->read32(h->user, actor + 0x30);
+    int count = 0;
+    uint32_t table = h->read32(h->user, SKILL_TABLE_PTR);
+    *pc = h->read32(h->user, unit + 0xA4) & 0xFFFFu;
+    if (items) {
+        uint32_t meta = h->read32(h->user, ITEM_TABLE_PTR);
+        for (unsigned id = 0x301; meta && table && id < 0x400; id++) {
+            if (!((h->read32(h->user, (ITEM_COUNTS + id) & ~3u) >> (((ITEM_COUNTS + id) & 3u) * 8u)) & 0xFFu)) continue;
+            if (skill_active(h, table, h->read32(h->user, meta + id * 0x44u + 0x24u) & 0xFFFFu)) list[count++] = (uint16_t)id;
+        }
+    } else {
+        uint32_t record = 0;
+        if (*pc == 1) record = HERO_ROSTER + (h->read32(h->user, HERO_PERSONA_SLOT) & 0xFFFFu) * 0x30u;
+        else if (*pc >= 2 && *pc <= 10) record = PARTY_SLOTS + (*pc - 2u) * 0x88u + 0x54u;
+        if (record && table && !((h->read32(h->user, unit + 0xA0) >> 16) & 0xFFu))   /* BtlUnit +0xA2 nonzero lists nothing */
+            for (unsigned i = 0; i < 8; i++) {
+                unsigned id = (h->read32(h->user, record + 0xC + (i & ~1u) * 2u) >> ((i & 1u) * 16u)) & 0xFFFFu;
+                if (skill_active(h, table, id)) list[count++] = (uint16_t)id;
+            }
+    }
+    return count;
+}
+
+/* A rule whose skill:/item: entry is missing from the actor's list (a spent Revival Bead, a skill not learned) cannot apply. */
+static int battle_rule_usable(const P4WalkHost *h, uint32_t actor, const P4WalkBattleRule *rule) {
+    uint16_t list[256];
+    unsigned pc;
+    for (int k = 0; k < rule->key_count; k++) {
+        unsigned key = rule->keys[k];
+        if (!(key & (P4WALK_KEY_SKILL | P4WALK_KEY_ITEM))) continue;
+        int count = battle_list(h, actor, (key & P4WALK_KEY_ITEM) != 0, list, &pc), held = 0;
+        for (int i = 0; i < count && !held; i++) held = list[i] == (key & 0xFFFFu);
+        if (!held) return 0;
+    }
+    return 1;
+}
+
+/* skill:ID / item:ID: the signed Down/Up presses from the row the actor's Skill or Item list opens on to that entry (see the header).
+ * The opening row is btlSelectionUpdateWindow's (00202D20). 0 with `why` set on failure. */
+static int battle_list_key_moves(const P4WalkHost *h, uint32_t actor, unsigned key, int *moves, char *why, size_t whysz) {
+    unsigned pc, want = key & 0xFFFFu;
+    int items = (key & P4WALK_KEY_ITEM) != 0;
+    uint16_t list[256];
+    int count = battle_list(h, actor, items, list, &pc);
+    int cursor = 0;                                         /* pair 1 (Skill) or 2 (Item) of the remembered {first, selected} rows */
+    uint32_t saved = h->read32(h->user, actor + 0x3F0);
+    if (((h->read32(h->user, FLAG_WORDS + 4u) >> 28) & 1u) && saved > 0x100000u && saved < 0x02000000u)
+        cursor = (int16_t)(h->read32(h->user, saved + (items ? 8u : 4u)) >> 16);
+    if (cursor < 0 || cursor >= count) cursor = 0;          /* a remembered row past the list's end opens on row 0 */
+    if (p4walk_battle_list_moves(list, count, cursor, want, moves)) return 1;
+    int at = snprintf(why, whysz, "%s:%#x is not in character %u's %s list (%d entries:", items ? "item" : "skill", want, pc,
+                      items ? "Item" : "Skill", count);
+    for (int i = 0; i < count && i < 8 && at > 0 && (size_t)at < whysz; i++)
+        at += snprintf(why + at, whysz - (size_t)at, " %#x", list[i]);
+    if (at > 0 && (size_t)at < whysz) snprintf(why + at, whysz - (size_t)at, "%s)", count > 8 ? " ..." : "");
+    return 0;
+}
+
+#define MESSAGE_WINDOW_CURRENT 0x00882F60u /* NmMesWindowRecord returned by nmMesWindowCurrent: handle +0, state byte +4 */
+#define MESSAGE_WINDOW_SLOTS 0x00881808u   /* ItfMesWindowSlot[], 0x20 stride, window at +0 */
+
+unsigned p4walk_skill_prompt_buttons(const P4WalkSkillPrompt *p) {
+    switch (p->state) {
+    case 0: case 1: case 6:                                 /* opening and "did not learn" messages: text only */
+        return p->row_waiting ? 1u << P4W_CROSS : 0;
+    case 2:                                                 /* the list: walk to the offered skill (slot 8) and pick it */
+        if (!p->list_active || p->list_cursor < 0 || p->pending <= 0) return 0;
+        return 1u << (p->list_cursor == 8 ? P4W_CROSS : P4W_LEFT);
+    case 3:                                                 /* Yes only for the offered skill itself, otherwise No */
+        if (p->choice_active) {
+            int wanted = p->replacement_pending ? 0 : 1;
+            if (p->choice_cursor == wanted) return 1u << P4W_CROSS;
+            return 1u << (wanted ? P4W_DOWN : P4W_UP);
+        }
+        return p->row_waiting ? 1u << P4W_CROSS : 0;
+    default:
+        return 0;
+    }
+}
+
+/* The skill-replace task (shdPersonaSkillSelectSeq 0011f5a0, stored under the 23-character name) while it reads input
+ * (states 0-3 and 6): its persona panel and the current message window, as the battle simulator reads them. */
+static int battle_skill_prompt(const P4WalkHost *h, P4WalkSkillPrompt *p) {
+    uint32_t node = task_node(h, "shdPersonaSkillSelectSe");
+    uint32_t work = node ? h->read32(h->user, node + TASK_WORK) : 0;
+    uint32_t parent = work ? h->read32(h->user, work + 0xC) : 0;
+    uint32_t panel = parent ? h->read32(h->user, parent + TASK_WORK) : 0;
+    if (!panel) return 0;
+    memset(p, 0, sizeof *p);
+    p->state = (int32_t)h->read32(h->user, work + 8);
+    if (p->state < 0 || (p->state > 3 && p->state != 6)) return 0;
+    p->list_active = (h->read32(h->user, panel + 0x534) & 0x800u) != 0;
+    p->list_cursor = (int8_t)read8(h, panel + 0x88);
+    p->pending = (int32_t)read16(h, panel + 0x8C + 0x224);
+    p->replacement_pending = read16(h, work + 6) == read16(h, panel + 0x8C + 0x66);
+    int32_t handle = (int32_t)h->read32(h->user, MESSAGE_WINDOW_CURRENT);
+    int8_t window_state = (int8_t)read8(h, MESSAGE_WINDOW_CURRENT + 4);     /* 1 text, 2 choice/close */
+    if ((window_state == 1 || window_state == 2) && handle >= 0 && handle < 0x100) {
+        uint32_t window = h->read32(h->user, MESSAGE_WINDOW_SLOTS + (uint32_t)handle * 0x20u);
+        if (window) {
+            p->row_waiting = (int8_t)read8(h, window + 0x24) == 1;
+            p->choice_active = (int16_t)read16(h, window + 0x48) == 2 && (int16_t)read16(h, window + 0x4E) == 2;
+            p->choice_cursor = (int16_t)read16(h, window + 0x4A);
+        }
+    }
+    return 1;
 }
 
 /* The battle driver: in a fight it owns the pad (a held-back walk script would press Attack every 24 frames); outside one it returns 0 and the
@@ -1300,9 +1772,17 @@ static int battle_drive(P4Walk *w, const P4WalkHost *h, uint32_t frame, uint32_t
         d->wait_since = frame;
         d->hold_until = 0;
     }
+    /* A results-screen level-up with eight skills asks which to forget; its Yes/No defaults to No, so the periodic Cross
+     * below would loop forever. Decline the offer through the real list and Yes/No: one press, then a release. */
+    P4WalkSkillPrompt prompt;
+    if (!waiting && state == BTL_RESULT_STATE && battle_skill_prompt(h, &prompt)) {
+        if (frame >= d->prompt_at) {
+            unsigned bits = p4walk_skill_prompt_buttons(&prompt);
+            if (bits) { d->hold_mask = bits; d->hold_until = frame + 5; d->prompt_at = frame + 10; }
+        }
     /* Explicit result profile: an optional Persona decision owns Cross, not its
      * underlying card grid. Ordinary plans retain their legacy input cadence. */
-    if (!waiting && task_node(h, "battle_shuffle") &&
+    } else if (!waiting && task_node(h, "battle_shuffle") &&
         (!d->persona_modal || !task_node(h, "shdPersonaStatusDraw"))) {
         if (frame >= d->shuffle_at) {
             static const int move[] = { P4W_RIGHT, P4W_RIGHT, P4W_RIGHT, P4W_DOWN, P4W_LEFT, P4W_LEFT, P4W_LEFT, P4W_DOWN };
@@ -1321,13 +1801,31 @@ static int battle_drive(P4Walk *w, const P4WalkHost *h, uint32_t frame, uint32_t
             d->plan_actor = actor;
             d->step = 0;
             d->target_moves = 0;
+            d->nav_left = -1;
             d->hold_until = 0;
             d->cur_first = party < BTL_PARTY_MAX && !d->commanded[party];
             d->cur_pc = (h->read32(h->user, unit + 0xA4) & 0xFFFFu) - 1u;
             d->cur_guard = d->guard_enemy &&
                 (!d->guard_party || (d->cur_pc < BTL_PARTY_MAX && (d->guard_party & (1u << d->cur_pc)))) &&
                 battle_enemy_charged(h, c, d->guard_enemy);
-            if (!d->cur_guard && party < BTL_PARTY_MAX) d->commanded[party] = 1;
+            d->cur_rule = -1;
+            d->cur_ally = 0;
+            d->cur_enemy = 0;
+            if (!d->cur_guard && d->nrules > 0) {
+                P4WalkBattleUnit allies[BTL_PARTY_MAX], enemies[BTL_ENEMY_MAX];
+                P4WalkBattleView view = {d->cur_pc + 1u, allies, 0, enemies, 0, 0};
+                battle_view(h, c, allies, &view.party_count, enemies, &view.enemy_count);
+                for (int r = 0; r < d->nrules; r++)
+                    if (!battle_rule_usable(h, actor, &d->rules[r])) view.unusable |= 1u << r;
+                d->cur_rule = p4walk_battle_rule_select(d->rules, d->nrules, &view, &d->cur_ally, &d->cur_enemy);
+                if (d->cur_rule >= 0 && h->note) {
+                    char m[112];
+                    snprintf(m, sizeof m, "battle rule %d for character %u (ally %u, enemy %u)", d->cur_rule + 1, d->cur_pc + 1,
+                             (unsigned)d->cur_ally, (unsigned)d->cur_enemy);
+                    h->note(h->user, m);
+                }
+            }
+            if (!d->cur_guard && d->cur_rule < 0 && party < BTL_PARTY_MAX) d->commanded[party] = 1;
         }
         if (d->acted) {
             const unsigned *bits = d->cur_first ? d->first : d->plan;
@@ -1336,6 +1834,9 @@ static int battle_drive(P4Walk *w, const P4WalkHost *h, uint32_t frame, uint32_t
                 static const unsigned guard[] = {1u << P4W_CIRCLE, 1u << P4W_UP, 1u << P4W_CROSS};
                 bits = guard;
                 len = sizeof guard / sizeof guard[0];
+            } else if (d->cur_rule >= 0) {
+                bits = d->rules[d->cur_rule].keys;
+                len = d->rules[d->cur_rule].key_count;
             } else if (d->cur_first && d->cur_pc < BTL_PARTY_MAX && d->first_pc_len[d->cur_pc] > 0) {
                 bits = d->first_pc[d->cur_pc];
                 len = d->first_pc_len[d->cur_pc];
@@ -1343,15 +1844,43 @@ static int battle_drive(P4Walk *w, const P4WalkHost *h, uint32_t frame, uint32_t
                 bits = d->plan_pc[d->cur_pc];
                 len = d->plan_pc_len[d->cur_pc];
             }
-            if (d->step < len && frame >= d->start_at + (uint32_t)d->step * 14u) {
-                unsigned id = d->cur_pc < BTL_PARTY_MAX ? d->target_pc[d->cur_pc] : 0;
+            if (d->step < len && (bits[d->step] & (P4WALK_KEY_SKILL | P4WALK_KEY_ITEM)) && frame >= d->start_at + (uint32_t)d->step * 14u) {
+                /* skill:ID / item:ID: count the presses once, then one Down/Up per 14-frame slot (later keys wait), then move on. */
+                if (d->nav_left < 0) {
+                    int moves;
+                    char why[192];
+                    if (!battle_list_key_moves(h, actor, bits[d->step], &moves, why, sizeof why)) {
+                        fail(w, h, why);
+                        *mask = 0;
+                        return 1;
+                    }
+                    d->nav_key = 1u << (moves < 0 ? P4W_UP : P4W_DOWN);
+                    d->nav_left = moves < 0 ? -moves : moves;
+                }
+                if (d->nav_left > 0) {
+                    d->hold_mask = d->nav_key;
+                    d->nav_left--;
+                    d->start_at += 14u;
+                } else {
+                    d->hold_mask = 0;
+                    d->step++;
+                    d->nav_left = -1;
+                }
+                d->hold_until = frame + 5;
+            } else if (d->step < len && frame >= d->start_at + (uint32_t)d->step * 14u) {
+                int ally = d->cur_rule >= 0 && d->cur_ally, foe = d->cur_rule >= 0 && d->cur_enemy;
+                unsigned id = ally ? d->cur_ally : foe ? d->cur_enemy : d->cur_pc < BTL_PARTY_MAX ? d->target_pc[d->cur_pc] : 0;
                 int target = 1;
                 if (id && !d->cur_guard && action_state == BTL_ACTION_TARGET && (bits[d->step] & (1u << P4W_CROSS)))
-                    target = battle_bound_target(h, actor, id);
+                    target = battle_bound_target(h, actor, id, ally, ally && d->rules[d->cur_rule].kind == P4WALK_RULE_DEAD);
                 if (target < 0 || (!target && d->target_moves >= 12)) {
                     char why[128];
-                    snprintf(why, sizeof why, "battle target%u=%u is %s", d->cur_pc + 1, id,
-                             target < 0 ? "dead or absent from TARGET" : "not reachable with TARGET input");
+                    if (ally || foe)
+                        snprintf(why, sizeof why, "battle rule %d's %s %u is %s", d->cur_rule + 1, ally ? "ally" : "enemy", id,
+                                 target < 0 ? "absent from TARGET" : "not reachable with TARGET input");
+                    else
+                        snprintf(why, sizeof why, "battle target%u=%u is %s", d->cur_pc + 1, id,
+                                 target < 0 ? "dead or absent from TARGET" : "not reachable with TARGET input");
                     fail(w, h, why);
                     *mask = 0;
                     return 1;
@@ -1612,6 +2141,12 @@ static uint32_t walk_step(P4Walk *w, const P4WalkHost *h, uint32_t frame) {
             battle_parse(c->text + 7, &w->bd);
             done = 1;
             break;
+        case C_BATTLERULE:
+            if (!w->bd.on) { fail(w, h, "battlerule: needs an active battle: driver"); return 0; }
+            if (w->bd.nrules >= P4WALK_BATTLE_RULE_MAX) { fail(w, h, "more than 16 battlerule: lines"); return 0; }
+            p4walk_battle_rule_parse(c->text + 11, &w->bd.rules[w->bd.nrules++]);
+            done = 1;
+            break;
         case C_PLAN:
             w->plan = c->on;
             done = 1;
@@ -1776,7 +2311,8 @@ static uint32_t walk_step(P4Walk *w, const P4WalkHost *h, uint32_t frame) {
         }
         case C_FACE: {
             if (!p4walk_player(h, &x, &z, &fx, &fz)) { if (el > c->timeout) { fail(w, h, "the player is not under control"); return 0; } break; }
-            float rad = c->a * 0.01745329252f, tx = sinf(rad), tz = cosf(rad);
+            float tx, tz;
+            face_dir(c->a, &tx, &tz);
             if (fx * tx + fz * tz > 0.978f) { done = 1; break; }
             if (el > 60) { fail(w, h, "could not turn to the angle"); return 0; }
             held = steer(h, tx, tz);

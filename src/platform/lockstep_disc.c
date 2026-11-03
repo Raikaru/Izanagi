@@ -2,15 +2,18 @@
  *
  * Retail p4hook --lockstep-disc-trace records each top-level disc read with the game frame of
  * its request and of the first status poll that saw it complete; tools/lockstep_disc.py turns
- * an earlier session's trace into anchor-relative rows. Once the qualified anchor is applied,
- * the frame-alarm seam stands in for the next-frame completion fence of each read (disc reads
- * are its only users). The read is keyed from the VFS read observer: family, file base name,
- * member-relative offset and sectors (raw CDVD: LSN and sectors). It takes the next unused row
- * with that key, must start at the same anchor-relative frame, and completes no earlier than
- * the normal frame boundary and not before the anchor-relative frame retail first observed
- * completion; a device poll in that frame releases it. Unmatched reads fail the run. Host bytes
- * are still copied at submission: retail consumers read a destination only after observing
- * completion (H_Cdvd_UpdateRequests state 3). Every hold is written to port-disc-holds.tsv. */
+ * an earlier session's trace into anchor-relative rows classed game (H_Cdvd_UpdateRequests),
+ * stream (ADX stream server) or other. Once the qualified anchor is applied, the frame-alarm
+ * seam stands in for the next-frame completion fence of each read (disc reads are its only
+ * users). The read is keyed from the VFS read observer: file base name, handle-relative offset
+ * and sectors (raw CDVD: LSN and sectors), and classified by its owner. A game-level request
+ * takes the next unused game row with that key, must start at the same anchor-relative frame,
+ * and completes no earlier than the normal frame boundary and not before the anchor-relative
+ * frame retail first observed completion; a device poll in that frame releases it. An ADX
+ * stream server read completes normally and is only recorded. Unmatched or unowned reads fail
+ * the run. Host bytes are still copied at submission: retail consumers read a destination only
+ * after observing completion (H_Cdvd_UpdateRequests state 3). port-disc-holds.tsv records every
+ * held and stream read. */
 #include <ctype.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -29,11 +32,15 @@
 #define DISC_HOLDS 32
 #define DISC_SECTOR 2048
 #define DISC_RECHECK_US (1000000u / 60u)
+#define HCDVD_REQUESTS 0x008D1B84u
+
+/* Held by ADXSTM_ExecServer's test-and-set for its whole pass (src/cri/re4/adx_stmc.c). */
+extern int32_t adxstmf_execsvr_flg;
 
 enum { DISC_FILE, DISC_CDVD };
 
 typedef struct {
-    int family, used;
+    int game, used; /* only game rows (retail H_Cdvd requests) are matched */
     char name[DISC_NAME];
     uint32_t offset, sectors;
     int32_t request, complete; /* anchor-relative retail frames; complete -1: never observed */
@@ -112,12 +119,38 @@ static void observe_read(const P4VfsOrigin *origin, const void *bytes, size_t si
 
 static void receipt(const DiscHold *hold, uint32_t frame, const char *outcome) {
     const DiscRow *row = &sRows[hold->row];
-    if (fprintf(sReceipt, "%llu\t%s\t%s\t%u\t%u\t%u\t%d\t%d\t%u\t%u\t%s\n",
-                (unsigned long long)hold->row, row->family == DISC_CDVD ? "cdvd" : "file",
-                row->name[0] ? row->name : "-", row->offset, row->sectors, hold->request,
+    if (fprintf(sReceipt, "%lld\tgame\t%s\t%u\t%u\t%u\t%d\t%d\t%u\t%u\t%s\n",
+                (long long)hold->row, row->name, row->offset, row->sectors, hold->request,
                 row->request, row->complete, frame, frame - hold->request, outcome) < 0 ||
         fflush(sReceipt))
         disc_fail("writing port-disc-holds.tsv");
+}
+
+/* ADX stream server reads complete at the normal frame boundary; only the request is recorded. */
+static void stream_receipt(const char *name, uint32_t offset, uint32_t sectors, uint32_t frame) {
+    if (fprintf(sReceipt, "-1\tstream\t%s\t%u\t%u\t%u\t-1\t-1\t-1\t-1\tstream-not-held\n",
+                name[0] ? name : "-", offset, sectors, frame) < 0 || fflush(sReceipt))
+        disc_fail("writing port-disc-holds.tsv");
+}
+
+static uint32_t guest_word(uint32_t address) {
+    if (address < 0x100000u || address > 0x2000000u - 4u || (address & 3u))
+        disc_fail("the H_Cdvd request list leaves guest RAM");
+    return p4ls_get((const uint8_t *)P4_G2H(address));
+}
+
+/* Classification is by ownership, never by file type. A handle held by an H_Cdvd request node
+ * (decomp/src/Kernel/sdkCdvd.c: list head 0x008D1B84, next +0x4, adxf +0x154) is a game-level
+ * request. A read issued while the ADXSTM server pass holds its test-and-set flag belongs to
+ * the ADX stream server (BGM .ADX, voice .AFS). Anything else refuses the run. */
+static int hcdvd_request(uint32_t handle) {
+    uint32_t node = guest_word(HCDVD_REQUESTS);
+    for (unsigned count = 0; node; count++) {
+        if (count == 256) disc_fail("the H_Cdvd request list does not terminate");
+        if (guest_word(node + 0x154u) == handle) return 1;
+        node = guest_word(node + 0x4u);
+    }
+    return 0;
 }
 
 static void release(DiscHold *hold, int from_alarm) {
@@ -172,17 +205,27 @@ static int32_t seam_set(uint32_t (*handler)(int32_t, void *), void *arg) {
         sectors = (uint32_t)((file->pos - before) / DISC_SECTOR);
     }
     sRead.valid = 0;
+    if (sRead.family != DISC_FILE || !hcdvd_request(P4_H2G(arg))) {
+        if (adxstmf_execsvr_flg) {
+            stream_receipt(sRead.name, offset, sectors, frame);
+            return p4pc_set_frame_boundary_alarm(handler, arg);
+        }
+        snprintf(why, sizeof why, "%s read %s offset %u sectors %u at port frame %u (anchor+%d) has neither "
+                 "an H_Cdvd request node nor the ADX stream server as owner",
+                 sRead.family == DISC_CDVD ? "raw sector" : "file", sRead.name[0] ? sRead.name : "-",
+                 offset, sectors, frame, relative);
+        disc_fail(why);
+    }
     for (index = 0; index < sRowCount; index++) {
         const DiscRow *row = &sRows[index];
-        if (!row->used && row->family == sRead.family && !strcmp(row->name, sRead.name) &&
+        if (!row->used && row->game && !strcmp(row->name, sRead.name) &&
             row->offset == offset && row->sectors == sectors)
             break;
     }
     if (index == sRowCount) {
-        snprintf(why, sizeof why, "unmatched %s read %s offset %u sectors %u at port frame %u "
-                 "(anchor+%d; the retail trace ends at anchor+%d)",
-                 sRead.family == DISC_CDVD ? "cdvd" : "file", sRead.name[0] ? sRead.name : "-",
-                 offset, sectors, frame, relative, (int32_t)(sHorizon - sRetailAnchor));
+        snprintf(why, sizeof why, "unmatched game read %s offset %u sectors %u at port frame %u "
+                 "(anchor+%d; the retail trace ends at anchor+%d)", sRead.name, offset, sectors, frame,
+                 relative, (int32_t)(sHorizon - sRetailAnchor));
         disc_fail(why);
     }
     if (sRows[index].request != relative || sRows[index].complete < 0) {
@@ -234,15 +277,15 @@ int p4pc_lockstep_disc_open(const char *directory) {
         disc_fail("the table header is not p4pc-disc-replay 1");
     while (fgets(line, sizeof line, table)) {
         DiscRow row = {0};
-        char family[8], name[128];
+        char family[16], name[128];
         DiscRow *grown;
         if (line[0] == '#' || line[0] == '\n') continue;
-        if (sscanf(line, "%7s %127s %u %u %d %d", family, name, &row.offset, &row.sectors,
+        if (sscanf(line, "%15s %127s %u %u %d %d", family, name, &row.offset, &row.sectors,
                    &row.request, &row.complete) != 6)
             disc_fail("malformed table row");
-        if (!strcmp(family, "cdvd")) row.family = DISC_CDVD;
-        else if (!strcmp(family, "file")) row.family = DISC_FILE;
-        else disc_fail("unknown table row family");
+        if (!strcmp(family, "game")) row.game = 1;
+        else if (strcmp(family, "stream") && strcmp(family, "substrate") && strcmp(family, "other"))
+            disc_fail("unknown table row class");
         base_name(strcmp(name, "-") ? name : "", row.name);
         grown = realloc(sRows, (sRowCount + 1) * sizeof *sRows);
         if (!grown) disc_fail("allocating the table");

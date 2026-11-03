@@ -191,16 +191,19 @@ if(P4_PORT64_LINK AND P4_PORT64_OBJS)
   endforeach()
 
   # ovdiff (retail interpreter against the native, docs/override_diff.md) on the 64-bit objects: the same verdicts as i386 are the M4 criterion.
-  add_executable(ovdiff64 "${CMAKE_SOURCE_DIR}/tools/mipsdiff/ovdiff.c" "${CMAKE_SOURCE_DIR}/tools/mipsdiff/r5900.c" "${P4_TABLES64}" ${P4_OBJS64})
-  target_include_directories(ovdiff64 PRIVATE "${CMAKE_SOURCE_DIR}/include" "${CMAKE_SOURCE_DIR}/tools/mipsdiff")
-  target_compile_options(ovdiff64 PRIVATE ${P4_X64_FLAGS} -fno-builtin -Wno-unused)
-  target_compile_definitions(ovdiff64 PRIVATE ${P4_PORT_DEFINES})
-  target_link_options(ovdiff64 PRIVATE ${P4_X64_LINK_FLAGS} LINKER:--wrap=func_0043f810 LINKER:--wrap=func_0043f9c8)
-  target_link_libraries(ovdiff64 m ${P4_SDL3_LIB64} ${P4_FFMPEG_LIBS64})
-  add_dependencies(ovdiff64 p4decomp64)
-  add_test(NAME ovdiff_subset64 COMMAND ovdiff64 -n 40 env "@${CMAKE_SOURCE_DIR}/tests/ovdiff_subset.txt")
-  set_tests_properties(ovdiff_subset64 PROPERTIES SKIP_RETURN_CODE 77 TIMEOUT 900 WORKING_DIRECTORY "${CMAKE_BINARY_DIR}" LABELS port64
-    ENVIRONMENT "P4_MIPSDIFF_DIR=${CMAKE_SOURCE_DIR}/tools/mipsdiff")
+  # Not on macOS: it is a Linux harness (personality(), /proc, the ucontext register file, GNU ld's --wrap), which macOS has none of.
+  if(NOT P4_APPLE)
+    add_executable(ovdiff64 "${CMAKE_SOURCE_DIR}/tools/mipsdiff/ovdiff.c" "${CMAKE_SOURCE_DIR}/tools/mipsdiff/r5900.c" "${P4_TABLES64}" ${P4_OBJS64})
+    target_include_directories(ovdiff64 PRIVATE "${CMAKE_SOURCE_DIR}/include" "${CMAKE_SOURCE_DIR}/tools/mipsdiff")
+    target_compile_options(ovdiff64 PRIVATE ${P4_X64_FLAGS} -fno-builtin -Wno-unused)
+    target_compile_definitions(ovdiff64 PRIVATE ${P4_PORT_DEFINES})
+    target_link_options(ovdiff64 PRIVATE ${P4_X64_LINK_FLAGS} LINKER:--wrap=func_0043f810 LINKER:--wrap=func_0043f9c8)
+    target_link_libraries(ovdiff64 m ${P4_SDL3_LIB64} ${P4_FFMPEG_LIBS64})
+    add_dependencies(ovdiff64 p4decomp64)
+    add_test(NAME ovdiff_subset64 COMMAND ovdiff64 -n 40 env "@${CMAKE_SOURCE_DIR}/tests/ovdiff_subset.txt")
+    set_tests_properties(ovdiff_subset64 PROPERTIES SKIP_RETURN_CODE 77 TIMEOUT 900 WORKING_DIRECTORY "${CMAKE_BINARY_DIR}" LABELS port64
+      ENVIRONMENT "P4_MIPSDIFF_DIR=${CMAKE_SOURCE_DIR}/tools/mipsdiff")
+  endif()
   # ---- The host tests that are not the game: a 64-bit twin of every one of them.
   # A host test is an executable built from port sources (and, for some, the rewritten mirror), run by one test or several (arguments, environment). Its twin
   # is the same sources compiled for the selected ABI, with the same arguments,
@@ -268,6 +271,10 @@ if(P4_PORT64_LINK AND P4_PORT64_OBJS)
     get_target_property(opts ${exe} COMPILE_OPTIONS)
     get_target_property(linkopts ${exe} LINK_OPTIONS)
     get_target_property(libs ${exe} LINK_LIBRARIES)
+    if(P4_APPLE AND linkopts)
+      # ld64's spelling of section garbage collection (GNU ld's --wrap has none: p4_host64_tests does not clone those tests on macOS)
+      list(TRANSFORM linkopts REPLACE "^(LINKER:|-Wl,)--gc-sections$" "-Wl,-dead_strip")
+    endif()
     set(mirror FALSE)
     set(src64)
     foreach(s IN LISTS srcs)
@@ -517,6 +524,14 @@ if(P4_PORT64_LINK AND P4_PORT64_OBJS)
       # ovdiff has no Win32 variant: its interpreter harness is POSIX-only.
       if(suffix STREQUAL "64w" AND exe STREQUAL "ovdiff")
         continue()
+      endif()
+      # macOS: ld64 has no --wrap. The tests that intercept calls with it (ovdiff, the CRI file-system and SFD callback adapters) check
+      # port code that is the same on every target; Linux and Windows run them.
+      if(P4_APPLE)
+        get_target_property(exe_linkopts ${exe} LINK_OPTIONS)
+        if(exe_linkopts MATCHES "--wrap=")
+          continue()
+        endif()
       endif()
       get_target_property(etype ${exe} TYPE)
       if(NOT etype STREQUAL "EXECUTABLE")

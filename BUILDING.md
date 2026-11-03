@@ -129,12 +129,32 @@ at `/lane/src`, a cache volume at `/android-cache`, and writes the APK to `/lane
 Set `P4PC_ANDROID_ABI=arm64-v8a` for phones, and `P4PC_ANDROID_VERSION_NAME` /
 `P4PC_ANDROID_VERSION_CODE` for the APK's version. Details: [docs/android.md](docs/android.md).
 
+## macOS
+
+macOS builds natively on a Mac (Apple silicon or Intel: the build is for the Mac's own
+architecture), without the container. It needs the Xcode command line tools, CMake,
+Ninja and Python 3; `ci/macos/build_deps.sh` fetches the same pinned clang the
+container uses and builds SDL3, the LGPL-only FFmpeg and ANGLE's libraries into a prefix:
+
+```sh
+sh ci/macos/build_deps.sh build/macos-deps
+sh ci/macos/configure.sh build/macos-deps build/macos
+cmake --build build/macos --target p4pc64        # the player; --target p4_x64 adds every test program
+ctest --test-dir build/macos -L '^port64$'        # the tests; those that need the game skip
+P4PC_ISO=/path/to/your.iso ./build/macos/p4pc64
+```
+
+Only the 64-bit build exists on macOS. Details, the renderer (OpenGL ES on ANGLE's
+Metal back end) and what has not been tested on real Macs: [docs/platform/macos.md](docs/platform/macos.md).
+
 ## Packages
 
 `sh tools/package_win.sh` and `sh tools/package_linux.sh`, run in the container from
 a clean checkout, build and package the Windows x64 zip and the Linux x86_64 AppImage
 into `dist/`. They check the shipped DLL/shared-library set, verify that FFmpeg is
 LGPL-only, and add `THIRD_PARTY_NOTICES.txt`, `licenses/` and the corresponding
-library sources. Packages never contain game data, saves or captures. The GitHub
-Actions workflow `.github/workflows/build.yml` runs both for every pushed tag and
-attaches the packages to the release. See [release packaging](docs/platform/packaging.md).
+library sources. `sh tools/package_macos.sh` does the same on a Mac for the macOS app
+(`dist/p4pc-macos-<arch>-<version>.zip`, ad-hoc signed). Packages never contain game
+data, saves or captures. The GitHub Actions workflow `.github/workflows/build.yml` runs
+all of them for every pushed tag and attaches the packages to the release. See
+[release packaging](docs/platform/packaging.md).

@@ -363,10 +363,11 @@ class Origin:
 
 
 class Rewriter:
-    def __init__(self, ast, root, syms=None, layouts=None, ifile=None, abi=None, sym_prefix=""):
+    def __init__(self, ast, root, syms=None, layouts=None, ifile=None, abi=None, sym_prefix="", variadic_on_stack=False):
         self.ast = ast
         self.ifile = os.path.abspath(ifile) if ifile else None
         self.sym_prefix = sym_prefix   # the C symbol prefix of the target ("" on ELF, "_" on Mach-O and i386 PE)
+        self.variadic_on_stack = variadic_on_stack   # the target passes variable arguments elsewhere than fixed ones (Apple arm64)
         self.abi = abi or {}           # function name -> its definition's ABI (merge_abi): the call sites follow it
         self.local_defs = set()
         self.origin = None
@@ -399,6 +400,16 @@ class Rewriter:
         self.pending_moves = []
         self.eof_code = []
         self.assert_done = set()
+
+    def linked_name(self, decl, fallback):
+        """The C-level name a declaration links as: its asm label, else its own name. Clang's JSON gives the symbol (`mangledName`), which on
+        Mach-O carries the target's `_` for an ordinary name but is spelled as written for an asm label."""
+        name = decl.get("mangledName")
+        if not name:
+            return fallback
+        if self.sym_prefix and name.startswith(self.sym_prefix):
+            return name[len(self.sym_prefix):]
+        return name
 
     # --- helpers
     def site(self):
@@ -583,11 +594,12 @@ class Rewriter:
         if rd.get("kind") == "VarDecl":
             # `extern T local_name __asm__("D_00887300");` (an override naming retail data by its asm label): the label is the name
             d = self.decl_by_id.get(rd.get("id"))
-            if d and d.get("mangledName") and d["mangledName"] != name and any(
+            linked = self.linked_name(d, name) if d else name
+            if d and linked != name and any(
                     isinstance(c, dict) and c.get("kind") == "AsmLabelAttr" for c in d.get("inner", ())):
-                if re.match(r"^(?:func|FUN)_[0-9A-Fa-f]{8}", d["mangledName"]):
+                if re.match(r"^(?:func|FUN)_[0-9A-Fa-f]{8}", linked):
                     return None       # the address of a function symbol declared as data (`u8 p4cb_x[] __asm__("func_003bcbc0")`): a host function
-                name = d["mangledName"]
+                name = linked
         # the symbol lists are the evidence of where retail data is: a handful of D_XXXXXXXX names sit at another address than the
         # one they spell (D_00724840 is 0x00764840), which is also what gen_port's tables step places them at
         m = GP_RE.match(name)
@@ -760,7 +772,7 @@ class Rewriter:
             if n.get("kind") == "DeclRefExpr" and n.get("referencedDecl", {}).get("kind") == "FunctionDecl":
                 rd = n["referencedDecl"]
                 decl = self.decl_by_id.get(rd["id"], {})
-                name = decl.get("mangledName") or rd["name"]
+                name = self.linked_name(decl, rd["name"])
                 if rd["name"] in self.local_defs and rd["name"] == name:
                     return self.sig_string(rd["type"]["qualType"])        # defined in this unit: its own type is its signature
                 d = self.abi.get(name) if self.abi else None
@@ -1441,6 +1453,11 @@ class Rewriter:
         c = self.clq(self.qt(lv))
         t = "u32 *" if c["levels"] >= 2 else self.qt(lv)       # a pointer to a guest slot steps by 4, as a PS2 pointer does
         sp, lsp = span(x), span(lv)
+        if sp and os.path.abspath(sp[0]) == self.ifile and \
+                not os.path.abspath(self.origin_of(sp[0], sp[1])[0]).startswith(self.root + os.sep):
+            # a system or port header's own inline code (macOS's __sputc in <_stdio.h> steps FILE's buffer pointer): nothing outside the
+            # mirror is rewritten, and its structs are the host's
+            return
         if (c["fn"] and c["levels"] == 1) or c["levels"] < 1 or not sp or not lsp or not self.mine(sp[0], sp[1]):
             self.unsup(x, "pointer-rmw-shape")
             return
@@ -1940,7 +1957,7 @@ class Rewriter:
         """a by-value struct of floats (at most 8 bytes) passed where the callee's definition takes an integer (see v_FunctionDecl): its bytes in an
         integer"""
         decl = self.decl_by_id.get(callee["referencedDecl"]["id"], {})
-        d = self.abi.get(decl.get("mangledName") or callee["referencedDecl"]["name"]) if self.abi else None
+        d = self.abi.get(self.linked_name(decl, callee["referencedDecl"]["name"])) if self.abi else None
         if not d or d.get("va"):
             return
         args = x["inner"][1:]
@@ -1984,7 +2001,7 @@ class Rewriter:
         cname = callee["referencedDecl"]["name"]
         decl = self.decl_by_id.get(callee["referencedDecl"]["id"], {})
         # `extern T p4_name(...) __asm__("func_003df890")` names a function by another symbol: the symbol is what has an ABI
-        name = decl.get("mangledName") or cname
+        name = self.linked_name(decl, cname)
         d = self.abi.get(name)
         # a function defined in this unit is called through the declaration the compiler checked against the definition; only a
         # call through another name for the same symbol (an asm label) can disagree with it
@@ -2043,7 +2060,15 @@ class Rewriter:
         if not ret_fix and have == "int" and want == "int":
             dsz, wsz = self.int_size(d["rt"]), self.int_size(rt)
             ret_narrow = bool(dsz and wsz and dsz < wsz)
-        if not todo and not ret_fix and not pf and not narrow and not ret_narrow:
+        # Apple's arm64 ABI passes a variadic function's variable arguments on the stack and its fixed ones in registers: a call through a
+        # declaration that disagrees with the definition about `...` (an m2c `int f();` for a printf-like definition, a `...` prototype for a
+        # fixed one) puts the arguments where the callee does not read them, so it goes through the definition's prototype (elsewhere the two
+        # conventions put every argument in the same place)
+        va_fix = self.variadic_on_stack and bool(d.get("va")) != ("..." in self.qt(callee))
+        if va_fix and any(p_["ct"] is None for p_ in params[:len(args)]):
+            self.census["abi-variadic-unadapted"] += 1
+            va_fix = False
+        if not todo and not ret_fix and not pf and not narrow and not ret_narrow and not va_fix:
             return
         # the call goes through a declaration with the definition's types, under a private name bound to the same symbol
         # (an asm label): the converted arguments and the result are then what the callee takes and gives, and nothing
@@ -2093,6 +2118,8 @@ class Rewriter:
             self.census["abi-ret-adapted"] += 1
         if narrow or ret_narrow:
             self.census["abi-narrow-adapted"] += 1
+        if va_fix:
+            self.census["abi-variadic-adapted"] += 1
         self.census["abi-call-adapted"] += 1
 
     def v_UnaryOperator(self, x, depth, parent):
@@ -2189,7 +2216,19 @@ def oracle_layouts(unit, flags, clang="clang", deps=None):
     """The original i386 layout oracle, cached by its exact preprocessed input."""
     def produce():
         with build_cache.timed("clang.layout", source=os.path.abspath(unit)) as trace:
-            p = subprocess.run([clang] + LAYOUT_FLAGS + flags + [unit], capture_output=True, text=True, errors="replace")
+            if symbol_prefix(flags):
+                # the Apple oracle (i686-apple-macos): the unit's text with what a Mach-O target rejects removed (macho_text), compiled with
+                # the unit's own diagnostic flags (its -Wno-... keep a decomp error that is a warning there from ending the dump); the line
+                # markers keep the anonymous records' file:line labels those of the original unit
+                with tempfile.TemporaryDirectory(prefix="p4-layout-macho-") as work:
+                    ipath = os.path.join(work, os.path.basename(unit) + ".i")
+                    preprocess(unit, flags, ipath, clang)
+                    macho_text(ipath, symbol_prefix(flags))
+                    diagnostics = [f for f in flags if f.startswith(("-W", "-ferror-limit"))]
+                    p = subprocess.run([clang] + LAYOUT_FLAGS + stage2_flags(flags) + diagnostics + ["-x", "cpp-output", ipath],
+                                       capture_output=True, text=True, errors="replace")
+            else:
+                p = subprocess.run([clang] + LAYOUT_FLAGS + flags + [unit], capture_output=True, text=True, errors="replace")
             trace["returncode"] = p.returncode
         return json.dumps(parse_layouts(p.stdout + p.stderr), sort_keys=True).encode("utf-8")
     if build_cache.enabled():
@@ -2364,11 +2403,48 @@ def process(unit, flags, work, root, syms=None, oracle_unit=None, oracle_flags=N
     return rewrite_preprocessed(ipath, flags, root, syms, oracle_unit, oracle_flags, clang, abi)
 
 
+def compile_target(flags):
+    return next((f.split("=", 1)[1] for f in reversed(flags) if f.startswith("--target=")), "")
+
+
+def symbol_prefix(flags):
+    """The C symbol prefix of the compile target in `flags`: `_` on Apple's Mach-O, none on ELF (the asm labels the rewriter writes
+    name symbols, not C names)."""
+    return "_" if re.search(r"-apple-|-darwin", compile_target(flags)) else ""
+
+
+def variadic_on_stack(flags):
+    """Apple's arm64 ABI (the compile target in `flags`) passes the variable arguments of a call on the stack, the fixed ones in registers."""
+    return bool(re.match(r"(?:arm64|aarch64)\w*-apple-", compile_target(flags)))
+
+
+
+# a declaration's asm label spelled for ELF: after a declarator (`)`, `]` or a name), one string literal naming a C identifier; an asm statement
+# (`__asm__("sync")` after `;` or `{`) and a label that already carries an underscore (the SDK's own, `__asm("_" "fopen" ...)`) do not match
+ASM_LABEL_RE = re.compile(r'([\w\])]\s*)(__asm__|__asm)(\s*\(\s*")([A-Za-z][\w$.]*)("\s*\))')
+# an ELF section placement (the decomp's MWCC `.sdata` hint on an extern declaration); Mach-O names a section `segment,section`
+ELF_SECTION_RE = re.compile(r'__attribute__\s*\(\(\s*(?:__section__|section)\s*\(\s*"[^",]*"\s*\)\s*\)\)')
+
+
+def macho_text(path, prefix):
+    """Mach-O (macOS): an asm label names the symbol exactly as written, while every C name carries the target's `_`, so the mirror's and
+    the overrides' labels (`__asm__("func_003df4d0")`, written for ELF) get the prefix; and ELF section attributes, which mean nothing to the
+    PC build and which a Mach-O target rejects, are dropped. On the preprocessed text, before the AST is read (like va_list_casts)."""
+    with open(path, "rb") as stream:
+        text = stream.read().decode("latin-1")
+    new = ASM_LABEL_RE.sub(lambda m: m[1] + m[2] + m[3] + prefix + m[4] + m[5], text)
+    new = ELF_SECTION_RE.sub("", new)
+    if new != text:
+        open(path, "wb").write(new.encode("latin-1"))
+
+
 def rewrite_preprocessed(ipath, flags, root, syms=None, oracle_unit=None, oracle_flags=None,
                          clang="clang", abi=None, layouts=None):
     """Rewrite an already expanded input without running its preprocessor twice."""
     if any(f.startswith("--target=aarch64") for f in flags):
         va_list_casts(ipath)
+    if symbol_prefix(flags):
+        macho_text(ipath, symbol_prefix(flags))
     ast = load_ast(ipath, stage2_flags(flags), clang)
     lay = {}
     if oracle_unit:
@@ -2376,7 +2452,7 @@ def rewrite_preprocessed(ipath, flags, root, syms=None, oracle_unit=None, oracle
             m = re.match(r"^(struct|union) \(unnamed at (.*):(\d+):\d+\)$", name)
             key = f"@{os.path.relpath(m.group(2), root)}:{m.group(3)}" if m else name
             lay[key] = [{"size": r["size"], "fields": r["fields"]} for r in rs]
-    rw = Rewriter(ast, root, syms, lay, ifile=ipath, abi=abi)
+    rw = Rewriter(ast, root, syms, lay, ifile=ipath, abi=abi, sym_prefix=symbol_prefix(flags), variadic_on_stack=variadic_on_stack(flags))
     with build_cache.timed("rewrite.visit"):
         rw.run()
     with build_cache.timed("rewrite.apply"):

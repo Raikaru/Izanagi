@@ -23,6 +23,8 @@ Repository-relative source paths in the pages identify the implementation owners
 - [Game CRT boundary](platform/crt_boundary.md): retail bindings, caller inventories, reviewed host
   adapters and fail-closed object guards.
 - [Windows reference build](platform/windows.md): i386 address placement, toolchain and host APIs.
+- [macOS](platform/macos.md): the arm64 and x86_64 builds, ANGLE on Metal, the app bundle,
+  Gatekeeper and what only real Macs can verify.
 - [Testing and harnesses](platform/testing.md): headless tools, capture/debug controls and gates.
 - [Playthrough coverage](platform/playthrough_coverage.md): story, dungeon and boss gates from
   June to the endings, and the segments still uncovered.

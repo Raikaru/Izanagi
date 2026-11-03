@@ -9,6 +9,7 @@
 #include <stdint.h>
 
 #include "p4pc/gmem.h"
+#include "p4pc/os.h"
 
 void *func_003de280(uint8_t *dev, uint32_t i)
 {
@@ -25,7 +26,7 @@ void *func_003de280(uint8_t *dev, uint32_t i)
  * (0x008873AC) and returns 1.
  *
  * Direct transliteration of the retail code. */
-extern void *p4cdvd_find_device(const char *name) __asm__("func_003ddc20");
+extern void *p4cdvd_find_device(const char *name) P4_ASM_LABEL("func_003ddc20");
 
 typedef void (*P4CdFreeFn)(void *p);
 typedef int (*P4CdStrlenFn)(const char *s);

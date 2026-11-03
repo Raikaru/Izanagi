@@ -56,6 +56,17 @@ target_include_directories(png_writer_test PRIVATE "${CMAKE_SOURCE_DIR}/src/view
 target_compile_definitions(png_writer_test PRIVATE ${P4_PORT_DEFINES})
 add_test(NAME png_writer COMMAND png_writer_test)
 
+# The renderer's GL context with no game data (gles_context_smoke.c): the port's API choice and window-system calls, its GL loader and shader
+# header, one triangle read back from an RGBA8 framebuffer object, and the picture as a PNG in the build directory. Skipped (exit 77) where
+# the machine gives no context; the macOS CI requires the ES path on ANGLE (P4PC_REQUIRE_GLES=1, docs/platform/macos.md).
+add_executable(gles_context_smoke gles_context_smoke.c ${P4_PNG_SOURCES} "${P4_OS_SRC}"
+  "${CMAKE_SOURCE_DIR}/src/render/p4gl_gl.c" "${CMAKE_SOURCE_DIR}/src/render/p4gl_profile.c")
+target_include_directories(gles_context_smoke PRIVATE "${CMAKE_SOURCE_DIR}/src/render" "${CMAKE_SOURCE_DIR}/src/viewer")
+target_compile_definitions(gles_context_smoke PRIVATE ${P4_PORT_DEFINES})
+target_link_libraries(gles_context_smoke m ${P4_SDL3_LIB})
+add_test(NAME gles_context_smoke COMMAND gles_context_smoke "${CMAKE_BINARY_DIR}/gles_context_smoke.png")
+set_tests_properties(gles_context_smoke PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl" TIMEOUT 120)
+
 # OpenGL 3.3 device path, offscreen: a retail TMX through RASTERCREATE/LOCK/UNLOCK, an Im2D quad
 # into a readback FBO, a pixel check and a PNG. Links the same objects as p4pc_viewer. Skipped
 # (exit 77) unless P4PC_ISO names the image. The PNG lands in the build directory.

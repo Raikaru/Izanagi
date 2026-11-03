@@ -45,8 +45,10 @@ typedef struct __attribute__((aligned(16))) P4Q128 {
 
 /* 64-bit host: the decomp's type.h typedefs size_t, intptr_t and uintptr_t as 32-bit integers, which clash with
  * the host's. No game struct holds one of them (docs/port64.md, inventory), so the decomp's own units use the
- * host types and type.h keeps only the fixed-width names: this block pre-empts its include guard. */
-#if defined(P4_DECOMP_UNIT) && defined(P4_GUEST64)
+ * host types and type.h keeps only the fixed-width names: this block pre-empts its include guard. The i386 Apple
+ * target (only the rewrite's layout oracle compiles for it, docs/platform/macos.md) declares them `long`, which is
+ * the same 4 bytes there, so it takes the host types too. */
+#if defined(P4_DECOMP_UNIT) && (defined(P4_GUEST64) || (defined(__APPLE__) && __SIZEOF_POINTER__ == 4))
 #define TYPE_H
 #define RW_SHIM_STDDEF_H   /* include/rw/std/stddef.h: `typedef unsigned int size_t`; the host's stddef.h is already in */
 typedef unsigned char u8;

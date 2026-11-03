@@ -1,7 +1,7 @@
 # Izanagi
 
 Izanagi is an unofficial native port of **Shin Megami Tensei: Persona 4** (PlayStation 2,
-USA, `SLUS-21782`) to Windows, Linux and Android. It runs the game's own code,
+USA, `SLUS-21782`) to Windows, Linux, macOS and Android. It runs the game's own code,
 recompiled from the [Persona4-Decompilation](https://github.com/Raikaru/Persona4-Decompilation)
 project, on a native platform layer and an OpenGL renderer. It is not an emulator.
 
@@ -22,6 +22,11 @@ Release packages are attached to the [GitHub releases](https://github.com/Raikar
 - **Windows (x64):** unzip `p4pc-win64-*.zip`, keep its DLLs beside the exe, run `p4pc64w.exe`.
 - **Linux (x86_64, glibc 2.41 or newer):** `chmod +x p4pc-linux64-*.AppImage`, then run it.
   Without FUSE add `--appimage-extract-and-run`. Mesa or a vendor OpenGL driver is required.
+- **macOS 12 or newer (Apple silicon: `arm64`, Intel: `x86_64`):** unzip `p4pc-macos-<arch>-*.zip`
+  and open `Persona 4 PC.app`. The app is not notarized, so the first time right-click it and
+  choose **Open** (or run `xattr -dr com.apple.quarantine "Persona 4 PC.app"`); the package's
+  README has the details. Built and tested only on GitHub's macOS machines so far
+  ([docs/platform/macos.md](docs/platform/macos.md)).
 - **Android (arm64) and Linux aarch64:** build from source ([BUILDING.md](BUILDING.md)).
 
 On first launch the port asks for your `.iso`, checks it is the USA disc and remembers it.

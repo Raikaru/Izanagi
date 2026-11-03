@@ -138,7 +138,9 @@ int main(void) {
                     exe = directory / f"{mode}.exe"
                     subprocess.run([
                         sys.executable, str(ROOT / "tools/ee_float_cc.py"),
-                        f"--modes={mode}", f"--printf-root={work}", clang,
+                        f"--modes={mode}", f"--printf-root={work}",
+                        # the host compiler's C symbol prefix, as CMake passes it for Win32: Mach-O names C symbols `_name`
+                        *(["--printf-symbol-prefix=_"] if sys.platform == "darwin" else []), clang,
                         "-std=c2x", "-O1", "-Xclang", "-fno-spell-checking",
                         "-MMD", "-MF", str(dep), "-MT", obj.name,
                         "-c", str(source), "-o", str(obj),

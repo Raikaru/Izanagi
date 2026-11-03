@@ -375,7 +375,8 @@ class MirrorCacheTest(CacheFixture):
             disabled = gen_port.mirror_cache_inputs(decomp, self.build, False)
             enabled = gen_port.mirror_cache_inputs(decomp, self.build, True)
         self.assertNotEqual(cache.canonical(disabled), cache.canonical(enabled))
-        self.assertEqual(enabled["versions"][str(generator)], cache.file_digest(generator))
+        # (keyed by the resolved path, as build_cache.versions records it: macOS's temporary directory is under the /var symlink)
+        self.assertEqual(enabled["versions"][str(generator.resolve())], cache.file_digest(generator))
 
     def test_cached_mirror_missing_bridge_is_rejected(self):
         facts = {"reviewed-pass": {}}

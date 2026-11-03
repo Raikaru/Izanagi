@@ -1,6 +1,6 @@
-# Builds, tests and packages the port in the p4pc-ci image (ci/Dockerfile). No game data is used or available here:
-# the build reads config/retail_fnptr_words.txt, and the tests that need the disc skip.
-# A pushed tag v* also attaches the Windows x64 zip and the Linux x86_64 AppImage to its GitHub release.
+# Builds, tests and packages the port: Linux and Windows in the p4pc-ci image (ci/Dockerfile), macOS on GitHub's Macs (ci/macos/). No game
+# data is used or available here: the build reads config/retail_fnptr_words.txt, and the tests that need the disc skip.
+# A pushed tag v* also attaches the Windows x64 zip, the Linux x86_64 AppImage and the macOS arm64 and x86_64 zips to its GitHub release.
 name: build
 
 on:
@@ -131,10 +131,86 @@ jobs:
           path: dist/*
           if-no-files-found: error
 
+  # macOS (docs/platform/macos.md): built natively on GitHub's hosted Macs, Apple silicon and Intel, with the pinned clang, SDL3, FFmpeg and
+  # ANGLE of ci/macos/build_deps.sh. The tests labelled port64 (the build's own; those that need the disc skip), the GL context smoke (on
+  # Apple silicon an OpenGL ES context on ANGLE's Metal back end is required; the Intel runners have no Metal device, so there the game's
+  # fallback to Apple's desktop OpenGL must draw), then the app bundle in a zip.
+  macos:
+    name: macOS ${{ matrix.arch }} (build, test, package)
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: arm64
+            runner: macos-latest
+            smoke: P4PC_REQUIRE_GLES=1 P4PC_REQUIRE_GL_RENDERER=Metal
+          - arch: x86_64
+            runner: macos-15-intel
+            smoke: ""   # ES where ANGLE has a display, else the desktop OpenGL fallback: either must draw
+    env:
+      DEPS: ${{ github.workspace }}/build/macos-deps
+      P4PC_DL_CACHE: ${{ github.workspace }}/build/dl-cache
+      P4PC_BUILD_CACHE_DIR: ${{ github.workspace }}/build/rewrite-cache
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+      - name: Ninja
+        run: |
+          python3 -m venv "$RUNNER_TEMP/venv"
+          "$RUNNER_TEMP/venv/bin/pip" install --quiet ninja
+          echo "$RUNNER_TEMP/venv/bin" >> "$GITHUB_PATH"
+          sw_vers; xcrun --sdk macosx --show-sdk-path; cmake --version | head -n 1
+          # the identity of the rewrite cache's toolchain (tools/build_cache.py): the pinned dependencies, the SDK and the architecture
+          echo "P4PC_BUILD_TOOLCHAIN_ID=sha256:$({ cat ci/macos/build_deps.sh; xcrun --sdk macosx --show-sdk-version; uname -m; } | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_ENV"
+      - uses: actions/cache@v4
+        with:
+          path: build/macos-deps
+          key: macos-deps-${{ matrix.arch }}-${{ hashFiles('ci/macos/build_deps.sh') }}
+      - name: Clang, SDL3, FFmpeg and ANGLE (ci/macos/build_deps.sh)
+        run: sh ci/macos/build_deps.sh "$DEPS"
+      - uses: actions/cache@v4
+        with:
+          path: build/rewrite-cache
+          key: macos-rewrite-${{ matrix.arch }}-${{ github.sha }}
+          restore-keys: macos-rewrite-${{ matrix.arch }}-
+      - name: Configure and build the 64-bit targets
+        run: |
+          sh ci/macos/configure.sh "$DEPS" build/macos -DP4_CENSUS_CHECK=ON
+          cmake --build build/macos --target p4_x64 -- -k 0
+      - name: Tests that need no game files
+        run: ctest --test-dir build/macos -j "$(sysctl -n hw.ncpu)" --timeout 900 --output-on-failure -L '^port64$'
+      - name: GL context smoke
+        run: |
+          set -o pipefail
+          env ${{ matrix.smoke }} ctest --test-dir build/macos -R '^gles_context_smoke64$' -V 2>&1 | tee build/macos/gles-smoke.log
+          grep -q 'gles_context_smoke: OK' build/macos/gles-smoke.log   # drawn, not skipped
+          mkdir -p smoke && cp build/macos/gles-smoke.log build/macos/64_gles_context_smoke.png smoke/
+          # Apple's own OpenGL asked for directly (P4PC_GL_API=gl), beside it
+          P4PC_GL_API=gl ctest --test-dir build/macos -R '^gles_context_smoke64$' -V 2>&1 | tee build/macos/gles-smoke-desktop.log
+          grep -q 'gles_context_smoke: OK' build/macos/gles-smoke-desktop.log
+          cp build/macos/gles-smoke-desktop.log smoke/ && cp build/macos/64_gles_context_smoke.png smoke/64_gles_context_smoke_desktop.png
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: macos-${{ matrix.arch }}-gl-smoke
+          path: smoke/*
+          if-no-files-found: warn
+      - name: Package
+        run: sh tools/package_macos.sh --deps "$DEPS" --build build/macos --out dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p4pc-macos-${{ matrix.arch }}
+          path: dist/*
+          if-no-files-found: error
+
   release:
     name: Attach packages to the release
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [test, package]
+    needs: [test, package, macos]
     runs-on: ubuntu-24.04
     permissions:
       contents: write

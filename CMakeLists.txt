@@ -1,4 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
+# macOS only (ignored elsewhere, and read by project()): the oldest system the build runs on, that of the ANGLE it ships
+# (ci/macos/build_deps.sh). docs/platform/macos.md.
+set(CMAKE_OSX_DEPLOYMENT_TARGET "12.0" CACHE STRING "Minimum macOS version")
 project(p4pc C)
 
 # Numbered owner fragments retain the original command and source order.

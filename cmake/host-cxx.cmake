@@ -66,7 +66,7 @@ function(p4_host_cxx_profiles callback)
     # variable, not a target property; archive/target dependencies remain.
     set(CMAKE_LINK_DEPENDS_USE_LINKER OFF PARENT_SCOPE)
   endif()
-  if(NOT P4_ANDROID64 AND NOT P4_PORT64_ARCH STREQUAL "aarch64")
+  if(NOT P4_ANDROID64 AND NOT P4_PORT64_ARCH STREQUAL "aarch64" AND NOT P4_APPLE)
     cmake_language(CALL "${callback}" "" ${P4_TARGET_FLAGS})
   endif()
   if(P4_PORT64_LINK AND P4_PORT64_OBJS)

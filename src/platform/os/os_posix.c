@@ -1,4 +1,4 @@
-/* Linux implementation of include/p4pc/os.h. */
+/* POSIX (Linux, Android, macOS) implementation of include/p4pc/os.h. */
 #ifndef _DEFAULT_SOURCE
 #define _DEFAULT_SOURCE
 #endif
@@ -7,7 +7,11 @@
 #include <limits.h>
 #include <dirent.h>
 #include <fcntl.h>
+#ifdef __APPLE__
+#include <sys/ucontext.h> /* (<ucontext.h> there is the deprecated makecontext API, refused without _XOPEN_SOURCE) */
+#else
 #include <ucontext.h>
+#endif
 #ifdef __ANDROID__
 #include <dlfcn.h>
 #include <android/log.h>
@@ -28,7 +32,7 @@
 #include <unistd.h>
 #ifdef __APPLE__
 #include <mach-o/dyld.h>
-#include <limits.h>
+#include <mach-o/loader.h>
 #endif
 
 #include "p4pc/os.h"
@@ -111,6 +115,27 @@ static void crash_handler(int sig, siginfo_t *info, void *context)
         dprintf(STDERR_FILENO, "p4pc:   x%u=%016llx\n", i, (unsigned long long)uc->uc_mcontext.regs[i]);
     dprintf(STDERR_FILENO, "p4pc:   sp=%016llx pstate=%016llx\n",
             (unsigned long long)uc->uc_mcontext.sp, (unsigned long long)uc->uc_mcontext.pstate);
+#elif defined(__APPLE__) && defined(__x86_64__)
+    {
+        const struct __darwin_x86_thread_state64 *ss = &uc->uc_mcontext->__ss;
+        const struct { const char *name; uint64_t value; } regs[] = {
+            {"rax", ss->__rax}, {"rbx", ss->__rbx}, {"rcx", ss->__rcx}, {"rdx", ss->__rdx}, {"rdi", ss->__rdi}, {"rsi", ss->__rsi},
+            {"rbp", ss->__rbp}, {"rsp", ss->__rsp}, {"r8", ss->__r8}, {"r9", ss->__r9}, {"r10", ss->__r10}, {"r11", ss->__r11},
+            {"r12", ss->__r12}, {"r13", ss->__r13}, {"r14", ss->__r14}, {"r15", ss->__r15}, {"rip", ss->__rip}, {"rflags", ss->__rflags}};
+        crash_address("instruction", 0, (uintptr_t)ss->__rip);
+        for (unsigned i = 0; i < sizeof regs / sizeof regs[0]; ++i)
+            dprintf(STDERR_FILENO, "p4pc:   %s=%016llx\n", regs[i].name, (unsigned long long)regs[i].value);
+    }
+#elif defined(__APPLE__) && defined(__aarch64__)
+    {
+        const struct __darwin_arm_thread_state64 *ss = &uc->uc_mcontext->__ss;
+        crash_address("instruction", 0, (uintptr_t)__darwin_arm_thread_state64_get_pc(*ss));
+        for (unsigned i = 0; i < 29; ++i)
+            dprintf(STDERR_FILENO, "p4pc:   x%u=%016llx\n", i, (unsigned long long)ss->__x[i]);
+        dprintf(STDERR_FILENO, "p4pc:   fp=%016llx lr=%016llx sp=%016llx cpsr=%08x\n",
+                (unsigned long long)__darwin_arm_thread_state64_get_fp(*ss), (unsigned long long)__darwin_arm_thread_state64_get_lr(*ss),
+                (unsigned long long)__darwin_arm_thread_state64_get_sp(*ss), (unsigned)ss->__cpsr);
+    }
 #else
     (void)uc;
 #endif
@@ -185,9 +210,32 @@ int p4_os_restart_self(int argc, char **argv)
 }
 #endif
 
+#ifdef __APPLE__
+int p4_os_runtime_library(const char *name, char *out, size_t capacity) {
+    static const char *const places[] = {"/../Frameworks/", "/"};   /* the app bundle's, then a build tree's (beside the executable) */
+    char executable[PATH_MAX], dir[PATH_MAX];
+    uint32_t size = sizeof executable;
+    char *slash;
+
+    if (_NSGetExecutablePath(executable, &size) != 0 || realpath(executable, dir) == NULL || (slash = strrchr(dir, '/')) == NULL) return -1;
+    *slash = '\0';
+    for (size_t i = 0; i < sizeof places / sizeof places[0]; i++) {
+        int n = snprintf(out, capacity, "%s%s%s", dir, places[i], name);
+        if (n > 0 && (size_t)n < capacity && access(out, R_OK) == 0) return 0;
+    }
+    return -1;
+}
+#endif
+
 int p4_os_setenv(const char *name, const char *value, int overwrite) { return setenv(name, value, overwrite); }
 
+#ifdef __APPLE__
+/* macOS: SDL's offscreen driver has only EGL device displays, which ANGLE's Metal back end does not offer; a hidden Cocoa window gives the
+ * context instead (as on Windows: src/platform/pad/pad_sdl.c, P4PC_HIDDEN_WINDOW). */
+void p4_os_headless_env(void) { setenv("P4PC_HIDDEN_WINDOW", "1", 0); }
+#else
 void p4_os_headless_env(void) { setenv("SDL_VIDEODRIVER", "offscreen", 0); }
+#endif
 
 int p4_os_is_dir_nofollow(const char *path) {
     struct stat st;
@@ -429,6 +477,18 @@ struct p4_coro {
 };
 
 void p4_coro_swap(void **save_sp, void *load_sp);
+#if defined(__APPLE__)
+/* Mach-O: the C name has a leading underscore, and there is no .type/.size */
+__asm__(".text\n"
+        ".globl _p4_coro_swap\n"
+        ".private_extern _p4_coro_swap\n"
+        "_p4_coro_swap:\n"
+        "\tpushq %rbp\n\tpushq %rbx\n\tpushq %r12\n\tpushq %r13\n\tpushq %r14\n\tpushq %r15\n"
+        "\tmovq %rsp, (%rdi)\n"
+        "\tmovq %rsi, %rsp\n"
+        "\tpopq %r15\n\tpopq %r14\n\tpopq %r13\n\tpopq %r12\n\tpopq %rbx\n\tpopq %rbp\n"
+        "\tretq\n");
+#else
 __asm__(".text\n"
         ".globl p4_coro_swap\n"
         ".hidden p4_coro_swap\n"
@@ -440,6 +500,7 @@ __asm__(".text\n"
         "\tpopq %r15\n\tpopq %r14\n\tpopq %r13\n\tpopq %r12\n\tpopq %rbx\n\tpopq %rbp\n"
         "\tretq\n"
         ".size p4_coro_swap,.-p4_coro_swap\n");
+#endif
 
 p4_coro *p4_coro_adopt(void) { return calloc(1, sizeof(p4_coro)); }
 
@@ -576,6 +637,24 @@ int p4_os_code_readable(uintptr_t addr) {
     return 1;
 }
 
+#if defined(__APPLE__)
+/* macOS has no /proc: the executable code of each image dyld has loaded is its __TEXT segment */
+void p4_os_list_modules(void (*cb)(uintptr_t base, uintptr_t size, const char *name)) {
+    for (uint32_t i = 0, n = _dyld_image_count(); i < n; i++) {
+        const struct mach_header_64 *mh = (const struct mach_header_64 *)_dyld_get_image_header(i);
+        const char *path = _dyld_get_image_name(i);
+        if (mh == NULL || mh->magic != MH_MAGIC_64 || path == NULL) continue;
+        const struct load_command *lc = (const struct load_command *)(mh + 1);
+        for (uint32_t c = 0; c < mh->ncmds; c++, lc = (const struct load_command *)((const char *)lc + lc->cmdsize)) {
+            const struct segment_command_64 *sc = (const struct segment_command_64 *)lc;
+            if (lc->cmd == LC_SEGMENT_64 && strcmp(sc->segname, "__TEXT") == 0) {
+                cb((uintptr_t)(sc->vmaddr + (uint64_t)_dyld_get_image_vmaddr_slide(i)), (uintptr_t)sc->vmsize, path);
+                break;
+            }
+        }
+    }
+}
+#else
 void p4_os_list_modules(void (*cb)(uintptr_t base, uintptr_t size, const char *name)) {
     FILE *f = fopen("/proc/self/maps", "r");
     char line[512];
@@ -589,3 +668,4 @@ void p4_os_list_modules(void (*cb)(uintptr_t base, uintptr_t size, const char *n
     }
     fclose(f);
 }
+#endif

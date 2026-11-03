@@ -13,11 +13,13 @@ A wrong file shows an error and asks again; cancel quits with a message. The val
 choice is persisted. The executable is extracted to `SLUS_217.82` beside the INI once,
 with its size checked on subsequent launches; players need not extract it manually.
 
-The [settings file](settings.md#file-and-precedence) lives in SDL's per-user data folder.
+The [settings file](settings.md#file-and-precedence) lives in SDL's per-user data folder:
+`~/.local/share/p4pc/Persona4/` on Linux, `%APPDATA%\p4pc\Persona4\` on Windows and
+`~/Library/Application Support/p4pc/Persona4/` on macOS.
 Player saves default to its sibling `save/`, overridden by `P4PC_SAVE_DIR`.
-On Windows and Linux, player startup redirects stdout/stderr to sibling `p4pc.log`,
+On Windows, Linux and macOS, player startup redirects stdout/stderr to sibling `p4pc.log`,
 truncated on each launch. Android uses internal `boot.log` plus logcat. Fatal native
-signals on Linux/Android also retain `p4pc-crash.log` beside it; attach both logs.
+signals on Linux, macOS and Android also retain `p4pc-crash.log` beside it; attach both logs.
 
 A nonplayer run (test/harness/capture/headless switches, dummy audio, offscreen video)
 may read an existing INI but never creates it or asks for a disc. Automated tools force
@@ -27,11 +29,12 @@ change their evidence.
 ## Release contents
 
 Run the package tools in the `p4pc-ci` container from a clean checkout
-([BUILDING.md](../../BUILDING.md)):
+([BUILDING.md](../../BUILDING.md)); the macOS packager runs on a Mac:
 
 ```sh
 sh tools/package_win.sh             # x64 player zip
 sh tools/package_linux.sh           # Linux x86_64 AppImage
+sh tools/package_macos.sh           # macOS app zip, on a Mac (arm64 or x86_64: the Mac's own)
 P4PC_ISO=<your disc image> sh tools/package_smoke.sh dist/p4pc-win64-<version>.zip   # on Windows, Git Bash
 ```
 
@@ -40,6 +43,9 @@ Windows packages are `p4pc-win64-<version>.zip` with `p4pc64w.exe`, its non-syst
 imports against system/shipped DLLs and requires the `ffmpeg_license` check with
 `P4PC_REQUIRE_LGPL=1` against the shipped FFmpeg libraries. Linux packages include SDL3
 and LGPL-only FFmpeg built from source with mandatory license checking and intact symlinks.
+macOS packages are `p4pc-macos-<arch>-<version>.zip`: an ad-hoc signed `Persona 4 PC.app`
+(SDL3, LGPL-only FFmpeg and ANGLE in `Contents/Frameworks`), README, notices and licences;
+see [macOS](macos.md) for the bundle checks and the Gatekeeper first start.
 No retail files, saves, captures or test environment overrides are shipped.
 
 Staging and build trees stay below the packager's build directory (`build/package-*`);

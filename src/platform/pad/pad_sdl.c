@@ -276,7 +276,7 @@ int p4pc_pad_sdl_init(void)
         if (video->fullscreen) {
             flags |= SDL_WINDOW_FULLSCREEN;
         }
-        sWindow = SDL_CreateWindow("Persona 4 PC", video->width, video->height, flags);
+        sWindow = p4gl_api_create_window("Persona 4 PC", video->width, video->height, flags);
         if (sWindow != NULL && video->fullscreen && !(hidden != NULL && hidden[0] == '1')) {
             SDL_HideCursor();
         }
@@ -578,6 +578,17 @@ static uint16_t autoButtonBit(const char *name, size_t len)
     return 0;
 }
 
+/* Host strtod rounds by the thread's float mode, and the Windows CRT follows the EE mode's round-toward-zero where glibc rounds to nearest: scripted
+ * times parse in round-to-nearest, the same value on every target (src/platform/pad/walk_script.c parses walk scripts the same way). */
+static double autoParseTime(const char *s, char **end)
+{
+    const unsigned csr = p4pc_fpu_host_enter();
+    const double v = strtod(s, end);
+
+    p4pc_fpu_host_leave(csr);
+    return v;
+}
+
 /* Parses a spec into `out`; returns the entry count, or -1 on a malformed entry (message on stderr). */
 int p4pc_pad_autopress_parse(const char *spec, P4PadAutoPress *out, int max)
 {
@@ -603,16 +614,16 @@ int p4pc_pad_autopress_parse(const char *spec, P4PadAutoPress *out, int max)
         a.hold = 0.3;
         a.every = 0.0;
         a.count = 0;
-        a.start = strtod(at + 1, &rest);
+        a.start = autoParseTime(at + 1, &rest);
         if (a.bit == 0 || rest == at + 1) {
             fprintf(stderr, "p4pc: P4PC_AUTOPRESS: bad entry '%.*s'\n", (int)len, p);
             return -1;
         }
         if (*rest == ':') {
-            a.hold = strtod(rest + 1, &rest);
+            a.hold = autoParseTime(rest + 1, &rest);
         }
         if (*rest == '/') {
-            a.every = strtod(rest + 1, &rest);
+            a.every = autoParseTime(rest + 1, &rest);
             if (*rest == '*') {
                 a.count = (int)strtol(rest + 1, &rest, 10);
             }
@@ -889,6 +900,40 @@ static void walkLog(void *user, const char *message)
     fprintf(stderr, "p4pc: %s\n", message);
 }
 
+/* The dungeon digest's reader: the whole guest block (a 64-bit host's game heap reaches the port half above 0x02000000, where the walker's own reader stops). */
+static uint32_t digestRead32(void *user, uint32_t addr)
+{
+#ifdef P4_GUEST64
+    const uint32_t top = P4_GUEST_SIZE - 4u;
+#else
+    const uint32_t top = 0x01FFFFFCu;
+#endif
+
+    (void)user;
+    if (addr < 0x00100000u || addr > top) {
+        return 0;
+    }
+    return *(volatile uint32_t *)P4_G2H(addr);
+}
+
+/* P4PC_DUNGEON_DIGEST=1: one row of per-component state hashes every 100 flips (p4walk_dungeon_digest, include/p4pc/walk_script.h), with a rolling hash
+ * of the player's matrix and the additive random generator over every flip. tests/dungeon_digest_gate.sh holds a dungeon walk's rows to the ones
+ * the Windows x64 and the Linux x64 builds both recorded (docs/platform/numeric_determinism.md). */
+static void dungeonDigest(uint32_t frame)
+{
+    static int on = -1;
+    static uint32_t roll = 2166136261u;
+    const P4WalkHost host = { digestRead32, NULL, NULL };
+    char line[320];
+
+    if (on < 0) {
+        on = getenv("P4PC_DUNGEON_DIGEST") != NULL;
+    }
+    if (on && p4walk_dungeon_digest(&host, frame, 100u, &roll, line, sizeof line)) {
+        fprintf(stderr, "p4pc: %s\n", line);
+    }
+}
+
 static uint16_t walkSnapshotBit(int b)
 {
     static const uint16_t bits[P4W_BUTTON_COUNT] = {
@@ -969,6 +1014,7 @@ static void walkScriptRead(P4PadSnapshot *out)
                 sWalkMask = gameFrames ? p4walk_tick(sWalk, &host) : p4walk_frame(sWalk, &host, frame);
             }
             walkDigest(&host, frame);
+            dungeonDigest(frame);
             if (frame % walkLogEvery() == 0) {
                 static int logPos = -1;
 

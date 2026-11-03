@@ -72,6 +72,46 @@ elseif(P4_ANDROID)
   set(P4_GEN_TOOL_ARGS --pic --nm "${P4_NM}" --objdump "${P4_OBJDUMP}")
   function(p4_ps2_exe target)
   endfunction()
+elseif(P4_APPLE)
+  # SDL3, FFmpeg and ANGLE for the host architecture, from ci/macos/build_deps.sh <prefix> (shared libraries whose install names are @rpath/...;
+  # every executable carries the prefix's lib directory and the app bundle's Frameworks as run paths, P4_X64_LINK_FLAGS).
+  set(P4_MACOS_PREFIX "" CACHE PATH "ci/macos/build_deps.sh output: SDL3, FFmpeg and ANGLE for this architecture")
+  if(NOT EXISTS "${P4_MACOS_PREFIX}/lib/libSDL3.0.dylib")
+    message(FATAL_ERROR "P4_MACOS_PREFIX is not a ci/macos/build_deps.sh prefix: '${P4_MACOS_PREFIX}'")
+  endif()
+  find_library(P4_SDL3_LIB NAMES SDL3 PATHS "${P4_MACOS_PREFIX}/lib" NO_DEFAULT_PATH REQUIRED)
+  set(P4_LIBM_LIB "")
+  find_library(P4_AVCODEC_LIB NAMES avcodec PATHS "${P4_MACOS_PREFIX}/lib" NO_DEFAULT_PATH REQUIRED)
+  find_library(P4_AVUTIL_LIB NAMES avutil PATHS "${P4_MACOS_PREFIX}/lib" NO_DEFAULT_PATH REQUIRED)
+  find_library(P4_SWSCALE_LIB NAMES swscale PATHS "${P4_MACOS_PREFIX}/lib" NO_DEFAULT_PATH REQUIRED)
+  find_path(P4_FFMPEG_INC libavcodec/avcodec.h PATHS "${P4_MACOS_PREFIX}/include" NO_DEFAULT_PATH REQUIRED)
+  include_directories(SYSTEM "${P4_MACOS_PREFIX}/include")
+  # Host names for the tables and CRT steps: libSystem's text stub (it re-exports libc, libm, libdyld and the compiler runtime), SDL3 and
+  # FFmpeg. Mach-O objects spell C names with a leading underscore (--macho).
+  set(P4_LIBSYSTEM_TBD "${CMAKE_OSX_SYSROOT}/usr/lib/libSystem.tbd")
+  if(NOT EXISTS "${P4_LIBSYSTEM_TBD}")
+    message(FATAL_ERROR "no libSystem.tbd in the SDK '${CMAKE_OSX_SYSROOT}'")
+  endif()
+  set(P4_HOST_LIB_ARGS --macho --host-lib "${P4_LIBSYSTEM_TBD}" --host-lib "${P4_SDL3_LIB}"
+    --host-lib "${P4_AVCODEC_LIB}" --host-lib "${P4_SWSCALE_LIB}" --host-lib "${P4_AVUTIL_LIB}")
+  set(P4_GEN_TOOL_ARGS --macho --nm "${P4_CRT_NM}" --objdump "${P4_CRT_OBJDUMP}")
+  function(p4_ps2_exe target)
+  endfunction()
+  # ANGLE (libEGL, libGLESv2) beside the executables of the build tree, where the renderer looks when it is not in an app bundle
+  # (src/render/p4gl_api.h); ctest runs the tests from tests/.
+  set(P4_MACOS_RUNTIME "${P4_MACOS_PREFIX}/lib/libEGL.dylib" "${P4_MACOS_PREFIX}/lib/libGLESv2.dylib")
+  set(P4_MACOS_RUNTIME_COPIES)
+  foreach(dir "${CMAKE_BINARY_DIR}" "${CMAKE_BINARY_DIR}/tests")
+    foreach(f IN LISTS P4_MACOS_RUNTIME)
+      get_filename_component(fname "${f}" NAME)
+      list(APPEND P4_MACOS_RUNTIME_COPIES "${dir}/${fname}")
+      add_custom_command(OUTPUT "${dir}/${fname}"
+        COMMAND "${CMAKE_COMMAND}" -E make_directory "${dir}"
+        COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${f}" "${dir}/${fname}"
+        DEPENDS "${f}" VERBATIM)
+    endforeach()
+  endforeach()
+  add_custom_target(p4_macos_runtime ALL DEPENDS ${P4_MACOS_RUNTIME_COPIES})
 else()
   # Host SDL3 for the pad and window (src/platform/pad/pad_sdl.c). The build is 32-bit, so the
   # library comes from the i386 multiarch directory (NO_DEFAULT_PATH: the CI image also carries the

@@ -1,7 +1,8 @@
 # Independent pristine collection card3-slot06, August 3 at the TV-world Entrance.
-# Rise's Chase the boy leads to the Void Quest title screen; enter Chapter 1 and stop at
-# its arrival (field 43:0, step 61) with player control. Generated floors are not walked:
-# their routes diverge between the Windows and Linux x64 builds.
+# Rise's Chase the boy leads to the Void Quest title screen; enter Chapter 1 (step 61)
+# and take its generated floor's stairs to Chapter 2 (step 62) without an encounter.
+# tests/dungeon_digest_gate.sh holds the walk to the dungeon digest the Windows x64 and
+# Linux x64 builds recorded.
 timeout:20000
 wait:140
 press:cross
@@ -26,5 +27,11 @@ press:cross
 skipmsg
 waitfield:43:0
 waitstep:61
+log
+plan:on
+walk:goal,80
+press:cross
+skipmsg
+waitstep:62
 waitcontrol:on
 log

@@ -41,7 +41,7 @@ from collection card2-slot08 descendants.
 | 06/21–06/23 | card2-slot12 | `collection_evening_0623` | save | two automatic days to 06/23 evening |
 | 06/23–06/24 | card2-slot13 | `collection_junes_0624` | save | 06/24 TV-world scene, Junes meeting, Go back home |
 | 06/23–06/25 | card2-slot13 | `collection_rise_search_0625` | save | 06/24 as above, then 06/25's information search on Rise into the TV and an Entrance save |
-| 06/25 | card2-slot14 | `collection_marukyu_entry_0625` | walk | Marukyu Striptease seats, stage, 1F arrival |
+| 06/25 | card2-slot14 | `collection_marukyu_entry_0625` (+ `_linux`) | walk, digest | Marukyu Striptease seats, stage, 1F and 2F with every encounter escaped, 3F arrival |
 | 06/25 | card2-slot15 | `marukyu_allocator` | walk | 11F: Shadow Rise victory, Rise cleanup, Shadow Teddie's first COMMAND |
 | 06/26–06/27 | card2-slot16 | `collection_school_story_0627` | save | post-rescue school story |
 | 06/26–07/08 | card2-slot16 | `collection_evening_0708` | save | 06/27 home, school days and free nights to 07/08 evening |
@@ -51,7 +51,7 @@ from collection card2-slot08 descendants.
 | 07/25 | none | — | — | no anchor |
 | 07/26–08/01 | card3-slot04 | `collection_evening_0801` | save | 07/27 Junes meeting, home, summer days to 08/01 evening |
 | 08/01–08/03 | card3-slot05 | `collection_evening_0803` | save | day out, 08/02, 08/03's automatic day, 08/03 evening home |
-| 08/03 | card3-slot06 | `collection_voidquest_entry_0803` | walk | Void Quest title, Chapter 1 arrival |
+| 08/03 | card3-slot06 | `collection_voidquest_entry_0803` (+ `_linux`) | walk, digest | Void Quest title, Chapter 1's floor, Chapter 2 arrival |
 | 08/03 | card3-slot07 | `collection_voidquest_opening_0803` | walk | Endgame: Shadow Mitsuo's first COMMAND |
 | 08/04–08/11 | none | — | — | no anchor |
 | 08/12–08/14 | card3-slot08 | `collection_summer_break_0814` | save | summer break |
@@ -81,12 +81,16 @@ from collection card2-slot08 descendants.
 | 12/02–12/03 | MAX18657 (12/02) | `collection_hospital_bad_1203` | walk | Namatame pushed in: bad ending to the new-cycle prompt |
 | 12/02–12/03 | MAX18657 (12/02) | `collection_hospital_continue_1203` | save | spare Namatame, 12/03 home |
 | 12/03–12/04 | card4-slot12 | `collection_deduction_1204` | save | Junes deduction, hospital questions, 12/04 home |
-| 12/05 | card4-slot13/-slot14 | — | — | see "12/05 clue search" below |
+| 12/04–12/05 | card4-slot13 | `collection_culprit_1205` | save | 12/05 information search (every townsperson, both questions), Aiya, naming Adachi, questioning him, 12/05 home |
+| 12/05–12/06 | card4-slot14 | `collection_adachi_1206` | save | the search's last answer, Aiya, naming Adachi, 12/06 story, 12/06 home |
 | 12/06–12/07 | card4-slot15 | `collection_evening_1207` | save | 12/07 home |
 | 12/08–12/22 | none | — | — | no anchor |
 | 12/23 | card4-slot16 | `collection_adachi_opening_1223` | walk | Magatsu Inaba top: Adachi's first COMMAND |
+| 12/23 | card4-slot16 | `collection_adachi_victory_1223` | walk | Yu's Persona switch, Adachi defeated by battle rules, Ameno-sagiri's first COMMAND |
 | 12/24–03/20 | card5-slot01 | `collection_departure_calendar_0320` | walk | Christmas, calendar jump, farewell map |
 | 03/20 | card5-slot02 | `collection_normal_ending_0320` | save | home, departure, normal ending, credits, new-cycle save |
+| 03/20 | card5-slot02 | `collection_true_trigger_0320` | save | true-ending trigger: Junes refusal, food court, Dojima, Velvet Room, attendant, TV Entrance save |
+| 03/20 | card5-slot04 | `collection_attendant_0320` | save | the attendant and Izanami's reveal, TV Entrance save |
 | 03/20 | card5-slot05 | `collection_yomotsu_entrance_0320` | walk | Search for Izanami: Yomotsu Hirasaka exterior |
 | 03/20 | card5-slot06 | `collection_izanami_opening_0320` | walk | Path 9: Izanami's first COMMAND |
 | 03/20 | CBS18506 (NG+) | `collection_margaret_0320` | walk | Margaret victory |
@@ -98,11 +102,11 @@ from collection card2-slot08 descendants.
 |---|---|---|---|
 | Yukiko's Castle | New Game chain | 1F–8F | Shadow Yukiko: `yukiko_rescue_0426` |
 | Steamy Bathhouse | New Game chain | 1F–11F | Shadow Kanji: not qualified |
-| Marukyu Striptease | `collection_marukyu_entry_0625` | 1F arrival; 1F–10F uncovered | Shadow Rise: `marukyu_allocator`; Shadow Teddie: opening only |
-| Void Quest | `collection_voidquest_entry_0803` | Chapter 1 arrival; chapters uncovered | Shadow Mitsuo: opening only |
+| Marukyu Striptease | `collection_marukyu_entry_0625` | 1F–2F, 3F arrival; 4F–10F uncovered | Shadow Rise: `marukyu_allocator`; Shadow Teddie: opening only |
+| Void Quest | `collection_voidquest_entry_0803` | Chapter 1, Chapter 2 arrival; later chapters uncovered | Shadow Mitsuo: opening only |
 | Secret Laboratory | `collection_secretlab_entrance_0918` | exterior, B9F; B1F–B8F uncovered | Shadow Naoto: opening only |
 | Heaven | `collection_heaven_entrance_1106` | gates, 10F; 1F–9F uncovered | Kunino-sagiri: opening only |
-| Magatsu Inaba | none | final field only | Adachi: opening only; Ameno-sagiri: uncovered |
+| Magatsu Inaba | none | final field only | Adachi: `collection_adachi_victory_1223`; Ameno-sagiri: opening only |
 | Yomotsu Hirasaka | `collection_yomotsu_entrance_0320` | exterior, Path 9; Paths 1–8 uncovered | Izanami: opening only |
 
 ## Endings
@@ -110,37 +114,30 @@ from collection card2-slot08 descendants.
 - **Bad ending:** `collection_hospital_bad_1203` (to the native new-cycle save prompt, no write).
 - **Normal ending:** `collection_normal_ending_0320`, through the credits and a native
   new-cycle save.
-- **True-ending route:** `collection_yomotsu_entrance_0320` and
-  `collection_izanami_opening_0320`; the clear data it produces is exercised by
-  `collection_new_cycle_0411`. Izanami's defeat and the true ending itself are uncovered.
+- **True-ending route:** `collection_true_trigger_0320` (farewell to the Entrance),
+  `collection_yomotsu_entrance_0320` and `collection_izanami_opening_0320`; the clear data it
+  produces is exercised by `collection_new_cycle_0411`. Izanami's defeat and the true ending
+  itself are uncovered.
 
 ## Uncovered and why
 
 - **Days with no anchor** (rows marked "no anchor" above): no collection card sits inside
   them or at their start, and chained private descendants are kept out of the collection
   gates. Every leg that could be played through to the next card's date was.
-- **Dungeon floors between anchors** (Marukyu 1F–10F, Void Quest's chapters, Secret
-  Laboratory B1F–B8F, Heaven 1F–9F, Magatsu Inaba, Yomotsu Paths 1–8): no anchor inside
-  them, and generated floors are not yet stable across targets. From the same Marukyu card
-  and input, the Windows x64 build wins one 1F battle and reaches 3F, while the Linux x64
-  build's route parts from it about 21 units into 1F, meets three encounters and loses the
-  third (the earlier one-digit differences in the walk logs are printf rounding, not state).
-  The dungeon legs therefore stop at the first floor's arrival. With an attack-only plan,
-  Void Quest Chapter 2 also lost an ordinary encounter on Windows.
-- **Boss victories** (Shadow Kanji, Teddie, Mitsuo, Naoto, Kunino-sagiri, Adachi,
-  Ameno-sagiri, Izanami): only openings are gated. Earlier scripted-combat studies of
-  Mitsuo, Naoto and Izanami lost or did not finish, and an attack-only plan from the 11F
-  card loses to Shadow Teddie (`dng_decease`); a victory needs a qualified battle plan per
-  boss.
-- **12/05 clue search:** after the 12/04 deduction, 12/05 starts at Junes; the elevator
-  answers "You have to gather information... You decide to ask around." and going home
-  answers "There doesn't seem to be enough information... You should go to town and gather
-  more clues." In the shopping district the townspeople offer an "About those murders..."
-  topic and party members (Yukiko) wait with hints; which conversations complete the search
-  and lead to naming the culprit is not mapped yet, so card4-slot13/-slot14 have no gate.
-- **03/20 true-ending trigger:** cards card5-slot03 and -slot04 are later farewell states in
-  the shopping district (their save point is the area near (437, -2106)); Junes refuses
-  them ("There's no need to be here..."). The step from them to the Entrance save
-  (card5-slot05) is not mapped yet.
+- **Dungeon floors between anchors** (Marukyu 4F–10F, Void Quest after Chapter 2's
+  arrival, Secret Laboratory B1F–B8F, Heaven 1F–9F, Magatsu Inaba, Yomotsu Paths 1–8): no
+  anchor inside them. Generated floors are stable across targets: the Marukyu and Void
+  Quest gates are cross-target digest pairs (`tests/dungeon_digest_gate.sh`), and the
+  2026-11-02 Marukyu split between a Windows and a Linux run was two different sources
+  (before and after the VU0 multiplies of 06c24b38), not two targets
+  ([numeric determinism](numeric_determinism.md#dungeon-floors-across-targets)). Under that
+  arithmetic an attack-only Yu loses the third 1F encounter, so the Marukyu walk escapes
+  every encounter. With an attack-only plan, Void Quest Chapter 2 also lost an ordinary
+  encounter on Windows.
+- **Boss victories** (Shadow Kanji, Teddie, Mitsuo, Naoto, Kunino-sagiri, Ameno-sagiri,
+  Izanami): only openings are gated. Adachi's defeat is gated with walker battle rules that
+  pick skills and items by native ID. Earlier scripted-combat studies of Mitsuo, Naoto and
+  Izanami lost or did not finish, and an attack-only plan from the 11F card loses to Shadow
+  Teddie (`dng_decease`); a victory needs a qualified battle plan per boss.
 - **First-cycle hospital card card4-slot11 (12/02):** the same hospital segment as the
   gated MAX18657 card; Cross-only input plays it into the bad ending.

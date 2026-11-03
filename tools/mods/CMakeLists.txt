@@ -2,6 +2,10 @@
 # outside guest-pointer/EE-float launchers; the provider alone owns C++/the VM.
 set_property(DIRECTORY PROPERTY COMPILE_OPTIONS "")
 set_property(DIRECTORY PROPERTY LINK_OPTIONS "")
+if(P4_APPLE)
+  # macOS's link requirement is the platform's, not a profile flag (cmake/sources/050-platform-flags.cmake: the weak kwlnTaskDumpAll)
+  set_property(DIRECTORY PROPERTY LINK_OPTIONS ${P4_TARGET_LINK_FLAGS})
+endif()
 get_filename_component(P4_MOD_ROOT "${CMAKE_CURRENT_LIST_DIR}/../.." ABSOLUTE)
 set(P4_MOD_BINDING_SOURCES)
 foreach(unit lua_api lua_runtime lua_memory lua_hooks lua_events lua_input lua_files lua_save failure_script)

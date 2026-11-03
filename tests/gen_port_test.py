@@ -65,7 +65,9 @@ class MatchContractsTest(unittest.TestCase):
         source.write_text("void p4_mod_entry_example(void) {}\nvoid host_collision(void) {}\n", encoding="utf-8")
         subprocess.run([cc, "-c", str(source), "-o", str(obj)], check=True)
         subprocess.run([ar, "rcs", str(archive), str(obj)], check=True)
-        with mock.patch.object(gen_port.Tools, "nm", nm), mock.patch.object(gen_port.Tools, "coff", False):
+        # the host's own object format: Mach-O on macOS (its C names carry `_`), ELF elsewhere
+        with mock.patch.object(gen_port.Tools, "nm", nm), mock.patch.object(gen_port.Tools, "coff", False), \
+                mock.patch.object(gen_port.Tools, "macho", sys.platform == "darwin"):
             self.assertEqual(gen_port.project_symbols([archive], {"host_collision"}), {"p4_mod_entry_example"})
 
     def test_retail_aliases_read_root_relative_manifest_entries(self):
@@ -620,6 +622,117 @@ class MatchContractsTest(unittest.TestCase):
         self.assertLess(text.index("extern u8 other();"), first)
         self.assertGreater(text.index('#include "override.h"'), first)
         self.assertEqual(gen_port.align_narrow_returns(self.mirror)[0], 0)
+
+
+class MachOTest(unittest.TestCase):
+    """macOS (--macho): C names carry `_`, asm labels get it from the rewriter's Mach-O pass, the i386 oracle follows the triple."""
+
+    def setUp(self):
+        saved = (gen_port.Tools.macho, gen_port.Tools.coff, set(gen_port.Tools.raw_undefined))
+        def restore():
+            gen_port.Tools.macho, gen_port.Tools.coff, gen_port.Tools.raw_undefined = saved
+        self.addCleanup(restore)
+        gen_port.Tools.macho, gen_port.Tools.coff = True, False
+        gen_port.Tools.raw_undefined = set()
+
+    def test_symbol_names_and_relocations(self):
+        self.assertEqual(gen_port.target_name("_SDL_Init"), "SDL_Init")
+        self.assertEqual(gen_port.target_name("___divdi3"), "__divdi3")
+        self.assertEqual(gen_port.target_name("_ext@GOTPCREL"), "ext")
+        self.assertEqual(gen_port.target_name("func_003df4d0"), "func_003df4d0")
+        # `objdump --macho -r` rows (arm64 prints a pointer's length as `?( 3)`); only an external entry names a symbol
+        for line, ext, kind, name in (("00000018 True  long   True   BR26    False     _ext_fn", "True", "BR26", "_ext_fn"),
+                                      ("000695f0 False ?( 3)  True   UNSIGND False     _vfs_stat", "True", "UNSIGND", "_vfs_stat"),
+                                      ("00000031 True  long   True   BRANCH  False     func_003df4d0", "True", "BRANCH", "func_003df4d0"),
+                                      ("000695f8 False quad   False  UNSIGND False     2 (__TEXT,__cstring)", "False", "UNSIGND", "2")):
+            m = gen_port.MACHO_RELOC_RE.match(line)
+            self.assertIsNotNone(m, line)
+            self.assertEqual((m[1], m[2], m[3]), (ext, kind, name))
+        self.assertIn("ARM64_RELOC_BRANCH26", gen_port.CALL_RELOCS)
+        self.assertIn("X86_64_RELOC_BRANCH", gen_port.CALL_RELOCS)
+        self.assertNotIn("X86_64_RELOC_GOT_LOAD", gen_port.CALL_RELOCS)
+
+    def test_real_objects_relocation_kinds(self):
+        cc, objdump = shutil.which("clang"), shutil.which("llvm-objdump")
+        if not cc or not objdump:
+            self.skipTest("clang/llvm-objdump unavailable")
+        saved = (gen_port.Tools.objdump, gen_port.Tools.arm64)
+        self.addCleanup(lambda: (setattr(gen_port.Tools, "objdump", saved[0]), setattr(gen_port.Tools, "arm64", saved[1])))
+        gen_port.Tools.objdump = objdump
+        with tempfile.TemporaryDirectory() as tmp:
+            src = pathlib.Path(tmp) / "table.c"
+            src.write_text("void called(void); void listed(void); extern int datum;\n"
+                           "void *const table[] = { (void *)&listed, (void *)&called, &datum };\n"
+                           "void caller(void) { called(); }\n", encoding="utf-8")
+            for triple, arm64, call, data in (("arm64-apple-macos12.0", True, "ARM64_RELOC_BRANCH26", "ARM64_RELOC_UNSIGNED"),
+                                              ("x86_64-apple-macos12.0", False, "X86_64_RELOC_BRANCH", "X86_64_RELOC_UNSIGNED")):
+                with self.subTest(triple=triple):
+                    gen_port.Tools.arm64 = arm64
+                    obj = pathlib.Path(tmp) / (triple + ".o")
+                    subprocess.run([cc, "--target=" + triple, "-c", "-O1", str(src), "-o", str(obj)], check=True, capture_output=True)
+                    self.assertEqual(gen_port.reloc_kinds([obj], {"called", "listed", "datum"}),
+                                     {"called": {call, data}, "listed": {data}, "datum": {data}})
+
+    def test_real_objects_report_unprefixed_labels(self):
+        cc, nm = shutil.which("clang"), shutil.which("llvm-nm")
+        if not cc or not nm:
+            self.skipTest("clang/llvm-nm unavailable")
+        saved_nm = gen_port.Tools.nm
+        self.addCleanup(setattr, gen_port.Tools, "nm", saved_nm)
+        gen_port.Tools.nm = nm
+        with tempfile.TemporaryDirectory() as tmp:
+            src = pathlib.Path(tmp) / "unit.c"
+            src.write_text('extern int lab(int) __asm__("func_003df4d0");\nextern int ext(int);\n'
+                           'int caller(int x) { return lab(x) + ext(x); }\n', encoding="utf-8")
+            for triple in ("arm64-apple-macos12.0", "x86_64-apple-macos12.0"):
+                with self.subTest(triple=triple):
+                    obj = pathlib.Path(tmp) / (triple + ".o")
+                    subprocess.run([cc, "--target=" + triple, "-c", "-O1", str(src), "-o", str(obj)], check=True, capture_output=True)
+                    defined, undefined, functions = gen_port.nm_symbols([obj])
+                    self.assertEqual(defined, {"caller"})
+                    self.assertEqual(undefined, {"func_003df4d0", "ext"})
+                    self.assertEqual(functions, {"caller"})
+                    self.assertEqual(gen_port.Tools.raw_undefined, {"func_003df4d0"})
+
+    def test_rewriter_prefix_and_i386_oracle(self):
+        sdk = ["-isysroot", "/sdk"]
+        self.assertEqual(gptr_rewrite.symbol_prefix(["--target=arm64-apple-macos12.0", *sdk]), "_")
+        self.assertEqual(gptr_rewrite.symbol_prefix(["--target=x86_64-apple-macos12.0"]), "_")
+        self.assertEqual(gptr_rewrite.symbol_prefix(["--target=x86_64-linux-gnu", "-m64"]), "")
+        self.assertEqual(gptr_rewrite.symbol_prefix(["--target=x86_64-w64-mingw32"]), "")
+        self.assertEqual(unit64.default_t32(["--target=arm64-apple-macos12.0", *sdk, "-fsigned-char"]),
+                         ["--target=i686-apple-macos10.13", *sdk, "-fno-blocks"])
+        self.assertEqual(unit64.default_t32(["--target=aarch64-linux-gnu"]), ["--target=i386-linux-gnu"])
+        mach = gptr_rewrite.Rewriter({"inner": []}, "/root", sym_prefix="_")
+        elf = gptr_rewrite.Rewriter({"inner": []}, "/root")
+        self.assertEqual(mach.linked_name({"mangledName": "_RwMatrixCreate"}, "RwMatrixCreate"), "RwMatrixCreate")
+        self.assertEqual(mach.linked_name({"mangledName": "func_003df4d0"}, "p4c_cos"), "func_003df4d0")
+        self.assertEqual(mach.linked_name({}, "plain"), "plain")
+        self.assertEqual(elf.linked_name({"mangledName": "_leading"}, "_leading"), "_leading")
+
+    def test_macho_text_prefixes_declaration_labels_only(self):
+        source = ('extern int lab(int) __asm__("func_003df4d0");\n'
+                  'extern unsigned char d[] __asm__ ("D_008873E8");\n'
+                  'extern int two(int)\n    __asm__("func_003df590");\n'
+                  'extern int sdk(void) __asm("_" "fopen" "$DARWIN_EXTSN");\n'
+                  'extern int done(void) __asm__("_already");\n'
+                  'extern struct S { int a; } gp __attribute__((section(".sdata")));\n'
+                  'void f(void) { __asm__ volatile("nop"); ; __asm__("sync"); }\n'
+                  '__asm__(".globl x");\n')
+        with tempfile.TemporaryDirectory() as tmp:
+            path = pathlib.Path(tmp) / "unit.i"
+            path.write_bytes(source.encode("latin-1"))
+            gptr_rewrite.macho_text(str(path), "_")
+            text = path.read_bytes().decode("latin-1")
+        self.assertIn('__asm__("_func_003df4d0")', text)
+        self.assertIn('__asm__ ("_D_008873E8")', text)
+        self.assertIn('__asm__("_func_003df590")', text)
+        self.assertIn('__asm("_" "fopen" "$DARWIN_EXTSN")', text)
+        self.assertIn('__asm__("_already")', text)
+        self.assertNotIn("section", text)
+        self.assertIn('__asm__ volatile("nop")', text)
+        self.assertIn('; __asm__("sync")', text)
+        self.assertIn('__asm__(".globl x")', text)
 
 
 class OracleLayoutTest(unittest.TestCase):

@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include "p4pc/package_boot.h"
 
+#include "p4pc/hostmath.h"
 #include "p4pc/os.h"
 extern void *kwlnTaskGetTaskByName(const void *name);
 extern void p4pc_pad_inject(unsigned bits, unsigned frames);
@@ -46,7 +47,13 @@ void p4pc_title_driver_frame(unsigned flip)
         }
 
         mode = e != NULL && *e != '\0';
-        originT = mode ? strtod(e, NULL) : 0.0;
+        if (mode) {
+            /* round-to-nearest, as the pad's script times (the Windows CRT's strtod follows the EE mode's truncation, glibc's does not) */
+            const unsigned csr = p4pc_fpu_host_enter();
+
+            originT = strtod(e, NULL);
+            p4pc_fpu_host_leave(csr);
+        }
         if (mode) {
             fprintf(stderr, "p4pc: title driver on: the script starts at T=%g when %s is confirmed\n", originT, sWantCursor ? "NEW GAME" : "LOAD GAME");
         }

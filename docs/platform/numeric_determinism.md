@@ -81,3 +81,51 @@ are unchanged.
 Arithmetic checks and independent same-walk gameplay are not whole-machine equality.
 Use save-anchored lockstep (the private retail-comparison tooling) with exact retained input and
 full state for fidelity comparisons. An expected first divergence does not qualify its unverified suffix.
+
+## Dungeon floors across targets
+
+`tests/dungeon_digest_gate.sh` holds a completed walk over generated floors to a digest that
+the Windows x64 and the Linux x64 builds both recorded (`tests/dungeon_digests/<walk>.txt`).
+`P4PC_DUNGEON_DIGEST=1` (`p4walk_dungeon_digest`, `src/platform/pad/walk_script.c`) prints a
+row every 100 flips with separate hashes of the field ids, dungeon step and floor seed, the
+floor's placed cells, the additive random generator, RpRandom's MT array, the player's
+matrix, the floor's units (ids and model matrices) and the battle state, plus a rolling hash
+of the player's matrix and the additive generator over every flip. A failure prints the
+first differing row and names its differing components. Pointer words are never hashed: the
+64-bit port half's heap blocks do not sit at the same guest addresses on the two targets (at
+flip 1000 of the Marukyu walk the word at 0x0071669C is 0x02433B70 on Windows and 0x02433C90
+on Linux), while the data they lead to is equal. Nor are RwMatrix's three pad words: the game
+leaves them uninitialised. `btlUnitUpdateAll` (0019c0d0) builds each battle unit's matrix on
+the stack, sets rows, position and flags as retail does (`swc1`/`sw` to sp+0x60..0x98, never
+0x7c/0x8c/0x9c) and copies all 64 bytes, so the pads hold each host's stack garbage (the hero's
+battle matrix at 0x01153AF0 holds `0 / 3 / 0x00007FF7` in them on Windows, `3 / 0 / 0` on Linux,
+with equal rows); other matrices' pads hold host garbage too (0x00940CDC at flip 6000:
+0x00007FF6 on Windows, 0x00007F6E on Linux). The Marukyu
+(`collection_marukyu_entry_0625`, 1F and 2F to the fixed 3F) and Void Quest
+(`collection_voidquest_entry_0803`, Chapter 1's floor
+to Chapter 2) gates are registered as pairs: the `P4PC_GATE_TARGET=windows` twin runs on the
+PC and the `_linux` twin on the laptop (`tools/land_game_split.py`). After a deliberate
+arithmetic change, re-record on both targets and commit only an equal recording.
+
+The Marukyu split reported on 2026-11-02 (Windows won one 1F battle and reached 3F, Linux met
+three encounters and lost) was a source difference, not a target one. The Windows run was
+built from 3f30e0ad (base 9c78ff3b), the Linux runs from land batch a92cdb38 (base e7d9bdf1).
+Built from the same source, the targets are bit-identical through 30000 flips: the player's
+matrix every flip, every game frame's pad packet and the walk digest, at 3f30e0ad and at
+80927fb5 alike, and three Windows runs equal each other. 3f30e0ad on Linux reproduces the
+Windows log line for line, 80927fb5 on Windows the Linux one. The route change bisects to
+06c24b38, the sky driver's VU0 multiplies above: 0dd3a503 reaches 3F, 06c24b38 does not. Its
+first player-state difference is flip 1375 at the TV-world Entrance, where the step that
+`FldFrameTask_Update` applies through `mdlTranslateMatrix`/`RwMatrixTranslate` leaves the
+player's x at 0x42D344C9 instead of 0x42D344C8 (matrix 0x00FDEF40 + 0x30). The engine's
+vector-multiply slots differ from the first flip (0x0088741C: 0x00402410.. instead of
+0x003E3DC0..), transformed field coordinates around 0x00CED800 by one ulp after flip 500, the
+player only from 1375. That arithmetic is the PCSX2-exact one, so the walk had to change.
+
+Host code that turns a script into input must not depend on the C library's rounding. In the
+EE mode (MXCSR round toward zero, x87 nearest) the Windows CRT's `strtof`/`strtod` truncate
+while glibc's round to nearest: 99,316 of 200,000 decimal fractions parsed one ulp apart, none
+in round-to-nearest. Host `sinf`/`cosf` differ in the last place for about one input in eighty
+in either mode; `hypotf` and `sqrtf` agreed on all 2,000,000 samples. The walker therefore
+parses script numbers in round-to-nearest, as do `P4PC_AUTOPRESS` times and the title
+driver's origin, and `face:DEG` takes its direction from basic operations only.

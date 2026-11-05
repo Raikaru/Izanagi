@@ -1,4 +1,4 @@
-# From canonical story0530bathhouse9f: win the Magi and two Twins, Guard and Escape the three Twins, then visit Hall 10 and save using one owned Goho-M.
+# From canonical story0530bathhouse9f: win the Magi, escape the groups on the stair route, then visit Hall 10 and save using one owned Goho-M.
 timeout:10000
 wait:140
 press:cross
@@ -150,114 +150,12 @@ press:circle
 wait:70
 waitcontrol:on
 log
+# The Killer Twins fell Yukiko before her first command, so do not strike more groups. Escape any group on the way
+# to the stairs: Yu chooses Escape and Guards while Teddie asks for patience, Yukiko casts Media for anyone under
+# 100 HP and otherwise Guards like Chie; Yosuke stays Heal/Support.
 battleskip:on
-plan:on
-walk:shadow,250
-press:cross:30
-waitbtl:menu
-# Killer Twins are Fire weak in the original game. Yukiko already remembers Maragi; reopen Skill and confirm the real all-enemy target.
-battle:first1=circle,down,cross,cross,cross;first3=circle,cross,cross;first4=cross,cross,cross;plan=cross;skip=0;delay=80
-waittask:battle:off
-battle:off
-skipmsg
-wait:150
-waitmsg:closed
-waitcontrol:on
-log
-# Recover the actual second-group damage with owned field Media; no HP or SP is edited.
-press:triangle
-waittask:cmpMain
-wait:100
-press:cross
-wait:100
-press:down
-wait:20
-press:down
-wait:20
-press:down
-wait:20
-press:cross
-wait:100
-press:down
-wait:100
-press:cross
-wait:100
-press:cross
-wait:100
-press:cross
-wait:100
-press:cross
-wait:100
-press:cross
-wait:100
-press:cross
-wait:100
-press:cross
-wait:100
-press:cross
-wait:100
-press:cross
-wait:100
-press:cross
-wait:100
-press:circle
-wait:70
-press:circle
-wait:70
-press:circle
-wait:70
-press:circle
-wait:70
-waitcontrol:on
-log
-battleskip:on
-plan:on
-walk:shadow,250
-press:cross:30
-waitbtl:menu
-# Only the protagonist's wheel can change Tactics. Let Chie and Yukiko Guard, then require Yu's own command.
-battle:first1=circle;first3=circle,up,cross;first4=circle,up,cross;plan=cross;skip=0;delay=80
-waitbtl:menu:1
-battle:off
-press:circle
-wait:100
-press:up
-wait:20
-press:up
-wait:20
-press:cross
-wait:600
-# The protagonist's roster is on Yukiko. Move to Yosuke and choose Full Assault (row 1).
-press:up
-wait:20
-press:up
-wait:20
-press:cross
-wait:600
-press:down
-wait:20
-press:cross
-wait:600
-press:circle
-wait:100
-# Tactics -> Analysis -> Escape. Request once; Guard Direct Commands Chie and Yukiko while Yosuke uses Full Assault.
-press:up
-wait:20
-press:up
-wait:20
-press:cross
-wait:600
-battle:first1=circle,up,cross;first2=circle,up,cross;first3=circle,up,cross;first4=circle,up,cross;plan=cross;skip=0;delay=80
-waittask:battle:off
-battle:off
-skipmsg
-wait:150
-waitmsg:closed
-waitcontrol:on
-log
-# Keep the Direct Commands companions on Guard. A new encounter requests Escape once, then guards subsequent turns.
-battleskip:on
-battle:first1=circle,down,down,down,down,cross;first2=circle,up,cross;first3=circle,up,cross;first4=circle,up,cross;plan=circle,up,cross;skip=0;delay=80
+battle:first1=circle,down,down,down,down,cross,circle,circle,circle,up,cross;first3=circle,up,cross;first4=circle,up,cross;plan=circle,down,down,down,down,cross,circle,circle,circle,up,cross;skip=0;delay=80
+battlerule:hp<100@4=circle,down,cross,skill:195,cross,cross,circle,circle,circle,up,cross
 plan:on
 timeout:60000
 walk:goal,60

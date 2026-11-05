@@ -14,10 +14,14 @@
  *   and the triggers as L2/R2 with pressure. The first pad found is used; one plugged in later is picked up, and when it is
  *   unplugged another connected pad takes over.
  *
- * Closing the window ends the process. Nothing else in the port has a quit path. */
+ * Closing the window ends the process (after the mods' exit event when one is
+ * subscribed). Nothing else in the port has a quit path. */
 #include "pad_sdl.h"
 #ifdef P4_MOD_GAME_BINDINGS
 #include "p4pc/package_boot.h"
+#endif
+#if defined(P4_MOD_GAME_BINDINGS) && defined(P4_MOD_GUARDS)
+#include "p4pc/mod_entry.h"
 #endif
 
 #include <stdbool.h>
@@ -170,6 +174,13 @@ static void pumpEvents(void)
         }
         switch (event.type) {
         case SDL_EVENT_QUIT:
+#if defined(P4_MOD_GAME_BINDINGS) && defined(P4_MOD_GUARDS)
+            /* A mod exit subscriber gets the quit at the next frame boundary. */
+            if (p4_mod_event_quit_request(p4_package_boot_clean_exit)) {
+                fprintf(stderr, "p4pc pad: window closed, exiting at the next frame boundary\n");
+                break;
+            }
+#endif
             fprintf(stderr, "p4pc pad: window closed, exiting\n");
             fflush(stderr);
 #ifdef P4_MOD_GAME_BINDINGS
@@ -813,6 +824,17 @@ int p4pc_pad_walk_status(void)
     return sWalk ? p4walk_status(sWalk) : -2;
 }
 
+static int (*sBattleTurn)(unsigned n, char *line, size_t size);
+void p4pc_pad_set_battle_turn_hook(int (*hook)(unsigned n, char *line, size_t size))
+{
+    sBattleTurn = hook;
+}
+static int walkBattleTurn(void *user, unsigned n, char *line, size_t size)
+{
+    (void)user;
+    return sBattleTurn != NULL ? sBattleTurn(n, line, size) : 0;
+}
+
 /* P4PC_WALK_LOG_EVERY=<flips>: how often P4PC_WALK_LOG prints (default 30). */
 static unsigned walkLogEvery(void)
 {
@@ -994,7 +1016,7 @@ static void walkScriptRead(P4PadSnapshot *out)
         uint32_t frame = sFrameClock();
 
         if (frame != sWalkFrame) {
-            const P4WalkHost host = { walkRead32, walkLog, NULL, sNavBlocked, sNavGround };
+            const P4WalkHost host = { walkRead32, walkLog, NULL, sNavBlocked, sNavGround, walkBattleTurn };
 
             sWalkFrame = frame;
             /* flips by default (the scene gates' schedules are calibrated in flips: under P4PC_TURBO=2 a flip runs two game frames); P4PC_WALK_GAME=1 counts the

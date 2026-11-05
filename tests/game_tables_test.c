@@ -460,9 +460,70 @@ static void semantic_id_width(void)
     assert(p4_game_tables_freeze(t, 1) == P4_TABLE_INVALID);
     p4_game_tables_destroy(t);
 }
+/* Retail-derived rows: the value is the entity's own decoded retail entry
+ * from the actual banks at seal; nothing authored or guessed before that. */
+static void retail_derived(void)
+{
+    uint8_t enemies[3 * 32] = {0}, personas[2 * 32] = {0};
+    enemies[2 * 32 + 0] = 0x00; enemies[2 * 32 + 1] = 0x08;      /* enemy row 2, Phys: weak, no percent */
+    enemies[2 * 32 + 12] = 0x0A; enemies[2 * 32 + 13] = 0x10;    /* column 6: resist 50% */
+    personas[1 * 32 + 0] = 0x14; personas[1 * 32 + 1] = 0x00;    /* persona row 1, Phys: normal 100 */
+    personas[1 * 32 + 14] = 0x00; personas[1 * 32 + 15] = 0x01;  /* column 7: null */
+    P4GameTables *t = p4_game_tables_create(); assert(t);
+    P4ElementDesc slash = leaf(19, "split:slash", 0);
+    assert(p4_game_tables_element(t, "split", &slash) == P4_TABLE_OK);
+    P4AffinityRow enemy = {P4_ENTITY_ENEMY, 2, 2, 19, P4_CHANNEL_DAMAGE, 999999u, 999999u};
+    assert(p4_game_tables_affinity_retail(t, "split", &enemy, 2, 0) == P4_TABLE_OK);
+    P4AffinityRow authored = enemy; authored.value = authored.scalar = 0;
+    assert(p4_game_tables_affinity(t, "split", &authored) == P4_TABLE_CONFLICT); /* Same key, authored or not. */
+    assert(p4_game_tables_affinity_retail(t, "other", &enemy, 2, 0) == P4_TABLE_CONFLICT);
+    P4AffinityRow persona = {P4_ENTITY_PERSONA, 1, 0x1001, 19, P4_CHANNEL_DAMAGE, 0, 0};
+    assert(p4_game_tables_affinity_retail(t, "split", &persona, 1, 0) == P4_TABLE_OK);
+    P4AffinityRow ko = {P4_ENTITY_PERSONA, 1, 0x1001, 7, P4_CHANNEL_INSTANT_KO, 0, 0};
+    assert(p4_game_tables_affinity_retail(t, "split", &ko, 1, 7) == P4_TABLE_OK);
+    P4AffinityRow resist = {P4_ENTITY_ENEMY, 2, 2, 6, P4_CHANNEL_DAMAGE, 0, 0};
+    assert(p4_game_tables_affinity_retail(t, "split", &resist, 2, 6) == P4_TABLE_OK);
+    P4AffinityRow bad_column = {P4_ENTITY_ENEMY, 2, 2, 20, P4_CHANNEL_DAMAGE, 0, 0};
+    assert(p4_game_tables_affinity_retail(t, "split", &bad_column, 2, 16) == P4_TABLE_INVALID);
+    assert(p4_game_tables_affinity_retail_pending(t) == 4);
+    assert(p4_game_tables_freeze(t, 5) == P4_TABLE_NOT_READY); /* Never publish an unread value. */
+    /* A row outside the actual bank refuses before resolving anything. */
+    assert(p4_game_tables_affinity_resolve_retail(t, enemies, 2 * 32, personas, sizeof personas) == P4_TABLE_NOT_FOUND);
+    assert(p4_game_tables_affinity_retail_pending(t) == 4);
+    assert(p4_game_tables_affinity_resolve_retail(t, enemies, sizeof enemies - 1, personas, sizeof personas) == P4_TABLE_NOT_FOUND);
+    assert(p4_game_tables_affinity_resolve_retail(t, enemies, sizeof enemies, NULL, 0) == P4_TABLE_NOT_FOUND);
+    /* A word with no form for its channel refuses here, naming its row and
+     * element: two flags (weak|null), retail's ailment no-effect flag 0x20 on a
+     * percentage row, and the same flag on a KO row (never projected as KO). */
+    uint8_t bad[sizeof enemies], bad_personas[sizeof personas];
+    memcpy(bad, enemies, sizeof bad);
+    bad[2 * 32 + 1] = 0x09;
+    assert(p4_game_tables_affinity_resolve_retail(t, bad, sizeof bad, personas, sizeof personas) == P4_TABLE_INVALID);
+    bad[2 * 32 + 1] = 0x20;
+    assert(p4_game_tables_affinity_resolve_retail(t, bad, sizeof bad, personas, sizeof personas) == P4_TABLE_INVALID);
+    memcpy(bad_personas, personas, sizeof bad_personas);
+    bad_personas[1 * 32 + 15] = 0x20;
+    assert(p4_game_tables_affinity_resolve_retail(t, enemies, sizeof enemies, bad_personas, sizeof bad_personas) == P4_TABLE_INVALID);
+    assert(p4_game_tables_affinity_retail_pending(t) == 4);
+    assert(p4_game_tables_affinity_resolve_retail(t, enemies, sizeof enemies, personas, sizeof personas) == P4_TABLE_OK);
+    assert(!p4_game_tables_affinity_retail_pending(t));
+    assert(p4_game_tables_freeze(t, 5) == P4_TABLE_OK);
+    const P4AffinityRow *row = p4_game_tables_find_affinity(t, P4_ENTITY_ENEMY, 2, 2, 19, P4_CHANNEL_DAMAGE);
+    assert(row && row->value == (P4_AFF_WEAK | 125) && row->scalar == 125);
+    row = p4_game_tables_find_affinity(t, P4_ENTITY_ENEMY, 2, 2, 6, P4_CHANNEL_DAMAGE);
+    assert(row && row->value == (P4_AFF_RESIST | 50) && row->scalar == 50);
+    row = p4_game_tables_find_affinity(t, P4_ENTITY_PERSONA, 1, 0x1001, 19, P4_CHANNEL_DAMAGE);
+    assert(row && row->value == 100 && row->scalar == 100);
+    row = p4_game_tables_find_affinity(t, P4_ENTITY_PERSONA, 1, 0x1001, 7, P4_CHANNEL_INSTANT_KO);
+    assert(row && row->value == P4_KO_NULL); /* The retail KO projection, not a raw word. */
+    assert(p4_game_tables_affinity_resolve_retail(t, enemies, sizeof enemies, personas, sizeof personas) == P4_TABLE_FROZEN);
+    assert(p4_game_tables_affinity_retail(t, "split", &bad_column, 2, 0) == P4_TABLE_FROZEN);
+    p4_game_tables_destroy(t);
+}
 int main(void)
 {
     retail(); expansion(); refusal(); action_profiles(); affinity_effects(); stable_image_references(); semantic_id_width(); runtime_row_transport();
+    retail_derived();
     puts("game_tables: retail decode, owned expansion, profile/channel isolation and atomic freeze passed");
     return 0;
 }

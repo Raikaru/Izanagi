@@ -7,7 +7,7 @@
 #include "p4pc/game_elements_ai_native.h"
 #include "p4pc/game_skills_native.h"
 #include "p4pc/gmem.h"
-#include <stdlib.h>
+#include <stddef.h>
 
 /* These two retail callbacks carry legacy selectors, not tagged semantic IDs.
  * Phys0 means the physical damage family. Light6/Dark7 still mean their KO
@@ -171,7 +171,7 @@ static int32_t p4_knowledge_ai_collect_body(void *script_work, uint8_t *action, 
         } else if (!p4_knowledge_ai_effect_match(&candidate->frame, effect_filter)) {
             continue;
         }
-        int allowed = p4_game_elements_ai_vm_candidate_allowed(script_work, action, target_action, &candidate->frame);
+        int allowed = p4_game_elements_ai_vm_candidate_allowed(script_work, action, &candidate->frame);
         if (allowed < 0) p4_game_elements_ai_native_fail();
         if (!allowed) continue;
         if (!p4_knowledge_ai_normal(target, target_genus, candidate)) continue;

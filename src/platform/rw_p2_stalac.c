@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: LicenseRef-reconstructed */
 /* Retail 00411740 (StalacTiteAlloc) and 004117b0 (StalacMiteAlloc): the two-ended bump allocator
  * that RxLockedPipeUnlock and the pipeline registry passes (overrides/00412ca0.c, 004143f0.c, ...)
  * use for temporary memory. The decomp's copies are file statics in src/renderware/p2/p2define.c

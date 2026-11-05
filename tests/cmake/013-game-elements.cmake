@@ -55,12 +55,23 @@ unset(_p4_element_runner)
 
 # Actual amount and formula overrides with explicit engine facts. Synthetic
 # low-address banks are a calculation witness, not a gameplay qualification.
-add_executable(game_elements_amount_test game_elements_amount_test.c)
+# The final-damage stage is linked as built: retail with no modifier, and the
+# challenge + hard-mode composition over the real equation.
+add_executable(game_elements_amount_test game_elements_amount_test.c
+  "${CMAKE_SOURCE_DIR}/src/platform/mods/game_damage_stage.c")
 target_include_directories(game_elements_amount_test PRIVATE "${P4_DECOMP}/include")
 target_compile_definitions(game_elements_amount_test PRIVATE ${P4_PORT_DEFINES})
 target_link_libraries(game_elements_amount_test m)
 add_test(NAME game_elements_amount COMMAND game_elements_amount_test)
 set_tests_properties(game_elements_amount PROPERTIES SKIP_RETURN_CODE 77 LABELS "host" TIMEOUT 60)
+
+# Final-damage stage order, single conversion, clamp and refusals.
+add_executable(game_damage_stage_test game_damage_stage_test.c
+  "${CMAKE_SOURCE_DIR}/src/platform/mods/game_damage_stage.c")
+target_compile_definitions(game_damage_stage_test PRIVATE ${P4_PORT_DEFINES})
+target_link_libraries(game_damage_stage_test m)
+add_test(NAME game_damage_stage COMMAND game_damage_stage_test)
+set_tests_properties(game_damage_stage PROPERTIES LABELS "host" TIMEOUT 60)
 
 # Actual hit resolver with scripted engine facts; compares retail and tagged
 # physical/magic branches, never native battle admission.

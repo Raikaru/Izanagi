@@ -126,7 +126,8 @@ if(P4_PORT64_OBJS)
   # One baseline per target (another target rewrites some constructs differently): the build of the mirror enforces it too (CMakeLists.txt, P4_CENSUS_BASELINE).
   if(P4_CENSUS_BASELINE)
     add_test(NAME port64_census COMMAND "${P4_PYTHON}" "${CMAKE_SOURCE_DIR}/tools/port64/unit64.py" report --dir "${P4_G64}/units"
-             --census-baseline "${P4_CENSUS_BASELINE}" --clang "${CMAKE_C_COMPILER}" --active-units "${P4_G64}/active_units.txt")
+             --census-baseline "${P4_CENSUS_BASELINE}" --clang "${CMAKE_C_COMPILER}" --active-units "${P4_G64}/active_units.txt"
+             --rw-clean-units "${P4_GEN}/rw_clean_units.txt" --rw-clean-stripped "${P4_GEN}/decomp/src/rwclean/stripped_units.txt")
   endif()
   add_test(NAME seam_abi_mirror COMMAND "${P4_PYTHON}" "${CMAKE_SOURCE_DIR}/tools/port64/seam_abi.py" --check --mirror "${P4_G64}/abi.json")
 endif()

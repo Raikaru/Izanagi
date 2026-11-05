@@ -85,7 +85,7 @@ class FileMods(unittest.TestCase):
     def test_missing_duplicate_and_incompatible_refused(self):
         self.mod("valid", "valid", files={"DATA/TEST.TXT": "valid"})
         self.mod("future", "future", api="2.0")
-        self.mod("new-minor", "new-minor", api="1.2")
+        self.mod("new-minor", "new-minor", api="1.5")
         self.mod("dup-one", "duplicate")
         self.mod("dup-two", "duplicate")
         for ids in ("valid,missing", "valid,future", "new-minor", "duplicate", "valid,valid", "valid,", "../valid"):

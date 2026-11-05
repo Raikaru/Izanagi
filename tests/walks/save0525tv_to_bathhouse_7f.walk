@@ -116,25 +116,17 @@ wait:70
 press:circle
 wait:70
 log
-# The Vicious Ravens are Electric weak. This retained winning recipe uses neutral Garu and Chie's weapon, not a claimed Wind weakness.
+# The Vicious Ravens focus Yukiko. Yu Guards and casts Media for anyone under 110 HP; Yosuke's Garu and Chie's weapon
+# move one target right each turn.
 walk:shadow,350
 press:cross
 waitbtl:menu
 wait:600
 log
-battle:first1=circle,up,cross;first2=circle,down,cross,cross,cross;first3=circle,cross,cross;plan=cross,cross,right,cross;skip=0;delay=80
-# A full-stock Persona reward needs its real discard confirmation, not endless automatic card flips.
-waittask:shdPersonaStatusDraw
+battle:first1=circle,up,cross;plan1=circle,up,cross;first2=circle,down,cross,skill:14,cross,right,cross;plan2=circle,down,cross,skill:14,cross,right,cross;plan=circle,cross,right,cross;skip=0;delay=80
+battlerule:hp<110@1=circle,down,cross,skill:195,cross,cross,circle,circle,circle,up,cross
+waittask:battle:off
 battle:off
-wait:100
-press:cross
-wait:100
-press:cross
-wait:100
-# Select the newly offered Persona's discard action, preserving all six owned Personas.
-press:cross
-wait:100
-choose:1
 skipmsg
 wait:150
 waitmsg:closed
@@ -157,7 +149,7 @@ press:down
 wait:100
 press:cross
 wait:100
-# The game returns the fallen Yukiko to 1 HP in the field. Four real Media casts heal her and Yosuke, spending 28 SP and no Revival Bead.
+# Four Media presses heal the party to full; casts at full HP are refused.
 press:cross
 wait:100
 press:cross

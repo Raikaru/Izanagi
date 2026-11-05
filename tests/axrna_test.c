@@ -1,13 +1,15 @@
 /* axrna_test: the AXRNA renderer (src/platform/sound/axrna.c) behind CRI's ADXRNA front end, on
  * CRI's own stream joints (SJRBF, the retail ring joint), with the mixer pulled offline.
  *
- * The contract ADXT's state machine (re4/adx_tsvr.c) relies on:
- *   - GetNumRoom is the ring (0x4000 samples) minus GetNumData; nothing is pulled from the
- *     joints while the transfer switch is off;
+ * The contract ADXT's server (src/cri/adxt_svr.c) relies on:
+ *   - GetNumRoom is PS2RNA's IOP buffer (0x2000 samples) minus GetNumData; nothing is pulled
+ *     from the joints while the transfer switch is off;
  *   - ExecServer moves the same number of samples from every channel's joint, returns the
- *     consumed chunks to the joint's free line, and never more than the ring has room for;
- *   - while playing, GetNumData falls at the stream's rate; paused (play off, transfer on) it holds;
- *     stopped (play off after transfer off) it empties;
+ *     consumed chunks to the joint's free line, and never more than GetNumRoom;
+ *   - while playing, GetNumData falls by what retail's EE hears back from the IOP: the samples
+ *     played 2.75 ExecServer passes back, in whole 256-sample blocks; paused (play off, transfer
+ *     on) it holds; stopped (play off after transfer off) it empties at once; a discard leaves it
+ *     at once;
  *   - what comes out is what went in, in order, channel 0 on the left and channel 1 on the right
  *     at stereo pan, scaled by the volume (1/10 dB), with a long input spread over several
  *     ExecServer calls.
@@ -28,8 +30,10 @@
 #include "p4snd.h"
 
 #define SKIP_RETURN 77
-#define RING 0x4000
-#define JOINT_BYTES 0x6000 /* the joint holds 0x3000 samples, less than the ring: the tail waits */
+#define RING 0x2000        /* the samples PS2RNA reports: its IOP buffer of 0x4000 bytes */
+#define REPORT_PASSES 3    /* ExecServer passes after which everything played is heard */
+#define BLOCKS(n) ((n) & ~255) /* the IOP reports consumption in 256-sample blocks */
+#define JOINT_BYTES 0x3000 /* the joint holds 0x1800 samples, less than the ring: the tail waits */
 
 /* A stream joint is a guest object whose first word is the guest address of its vtable of guest code addresses
  * (cri_mem.h): +0x14 Reset, +0x18 GetChunk, +0x20 PutChunk, +0x24 GetNumData. The chunk is a guest data address and a length. */
@@ -219,10 +223,16 @@ static int test_main(int argc, char **argv)
         }
     }
 
-    /* play 20 ms: data falls by 960 frames, the output is the input */
+    /* play 20 ms: 960 frames are played at once, and heard in whole blocks within three passes */
     AXRNA_SetPlaySw(rna, 1);
     render(l, r, 960);
-    check("playing, data falls at the stream rate", AXRNA_GetNumData(rna), n - 960);
+    check("playing, nothing reported yet", AXRNA_GetNumData(rna), n);
+    for (i = 1; i < REPORT_PASSES; i++) {
+        AXRNA_ExecServer();
+    }
+    check("playing, reported after two passes", AXRNA_GetNumData(rna), n);
+    AXRNA_ExecServer();
+    check("playing, reported after three passes", AXRNA_GetNumData(rna), n - BLOCKS(960));
     {
         double worst = 0.0;
 
@@ -241,7 +251,10 @@ static int test_main(int argc, char **argv)
     /* pause: play off, transfer on: the data stays and playing resumes where it was */
     AXRNA_SetPlaySw(rna, 0);
     render(l, r, 480);
-    check("paused, data holds", AXRNA_GetNumData(rna), n - 960);
+    for (i = 0; i < REPORT_PASSES; i++) {
+        AXRNA_ExecServer();
+    }
+    check("paused, data holds", AXRNA_GetNumData(rna), n - BLOCKS(960));
     AXRNA_SetPlaySw(rna, 1);
     render(l, r, 240);
     for (i = 0; i < 240; i++) {
@@ -250,7 +263,10 @@ static int test_main(int argc, char **argv)
             break;
         }
     }
-    check("data after resume", AXRNA_GetNumData(rna), n - 960 - 240);
+    for (i = 0; i < REPORT_PASSES; i++) {
+        AXRNA_ExecServer();
+    }
+    check("data after resume", AXRNA_GetNumData(rna), n - BLOCKS(960 + 240));
 
     /* the ring was filled with n < RING; push the rest of a longer stream through several
      * ExecServer calls while playing and compare the whole output */
@@ -261,7 +277,8 @@ static int test_main(int argc, char **argv)
     sj_reset(sj[0]);
     sj_reset(sj[1]);
     {
-        const int total = 40000; /* more than the ring and the joint together */
+        /* more than the ring and the joint together, in whole report blocks so that the last is heard */
+        const int total = 156 * 256;
         static float ol[40000 + 2000], or_[40000 + 2000];
         int sent = 0, got = 0;
         double worst = 0.0;
@@ -290,13 +307,14 @@ static int test_main(int argc, char **argv)
                 break;
             }
         }
-        /* the stream is done: the transfer switch goes off, the ring drains to zero */
+        /* the stream is done: the transfer switch goes off, the ring drains to zero as reported */
         AXRNA_SetTransSw(rna, 0);
         n = 0;
         while (AXRNA_GetNumData(rna) > 0 && n++ < 100) {
             static float tl[480], tr[480];
 
             render(tl, tr, 480);
+            AXRNA_ExecServer();
         }
         check("the ring drains", AXRNA_GetNumData(rna), 0);
         for (i = 0; i < total; i++) {
@@ -345,10 +363,14 @@ static int test_main(int argc, char **argv)
         }
     }
 
-    /* discard */
+    /* discard: once the played blocks are heard, the discarded samples leave the report at once */
+    for (i = 0; i < REPORT_PASSES; i++) {
+        AXRNA_ExecServer();
+    }
     {
         int before = AXRNA_GetNumData(rna);
 
+        check("reported after the passes", before, 2000 - BLOCKS(960));
         AXRNA_DiscardData(rna, 100);
         check("discard", AXRNA_GetNumData(rna), before - 100);
     }

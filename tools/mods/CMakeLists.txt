@@ -8,7 +8,7 @@ if(P4_APPLE)
 endif()
 get_filename_component(P4_MOD_ROOT "${CMAKE_CURRENT_LIST_DIR}/../.." ABSOLUTE)
 set(P4_MOD_BINDING_SOURCES)
-foreach(unit lua_api lua_runtime lua_memory lua_hooks lua_events lua_input lua_files lua_save failure_script)
+foreach(unit lua_api lua_runtime lua_memory lua_hooks lua_events lua_input lua_files lua_settings lua_lifecycle lua_save failure_script)
   list(APPEND P4_MOD_BINDING_SOURCES "${P4_MOD_ROOT}/src/platform/mods/${unit}.c")
 endforeach()
 
@@ -23,7 +23,8 @@ function(p4_mod_profile suffix)
   # fixture descriptors without pulling unresolved full-game functions into tests.
   set_source_files_properties("${P4_MOD_BRIDGES}" PROPERTIES GENERATED TRUE)
   add_library(p4_mod_game${suffix} STATIC "${P4_MOD_BRIDGES}"
-    "${P4_MOD_ROOT}/src/platform/mods/native_bindings.c")
+    "${P4_MOD_ROOT}/src/platform/mods/native_bindings.c"
+    "${P4_MOD_ROOT}/src/platform/mods/authorize.c")
   add_dependencies(p4_mod_game${suffix} p4_mirror)
   set(native_targets p4_mod_core${suffix} p4_mod_game${suffix})
   if(P4_MOD_LUAU_ACTIVE)
@@ -34,7 +35,10 @@ function(p4_mod_profile suffix)
     list(APPEND native_targets p4_mod_luau${suffix})
     # Game-only UI uses the real settings/hub backend. Core VM witnesses do
     # not link this provider and do not advertise a pretend UI implementation.
-    target_sources(p4_mod_game${suffix} PRIVATE "${P4_MOD_ROOT}/src/platform/mods/lua_ui.c")
+    target_sources(p4_mod_game${suffix} PRIVATE "${P4_MOD_ROOT}/src/platform/mods/lua_ui.c"
+      "${P4_MOD_ROOT}/src/platform/mods/lua_authorize.c"
+      "${P4_MOD_ROOT}/src/platform/mods/lua_services.c"
+      "${P4_MOD_ROOT}/src/platform/mods/game_services.c")
     target_link_libraries(p4_mod_game${suffix} PUBLIC p4_mod_luau${suffix})
   endif()
   foreach(target IN LISTS native_targets)
@@ -60,7 +64,7 @@ function(p4_mod_profile suffix)
     string(REGEX REPLACE "os/os_posix\\.c$" "os/os_win32.c" os_source "${os_source}")
   endif()
   set(core_sources)
-  foreach(unit mods package_registry package_memory compendium file_index)
+  foreach(unit mods package_registry package_memory mod_setting_store lifecycle compendium file_index)
     list(APPEND core_sources "${P4_MOD_ROOT}/src/platform/mods/${unit}.c")
   endforeach()
   add_executable(mod_luau_test${suffix} "${P4_MOD_ROOT}/tests/mod_luau_test.c" ${P4_MOD_TEST_GAME}
@@ -147,7 +151,10 @@ function(p4_mod_profile suffix)
     add_test(NAME mod_api_check${suffix} COMMAND "${P4_PYTHON}" "${P4_MOD_ROOT}/tests/mod_api_check_test.py"
       ${runner} "$<TARGET_FILE:p4_luau_check${suffix}>" --driver-end "${P4_MOD_ROOT}/include/p4pc/p4.d.luau"
       "${P4_MOD_ROOT}/tests/mod_fixtures/native_ui/main.luau"
-      "${P4_MOD_ROOT}/examples/mods/p4pc.example/main.luau")
+      "${P4_MOD_ROOT}/examples/mods/p4pc.example/main.luau"
+      "${P4_MOD_ROOT}/mods/p4pc.challenge/main.luau"
+      "${P4_MOD_ROOT}/tests/mod_fixtures/game_services/main.luau"
+      "${P4_MOD_ROOT}/mods/p4pc.practice/main.luau")
     set_tests_properties(mod_api_check${suffix} PROPERTIES LABELS "host" TIMEOUT 60
       ENVIRONMENT "P4PC_MODS=0;P4PC_PACKS=0;P4PC_INPUT=script")
     add_test(NAME mod_hook_cost${suffix} COMMAND ${runner} "$<TARGET_FILE:mod_luau_test${suffix}>"

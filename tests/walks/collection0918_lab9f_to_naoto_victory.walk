@@ -1,0 +1,60 @@
+# Independent pristine collection card3-slot15, Secret Laboratory B9F.
+# Switch Yu to his slot-1 Persona in camp (id 154: Atom Smasher, Resist Physical), take the interior door and defeat
+# Shadow Naoto (encounter 519) with walker battle rules (native skill and item IDs): Balm of Life for a downed member,
+# Attack while silenced, Yukiko's Me Patra on fear, Amrita on Yu's ailments, Yukiko's Mediarama under 400 HP, a Bead
+# Chain under 300 HP, Guard while Naoto is charged, otherwise Atom Smasher, Kanji's Zionga and Yosuke's Garula.
+# Stops at the post-battle B9F event. Not the later laboratory floors.
+timeout:30000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+waitfield:27:2
+waitstep:89
+waitstate16:0x00797b7a==170
+press:triangle
+wait:100
+press:down
+wait:20
+press:down
+wait:20
+press:down
+wait:20
+press:cross
+wait:600
+press:cross
+wait:600
+press:down
+wait:20
+press:cross
+wait:100
+press:circle
+wait:70
+press:circle
+wait:70
+press:circle
+wait:70
+press:circle
+wait:70
+waitstate16:0x00797f8e==154
+waitfield:27:2
+log
+walk:0,-1450,60
+push:0,-1050,16
+press:cross
+battle:plan1=circle,down,cross,skill:162,cross,cross,circle,circle,circle,cross,cross;plan6=circle,down,cross,skill:40,cross,cross,circle,circle,circle,cross,cross;plan2=circle,down,cross,skill:15,cross,cross,circle,circle,circle,cross,cross;plan4=circle,cross,cross;plan=circle,cross,cross;skip=0;delay=40;guard=263
+battlerule:dead@1,2,4,6=circle,down,down,down,cross,item:784,cross,cross,circle,circle,circle,cross,cross
+battlerule:status:0x8=circle,cross,cross
+battlerule:afflicted:0x4@4=circle,down,cross,skill:200,cross,cross,circle,circle,circle,cross,cross
+battlerule:afflicted:0x3F@1=circle,down,down,down,cross,item:793,cross,cross,circle,circle,circle,cross,cross
+battlerule:hp<400@4=circle,down,cross,skill:196,cross,cross,circle,circle,circle,cross,cross
+battlerule:hp<300@1,2,6=circle,down,down,down,cross,item:778,cross,cross,circle,circle,circle,cross,cross
+timeout:120000
+skiptask:battle
+waittask:battle:off
+log
+waitfield:27:2
+log

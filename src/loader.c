@@ -44,7 +44,10 @@ int main(int argc, char **argv) {
         path = elf;
     }
 #endif
-    int optional = !sim;
+    /* Simulator runs are retail; only a declared mod cohort admits its packages,
+     * through the same optional-package path as an ordinary launch. */
+    const int cohort = sim && p4_battle_sim_mod_cohort();
+    int optional = !sim || cohort;
     if (optional && p4_mod_native_failure_init() != 0) {
         if (p4_mod_witness_validate() ||
             !p4_mod_native_startup_refused("Native package recovery could not be initialized. Starting without optional packages."))
@@ -68,7 +71,7 @@ int main(int argc, char **argv) {
             !p4_mod_native_startup_refused("Optional packages could not be prepared. No replacement files/native work or mod code were exposed. Starting without optional packages."))
             return 1;
     }
-    if (!sim) p4_package_boot_admission_complete();
+    if (!sim || cohort) p4_package_boot_admission_complete();
     if (!sim && p4_content_init() != 0) return 1;
     if (p4_mod_witness_enabled())
         fprintf(stderr, "p4pc: run_mode=mod-witness mod_witness=true reference_eligible=false; NOT a retail reference\n");

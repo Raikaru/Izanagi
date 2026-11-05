@@ -294,6 +294,19 @@ def cmd_report(a):
             if not have:
                 sys.exit(f"cannot run {a.clang} --version: the baseline records the compiler's major")
             sections = read_census_file(path) if os.path.exists(path) else []
+            if sections:
+                # record-without-oracle counts records the compiler's layout dump did not cover: a rise means the oracle failed
+                # on that unit (2026-11-04: a Bionic header conflict made btlEffect.c's oracle fail, and the refresh recorded 12
+                # instead of 7). That is a defect to fix, never a baseline.
+                old = dict(sections[0]["units"])
+                if have != sections[0]["major"]:
+                    old.update(next((s["units"] for s in sections[1:] if s["major"] == have), {}))
+                rises = [f"{u}: record-without-oracle {old[u].get('record-without-oracle', 0)} -> {c['record-without-oracle']}"
+                         for u, c in sorted(now.items()) if u in old
+                         and c.get("record-without-oracle", 0) > old[u].get("record-without-oracle", 0)]
+                if rises:
+                    sys.exit(f"refusing to refresh {path}: the layout oracle covers fewer records in {len(rises)} units "
+                             f"(fix the unit's oracle compile first):\n  " + "\n  ".join(rises[:60]))
             if sections and sections[0]["major"] != have:
                 # another compiler than the baseline's: only the units whose counts differ (the layout oracle is the compiler's own record dump) are kept, as a patch
                 full = sections[0]["units"]
@@ -318,16 +331,38 @@ def cmd_report(a):
                              f"dump, so a few counts depend on the major: build with a supported compiler, or review and add this one with\n"
                              f"  python tools/port64/unit64.py report --dir <build>/gen/obj64/units --census-refresh {path} --clang {a.clang}")
                 base.update(patch["units"])
+            # Units the RenderWare clean switch governs (gen/rw_clean_units.txt, docs/rw_clean.md): an inactive one is not part of
+            # this build, and an active one is compared once its baseline row exists (a subsystem's rows are added when it becomes the default).
+            governed = {}
+            if getattr(a, "rw_clean_units", None):
+                for ln in open(a.rw_clean_units):
+                    if ln.strip():
+                        unit, state = ln.split()
+                        governed[unit] = state
+            # Units whose definitions a selected clean subsystem took over (the mirror lists them; absent with the switch off):
+            # their counts follow the switch until the subsystem becomes the default and the baseline takes them.
+            switched = set()
+            stripped_list = getattr(a, "rw_clean_stripped", None)
+            if stripped_list and os.path.isfile(stripped_list):
+                switched = {ln.strip() for ln in open(stripped_list) if ln.strip()}
             drift = []
             for u in sorted(set(base) | set(now)):
+                if governed.get(u) == "inactive" and u not in now:
+                    continue
                 if u not in now:
                     drift.append(f"{u}: unit missing from this build (baseline has it)")
                 elif u not in base:
+                    if governed.get(u) == "active":
+                        print(f"  {u}: RenderWare clean unit without a baseline row, not compared")
+                        continue
                     drift.append(f"{u}: unit not in the baseline")
                 else:
-                    for k in sorted(set(base[u]) | set(now[u])):
-                        if base[u].get(k, 0) != now[u].get(k, 0):
-                            drift.append(f"{u}: rule {k}: baseline {base[u].get(k, 0)}, now {now[u].get(k, 0)}")
+                    diff = [f"{u}: rule {k}: baseline {base[u].get(k, 0)}, now {now[u].get(k, 0)}"
+                            for k in sorted(set(base[u]) | set(now[u])) if base[u].get(k, 0) != now[u].get(k, 0)]
+                    if diff and u in switched:
+                        print(f"  {u}: changed by the RenderWare clean switch ({len(diff)} rule counts), not compared")
+                        continue
+                    drift += diff
             if drift:
                 print(f"{len(drift)} rewriter rule counts differ from {path}:")
                 for d in drift[:60]:
@@ -380,6 +415,8 @@ def main():
     s.add_argument("--census-refresh", help="write the baseline from the build's counts (review the diff)")
     s.add_argument("--clang", default="clang", help="the build's compiler: the census baseline of that clang major is the one checked")
     s.add_argument("--active-units", help="file listing the units of the current build, one per line: only these are compared (a stale .census of a dropped unit is ignored)")
+    s.add_argument("--rw-clean-units", help="gen/rw_clean_units.txt: `<unit> active|inactive` for the units the RenderWare clean switch governs (docs/rw_clean.md)")
+    s.add_argument("--rw-clean-stripped", help="the mirror's src/rwclean/stripped_units.txt: units a selected clean subsystem changed (absent when none is selected)")
     a = ap.parse_args()
     {"abi": cmd_abi, "merge": cmd_merge, "build": cmd_build, "report": cmd_report}[a.cmd](a)
 

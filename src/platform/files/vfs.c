@@ -18,6 +18,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#ifndef _WIN32
+#include <fcntl.h>
+#include <unistd.h>
+#endif
 
 #include "iso9660.h"
 #include "vfs.h"
@@ -57,6 +61,7 @@ typedef struct {
 } slot_t;
 
 static FILE *disc;
+static char disc_path[HOST_PATH_MAX]; /* the indexed image, reopened privately by vfs_fork_private */
 static entry_t *entries;
 static int n_entries;
 static int cap_entries;
@@ -180,6 +185,8 @@ static int index_disc(const char *iso_path, int pin_identity)
     walk_t w;
 
     memset(&root, 0, sizeof root);
+    if (strlen(iso_path) >= sizeof disc_path) return -1;
+    strcpy(disc_path, iso_path);
     disc = p4_os_fopen_rb(iso_path);
     if (!disc) {
         fprintf(stderr, "p4pc: vfs: cannot open disc image %s\n", iso_path);
@@ -219,6 +226,29 @@ fail:
     fclose(disc);
     disc = NULL;
     return -1;
+}
+
+int vfs_fork_private(void)
+{
+#ifdef _WIN32
+    return disc ? -1 : 0;
+#else
+    if (!disc) return 0;
+    if (override_count || *source_developer.path) return -1;
+    for (int i = 0; i < OPEN_MAX; i++) if (slots[i].used && slots[i].owned) return -1;
+    const int shared = fileno(disc);
+    const off_t position = lseek(shared, 0, SEEK_CUR);
+    const int fd = open(disc_path, O_RDONLY | O_CLOEXEC);
+    if (position < 0 || fd < 0) { if (fd >= 0) close(fd); return -1; }
+    struct stat a, b;
+    if (fstat(fd, &a) || fstat(shared, &b) || a.st_dev != b.st_dev || a.st_ino != b.st_ino ||
+        lseek(fd, position, SEEK_SET) != position || dup2(fd, shared) < 0) {
+        close(fd);
+        return -1;
+    }
+    close(fd);
+    return 0;
+#endif
 }
 
 static int register_root(const char *root, const char *provider, P4VfsOriginKind kind,

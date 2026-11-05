@@ -13,4 +13,9 @@ void p4pc_lockstep_pace(void);
 /* Full draw diagnostics; strict scenario replay retains gate draw windows. */
 int p4pc_lockstep_draw_active(void);
 void p4pc_lockstep_drawline(const char *line);
+/* Flushes the recording (input log and per-frame states); 0 on success or when nothing records. */
+int p4pc_lockstep_flush(void);
+/* In a forked battle-search child (battle_sim/live.c), continues the recording in DIR without a new header: the
+ * parent's files hold everything up to the fork, so the segments concatenate to one run's log. 0 on success. */
+int p4pc_lockstep_fork_reopen(const char *dir);
 #endif

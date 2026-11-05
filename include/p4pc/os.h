@@ -86,8 +86,8 @@ int p4_os_thread_cpu_ns(uint64_t *out);
  * scheduler tick that crossed a native-call boundary entirely to the VM. */
 int p4_os_thread_cpu_resolution_ns(uint64_t *out);
 /* Whether the run's time is virtual (P4PC_VIRTUAL_CLOCK=1, or P4PC_TURBO=1 or 2): the scheduler's clock advances by the game's own
- * frames and waits (kernel_thread.c), and so must everything else the game can observe the passing of time through: the mixer is
- * rendered one frame's worth of samples per flip (p4snd_virtual_tick) instead of by a real-time device or pacer. */
+ * frames and waits (kernel_thread.c), and so must everything else the game can observe the passing of time through: the kernel renders
+ * the mixer one VBLANK period's worth of samples per VBLANK that passes (p4snd_virtual_tick) instead of a real-time device or pacer. */
 int p4_os_virtual_clock(void);
 
 /* The game's float state is the EE mode (MXCSR round toward zero, flush, denormals-are-zero; x87 control word 0x037F, hostmath.h). Code that calls into
@@ -95,6 +95,9 @@ int p4_os_virtual_clock(void);
  * p4pc_fpu_state_log prints the state when P4PC_FPU_LOG is set. src/platform/state_dump.c. */
 void p4pc_fpu_check(const char *where);
 void p4pc_fpu_state_log(const char *where);
+/* Counts one 31 MB guest-RAM dump (P4PC_DUMP_RAM) against the run's P4PC_DUMP_RAM_MAX_MB (default 2048) before path is written; exits
+ * with a message instead of writing past it. src/platform/state_dump.c. */
+void p4pc_dump_ram_admit(const char *path);
 /* Sleeps at least ns nanoseconds (the thread, not busy-waiting). */
 void p4_os_sleep_ns(uint64_t ns);
 
@@ -121,6 +124,19 @@ void *p4_os_reserve_aligned(size_t reserve, size_t commit, size_t align);
 int p4_os_image_range(uintptr_t *lo, uintptr_t *hi);
 /* Adds guest address / stack-guard context to the native crash report. */
 extern void (*p4_os_fault_note)(uintptr_t addr);
+/* Crash marker (the mod lifecycle's crash record). open creates/truncates the
+ * file before any fault; set stages up to P4_OS_CRASH_MARKER_CAP bytes that the
+ * crash handler writes at offset 0 and flushes, first, using only write/flush
+ * calls (set double-buffers, so a fault on another thread never writes a torn
+ * marker). write is the handler's step; tests call it directly. close releases
+ * the file. Each returns 0, or -1 with no marker armed. */
+#define P4_OS_CRASH_MARKER_CAP 2048
+int p4_os_crash_marker_open(const char *path);
+int p4_os_crash_marker_set(const char *bytes, size_t length);
+void p4_os_crash_marker_write(void);
+void p4_os_crash_marker_close(void);
+/* Flushes a stdio stream and its file to the storage device: 0, or -1. */
+int p4_os_sync_file(FILE *stream);
 
 /* Coroutines: the thread model's host threads (src/platform/kernel_thread.c). One OS thread runs
  * them all, switching explicitly.

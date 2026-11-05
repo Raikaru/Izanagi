@@ -1,6 +1,6 @@
-# Independent pristine card5-slot06: Path 9 portal to Izanami's first COMMAND.
-# This does not join the separate entrance leg into Paths 1-8 traversal,
-# defeat either boss phase, or establish the true ending.
+# Independent pristine card5-slot06: Path 9 portal to Izanami's first COMMAND (encounter 523), one round
+# of Attacks from every member, and Yu's second COMMAND. This does not join the separate entrance leg
+# into Paths 1-8 traversal, defeat either boss phase, or establish the true ending.
 timeout:30000
 wait:140
 press:cross
@@ -18,4 +18,33 @@ press:cross
 choose:1
 skiptask:battle
 waitbtl:menu
+log
+press:circle
+wait:14
+press:cross
+wait:14
+press:cross
+wait:30
+waitbtl:menu
+press:circle
+wait:14
+press:cross
+wait:14
+press:cross
+wait:30
+waitbtl:menu
+press:circle
+wait:14
+press:cross
+wait:14
+press:cross
+wait:30
+waitbtl:menu
+press:circle
+wait:14
+press:cross
+wait:14
+press:cross
+wait:30
+waitbtl:menu:1
 log

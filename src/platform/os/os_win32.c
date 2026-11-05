@@ -64,6 +64,47 @@ static int readable(uintptr_t addr, size_t len) {
 void (*p4_os_fault_note)(uintptr_t addr);
 
 static volatile LONG crashing;
+static HANDLE marker_handle = INVALID_HANDLE_VALUE;
+static char marker_bytes[2][P4_OS_CRASH_MARKER_CAP];
+static DWORD marker_length[2];
+static volatile LONG marker_slot;
+
+int p4_os_crash_marker_open(const char *path)
+{
+    WCHAR wide[4096];
+    p4_os_crash_marker_close();
+    marker_length[0] = marker_length[1] = 0;
+    if (!MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, path, -1, wide, sizeof wide / sizeof wide[0])) return -1;
+    marker_handle = CreateFileW(wide, GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_DELETE, NULL, CREATE_ALWAYS,
+                                FILE_ATTRIBUTE_NORMAL, NULL);
+    return marker_handle != INVALID_HANDLE_VALUE ? 0 : -1;
+}
+int p4_os_crash_marker_set(const char *bytes, size_t length)
+{
+    if (marker_handle == INVALID_HANDLE_VALUE || length > P4_OS_CRASH_MARKER_CAP) return -1;
+    LONG next = !marker_slot;
+    memcpy(marker_bytes[next], bytes, length);
+    marker_length[next] = (DWORD)length;
+    InterlockedExchange(&marker_slot, next);
+    return 0;
+}
+/* Kernel calls only, on a handle opened before the fault: no CRT, no heap. */
+void p4_os_crash_marker_write(void)
+{
+    LONG slot = marker_slot;
+    DWORD written;
+    if (marker_handle == INVALID_HANDLE_VALUE || !marker_length[slot]) return;
+    if (SetFilePointer(marker_handle, 0, NULL, FILE_BEGIN) != INVALID_SET_FILE_POINTER &&
+        WriteFile(marker_handle, marker_bytes[slot], marker_length[slot], &written, NULL) &&
+        written == marker_length[slot])
+        FlushFileBuffers(marker_handle);
+}
+void p4_os_crash_marker_close(void)
+{
+    if (marker_handle != INVALID_HANDLE_VALUE) CloseHandle(marker_handle);
+    marker_handle = INVALID_HANDLE_VALUE;
+}
+
 
 static LONG WINAPI crash_handler(EXCEPTION_POINTERS *ep) {
     const EXCEPTION_RECORD *er = ep->ExceptionRecord;
@@ -82,6 +123,9 @@ static LONG WINAPI crash_handler(EXCEPTION_POINTERS *ep) {
         }
         return EXCEPTION_CONTINUE_SEARCH;
     }
+    /* The lifecycle crash marker first: it is the record a later launch trusts.
+     * Repeating it for a nested exception rewrites the same bytes. */
+    p4_os_crash_marker_write();
     {
         /* first: a line that needs almost no stack, before anything that could fault again (a stack overflow gives this handler a few KB) */
         char b[512];
@@ -523,6 +567,7 @@ int p4_os_rename(const char *from, const char *to) {
     return retry_path_change(wide_from, wide_to, "rename");
 }
 
+int p4_os_sync_file(FILE *stream) { return fflush(stream) || _commit(_fileno(stream)) ? -1 : 0; }
 int p4_os_replace_file(const char *from, const char *to) {
     WCHAR wide_from[4096], wide_to[4096];
     if (!MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, from, -1, wide_from, sizeof wide_from / sizeof wide_from[0]) ||

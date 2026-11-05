@@ -30,6 +30,7 @@ add_test(NAME crt_guard COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/crt_
   --clang "${CMAKE_C_COMPILER}" --nm "${P4_CRT_NM}" --objdump "${P4_CRT_OBJDUMP}")
 add_test(NAME printf_rewrite COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/printf_rewrite_test.py")
 add_test(NAME fn_word_rewrite COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/fn_word_rewrite_test.py")
+add_test(NAME null_offset_rewrite COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/null_offset_rewrite_test.py")
 add_test(NAME variadic_call_rewrite COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/variadic_call_rewrite_test.py")
 
 # EE 64-bit integer results live entirely in $v0, never a $v0:$v1 pair.

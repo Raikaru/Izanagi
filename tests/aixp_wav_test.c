@@ -441,7 +441,9 @@ static int test_main(int argc, char **argv)
             uint32_t idx = 0;
             double frac = 0.0;
             long long j;
-            long long n = endFrame - startFrame;
+            /* the voice's own frames: the end state comes the renderer's report latency later */
+            long long n = endFrame - startFrame < (long long)((double)(total - 1) / step) ?
+                          endFrame - startFrame : (long long)((double)(total - 1) / step);
             double err;
 
             for (j = 0; j < n; j++) {

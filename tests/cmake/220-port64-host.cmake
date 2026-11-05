@@ -135,13 +135,22 @@ if(P4_PORT64_LINK AND P4_PORT64_OBJS)
       ENVIRONMENT "P4PC_VIRTUAL_CLOCK=1;P4PC_ASPECT=4:3;P4PC_RESOLUTION=scale:1;P4PC_GATE_RENDERER=${portFrameRenderer};P4PC_SAVE_DIR=${CMAKE_BINARY_DIR}/save/${name};${ARGN}")
   endfunction()
 
+  # The port frame is port-scene-<scene>-<renderer>.rgb, or port-scene-<portEventRef_<name>>-<renderer>.rgb
+  # when a cutover gave the scene a new immutable frame (tests/refs.sha256).
   function(p4_port_event_frame name scene capture timeout seed walk)
     set(frameTest scene_port_${name}_${portFrameBackend}64)
+    set(frameRef ${scene})
+    if(DEFINED portEventRef_${name})
+      set(frameRef ${portEventRef_${name}})
+    endif()
     add_test(NAME ${frameTest} COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/event_scene_gate.sh"
       $<TARGET_FILE:p4pc64> ${scene} ${capture} 0.05 ${seed} ${walk} ${ARGN})
     p4_port_frame_properties(${frameTest} ${timeout}
-      "P4PC_EVENT_REF=port-scene-${scene}-${portFrameRef}")
+      "P4PC_EVENT_REF=port-scene-${frameRef}-${portFrameRef}")
   endfunction()
+  # Shadow haze: the same dialogue state, reached 7152 flips earlier once voices played in real time,
+  # has the haze noise in another phase (0.201% from the old frames on both renderers).
+  set(portEventRef_shadow_haze shadow-haze-realtime-voice)
 
   function(p4_port_viewer_frame name mode reference)
     set(frameTest scene_port_${name}_${portFrameBackend}64)
@@ -175,8 +184,8 @@ if(P4_PORT64_LINK AND P4_PORT64_OBJS)
       p4_port_event_frame(riverbank_vignette riverbank-vignette 5880 900 story0415 save0415_to_river_scene.walk)
       p4_port_event_frame(rain rain 25100 1200 newgame newgame_to_rain_scene.walk)
       p4_port_event_frame(arcana_rankup_sparkles arcana-rankup-sparkles 7300 900 story0415 save0415_to_street.walk)
-      p4_port_event_frame(tv_world_enter tv-world-enter 75594 1700 newgame newgame_to_0413.walk)
-      p4_port_event_frame(shadow_haze shadow-haze 110560 1700 newgame newgame_to_0413.walk)
+      p4_port_event_frame(tv_world_enter tv-world-enter 71778 1700 newgame newgame_to_0413.walk)
+      p4_port_event_frame(shadow_haze shadow-haze 103408 1700 newgame newgame_to_0413.walk)
     endif()
     if(TARGET p4pc_viewer64)
       p4_port_viewer_frame(field field:7:2 field P4PC_DRAW_WINDOW=4)

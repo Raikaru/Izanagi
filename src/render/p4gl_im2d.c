@@ -1143,8 +1143,71 @@ static uint32_t layout_callback_id(uint32_t callback)
 #endif
 }
 
+/* Render-only hidden HUD scopes (mod HUD groups, src/platform/mods/
+ * game_services.c): every draw inside a hidden ordering-table bucket or node
+ * is dropped by p4gl_gl_suppress_draw while the node itself still runs, so
+ * the game's glyph/sprite lists are consumed and released as usual. Every
+ * layout begin opens one scope and p4gl_layout_end closes it, with or
+ * without widescreen; queue and node begins say whether theirs is hidden. */
+static const uint32_t *sHudQueues;
+static const uint32_t (*sHudCallbacks)[2];
+static unsigned sHudQueueCount, sHudCallbackCount, sHudDepth, sHudOverflow;
+static uint8_t sHudStack[64];
+static int sHudPending;
+
+/* The caller keeps both arrays alive until the next call. */
+void p4gl_hud_hidden_set(const uint32_t *queues, unsigned queueCount, const uint32_t (*callbacks)[2],
+                         unsigned callbackCount)
+{
+    sHudQueues = queues;
+    sHudQueueCount = queueCount;
+    sHudCallbacks = callbacks;
+    sHudCallbackCount = callbackCount;
+}
+
+static int hud_active(void) { return sHudQueueCount || sHudCallbackCount || sHudDepth || sHudOverflow; }
+
+static int hud_queue_hidden(uint32_t queue)
+{
+    for (unsigned i = 0; i < sHudQueueCount; i++)
+        if (sHudQueues[i] == queue) return 1;
+    return 0;
+}
+
+static int hud_callback_hidden(uint32_t callback)
+{
+    for (unsigned i = 0; i < sHudCallbackCount; i++)
+        if (callback >= sHudCallbacks[i][0] && callback <= sHudCallbacks[i][1]) return 1;
+    return 0;
+}
+
+static void hud_push(int hidden)
+{
+    /* Scopes nested deeper than the stack keep their parent's state. */
+    if (sHudDepth == sizeof sHudStack) {
+        ++sHudOverflow;
+        return;
+    }
+    const int state = (sHudDepth && sHudStack[sHudDepth - 1]) || hidden;
+    sHudStack[sHudDepth++] = (uint8_t)state;
+    p4gl_gl_suppress_draw(state);
+}
+
+static void hud_pop(void)
+{
+    if (sHudOverflow) {
+        --sHudOverflow;
+        return;
+    }
+    if (sHudDepth == 0) return;
+    --sHudDepth;
+    p4gl_gl_suppress_draw(sHudDepth ? sHudStack[sHudDepth - 1] : 0);
+}
+
 void p4gl_layout_begin(uint32_t callback, unsigned command)
 {
+    if (hud_active()) hud_push(sHudPending);
+    sHudPending = 0;
     if (p4gl_aspect_width() == 1.0f) return;
     callback = layout_callback_id(callback);
     if (sLayoutDepth == sizeof sLayouts / sizeof sLayouts[0]) {
@@ -1181,8 +1244,10 @@ static int sCompactMap;
 
 void p4gl_layout_queue_begin(uint32_t queue)
 {
-    if (p4gl_aspect_width() == 1.0f) return;
+    if (p4gl_aspect_width() == 1.0f && !hud_active()) return;
+    sHudPending = hud_active() && hud_queue_hidden(queue);
     p4gl_layout_begin(0, 0);
+    if (p4gl_aspect_width() == 1.0f) return;
     if (queue == 0x00794c30u) sCompactMap = 0;
     if (queue == 0x00794930u || queue == 0x007943c0u || queue == 0x00794960u)
         sLayout = P4GL_LAYOUT_FILL; /* all fog/noise strips and colour-filter grid cells */
@@ -1201,21 +1266,24 @@ void p4gl_layout_queue_begin(uint32_t queue)
 
 void p4gl_layout_node_begin(const void *node)
 {
-    if (p4gl_aspect_width() == 1.0f) return;
     const uint8_t *packet = (const uint8_t *)node;
     uint32_t callback, argument;
     uint16_t command;
+    if (p4gl_aspect_width() == 1.0f && !hud_active()) return;
     memcpy(&callback, packet + 8, sizeof callback);
     memcpy(&argument, packet + 16, sizeof argument);
     memcpy(&command, packet + 24, sizeof command);
     callback = layout_callback_id(callback);
+    sHudPending = hud_active() && hud_callback_hidden(callback);
     p4gl_layout_begin(callback, command);
+    if (p4gl_aspect_width() == 1.0f) return;
     if (callback == 0x002add10u && argument != 0)
         sCompactMap = ((const uint8_t *)P4_G2H(argument))[0xb8] == 0;
 }
 
 void p4gl_layout_end(void)
 {
+    hud_pop();
     if (p4gl_aspect_width() == 1.0f) return;
     if (sLayoutDepth == 0) {
         fprintf(stderr, "p4gl: unbalanced widescreen ordering-table draw\n");

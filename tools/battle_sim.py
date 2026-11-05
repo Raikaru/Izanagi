@@ -10,10 +10,13 @@ import math
 import os
 from pathlib import Path
 import re
+import shutil
 import struct
 import subprocess
 import sys
 import time
+
+import mod_witness
 
 SCHEMA = 1
 STREAMS = {"additive": 1, "mt": 2, "policy": 3, "effect": 4}
@@ -21,11 +24,17 @@ OUTCOMES = {"win", "defeat", "escape", "scripted_conclusion", "action_limit",
             "update_limit", "engine_error", "policy_error"}
 CENSORED = {"action_limit", "update_limit"}
 ERRORS = {"engine_error", "policy_error"}
-POLICIES = {"tape": 0, "greedy": 1, "cautious": 2, "typical": 3, "walk": 4}
+POLICIES = {"tape": 0, "greedy": 1, "cautious": 2, "typical": 3, "walk": 4, "attentive": 5}
 WALK_PLAN_MAX = 16384
 LOCAL_GATES = Path(__file__).with_name("local_gates.py")   # machine-wide admission (admitted_case)
 # p4_game_table_catalog_identity's retail value; expanded catalogs hash their content.
 RETAIL_TABLE_CATALOG = hashlib.sha256(b"p4pc-table-catalog-v1:retail").hexdigest()
+# A declared mod cohort: manifest-syntax package ids, declared setting keys and printable values.
+MOD_ID = re.compile(r"[a-z0-9_-](?:[a-z0-9._-]{0,61}[a-z0-9_-])?")
+SETTING_KEY = re.compile(r"[a-z0-9_][a-z0-9_.-]{0,47}")
+SETTING_VALUE = re.compile(r"[!-~](?:[ -~]{0,198}[!-~])?")
+MAX_MOD_PACKAGES = 16
+MOD_WITNESS_ENVIRONMENT = {"P4PC_MOD_WITNESS": "1", "P4PC_INPUT": "script"}
 
 
 class ScenarioError(ValueError):
@@ -325,19 +334,111 @@ def validate_definition(definition):
 
 
 def validate_walk_plan(plan):
-    """The walk policy's plan: battle:/battlerule: lines only (no field-walking line), printable ASCII, bounded."""
+    """The walk policy's plan: battle:/battlerule:/battleturn: lines only (no field-walking line), printable ASCII, bounded."""
     if not isinstance(plan, str) or not plan or len(plan) > WALK_PLAN_MAX:
         raise ScenarioError("policy.plan: expected 1..%d characters" % WALK_PLAN_MAX)
     if any(ch != "\n" and not " " <= ch <= "~" for ch in plan):
         raise ScenarioError("policy.plan: expected printable ASCII lines")
     for number, line in enumerate(plan.split("\n"), 1):
-        if line and not (line.startswith("battle:") and len(line) > 7 or line.startswith("battlerule:") and len(line) > 11):
-            raise ScenarioError("policy.plan line %d: expected a battle: or battlerule: line" % number)
+        if line and not (line.startswith("battle:") and len(line) > 7 or
+                         line.startswith(("battlerule:", "battleturn:")) and len(line) > 11):
+            raise ScenarioError("policy.plan line %d: expected a battle:, battlerule: or battleturn: line" % number)
     return plan
 
 
+def validate_mods(mods):
+    """A declared mod cohort: package ids and directories, and per-package settings. Never retail evidence."""
+    object_fields(mods, "mods", ("packages", "settings"))
+    packages = mods["packages"]
+    if not isinstance(packages, list) or not 1 <= len(packages) <= MAX_MOD_PACKAGES:
+        raise ScenarioError("mods.packages: expected 1..%d packages" % MAX_MOD_PACKAGES)
+    ids = []
+    for index, package in enumerate(packages):
+        where = "mods.packages[%d]" % index
+        object_fields(package, where, ("id", "directory"))
+        if not isinstance(package["id"], str) or MOD_ID.fullmatch(package["id"]) is None:
+            raise ScenarioError(where + ".id: expected a manifest mod id")
+        text(package["directory"], where + ".directory")
+        ids.append(package["id"])
+    if len(set(ids)) != len(ids):
+        raise ScenarioError("mods.packages: duplicate package id")
+    settings = mods["settings"]
+    if not isinstance(settings, dict):
+        raise ScenarioError("mods.settings: expected object")
+    for owner, values in settings.items():
+        where = "mods.settings." + str(owner)
+        if owner not in ids:
+            raise ScenarioError(where + ": settings for an undeclared package")
+        if not isinstance(values, dict):
+            raise ScenarioError(where + ": expected object")
+        for key, value in values.items():
+            if not isinstance(key, str) or SETTING_KEY.fullmatch(key) is None:
+                raise ScenarioError(where + ": invalid setting key %r" % (key,))
+            if not isinstance(value, str) or SETTING_VALUE.fullmatch(value) is None or "#" in value or ";" in value:
+                raise ScenarioError("%s.%s: expected a printable setting value" % (where, key))
+    return mods
+
+
+def package_files(directory, location):
+    """{relative path: SHA-256} of every regular file; links refuse rather than follow."""
+    if directory.is_symlink() or not directory.is_dir():
+        raise ScenarioError(location + ": expected a package directory, not a link")
+    files = {}
+    for path in sorted(directory.rglob("*")):
+        if path.is_symlink():
+            raise ScenarioError(location + ": package contains a link: " + path.relative_to(directory).as_posix())
+        if path.is_file():
+            files[path.relative_to(directory).as_posix()] = file_digest(path)
+    return files
+
+
+def mod_cohort(mods, base):
+    """The declared packages' manifests and content, and the settings, named by one identity."""
+    packages = []
+    for index, package in enumerate(mods["packages"]):
+        where = "mods.packages[%d].directory" % index
+        directory = Path(package["directory"])
+        if not directory.is_absolute():
+            directory = Path(base) / directory
+        manifest = directory / "mod.ini"
+        if not manifest.is_file():
+            raise ScenarioError(where + ": no mod.ini")
+        fields = dict(re.findall(r"(?m)^\s*(id|version)\s*=\s*(\S(?:.*\S)?)\s*$", manifest.read_text(encoding="utf-8")))
+        if fields.get("id") != package["id"] or not fields.get("version"):
+            raise ScenarioError(where + ": mod.ini id/version do not declare " + package["id"])
+        packages.append({"id": package["id"], "version": fields["version"], "directory": os.path.abspath(directory),
+                         "files": package_files(directory, where)})
+    content = {"packages": [{key: package[key] for key in ("id", "version", "files")} for package in packages],
+               "settings": mods["settings"]}
+    return {"identity": digest(canonical(content)), "packages": packages, "settings": mods["settings"]}
+
+
+def stage_mod_packages(cohort, output):
+    """One private copy of the declared packages per batch; a resumed batch must find the same bytes."""
+    root = output / "mods"
+    for package in cohort["packages"]:
+        destination = root / package["id"]
+        if not destination.exists():
+            shutil.copytree(package["directory"], destination)
+        if package_files(destination, "staged package " + package["id"]) != package["files"]:
+            raise ScenarioError("staged package %s differs from its declared content" % package["id"])
+    return str(root)
+
+
+def write_mod_profile(profile, cohort):
+    """The case's private Config: the declared packages enabled and their settings, as a player sets them."""
+    (profile / "p4pc.ini").write_text("[mods]\nenabled=%s\n" % ",".join(p["id"] for p in cohort["packages"]),
+                                      encoding="ascii")
+    store = profile / "mod-settings"
+    store.mkdir()
+    for owner, values in cohort["settings"].items():
+        (store / (owner + ".ini")).write_text("".join("%s = %s\n" % item for item in values.items()), encoding="ascii")
+
+
 def validate_scenario(value):
-    object_fields(value, "scenario", ("schema", "entry", "encounter_id", "policy", "master_seed", "seed_start", "n", "options"), ("label", "runtime"))
+    object_fields(value, "scenario", ("schema", "entry", "encounter_id", "policy", "master_seed", "seed_start", "n", "options"), ("label", "runtime", "mods"))
+    if "mods" in value:
+        validate_mods(value["mods"])
     if type(value["schema"]) is not int or value["schema"] != SCHEMA:
         raise ScenarioError("scenario.schema: expected 1")
     master = value["master_seed"]
@@ -576,10 +677,26 @@ def validate_result(value):
                 raise ScenarioError(where + ".identity: expected lowercase SHA-256")
             if (catalog["identity"] == RETAIL_TABLE_CATALOG) != (expanded == 0):
                 raise ScenarioError(where + ": retail identity and expanded flag disagree")
+    if "mods" in value and value["mods"] is not None:
+        reported = value["mods"]
+        where = "worker result.mods"
+        object_fields(reported, where, ("identity", "witness", "active"))
+        if not isinstance(reported["identity"], str) or re.fullmatch(r"[0-9a-f]{64}", reported["identity"]) is None:
+            raise ScenarioError(where + ".identity: expected lowercase SHA-256")
+        if reported["witness"] is not True:
+            raise ScenarioError(where + ".witness: a mod cohort is always a non-reference mod-witness run")
+        if not isinstance(reported["active"], list):
+            raise ScenarioError(where + ".active: expected the native active package array")
+        for index, package in enumerate(reported["active"]):
+            object_fields(package, "%s.active[%d]" % (where, index), ("id", "version"))
+            text(package["id"], "%s.active[%d].id" % (where, index))
+            text(package["version"], "%s.active[%d].version" % (where, index))
+        if not reported["active"] and value["outcome"] not in ERRORS:
+            raise ScenarioError(where + ": no active package is only valid on a native error result")
     if "party_policy" in value:
         policy = value["party_policy"]
         object_fields(policy, "worker result.party_policy", ("id", "name", "latency_updates", "party_control", "knowledge"), ("plan_sha256",))
-        integer(policy["id"], "worker result.party_policy.id", maximum=4)
+        integer(policy["id"], "worker result.party_policy.id", maximum=max(POLICIES.values()))
         integer(policy["latency_updates"], "worker result.party_policy.latency_updates")
         for key in ("name", "party_control", "knowledge"):
             text(policy[key], "worker result.party_policy." + key)
@@ -661,6 +778,8 @@ def measurement_contract(result):
         "entry_kind": result.get("entry_kind", "unreported"),
         "observer_attached": result.get("observer_attached", "unreported"),
         "table_catalog": result.get("table_catalog", "unreported"),
+        # A mod cohort never pools or ranks with retail or with another mod set.
+        "mods": result.get("mods", "unreported"),
         "party_policy": result.get("party_policy", "unreported"),
         "entry_observation_boundaries": {
             "first_protagonist_command": result.get("entry_observations", {}).get("first_protagonist_command", {}).get("boundary", "unreported")},
@@ -772,6 +891,10 @@ def markdown(report):
              "", "Win rate: **%s** (%d/%d completed), Wilson 95%% CI %s." % (headline, rate["wins"], rate["denominator"], interval),
              "", rate["qualification"], "", "Outcomes: " + json.dumps(report["outcomes"], sort_keys=True),
              "", "Wipe terminal causes (not inferred explanations): " + json.dumps(report["wipe_causes"], sort_keys=True)]
+    if report.get("run_mode") == "mod-witness":
+        mods = report["identity"]["mods"]
+        lines += ["", "Mod cohort %s (%s): a mod-witness run, not a retail reference; never pooled or ranked with retail." %
+                  (mods["identity"], ", ".join("%s %s" % (p["id"], p["version"]) for p in mods["packages"]))]
     lines += ["", "RNG: schema-1 seeded streams; " + report["rng"]["draw_count_scope"]]
     lines += ["", "Resource preparation: " + report.get("resource_profile", "unreported"),
               "", "Initial-party snapshot boundaries: " + json.dumps(report["initial_party_boundaries"], sort_keys=True)]
@@ -807,7 +930,7 @@ def admitted_case(wait, rendered=False):
     return machine.case(wait, cpu=not rendered)
 
 
-def worker_environment(runtime_environment, profile):
+def worker_environment(runtime_environment, profile, cohort=None):
     assert_fidelity_environment(runtime_environment)
     env = {key: value for key, value in os.environ.items()
            if not key.upper().startswith(("P4PC_", "SDL_"))}
@@ -819,7 +942,27 @@ def worker_environment(runtime_environment, profile):
                P4PC_WINDOW_H="448", P4PC_FULLSCREEN="0", P4PC_VSYNC="off",
                P4PC_PRESENT="direct", P4PC_PRESENT_FIT="4:3",
                TMPDIR=str(profile), TMP=str(profile), TEMP=str(profile))
+    if cohort is not None:
+        # Only a declared cohort enables mods, as an explicit mod-witness run the worker
+        # verifies against the named identity; ambient presence was refused above.
+        env.update(P4PC_CONFIG=str(Path(profile) / "p4pc.ini"), P4PC_MODS="1", P4PC_MOD_DIR=cohort["root"],
+                   P4PC_BATTLE_SIM_MODS=cohort["identity"], **MOD_WITNESS_ENVIRONMENT)
     return env
+
+
+def check_reported_mods(candidate, cohort):
+    """A retail result names no mod set; a cohort result names exactly the declared one."""
+    reported = candidate.get("mods")
+    if cohort is None:
+        if reported is not None:
+            raise ScenarioError("worker result reports a mod set for a retail scenario")
+        return
+    if not isinstance(reported, dict) or reported["identity"] != cohort["identity"]:
+        raise ScenarioError("worker result mod-set identity mismatch")
+    declared = sorted((package["id"], package["version"]) for package in cohort["packages"])
+    active = sorted((package["id"], package["version"]) for package in reported["active"])
+    if active != declared and candidate["outcome"] not in ERRORS:
+        raise ScenarioError("worker result active packages differ from the declared mod set")
 
 
 def native_preparation_error(receipt):
@@ -977,7 +1120,7 @@ def prepare_entry(definition, source_image, worker, output, identity, *, resume=
 
 
 def run_case(scenario, save_image, worker, output, run_index, identity, *, admission=admitted_case,
-             wait=-1, rendered=False, replay=False, runtime_environment=None):
+             wait=-1, rendered=False, replay=False, runtime_environment=None, cohort=None):
     seeds = derive_seeds(scenario["master_seed"], run_index)
     case_dir = output / ("run-%020d" % run_index)
     case_dir.mkdir()
@@ -993,7 +1136,9 @@ def run_case(scenario, save_image, worker, output, run_index, identity, *, admis
         atomic_json(directory / "request.json", request)
         profile = directory / "profile"
         profile.mkdir()
-        env = worker_environment(runtime_environment, profile)
+        if cohort is not None:
+            write_mod_profile(profile, cohort)
+        env = worker_environment(runtime_environment, profile, cohort)
         command = list(worker) + ["--battle-sim", str(entry), "--battle-result", str(directory / "result.json"),
                                   "--battle-trace", str(directory / "trace.jsonl")]
         receipt = {"attempt": attempt, "directory": str(directory), "command": command}
@@ -1019,6 +1164,7 @@ def run_case(scenario, save_image, worker, output, run_index, identity, *, admis
                                                policy.get("plan_sha256") != (digest(scenario["policy"]["plan"].encode("ascii"))
                                                                              if scenario["policy"]["kind"] == "walk" else None)):
                         raise ScenarioError("worker result party policy identity/latency/plan mismatch")
+                    check_reported_mods(candidate, cohort)
                     native_rng = candidate.get("rng")
                     if isinstance(native_rng, dict):
                         for name in ("additive", "mt", "effect"):
@@ -1106,6 +1252,11 @@ def run_batch(scenario, base, worker, output, jobs=1, *, resume=False, admission
                 "port_executable": {"path": worker[0], "sha256": file_digest(worker[0])},
                 "worker_arguments": [{"argument": arg, "sha256": file_digest(arg) if Path(arg).is_file() else None} for arg in worker[1:]],
                 "rendered": rendered, "replay": run_index is not None}
+    cohort = None
+    if "mods" in scenario:
+        cohort = mod_cohort(scenario["mods"], base)
+        identity["mods"] = {"identity": cohort["identity"],
+                            "packages": [{"id": p["id"], "version": p["version"]} for p in cohort["packages"]]}
     if run_index is not None:
         integer(run_index, "replay run_index", maximum=2**64 - 1)
     output = Path(output).resolve()
@@ -1120,6 +1271,14 @@ def run_batch(scenario, base, worker, output, jobs=1, *, resume=False, admission
         if any(output.iterdir()):
             raise ScenarioError("output must be an empty private directory")
         atomic_json(manifest_file, manifest)
+    # A cohort's output root is a non-reference mod-witness root from here on; a
+    # retail batch refuses any root that ever held one.
+    try:
+        mod_witness.begin(output, MOD_WITNESS_ENVIRONMENT if cohort is not None else {})
+    except ValueError as exc:
+        raise ScenarioError(str(exc)) from exc
+    if cohort is not None:
+        cohort["root"] = stage_mod_packages(cohort, output)
     preparation_info = None
     if definition is not None:
         save_image, preparation_info = prepare_entry(
@@ -1156,15 +1315,23 @@ def run_batch(scenario, base, worker, output, jobs=1, *, resume=False, admission
     with ThreadPoolExecutor(max_workers=jobs) as pool:
         futures = [pool.submit(run_case, scenario, save_image, worker, output, index, identity,
                                admission=admission, wait=wait, rendered=rendered, replay=run_index is not None,
-                               runtime_environment=runtime_environment) for index in pending]
+                               runtime_environment=runtime_environment, cohort=cohort) for index in pending]
         rows.extend(future.result() for future in futures)
     report = aggregate(rows)
     report["identity"] = identity
     report["resource_profile"] = "declared_fill_living_hp_sp" if scenario["options"]["fill_resources"] else "native_inherit"
     if preparation_info is not None:
         report["preparation"] = preparation_info
+    if cohort is not None:
+        report.update(mod_witness.WITNESS_FIELDS)
     atomic_json(output / "report.json", report)
     (output / "summary.md").write_text(markdown(report), encoding="utf-8")
+    if cohort is not None:
+        # Tag the batch's outputs; the staged packages stay byte-identical to their identity.
+        staged = Path(cohort["root"])
+        outputs = [path for path in output.rglob("*") if path.is_file() and staged not in path.parents]
+        mod_witness.finish(output, 1 if report["errors"] else 0, outputs=outputs, environment=MOD_WITNESS_ENVIRONMENT,
+                           outcome="completed" if not report["errors"] else "errors")
     return report
 
 

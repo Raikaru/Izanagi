@@ -25,6 +25,7 @@
 
 #include "p4pc/gmem.h"
 #include "p4pc/platform.h"
+#include "p4pc/vblank_hook.h"
 #include "config/p4cfg.h"
 #include "pad/pad_sdl.h"
 #include "sound/p4snd.h"
@@ -89,6 +90,8 @@ void p4pc_rng_value(uint32_t draw, uint32_t value) {
 void p4pc_platform_init(void) {
     p4cfg_load();
     p4snd_set_user_volume((float)p4cfg_float("audio.volume", 100.0) / 100.0f);
+    /* On a virtual clock the SPU2's playing time is the kernel's VBLANK periods (kernel_thread.c). */
+    p4pc_vblank_period_hook = p4snd_virtual_tick;
     if (p4pc_intc_add_handler(INTC_TIMER0, kwlnHandleTimerInterrupt, 0) != INTC_TIMER0) {
         fprintf(stderr, "p4pc: AddIntcHandler(TIMER0) refused\n");
         exit(2);

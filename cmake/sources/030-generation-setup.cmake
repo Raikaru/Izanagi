@@ -3,6 +3,34 @@ file(MAKE_DIRECTORY "${P4_GEN}")
 
 file(GLOB_RECURSE P4_OVERRIDES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/overrides/*")
 
+# The RenderWare clean layer switch (docs/rw_clean.md, config/rw_clean.json): the subsystems whose clean sources (src/rwclean) are compiled instead
+# of the RenderWare units they replace. Empty (the cache default) selects config/rw_clean.json's "default" list; `none` selects nothing, which builds
+# the decomp's RenderWare for the subsystems that still have it. A lane check selects with P4PC_CHECK_ENV="P4PC_RW_CLEAN=<ids>|none": the
+# environment value, when set, wins over the cache at every configure.
+set(P4_RW_CLEAN "" CACHE STRING "RenderWare clean subsystems to compile (config/rw_clean.json), comma-separated; empty: its default; none: none")
+if(DEFINED ENV{P4PC_RW_CLEAN})
+  set(P4_RW_CLEAN "$ENV{P4PC_RW_CLEAN}" CACHE STRING "RenderWare clean subsystems to compile (config/rw_clean.json), comma-separated; empty: its default; none: none" FORCE)
+endif()
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/config/rw_clean.json")
+if(P4_RW_CLEAN STREQUAL "")
+  file(READ "${CMAKE_SOURCE_DIR}/config/rw_clean.json" p4_rw_clean_policy)
+  string(JSON p4_rw_clean_n LENGTH "${p4_rw_clean_policy}" default)
+  set(P4_RW_CLEAN_ARG "")
+  if(p4_rw_clean_n GREATER 0)
+    math(EXPR p4_rw_clean_last "${p4_rw_clean_n} - 1")
+    foreach(i RANGE ${p4_rw_clean_last})
+      string(JSON p4_rw_clean_id GET "${p4_rw_clean_policy}" default ${i})
+      list(APPEND P4_RW_CLEAN_ARG "${p4_rw_clean_id}")
+    endforeach()
+  endif()
+  string(REPLACE ";" "," P4_RW_CLEAN_ARG "${P4_RW_CLEAN_ARG}")
+elseif(P4_RW_CLEAN STREQUAL "none")
+  set(P4_RW_CLEAN_ARG "")
+else()
+  string(REPLACE ";" "," P4_RW_CLEAN_ARG "${P4_RW_CLEAN}")
+endif()
+file(GLOB_RECURSE P4_RW_CLEAN_FILES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/rwclean/*.c" "${CMAKE_SOURCE_DIR}/src/rwclean/*.h")
+
 # Configure-time inputs: the unit list and each unit's flags (gen_port.py units). CMake reruns
 # when one of these changes; `cmake --build` does that by itself, and an unchanged tree skips
 # configure entirely.
@@ -11,13 +39,14 @@ set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
   "${CMAKE_SOURCE_DIR}/config/units.txt"
   "${CMAKE_SOURCE_DIR}/config/excluded_units.txt"
   "${CMAKE_SOURCE_DIR}/config/inactive_movie_decoder.json"
+  "${CMAKE_SOURCE_DIR}/config/rw_clean.json"
   "${P4_DECOMP}/compile_flags.txt"
   "${P4_DECOMP}/config/compiler_units.txt"
   "${P4_DECOMP}/config/version_flags.txt")
 
 execute_process(
   COMMAND "${P4_PYTHON}" "${CMAKE_SOURCE_DIR}/tools/gen_port.py" units
-          --decomp "${P4_DECOMP}" --build "${P4_GEN}"
+          --decomp "${P4_DECOMP}" --build "${P4_GEN}" --rw-clean "${P4_RW_CLEAN_ARG}"
   RESULT_VARIABLE p4_rc
   OUTPUT_VARIABLE p4_out
   ERROR_VARIABLE p4_err)
@@ -25,6 +54,8 @@ message(STATUS "${p4_out}")
 if(NOT p4_rc EQUAL 0)
   message(FATAL_ERROR "gen_port units failed:\n${p4_err}")
 endif()
+# P4_RW_CLEAN_SUBSYSTEMS and P4_RW_CLEAN_PORT_DROP (the port transcriptions a selected subsystem retires).
+include("${P4_GEN}/rw_clean.cmake")
 
 # Each unit line is "<mirror path>|<flags>"; flags are tab-separated (paths may contain spaces).
 file(STRINGS "${P4_GEN}/units.txt" P4_UNIT_LINES)

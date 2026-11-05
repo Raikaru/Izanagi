@@ -1,6 +1,7 @@
 #include "p4pc/game_elements_ui.h"
 #include "p4pc/game_elements.h"
 #include "p4pc/game_table_boot.h"
+#include "p4pc/mod_setting_gate.h"
 #include "p4pc/guest.h"
 #include "p4pc/package_boot.h"
 #include "p4pc/packages.h"
@@ -109,6 +110,7 @@ static int parse_layout(const P4PackageProvider *provider, const P4PackageField 
         if (!strcmp(fields[i].key, "schema")) schema = fields[i].value;
         else if (!strcmp(fields[i].key, "revision")) revision = fields[i].value;
         else if (!strcmp(fields[i].key, "order")) order = fields[i].value;
+        else if (!strcmp(fields[i].key, P4_MOD_SETTING_GATE_FIELD)) continue; /* evaluated by prepare() */
         else return refuse(provider, boot.line, "unknown [element-ui] field");
     }
     uint32_t schema_number;
@@ -196,6 +198,15 @@ static int prepare(void *unused)
         size_t i = 0;
         while (i < count && strcmp(fields[i].section, "element-ui") && strcmp(fields[i].section, "element-column")) ++i;
         if (i == count) continue;
+        /* The layout's `when` gates the whole layout, its columns included. */
+        size_t first = 0;
+        while (first < count && strcmp(fields[first].section, "element-ui")) ++first;
+        size_t last = first;
+        while (last < count && !strcmp(fields[last].section, "element-ui")) ++last;
+        char reason[192];
+        const int gate = p4_mod_setting_section_gate(provider, fields + first, last - first, reason, sizeof reason);
+        if (gate < 0) return refuse(provider, first < count ? fields[first].line : fields[i].line, reason);
+        if (!gate) continue;
         if (boot.provider) return refuse(provider, fields[i].line, "another provider already owns the element layout");
         boot.provider = provider;
         if (parse_layout(provider, fields, count)) return -1;
@@ -275,7 +286,8 @@ int p4_game_elements_ui_boot_session_end(void)
     return P4_TABLE_OK;
 }
 static const char *const sections[] = {"element-ui", "element-column", NULL};
-static const char *const dependencies[] = {P4_GAME_TABLES_BOOT_PROVIDER, P4_RESOURCES_IMAGES_HANDLER, NULL};
+static const char *const dependencies[] = {P4_GAME_TABLES_BOOT_PROVIDER, P4_RESOURCES_IMAGES_HANDLER,
+    P4_MOD_SETTINGS_HANDLER, NULL};
 const P4PackageHandler p4_game_elements_ui_boot_provider = {
     .name = P4_GAME_ELEMENTS_UI_BOOT_PROVIDER, .sections = sections,
     .prepare = prepare, .publish = publish, .rollback = rollback,

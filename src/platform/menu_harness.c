@@ -9,7 +9,8 @@
  * P4PC_MENU_SCRIPT drives the menus by what the game shows rather than by flip numbers (a field's load time varies, an AUTOPRESS press
  * before it is ready is lost): a comma list of `open` (Triangle every 60 flips until the camp task has left state 0), button names
  * (cross, circle, triangle, square, up, down, left, right, l1, r1, start, select: held 6 flips, then P4PC_MENU_STEP flips of settling,
- * default 45), `waitN` (N flips), `shot:name` (writes menu_<name>.png from the next presented frame) and `state` (logs the camp state words).
+ * default 45), `waitN` (N flips), `shot:name` (writes menu_<name>.png from the next presented frame), `state` (logs the camp state words) and
+ * `walkdone` (holds until P4PC_WALK_SCRIPT has finished, e.g. loaded a save and reached free roam; without a walk the run fails).
  * P4PC_MENU_EXIT=1 exits 0 when the script ends. Example:
  *   P4PC_MENU_SCRIPT='open,shot:top,down,down,cross,wait90,shot:skill,circle'
  *
@@ -638,6 +639,22 @@ static void scriptStep(unsigned frame)
         return;
     }
     tok = sToks[sIdx];
+    /* `walkdone` holds the script until P4PC_WALK_SCRIPT has finished (loaded a
+     * save and reached free roam, say); a failed or absent walk fails the run. */
+    if (!strcmp(tok, "walkdone")) {
+        int status = p4pc_pad_walk_status();
+        if (status == 1) {
+            fprintf(stderr, "p4pc: menu harness: frame %u walk done\n", frame);
+            ++sIdx;
+            sWaitUntil = frame + (unsigned)stepFlips;
+        } else if (status != 0) {
+            fprintf(stderr, "menu harness: walkdone without a running walk (status %d)\n", status);
+            exit(1);
+        } else {
+            sWaitUntil = frame + 30;
+        }
+        return;
+    }
     if (strcmp(tok, "open") == 0) {
         if (camp != NULL && *(const uint32_t *)camp >= 2) {
             logCamp(frame, "camp is open:");

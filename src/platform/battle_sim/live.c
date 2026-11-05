@@ -13,6 +13,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "p4pc/lockstep.h"
+#include "../files/vfs.h"
+#include "../pad/pad_sdl.h"
+#if defined(__linux__) && !defined(__ANDROID__)
+#include <dirent.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <signal.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+#define P4_BATTLE_FORK 1
+#endif
 
 #define RAM_START 0x00100000u
 #define RAM_BYTES 0x01f00000u
@@ -39,6 +52,7 @@ static struct {
     P4BattleHit lethal;
     uint32_t lethal_update;
     int lethal_seen, terminal_lethal, first_command;
+    uint32_t ready_actor;
     uint32_t terminal, terminal_update, terminal_flip, terminal_frame, terminal_draws;
     LiveUnit terminal_units[2][12];
     unsigned terminal_counts[2];
@@ -57,6 +71,7 @@ static struct {
 } discovery;
 
 static void discovery_command_ready(uint32_t action);
+static int battle_fork_start(const char *dir);
 
 extern uint32_t p4pc_rng_draws;
 extern int p4pc_pad_walk_status(void);
@@ -372,6 +387,10 @@ static void hit(const P4BattleHit *event, void *unused)
 void p4_battle_live_command_ready(uint32_t action)
 {
     if (live.entry.mode == 3) { discovery_command_ready(action); return; }
+    if (range(action, 0x34)) { /* the party member whose command is ready, for a search checkpoint */
+        const uint32_t ready = P4_G32(action + 0x30);
+        if (range(ready, 0xa6) && P4_G8(ready + 0xa2) == 0) live.ready_actor = P4_G16(ready + 0xa4);
+    }
     if (!live.bound || live.terminal_seen || live.first_command || !range(action, 0x34)) return;
     const uint32_t unit = P4_G32(action + 0x30);
     if (!range(unit, 0xa6) || P4_G8(unit + 0xa2) != 0 || P4_G16(unit + 0xa4) != 1) return;
@@ -724,6 +743,8 @@ int p4_battle_live_start(const char *entry, const char *result, const char *trac
             !exact_env("P4PC_LOCKSTEP_STATE_ALIGNED", "1")) return bad("invalid_battle_qualification");
         live.qualification_terminal_present = 1;
     }
+    if (getenv("P4PC_BATTLE_FORK") && !battle_fork_start(getenv("P4PC_BATTLE_FORK")))
+        return bad("invalid_battle_fork");
     FILE *existing = fopen(result, "rb");
     if (existing) { fclose(existing); return bad("result_exists"); }
     if (live.entry.mode != 3) {
@@ -861,3 +882,170 @@ static int prefix(const char *cause)
 int p4_battle_live_lockstep_stop(void) { return prefix("lockstep_stop"); }
 int p4_battle_live_lockstep_eof(void) { return prefix("lockstep_replay_eof"); }
 int p4_battle_live_lockstep_boundary(void) { return prefix("lockstep_boundary_stop"); }
+
+/* P4PC_BATTLE_FORK=DIR (Linux): a search checkpoint at each fresh party command of the selected fight once the walk's
+ * battleturn: lines are spent. The process stops inside the walker's command arming, before that pad read is recorded,
+ * and serves DIR/NODE/control: "fork NAME LINE" forks a child that continues as node NAME with LINE as the command;
+ * "exit" ends the checkpoint. A child writes its own trace, result, lockstep log and stdout/stderr under DIR/NAME and
+ * reads the disc through a private descriptor, so each node's files continue its parent's exactly: a path's segments
+ * concatenate to a fresh run of the same tape. No guest state, RNG, input schedule or clock is changed. */
+#ifdef P4_BATTLE_FORK
+static struct {
+    char dir[1024], node[64], result[1200];
+} battle_fork;
+static int fork_turn(unsigned n, char *line, size_t size);
+static int fork_path(char *out, size_t size, const char *node, const char *leaf)
+{
+    const int length = snprintf(out, size, "%s/%s%s%s", battle_fork.dir, node, leaf ? "/" : "", leaf ? leaf : "");
+    return length > 0 && (size_t)length < size;
+}
+static int fork_threads(void)
+{
+    DIR *tasks = opendir("/proc/self/task");
+    if (!tasks) return -1;
+    int count = 0;
+    for (struct dirent *e; (e = readdir(tasks));) if (e->d_name[0] != '.') count++;
+    closedir(tasks);
+    return count;
+}
+#endif
+static int battle_fork_start(const char *dir)
+{
+#ifdef P4_BATTLE_FORK
+    char path[1200];
+    if (!dir[0] || strlen(dir) >= sizeof battle_fork.dir - 80 || live.entry.mode == 3 || live.entry.completion != 1 ||
+        live.qualification_terminal_present || getenv("P4PC_LOCKSTEP_REPLAY")) return 0;
+    strcpy(battle_fork.dir, dir);
+    strcpy(battle_fork.node, "root");
+    struct stat root;
+    /* The driver may create DIR/root first (the trace and lockstep log live there); it must be a directory. */
+    if (!fork_path(path, sizeof path, "root", NULL) || (mkdir(path, 0755) && errno != EEXIST)) return 0;
+    if (stat(path, &root) || !S_ISDIR(root.st_mode)) return 0;
+    signal(SIGCHLD, SIG_IGN); /* checkpoints never wait for their children */
+    p4pc_pad_set_battle_turn_hook(fork_turn);
+    return 1;
+#else
+    (void)dir;
+    return 0;
+#endif
+}
+#ifdef P4_BATTLE_FORK
+static int fork_become(const char *name)
+{
+    char path[1200];
+    for (int stream = 1; stream <= 2; stream++) {
+        if (!fork_path(path, sizeof path, name, stream == 1 ? "stdout.log" : "stderr.log")) return 0;
+        const int fd = open(path, O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC, 0644);
+        if (fd < 0 || dup2(fd, stream) < 0) return 0;
+        close(fd);
+    }
+    if (!fork_path(path, sizeof path, name, "trace.jsonl")) return 0;
+    fclose(live.trace); /* flushed before fork: closes only this process's descriptor */
+    if (!(live.trace = fopen(path, "wbx"))) return 0;
+    if (!fork_path(battle_fork.result, sizeof battle_fork.result, name, "result.json")) return 0;
+    live.result = battle_fork.result;
+    if (!fork_path(path, sizeof path, name, "lockstep") || p4pc_lockstep_fork_reopen(path) || vfs_fork_private()) return 0;
+    snprintf(battle_fork.node, sizeof battle_fork.node, "%s", name);
+    return 1;
+}
+static void fork_checkpoint_record(unsigned n)
+{
+    char path[1200], temp[1210];
+    LiveUnit units[2][12];
+    unsigned counts[2] = {0, 0};
+    if (!fork_path(path, sizeof path, battle_fork.node, "checkpoint.json")) return;
+    snprintf(temp, sizeof temp, "%s.tmp", path);
+    FILE *file = fopen(temp, "wbx");
+    if (!file) return;
+    fprintf(file, "{\"schema\":1,\"node\":\"%s\",\"turn\":%u,\"pid\":%ld,\"update\":%u,\"fight_updates\":%u,\"actions\":%u,"
+            "\"flip\":%u,\"game_frame\":%u,\"additive_draws\":%u,\"threads\":1,\"actor\":%u,\"linked_units\":",
+            battle_fork.node, n, (long)getpid(), live.updates, live.fight_updates, live.actions,
+            p4pc_flip_count(), P4_G32(0x00764290u), p4pc_rng_draws, live.ready_actor);
+    const int linked = collect_units(GP(0xb3ac), units, counts);
+    if (linked) write_units(file, units, counts); else fputs("null", file);
+    /* Per linked unit, in the same order, the DatUnit record words +0x00 (flags; 0x200 guarding, datCalcIsGuarding) and
+     * +0x10..+0x20 (+0x14 charge state, +0x1C..+0x23 signed buff nibbles) a search ranks by; null for an absent record. */
+    fputs(",\"record_words\":", file);
+    if (!linked) fputs("null", file);
+    else {
+        fputc('[', file);
+        for (unsigned group = 0; group < 2; group++) {
+            fputs(group ? ",[" : "[", file);
+            for (unsigned i = 0; i < counts[group]; i++) {
+                const uint32_t record = units[group][i].record;
+                if (i) fputc(',', file);
+                if (!record || !range(record, 0x24)) { fputs("null", file); continue; }
+                fprintf(file, "[%u,%u,%u,%u,%u,%u]", P4_G32(record), P4_G32(record + 0x10), P4_G32(record + 0x14),
+                        P4_G32(record + 0x18), P4_G32(record + 0x1c), P4_G32(record + 0x20));
+            }
+            fputc(']', file);
+        }
+        fputc(']', file);
+    }
+    fputs(",\"descriptors\":[", file);
+    DIR *fds = opendir("/proc/self/fd");
+    int first = 1;
+    for (struct dirent *e; fds && (e = readdir(fds));) {
+        char link[64], target[1024];
+        if (e->d_name[0] == '.') continue;
+        snprintf(link, sizeof link, "/proc/self/fd/%s", e->d_name);
+        const ssize_t length = readlink(link, target, sizeof target - 1);
+        target[length > 0 ? length : 0] = '\0';
+        for (char *c = target; *c; c++) if (*c == '"' || *c == '\\' || (unsigned char)*c < 0x20) *c = '?';
+        fprintf(file, "%s{\"fd\":%s,\"target\":\"%s\"}", first ? "" : ",", e->d_name, target);
+        first = 0;
+    }
+    if (fds) closedir(fds);
+    fputs("]}\n", file);
+    if (fclose(file) == 0) rename(temp, path);
+}
+/* Serves the control FIFO until a fork returns in the child. The checkpoint itself never runs another game update. */
+static int fork_turn(unsigned n, char *line, size_t size)
+{
+    char control[1200], command[1024];
+    if (!p4_battle_live_active || !live.bound || live.terminal_seen || live.failure) return 0;
+    if (fflush(live.trace) || p4pc_lockstep_flush() || fflush(stdout) || fflush(stderr)) {
+        live.failure = "battle_fork_flush";
+        return 0;
+    }
+    if (fork_threads() != 1) {
+        live.failure = "battle_fork_requires_single_thread";
+        return 0;
+    }
+    if (!fork_path(control, sizeof control, battle_fork.node, "control") || mkfifo(control, 0600)) {
+        live.failure = "battle_fork_control";
+        return 0;
+    }
+    fork_checkpoint_record(n);
+    for (;;) {
+        FILE *in = fopen(control, "r"); /* blocks until the driver opens the FIFO */
+        if (!in) _exit(4);
+        while (fgets(command, sizeof command, in)) {
+            command[strcspn(command, "\r\n")] = '\0';
+            if (!strcmp(command, "exit")) _exit(0);
+            if (strncmp(command, "fork ", 5)) continue;
+            char *name = command + 5, *turn = strchr(name, ' ');
+            if (!turn || turn == name || (size_t)(turn - name) >= sizeof battle_fork.node) continue;
+            *turn++ = '\0';
+            if (strspn(name, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.") != strlen(name) ||
+                strlen(turn) >= size) continue;
+            char node[1200];
+            if (!fork_path(node, sizeof node, name, NULL) || mkdir(node, 0755)) continue;
+            const pid_t child = fork();
+            if (child == 0) {
+                fclose(in);
+                if (!fork_become(name)) _exit(4);
+                strcpy(line, turn);
+                return 1;
+            }
+            char marker[1200];
+            FILE *note = fork_path(marker, sizeof marker, name, child < 0 ? "fork_failed" : "pid") ? fopen(marker, "wb") : NULL;
+            if (note) {
+                fprintf(note, "%ld\n", (long)child);
+                fclose(note);
+            }
+        }
+        fclose(in);
+    }
+}
+#endif

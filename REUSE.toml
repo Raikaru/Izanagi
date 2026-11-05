@@ -19,8 +19,15 @@ path = [
   "src/platform/ee_dlibm.c",
   "src/platform/ps2_fpbit.c",
   "src/platform/ee_heap.c",
+  "src/platform/rw_device_register.c",
+  "src/platform/rw_image_stream.c",
+  "src/platform/rw_normalize2.c",
+  "src/platform/rw_normalize3.c",
+  "src/platform/rw_p2_stalac.c",
+  "src/platform/rw_plugin_constructors.c",
   "src/platform/rw_rtanim.c",
   "src/platform/rw_rtanim_record.c",
+  "src/platform/rw_skin_callees.c",
   "src/platform/rw_skytran.c",
 ]
 precedence = "override"

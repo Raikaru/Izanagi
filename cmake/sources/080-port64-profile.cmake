@@ -113,9 +113,10 @@ function(p4_census_check var unitsdir baseline units)
   set(stamp "${unitsdir}/../census.ok")
   add_custom_command(OUTPUT "${stamp}"
     COMMAND "${P4_PYTHON}" -W ignore "${CMAKE_SOURCE_DIR}/tools/port64/unit64.py" report --dir "${unitsdir}" --census-baseline "${baseline}" --clang "${CMAKE_C_COMPILER}"
-            --active-units "${unitsdir}/../active_units.txt"
+            --active-units "${unitsdir}/../active_units.txt" --rw-clean-units "${P4_GEN}/rw_clean_units.txt"
+            --rw-clean-stripped "${P4_GEN}/decomp/src/rwclean/stripped_units.txt"
     COMMAND "${CMAKE_COMMAND}" -E touch "${stamp}"
-    DEPENDS ${ARGN} "${baseline}" "${CMAKE_SOURCE_DIR}/tools/port64/unit64.py" "${unitsdir}/../active_units.txt" VERBATIM)
+    DEPENDS ${ARGN} "${baseline}" "${CMAKE_SOURCE_DIR}/tools/port64/unit64.py" "${unitsdir}/../active_units.txt" "${P4_GEN}/rw_clean_units.txt" VERBATIM)
   set(${var} "${stamp}" PARENT_SCOPE)
 endfunction()
 set(P4_CENSUS_BASELINE)

@@ -180,8 +180,8 @@ void *p4_g2h_slow(uint32_t a)
 uint32_t p4_h2g_slow(const void *p)
 {
     if (!p) return 0;
-    /* a "pointer" below the first page is an offset: `&((T *)0)->member` (offsetof, rwLLLinkGetData) is a pointer arithmetic result on
-     * NULL; the guest address of it is the same number */
+    /* a "pointer" below the first page is an offset: address arithmetic on a null pointer at run time. The decomp's offsetof
+     * (`&((T *)0)->member`, at any offset) never comes here: the rewriter converts it as an integer (docs/port64.md, the null-offset rule) */
     if ((uintptr_t)p < 0x10000) return (uint32_t)(uintptr_t)p;
     for (int i = 0; i < n_windows; i++) {
         uintptr_t q = (uintptr_t)p - (uintptr_t)windows[i].host;

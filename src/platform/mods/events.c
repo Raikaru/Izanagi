@@ -7,8 +7,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-enum { FRAME, FIELD_ENTER, FIELD_LEAVE, BATTLE_START, BATTLE_END, MENU_OPEN, MENU_CLOSE, CALENDAR, SAVE, LOAD, EVENT_COUNT };
-static const char *const names[EVENT_COUNT] = {"frame_start", "field_enter", "field_leave", "battle_start", "battle_end", "menu_open", "menu_close", "calendar_advance", "save", "load"};
+enum { FRAME, FIELD_ENTER, FIELD_LEAVE, BATTLE_START, BATTLE_END, MENU_OPEN, MENU_CLOSE, CALENDAR, SAVE, LOAD, EXIT, EVENT_COUNT };
+static const char *const names[EVENT_COUNT] = {"frame_start", "field_enter", "field_leave", "battle_start", "battle_end", "menu_open", "menu_close", "calendar_advance", "save", "load", "exit"};
+_Static_assert(P4_MOD_FRAME_START_BIT == 1u << FRAME && P4_MOD_EXIT_BIT == 1u << EXIT, "scheduler event bits");
 struct P4ModEventSubscription {
     size_t owner;
     int event, enabled, removed;
@@ -18,6 +19,7 @@ struct P4ModEventSubscription {
 };
 static P4ModEventSubscription *subscriptions;
 uint32_t p4_mod_event_mask;
+uint32_t p4_mod_safe_point;
 static unsigned event_depth;
 static uint32_t field_root, field_ids;
 static int field_ready;
@@ -264,8 +266,38 @@ void p4_mod_events_clear(void)
     field_ready = 0;
     calendar_depth = 0;
 }
+static int (*published_notify)(void);
+static void (*quit_finish)(void);
+void p4_mod_events_set_published(int (*notify)(void)) { published_notify = notify; }
+static int (*services_pump)(uint32_t frame);
+void p4_mod_events_set_services(int (*pump)(uint32_t frame)) { services_pump = pump; }
 void p4_mod_event_frame(uint32_t frame)
 {
+    /* The scheduler's frame boundary is the game-thread safe point for queued
+     * work: durable-save publication notices first, then an orderly quit. */
+    if (p4_mod_safe_point & P4_MOD_SAFE_PUBLISHED) {
+        if (!published_notify || !published_notify()) p4_mod_safe_point &= ~P4_MOD_SAFE_PUBLISHED;
+    }
+    if (p4_mod_safe_point & P4_MOD_SAFE_SERVICES) {
+        if (!services_pump || !services_pump(frame)) p4_mod_safe_point &= ~P4_MOD_SAFE_SERVICES;
+    }
+    if (p4_mod_safe_point & P4_MOD_SAFE_EXIT) {
+        P4ModEvent quit = {NULL, 0, {{0}}};
+        emit(EXIT, &quit);
+        fprintf(stderr, "p4pc: orderly quit after the mod exit event\n");
+        fflush(stderr);
+        if (quit_finish) quit_finish();
+        exit(0);
+    }
+    if (!(p4_mod_event_mask & P4_MOD_FRAME_START_BIT)) return;
     P4ModEvent event = {NULL, 1, {{"frame", frame}}};
     emit(FRAME, &event);
+}
+int p4_mod_event_quit_request(void (*finish)(void))
+{
+    /* A second close request, or no exit subscriber, keeps the immediate exit. */
+    if (!(p4_mod_event_mask & P4_MOD_EXIT_BIT) || (p4_mod_safe_point & P4_MOD_SAFE_EXIT)) return 0;
+    quit_finish = finish;
+    p4_mod_safe_point |= P4_MOD_SAFE_EXIT;
+    return 1;
 }

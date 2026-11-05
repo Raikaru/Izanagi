@@ -22,6 +22,10 @@ int p4_mod_save_transport_written(const char *card,const char *slot,const char *
  * Stages every extension before the read can report success. No GP mutation. */
 int p4_mod_save_transport_loaded(const P4SaveTransaction *,const void *image,size_t size,char *error,size_t cap);
 void p4_mod_save_transport_load_abort(void);
+/* A complete native image that did not come from a card (the battle simulator's
+ * ENTRY) is staged untagged: no sidecar, so providers see no saved blocks. The
+ * native restore then proves and commits it exactly like a card load. */
+int p4_mod_save_transport_loaded_untagged(const void *image,size_t size,const char *label,char *error,size_t cap);
 int p4_mod_save_transport_restore(int32_t version,const void *payload,size_t size,char *error,size_t cap);
 void p4_mod_save_transport_restore_commit(void);
 int p4_mod_save_transport_reset(char *error,size_t cap);

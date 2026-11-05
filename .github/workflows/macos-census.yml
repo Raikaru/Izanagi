@@ -1,0 +1,68 @@
+# Scratch workflow (branch `rwclean-census` only, never in the private repo): measure the macOS rewriter census of this tree on both architectures.
+name: macos-census
+
+on:
+  push:
+    branches: [rwclean-census]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  census:
+    name: census ${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: arm64
+            runner: macos-latest
+            census: aarch64
+          - arch: x86_64
+            runner: macos-15-intel
+            census: x86_64
+    env:
+      DEPS: ${{ github.workspace }}/build/macos-deps
+      P4PC_DL_CACHE: ${{ github.workspace }}/build/dl-cache
+      P4PC_BUILD_CACHE_DIR: ${{ github.workspace }}/build/rewrite-cache
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+      - name: Ninja
+        run: |
+          python3 -m venv "$RUNNER_TEMP/venv"
+          "$RUNNER_TEMP/venv/bin/pip" install --quiet ninja
+          echo "$RUNNER_TEMP/venv/bin" >> "$GITHUB_PATH"
+          echo "P4PC_BUILD_TOOLCHAIN_ID=sha256:$({ cat ci/macos/build_deps.sh; xcrun --sdk macosx --show-sdk-version; uname -m; } | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_ENV"
+      - uses: actions/cache/restore@v4
+        with:
+          path: build/macos-deps
+          key: macos-deps-${{ matrix.arch }}-${{ hashFiles('ci/macos/build_deps.sh') }}
+      - name: Dependencies
+        run: sh ci/macos/build_deps.sh "$DEPS"
+      - uses: actions/cache/restore@v4
+        with:
+          path: build/rewrite-cache
+          key: macos-rewrite-${{ matrix.arch }}-${{ github.sha }}
+          restore-keys: macos-rewrite-${{ matrix.arch }}-
+      - name: Configure (census check off) and build the 64-bit mirror
+        run: |
+          sh ci/macos/configure.sh "$DEPS" build/macos -DP4_CENSUS_CHECK=OFF
+          cmake --build build/macos --target p4decomp64 -- -k 0
+      - name: Census refresh and diff
+        run: |
+          mkdir -p out
+          python3 tools/port64/unit64.py report --dir build/macos/gen/obj64/units --census-refresh out/port64macos_${{ matrix.census }}_census.txt \
+            --clang "$DEPS/llvm/bin/clang" --active-units build/macos/gen/obj64/active_units.txt | tail -n 5
+          diff -u config/port64macos_${{ matrix.census }}_census.txt out/port64macos_${{ matrix.census }}_census.txt > out/census.diff || true
+          wc -l out/census.diff; head -n 80 out/census.diff
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: census-${{ matrix.arch }}
+          path: out/*

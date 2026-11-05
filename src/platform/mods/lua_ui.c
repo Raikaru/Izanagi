@@ -1,17 +1,27 @@
 #include "native_bindings.h"
 #include "p4pc/mod_settings.h"
 #include "p4pc/settings_pages.h"
+#include "p4pc/mod_status.h"
+#include "p4pc/mod_services.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 typedef struct P4LuaUIPage {
-    struct P4LuaUIPage *next;
+    struct P4LuaUIPage *next, *unlisted_next;
     P4LuaMod *mod;
     char key[P4_SETTINGS_PAGE_KEY_MAX], title[P4_SETTINGS_PAGE_LABEL_MAX];
     uint64_t revision;
     int registered, attached, adjustable;
 } P4LuaUIPage;
+/* Registered unlisted pages of every mod: only their own mod may link them. */
+static P4LuaUIPage *unlisted_pages;
+static const P4LuaUIPage *unlisted_page(const char *key)
+{
+    for (const P4LuaUIPage *page = unlisted_pages; page; page = page->unlisted_next)
+        if (!strcmp(page->key, key)) return page;
+    return NULL;
+}
 enum Query { COUNT, ROW, FIND, ADJUST, DETAIL, OPENED, CLOSED };
 static const char *const callbacks[] = {"count", "row", "find", "adjust", "detail", "opened", "closed"};
 typedef struct UIInvocation {
@@ -81,6 +91,8 @@ static void parse_row(lua_State *L, P4LuaUIPage *page, P4SettingsPageRow *out)
     if (out->kind == P4_SETTINGS_PAGE_LINK) {
         out->target = text_field(L, table, "target", P4_SETTINGS_PAGE_KEY_MAX, 1, NULL);
         if (!out->target[0]) luaL_error(L, "native UI link target is empty");
+        const P4LuaUIPage *target = unlisted_page(out->target);
+        if (target && target->mod != page->mod) luaL_error(L, "native UI link to another mod's unlisted page");
     }
 }
 static int invoke_ui(lua_State *L)
@@ -240,6 +252,11 @@ static int create_page(lua_State *L, int detail)
         present[i] = function_field(L, callbacks[i], detail ? i == DETAIL : i == COUNT || i == ROW || i == FIND);
     if (detail ? (present[COUNT] || present[ROW] || present[FIND] || present[ADJUST]) : present[DETAIL])
         luaL_error(L, "native UI detail and row callbacks cannot be mixed");
+    /* listed=false (API 1.4): reachable through link rows only, no hub link. */
+    lua_rawgetfield(L, 1, "listed");
+    if (!lua_isnil(L, -1)) luaL_checktype(L, -1, LUA_TBOOLEAN);
+    int listed = lua_isnil(L, -1) || lua_toboolean(L, -1);
+    lua_pop(L, 1);
     if (mod->ui_reference == LUA_NOREF) {
         lua_newtable(L);
         mod->ui_reference = lua_ref(L, -1);
@@ -277,14 +294,18 @@ static int create_page(lua_State *L, int detail)
         luaL_error(L, "native UI page registration refused");
     }
     page->registered = 1;
-    if (p4_mod_settings_attach_page(mod, P4_MOD_SETTINGS_MOD, mod->info->id, page->key, page->title)) {
+    if (listed && p4_mod_settings_attach_page(mod, P4_MOD_SETTINGS_MOD, mod->info->id, page->key, page->title)) {
         if (p4_settings_page_unregister(page->key))
             p4_mod_failure(mod->owner, "Native UI attachment failed and its registered page could not be safely detached");
         page->registered = 0;
         forget_unregistered(L, page);
         luaL_error(L, "native Mods hub attachment refused");
     }
-    page->attached = 1;
+    page->attached = listed;
+    if (!listed) {
+        page->unlisted_next = unlisted_pages;
+        unlisted_pages = page;
+    }
     lua_pushvalue(L, userdata);
     return 1;
 }
@@ -293,6 +314,37 @@ static int new_detail(lua_State *L) { return create_page(L, 1); }
 static int go_back(lua_State *L) { p4_lua_require_mutation(L); lua_pushboolean(L, p4_settings_page_back() == 0); return 1; }
 static int close_page(lua_State *L) { p4_lua_require_mutation(L); lua_pushboolean(L, p4_settings_page_close() == 0); return 1; }
 static int active_page(lua_State *L) { lua_pushstring(L, p4_settings_page_active()); return 1; }
+/* p4.ui.status(text|{lines}|nil, placement?): replaces this mod's status rows.
+ * Returns false, keeping the previous rows, when a line is invalid or the
+ * rows do not fit beside earlier-loaded mods' rows. */
+static int set_status(lua_State *L)
+{
+    p4_lua_require_mutation(L);
+    P4LuaMod *mod = p4_luau_user(L);
+    const char *lines[P4_MOD_STATUS_ROWS];
+    int count = 0;
+    if (lua_type(L, 1) == LUA_TSTRING) {
+        lines[count++] = lua_tostring(L, 1);
+    } else if (lua_istable(L, 1)) {
+        int length = lua_objlen(L, 1);
+        if (length > P4_MOD_STATUS_ROWS) { lua_pushboolean(L, 0); return 1; }
+        for (int i = 1; i <= length; ++i) {
+            lua_rawgeti(L, 1, i);
+            if (lua_type(L, -1) != LUA_TSTRING) luaL_error(L, "p4.ui.status lines must be strings");
+            lines[count++] = lua_tostring(L, -1);
+            lua_pop(L, 1); /* The table keeps each string alive. */
+        }
+    } else if (!lua_isnoneornil(L, 1)) {
+        luaL_error(L, "p4.ui.status takes a string, a table of strings or nil");
+    }
+    const char *where = luaL_optstring(L, 2, "camp");
+    int placement = !strcmp(where, "camp") ? P4_MOD_STATUS_CAMP : !strcmp(where, "hud") ? P4_MOD_STATUS_HUD : -1;
+    if (placement < 0) luaL_error(L, "p4.ui.status placement must be \"camp\" or \"hud\"");
+    if (count && mod->ui_closing) luaL_error(L, "p4.ui.status after native UI shutdown");
+    lua_pushboolean(L, p4_mod_status_set((uint32_t)mod->owner, placement, lines, count) == 0);
+    p4_mod_hud_status_changed();
+    return 1;
+}
 void p4_lua_ui_initialize(lua_State *L)
 {
     P4LuaMod *mod = p4_luau_user(L);
@@ -309,7 +361,7 @@ void p4_lua_ui_initialize(lua_State *L)
     lua_setuserdatadtor(L, P4_LUA_TAG_UI_PAGE, page_destroyed);
     static const luaL_Reg methods[] = {
         {"page", new_page}, {"detail", new_detail}, {"back", go_back},
-        {"close", close_page}, {"active", active_page}, {NULL, NULL}
+        {"close", close_page}, {"active", active_page}, {"status", set_status}, {NULL, NULL}
     };
     p4_lua_library(L, methods);
     lua_setfield(L, -2, "ui");
@@ -317,7 +369,11 @@ void p4_lua_ui_initialize(lua_State *L)
 void p4_lua_ui_close(P4LuaMod *mod)
 {
     mod->ui_closing = 1;
+    p4_mod_status_set((uint32_t)mod->owner, P4_MOD_STATUS_CAMP, NULL, 0);
+    p4_mod_hud_status_changed();
     if (mod->ui_pages) {
+        for (P4LuaUIPage **slot = &unlisted_pages; *slot;)
+            if ((*slot)->mod == mod) *slot = (*slot)->unlisted_next; else slot = &(*slot)->unlisted_next;
         if (p4_mod_settings_detach_owner(mod) < 0)
             p4_mod_failure(mod->owner, "Native Mods hub links could not be safely detached before VM shutdown");
         for (P4LuaUIPage *page = mod->ui_pages; page; page = page->next) {

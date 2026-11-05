@@ -139,6 +139,7 @@ All rules work on the original types from the AST. `T` is the type clang prints 
 | `lv = v;` with `v` a pointer | `lv = p4_h2g(([v]))` | a copy slot to slot, an integer made into a pointer only to be stored, and 0/NULL need no conversion; function pointers: `p4_fn_h2g` |
 | `(T *)expr` with `expr` an integer; the same without a cast | `(T *)p4_g2h((u32)([expr]))` | `(u8 **)expr` also changes the cast type to `(u32 *)` |
 | `(u32)ptr`, `(s32)ptr`, an implicit pointer-to-integer conversion | `(u32)p4_h2g(([ptr]))`; folded away when `ptr` is itself a load from guest storage | |
+| `(s32)&((T *)0)->f` (the decomp's `MEMBER_OFFSET`, RenderWare's `rwLLLinkGetData`): an address computed from a null pointer constant through members, subscripts, no-op casts or `+`/`-` | `(s32)(unsigned long long)([expr])` | a byte offset into `T`, the same number on both sides since the rewritten layout is the i386 one; never `p4_h2g`, and `ptr + MEMBER_OFFSET(...)` is host pointer arithmetic, not a guest sum. Census rule `ptr2int-null-offset` |
 | `D_00887300`, `iGpffffba04` | `(*(T *)p4_g2h(0x00887300u))`, arrays `(*(T (*)[N])p4_g2h(...))` | retail-addressed data; pointer-typed data is `u32` |
 | `p++`, `p += n` on a guest-stored pointer | a statement expression: load, step by `n * sizeof(T)`, store | 2.3 |
 | `sizeof(T *)` | `4` | |
@@ -158,6 +159,17 @@ prev = ((struct KwlnTask *)p4_g2h((u32)(task->listPrev)));
 ```
 
 The first `task->listPrev` is a slot-to-slot copy, so it stays a `u32` assignment.
+
+**The null-offset rule.** The decomp's offsetof was first converted like any other pointer, `p4_h2g(&((T *)0)->f)`, and `p4_h2g_slow` gave the
+number back only below 64 KB (a "pointer" under the first page). A field past 64 KB faulted with `host pointer outside guest memory and every window
+stored as a guest address (0x1f2fc)`, or, without `P4_GUEST_CHECK`, read a wrong address: Shuffle Time pattern 3 (`btlShuffleSeq4Shuffle` 0037d840 and
+the free-card pick inlined in `btlShuffleSeq4Run` 0037da60, `BtlShuffleContext.pattern` +0x1F2FC) and pattern 4's tutorial (`btlShuffleSeq5Run`
+0037f6e0 phase 17, `flags` +0x1F2F4) on every 64-bit build, while i386 (identity conversions) was unaffected. The mirror has 2670 such conversions in
+194 units, 2555 of them added to a pointer (formerly guest sums); 15 in 4 units name an offset of 64 KB or more: the three Shuffle Time sites,
+`filerDrawDirectory` (00467880, the SDK file browser, `FilerTable.entryCount` +0x80F86) and 11 in `K_MapEditTask` (the map editor,
+`FldMapEditorWork` +0x1CD10/+0x1CD14). All of them are integer conversions now, so no generated code relies on that band. The fixture
+`tests/null_offset_rewrite_test.py` keeps an offset past 64 KB, and `shuffle_gate_*` ([testing](platform/testing.md#menu-and-battle-harnesses))
+runs every Shuffle Time pattern and variant to its end.
 
 ### 2.5 Function pointers and callbacks
 
@@ -362,6 +374,9 @@ check prints the first differences (`unit: rule X: baseline a, now b`); after re
 The counts that come from the layout oracle (`layout-asserts`, `record-without-oracle`) are the compiler's own record dump, so they depend on the clang major (19 and 23
 differ in `mdlManager.c` and `y_CmbCardEff.c` at the d19f9e22 pin): the baseline file is the full table of the CI compiler (`# clang-major: 23`, the llvm-mingw clang of the p4pc-ci image, which every land
 and nightly build uses) followed by `patch` sections that list only the units that differ for another supported major (19, a distribution clang on a developer machine).
+A refresh refuses to record a unit whose `record-without-oracle` count is higher than in the file it replaces (for that clang major): more records without
+the layout oracle means the oracle compile of that unit failed, a defect to fix rather than a baseline (2026-11-04: a Bionic `stdio.h` conflict broke
+`btlEffect.c`'s oracle and the Android refresh recorded 12 instead of 7, which every later check then accepted).
 A compiler of a major with no section fails the build with the command that reviews and adds one (`--census-refresh <file> --clang <that clang>` writes the patch); nothing is
 skipped silently. Only the units of the current build are compared (the build passes its unit list, `--active-units`): a `.census` left by a unit that is no longer compiled cannot stand in for it, and an active unit without one is an error. A missing selected baseline is a configure error, including Android; it must never silently disable the guard. `-DP4_CENSUS_CHECK=OFF` (a configure warning) skips it only for explicit experiments and still writes the active-unit list for reviewing a new baseline. AArch64 has its own (`config/port64a64_census.txt`, from the p4pc-ci-a64 image's clang 19); Android AArch64 uses `config/port64android_aarch64_census.txt`, reviewed with the NDK r27 clang 18. Android selection follows `ANDROID_ABI`, not the desktop architecture cache.
 

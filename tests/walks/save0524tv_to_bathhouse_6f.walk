@@ -1,4 +1,4 @@
-# From canonical story0524tv: use the real mixed Ice/Wind counters, recover in the field, then reach Hall 6 with native attackers and Senri Media; escape and save.
+# From canonical story0524tv: use the real mixed Ice/Wind counters and Senri Media rules, recover in the field, escape the stair route's groups to reach Hall 6; Goho-M and save.
 timeout:10000
 wait:140
 press:cross
@@ -119,25 +119,17 @@ wait:70
 press:circle
 wait:70
 log
-# The Vicious Ravens are Electric weak. This retained winning recipe uses neutral Garu and Chie's weapon, not a claimed Wind weakness.
+# The Vicious Ravens focus Yukiko. Yu Guards and casts Media for anyone under 110 HP; Yosuke's Garu and Chie's weapon
+# move one target right each turn.
 walk:shadow,350
 press:cross
 waitbtl:menu
 wait:600
 log
-battle:first1=circle,up,cross;first2=circle,down,cross,cross,cross;first3=circle,cross,cross;plan=cross,cross,right,cross;skip=0;delay=80
-# A full-stock Persona reward needs its real discard confirmation, not endless automatic card flips.
-waittask:shdPersonaStatusDraw
+battle:first1=circle,up,cross;plan1=circle,up,cross;first2=circle,down,cross,skill:14,cross,right,cross;plan2=circle,down,cross,skill:14,cross,right,cross;plan=circle,cross,right,cross;skip=0;delay=80
+battlerule:hp<110@1=circle,down,cross,skill:195,cross,cross,circle,circle,circle,up,cross
+waittask:battle:off
 battle:off
-wait:100
-press:cross
-wait:100
-press:cross
-wait:100
-# Select the newly offered Persona's discard action, preserving all six owned Personas.
-press:cross
-wait:100
-choose:1
 skipmsg
 wait:150
 waitmsg:closed
@@ -160,7 +152,7 @@ press:down
 wait:100
 press:cross
 wait:100
-# The game returns the fallen Yukiko to 1 HP in the field. Four real Media casts heal her and Yosuke, spending 28 SP and no Revival Bead.
+# Four Media presses heal the party to full; casts at full HP are refused, so the HP checks do not depend on the fight.
 press:cross
 wait:100
 press:cross
@@ -169,8 +161,9 @@ press:cross
 wait:100
 press:cross
 wait:100
-waitstate:0x00796e5c==0x007400db
-waitstate:0x00796f6c==0x008a00c0
+waitstate16:0x00796e5c==219
+waitstate16:0x00796ee4==234
+waitstate16:0x00796f6c==192
 press:circle
 wait:70
 press:circle
@@ -180,153 +173,13 @@ wait:70
 press:circle
 wait:70
 log
-# Reopen the next battle tactics roster and prepare Direct Commands before the late physical-burst corridor.
-walk:shadow,350
-press:cross
-waitbtl:menu
-wait:600
-press:circle
-wait:100
-press:up
-wait:20
-press:up
-wait:20
-press:cross
-wait:600
-log
-# The real roster remembers Chie. Set Chie, Yosuke and then Yukiko to Direct Commands.
-press:cross
-wait:600
-press:down
-wait:20
-press:down
-wait:20
-press:down
-wait:20
-press:down
-wait:20
-press:cross
-wait:600
-press:up
-wait:20
-press:cross
-wait:600
-press:down
-wait:20
-press:down
-wait:20
-press:down
-wait:20
-press:down
-wait:20
-press:cross
-wait:600
-press:down
-wait:20
-press:down
-wait:20
-press:cross
-wait:600
-press:down
-wait:20
-press:down
-wait:20
-press:down
-wait:20
-press:down
-wait:20
-press:cross
-wait:600
-press:circle
-wait:100
-waitstate:0x00796e64==4
-waitstate:0x00796eec==4
-waitstate:0x00796f74==4
-# Three Iron Dice have no Wind weakness. Use Senri Media, both physical weapons and Yukiko's Guard; refuse full-HP healing legally.
-battle:first1=circle,down,cross,cross,cross,circle,circle,circle,cross,cross;first2=circle,cross;first3=circle,cross;first4=circle,up,cross;plan=cross;skip=0;delay=80
-waittask:battle:off
-skipmsg
-wait:150
-waitmsg:closed
-waitcontrol:on
-battle:off
-log
-press:triangle
-wait:100
-# Spend one real Yukiko Media after the third victory before continuing the long corridor.
-press:cross
-wait:100
-press:down
-wait:20
-press:down
-wait:20
-press:down
-wait:20
-press:cross
-wait:100
-press:down
-wait:100
-press:cross
-wait:100
-press:cross
-wait:100
-press:circle
-wait:70
-press:circle
-wait:70
-press:circle
-wait:70
-press:circle
-wait:70
-log
-# Attack the next Shadow deliberately instead of accepting the Hand/two-Beast corridor ambush and its Rebellion/Rampage burst.
-walk:shadow,350
-press:cross
-waitbtl:menu
-wait:600
-# Escape needs search turns. Cancel "Be patient" to a real Guard, and keep every companion guarding against critical hits.
-battle:first1=circle,down,down,down,down,cross,circle,circle,circle,up,cross;first2=circle,up,cross;first3=circle,up,cross;first4=circle,up,cross;plan=circle,down,down,down,down,cross,circle,circle,circle,up,cross;skip=0;delay=80
-waittask:battle:off
-skipmsg
-wait:150
-waitmsg:closed
-waitcontrol:on
-battle:off
-log
-# The escape still costs real HP. Spend two owned Yukiko Media casts before the remaining corridor encounters.
-press:triangle
-wait:100
-press:cross
-wait:100
-press:down
-wait:20
-press:down
-wait:20
-press:down
-wait:20
-press:cross
-wait:100
-press:down
-wait:100
-press:cross
-wait:100
-press:cross
-wait:100
-press:cross
-wait:100
-press:circle
-wait:70
-press:circle
-wait:70
-press:circle
-wait:70
-press:circle
-wait:70
-log
-# Retain that Escape / Guard plan for incidental groups on the actual upstairs route.
+# Escape any group on the upstairs route (the Dancing Hand and Nizam Beasts' Rebellion/Rampage burst outlasts a fight):
+# Yu chooses Escape and Guards while it asks for patience, casting Media first for anyone under 110 HP;
+# Yosuke and Chie Guard, Yukiko stays Heal/Support.
 timeout:60000
 battleskip:on
-battle:first1=circle,down,down,down,down,cross,circle,circle,circle,up,cross;first2=circle,up,cross;first3=circle,up,cross;first4=circle,up,cross;plan=circle,down,down,down,down,cross,circle,circle,circle,up,cross;skip=0;delay=80
+battle:first1=circle,down,down,down,down,cross,circle,circle,circle,up,cross;first2=circle,up,cross;first3=circle,up,cross;plan=circle,down,down,down,down,cross,circle,circle,circle,up,cross;skip=0;delay=80
+battlerule:hp<110@1=circle,down,cross,skill:195,cross,cross,circle,circle,circle,up,cross
 walk:goal,60
 press:cross
 skipmsg

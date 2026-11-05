@@ -1,6 +1,7 @@
 /* P4PC_DUMP_RAM_AT=<flip>[,<flip>...] with P4PC_DUMP_RAM=<prefix>: writes the PS2 RAM (0x00100000..0x02000000, 31 MB) at those flips
  * to <prefix>_<flip>.bin, to diff two builds' game state at the same flip (tools/ram_diff.py; src/viewer/p4pc_viewer.c does the same
- * after a render). Called from the flip with the flip count, before the flip's present. Host pointers in the image differ by build. */
+ * after a render). Called from the flip with the flip count, before the flip's present. Host pointers in the image differ by build.
+ * One run's RAM dumps (these and the captured-frame dumps of p4gl_context.c) stop at P4PC_DUMP_RAM_MAX_MB, 2048 by default. */
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -233,6 +234,28 @@ static void field_entry_dump(unsigned flip, const char *path, int capture)
             (unsigned)field, (unsigned)room, (unsigned)event_word(0x00764290u), path);
 }
 
+/* The run refuses to continue past its RAM-dump volume: on 2026-11-03 timed dumps wrote 39 GB to C: in half an hour. Exits before
+ * writing the dump that would pass P4PC_DUMP_RAM_MAX_MB (default 2048 MB, about 66 dumps). */
+void p4pc_dump_ram_admit(const char *path)
+{
+    static unsigned long long used, cap;
+    static int init;
+    const unsigned long long size = 0x02000000u - 0x00100000u;
+
+    if (!init) {
+        const char *value = getenv("P4PC_DUMP_RAM_MAX_MB");
+        init = 1;
+        cap = (value != NULL && *value != '\0' ? strtoull(value, NULL, 10) : 2048ull) << 20;
+    }
+    if (used + size > cap) {
+        fprintf(stderr, "p4pc: refusing RAM dump %s: this run already wrote %llu dumps (%llu MB) and the next would pass "
+                        "P4PC_DUMP_RAM_MAX_MB=%llu; stopping. Dump fewer flips, delete dumps once read, or raise the cap "
+                        "deliberately.\n", path, used / size, used >> 20, cap >> 20);
+        exit(1);
+    }
+    used += size;
+}
+
 static unsigned sRequestedDump;
 
 void p4pc_state_dump_request(unsigned flip)
@@ -279,6 +302,7 @@ void p4pc_state_dump_flip(unsigned flip)
         if (entry_path && *entry_path) field_entry_dump(flip, entry_path, 1);
         p4pc_fpu_state_log("at the dump");
         snprintf(path, sizeof path, "%s_%u.bin", prefix, flip);
+        p4pc_dump_ram_admit(path);
         f = fopen(path, "wb");
         if (f != NULL) {
             fwrite(P4_G2H(0x00100000u), 1, 0x02000000u - 0x00100000u, f);

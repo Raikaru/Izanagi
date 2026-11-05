@@ -226,6 +226,8 @@ int p4gl_gl_load(void);
 const char *p4gl_gate_limit(const char *envName);
 /* Enables (1) or drops (0) glClear / glDrawArrays / glDrawElements; P4PC_TURBO=2 (p4gl_context.c). Call after p4gl_gl_load. */
 void p4gl_gl_set_draw(int on);
+/* Drop clears/draws inside hidden ordering-table scopes (p4gl_im2d.c). */
+void p4gl_gl_suppress_draw(int suppressed);
 /* 0 while P4PC_TURBO=2 drops the draw calls: nothing was drawn, so a copy of the framebuffer would copy the same stale pixels. */
 int p4gl_gl_draw_enabled(void);
 /* Whether a draw needs CPU/GL preparation. Undrawn turbo frames can omit port-only draw work,

@@ -76,6 +76,17 @@ class NativePackages(unittest.TestCase):
         out, _ = self.run_mode("admit-unknown")
         self.assertIn("unavailable native capability", out)
 
+    def test_settings_are_mod_only_and_admitted_from_the_store(self):
+        for path in (self.mods / "high/mod.ini", self.packs / "low/pack.ini"):
+            header = path.read_text().split("[content]", 1)[0].replace("api=1.1", "api=1.2")
+            path.write_text(header + "[setting flag]\nkind=toggle\nlabel=FLAG\napply=restart\n", encoding="utf-8")
+        store = self.root / "settings/mod-settings"
+        store.mkdir(parents=True)
+        (store / "mod.high.ini").write_text("flag = on\n", encoding="ascii")
+        out, _ = self.run_mode("settings-kinds")
+        self.assertIn("refused=pack.low reason=[setting] sections are for mods, not engine packs", out)
+        self.assertIn("setting kinds: PASS", out)
+
     def test_mandatory_prepare_io_refusal_renews_snapshot_and_keeps_old_pinned_work_immutable(self):
         out, _ = self.run_mode("admit-prepare")
         self.assertIn("Fixture format header is not P4HD", out)

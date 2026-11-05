@@ -1,0 +1,28 @@
+{
+ "_doc": "RenderWare clean layer subsystems (docs/rw_clean.md). Each subsystem lists the decomp units it replaces (units), the port transcriptions it retires (port_sources) and its clean sources (sources, src/rwclean). CMake P4_RW_CLEAN selects subsystems (empty: the default list below; none: none); the census baselines are those of the default. A clean source's FUN_ markers make it the only owner of those retail addresses: the mirror strips the definitions at them from every other compiled unit.",
+ "default": ["math"],
+ "subsystems": {
+  "math": {
+   "units": [
+    "src/renderware/plcore/bavector.c",
+    "src/renderware/plcore/bamatrix.c",
+    "src/renderware/plcore/babinmtx.c",
+    "src/renderware/plcore/bacolor.c",
+    "src/renderware/core/babbox.c"
+   ],
+   "port_sources": [
+    "src/platform/rw_normalize2.c",
+    "src/platform/rw_normalize3.c",
+    "src/platform/rw_skytran.c"
+   ],
+   "sources": [
+    "src/rwclean/rwc_vector.c",
+    "src/rwclean/rwc_matrix.c",
+    "src/rwclean/rwc_vu0.c",
+    "src/rwclean/rwc_bbox.c",
+    "src/rwclean/rwc_color.c",
+    "src/rwclean/rwc_quat.c"
+   ]
+  }
+ }
+}

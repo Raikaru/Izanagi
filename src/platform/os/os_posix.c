@@ -45,6 +45,41 @@ void (*p4_os_fault_note)(uintptr_t addr);
 static int crash_fd = -1;
 static volatile sig_atomic_t crashing;
 static _Thread_local unsigned char crash_stack[64 * 1024];
+static int marker_fd = -1;
+static char marker_bytes[2][P4_OS_CRASH_MARKER_CAP];
+static size_t marker_length[2];
+static volatile sig_atomic_t marker_slot;
+
+int p4_os_crash_marker_open(const char *path)
+{
+    p4_os_crash_marker_close();
+    marker_length[0] = marker_length[1] = 0;
+    marker_fd = open(path, O_RDWR | O_CREAT | O_TRUNC | O_CLOEXEC, 0600);
+    return marker_fd >= 0 ? 0 : -1;
+}
+int p4_os_crash_marker_set(const char *bytes, size_t length)
+{
+    if (marker_fd < 0 || length > P4_OS_CRASH_MARKER_CAP) return -1;
+    sig_atomic_t next = !marker_slot;
+    memcpy(marker_bytes[next], bytes, length);
+    marker_length[next] = length;
+    __atomic_signal_fence(__ATOMIC_SEQ_CST);
+    marker_slot = next;
+    return 0;
+}
+/* Async-signal-safe: pwrite and fsync on a descriptor opened before the fault. */
+void p4_os_crash_marker_write(void)
+{
+    sig_atomic_t slot = marker_slot;
+    if (marker_fd < 0 || !marker_length[slot]) return;
+    if (pwrite(marker_fd, marker_bytes[slot], marker_length[slot], 0) == (ssize_t)marker_length[slot])
+        fsync(marker_fd);
+}
+void p4_os_crash_marker_close(void)
+{
+    if (marker_fd >= 0) close(marker_fd);
+    marker_fd = -1;
+}
 
 static void crash_address(const char *kind, unsigned index, uintptr_t pc)
 {
@@ -77,6 +112,8 @@ static void crash_handler(int sig, siginfo_t *info, void *context)
     static const char prefix[] = "p4pc: fatal signal; writing native crash report\n";
     if (crashing) _exit(128 + sig);
     crashing = 1;
+    /* The lifecycle crash marker first: it is the record a later launch trusts. */
+    p4_os_crash_marker_write();
     /* Publish a minimal record before best-effort libc/unwinder diagnostics. Neither
      * backtrace nor the guest callback is guaranteed async-signal-safe after heap damage. */
     if (crash_fd >= 0) {
@@ -413,6 +450,7 @@ int p4_os_mkdir(const char *path) { return mkdir(path, 0777); }
 int p4_os_rmdir(const char *path) { return rmdir(path); }
 int p4_os_rename(const char *from, const char *to) { return rename(from, to); }
 int p4_os_replace_file(const char *from, const char *to) { return rename(from, to); }
+int p4_os_sync_file(FILE *stream) { return fflush(stream) || fsync(fileno(stream)) ? -1 : 0; }
 
 int p4_os_directory_lock(const char *path, uintptr_t token[2]) {
     if (!path || !token || token[0] || token[1]) { errno = EINVAL; return -1; }

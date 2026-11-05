@@ -177,6 +177,31 @@ void p4pc_lockstep_init(void) {
     p4pc_pad_set_packet_hook(pad);
     p4pc_pad_set_key_hook(hotkey);
 }
+int p4pc_lockstep_flush(void) {
+    int failed=0;
+    if (sRecord && fflush(sRecord)) failed=1;
+    if (sStates && fflush(sStates)) failed=1;
+    return failed ? -1 : 0;
+}
+int p4pc_lockstep_fork_reopen(const char *dir) {
+    static char forkDir[1024];
+    char path[1100];
+    if (!sActive || sReplay || sAligned || !sDir || strlen(dir)>=sizeof forkDir) return -1;
+    if (!SDL_CreateDirectory(dir)) return -1;
+    if (sRecord) {
+        fclose(sRecord); /* flushed before the fork: only this process's descriptor closes */
+        snprintf(path,sizeof path,"%s/input.p4input",dir);
+        if (!(sRecord=fopen(path,"wbx"))) return -1;
+    }
+    if (sStates) {
+        fclose(sStates);
+        snprintf(path,sizeof path,"%s/port-states.tsv",dir);
+        if (!(sStates=fopen(path,"wbx"))) return -1;
+    }
+    strcpy(forkDir,dir);
+    sDir=forkDir;
+    return 0;
+}
 int p4pc_lockstep_draw_active(void) { return sActive && !sScenarioReplay; }
 void p4pc_lockstep_drawline(const char *line) {
     const char *error;

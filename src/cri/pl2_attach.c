@@ -23,7 +23,7 @@ extern void func_004c6a98(const char *msg);                              /* ADXE
 extern void func_004cc9d0(void);                                         /* ADXM lock */
 extern void func_004cc9e8(void);                                         /* ADXM unlock */
 extern void func_004d4308(void *adxt);                                   /* ADXT_Stop */
-extern void *ADXT_Create(int32_t maxnch, void *work, int32_t size);
+extern void *adxt_Create(int32_t maxnch, void *work, int32_t size);        /* src/cri/adxt_wrap.c */
 extern void *func_0043f9c8(void *d, int32_t c, uint32_t n);              /* memset */
 extern int32_t func_0043f778(const void *a, const void *b, uint32_t n);  /* memcmp */
 
@@ -221,10 +221,10 @@ void func_004eb180(uint8_t *adxt, int32_t a, int32_t b)
 }
 
 /* 0x004d3c08: ADXT create variant with the encoder: the first 1024 bytes of the work area are the
- * encoder's, the rest is a stereo ADXT's (ADXT_Create(2, ...)). */
+ * encoder's, the rest is a stereo ADXT's (adxt_Create(2, ...), 0x004d38a8). */
 void *func_004d3c08(void *work, int32_t size)
 {
-    void *adxt = ADXT_Create(2, (uint8_t *)work + 1024, size - 1024);
+    void *adxt = adxt_Create(2, (uint8_t *)work + 1024, size - 1024);
 
     if (adxt) {
         func_004eb020(adxt, work, 1024);

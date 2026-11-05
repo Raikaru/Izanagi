@@ -11,6 +11,9 @@
 #include <stdio.h>
 #include <string.h>
 
+/* The published enemy-bank limit; retail until a fixture expands it. */
+uint32_t p4_game_enemies_native_limit(void) { return 336; }
+
 static int16_t equipped = 9;
 static unsigned retail_equipment_reads;
 static P4TestElementSkillInputs inputs;
@@ -194,6 +197,22 @@ int main(void)
     assert(p4_game_elements_resolve_action(tables, skills, items, NULL, 11, P4_ACTION_COMPONENT_STATUS, 0x80020u, &result) == P4_TABLE_OK && result.element_id == 6);
     assert(p4_game_elements_resolve_action(tables, skills, items, NULL, 11, P4_ACTION_COMPONENT_INSTANT_KO, 0x80000u, &result) == P4_TABLE_OK && result.element_id == 6);
     assert(p4_game_elements_resolve_action(tables, skills, items, NULL, 577, P4_ACTION_COMPONENT_INSTANT_KO, 0, &result) == P4_TABLE_INVALID);
+    /* No skill (skill -1): 001F6930's recovery chance maps the payload alone,
+     * as datCalcStatusElement does, without a skill definition. */
+    assert(p4_game_elements_resolve_action(tables, skills, items, NULL, 0xffff, P4_ACTION_COMPONENT_STATUS, 0x4u, &result) == P4_TABLE_OK);
+    assert(result.valid && result.element_id == 10 && result.channel_id == P4_CHANNEL_STATUS);
+    assert(p4_game_elements_resolve_action(tables, skills, items, NULL, 0xffff, P4_ACTION_COMPONENT_INSTANT_KO, 0x80000u, &result) == P4_TABLE_OK);
+    assert(result.element_id == 7 && result.channel_id == P4_CHANNEL_INSTANT_KO);
+    assert(p4_game_elements_resolve_action(tables, skills, items, NULL, 0xffff, P4_ACTION_COMPONENT_STATUS, 0x6u, &result) == P4_TABLE_INVALID);
+    assert(p4_game_elements_resolve_action(tables, skills, items, NULL, 0xffff, P4_ACTION_COMPONENT_INSTANT_KO, 0x80004u, &result) == P4_TABLE_INVALID);
+    assert(p4_game_elements_resolve_action(tables, skills, items, NULL, 0xffff, P4_ACTION_COMPONENT_DAMAGE, 0, &result) == P4_TABLE_INVALID);
+    {
+        P4GameActionFrame recovery;
+        assert(p4_game_elements_resolve_action_frame(tables, skills, items, NULL, 0xffff, P4_ACTION_COMPONENT_STATUS,
+            0x8u, 0, &recovery) == P4_TABLE_OK);
+        assert(recovery.skill_id == 0xffff && recovery.source_kind == P4_ACTION_ELEMENT_SKILL && !recovery.owned_binding);
+        assert(recovery.element.element_id == 15 && recovery.element.channel_id == P4_CHANNEL_STATUS);
+    }
     assert(p4_game_elements_resolve_action(tables, skills, items, NULL, 578, P4_ACTION_COMPONENT_DAMAGE, 0, &result) == P4_TABLE_INVALID);
     assert(p4_game_elements_resolve_action(tables, skills, items, NULL, 12, P4_ACTION_COMPONENT_DAMAGE, 0, &result) == P4_TABLE_OK && !result.valid);
     assert(p4_game_elements_resolve_action(tables, skills, items, NULL, 13, P4_ACTION_COMPONENT_DAMAGE, 0, &result) == P4_TABLE_INVALID);

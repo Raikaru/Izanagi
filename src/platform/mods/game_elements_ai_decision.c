@@ -111,7 +111,7 @@ int p4_game_elements_ai_native_decision_group(void *source, uint32_t row,
         if (!(permission & (1u << index))) continue;
         if (carrier->table_work_guest) {
             int allowed = p4_game_elements_ai_vm_candidate_allowed(P4_G2H(carrier->table_work_guest),
-                source, NULL, &carrier->available[index].frame);
+                source, &carrier->available[index].frame);
             if (allowed < 0) return allowed;
             if (!allowed) continue;
         }
@@ -121,7 +121,7 @@ int p4_game_elements_ai_native_decision_group(void *source, uint32_t row,
     uint32_t zero_allowed = !has_weight && (permission & 1u);
     if (zero_allowed && carrier->table_work_guest) {
         int allowed = p4_game_elements_ai_vm_candidate_allowed(P4_G2H(carrier->table_work_guest),
-            source, NULL, &carrier->available[0].frame);
+            source, &carrier->available[0].frame);
         if (allowed < 0) return allowed;
         zero_allowed = !!allowed;
     }

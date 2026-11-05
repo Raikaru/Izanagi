@@ -15,7 +15,7 @@ sys.argv = [sys.argv[0], *sys.argv[separator + 1:]]
 
 class TableSourceBoot(unittest.TestCase):
     def test_declared_source_lifecycle(self):
-        for mode in ("empty", "good", "families", "item-only", "skill-only", "bound-category", "unbound-category", "bad-format", "zero-revision", "bad-schema",
+        for mode in ("empty", "good", "gated-on", "gated-off", "gated-live", "families", "item-only", "skill-only", "bound-category", "unbound-category", "bad-format", "zero-revision", "bad-schema",
                      "outside", "missing", "unknown-record", "truncated", "split-dtd"):
             with self.subTest(mode=mode), tempfile.TemporaryDirectory(prefix="p4-table-boot-") as temporary:
                 root = Path(temporary)
@@ -25,10 +25,17 @@ class TableSourceBoot(unittest.TestCase):
                 revision = "0" if mode == "zero-revision" else "37"
                 schema = "2" if mode == "bad-schema" else "1"
                 filename = "../outside.xml" if mode == "outside" else "missing.xml" if mode == "missing" else "tables.xml"
+                gate = ""
+                if mode.startswith("gated-"):
+                    gate = ("[setting split]\nkind=toggle\nlabel=SPLIT\n"
+                            f"default={'off' if mode == 'gated-off' else 'on'}\n"
+                            f"apply={'live' if mode == 'gated-live' else 'restart'}\n")
                 (package / "mod.ini").write_text(
-                    "[mod]\nid=source.owner\nname=Synthetic tables\nversion=1.2.3\napi=1.1\npriority=0\norder=0\n"
-                    f"[table-source xml:combat]\nfile={filename}\nformat={format_name}\nschema={schema}\nrevision={revision}\n",
-                    encoding="utf-8",
+                    "[mod]\nid=source.owner\nname=Synthetic tables\nversion=1.2.3\n"
+                    f"api={'1.2' if gate else '1.1'}\npriority=0\norder=0\n" + gate +
+                    f"[table-source xml:combat]\nfile={filename}\nformat={format_name}\nschema={schema}\nrevision={revision}\n"
+                    + ("when=split\n" if gate else ""),
+                    encoding="utf-8", newline="\n",
                 )
                 xml = " " * 5000 + '<p4-tables schema="1"><element id="19" flags="7" family="0" order="0" key="xml:leaf" display-name="Synthetic" short-name="Test"/></p4-tables>'
                 if mode == "families":
@@ -79,6 +86,13 @@ class TableSourceBoot(unittest.TestCase):
                         '<string table="4" id="6" role="1" bytes="4400"/>'
                         '</p4-tables>'
                     )
+                elif mode == "gated-off":
+                    # A retail-row would need the UNIT input at seal; a gated-off
+                    # section must be skipped before the builder ever seals it.
+                    xml = xml.removesuffix("</p4-tables>") + (
+                        '<affinity kind="1" entity="1" profile="1" element="19" channel="0" '
+                        'retail-row="1" retail-element="0"/></p4-tables>'
+                    )
                 if mode == "unknown-record":
                     xml = '<p4-tables schema="1"><not-a-table/></p4-tables>'
                 elif mode == "truncated":
@@ -91,7 +105,7 @@ class TableSourceBoot(unittest.TestCase):
                                    P4PC_INPUT="script", P4PC_CONFIG="none", SDL_AUDIODRIVER="dummy")
                 environment.pop("P4PC_OVERRIDE_DIR", None)
                 environment.pop("P4PC_ISO", None)
-                if mode in ("good", "families", "item-only", "skill-only", "bound-category", "unbound-category"):
+                if mode in ("good", "gated-on", "families", "item-only", "skill-only", "bound-category", "unbound-category"):
                     image = root / "inputs.iso"
                     image.write_bytes(input_disc(effective_ai=True))
                     environment["P4PC_ISO"] = str(image)

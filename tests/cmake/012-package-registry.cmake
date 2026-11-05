@@ -2,6 +2,7 @@
 add_executable(package_registry_test package_registry_test.c
   "${CMAKE_SOURCE_DIR}/src/platform/mods/package_registry.c"
   "${CMAKE_SOURCE_DIR}/src/platform/mods/package_memory.c"
+  "${CMAKE_SOURCE_DIR}/src/platform/mods/mod_setting_store.c"
   "${CMAKE_SOURCE_DIR}/src/platform/mods/compendium.c"
   "${CMAKE_SOURCE_DIR}/src/platform/mods/file_index.c"
   "${CMAKE_SOURCE_DIR}/third_party/yxml/yxml.c"

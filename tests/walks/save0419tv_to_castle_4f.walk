@@ -23,8 +23,9 @@ skipmsg
 waitstep:8
 log
 timeout:60000
-# Positive King repels Electric and resists physical; its three Secret Bambinos are Electric weak.
-# Use a brief reinforcement-knockdown phase, then weapons with Yosuke's Heal/Support.
+# Positive King (79) repels Electric and resists physical and summons Electric-weak Secret Bambinos (58).
+# Set Yosuke and Chie to Direct Commands. Yu's Zio keeps a Bambino down while Yosuke's Garu and Chie's weapon
+# kill the King; after its defeat all three turn on the Bambinos. Yosuke's Dia covers anyone under 70 HP.
 battleskip:on
 plan:on
 walk:shadow,250
@@ -47,19 +48,33 @@ press:down
 wait:20
 press:down
 wait:20
+press:down
+wait:20
+press:cross
+wait:100
+press:down
+wait:20
+press:cross
+wait:600
+press:down
+wait:20
+press:down
+wait:20
+press:down
+wait:20
+press:down
+wait:20
 press:cross
 wait:100
 press:circle
 wait:100
-# Reset to Attack, select Skill, and rotate Zio targets during the short opening.
-# Do not leave this elemental plan running after the weak reinforcements are gone.
-press:circle
-wait:100
-press:down
-wait:100
-battle:first=cross,cross,right,cross;plan=cross,cross,right,cross;skip=0;delay=80
-wait:2200
-battle:first1=circle;plan=cross,cross,cross;skip=0;delay=80
+waitstate:0x00796e64==4
+waitstate:0x00796eec==4
+battle:first1=circle,down,cross,skill:39,cross,cross,circle,circle,circle,cross,cross;plan1=circle,down,cross,skill:39,cross,cross,circle,circle,circle,cross,cross;first2=circle,down,cross,skill:14,cross,cross,circle,circle,circle,cross,cross;plan2=circle,down,cross,skill:14,cross,cross,circle,circle,circle,cross,cross;plan=circle,cross,cross;skip=0;delay=40;target1=58;target2=79;target3=79
+battlerule:hp<70@2=circle,down,cross,skill:192,cross,cross,circle,circle,circle,cross,cross
+waitbtl:dead:79
+battle:first1=circle,down,cross,skill:39,cross,cross,circle,circle,circle,cross,cross;plan1=circle,down,cross,skill:39,cross,cross,circle,circle,circle,cross,cross;first2=circle,down,cross,skill:14,cross,cross,circle,circle,circle,cross,cross;plan2=circle,down,cross,skill:14,cross,cross,circle,circle,circle,cross,cross;plan=circle,cross,cross;skip=0;delay=40;target1=58;target2=58;target3=58
+battlerule:hp<70@2=circle,down,cross,skill:192,cross,cross,circle,circle,circle,cross,cross
 waittask:battle:off
 skipmsg
 log

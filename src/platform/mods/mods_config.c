@@ -1,4 +1,6 @@
 #include "p4pc/mods.h"
+#include "p4pc/mod_setting_store.h"
+#include "p4pc/mod_lifecycle.h"
 #include "../config/p4cfg.h"
 #include "p4pc/os.h"
 #include <errno.h>
@@ -24,9 +26,32 @@ static const char *configured_root(char path[1200])
     memcpy(path + base, "mods", sizeof "mods");
     return path;
 }
+/* Per-mod settings live beside p4pc.ini; without a settings file (P4PC_CONFIG=none)
+ * they stay at their declared defaults and writes are refused. */
+static void settings_root(void)
+{
+    const char *config = p4cfg_path();
+    char directory[1200];
+    if (!config || strlen(config) >= sizeof directory) {
+        p4_mod_setting_store_root(NULL);
+        p4_mod_lifecycle_root(NULL);
+        return;
+    }
+    strcpy(directory, config);
+    char *slash = strrchr(directory, '/'), *back = strrchr(directory, '\\');
+    if (back && (!slash || back > slash)) slash = back;
+    if (slash) *slash = 0;
+    else strcpy(directory, ".");
+    if (p4_mod_setting_store_root(directory[0] ? directory : "/"))
+        fprintf(stderr, "p4pc: mods: cannot use the settings directory for mod settings\n");
+    /* The lifecycle session lives beside them; nothing is written until a mod asks. */
+    if (p4_mod_lifecycle_root(directory[0] ? directory : "/"))
+        fprintf(stderr, "p4pc: mods: cannot use the settings directory for mod lifecycle records\n");
+}
 int p4_mods_configured_installations_scan(P4PackageInstallationVisitor visitor, void *user)
 {
     p4cfg_load();
+    settings_root();
     char path[1200];
     const char *root = configured_root(path);
     if (!root) return -1;
@@ -64,6 +89,7 @@ int p4_mods_init(void)
         fprintf(stderr, "p4pc: mods: automation requires P4PC_MODS=0\n");
         return -1;
     }
+    settings_root();
     char path[1200];
     const char *root = configured_root(path);
     if (!root || p4_mods_stage(root, enabled)) return -1;

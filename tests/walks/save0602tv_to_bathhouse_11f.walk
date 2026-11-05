@@ -28,36 +28,12 @@ waitstep:30
 log
 battleskip:on
 plan:on
+# Each engagement escapes with one real Vanish Ball (0x317), chosen by item ID at Yu's own first command and
+# confirmed on its TARGET; Direct Commands companions who act first Guard. The driver dismisses the zero-reward result.
+battle:first1=circle,down,down,down,cross,item:0x317,cross,cross;plan1=circle,down,down,down,cross,item:0x317,cross,cross;plan=circle,up,cross;skip=0;delay=80
 walk:shadow,250
 press:cross:30
-waitbtl:menu
-# Open Item from the actual first command; do not assume a remembered inventory row.
-press:circle
-wait:100
-press:down
-wait:20
-press:down
-wait:20
-press:down
-wait:20
-press:cross
-wait:600
-press:down
-wait:20
-press:down
-wait:20
-press:down
-wait:20
-press:down
-wait:20
-log
-# Use the selected real Vanish Ball; the next wait requires actual escape completion.
-press:cross
-# Even an all-party escape item has a real TARGET confirmation.
-wait:100
-press:cross
-# Let the battle driver dismiss the actual zero-reward result before resuming field input.
-battle:plan=cross;skip=0;delay=80
+waittask:battle
 waittask:battle:off
 battle:off
 skipmsg
@@ -116,24 +92,10 @@ log
 # Approach the measured route shadow 0x465; spend one owned ball and require the actual remaining count 4.
 battleskip:on
 plan:on
+battle:first1=circle,down,down,down,cross,item:0x317,cross,cross;plan1=circle,down,down,down,cross,item:0x317,cross,cross;plan=circle,up,cross;skip=0;delay=80
 walk:unit:0x465,250
 press:cross:30
-waitbtl:menu
-press:circle
-wait:100
-press:down
-wait:20
-press:down
-wait:20
-press:down
-wait:20
-press:cross
-wait:600
-# Vanish Ball is genuinely remembered; confirm selection and its real TARGET.
-press:cross
-wait:100
-press:cross
-battle:plan=cross;skip=0;delay=80
+waittask:battle
 waittask:battle:off
 battle:off
 skipmsg
@@ -193,24 +155,10 @@ log
 # Approach the measured route shadow 0x469; spend one owned ball and require the actual remaining count 3.
 battleskip:on
 plan:on
+battle:first1=circle,down,down,down,cross,item:0x317,cross,cross;plan1=circle,down,down,down,cross,item:0x317,cross,cross;plan=circle,up,cross;skip=0;delay=80
 walk:unit:0x469,250
 press:cross:30
-waitbtl:menu
-press:circle
-wait:100
-press:down
-wait:20
-press:down
-wait:20
-press:down
-wait:20
-press:cross
-wait:600
-# Vanish Ball is genuinely remembered; confirm selection and its real TARGET.
-press:cross
-wait:100
-press:cross
-battle:plan=cross;skip=0;delay=80
+waittask:battle
 waittask:battle:off
 battle:off
 skipmsg
@@ -270,24 +218,10 @@ log
 # Approach the measured route shadow 0x466; spend one owned ball and require the actual remaining count 2.
 battleskip:on
 plan:on
+battle:first1=circle,down,down,down,cross,item:0x317,cross,cross;plan1=circle,down,down,down,cross,item:0x317,cross,cross;plan=circle,up,cross;skip=0;delay=80
 walk:unit:0x466,250
 press:cross:30
-waitbtl:menu
-press:circle
-wait:100
-press:down
-wait:20
-press:down
-wait:20
-press:down
-wait:20
-press:cross
-wait:600
-# Vanish Ball is genuinely remembered; confirm selection and its real TARGET.
-press:cross
-wait:100
-press:cross
-battle:plan=cross;skip=0;delay=80
+waittask:battle
 waittask:battle:off
 battle:off
 skipmsg
@@ -347,24 +281,10 @@ log
 # Approach the measured route shadow 0x468; spend one owned ball and require the actual remaining count 1.
 battleskip:on
 plan:on
+battle:first1=circle,down,down,down,cross,item:0x317,cross,cross;plan1=circle,down,down,down,cross,item:0x317,cross,cross;plan=circle,up,cross;skip=0;delay=80
 walk:unit:0x468,250
 press:cross:30
-waitbtl:menu
-press:circle
-wait:100
-press:down
-wait:20
-press:down
-wait:20
-press:down
-wait:20
-press:cross
-wait:600
-# Vanish Ball is genuinely remembered; confirm selection and its real TARGET.
-press:cross
-wait:100
-press:cross
-battle:plan=cross;skip=0;delay=80
+waittask:battle
 waittask:battle:off
 battle:off
 skipmsg
@@ -424,24 +344,10 @@ log
 # Approach the measured route shadow 0x464; spend one owned ball and require the actual remaining count 0.
 battleskip:on
 plan:on
+battle:first1=circle,down,down,down,cross,item:0x317,cross,cross;plan1=circle,down,down,down,cross,item:0x317,cross,cross;plan=circle,up,cross;skip=0;delay=80
 walk:unit:0x464,250
 press:cross:30
-waitbtl:menu
-press:circle
-wait:100
-press:down
-wait:20
-press:down
-wait:20
-press:down
-wait:20
-press:cross
-wait:600
-# Vanish Ball is genuinely remembered; confirm selection and its real TARGET.
-press:cross
-wait:100
-press:cross
-battle:plan=cross;skip=0;delay=80
+waittask:battle
 waittask:battle:off
 battle:off
 skipmsg

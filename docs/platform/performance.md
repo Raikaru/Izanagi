@@ -199,7 +199,7 @@ and broadcasts on both host ABI variants.
   scene ordering for a six-scene1x, then1080p, then4K comparison.
   `--visible` enables conditional presentation studies only after 30 minutes of
   Windows input inactivity and observed XInput inactivity, with neutral connected
-  controllers, no foreground fullscreen app and no `<private data>/PAUSE`.
+  controllers, no foreground fullscreen app and no `<scratch>/PAUSE`.
   `GetLastInputInfo` does not include XInput: a connected pad therefore needs an
   actually observed 30-minute quiet interval. `--wait-idle` observes eligibility
   without opening windows until all conditions hold; ordinary refusal exits3.
@@ -253,8 +253,11 @@ transient uploads followed by correct drawn output.
 ## Audio and virtual time
 
 On virtual time (`P4PC_VIRTUAL_CLOCK` or turbo), `p4snd_open` uses offline mixing with no
-audio device or pacing thread. The flip calls `p4snd_virtual_tick` for its fractional
-share of `48000 * 1001 / 60000` samples; inaudible reverb is skipped. Guest sequencers,
+audio device or pacing thread. The kernel calls `p4snd_virtual_tick` (installed by
+`p4pc_platform_init` as `p4pc_vblank_period_hook`) once per VBLANK period that passes, each for its
+fractional share of `48000 * 1001 / 60000` samples, not once per flip: a 30 fps update spans two
+periods and hears both, as the SPU2 does.
+Inaudible reverb is skipped. Guest sequencers,
 stream consumers and movie audio pumps therefore advance independently of host throughput.
 A real-time dummy consumer is not equivalent: the game observes audio time.
 Interactive play retains the real-time device. See [audio](../audio.md) and

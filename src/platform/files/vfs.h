@@ -35,6 +35,11 @@ int vfs_override_register(const char *root, const char *provider,
 /* Rolls back pre-mount registrations (used when mod activation fails). */
 void vfs_override_clear(void);
 
+/* In a forked process (the battle simulator's fork search), gives the disc stream a private descriptor at the same
+ * offset, so concurrent children never share a file position. The stream's buffered bytes stay valid: they are the
+ * same file's content. 0 on success or without a disc, -1 when a host file layer is open or on a host error. */
+int vfs_fork_private(void);
+
 /* Opens a PS2 path for reading. Returns a descriptor >= 0, or -1 if the path is not
  * found, the tree is not mounted, or `writable` is set (the file system is read-only). */
 int vfs_open(const char *path, int writable);

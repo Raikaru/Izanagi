@@ -20,4 +20,11 @@ int p4_mod_event_remove(P4ModEventSubscription *subscription);
 int p4_mod_events_quiescent(void);
 void p4_mod_events_remove_owner(size_t owner);
 void p4_mod_events_clear(void);
+/* Save-codec publication notices run at the frame safe point through this
+ * owner-installed function; it returns nonzero while notices remain queued. */
+void p4_mod_events_set_published(int (*notify)(void));
+/* Mod game services (mod_services.h) run their queued requests and lease
+ * checks at the same safe point, before frame_start subscribers, while
+ * P4_MOD_SAFE_SERVICES is set; the pump returns nonzero while work remains. */
+void p4_mod_events_set_services(int (*pump)(uint32_t frame));
 #endif

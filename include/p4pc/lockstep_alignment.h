@@ -146,6 +146,27 @@ static inline int p4la_battle_field_effects_idle(const P4WalkHost *h) {
     }
     return 1;
 }
+/* Effect emitters advanced in one update: mdlEffectAdvanceEmitter (00492d10) receives each
+ * EffTrackPath and increments its +0x10 ticks. Both participants record the guest address at
+ * that call entry (read-only), take the list at each presentation, and retain it with the
+ * ready RAM, so the checkpoint can name every emitter the boundary's own update advanced. */
+#define P4LA_EMITTER_ADVANCE 0x00492d10u
+#define P4LA_EMITTERS 1024u
+typedef struct P4AlignEmitters {
+    uint32_t count, overflow, address[P4LA_EMITTERS];
+} P4AlignEmitters;
+static inline void p4la_emitter_seen(P4AlignEmitters *e, uint32_t emitter) {
+    if (e->count<P4LA_EMITTERS) e->address[e->count++]=emitter;
+    else e->overflow=1;
+}
+static inline int p4la_emitters_write(const char *path, const P4AlignEmitters *e, uint32_t frame) {
+    FILE *f=fopen(path,"w");
+    int ok;
+    if (!f) return 0;
+    ok=fprintf(f,"# p4la-emitters 1 frame %u count %u overflow %u\n",frame,e->count,e->overflow)>0;
+    for (uint32_t i=0;ok && i<e->count;i++) ok=fprintf(f,"%08x\n",e->address[i])>0;
+    return fclose(f)==0 && ok;
+}
 /* Per-presentation event-player provenance is separate from elapsed-clock
  * policy: logging a loader/timeline word never authorizes resynchronizing it. */
 static inline int p4la_event_header(FILE *file) {

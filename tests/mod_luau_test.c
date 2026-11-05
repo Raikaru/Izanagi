@@ -12,6 +12,8 @@
 #include "p4pc/ps2_libc.h"
 #include "vfs.h"
 #include "../src/platform/memcard/mod_save_internal.h"
+#include "p4pc/mod_setting_store.h"
+#include "p4pc/mod_lifecycle.h"
 #ifdef P4_MOD_NATIVE_RECOVERY
 #include "p4pc/crt.h"
 #include "failure_native.h"
@@ -21,6 +23,7 @@
 #include "p4pc/mod_bindings.h"
 #include "p4pc/package_boot.h"
 #endif
+#include <errno.h>
 #include <fenv.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -296,6 +299,46 @@ static int frame_cpu_witness(int argc,char **argv)
     return failures?1:0;
 }
 
+/* [setting] declarations: bounded parse and refusals, without a package. */
+static void setting_declarations_witness(void)
+{
+    P4PackageField good[] = {
+        {"setting", "flag", "kind", "toggle", 9}, {"setting", "flag", "label", "FLAG", 10},
+        {"setting", "style", "choices", "A | B|C", 4}, {"setting", "style", "default", "B", 5},
+        {"setting", "style", "group", "LOOK", 6}, {"setting", "style", "kind", "choice", 3},
+        {"setting", "style", "label", "STYLE", 7}};
+    P4ModSettingDecl *decls = NULL;
+    size_t count = 0;
+    char reason[256];
+    CHECK(!p4_mod_setting_declarations(good, 7, &decls, &count, reason, sizeof reason) && count == 2);
+    if (count == 2) {
+        /* Manifest line order, not key order: style starts on line 3. */
+        CHECK(!strcmp(decls[0].key, "style") && decls[0].choice_count == 3 && decls[0].default_choice == 1 &&
+              !strcmp(decls[0].choices[0], "A") && !strcmp(decls[0].choices[2], "C") && !strcmp(decls[0].group, "LOOK"));
+        CHECK(!strcmp(decls[1].key, "flag") && decls[1].kind == P4_MOD_SETTING_TOGGLE &&
+              decls[1].default_choice == 0 && !decls[1].restart);
+        CHECK(p4_mod_setting_choice(&decls[0], "C") == 2 && p4_mod_setting_choice(&decls[0], "D") == 1);
+    }
+    free(decls);
+    static const P4PackageField bad[][2] = {
+        {{"setting", "x", "kind", "toggle", 1}, {"setting", "x", "unknown", "1", 2}},
+        {{"setting", "x", "kind", "slider", 1}, {"setting", "x", "label", "X", 2}},
+        {{"setting", "x", "kind", "toggle", 1}, {"setting", "x", "default", "maybe", 2}},
+        {{"setting", "Bad", "kind", "toggle", 1}, {"setting", "Bad", "label", "X", 2}},
+        {{"setting", "x", "kind", "choice", 1}, {"setting", "x", "label", "X", 2}},
+        {{"setting", "x", "kind", "toggle", 1}, {"setting", "x", "apply", "later", 2}},
+        {{"setting", "x", "kind", "toggle", 1}, {"setting", "x", "help", "no label", 2}}};
+    for (size_t i = 0; i < sizeof bad / sizeof bad[0]; ++i) {
+        decls = NULL;
+        CHECK(p4_mod_setting_declarations(bad[i], 2, &decls, &count, reason, sizeof reason) == -1 && !decls);
+    }
+    const P4PackageField repeated[] = {{"setting", "x", "kind", "choice", 1}, {"setting", "x", "label", "X", 2},
+                                       {"setting", "x", "choices", "A|A", 3}};
+    CHECK(p4_mod_setting_declarations(repeated, 3, &decls, &count, reason, sizeof reason) == -1);
+    CHECK(p4_mod_setting_key_valid("run.count-2") && !p4_mod_setting_key_valid(".x") &&
+          !p4_mod_setting_key_valid("a b") && !p4_mod_setting_value_valid(" x") && p4_mod_setting_value_valid("x y"));
+}
+
 static int witness(int argc, char **argv)
 {
     if (argc != 2) return 2;
@@ -319,6 +362,11 @@ static int witness(int argc, char **argv)
     if (length < 0 || (size_t)length >= sizeof mod_root) return 2;
     p4_os_mkdir(mod_root);
     static const char *const ids[] = {"test.luau", "test.isolation"};
+    /* test.luau declares three settings; boot=on is stored before admission. */
+    static const char settings[] =
+        "[setting flag]\nkind=toggle\nlabel=FLAG\n"
+        "[setting style]\nkind=choice\nchoices=A|B|C\nlabel=STYLE\n"
+        "[setting boot]\nkind=toggle\nlabel=BOOT\napply=restart\n";
     for (unsigned i = 0; i < 2; ++i) {
         length = snprintf(path, sizeof path, "%s/%s", mod_root, ids[i]);
         if (length < 0 || (size_t)length >= sizeof path) return 2;
@@ -330,11 +378,29 @@ static int witness(int argc, char **argv)
             fixture = fopen(path, "wb");
             if (!fixture) return 2;
             wrote = source ? fputs("-- Native VM witness supplies source below.\n", fixture) :
-                fprintf(fixture, "[mod]\nid=%s\nname=Native VM witness\nversion=1.0\napi=1.1\npriority=%u\norder=0\n", ids[i], i);
+                fprintf(fixture, "[mod]\nid=%s\nname=Native VM witness\nversion=1.0\napi=1.2\npriority=%u\norder=0\n%s",
+                        ids[i], i, i ? "" : settings);
             closed = fclose(fixture);
             if (wrote < 0 || closed) return 2;
         }
     }
+    setting_declarations_witness();
+    char settings_root[1200];
+    length = snprintf(settings_root, sizeof settings_root, "%s/settings", argv[1]);
+    if (length < 0 || (size_t)length >= sizeof settings_root) return 2;
+    p4_os_mkdir(settings_root);
+    /* The data directory outlives a run (reused build trees): start from no stored values. */
+    for (unsigned i = 0; i < 4; ++i) {
+        static const char *const stale[] = {"test.luau.ini", "test.luau.ini.tmp", "test.isolation.ini",
+                                            "test.isolation.ini.tmp"};
+        length = snprintf(path, sizeof path, "%s/mod-settings/%s", settings_root, stale[i]);
+        if (length < 0 || (size_t)length >= sizeof path) return 2;
+        if (remove(path) && errno != ENOENT) p4_os_rmdir(path);
+    }
+    CHECK(p4_mod_setting_store_root(settings_root) == 0);
+    char reason[256];
+    CHECK(p4_mod_setting_store("test.luau", "boot", "on", reason, sizeof reason) == 0);
+    CHECK(p4_package_handler_register(&p4_mod_settings_boot_provider) == 0);
     if (p4_mods_stage(mod_root, "test.luau,test.isolation") || p4_package_registry_publish()) return 2;
     if (vfs_mount(NULL, argv[1])) return 2;
     const P4PackageProvider *provider = p4_packages_provider(0);
@@ -364,9 +430,60 @@ static int witness(int argc, char **argv)
     CHECK(mod_test_unsigned(10)==11&&mod->semantic_used);
     saved_provenance(1); /* Actual script dispatch records its selected pin. */
     run(mod,"semantic_hook:remove(); semantic_hook=nil",1);
+    /* p4.settings: declared toggle/choice/restart-bound values and undeclared data keys. */
     run(mod,
-        "assert(p4.language=='Luau' and p4.language_version=='0.744' and p4.api_version=='1.1')\n"
-        "assert(p4.fixture_native and p4.ui==nil)\n"
+        "assert(p4.settings.get('flag')==false and p4.settings.get('style')=='A' and p4.settings.get('boot')==true)\n"
+        "assert(p4.settings.set('flag',true) and p4.settings.get('flag')==true)\n"
+        "assert(p4.settings.set('style','C') and p4.settings.get('style')=='C')\n"
+        "assert(not pcall(p4.settings.set,'style','D') and not pcall(p4.settings.set,'flag','yes'))\n"
+        "assert(p4.settings.set('boot',false) and p4.settings.get('boot')==true)\n"
+        "assert(p4.settings.set('run.count',3) and p4.settings.get('run.count')==3)\n"
+        "assert(p4.settings.set('note','hello world') and p4.settings.get('note')=='hello world')\n"
+        "assert(p4.settings.set('note',nil) and p4.settings.get('note')==nil)\n"
+        "assert(p4.settings.set('done',false) and p4.settings.get('done')==false)\n"
+        "assert(not pcall(p4.settings.set,'Bad Key',1) and not pcall(p4.settings.set,'x',0/0))\n"
+        "assert(not pcall(p4.settings.set,'x',' edge') and not pcall(p4.settings.set,'x',{}))\n", 1);
+    {
+        /* The file round-trips from disk, and the admitted restart value stays put. */
+        char value[P4_MOD_SETTING_VALUE_MAX];
+        CHECK(p4_mod_setting_store_root(NULL) == 0 && p4_mod_setting_store_root(settings_root) == 0);
+        CHECK(p4_mod_setting_stored("test.luau", "flag", value, sizeof value, reason, sizeof reason) == 1 && !strcmp(value, "on"));
+        CHECK(p4_mod_setting_stored("test.luau", "style", value, sizeof value, reason, sizeof reason) == 1 && !strcmp(value, "C"));
+        CHECK(p4_mod_setting_stored("test.luau", "boot", value, sizeof value, reason, sizeof reason) == 1 && !strcmp(value, "off"));
+        CHECK(p4_mod_setting_stored("test.luau", "run.count", value, sizeof value, reason, sizeof reason) == 1 && !strcmp(value, "n:3"));
+        CHECK(p4_mod_setting_stored("test.luau", "note", value, sizeof value, reason, sizeof reason) == 0);
+        CHECK(p4_mod_setting_boot(provider, "boot", value, sizeof value) == 1 && !strcmp(value, "on"));
+        CHECK(p4_mod_setting_boot(provider, "run.count", value, sizeof value) == 0);
+        CHECK(p4_mod_setting_boot(other_provider, "flag", value, sizeof value) == 0);
+    }
+    run(mod, "assert(p4.settings.get('style')=='C' and p4.settings.get('run.count')==3)", 1);
+    /* No settings file (P4PC_CONFIG=none): defaults, and writes refused. */
+    CHECK(p4_mod_setting_store_root(NULL) == 0);
+    run(mod, "local ok, why = p4.settings.set('flag', false); assert(ok == false and why)\n"
+             "assert(p4.settings.get('flag') == false and p4.settings.get('style') == 'A')", 1);
+    /* A failed replace changes neither the cached value nor the old file. */
+    CHECK(p4_mod_setting_store_root(settings_root) == 0);
+    length = snprintf(path, sizeof path, "%s/mod-settings/test.luau.ini.tmp", settings_root);
+    CHECK(length > 0 && (size_t)length < sizeof path && p4_os_mkdir(path) == 0);
+    run(mod, "local ok, why = p4.settings.set('style', 'A'); assert(ok == false and why)\n"
+             "assert(p4.settings.get('style') == 'C')", 1);
+    CHECK(p4_os_rmdir(path) == 0);
+    CHECK(p4_mod_setting_store_root(NULL) == 0 && p4_mod_setting_store_root(settings_root) == 0);
+    run(mod, "assert(p4.settings.get('style') == 'C' and p4.settings.get('flag') == true)", 1);
+    /* p4.lifecycle: no session without a settings directory, then the real one. */
+    CHECK(p4_mod_lifecycle_root(NULL) == 0);
+    run(mod, "local s, why = p4.lifecycle.session(); assert(s == nil and why)\n"
+             "local ok, why2 = p4.lifecycle.tag('R1:B1'); assert(ok == false and why2)", 1);
+    CHECK(p4_mod_lifecycle_root(settings_root) == 0);
+    run(mod, "local s = p4.lifecycle.session(); assert(type(s) == 'number' and s >= 1 and p4.lifecycle.session() == s)\n"
+             "assert(p4.lifecycle.tag('R1:B1') == true and p4.lifecycle.tag(nil) == true)\n"
+             "local ok, why = p4.lifecycle.tag(string.rep('x', 64)); assert(ok == false and why)\n"
+             "assert(p4.lifecycle.crashed(s) == false and p4.lifecycle.consume(s) == true)\n"
+             "assert(not pcall(p4.lifecycle.crashed, 0) and not pcall(p4.lifecycle.tag, {}))", 1);
+    CHECK(p4_mod_lifecycle_root(NULL) == 0);
+    run(mod,
+        "assert(p4.language=='Luau' and p4.language_version=='0.744' and p4.api_version=='1.4')\n"
+        "assert(p4.fixture_native and p4.ui==nil and p4.scene==nil and p4.camera==nil and p4.clock==nil)\n"
         "for _,key in {'os','io','debug','package','require','load','loadstring','loadfile','dofile','vector','integer'} do assert(_G[key]==nil,key) end\n"
         "assert(type(pcall)=='function' and type(xpcall)=='function' and type(getfenv)=='function' and type(coroutine.resume)=='function')\n"
         "assert(string.dump==nil and p4.mem._pin==nil)\n"
@@ -422,6 +539,9 @@ static int witness(int argc, char **argv)
     CHECK(p4_lua_compile(mod, binary, sizeof binary - 1, "binary-refused") == -1);
     run(mod, "action_body=function() p4.call(0x100100,'II',1) end", 1);
     CHECK(p4_lua_invoke(mod, synchronous_callback, NULL, 0, P4_LUA_SYNCHRONOUS) == -1);
+    run(mod, "action_body=function() p4.settings.set('run.count', 4) end", 1);
+    CHECK(p4_lua_invoke(mod, synchronous_callback, NULL, 0, P4_LUA_SYNCHRONOUS) == -1);
+    run(mod, "assert(p4.settings.get('run.count') == 3)", 1);
     run(mod,
         "before=p4.hook(0x100100,'II','before',function(c) c.args[1]+=2 end)\n"
         "after=p4.hook(0x100100,'II','after',function(c) c.result*=2 end)\n"
@@ -440,6 +560,7 @@ static int witness(int argc, char **argv)
     CHECK(other != NULL);
     if (other) {
         run(other, "assert(scratch==nil and saved==nil and type(buffer.create)=='function')", 1);
+        run(other, "assert(p4.settings.get('flag')==nil and p4.settings.get('run.count')==nil)", 1);
         run(other, "p4.hook(0x100100,'II','replace',function(c) c.result=0 end)", 0);
         lua_getglobal(mod->state, "a");
         uint32_t address = lua_tounsigned(mod->state, -1);
@@ -499,6 +620,15 @@ static int witness(int argc, char **argv)
         p4pc_vsync_wait();
         CHECK(p4_lua_invoke(other, empty_callback, NULL, 0, 0) != 0);
         run(other, "assert(true)", 1);
+        /* A finished large job leaves garbage that callbacks allocating almost
+         * nothing never collect; later flips must reclaim it before a burst. */
+        run(other, "local junk = {} for i = 1, 4200 do junk[i] = table.create(64, i) end junk = nil", 1);
+        CHECK(p4_luau_memory_used(other->vm) > (4u << 20));
+        for (unsigned i = 0; i < 32; ++i) {
+            p4pc_vsync_wait();
+            CHECK(p4_lua_invoke(other, empty_callback, NULL, 0, 0) == 0);
+        }
+        CHECK(p4_luau_memory_used(other->vm) < (4u << 20));
         p4_lua_destroy(other);
     }
     lua_getglobal(mod->state, "a");

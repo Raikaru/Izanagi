@@ -15,9 +15,11 @@
  * emulates no DMA channel, so a DMAC handler is registered and masked but never raised.
  *
  * INTC (AddIntcHandler, EnableIntc): a chain of up to INTC_CHAIN callbacks per cause, 0..31, run in
- * order when the cause is raised. The thread model (kernel_thread.c) raises VBLANK_START at 60 Hz
- * through p4pc_intc_raise; the game puts two handlers on it (the shadow module's and the sound
- * server's).
+ * order when the cause is raised until one returns negative. The thread model (kernel_thread.c)
+ * raises VBLANK_START at 60 Hz through p4pc_intc_raise, which also flips GS CSR.FIELD; the game puts
+ * two handlers on it: the shadow module's field gate (FldShadow_PollIntcBit13, first, negative on
+ * one field) and the sound server's wake-up (kwlnEnableInterrupts, last), so the sound server runs
+ * on every second VBLANK.
  *
  * All of these are defined here rather than generated as traps, so start-up runs
  * past them. None stands in for unported game logic. */
@@ -36,6 +38,8 @@ static uint32_t intc_enabled;
 static int32_t (*dmac_handler[P4PC_DMAC_CAUSES])(int32_t);
 static uint32_t dmac_enabled;
 static uint64_t intc_stat;
+#define GS_CSR_FIELD (1ull << 13)
+static uint64_t gs_csr_field = GS_CSR_FIELD;
 
 uint32_t p4pc_game_frame_count(void) {
     return *(const uint32_t *)P4_G2H(0x00764290u);
@@ -101,15 +105,22 @@ int32_t p4pc_intc_enable(int32_t cause) {
     return 0;
 }
 
-/* Delivers an enabled cause through its ordered native handler chain.
+/* Delivers an enabled cause through its ordered handler chain until a handler returns negative
+ * (the EE kernel's rule). VBLANK_START also flips the GS display field (CSR.FIELD), even while
+ * its interrupt is masked: the game's first VBLANK handler (FldShadow_PollIntcBit13) returns
+ * negative on one field, so the handlers behind it (kwlnEnableInterrupts -> ADXM_ExecVint, the
+ * CRI server wake-up) run on every second VBLANK, as on the console.
  * The INTC cause bit is set during delivery and cleared when the chain finishes. */
 void p4pc_intc_raise(int32_t cause) {
     int32_t i;
+    if (cause == 2)
+        gs_csr_field ^= GS_CSR_FIELD;
     if (cause < 0 || cause >= P4PC_INTC_CAUSES || !(intc_enabled & (1u << cause)))
         return;
     intc_stat |= 1ull << cause;
     for (i = 0; i < INTC_CHAIN && intc_handler[cause][i] != NULL; i++) {
-        intc_handler[cause][i](cause);
+        if (intc_handler[cause][i](cause) < 0)
+            break;
     }
     intc_stat &= ~(1ull << cause);
 }
@@ -123,9 +134,9 @@ uint64_t p4pc_intc_stat_read(void) {
     return intc_stat;
 }
 
-/* Preserve the native display gate's INTC snapshot. */
+/* GS CSR (0x12001000): only FIELD (bit 13) is modelled. */
 uint64_t p4pc_gs_csr_read(void) {
-    return intc_stat;
+    return gs_csr_field;
 }
 
 /* INTC syscall wrappers at their retail addresses. AddIntcHandler (0x4214c0, syscall 0x10)

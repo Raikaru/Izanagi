@@ -7,7 +7,11 @@ extern uint8_t *btlActionFindById(int32_t id);
 extern uint32_t datCalcGetBadStatusNoDown(void *unit);
 
 /* Parallel metadata for the ACTUAL three native work-pool slots. No guest
- * padding, actor->last-element global, pointer-keyed map or runtime allocation. */
+ * padding, actor->last-element global, pointer-keyed map or runtime allocation.
+ * proofs[i] is whether a value holds for candidate source i (the last slot:
+ * the explicit or unrestricted source). It is never about a defender: the
+ * original script may ask about unit B and act on C, so no result about a
+ * target binds the targets the native command finally uses. */
 typedef struct Permit {
     uint32_t mask, constrained, explicit_valid, source_unrestricted;
     P4GameActionFrame explicit_frame;
@@ -30,36 +34,6 @@ static uint32_t le32(const uint8_t *p)
 static uint32_t word(uint32_t work, uint32_t index) { return P4_G32(work + 0x50u + index * 4u); }
 static uint32_t type(uint32_t work, uint32_t index) { return P4_G8(work + 0x20u + index); }
 static uint32_t all_mask(const P4AiCarrier *carrier) { return (1u << carrier->candidate_count) - 1u; }
-static int lease_proof(P4AiVmState *vm, uint32_t owned, uint32_t *out)
-{
-    if (owned >= 2u) {
-        if (vm->proof_temporary_count == vm->proof_temporary_capacity) {
-            p4_ai_proof_release(&vm->proofs, owned); return P4_TABLE_NOMEM;
-        }
-        vm->proof_temporaries[vm->proof_temporary_count++] = owned;
-    }
-    *out = owned;
-    return P4_TABLE_OK;
-}
-static int join_proof(P4AiVmState *vm, uint32_t kind, uint32_t left, uint32_t right, uint32_t *out)
-{
-    uint32_t owned;
-    int result = p4_ai_proof_join(&vm->proofs, kind, left, right, &owned);
-    return result ? result : lease_proof(vm, owned, out);
-}
-static void copy_proofs(P4AiVmState *vm, uint32_t *out, const uint32_t *in)
-{
-    for (uint32_t i = 0; i < P4_AI_PROOF_SOURCES; ++i) out[i] = p4_ai_proof_retain(&vm->proofs, in[i]);
-}
-static void release_proofs(P4AiVmState *vm, uint32_t *proofs)
-{
-    for (uint32_t i = 0; i < P4_AI_PROOF_SOURCES; ++i) p4_ai_proof_release(&vm->proofs, proofs[i]);
-}
-static void clear_temporaries(P4AiVmState *vm)
-{
-    while (vm->proof_temporary_count)
-        p4_ai_proof_release(&vm->proofs, vm->proof_temporaries[--vm->proof_temporary_count]);
-}
 static P4AiValueTag *int_tags(P4AiVmState *vm) { return (P4AiValueTag *)(vm + 1); }
 static P4AiValueTag *float_tags(P4GameAiPrepared *product, P4AiVmState *vm)
 {
@@ -142,13 +116,7 @@ int p4_game_elements_ai_native_script_bind(void *work, void *source)
         if (product->scripts[program].native_header == header) break;
     if (program == product->script_count) return P4_TABLE_NOT_FOUND;
     if (++vm->generation == 0u) abort();
-    vm->proofs.nodes = (P4AiProofNode *)((uint8_t *)vm + product->proof_nodes_offset);
-    vm->proofs.scratch = (uint32_t *)((uint8_t *)vm + product->proof_scratch_offset);
-    vm->proofs.capacity = product->proof_capacity;
-    p4_ai_proof_reset(&vm->proofs);
-    vm->proof_temporaries = (uint32_t *)((uint8_t *)vm + product->proof_temporaries_offset);
-    vm->proof_temporary_capacity = product->proof_temporary_capacity;
-    vm->proof_temporary_count = vm->choice_valid = 0u;
+    vm->choice_valid = 0u;
     vm->work_guest = guest; vm->program = (uint32_t)program; vm->owner = carrier->owner;
     vm->call_depth = vm->control_count = vm->command_active = vm->running = vm->step_active = 0;
     vm->pending_return.kind = P4_AI_TAG_NONE;
@@ -216,28 +184,21 @@ static int permit_frame(const Permit *permit, const P4AiCarrier *carrier, const 
 }
 static uint32_t frame_proof(const Permit *permit, const P4AiCarrier *carrier, const P4GameActionFrame *frame)
 {
-    if (!permit->constrained) return P4_AI_PROOF_TRUE;
+    if (!permit->constrained) return 1u;
     if (permit->source_unrestricted) return permit->proofs[P4_GAME_AI_CANDIDATE_COUNT];
     for (uint32_t i = 0; i < carrier->candidate_count; ++i)
         if ((permit->mask & (1u << i)) && same_frame(frame, &carrier->available[i].frame))
             return permit->proofs[i];
-    return permit->explicit_valid && same_frame(frame, &permit->explicit_frame) ?
-        permit->proofs[P4_GAME_AI_CANDIDATE_COUNT] : P4_AI_PROOF_FALSE;
+    return permit->explicit_valid && same_frame(frame, &permit->explicit_frame) &&
+        permit->proofs[P4_GAME_AI_CANDIDATE_COUNT];
 }
-static int merge_permit(P4AiVmState *vm, Permit *permit, uint32_t mask, uint32_t constrained,
-    uint32_t explicit_valid, uint32_t source_unrestricted,
+static void merge_permit(Permit *permit, uint32_t mask, uint32_t explicit_valid, uint32_t source_unrestricted,
     const P4GameActionFrame *explicit_frame, const uint32_t *proofs)
 {
-    if (!constrained) return P4_TABLE_OK;
     permit->mask &= mask;
     for (uint32_t i = 0; i < P4_GAME_AI_CANDIDATE_COUNT; ++i) {
-        if (!(permit->mask & (1u << i))) permit->proofs[i] = P4_AI_PROOF_FALSE;
-        else {
-            int result = join_proof(vm, P4_AI_PROOF_AND, permit->proofs[i],
-                proofs ? proofs[i] : P4_AI_PROOF_TRUE, &permit->proofs[i]);
-            if (result) return result;
-            if (permit->proofs[i] == P4_AI_PROOF_FALSE) permit->mask &= ~(1u << i);
-        }
+        permit->proofs[i] = (permit->mask & (1u << i)) && permit->proofs[i] && proofs[i];
+        if (!permit->proofs[i]) permit->mask &= ~(1u << i);
     }
     uint32_t previous_any = !permit->constrained || permit->source_unrestricted;
     if (previous_any) {
@@ -248,23 +209,18 @@ static int merge_permit(P4AiVmState *vm, Permit *permit, uint32_t mask, uint32_t
         permit->explicit_valid = 0u;
     }
     permit->source_unrestricted = previous_any && source_unrestricted;
-    if (permit->explicit_valid || permit->source_unrestricted) {
-        int result = join_proof(vm, P4_AI_PROOF_AND, permit->proofs[P4_GAME_AI_CANDIDATE_COUNT],
-            proofs ? proofs[P4_GAME_AI_CANDIDATE_COUNT] : P4_AI_PROOF_TRUE,
-            &permit->proofs[P4_GAME_AI_CANDIDATE_COUNT]);
-        if (result) return result;
-        if (permit->proofs[P4_GAME_AI_CANDIDATE_COUNT] == P4_AI_PROOF_FALSE)
-            permit->explicit_valid = permit->source_unrestricted = 0u;
-    } else permit->proofs[P4_GAME_AI_CANDIDATE_COUNT] = P4_AI_PROOF_FALSE;
+    uint32_t *generic = &permit->proofs[P4_GAME_AI_CANDIDATE_COUNT];
+    *generic = (permit->explicit_valid || permit->source_unrestricted) && *generic &&
+        proofs[P4_GAME_AI_CANDIDATE_COUNT];
+    if (!*generic) permit->explicit_valid = permit->source_unrestricted = 0u;
     permit->constrained = 1;
-    return P4_TABLE_OK;
 }
 static int current_permit(P4GameAiPrepared *product, P4AiVmState *vm, int command, Permit *permit)
 {
     P4AiCarrier *carrier = vm_carrier(vm);
     if (!carrier) return P4_TABLE_NOT_READY;
     *permit = (Permit){.mask = all_mask(carrier), .source_unrestricted = 1u};
-    for (uint32_t i = 0; i < P4_AI_PROOF_SOURCES; ++i) permit->proofs[i] = P4_AI_PROOF_TRUE;
+    for (uint32_t i = 0; i < P4_AI_PROOF_SOURCES; ++i) permit->proofs[i] = 1u;
     if (command && vm->command_active) {
         permit->mask = vm->command_allowed_mask; permit->constrained = vm->command_constrained;
         permit->explicit_valid = vm->command_explicit_valid;
@@ -276,35 +232,33 @@ static int current_permit(P4GameAiPrepared *product, P4AiVmState *vm, int comman
     const P4AiControlScope *scope = controls(product, vm);
     for (uint32_t i = 0; i < vm->control_count; ++i) {
         if (scope[i].candidate_epoch != carrier->candidate_epoch) return P4_TABLE_CONFLICT;
-        int result = merge_permit(vm, permit, scope[i].allowed_mask, 1u,
-            scope[i].explicit_valid, scope[i].source_unrestricted, &scope[i].explicit_frame, scope[i].proofs);
-        if (result) return result;
+        merge_permit(permit, scope[i].allowed_mask, scope[i].explicit_valid,
+            scope[i].source_unrestricted, &scope[i].explicit_frame, scope[i].proofs);
     }
     return P4_TABLE_OK;
 }
-static int tag_permit(P4AiVmState *vm, const P4AiValueTag *tag, P4AiCarrier *carrier, Permit *permit)
+static int tag_permit(const P4AiValueTag *tag, P4AiCarrier *carrier, Permit *permit)
 {
     if (!tag || !tag->constrained) return P4_TABLE_OK;
     if (tag->candidate_epoch != carrier->candidate_epoch) return P4_TABLE_CONFLICT;
     const P4GameActionFrame *extra = tag->kind == P4_AI_TAG_NUMBER ?
         &tag->value.vector.explicit_frame : &tag->value.selection.candidate.frame;
-    return merge_permit(vm, permit, all_mask(carrier) & ~tag->invalid_mask,
-        1u, tag->explicit_valid, tag->source_unrestricted, extra, tag->proofs);
+    merge_permit(permit, all_mask(carrier) & ~tag->invalid_mask, tag->explicit_valid,
+        tag->source_unrestricted, extra, tag->proofs);
+    return P4_TABLE_OK;
 }
-static void clear_tag(P4AiVmState *vm, P4AiValueTag *tag)
+static void clear_tag(P4AiValueTag *tag)
 {
-    if (live_tag(vm, tag)) release_proofs(vm, tag->proofs);
     tag->kind = P4_AI_TAG_NONE;
 }
-static void store_tag(P4AiVmState *vm, P4AiValueTag *out, const P4AiValueTag *in)
+static void store_tag(P4AiValueTag *out, const P4AiValueTag *in)
 {
-    clear_tag(vm, out);
     out->generation = in->generation; out->kind = in->kind;
     out->actual_word = in->actual_word; out->actual_type = in->actual_type;
     out->invalid_mask = in->invalid_mask; out->candidate_epoch = in->candidate_epoch;
     out->constrained = in->constrained; out->explicit_valid = in->explicit_valid;
     out->source_unrestricted = in->source_unrestricted;
-    if (in->kind != P4_AI_TAG_NONE) copy_proofs(vm, out->proofs, in->proofs);
+    if (in->kind != P4_AI_TAG_NONE) memcpy(out->proofs, in->proofs, sizeof out->proofs);
     if (in->kind == P4_AI_TAG_NUMBER) {
         out->value.vector.count = in->value.vector.count;
         out->value.vector.source = in->value.vector.source;
@@ -316,14 +270,13 @@ static void store_tag(P4AiVmState *vm, P4AiValueTag *out, const P4AiValueTag *in
 static void number_constant(P4AiVmState *vm, P4AiCarrier *carrier, P4AiValueTag *out,
     uint32_t actual_type, uint32_t actual_word, const Permit *permit)
 {
-    clear_tag(vm, out);
     out->generation = vm->generation; out->actual_type = actual_type; out->actual_word = actual_word;
     out->kind = permit->constrained ? P4_AI_TAG_NUMBER : P4_AI_TAG_NONE;
     out->constrained = permit->constrained; out->candidate_epoch = carrier->candidate_epoch;
     out->invalid_mask = all_mask(carrier) & ~permit->mask; out->explicit_valid = permit->explicit_valid;
     out->source_unrestricted = permit->source_unrestricted;
     if (out->kind == P4_AI_TAG_NONE) return;
-    copy_proofs(vm, out->proofs, permit->proofs);
+    memcpy(out->proofs, permit->proofs, sizeof out->proofs);
     out->value.vector.source = vm->owner;
     out->value.vector.count = carrier->candidate_count;
     for (uint32_t i = 0; i < carrier->candidate_count; ++i) out->value.vector.words[i] = actual_word;
@@ -338,14 +291,13 @@ static int copy_value(P4GameAiPrepared *product, P4AiVmState *vm, P4AiValueTag *
     if (result) return result;
     const P4AiValueTag *tag = in ? live_tag(vm, in) : NULL;
     if (!tag) { number_constant(vm, carrier, out, actual_type, actual_word, &permit); return P4_TABLE_OK; }
-    result = tag_permit(vm, tag, carrier, &permit);
+    result = tag_permit(tag, carrier, &permit);
     if (result) return result;
-    store_tag(vm, out, tag);
+    store_tag(out, tag);
     out->actual_type = actual_type; out->actual_word = actual_word;
     out->constrained = permit.constrained; out->invalid_mask = all_mask(carrier) & ~permit.mask;
     out->source_unrestricted = permit.source_unrestricted;
-    release_proofs(vm, out->proofs);
-    copy_proofs(vm, out->proofs, permit.proofs);
+    memcpy(out->proofs, permit.proofs, sizeof out->proofs);
     const P4GameActionFrame *extra = tag->kind == P4_AI_TAG_NUMBER ?
         &tag->value.vector.explicit_frame : &tag->value.selection.candidate.frame;
     out->explicit_valid = !out->source_unrestricted && tag->explicit_valid && permit_frame(&permit, carrier, extra);
@@ -373,10 +325,8 @@ static int prune_controls(P4GameAiPrepared *product, P4AiVmState *vm, uint32_t p
             return P4_TABLE_CONFLICT;
         const P4AiCfgNode *branch = &script->nodes[scope[i].branch_pc];
         if (scope[i].call_depth == vm->call_depth &&
-            (pc == scope[i].branch_pc || pc == branch->join || !contains_pc(script, branch, pc))) {
-            release_proofs(vm, scope[i].proofs);
+            (pc == scope[i].branch_pc || pc == branch->join || !contains_pc(script, branch, pc)))
             continue;
-        }
         if (keep != i) scope[keep] = scope[i];
         ++keep;
     }
@@ -474,7 +424,7 @@ int p4_game_elements_ai_vm_before(void *work_pointer, const P4GameAiVmToken *tok
             result = checked_tag(vm, &vm->stack[index], type(work, index), word(work, index));
             if (result) return result;
             const P4AiValueTag *tag = live_tag(vm, &vm->stack[index]);
-            result = tag_permit(vm, tag, carrier, &permit);
+            result = tag_permit(tag, carrier, &permit);
             if (result) return result;
             if (tag && tag->kind == P4_AI_TAG_NUMBER) {
                 uint32_t mask = all_mask(carrier);
@@ -488,8 +438,8 @@ int p4_game_elements_ai_vm_before(void *work_pointer, const P4GameAiVmToken *tok
         vm->command_explicit_valid = permit.explicit_valid;
         vm->command_source_unrestricted = permit.source_unrestricted;
         if (permit.explicit_valid) vm->command_explicit_frame = permit.explicit_frame;
-        copy_proofs(vm, vm->command_proofs, permit.proofs);
-        clear_tag(vm, &vm->pending_return);
+        memcpy(vm->command_proofs, permit.proofs, sizeof vm->command_proofs);
+        clear_tag(&vm->pending_return);
         vm->target_contract_valid = 0u;
     }
     if (op == 20u || op == 21u) {
@@ -556,11 +506,10 @@ static int shadow_value(const P4AiValueTag *tag, const P4GameActionFrame *frame,
 }
 static uint32_t value_proof(const P4AiValueTag *tag, uint32_t index)
 {
-    if (!tag) return P4_AI_PROOF_TRUE;
-    if (index < P4_GAME_AI_CANDIDATE_COUNT && (tag->invalid_mask & (1u << index)))
-        return P4_AI_PROOF_FALSE;
+    if (!tag) return 1u;
+    if (index < P4_GAME_AI_CANDIDATE_COUNT && (tag->invalid_mask & (1u << index))) return 0u;
     if (index == P4_GAME_AI_CANDIDATE_COUNT && !tag->explicit_valid && !tag->source_unrestricted && tag->constrained)
-        return P4_AI_PROOF_FALSE;
+        return 0u;
     return tag->proofs[index];
 }
 static int numeric_proof(P4AiVmState *vm, uint32_t opcode, uint32_t left, uint32_t right,
@@ -572,11 +521,12 @@ static int numeric_proof(P4AiVmState *vm, uint32_t opcode, uint32_t left, uint32
         if (!result) result = truth(vm->before_types[1], rword, &rt);
         if (result) return result;
         uint32_t decisive = opcode == 20u ? 1u : 0u;
-        if (lt == decisive && rt == decisive) return join_proof(vm, P4_AI_PROOF_OR, left, right, out);
+        if (lt == decisive && rt == decisive) { *out = left || right; return P4_TABLE_OK; }
         if (lt == decisive) { *out = left; return P4_TABLE_OK; }
         if (rt == decisive) { *out = right; return P4_TABLE_OK; }
     }
-    return join_proof(vm, P4_AI_PROOF_AND, left, right, out);
+    *out = left && right;
+    return P4_TABLE_OK;
 }
 static int numeric_after(P4GameAiPrepared *product, P4AiVmState *vm, uint32_t opcode,
     uint32_t destination, const P4AiValueTag *left, const P4AiValueTag *right,
@@ -592,8 +542,8 @@ static int numeric_after(P4GameAiPrepared *product, P4AiVmState *vm, uint32_t op
     uint32_t output_type = type(vm->work_guest, destination), output_word = word(vm->work_guest, destination);
     int reference = (left && left->kind == P4_AI_TAG_ELEMENT) || (right && right->kind == P4_AI_TAG_ELEMENT);
     if (!reference && (!left || left->kind != P4_AI_TAG_NUMBER) && (!right || right->kind != P4_AI_TAG_NUMBER)) {
-        result = tag_permit(vm, left, carrier, &permit);
-        if (!result) result = tag_permit(vm, right, carrier, &permit);
+        result = tag_permit(left, carrier, &permit);
+        if (!result) result = tag_permit(right, carrier, &permit);
         if (result) return result;
         number_constant(vm, carrier, &vm->stack[destination], output_type, output_word, &permit);
         return P4_TABLE_OK;
@@ -623,18 +573,18 @@ static int numeric_after(P4GameAiPrepared *product, P4AiVmState *vm, uint32_t op
     for (uint32_t i = 0; i < carrier->candidate_count; ++i) {
         if (invalid & (1u << i)) {
             output.value.vector.words[i] = 0u; /* Undefined metadata only; never a game fallback. */
-            output.proofs[i] = P4_AI_PROOF_FALSE;
+            output.proofs[i] = 0u;
             continue;
         }
         uint32_t proof;
         result = numeric_proof(vm, opcode, value_proof(left, i), value_proof(right, i),
             lwords[i], rwords[i], &proof);
-        if (!result) result = join_proof(vm, P4_AI_PROOF_AND, permit.proofs[i], proof, &output.proofs[i]);
         if (result) return result;
-        if (output.proofs[i] == P4_AI_PROOF_FALSE) output.invalid_mask |= 1u << i;
+        output.proofs[i] = permit.proofs[i] && proof;
+        if (!output.proofs[i]) output.invalid_mask |= 1u << i;
     }
-    uint32_t generic_left = !left || left->source_unrestricted ? value_proof(left, P4_GAME_AI_CANDIDATE_COUNT) : P4_AI_PROOF_FALSE;
-    uint32_t generic_right = !right || right->source_unrestricted ? value_proof(right, P4_GAME_AI_CANDIDATE_COUNT) : P4_AI_PROOF_FALSE;
+    uint32_t generic_left = !left || left->source_unrestricted ? value_proof(left, P4_GAME_AI_CANDIDATE_COUNT) : 0u;
+    uint32_t generic_right = !right || right->source_unrestricted ? value_proof(right, P4_GAME_AI_CANDIDATE_COUNT) : 0u;
     uint32_t generic_lword = !left || left->source_unrestricted ? vm->before_words[0] : 0u;
     uint32_t generic_rword = !right || right->source_unrestricted ? vm->before_words[1] : 0u;
     if (left && left->kind == P4_AI_TAG_ELEMENT && left->source_unrestricted) {
@@ -649,11 +599,10 @@ static int numeric_after(P4GameAiPrepared *product, P4AiVmState *vm, uint32_t op
     }
     uint32_t generic_proof;
     result = numeric_proof(vm, opcode, generic_left, generic_right, generic_lword, generic_rword, &generic_proof);
-    if (!result) result = join_proof(vm, P4_AI_PROOF_AND,
-        !permit.constrained || permit.source_unrestricted ? permit.proofs[P4_GAME_AI_CANDIDATE_COUNT] : P4_AI_PROOF_FALSE,
-        generic_proof, &output.proofs[P4_GAME_AI_CANDIDATE_COUNT]);
     if (result) return result;
-    output.source_unrestricted = output.proofs[P4_GAME_AI_CANDIDATE_COUNT] != P4_AI_PROOF_FALSE;
+    output.proofs[P4_GAME_AI_CANDIDATE_COUNT] = (!permit.constrained || permit.source_unrestricted) &&
+        permit.proofs[P4_GAME_AI_CANDIDATE_COUNT] && generic_proof;
+    output.source_unrestricted = output.proofs[P4_GAME_AI_CANDIDATE_COUNT];
     const P4AiValueTag *extra = left && left->explicit_valid ? left : right && right->explicit_valid ? right : NULL;
     if (!output.source_unrestricted && extra && (!left || !left->constrained || left->source_unrestricted || left->explicit_valid) &&
         (!right || !right->constrained || right->source_unrestricted || right->explicit_valid) &&
@@ -673,12 +622,11 @@ static int numeric_after(P4GameAiPrepared *product, P4AiVmState *vm, uint32_t op
         uint32_t proof;
         result = numeric_proof(vm, opcode, value_proof(left, P4_GAME_AI_CANDIDATE_COUNT),
             value_proof(right, P4_GAME_AI_CANDIDATE_COUNT), lword, rword, &proof);
-        if (!result) result = join_proof(vm, P4_AI_PROOF_AND,
-            permit.proofs[P4_GAME_AI_CANDIDATE_COUNT], proof, &output.proofs[P4_GAME_AI_CANDIDATE_COUNT]);
         if (result) return result;
-        if (output.proofs[P4_GAME_AI_CANDIDATE_COUNT] == P4_AI_PROOF_FALSE) output.explicit_valid = 0u;
+        output.proofs[P4_GAME_AI_CANDIDATE_COUNT] = permit.proofs[P4_GAME_AI_CANDIDATE_COUNT] && proof;
+        if (!output.proofs[P4_GAME_AI_CANDIDATE_COUNT]) output.explicit_valid = 0u;
     }
-    store_tag(vm, &vm->stack[destination], &output);
+    store_tag(&vm->stack[destination], &output);
     return P4_TABLE_OK;
 }
 static int finish_branch(P4GameAiPrepared *product, P4AiVmState *vm,
@@ -714,8 +662,6 @@ static int finish_branch(P4GameAiPrepared *product, P4AiVmState *vm,
         scope.proofs[P4_GAME_AI_CANDIDATE_COUNT] = tag->proofs[P4_GAME_AI_CANDIDATE_COUNT];
     if (!node->region_count) return P4_TABLE_OK;
     if (vm->control_count >= product->control_capacity) return P4_TABLE_CONFLICT;
-    for (uint32_t i = 0; i < P4_AI_PROOF_SOURCES; ++i)
-        scope.proofs[i] = p4_ai_proof_retain(&vm->proofs, scope.proofs[i]);
     controls(product, vm)[vm->control_count++] = scope;
     return P4_TABLE_OK;
 }
@@ -732,8 +678,6 @@ int p4_game_elements_ai_vm_after(void *work_pointer, const P4GameAiVmToken *toke
     int result = P4_TABLE_OK;
     if (code_result == 0u) {
         result = finalize_choice(vm);
-        P4AiControlScope *scope = controls(product, vm);
-        for (uint32_t i = 0; i < vm->control_count; ++i) release_proofs(vm, scope[i].proofs);
         vm->control_count = 0; goto finish;
     }
     if (code_result == 2u) {
@@ -752,10 +696,8 @@ int p4_game_elements_ai_vm_after(void *work_pointer, const P4GameAiVmToken *toke
         --vm->call_depth;
         P4AiControlScope *scope = controls(product, vm);
         uint32_t keep = 0;
-        for (uint32_t i = 0; i < vm->control_count; ++i) {
+        for (uint32_t i = 0; i < vm->control_count; ++i)
             if (scope[i].call_depth <= vm->call_depth) scope[keep++] = scope[i];
-            else release_proofs(vm, scope[i].proofs);
-        }
         vm->control_count = keep;
     } else if (op == 28u) {
         uint32_t taken;
@@ -795,8 +737,7 @@ int p4_game_elements_ai_vm_after(void *work_pointer, const P4GameAiVmToken *toke
                     output->invalid_mask |= invalid;
                     for (uint32_t i = 0; i < vm_carrier(vm)->candidate_count; ++i) {
                         if (invalid & (1u << i)) {
-                            p4_ai_proof_release(&vm->proofs, output->proofs[i]);
-                            output->proofs[i] = P4_AI_PROOF_FALSE;
+                            output->proofs[i] = 0u;
                             output->value.vector.words[i] = 0u;
                         }
                     }
@@ -810,18 +751,16 @@ int p4_game_elements_ai_vm_after(void *work_pointer, const P4GameAiVmToken *toke
             left, right, shadow, scratch);
     } else if (op == 28u) result = finish_branch(product, vm, node, live_tag(vm, &vm->stack[before_sp - 1u]));
     else if (sp > before_sp) {
-        if (op == 11u) clear_tag(vm, &vm->stack[before_sp]);
+        if (op == 11u) clear_tag(&vm->stack[before_sp]);
         else result = copy_value(product, vm, &vm->stack[before_sp], NULL,
             type(vm->work_guest, before_sp), word(vm->work_guest, before_sp));
     }
     if (!result && sp < before_sp)
-        for (uint32_t i = sp; i < before_sp; ++i) clear_tag(vm, &vm->stack[i]);
+        for (uint32_t i = sp; i < before_sp; ++i) clear_tag(&vm->stack[i]);
 finish:
-    if (vm->command_active) release_proofs(vm, vm->command_proofs);
     vm->step_active = vm->command_active = 0;
-    clear_tag(vm, &vm->pending_return);
+    clear_tag(&vm->pending_return);
     vm->target_contract_valid = 0u;
-    clear_temporaries(vm);
     return result;
 }
 
@@ -860,14 +799,14 @@ static int count_result(P4AiVmState *vm, void *work, uint32_t scalar)
     const P4GameActionFrame *frame = plan->mode == P4_GAME_AI_PLAN_FRAME ? &plan->frame : NULL;
     uint32_t independent = plan->mode == P4_GAME_AI_PLAN_BASIC || plan->mode == P4_GAME_AI_PLAN_PROFILE ||
         (plan->mode == P4_GAME_AI_PLAN_FAMILY && !scalar);
-    return p4_game_elements_ai_vm_pending_numbers(work, frame, words, invalid, NULL, independent);
+    return p4_game_elements_ai_vm_pending_numbers(work, frame, words, invalid, independent);
 }
 static int target_result(P4AiVmState *vm, void *work, uint32_t actual_type, uint32_t scalar)
 {
     if (!vm->target_contract_valid) return P4_TABLE_OK;
     vm->target_contract_valid = 0u;
     if (actual_type != 0u) return P4_TABLE_CONFLICT;
-    clear_tag(vm, &vm->pending_return);
+    clear_tag(&vm->pending_return);
     if (vm->target_contract_count) return count_result(vm, work, scalar);
     if (scalar == UINT32_MAX) return P4_TABLE_OK;
     void *target = btlActionFindById((int32_t)(scalar & 0x0fffffffu));
@@ -888,7 +827,7 @@ static int target_result(P4AiVmState *vm, void *work, uint32_t actual_type, uint
         &vm->target_contract_plan.frame : NULL;
     uint32_t independent = vm->target_contract_plan.mode == P4_GAME_AI_PLAN_BASIC ||
         vm->target_contract_plan.mode == P4_GAME_AI_PLAN_PROFILE;
-    return p4_game_elements_ai_vm_pending_numbers(work, frame, words, invalid, target, independent);
+    return p4_game_elements_ai_vm_pending_numbers(work, frame, words, invalid, independent);
 }
 void p4_game_elements_ai_vm_return_set(void *work)
 {
@@ -902,7 +841,7 @@ void p4_game_elements_ai_vm_return_set(void *work)
     const P4AiValueTag *pending = live_tag(vm, &vm->pending_return);
     if (vm->running && vm->command_active && pending && actual_type == 0u &&
         (pending->kind == P4_AI_TAG_NUMBER || pending->actual_word == actual_word)) {
-        store_tag(vm, &vm->stack[47], pending);
+        store_tag(&vm->stack[47], pending);
         vm->stack[47].actual_type = actual_type;
         vm->stack[47].actual_word = actual_word;
     } else {
@@ -910,7 +849,7 @@ void p4_game_elements_ai_vm_return_set(void *work)
         if (current_permit(product, vm, 1, &permit)) abort();
         number_constant(vm, carrier, &vm->stack[47], actual_type, actual_word, &permit);
     }
-    clear_tag(vm, &vm->pending_return);
+    clear_tag(&vm->pending_return);
 }
 static int argument(void *work, uint32_t parameter, void *source, uint32_t kind, P4GameAiSelection *out)
 {
@@ -955,7 +894,7 @@ static int pending_reference(void *work, const P4GameAiSelection *selection, uin
     int result = current_permit(p4_ai_native_product(), vm, 1, &permit);
     if (result) return result;
     P4AiValueTag *pending = &vm->pending_return;
-    clear_tag(vm, pending);
+    clear_tag(pending);
     pending->generation = vm->generation; pending->kind = kind;
     pending->actual_word = scalar; pending->actual_type = 0u;
     pending->candidate_epoch = carrier->candidate_epoch;
@@ -963,7 +902,7 @@ static int pending_reference(void *work, const P4GameAiSelection *selection, uin
         (!permit.constrained || permit.source_unrestricted);
     pending->constrained = permit.constrained; pending->invalid_mask = all_mask(carrier) & ~permit.mask;
     pending->explicit_valid = !pending->source_unrestricted && permit_frame(&permit, carrier, &selection->candidate.frame);
-    copy_proofs(vm, pending->proofs, permit.proofs);
+    memcpy(pending->proofs, permit.proofs, sizeof pending->proofs);
     pending->value.selection = *selection;
     return P4_TABLE_OK;
 }
@@ -976,7 +915,7 @@ int p4_game_elements_ai_vm_pending_element(void *work, const P4GameAiSelection *
     return pending_reference(work, selection, scalar, P4_AI_TAG_ELEMENT);
 }
 int p4_game_elements_ai_vm_pending_numbers(void *work, const P4GameActionFrame *actual_frame,
-    const uint32_t *words, uint32_t invalid, void *id_defender, uint32_t independent)
+    const uint32_t *words, uint32_t invalid, uint32_t independent)
 {
     P4AiVmState *vm = bound_work(work);
     P4AiCarrier *carrier = vm ? vm_carrier(vm) : NULL;
@@ -989,30 +928,8 @@ int p4_game_elements_ai_vm_pending_numbers(void *work, const P4GameActionFrame *
     Permit permit;
     int result = current_permit(p4_ai_native_product(), vm, 1, &permit);
     if (result) return result;
-    uint32_t target_proof = P4_AI_PROOF_TRUE;
-    if (id_defender) {
-        uint32_t slot;
-        P4GameAiPrepared *product = p4_ai_native_product();
-        if (slot_for_work(product, work, &slot) != vm) return P4_TABLE_CONFLICT;
-        P4AiCarrier *defender = p4_ai_native_carrier(id_defender);
-        P4AiTargetFact fact;
-        if (!defender) return P4_TABLE_INVALID;
-        result = p4_ai_native_target_fact(id_defender, &fact);
-        if (result) return result;
-        uint32_t owned, cached = defender->target_proof_vm[slot] == vm->generation ?
-            defender->target_proof_node[slot] : 0u;
-        result = p4_ai_proof_target(&vm->proofs, &fact, cached,
-            defender->target_proof_generation[slot], &owned);
-        if (result) return result;
-        result = lease_proof(vm, owned, &target_proof);
-        if (result) return result;
-        defender->target_proof_vm[slot] = vm->generation;
-        defender->target_proof_node[slot] = owned;
-        defender->target_proof_generation[slot] = vm->proofs.nodes[owned].generation;
-    }
     P4AiValueTag *pending = &vm->pending_return;
-    clear_tag(vm, pending);
-    memset(pending->proofs, 0, sizeof pending->proofs);
+    clear_tag(pending);
     pending->generation = vm->generation; pending->kind = P4_AI_TAG_NUMBER;
     /* The actual scalar is installed by the real return setter below. */
     pending->actual_word = word(vm->work_guest, 47u); pending->actual_type = 0u;
@@ -1024,15 +941,10 @@ int p4_game_elements_ai_vm_pending_numbers(void *work, const P4GameActionFrame *
     pending->explicit_valid = actual_frame && permit_frame(&permit, carrier, actual_frame);
     pending->source_unrestricted = independent && (!permit.constrained || permit.source_unrestricted);
     if (pending->explicit_valid) pending->value.vector.explicit_frame = *actual_frame;
-    for (uint32_t i = 0; i < P4_AI_PROOF_SOURCES; ++i) {
-        uint32_t proof = P4_AI_PROOF_FALSE;
-        if ((i < carrier->candidate_count && !(pending->invalid_mask & (1u << i))) ||
-            (i == P4_GAME_AI_CANDIDATE_COUNT && (pending->explicit_valid || pending->source_unrestricted))) {
-            result = join_proof(vm, P4_AI_PROOF_AND, permit.proofs[i], target_proof, &proof);
-            if (result) { clear_tag(vm, pending); return result; }
-        }
-        pending->proofs[i] = p4_ai_proof_retain(&vm->proofs, proof);
-    }
+    for (uint32_t i = 0; i < P4_AI_PROOF_SOURCES; ++i)
+        pending->proofs[i] = permit.proofs[i] &&
+            ((i < carrier->candidate_count && !(pending->invalid_mask & (1u << i))) ||
+             (i == P4_GAME_AI_CANDIDATE_COUNT && (pending->explicit_valid || pending->source_unrestricted)));
     return P4_TABLE_OK;
 }
 int p4_game_elements_ai_vm_query_role(void *work, void *source, uint32_t *role)
@@ -1044,8 +956,7 @@ int p4_game_elements_ai_vm_query_role(void *work, void *source, uint32_t *role)
     *role = vm->command_role;
     return P4_TABLE_OK;
 }
-int p4_game_elements_ai_vm_candidate_allowed(void *work, void *source, void *target,
-    const P4GameActionFrame *frame)
+int p4_game_elements_ai_vm_candidate_allowed(void *work, void *source, const P4GameActionFrame *frame)
 {
     if (!work) return 1;
     P4AiVmState *vm = bound_work(work);
@@ -1054,15 +965,7 @@ int p4_game_elements_ai_vm_candidate_allowed(void *work, void *source, void *tar
         !same_owner(&carrier->owner, &vm->owner)) return P4_TABLE_NOT_READY;
     Permit permit;
     int result = current_permit(p4_ai_native_product(), vm, 1, &permit);
-    if (result) return result;
-    uint32_t proof = frame_proof(&permit, carrier, frame);
-    if (!target) return proof != P4_AI_PROOF_FALSE;
-    P4AiTargetFact fact;
-    result = p4_ai_native_target_fact(target, &fact);
-    if (result) return result;
-    uint32_t value;
-    result = p4_ai_proof_evaluate(&vm->proofs, proof, &fact, 1u, &value);
-    return result ? result : (int)value;
+    return result ? result : (int)frame_proof(&permit, carrier, frame);
 }
 
 int p4_game_elements_ai_vm_commit_choice(void *work, void *source, const P4GameActionFrame *frame)
@@ -1074,12 +977,9 @@ int p4_game_elements_ai_vm_commit_choice(void *work, void *source, const P4GameA
     Permit permit;
     int result = current_permit(p4_ai_native_product(), vm, 1, &permit);
     if (result) return result;
-    uint32_t proof = frame_proof(&permit, carrier, frame);
-    if (proof == P4_AI_PROOF_FALSE) return P4_TABLE_CONFLICT;
-    if (vm->choice_valid) p4_ai_proof_release(&vm->proofs, vm->choice_proof);
+    if (!frame_proof(&permit, carrier, frame)) return P4_TABLE_CONFLICT;
     if (++carrier->choice_generation == 0u) return P4_TABLE_CONFLICT;
     vm->choice_valid = 1u; vm->choice_generation = carrier->choice_generation;
-    vm->choice_proof = p4_ai_proof_retain(&vm->proofs, proof);
     vm->choice_frame = *frame;
     return P4_TABLE_OK;
 }
@@ -1121,7 +1021,6 @@ int p4_game_elements_ai_vm_decoded(void *work, void *source, uint32_t command_pa
         }
         return p4_game_elements_ai_vm_commit_choice(work, source, &carrier->selected.candidate.frame);
     }
-    if (vm->choice_valid) p4_ai_proof_release(&vm->proofs, vm->choice_proof);
     vm->choice_valid = 0u;
     return P4_TABLE_OK;
 }
@@ -1138,32 +1037,8 @@ static int finalize_choice(P4AiVmState *vm)
     P4GameActionFrame current;
     p4_game_elements_native_primary_frame(p4_ai_native_unit_data(P4_G2H(action)),
         P4_G16(action + 0x6eu), vm->choice_frame.native_options, &current);
-    if (!same_frame(&current, &vm->choice_frame)) return P4_TABLE_CONFLICT;
-    if (vm->choice_proof == P4_AI_PROOF_TRUE) return P4_TABLE_OK;
-    uint32_t count = P4_G16(action + 0x6au);
-    /* Matched BtlAction.targets is exactly12 native guest words at0x38;
-     * this bounds the chosen set, not the number of live/addressable actors. */
-    if (count > 12u) return P4_TABLE_CONFLICT;
-    P4AiTargetFact targets[12];
-    for (uint32_t i = 0; i < count; ++i) {
-        uint32_t target = P4_G32(action + 0x38u + i * 4u);
-        if (!target) return P4_TABLE_CONFLICT;
-        int result = p4_ai_native_target_fact(P4_G2H(target), &targets[i]);
-        if (result) return result;
-    }
-    uint32_t value;
-    int result = p4_ai_proof_evaluate(&vm->proofs, vm->choice_proof, targets, count, &value);
-    return result ? result : value ? P4_TABLE_OK : P4_TABLE_CONFLICT;
+    return same_frame(&current, &vm->choice_frame) ? P4_TABLE_OK : P4_TABLE_CONFLICT;
 }
-int p4_game_elements_ai_vm_validate_targets(void *work, void *source)
-{
-    P4AiVmState *vm = bound_work(work);
-    P4AiCarrier *carrier = p4_ai_native_carrier(source);
-    if (!vm || !carrier || !vm->running || !vm->command_active ||
-        !same_owner(&carrier->owner, &vm->owner)) return P4_TABLE_NOT_READY;
-    return finalize_choice(vm);
-}
-
 int p4_game_elements_ai_vm_target_contract(void *work, void *source, const P4GameAiQueryPlan *plan,
     uint32_t known, uint32_t policy, int32_t rejected)
 {

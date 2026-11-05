@@ -208,21 +208,9 @@ wait:20
 press:cross
 wait:30
 press:cross
+# Repeat the remembered Zio; once Yu cannot afford it (4 SP), finish with the weapon instead.
 battle:first=cross,cross,cross;plan=cross,cross,cross;skip=0;delay=80
-# The measured encounter exhausts Yu's SP with the knight at 12 HP (flip 25000).
-# Finish with the weapon instead of confirming an unaffordable Zio forever.
-wait:3600
-battle:off
-waitbtl:menu
-wait:100
-press:circle
-wait:100
-press:up
-wait:20
-press:cross
-wait:30
-press:cross
-battle:first=cross,cross;plan=cross,cross;skip=0;delay=80
+battlerule:sp<4@1=circle,cross,cross
 waittask:battle:off
 skipmsg
 skipfield:60:1

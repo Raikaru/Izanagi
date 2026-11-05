@@ -1,0 +1,27 @@
+# From the 04/17 evening checkpoint (story0417), loaded with P4PC_AUTOPRESS_LOAD=0: the 04/18
+# morning conversations (the route of save0417_to_school_0418.walk up to its last choice), then
+# free roam at school. The bundled QoL mod's backlog witness (tests/mod_qol_game_test.py) reads
+# those conversations back from its DIALOGUE BACKLOG page once this walk is done.
+timeout:6000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+timeout:40000
+waitcontrol:on
+wait:30
+walk:314,-360,25
+face:100
+wait:20
+press:cross
+wait:40
+skipfield:6:6
+choose:1                  # The first morning question.
+choose:1                  # Yosuke's teasing question.
+choose:2                  # Chie's contact information: the investigation, not Courage.
+skipmsg
+waitcontrol:on
+wait:120

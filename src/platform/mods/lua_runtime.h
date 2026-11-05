@@ -14,7 +14,9 @@ enum {
     P4_LUA_TAG_CONTEXT,
     P4_LUA_TAG_EVENT,
     P4_LUA_TAG_FUNCTION,
-    P4_LUA_TAG_UI_PAGE
+    P4_LUA_TAG_UI_PAGE,
+    P4_LUA_TAG_AUTHORIZER,
+    P4_LUA_TAG_CAMERA
 };
 typedef struct P4LuaContext P4LuaContext;
 enum { P4_LUA_STARTUP = 1, P4_LUA_SYNCHRONOUS = 2, P4_LUA_SEMANTIC = 4, P4_LUA_SNAPSHOT = 8 };
@@ -36,6 +38,7 @@ typedef struct P4LuaThread {
 struct P4LuaNativeBindings;
 struct P4LuaUIPage;
 struct P4LuaSave;
+struct P4ModSettingDecl;
 typedef struct P4LuaMod {
     p4_luau *vm;
     lua_State *state; /* idle control plane; callbacks use a native-coroutine Lua thread */
@@ -51,11 +54,14 @@ typedef struct P4LuaMod {
     struct P4LuaSave *save;
     struct P4LuaUIPage *ui_pages;
     int ui_reference, ui_closing;
+    struct P4ModSettingDecl *settings; /* parsed [setting] declarations, on first p4.settings use */
+    size_t setting_count;
+    int settings_parsed;
     char error[1024]; /* Owned before the protected call pops its Lua error. */
     P4LuaThread threads[65];
-    uint32_t budget_frame;
+    uint32_t budget_frame, pressure_frame;
     unsigned frame_fuel;
-    int has_budget_frame, budget_failed, semantic_used;
+    int has_budget_frame, has_pressure_frame, budget_failed, semantic_used;
 } P4LuaMod;
 typedef struct P4LuaInvocation {
     lua_CFunction function;
@@ -95,4 +101,6 @@ void p4_lua_hooks(P4LuaMod *mod);
 void p4_lua_events(lua_State *state);
 void p4_lua_input(lua_State *state);
 void p4_lua_files(lua_State *state);
+void p4_lua_settings(lua_State *state);
+void p4_lua_lifecycle(lua_State *state);
 #endif

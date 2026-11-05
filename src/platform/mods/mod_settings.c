@@ -1,4 +1,5 @@
 #include "p4pc/mod_settings.h"
+#include "p4pc/mod_setting_store.h"
 #include "p4pc/settings.h"
 #include "p4pc/native_glyphs.h"
 #include "p4pc/mods.h"
@@ -25,6 +26,12 @@ typedef struct HubInstallation {
     P4PackageInfo info;
     int valid, active;
     char *diagnostic;
+    /* Declared [setting] rows, drawn even while the mod is disabled. plan[i] is a
+     * declaration index, or -(index + 1) for the group heading above it. */
+    P4ModSettingDecl *settings;
+    size_t settingCount, planCount;
+    int *plan;
+    char *settingError;
 } HubInstallation;
 typedef struct HubIds {
     size_t count;
@@ -52,6 +59,7 @@ static unsigned catalogDepth, selectionDepth, detailDepth;
 static HubSelection selections[P4_SETTINGS_PAGE_DEPTH_MAX], pending;
 static char *details[P4_SETTINGS_PAGE_DEPTH_MAX];
 static char rowKey[32], rowLabel[P4_SETTINGS_PAGE_LABEL_MAX], rowValue[P4_SETTINGS_PAGE_VALUE_MAX];
+static char settingKey[P4_MOD_SETTING_KEY_MAX + 8];
 
 static int error(const char *text)
 {
@@ -200,7 +208,12 @@ static int load_selection(HubCatalog *catalog)
 static void catalog_free(HubCatalog *catalog)
 {
     if (!catalog) return;
-    for (size_t i = 0; i < catalog->count; ++i) free(catalog->items[i].diagnostic);
+    for (size_t i = 0; i < catalog->count; ++i) {
+        free(catalog->items[i].diagnostic);
+        free(catalog->items[i].settings);
+        free(catalog->items[i].plan);
+        free(catalog->items[i].settingError);
+    }
     free(catalog->items);
     free(catalog);
 }
@@ -221,6 +234,31 @@ static int installation_active(const P4PackageInfo *info)
         const P4PackageInfo *active = p4_packages_info(i);
         if (active && active->kind == info->kind && !strcmp(active->id, info->id) &&
             !strcmp(active->directory, info->directory)) return 1;
+    }
+    return 0;
+}
+static int collect_settings(HubInstallation *item, const P4PackageInstallation *source)
+{
+    char reason[256];
+    if (p4_mod_setting_declarations(source->fields, source->field_count, &item->settings,
+                                    &item->settingCount, reason, sizeof reason)) {
+        size_t size = strlen(reason) + 1;
+        item->settingError = malloc(size);
+        if (!item->settingError) return error("Package settings allocation failed.");
+        memcpy(item->settingError, reason, size);
+        for (char *c = item->settingError; *c; ++c)
+            if ((unsigned char)*c < 32 || (unsigned char)*c > 126) *c = '?';
+        return 0;
+    }
+    if (!item->settingCount) return 0;
+    item->plan = malloc(2 * item->settingCount * sizeof *item->plan);
+    if (!item->plan) return error("Package settings allocation failed.");
+    const char *group = "";
+    for (size_t i = 0; i < item->settingCount; ++i) {
+        if (strcmp(item->settings[i].group, group) && item->settings[i].group[0])
+            item->plan[item->planCount++] = -(int)i - 1;
+        group = item->settings[i].group;
+        item->plan[item->planCount++] = (int)i;
     }
     return 0;
 }
@@ -248,6 +286,12 @@ static int collect(const P4PackageInstallation *source, void *userdata)
         return error("Package directory exceeds catalog bounds.");
     }
     item.info.kind = catalog->collecting_kind;
+    if (item.valid && item.info.kind == P4_PACKAGE_MOD && collect_settings(&item, source)) {
+        free(item.settings);
+        free(item.plan);
+        free(item.settingError);
+        return -1;
+    }
     if (source->diagnostic && source->diagnostic[0]) {
         size_t size = strlen(source->diagnostic);
         if (size >= P4_SETTINGS_PAGE_DETAIL_MAX / 4)
@@ -391,12 +435,76 @@ static int owns_installation(HubLink *link, const HubInstallation *item)
     return item->valid && item->active && item->info.kind == P4_PACKAGE_MOD &&
         link->kind == P4_MOD_SETTINGS_MOD && !strcmp(link->id, item->info.id);
 }
+static size_t setting_rows(const HubInstallation *item)
+{
+    return item->settingError ? 1 : item->planCount;
+}
+static void setting_row(const HubInstallation *item, size_t row, P4SettingsPageRow *out)
+{
+    *out = (P4SettingsPageRow){0};
+    if (item->settingError) {
+        out->key = "settings-error";
+        out->label = "INVALID SETTINGS";
+        out->help = item->settingError;
+        out->kind = P4_SETTINGS_PAGE_INFO;
+        return;
+    }
+    int entry = item->plan[row];
+    const P4ModSettingDecl *decl = &item->settings[entry < 0 ? -entry - 1 : entry];
+    snprintf(settingKey, sizeof settingKey, "%s:%s", entry < 0 ? "grp" : "set", decl->key);
+    out->key = settingKey;
+    if (entry < 0) {
+        out->label = decl->group;
+        out->kind = P4_SETTINGS_PAGE_INFO;
+        return;
+    }
+    char stored[P4_MOD_SETTING_VALUE_MAX], reason[160];
+    int found = p4_mod_setting_stored(item->info.id, decl->key, stored, sizeof stored, reason, sizeof reason);
+    unsigned choice = p4_mod_setting_choice(decl, found > 0 ? stored : NULL);
+    out->label = decl->label;
+    out->help = decl->help[0] ? decl->help : decl->restart ? "Takes effect after restart." : NULL;
+    out->flags = decl->restart ? P4_SETTINGS_PAGE_RESTART : 0;
+    if (decl->kind == P4_MOD_SETTING_TOGGLE) {
+        out->kind = P4_SETTINGS_PAGE_TOGGLE;
+        out->checked = choice == 1;
+    } else {
+        snprintf(rowValue, sizeof rowValue, "%s", decl->choices[choice]);
+        out->value = rowValue;
+        out->kind = P4_SETTINGS_PAGE_VALUE;
+    }
+}
+static int setting_find(const HubInstallation *item, const char *key)
+{
+    if (item->settingError) return !strcmp(key, "settings-error") ? 0 : -1;
+    if (strncmp(key, "set:", 4) && strncmp(key, "grp:", 4)) return -1;
+    for (size_t row = 0; row < item->planCount; ++row) {
+        int entry = item->plan[row];
+        if ((entry < 0) == (key[0] == 'g') && !strcmp(item->settings[entry < 0 ? -entry - 1 : entry].key, key + 4))
+            return (int)row;
+    }
+    return -1;
+}
+static int setting_adjust(const HubInstallation *item, const char *key, int direction)
+{
+    const P4ModSettingDecl *decl = item->valid && !item->settingError ?
+        p4_mod_setting_find(item->settings, item->settingCount, key + 4) : NULL;
+    if (!decl) return -1;
+    char stored[P4_MOD_SETTING_VALUE_MAX], reason[192];
+    int found = p4_mod_setting_stored(item->info.id, decl->key, stored, sizeof stored, reason, sizeof reason);
+    if (found < 0) return error(reason);
+    unsigned choice = p4_mod_setting_choice(decl, found > 0 ? stored : NULL), count = decl->choice_count;
+    unsigned next = direction < 0 ? (choice + count - 1) % count : (choice + 1) % count;
+    if (p4_mod_setting_store(item->info.id, decl->key, decl->choices[next], reason, sizeof reason))
+        return error(reason);
+    ++revision;
+    return 0;
+}
 static int installation_count(void *unused, uint64_t *version)
 {
     (void)unused;
     HubInstallation *item = current_installation();
     if (!item) return -1;
-    int count = item->info.kind == P4_PACKAGE_ENGINE_PACK ? 4 : 5;
+    int count = item->info.kind == P4_PACKAGE_ENGINE_PACK ? 4 : 5 + (int)setting_rows(item);
     for (HubLink *link = links; link; link = link->next)
         if (owns_installation(link, item)) ++count;
     *version = revision;
@@ -472,7 +580,11 @@ static int installation_row(void *unused, int index, P4SettingsPageRow *out)
         }
         return 0;
     }
-    int position = 5;
+    if ((size_t)index - 5 < setting_rows(item)) {
+        setting_row(item, (size_t)index - 5, out);
+        return 0;
+    }
+    int position = 5 + (int)setting_rows(item);
     for (HubLink *link = links; link; link = link->next)
         if (owns_installation(link, item) && position++ == index) {
             link_row(link, out);
@@ -496,7 +608,9 @@ static int installation_find(void *unused, const char *key)
     if (!strcmp(key, "enabled")) return 2;
     if (!strcmp(key, "order")) return 3;
     if (!strcmp(key, "details")) return 4;
-    int index = 5;
+    int index = setting_find(item, key);
+    if (index >= 0) return 5 + index;
+    index = 5 + (int)setting_rows(item);
     for (HubLink *link = links; link; link = link->next)
         if (owns_installation(link, item)) {
             if (!strcmp(link->key, key)) return index;
@@ -576,6 +690,7 @@ static int installation_adjust(void *unused, const char *key, int direction)
     HubCatalog *catalog = catalog_find(selections[selectionDepth - 1].catalog);
     if (!catalog) return -1;
     if (!strcmp(key, "details")) return direction ? 0 : p4_settings_page_open("mods/details");
+    if (!strncmp(key, "set:", 4)) return setting_adjust(item, key, direction);
     if (item->info.kind == P4_PACKAGE_ENGINE_PACK) {
         if (!item->valid || unique_pack_info(catalog, item->info.id) != &item->info) return -1;
         if (strcmp(key, "enabled")) return 0;

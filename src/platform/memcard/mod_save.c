@@ -51,6 +51,10 @@ struct P4ModSaveRegistration {
     char owner[64],key[96];
     void (*notify)(void *);
     int notify_pending;
+    /* Durable-publication notification: queued at capture commit only after the
+     * native transaction committed, dispatched later at a game-thread safe point. */
+    void (*published)(void *);
+    int published_pending;
     struct P4ModSaveRegistration *next;
 };
 struct P4ModSaveCaptureStage {
@@ -287,7 +291,7 @@ int p4_mod_save_register(const P4ModSaveProvider *p,P4ModSaveRegistration **out)
 }
 int p4_mod_save_unregister(P4ModSaveRegistration *r)
 {
-    if(!r||running||pending_load||pending_capture||notifying||r->notify_pending)return -1;
+    if(!r||running||pending_load||pending_capture||notifying||r->notify_pending||r->published_pending)return -1;
     P4ModSaveRegistration **link=&registrations;
     while(*link&&*link!=r)link=&(*link)->next;
     if(!*link)return -1;
@@ -298,6 +302,12 @@ int p4_mod_save_set_notify(P4ModSaveRegistration *r,void (*notify)(void *))
     if(!r||!notify||running||pending_load||pending_capture||notifying||
        find_registration(r->owner,r->key)!=r||r->notify)return -1;
     r->notify=notify;return 0;
+}
+int p4_mod_save_set_published(P4ModSaveRegistration *r,void (*published)(void *))
+{
+    if(!r||!published||running||pending_load||pending_capture||notifying||
+       find_registration(r->owner,r->key)!=r||r->published)return -1;
+    r->published=published;return 0;
 }
 int p4_mod_save_has_providers(void){return registration_count!=0;}
 int p4_mod_save_needs_codec(void)
@@ -429,6 +439,12 @@ int p4_mod_save_capture_image(const P4ModSaveImage *image,P4ModSaveCapture **out
     for(size_t i=0;i<touches.count;i++)if(dependency_add(&c.history,&touches.data[i],1))goto allocation;
     P4ModSaveRegistration *r=registrations;
     size_t old=0;
+    for(P4ModSaveRegistration *a=registrations;a;a=a->next){
+        if(!a->provider.authorize)continue;
+        clear_error(&c.context);
+        int authorized=a->provider.authorize(&c.context,a->provider.user);
+        if(authorized){callback_failure(&c.context,a,"authorize",authorized);goto done;}
+    }
     while(r||old<active_state.block_count){
         SavedBlock *block=old<active_state.block_count?&active_state.blocks[old]:NULL;
         int order=!r?1:!block?-1:key_compare(r->owner,r->key,block->owner,block->key);
@@ -499,11 +515,27 @@ void p4_mod_save_capture_commit(P4ModSaveCapture *capture)
         running=1;
         for(size_t i=0;i<capture->stage_count;i++){
             P4ModSaveCaptureStage *stage=&capture->stages[i];
+            /* Only an emitted block is a publication of this provider's state. */
+            if(stage->value&&stage->registration->published)stage->registration->published_pending=1;
             stage->registration->provider.commit(stage->value,stage->registration->provider.user);
         }
         pending_capture=NULL;capture->stage_count=0;running=0;
     }
     p4_mod_save_capture_free(capture);
+}
+int p4_mod_save_published_pending(void)
+{
+    for(P4ModSaveRegistration *r=registrations;r;r=r->next)if(r->published_pending)return 1;
+    return 0;
+}
+void p4_mod_save_published_notify(void)
+{
+    if(running||pending_capture||pending_load||notifying)return; /* Retried at the next safe point. */
+    notifying=1;
+    for(P4ModSaveRegistration *r=registrations;r;r=r->next){
+        if(r->published_pending){r->published_pending=0;r->published(r->provider.user);}
+    }
+    notifying=0;
 }
 static int parse_string(P4ModSaveReader *reader,char *out,size_t capacity,size_t length,int version)
 {

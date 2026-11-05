@@ -88,6 +88,23 @@ static inline long double fprod(float a, float b) {
     return (long double)b2f(r5900_ee_out((long double)a * (long double)b));
 }
 
+/* x + y as a VU add computes it: the exact sum truncated (r5900_ee_out). An x87 sum rounds to nearest at 64 bits first, so
+ * when the operands lie more than 64 bits apart it can land exactly on a float the exact sum does not reach, and the
+ * truncation then keeps that float (one ulp too large, and near FLT_MAX a cancellation that should leave one ulp leaves
+ * none). The sum's rounding error (TwoSum, exact under round to nearest) says when: the sum is a float and the exact sum
+ * lies on the zero side of it. Hosts whose long double is not the x87 format compute it under the EE mode's truncation. */
+static inline uint32_t vu_sum(long double x, long double y) {
+    long double s = x + y;
+    uint32_t r = r5900_ee_out(s);
+#if defined(__i386__) || defined(__x86_64__)
+    long double bb = s - x;
+    long double err = (x - (s - bb)) + (y - bb);
+    if (err != 0 && (long double)b2f(r) == s && (err < 0) != (s < 0))
+        r = (r & 0x7FFFFFFFu) <= 0x00800000u ? (r & 0x80000000u) : r - 1u;
+#endif
+    return r;
+}
+
 /* cvt.w.s / vftoi: saturates on the EE, 0x80000000 for NaN and out of range on x86. */
 static inline uint32_t cvt_w(float v) {
     if (r5900_ieee) {
@@ -312,9 +329,9 @@ static void vu_op_inner(R5900 *c, uint32_t ins) {
         case 0x2E:                                 /* OPMSUB */
             {
                 uint32_t r[3];
-                r[0] = r5900_ee_out((long double)r5900_ee_in(acc[0]) - (long double)r5900_ee_in(S[1]) * r5900_ee_in(T[2]));
-                r[1] = r5900_ee_out((long double)r5900_ee_in(acc[1]) - (long double)r5900_ee_in(S[2]) * r5900_ee_in(T[0]));
-                r[2] = r5900_ee_out((long double)r5900_ee_in(acc[2]) - (long double)r5900_ee_in(S[0]) * r5900_ee_in(T[1]));
+                r[0] = vu_sum(r5900_ee_in(acc[0]), -((long double)r5900_ee_in(S[1]) * r5900_ee_in(T[2])));
+                r[1] = vu_sum(r5900_ee_in(acc[1]), -((long double)r5900_ee_in(S[2]) * r5900_ee_in(T[0])));
+                r[2] = vu_sum(r5900_ee_in(acc[2]), -((long double)r5900_ee_in(S[0]) * r5900_ee_in(T[1])));
                 if (dest & 8) Dd[0] = r[0];
                 if (dest & 4) Dd[1] = r[1];
                 if (dest & 2) Dd[2] = r[2];
@@ -340,13 +357,13 @@ static void vu_op_inner(R5900 *c, uint32_t ins) {
             uint32_t r;
             long double a = r5900_ee_in(S[k]), b = r5900_ee_in(t);
             switch (kind) {
-            case ADD: r = r5900_ee_out(a + b); break;
-            case SUB: r = r5900_ee_out(a - b); break;
+            case ADD: r = vu_sum(a, b); break;
+            case SUB: r = vu_sum(a, -b); break;
             case MUL: r = r5900_ee_out(a * b); break;
             case MAX: r = (float)a > (float)b ? f2b((float)a) : f2b((float)b); break;
             case MINI: r = (float)a < (float)b ? f2b((float)a) : f2b((float)b); break;
-            case MADD: r = r5900_ee_out((long double)r5900_ee_in(acc[k]) + fprod((float)a, (float)b)); break;
-            default: r = r5900_ee_out((long double)r5900_ee_in(acc[k]) - fprod((float)a, (float)b)); break;
+            case MADD: r = vu_sum(r5900_ee_in(acc[k]), fprod((float)a, (float)b)); break;
+            default: r = vu_sum(r5900_ee_in(acc[k]), -fprod((float)a, (float)b)); break;
             }
             (void)to_acc;
             Dd[k] = r;
@@ -457,10 +474,10 @@ static void vu_op_inner(R5900 *c, uint32_t ins) {
         long double a = r5900_ee_in(S[k]), b = r5900_ee_in(src_kind ? bval : T[k]);
         long double ac = r5900_ee_in(acc[k]);
         switch (akind) {
-        case 0: acc[k] = r5900_ee_out(a + b); break;
-        case 1: acc[k] = r5900_ee_out(a - b); break;
-        case 2: acc[k] = r5900_ee_out(ac + fprod((float)a, (float)b)); break;
-        case 3: acc[k] = r5900_ee_out(ac - fprod((float)a, (float)b)); break;
+        case 0: acc[k] = vu_sum(a, b); break;
+        case 1: acc[k] = vu_sum(a, -b); break;
+        case 2: acc[k] = vu_sum(ac, fprod((float)a, (float)b)); break;
+        case 3: acc[k] = vu_sum(ac, -fprod((float)a, (float)b)); break;
         default: acc[k] = r5900_ee_out(a * b); break;
         }
     }

@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "package_sort.h"
+#include "p4pc/mod_setting_store.h"
 void p4pc_state_dump_flip(unsigned flip); /* actual state_dump.c fidelity harness */
 
 static int failures, prepares, publishes, rollbacks, observed, installations, invalid;
@@ -106,6 +107,38 @@ static void rollback(void *user) { CHECK(user == &prepares); ++rollbacks; }
 static const char *const sections[] = {"content", "texture", "music", NULL};
 static const P4PackageHandler handler = {"fixture", sections, prepare, publish, rollback, &prepares};
 
+/* [setting] in a pack is refused through the pack selector; the mod keeps its value. */
+static int settings_refusal(const char *id, const char *reason, void *user)
+{
+    CHECK(user == &refusals && reason && reason[0]);
+    ++refusals;
+    printf("refused=%s reason=%s\n", id, reason);
+    return 0;
+}
+static int settings_kinds(P4PackageClient *mod_client, P4PackageClient *pack_client, const char *mod_root,
+                          const char *pack_root)
+{
+    P4PackageRegistry *mods = NULL, *packs = NULL;
+    char settings[1200], value[32];
+    snprintf(settings, sizeof settings, "%s/../settings", mod_root);
+    mod_client->refuse = pack_client->refuse = settings_refusal;
+    mod_client->user = pack_client->user = &refusals;
+    CHECK(p4_mod_setting_store_root(settings) == 0);
+    CHECK(p4_package_handler_register(&p4_mod_settings_boot_provider) == 0);
+    CHECK(p4_package_registry_load(&mods, mod_client, mod_root, "mod.high") == 0);
+    CHECK(p4_package_registry_load(&packs, pack_client, pack_root, "pack.low") == 0);
+    CHECK(p4_package_registry_publish() == 0);
+    CHECK(refusals == 1 && p4_packages_count() == 1 && !strcmp(p4_packages_info(0)->id, "mod.high"));
+    if (p4_packages_count() == 1) {
+        CHECK(p4_mod_setting_boot(p4_packages_provider(0), "flag", value, sizeof value) == 1 && !strcmp(value, "on"));
+        char reason[128];
+        CHECK(p4_mod_setting_store("mod.high", "flag", "off", reason, sizeof reason) == 0);
+        CHECK(p4_mod_setting_boot(p4_packages_provider(0), "flag", value, sizeof value) == 1 && !strcmp(value, "on"));
+    }
+    p4_package_registry_retire();
+    printf("setting kinds: %s\n", failures ? "FAIL" : "PASS");
+    return failures ? 1 : 0;
+}
 static int admission_refusal(const char *id, const char *reason, void *user)
 {
     CHECK(user == &refusals && !strcmp(id, "mod.high") && reason && reason[0]);
@@ -355,6 +388,7 @@ int main(int argc, char **argv)
         return failures ? 1 : 0;
     }
     p4_mod_fidelity_check_start();
+    if (!strcmp(mode, "settings-kinds")) return settings_kinds(&mod_client, &pack_client, argv[2], argv[3]);
     if (!strcmp(mode, "guard-mod") || !strcmp(mode, "guard-pack")) {
         if (!strcmp(mode, "guard-mod"))
             CHECK(p4_package_registry_load(&mods, &mod_client, argv[2], "mod.high") == 0);

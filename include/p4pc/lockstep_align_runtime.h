@@ -8,6 +8,8 @@ uint32_t p4pc_align_profile(void);
 extern int p4pc_align_rng_calls_enabled;
 void p4pc_align_rng_call(uint32_t draw, const void *caller);
 void p4pc_align_effect_call(uint32_t kind, const void *state, uint32_t argument, const void *caller);
+extern int p4pc_align_emitters_enabled;
+void p4pc_align_emitter_advance(const void *emitter);
 void p4pc_align_prepare(const P4WalkHost *host, uint32_t marker[8]);
 const uint8_t *p4pc_align_replay_pad(const P4WalkHost *host);
 const uint8_t *p4pc_align_replay_frame(const P4WalkHost *host);

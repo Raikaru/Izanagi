@@ -147,6 +147,21 @@ void p4_game_tables_destroy(P4GameTables *tables);
 int p4_game_tables_element(P4GameTables *tables, const char *owner, const P4ElementDesc *desc);
 int p4_game_tables_channel(P4GameTables *tables, const char *owner, const P4AffinityChannelDesc *desc);
 int p4_game_tables_affinity(P4GameTables *tables, const char *owner, const P4AffinityRow *row);
+/* A side row whose value is the entity's own retail affinity entry, read from
+ * the user's selected UNIT banks at seal: row retail_row and packed column
+ * retail_element (0..15) of the 32-byte enemy (UNIT1) or persona (UNIT2) bank
+ * of the row's entity kind. Keys, conflicts and ownership are those of an
+ * authored row; value/scalar are ignored. A percentage channel stores the exact
+ * p4_affinity_decode word with its low16 as scalar; a KO channel stores the
+ * p4_affinity_project_ko projection. Until resolved the row is pending and
+ * freeze refuses NOT_READY. Mods ship no retail value this way. */
+int p4_game_tables_affinity_retail(P4GameTables *tables, const char *owner, const P4AffinityRow *row,
+    uint32_t retail_row, uint32_t retail_element);
+size_t p4_game_tables_affinity_retail_pending(const P4GameTables *tables);
+/* Resolve every pending retail row from the actual sealed bank bytes. A row or
+ * column outside the given bank refuses NOT_FOUND and resolves nothing. */
+int p4_game_tables_affinity_resolve_retail(P4GameTables *tables,
+    const uint8_t *enemy_bank, size_t enemy_size, const uint8_t *persona_bank, size_t persona_size);
 int p4_game_tables_action_element(P4GameTables *tables, const char *owner, const P4ActionElementBinding *binding);
 int p4_game_tables_affinity_alias(P4GameTables *tables, const char *owner, const P4AffinityProfileAlias *alias);
 int p4_game_tables_affinity_effect(P4GameTables *tables, const char *owner, const P4AffinityEffectBinding *effect);

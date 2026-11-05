@@ -175,6 +175,16 @@ int p4_game_tables_builder_seal(P4GameTablesDefinitionBuilder *b,
     }
     int result = b->names ? p4_game_tables_text_seal(b->names, b->registry_revision) : P4_TABLE_OK;
     if (!result && b->descriptions) result = p4_game_tables_text_seal(b->descriptions, b->registry_revision);
+    if (!result && p4_game_tables_affinity_retail_pending(b->tables)) {
+        /* Retail-derived side rows read the actual selected UNIT banks:
+         * block 1 enemy and block 2 persona affinity, 32-byte rows. */
+        const P4GameTableInput *unit = p4_game_tables_builder_input(b, P4_TABLE_INPUT_UNIT);
+        const P4GameTableInputSpan *enemy = p4_game_table_input_span(unit, 1);
+        const P4GameTableInputSpan *persona = p4_game_table_input_span(unit, 2);
+        result = !enemy || !persona ? P4_TABLE_NOT_FOUND : p4_game_tables_affinity_resolve_retail(b->tables,
+            p4_game_table_input_span_bytes(enemy), p4_game_table_input_span_size(enemy),
+            p4_game_table_input_span_bytes(persona), p4_game_table_input_span_size(persona));
+    }
     if (!result) result = p4_game_tables_freeze(b->tables, b->registry_revision);
     if (!result && b->skills) {
         const P4GameTableInput *skill = p4_game_tables_builder_input(b, P4_TABLE_INPUT_SKILL);

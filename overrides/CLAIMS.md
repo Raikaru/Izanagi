@@ -865,6 +865,20 @@ One line per address: `<addr>  <owner>  <what it replaces>`. Claim an address he
 004bfba0  PortCriC  ACSSND object reset (src/cri/acssnd.c)
 004d3850  PortCriC  ADXT_Create locked wrapper (src/cri/adxt_wrap.c)
 004d3cd8  PortCriC  ADXT_Destroy locked wrapper (src/cri/adxt_wrap.c)
+004d38a8  PortAudioADXT  adxt_Create inner create: PS2 work layout (0x2060-sample output rings, file ring of the rest), retail translation (src/cri/adxt_wrap.c)
+004d7320  PortAudioADXT  adxt_trap_entry_lps loop-start trap (src/cri/adxt_svr.c)
+004d73d8  PortAudioADXT  adxt_trap_entry loop-end trap (src/cri/adxt_svr.c)
+004d7570  PortAudioADXT  adxt_eos_entry stream end-of-sector callback with the +0xc4 stream window (src/cri/adxt_svr.c)
+004d7618  PortAudioADXT  ADXT output pans from the stream's channel count (src/cri/adxt_svr.c)
+004d7680  PortAudioADXT  adxt_nlp_trap_entry linked-file end trap (src/cri/adxt_svr.c)
+004d7968  PortAudioADXT  adxt_stat_decinfo: flush_nsmpl clear, decoder error state 6, ADXT_SetOutVol (src/cri/adxt_svr.c)
+004d7d90  PortAudioADXT  ADXT PREP step: start at min(2 * maxdecsmpl, 0x4000) (src/cri/adxt_svr.c)
+004d7f18  PortAudioADXT  ADXT PLAYING step: transfer stays on into PLAYEND_WAIT (src/cri/adxt_svr.c)
+004d8000  PortAudioADXT  ADXT PLAYEND_WAIT step: silence padding counted in flush_nsmpl (src/cri/adxt_svr.c)
+004d8208  PortAudioADXT  ADXT PLAYEND step (empty) (src/cri/adxt_svr.c)
+004d8550  PortAudioADXT  ADXT_ExecRdErrChk read error check (src/cri/adxt_svr.c)
+004d85d0  PortAudioADXT  ADXT decoder supply termination by input kind (src/cri/adxt_svr.c)
+004d8698  PortAudioADXT  adxt_ExecHndl per-state dispatch, native ADXT_ExecHndl (src/cri/adxt_svr.c; replaces re4/adx_tsvr.c)
 004bd890  PortCriC  ACSFDR fader tick (src/cri/acs_step.c)
 004c1038  PortCriC  ACSVHL highlight state machine (src/cri/acs_step.c)
 004bf960  PortCriC  ACSSND per-frame step (src/cri/acs_step.c)
@@ -1448,7 +1462,7 @@ One line per address: `<addr>  <owner>  <what it replaces>`. Claim an address he
 001e0110  TablesEnemyKnowledge  actual fixed-self base drain query with full VM argument frame and proven basic/available source role before low24 packing
 001e01c0  TablesEnemyKnowledge  actual fixed-self base null predicate, preserving null sense rather than substituting normal
 001e0270  TablesEnemyKnowledge  actual fixed-self base weak query with full-width frame/source classification
-001e6930  TablesEnemyKnowledge  exact-ID normal predicate with defender UID/profile validity, no B-to-C result reuse
+001e6930  TablesEnemyKnowledge  exact-ID normal predicate asked of the actual ID defender; its answer never binds the final targets
 001e6b90  TablesEnemyKnowledge  exact-ID not-normal predicate with original unknown-first policy and full VM argument frame
 001e6ea0  TablesEnemyKnowledge  explicit-VM weak candidate selector with original flag2E policy and one original chosen-target RNG draw
 001e6fa0  TablesEnemyKnowledge  explicit-VM weak selector preserving original100000 exclusion and2E flags
@@ -1503,7 +1517,7 @@ One line per address: `<addr>  <owner>  <what it replaces>`. Claim an address he
 001db5e0  TablesEnemyKnowledge  canonical status-normal predicate facet preserves original literal profile policy and full source frame
 001db900  TablesEnemyKnowledge  canonical BASE resistance predicate facet, never inverted into wrapper normal
 001def60  TablesEnemyKnowledge  actual default-basic setter preserves literal8000 and actor-owned basic kind; no paid replacement
-001defa0  TablesEnemyKnowledge  actual encoded command argument0 commits this VM's immutable returned command/frame/query proof
+001defa0  TablesEnemyKnowledge  actual encoded command argument0 commits this VM's immutable returned command/frame/query selection
 001df040  TablesEnemyKnowledge  item-granted skill setter binds actual decoded kind3 skill, never treats item id as a skill tag
 001df0c0  TablesEnemyKnowledge  explicit8001 nonattack setter supersedes prior frame/choice metadata
 001df100  TablesEnemyKnowledge  explicit8002 nonattack setter supersedes prior frame/choice metadata
@@ -1556,7 +1570,7 @@ One line per address: `<addr>  <owner>  <what it replaces>`. Claim an address he
 00202340  PortTablesSkill  effect counter skill panel name lookup through canonical skill accessor
 0013b420  PortTablesSkill  skill card description through owned native MSG text; retail bank recipe unchanged
 00114e50  PortTablesSkill  selected persona skill help through owned native MSG text; caller passes selected skill ID
-001f14f0  PortTables  native action/element resolution and expanded enemy-knowledge gate through the knowledge owner's observe API; PortTablesSkill coordinates endurance sentinel4096 when expanded, original576 otherwise
+001f14f0  PortTables  native action/element resolution and expanded enemy-knowledge gate through the knowledge owner's observe API; brackets each resolved hit's HP amount for the final-damage stage (aimed-at unit, repel); PortTablesSkill coordinates endurance sentinel4096 when expanded, original576 otherwise
 00313690  PortTablesSkill  expanded skill inheritance/mutation grade; unchanged signed retail selector byte
 00304410  PortTablesSkill  fusion mutation catalog enumeration without 576-row scratch bound; original retail RNG path retained
 00312c60  PortTablesSkill  inherited skill weights use explicit expanded rate and bounded inheritance group, never full-width element as19-column index
@@ -1634,7 +1648,7 @@ One line per address: `<addr>  <owner>  <what it replaces>`. Claim an address he
 002df020  PortTables  scoped quantity-popup item icons retain stable IDs before retail atlas classification
 00109e30  PortTables  scoped overlay-first accessory-ID read only; preserve original hero/party physical reads without an overlay; all persona arithmetic remains the future persona owner's scope
 002d5040  PortTables  scoped selected/equipped stats-header icons use authored new-ID resources; retail getter/sprite paths and stat arithmetic stay untouched
-00235520  PortTables  native element/action amount route and enemy-ID bank bound; PortTablesSkill coordinates existing registered/active skill predicate facet
+00235520  PortTables  native element/action amount route, enemy-ID bank bound and the final-damage stage (ordered registered modifiers; Hardmode and Challenge register, never hook); PortTablesSkill coordinates existing registered/active skill predicate facet
 00244110  PortTables  canonical physical formula shared by original ABI and explicit owning frame/target-query calculation; preserve every term/order/conversion
 00244540  PortTables  canonical magic formula shared by original ABI and explicit owning frame/target-query calculation
 002447c0  PortTables  canonical power-plus-magic-tier formula with explicit calculation frame transport
@@ -1696,3 +1710,5 @@ One line per address: `<addr>  <owner>  <what it replaces>`. Claim an address he
 003133b0  PortTables  normal-fusion result scan (at-most) also visits added personas (override)
 0036ee60  PortTables  shuffle-time persona pools include added personas (mirror_fixes)
 0036c7e0  PortTables  persona card image of an added persona is its model source's (mirror_fixes)
+002ecfc0  PortChallenge  fusion command rows: a fusion kind is omitted only when a p4.authorize "fusion" authorizer denies it; exact retail rows otherwise
+001b1d70  PortChallenge  battle party/enemy action creation: a p4.battle.formation projector may replace the player-side lineup; exact retail loop over the encounter party otherwise

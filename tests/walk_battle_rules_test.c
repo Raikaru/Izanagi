@@ -179,7 +179,7 @@ static void select_rules(void)
     CHECK(!p4walk_battle_rule_parse("enemy:=cross", &rule_scratch) && !p4walk_battle_rule_parse("enemy:0x10000=cross", &rule_scratch));
     enemies[0].id = 138;
     enemies[0].hp = 546;
-    CHECK(p4walk_battle_rule_select(&flee, 1, &view, &ally, &enemy) == 0 && ally == 0);
+    CHECK(p4walk_battle_rule_select(&flee, 1, &view, &ally, &enemy) == 0 && ally == 0 && enemy == 138);
     enemies[0].hp = 0;
     CHECK(p4walk_battle_rule_select(&flee, 1, &view, &ally, &enemy) == -1);
     CHECK(enemy == 0);
@@ -283,6 +283,42 @@ static void walk_lines(void)
     p4walk_free(walk);
 }
 
+/* battleturn: KEYS or COND=KEYS, COND binding an enemy, a living ally or a downed one by native ID. */
+static void parse_turns(void)
+{
+    P4WalkBattleRule turn;
+    static const char *const bad[] = {"", "enemy:=cross", "ally:9=cross", "dead:0=cross", "hp<100=cross", "enemy:272=", "enemy:272=bogus"};
+    for (size_t i = 0; i < sizeof bad / sizeof bad[0]; i++) CHECK(!p4walk_battle_turn_parse(bad[i], &turn));
+    CHECK(p4walk_battle_turn_parse("circle,cross,cross", &turn) && turn.kind == 0 && turn.key_count == 3);
+    CHECK(p4walk_battle_turn_parse("enemy:0x110=circle,down,cross,skill:14,cross,cross", &turn) &&
+          turn.kind == P4WALK_RULE_ENEMY && turn.value == 272 && turn.key_count == 6 && turn.keys[3] == (P4WALK_KEY_SKILL | 14u));
+    CHECK(p4walk_battle_turn_parse("ally:2=circle,down,cross,skill:192,cross,cross", &turn) && turn.kind == P4WALK_RULE_ALLY && turn.value == 2);
+    CHECK(p4walk_battle_turn_parse("dead:4=circle,down,down,down,cross,item:0x30F,cross,cross", &turn) &&
+          turn.kind == P4WALK_RULE_DEAD && turn.value == 4 && turn.keys[5] == (P4WALK_KEY_ITEM | 0x30Fu));
+
+    char error[160];
+    P4WalkHost host = {read_zero, NULL, NULL, NULL, NULL, NULL};
+    P4Walk *walk = p4walk_parse("battleturn:enemy:272=bogus\n", error, sizeof error);
+    CHECK(walk == NULL);
+    /* A tape needs a driver, and 257 lines overflow its 256. */
+    walk = p4walk_parse("battleturn:cross\n", error, sizeof error);
+    CHECK(walk != NULL);
+    if (walk) {
+        p4walk_frame(walk, &host, 1);
+        CHECK(p4walk_status(walk) == P4WALK_FAILED);
+    }
+    p4walk_free(walk);
+    static char script[P4WALK_BATTLE_TURN_MAX * 20 + 64] = "battle:plan=cross\n";
+    for (int i = 0; i <= P4WALK_BATTLE_TURN_MAX; ++i) strcat(script, "battleturn:cross\n");
+    walk = p4walk_parse(script, error, sizeof error);
+    CHECK(walk != NULL);
+    if (walk) {
+        for (uint32_t frame = 1; frame < 1000 && p4walk_status(walk) == P4WALK_RUNNING; ++frame) p4walk_frame(walk, &host, frame);
+        CHECK(p4walk_status(walk) == P4WALK_FAILED);
+    }
+    p4walk_free(walk);
+}
+
 /* skill:ID / item:ID keys: parsed into P4WALK_KEY_SKILL/ITEM | ID, navigated the shorter way around the wrapping list. */
 static void skill_keys(void)
 {
@@ -337,6 +373,7 @@ int main(void)
     select_rules();
     affinities();
     walk_lines();
+    parse_turns();
     skill_keys();
     skill_offer();
     if (failures) {

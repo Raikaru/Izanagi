@@ -327,7 +327,7 @@ static int manifest(const P4PackageClient *client, const char *directory, P4Pack
         else if (!strcmp(key, "order")) { bit = 32; result = number(value, &info->order); }
         if (seen & bit) { provider->diagnostic = "Duplicate metadata key"; goto fail; }
         if (result) {
-            provider->diagnostic = !strcmp(key, "api") ? "Unsupported required API version (runtime1.1)" :
+            provider->diagnostic = !strcmp(key, "api") ? "Unsupported required API version (runtime" P4_PACKAGE_API_TEXT ")" :
                 "Unknown metadata key or invalid bounded value";
             goto fail;
         }

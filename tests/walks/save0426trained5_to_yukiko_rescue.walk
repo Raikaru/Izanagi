@@ -1,4 +1,4 @@
-# From story0426trained5: earned Media, Omoikane Tarunda, Senri Fire Null, Ice on the Prince, Chie Guard.
+# From story0426trained5: earned Media, Omoikane Tarunda, Senri Fire Null, battle rules for Ice on Yukiko and the Prince, Chie's charge Guard.
 timeout:10000
 wait:140
 press:cross
@@ -108,44 +108,26 @@ press:cross
 wait:100
 press:circle
 wait:100
-# Tactics -> Skill; highlight Bufu but cancel back to the wheel before driving.
-press:down
-wait:20
-press:down
-wait:20
-press:down
-wait:30
-press:cross
-wait:100
-press:down
-wait:20
-press:down
-wait:20
-press:down
-wait:20
-press:down
-wait:20
-press:down
-wait:20
-press:circle
-wait:30
-press:down
-# Per-character first plans align each remembered wheel; subsequent turns repeat the selected action.
-battle:first1=up,cross,cross,cross;first3=up,cross;plan=cross,cross,cross
+# Rules from here: Yu (Senri, Fire Null) casts Bufu, Media for anyone under 90 HP, and falls back to his weapon without SP;
+# Chie (Direct Commands) casts Bufu, falls back to her weapon, and Guards while Shadow Yukiko (258) is charged for
+# Burn to Ashes; Yosuke stays Heal/Support. Both strike Yukiko until she summons the Ice-weak, healing Charming Prince
+# (269) on her second turn, then the Prince until it falls, then Yukiko again.
+battle:first1=circle,down,cross,skill:26,cross,cross,circle,circle,circle,cross,cross;plan1=circle,down,cross,skill:26,cross,cross,circle,circle,circle,cross,cross;plan=circle,down,cross,skill:26,cross,cross,circle,circle,circle,cross,cross;skip=0;delay=80;target1=258;target3=258;guard=258:3
+battlerule:hp<90@1=circle,down,cross,skill:195,cross,cross,circle,circle,circle,cross,cross
 battleskip:on
-wait:1000
-# Keep the in-flight first plan through native TARGET6 and select the Prince.
-battle:first1=circle,circle,circle,down,cross,cross,right,cross;plan=cross,cross,cross
-wait:700
-# Chie's native target initialization already selects the Prince here; Right rotated her back to Yukiko.
-battle:first3=down,down,cross,down,down,cross,cross;plan=cross,cross,cross
-wait:6000
-# Return Chie to Guard before damaging Yukiko into the Burn to Ashes phase.
-battle:first3=circle,circle,circle,up,cross;plan=cross,cross,cross
-wait:10000
-# A physical finisher avoids confirming a disabled Bufu after Yu runs out of SP.
-battle:first1=circle,circle,circle,cross,cross;plan=cross,cross,cross
-wait:8000
+timeout:40000
+waitbtl:menu:3
+waitbtl:menu:1
+log
+battle:first1=circle,down,cross,skill:26,cross,cross,circle,circle,circle,cross,cross;plan1=circle,down,cross,skill:26,cross,cross,circle,circle,circle,cross,cross;plan=circle,down,cross,skill:26,cross,cross,circle,circle,circle,cross,cross;skip=0;delay=80;target1=269;target3=269;guard=258:3
+battlerule:hp<90@1=circle,down,cross,skill:195,cross,cross,circle,circle,circle,cross,cross
+waitbtl:dead:269
+log
+# Yukiko is then the only target, so no binding is needed (an ally-target Soul Drop could not satisfy one):
+# Yu opens with Rakunda and drinks a Soul Drop below 8 SP.
+battle:first1=circle,down,cross,skill:215,cross,cross,circle,circle,circle,cross,cross;plan1=circle,down,cross,skill:26,cross,cross,circle,circle,circle,cross,cross;plan=circle,down,cross,skill:26,cross,cross,circle,circle,circle,cross,cross;skip=0;delay=80;guard=258:3
+battlerule:sp<8@1=circle,down,down,down,cross,item:0x30B,cross,cross,circle,circle,circle,cross,cross
+battlerule:hp<90@1=circle,down,cross,skill:195,cross,cross,circle,circle,circle,cross,cross
 log
 waittask:battle:off
 skipmsg

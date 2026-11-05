@@ -26,6 +26,21 @@ set_tests_properties(field_mad PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes"
 # Skipped (exit 77) without P4PC_ISO and P4PC_ELF.
 add_test(NAME battle_menu COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/battle_gate.sh" $<TARGET_FILE:p4pc> 20 420)
 set_tests_properties(battle_menu PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 300)
+# Shuffle Time, every pattern and variant (tests/shuffle_gate.sh, src/platform/shuffle_harness.c): the harness battle ends in Shuffle Time with
+# P4PC_SHUFFLE's pattern and variant, drawn by the game's own selection from rewritten roll tables, and the shuffle task must run its sequence
+# to the end. `first` is the player's first Shuffle Time with the pattern's tutorial. The 64-bit twins guard the null-offset rule
+# (docs/port64.md): patterns 3 and 4 faulted there on BtlShuffleContext fields past 64 KB.
+foreach(shufflePattern 0 1 2 3 4)
+  set(shuffleVariants first 0 1 2)
+  if(shufflePattern EQUAL 3)
+    list(APPEND shuffleVariants 3)
+  endif()
+  foreach(shuffleVariant IN LISTS shuffleVariants)
+    add_test(NAME shuffle_gate_${shufflePattern}_${shuffleVariant} COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/shuffle_gate.sh" $<TARGET_FILE:p4pc>
+      ${shufflePattern}:${shuffleVariant})
+    set_tests_properties(shuffle_gate_${shufflePattern}_${shuffleVariant} PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600)
+  endforeach()
+endforeach()
 # The command menu of the Shadow Yosuke fight (encounter 512, the corpus battle-floor-a savestate's stage f222) against the PCSX2 frame: the same
 # stage, hero and menu; the boss's pose and the film grain differ. refs/p4-battle-floor-a.rgb beside the retail image. The presses end at flip 1200 so
 # the menu stays up; the virtual clock makes the frame repeat.
@@ -98,9 +113,9 @@ add_test(NAME scene_rain COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/event_scene_gat
 set_tests_properties(scene_rain PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 1200)
 add_test(NAME scene_arcana_rankup_sparkles COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/event_scene_gate.sh" $<TARGET_FILE:p4pc> arcana-rankup-sparkles 7300 3.65 story0415 save0415_to_street.walk)
 set_tests_properties(scene_arcana_rankup_sparkles PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 900)
-add_test(NAME scene_tv_world_enter COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/event_scene_gate.sh" $<TARGET_FILE:p4pc> tv-world-enter 75594 1.65 newgame newgame_to_0413.walk)
+add_test(NAME scene_tv_world_enter COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/event_scene_gate.sh" $<TARGET_FILE:p4pc> tv-world-enter 71778 1.65 newgame newgame_to_0413.walk)
 set_tests_properties(scene_tv_world_enter PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 1700)
-add_test(NAME scene_shadow_haze COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/event_scene_gate.sh" $<TARGET_FILE:p4pc> shadow-haze 110560 1.65 newgame newgame_to_0413.walk)
+add_test(NAME scene_shadow_haze COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/event_scene_gate.sh" $<TARGET_FILE:p4pc> shadow-haze 103408 1.65 newgame newgame_to_0413.walk)
 set_tests_properties(scene_shadow_haze PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 1700)
 
 # A real field walk driven through SDL, including short rim travel and 1 kHz cross-axis jitter.

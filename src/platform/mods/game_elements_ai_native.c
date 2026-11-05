@@ -612,7 +612,7 @@ int p4_game_elements_ai_native_plan_mask(const P4GameAiQueryPlan *plan, void *ta
     *out = mask;
     return P4_TABLE_OK;
 }
-int p4_game_elements_ai_native_target_allowed(void *work, void *source, void *target, uint32_t *out)
+int p4_game_elements_ai_native_choice_allowed(void *work, void *source, uint32_t *out)
 {
     P4AiCarrier *carrier = p4_ai_native_carrier(source);
     if (!out || !carrier) return P4_TABLE_INVALID;
@@ -621,13 +621,12 @@ int p4_game_elements_ai_native_target_allowed(void *work, void *source, void *ta
     const P4GameAiSelection *actual = &carrier->selected;
     if (!actual->valid || actual->candidate.command != P4_G16(guest + 0x6eu) ||
         memcmp(&actual->source, &carrier->owner, sizeof actual->source)) return P4_TABLE_CONFLICT;
-    int allowed = p4_game_elements_ai_vm_candidate_allowed(work, source, target, &actual->candidate.frame);
+    int allowed = p4_game_elements_ai_vm_candidate_allowed(work, source, &actual->candidate.frame);
     if (allowed < 0) return allowed;
     *out = !!allowed;
     return P4_TABLE_OK;
 }
-int p4_game_elements_ai_native_selection_mask(const P4GameAiQueryPlan *plan,
-    void *target, uint32_t mask, uint32_t *out)
+int p4_game_elements_ai_native_selection_mask(const P4GameAiQueryPlan *plan, uint32_t mask, uint32_t *out)
 {
     if (!out) return P4_TABLE_INVALID;
     P4AiCarrier *carrier;
@@ -642,7 +641,7 @@ int p4_game_elements_ai_native_selection_mask(const P4GameAiQueryPlan *plan,
          * Do not infer one from this actor's old/default command work. */
         for (uint32_t i = 0; mask && i < carrier->candidate_count; ++i) {
             int allowed = p4_game_elements_ai_vm_candidate_allowed(P4_G2H(plan->script_work_guest),
-                P4_G2H(plan->source_guest), target, &carrier->available[i].frame);
+                P4_G2H(plan->source_guest), &carrier->available[i].frame);
             if (allowed < 0) return allowed;
             if (allowed) { *out = mask; return P4_TABLE_OK; }
         }
@@ -662,7 +661,7 @@ int p4_game_elements_ai_native_selection_mask(const P4GameAiQueryPlan *plan,
         const P4GameActionFrame *frame = profile_choice ? profile_choice :
             plan->mode == P4_GAME_AI_PLAN_FAMILY ? &carrier->available[i].frame : &plan->frame;
         int allowed = p4_game_elements_ai_vm_candidate_allowed(P4_G2H(plan->script_work_guest),
-            P4_G2H(plan->source_guest), target, frame);
+            P4_G2H(plan->source_guest), frame);
         if (allowed < 0) return allowed;
         if (!allowed) mask &= ~(1u << i);
     }
@@ -810,9 +809,9 @@ int p4_game_elements_ai_native_plan_predict(const P4GameAiQueryPlan *plan, void 
     return P4_TABLE_OK;
 }
 int p4_game_elements_ai_native_query(void *work, void *source, void *target,
-    uint32_t parameter, int32_t selector, uint32_t policy, uint32_t id_domain, uint32_t *out)
+    uint32_t parameter, int32_t selector, uint32_t policy, uint32_t *out)
 {
-    if (!out || id_domain > 1u) return P4_TABLE_INVALID;
+    if (!out) return P4_TABLE_INVALID;
     P4GameAiQueryPlan plan;
     int result = p4_game_elements_ai_native_plan_begin(work, source, parameter, selector, &plan);
     if (result) return result;
@@ -822,8 +821,7 @@ int p4_game_elements_ai_native_query(void *work, void *source, void *target,
     const P4GameActionFrame *actual = plan.mode == P4_GAME_AI_PLAN_FRAME ? &plan.frame : NULL;
     uint32_t independent = plan.mode == P4_GAME_AI_PLAN_BASIC || plan.mode == P4_GAME_AI_PLAN_PROFILE ||
         (plan.mode == P4_GAME_AI_PLAN_FAMILY && !value);
-    result = p4_game_elements_ai_vm_pending_numbers(work, actual, words, invalid,
-        id_domain ? target : NULL, independent);
+    result = p4_game_elements_ai_vm_pending_numbers(work, actual, words, invalid, independent);
     if (result) return result;
     *out = value;
     return P4_TABLE_OK;

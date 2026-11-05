@@ -58,6 +58,20 @@ p4_ps2_exe(axrna_test)
 add_test(NAME axrna COMMAND axrna_test)
 set_tests_properties(axrna PROPERTIES SKIP_RETURN_CODE 77)
 
+# When an ADX voice ends, in game updates, on the battle's clocks: two VBLANKs per update, audio
+# rendered on every VBLANK by the kernel's virtual clock, the CRI server behind the game's GS-field
+# gate on every second one; a synthetic 24 kHz voice arriving at a fixed update through the retail
+# create and the retail ADXT server (tests/adxt_playend_test.c). Skipped (exit 77) unless P4PC_ISO and
+# P4PC_ELF are set.
+add_executable(adxt_playend_test adxt_playend_test.c "${P4_TABLES}" $<TARGET_OBJECTS:p4decomp> $<TARGET_OBJECTS:p4port> $<TARGET_OBJECTS:p4portee>)
+target_include_directories(adxt_playend_test PRIVATE "${CMAKE_SOURCE_DIR}/include" "${CMAKE_SOURCE_DIR}/src/platform/sound")
+target_compile_options(adxt_playend_test PRIVATE -fno-builtin)
+target_compile_definitions(adxt_playend_test PRIVATE ${P4_PORT_DEFINES})
+target_link_libraries(adxt_playend_test m ${P4_SDL3_LIB} ${P4_FFMPEG_LIBS})
+p4_ps2_exe(adxt_playend_test)
+add_test(NAME adxt_playend COMMAND adxt_playend_test)
+set_tests_properties(adxt_playend PROPERTIES SKIP_RETURN_CODE 77)
+
 # The boot movie's player start in an exe linked like p4pc (generated tables included), with traps fatal:
 # a host library name the tables step took for a retail function becomes a trap stub that shadows it
 # (pthread_mutex_* on Windows) and only fails once the movie plays. Skipped (exit 77) unless P4PC_ISO is set.

@@ -5,7 +5,10 @@
 #include "p4pc/mod_fidelity.h"
 #include "p4pc/package_memory.h"
 #define P4_PACKAGE_API_MAJOR 1
-#define P4_PACKAGE_API_MINOR 1
+#define P4_PACKAGE_API_MINOR 4
+#define P4_PACKAGE_API_STRINGIZE(x) #x
+#define P4_PACKAGE_API_VERSION_TEXT(major, minor) P4_PACKAGE_API_STRINGIZE(major) "." P4_PACKAGE_API_STRINGIZE(minor)
+#define P4_PACKAGE_API_TEXT P4_PACKAGE_API_VERSION_TEXT(P4_PACKAGE_API_MAJOR, P4_PACKAGE_API_MINOR)
 #define P4_PACKAGE_MAX 64 /* per independent selector */
 
 typedef enum P4PackageKind { P4_PACKAGE_MOD = 1, P4_PACKAGE_ENGINE_PACK = 2 } P4PackageKind;

@@ -23,7 +23,7 @@ static const uint32_t kTaskLists[TASK_LISTS] = {0x00764adcu, 0x00764af4u, 0x0076
 #define STUCK_FRAMES 150
 #define STUCK_PROGRESS 3.0f
 
-typedef enum { C_WALK, C_FACE, C_PRESS, C_WAIT, C_WAITFIELD, C_WAITSTEP, C_WAITSTATE, C_WAITCONTROL, C_WAITMSG, C_SKIPMSG, C_SKIPFOR, C_SKIPFIELD, C_SKIPEVTMSG, C_WAITCHOICE, C_CHOOSE, C_AUTOSKIP, C_BATTLESKIP, C_PLAN, C_BATTLE, C_BATTLERULE, C_WAITBTL, C_WAITTASK, C_SKIPTASK, C_NAVPROBE, C_NAVDUMP, C_LOG, C_PUSH, C_EXIT } Kind;
+typedef enum { C_WALK, C_FACE, C_PRESS, C_WAIT, C_WAITFIELD, C_WAITSTEP, C_WAITSTATE, C_WAITCONTROL, C_WAITMSG, C_SKIPMSG, C_SKIPFOR, C_SKIPFIELD, C_SKIPEVTMSG, C_WAITCHOICE, C_CHOOSE, C_AUTOSKIP, C_BATTLESKIP, C_PLAN, C_BATTLE, C_BATTLERULE, C_BATTLETURN, C_WAITBTL, C_WAITTASK, C_SKIPTASK, C_NAVPROBE, C_NAVDUMP, C_LOG, C_PUSH, C_EXIT } Kind;
 
 typedef struct {
     Kind kind;
@@ -80,6 +80,12 @@ typedef struct {
     int nav_left;                          /* skill:ID presses still due at the current step, -1 before they are counted */
     unsigned nav_key;                      /* their button: 1 << P4W_DOWN or 1 << P4W_UP */
     uint32_t prompt_at;                    /* the next results-screen skill-offer press is due */
+    P4WalkBattleRule turns[P4WALK_BATTLE_TURN_MAX]; /* battleturn: lines: the Nth supplies the Nth fresh command */
+    int nturns, turn_next;                 /* lines given, and the next one to arm */
+    int cur_turn;                          /* the armed command's line, -1 for none, -2 for the host's line in host_turn */
+    int turn_retry;                        /* the line to retry after a command that did not take, -1 for none */
+    unsigned host_turns;                   /* commands the host's battle_turn callback has supplied */
+    P4WalkBattleRule host_turn;
 } BattleDriver;
 
 struct NavMap;
@@ -176,6 +182,8 @@ static int battle_parse(const char *s, BattleDriver *d) {
     d->delay = 20;
     d->seen = -2;
     d->cur_rule = -1;
+    d->cur_turn = -1;
+    d->turn_retry = -1;
     if (!strcmp(s, "off")) return 1;
     d->on = 1;
     d->first_len = -1;
@@ -291,6 +299,25 @@ int p4walk_battle_rule_parse(const char *text, P4WalkBattleRule *out) {
     return battle_plan(eq + 1, strlen(eq + 1), out->keys, &out->key_count) && out->key_count > 0;
 }
 
+int p4walk_battle_turn_parse(const char *text, P4WalkBattleRule *out) {
+    memset(out, 0, sizeof *out);
+    const char *eq = strchr(text, '='), *keys = text;
+    if (eq) {
+        static const struct { const char *name; int kind; } conds[] = {
+            {"enemy:", P4WALK_RULE_ENEMY}, {"ally:", P4WALK_RULE_ALLY}, {"dead:", P4WALK_RULE_DEAD}};
+        size_t i;
+        for (i = 0; i < sizeof conds / sizeof conds[0]; i++) {
+            size_t n = strlen(conds[i].name);
+            if (!strncmp(text, conds[i].name, n) && (size_t)(eq - text) > n) break;
+        }
+        if (i == sizeof conds / sizeof conds[0]) return 0;
+        out->kind = conds[i].kind;
+        if (!rule_number(text + strlen(conds[i].name), eq, 0, 1, out->kind == P4WALK_RULE_ENEMY ? 0xFFFFu : BTL_PARTY_MAX, &out->value)) return 0;
+        keys = eq + 1;
+    }
+    return battle_plan(keys, strlen(keys), out->keys, &out->key_count) && out->key_count > 0;
+}
+
 /* datCalcGetBuffLevel: index i's signed nibble at DatUnit +0x1C + i/2 (odd indices high), values above 7 minus 15. */
 static int rule_buff_level(const P4WalkBattleUnit *u, unsigned index) {
     int v = (u->buffs[index >> 1] >> ((index & 1u) * 4u)) & 0xF;
@@ -341,7 +368,7 @@ int p4walk_battle_rule_select(const P4WalkBattleRule *rules, int count, const P4
             continue;
         case P4WALK_RULE_ENEMY:
             for (int i = 0; i < v->enemy_count; i++)
-                if (v->enemies[i].id == rule->value && v->enemies[i].hp) return r;
+                if (v->enemies[i].id == rule->value && v->enemies[i].hp) { *enemy = v->enemies[i].id; return r; }
             continue;
         case P4WALK_RULE_STATUS:
             if (self && (self->bad & rule->value)) return r;
@@ -581,6 +608,10 @@ P4Walk *p4walk_parse(const char *text, char *err, size_t errsz) {
             P4WalkBattleRule probe;
             c->kind = C_BATTLERULE;
             if (!p4walk_battle_rule_parse(s + 11, &probe)) goto bad;
+        } else if (!strncmp(s, "battleturn:", 11)) {
+            P4WalkBattleRule probe;
+            c->kind = C_BATTLETURN;
+            if (!p4walk_battle_turn_parse(s + 11, &probe)) goto bad;
         } else if (!strncmp(s, "battleskip:", 11)) {
             c->kind = C_BATTLESKIP;
             if (!strcmp(s + 11, "on")) c->on = 1;
@@ -1824,7 +1855,34 @@ static int battle_drive(P4Walk *w, const P4WalkHost *h, uint32_t frame, uint32_t
             d->cur_rule = -1;
             d->cur_ally = 0;
             d->cur_enemy = 0;
-            if (!d->cur_guard && d->nrules > 0) {
+            /* battleturn: the Nth fresh command takes the Nth line (a retry keeps its line), then the host's, ahead of everything else. */
+            d->cur_turn = -1;
+            if (d->turn_retry != -1) { d->cur_turn = d->turn_retry; d->turn_retry = -1; }
+            else if (d->turn_next < d->nturns) d->cur_turn = d->turn_next++;
+            else if (h->battle_turn) {
+                char line[512];
+                if (h->battle_turn(h->user, (unsigned)d->nturns + d->host_turns, line, sizeof line)) {
+                    if (!p4walk_battle_turn_parse(line, &d->host_turn)) {
+                        fail(w, h, "the host's battle turn is not a battleturn: line");
+                        *mask = 0;
+                        return 1;
+                    }
+                    d->cur_turn = -2;
+                    d->host_turns++;
+                }
+            }
+            if (d->cur_turn != -1) {
+                const P4WalkBattleRule *turn = d->cur_turn == -2 ? &d->host_turn : &d->turns[d->cur_turn];
+                d->cur_guard = 0;
+                d->cur_ally = turn->kind == P4WALK_RULE_ALLY || turn->kind == P4WALK_RULE_DEAD ? turn->value : 0;
+                d->cur_enemy = turn->kind == P4WALK_RULE_ENEMY ? turn->value : 0;
+                if (h->note) {
+                    char m[96];
+                    snprintf(m, sizeof m, "battle turn %u for character %u",
+                             d->cur_turn == -2 ? (unsigned)d->nturns + d->host_turns : (unsigned)d->cur_turn + 1u, d->cur_pc + 1);
+                    h->note(h->user, m);
+                }
+            } else if (!d->cur_guard && d->nrules > 0) {
                 P4WalkBattleUnit allies[BTL_PARTY_MAX], enemies[BTL_ENEMY_MAX];
                 P4WalkBattleView view = {d->cur_pc + 1u, allies, 0, enemies, 0, 0};
                 battle_view(h, c, allies, &view.party_count, enemies, &view.enemy_count);
@@ -1847,6 +1905,10 @@ static int battle_drive(P4Walk *w, const P4WalkHost *h, uint32_t frame, uint32_t
                 static const unsigned guard[] = {1u << P4W_CIRCLE, 1u << P4W_UP, 1u << P4W_CROSS};
                 bits = guard;
                 len = sizeof guard / sizeof guard[0];
+            } else if (d->cur_turn != -1) {
+                const P4WalkBattleRule *turn = d->cur_turn == -2 ? &d->host_turn : &d->turns[d->cur_turn];
+                bits = turn->keys;
+                len = turn->key_count;
             } else if (d->cur_rule >= 0) {
                 bits = d->rules[d->cur_rule].keys;
                 len = d->rules[d->cur_rule].key_count;
@@ -1881,14 +1943,20 @@ static int battle_drive(P4Walk *w, const P4WalkHost *h, uint32_t frame, uint32_t
                 }
                 d->hold_until = frame + 5;
             } else if (d->step < len && frame >= d->start_at + (uint32_t)d->step * 14u) {
-                int ally = d->cur_rule >= 0 && d->cur_ally, foe = d->cur_rule >= 0 && d->cur_enemy;
+                const P4WalkBattleRule *bound = d->cur_turn == -2 ? &d->host_turn : d->cur_turn >= 0 ? &d->turns[d->cur_turn] :
+                                                d->cur_rule >= 0 ? &d->rules[d->cur_rule] : NULL;
+                int ally = bound && d->cur_ally, foe = bound && d->cur_enemy;
                 unsigned id = ally ? d->cur_ally : foe ? d->cur_enemy : d->cur_pc < BTL_PARTY_MAX ? d->target_pc[d->cur_pc] : 0;
                 int target = 1;
                 if (id && !d->cur_guard && action_state == BTL_ACTION_TARGET && (bits[d->step] & (1u << P4W_CROSS)))
-                    target = battle_bound_target(h, actor, id, ally, ally && d->rules[d->cur_rule].kind == P4WALK_RULE_DEAD);
+                    target = battle_bound_target(h, actor, id, ally, ally && bound->kind == P4WALK_RULE_DEAD);
                 if (target < 0 || (!target && d->target_moves >= 12)) {
                     char why[128];
-                    if (ally || foe)
+                    if ((ally || foe) && d->cur_turn != -1)
+                        snprintf(why, sizeof why, "battle turn %u's %s %u is %s",
+                                 d->cur_turn == -2 ? (unsigned)d->nturns + d->host_turns : (unsigned)d->cur_turn + 1u, ally ? "ally" : "enemy", id,
+                                 target < 0 ? "absent from TARGET" : "not reachable with TARGET input");
+                    else if (ally || foe)
                         snprintf(why, sizeof why, "battle rule %d's %s %u is %s", d->cur_rule + 1, ally ? "ally" : "enemy", id,
                                  target < 0 ? "absent from TARGET" : "not reachable with TARGET input");
                     else
@@ -1910,7 +1978,11 @@ static int battle_drive(P4Walk *w, const P4WalkHost *h, uint32_t frame, uint32_t
                 }
                 d->hold_until = frame + 5;
             }
-            else if (d->step >= len && frame - d->start_at > 600) { d->acted = 0; d->wait_since = frame - d->delay; }   /* the plan did not take: again */
+            else if (d->step >= len && frame - d->start_at > 600) {                     /* the plan did not take: again (a turn keeps its line) */
+                d->acted = 0;
+                d->wait_since = frame - d->delay;
+                if (d->cur_turn != -1) d->turn_retry = d->cur_turn;
+            }
         }
     }
     *mask = frame < d->hold_until ? d->hold_mask : 0;
@@ -2158,6 +2230,12 @@ static uint32_t walk_step(P4Walk *w, const P4WalkHost *h, uint32_t frame) {
             if (!w->bd.on) { fail(w, h, "battlerule: needs an active battle: driver"); return 0; }
             if (w->bd.nrules >= P4WALK_BATTLE_RULE_MAX) { fail(w, h, "more than 16 battlerule: lines"); return 0; }
             p4walk_battle_rule_parse(c->text + 11, &w->bd.rules[w->bd.nrules++]);
+            done = 1;
+            break;
+        case C_BATTLETURN:
+            if (!w->bd.on) { fail(w, h, "battleturn: needs an active battle: driver"); return 0; }
+            if (w->bd.nturns >= P4WALK_BATTLE_TURN_MAX) { fail(w, h, "more than 256 battleturn: lines"); return 0; }
+            p4walk_battle_turn_parse(c->text + 11, &w->bd.turns[w->bd.nturns++]);
             done = 1;
             break;
         case C_PLAN:

@@ -1,6 +1,7 @@
-/* Lockstep-only disc replay (docs/lockstep.md, "In-battle disc replay"). After a qualified
- * battle anchor, each disc read stays busy until the game frame at which retail first saw
- * the matching read complete. Nothing changes unless P4PC_LOCKSTEP_DISC_REPLAY is set. */
+/* Lockstep-only disc replay (docs/lockstep.md, "Lockstep disc replay"). After the accepted
+ * initial LOAD anchor of a state-aligned run (or the qualified anchor of a battle qualification),
+ * each disc read stays busy until the game frame at which retail first saw the matching read
+ * complete. Nothing changes unless P4PC_LOCKSTEP_DISC_REPLAY is set. */
 #ifndef P4PC_LOCKSTEP_DISC_H
 #define P4PC_LOCKSTEP_DISC_H
 
@@ -10,7 +11,7 @@
  * DIRECTORY/port-disc-holds.tsv. Returns 1 when configured, 0 when the variable is unset;
  * a malformed table fails the lockstep run. */
 int p4pc_lockstep_disc_open(const char *directory);
-/* At the qualified anchor boundary: from the next update on, every disc read must match a
+/* At the replay anchor boundary: from the next update on, every disc read must match a
  * table row and is held until the anchor-relative frame retail observed its completion. */
 void p4pc_lockstep_disc_activate(uint32_t anchor_frame);
 

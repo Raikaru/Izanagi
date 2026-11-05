@@ -25,6 +25,14 @@
   request scheduler must compile and read the same guest word on both.
 - **Marker overrides may replace an INCLUDE_ASM.** When the `// FUN_` marker is followed by
   `INCLUDE_ASM(...)` (no C body in the decomp), the override replaces that line.
+- **An override may open with includes, data, types or helpers.** After splicing, the
+  generator moves the `// FUN_` marker line (a comment; the compiled text is unchanged)
+  to just before the override's own body: the definition it replaced (its callers' link
+  name, or `func_<addr8>`), else its first non-static definition when the override
+  renames the body. Function-pointer tables, retail names and the mod hook catalog all
+  read the definition after that marker, so a static helper or a data line first can no
+  longer bind the address to the wrong function or none. An override with no non-static
+  definition fails the mirror.
 - **Marker functions link by name.** The mirror copy drops `static` from a prototype whose name
   a `// FUN_` marker introduces (`static T name(` before a later definition). Otherwise the
   retail-address alias cannot link to it (for example `FreeListCreate` at `0x003e1030`).

@@ -1,5 +1,6 @@
 #include "p4pc/vu0.h"
 #include "p4pc/settings_native.h"
+#include "p4pc/mod_status.h"
 
 /* 0012c510..0012cc4c: retail Camp dispatcher, verified against the ELF.
  * An accepted field request selects the real enabled System command only after
@@ -46,6 +47,7 @@ s32 cmpMainTaskStep(u8 *unusedTask) {
         if ((titleSlotsSettled(work + 0x18) != 0) && (menu->activeMenus == 1)) {
             s32 shortcut = 0;
             p4_settings_native_corner();
+            p4_mod_status_draw();
             if (p4_settings_native_camp_route((u32)work)) {
                 for (s32 slot = 0; slot < menu->title.slotCount; ++slot) {
                     if (menu->title.commandIds[slot] == 6) {

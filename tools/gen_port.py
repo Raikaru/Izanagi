@@ -47,6 +47,7 @@ DATA_NAME_RE = re.compile(r"^(?:D|DAT|PTR_DAT|jtbl)_([0-9A-Fa-f]{8})(?:_abs)?$")
 FUNC_NAME_RE = re.compile(r"^(?:func|FUN)_([0-9A-Fa-f]{8})$")
 GP_NAME_RE = re.compile(r"^(?:[if]Gp|gp0x)([0-9A-Fa-f]{8})$")
 OVERRIDE_RE = re.compile(r"^([0-9a-f]{8})\.c$")
+INCLUDE_ASM_NAME_RE = re.compile(r'\bINCLUDE_ASM\(\s*"[^"]*"\s*,\s*([A-Za-z_]\w*)\s*\)')
 # Any `FUN_<ADDR8>` token; the excluded-unit check matches these exactly as a substring test would.
 FUN_TOKEN_RE = re.compile(r"FUN_[0-9A-F]{8}")
 IDENT_RE = re.compile(r"([A-Za-z_]\w*)\s*$")
@@ -237,6 +238,85 @@ def marker_body_name(text, marker_end, addr, syms):
     return name
 
 
+SIGNATURE_RE = re.compile(r"(?P<ret>[\w\s*]+?)\b(?P<name>\w+)\s*\((?P<args>[^{};]*)\)")
+# String/char literals and comments, whichever starts first, for brace scanning.
+OPAQUE_RE = re.compile(r'"(?:\\.|[^"\\\n])*"|\'(?:\\.|[^\'\\\n])*\'|/\*.*?\*/|//[^\n]*', re.S)
+CONDITIONAL_RE = re.compile(r"#[ \t]*(?:if|ifdef|ifndef|elif|else|endif)\b")
+
+
+def opaque_blanked(text):
+    """Same offsets and newlines, with literals and comments replaced by spaces."""
+    return OPAQUE_RE.sub(lambda match: re.sub(r"[^\n]", " ", match[0]), text)
+
+
+def marked_definition(plain, start, limit, names=None):
+    """The non-static top-level definition named in `names` (any, when None) between
+    start and limit, behind any comments, directives, prototypes, types, data or helper
+    functions. Returns (start, opening, name), "conditional" when a conditional directive
+    precedes it (the active body is not guessed), or None. `plain` is opaque_blanked."""
+    depth, item, conditional, i = 0, start, False, start
+    while i < limit:
+        if depth == 0 and (i == 0 or plain[i - 1] == "\n") and plain[i:i + 256].lstrip(" \t").startswith("#"):
+            end = plain.find("\n", i)
+            while end >= 0 and plain[end - 1] == "\\":
+                end = plain.find("\n", end + 1)
+            end = limit if end < 0 or end > limit else end
+            conditional |= bool(CONDITIONAL_RE.match(plain[i:end].lstrip(" \t")))
+            i = item = end
+            continue
+        c = plain[i]
+        if c == "{":
+            if depth == 0:
+                head = plain[item:i].strip()
+                parsed = SIGNATURE_RE.fullmatch(head)
+                if (parsed and (names is None or parsed["name"] in names) and
+                        not {"static", "extern"} & set(parsed["ret"].split())):
+                    return "conditional" if conditional else (plain.index(head, item), i, parsed["name"])
+            depth += 1
+        elif c == "}":
+            depth -= 1
+            if depth < 0:
+                return None
+            if depth == 0:
+                item = i + 1
+        elif c == ";" and depth == 0:
+            item = i + 1
+        i += 1
+    return None
+
+
+def settle_override_marker(text, marker_end, addr, body_start, body_end, replaced, label):
+    """Every marker consumer (function tables, retail names, the mod hook catalog)
+    reads the definition right after a `// FUN_` marker. An override may open with
+    data, types or helper functions, so after splicing, move the marker line (a
+    comment; the token stream is unchanged) to just before the override's own body:
+    the definition it replaced (its callers' link name), else its first non-static
+    definition when the override renames the body."""
+    line_start = text.rfind("\n", 0, marker_end) + 1
+    line_stop = line_end(text, marker_end)
+    names = {f"func_{addr:08x}", *([replaced] if replaced else [])}
+    if any(int(m[1], 16) == addr for m in MARKER_RE.finditer(text, body_start, body_end)):
+        return text  # The override carries its own marker beside its body.
+    current = marker_definition_name(text, marker_end)
+    if current in names:
+        return text
+    plain = opaque_blanked(text)
+    found = marked_definition(plain, body_start, body_end, names)
+    if found is None and current is not None and marked_definition(plain, body_start, body_end, {current}):
+        return text  # A renamed, non-static body already follows the marker.
+    if found is None:
+        found = marked_definition(plain, body_start, body_end)
+    if not isinstance(found, tuple):
+        die(f"{label}: cannot identify the function this override defines for FUN_{addr:08X}; "
+            "put its definition first, before helpers and data")
+    target = text.rfind("\n", 0, found[0]) + 1
+    settled = text[:line_start] + text[line_stop:target] + text[line_start:line_stop] + text[target:]
+    moved = MARKER_RE.search(settled, line_start + (target - line_stop))
+    if marker_definition_name(settled, moved.end()) != found[2]:
+        die(f"{label}: FUN_{addr:08X} still does not name {found[2]} after moving its marker")
+    return settled
+
+
 # ---------------------------------------------------------------- inputs
 
 def read_symbols(decomp):
@@ -267,6 +347,139 @@ def read_units(root):
     excluded.update((unit, inactive["reason"]) for unit in inactive["units"])
     units = [u for u in read_list(root / "config/units.txt") if u not in excluded]
     return units, excluded
+
+
+# ---------------------------------------------------------------- RenderWare clean layer (docs/rw_clean.md)
+
+# config/rw_clean.json names, per subsystem, the RenderWare units a clean subsystem replaces ("units", decomp paths),
+# the port transcriptions it retires ("port_sources", port paths) and its clean sources ("sources", port paths under
+# src/rwclean). `gen_port.py units --rw-clean <ids>` selects subsystems and records the selection in the build directory
+# (CMake passes the policy's "default" list unless P4_RW_CLEAN says otherwise). A clean source's `// FUN_` markers make it
+# the only owner of those retail addresses: the mirror strips the definitions at those markers from every other compiled unit.
+RW_CLEAN_POLICY = ROOT / "config/rw_clean.json"
+RW_CLEAN_DIR = "src/rwclean"
+RW_CLEAN_STRIPPED = "stripped_units.txt"   # in the mirror's RW_CLEAN_DIR: units whose definitions a clean unit took over
+
+
+def read_rw_clean_policy():
+    policy = json.loads(RW_CLEAN_POLICY.read_text(encoding="utf-8"))
+    for sid, sub in policy["subsystems"].items():
+        for key in ("units", "port_sources", "sources"):
+            if not isinstance(sub.get(key), list):
+                die(f"{RW_CLEAN_POLICY}: subsystem {sid} has no {key} list")
+        for src in sub["sources"]:
+            if not src.startswith(RW_CLEAN_DIR + "/") or not src.endswith(".c"):
+                die(f"{RW_CLEAN_POLICY}: {sid}: clean source {src} is not a .c file under {RW_CLEAN_DIR}/")
+    default = policy.get("default")
+    if not isinstance(default, list) or any(s not in policy["subsystems"] for s in default):
+        die(f"{RW_CLEAN_POLICY}: `default` must list known subsystems")
+    return policy
+
+
+def rw_clean_plan(selected):
+    """The union of the selected subsystems' lists, in policy order."""
+    known = read_rw_clean_policy()["subsystems"]
+    unknown = [s for s in selected if s not in known]
+    if unknown:
+        die(f"--rw-clean: unknown subsystem(s) {', '.join(unknown)} (config/rw_clean.json has {', '.join(known)})")
+    plan = {"subsystems": [s for s in known if s in selected], "units": [], "port_sources": [], "sources": []}
+    for sid in plan["subsystems"]:
+        for key in ("units", "port_sources", "sources"):
+            plan[key] += known[sid][key]
+    return plan
+
+
+def rw_clean_selected(build):
+    """The plan `units` recorded for this build directory (no file: the default build, nothing selected)."""
+    path = Path(build) / "rw_clean.json"
+    return json.loads(path.read_text(encoding="utf-8")) if path.is_file() else rw_clean_plan([])
+
+
+def rw_clean_units(units, plan):
+    """The compiled unit list: the default units minus the replaced ones, plus the clean sources."""
+    missing = [u for u in plan["units"] if u not in units]
+    if missing:
+        die(f"config/rw_clean.json replaces units the build does not compile: {', '.join(missing)}")
+    return [u for u in units if u not in plan["units"]] + plan["sources"]
+
+
+def rw_clean_owned(plan):
+    """Retail address -> clean source for every `// FUN_` marker of the selected clean sources."""
+    owned = {}
+    for src in plan["sources"]:
+        for mk in MARKER_RE.finditer((ROOT / src).read_text(encoding="utf-8")):
+            addr = int(mk[1], 16)
+            if addr in owned:
+                die(f"FUN_{addr:08X} is marked in both {owned[addr]} and {src}")
+            owned[addr] = src
+    return owned
+
+
+def rw_clean_apply(stage, plan, compiled):
+    """Copy the clean sources and headers into the mirror and strip, from every other compiled unit, the
+    definition after each marker a clean source owns (an INCLUDE_ASM marker loses only its marker line); list the
+    units it changed in RW_CLEAN_STRIPPED. Runs after the reviewed mirror passes: those passes and their contracts see
+    the default tree."""
+    src_root = ROOT / RW_CLEAN_DIR
+    for f in sorted(src_root.rglob("*")):
+        if f.is_file() and f.suffix in (".c", ".h"):
+            dest = stage / RW_CLEAN_DIR / f.relative_to(src_root)
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            dest.write_bytes(f.read_bytes().replace(b"\r\n", b"\n"))
+    owned = rw_clean_owned(plan)
+    # The census baselines are the default selection's: only a subsystem outside it changes a unit's counts against them.
+    default = set(read_rw_clean_policy()["default"])
+    switched = set(rw_clean_owned(rw_clean_plan([s for s in plan["subsystems"] if s not in default])))
+    stripped = 0
+    touched = []
+    for u in compiled:
+        if u in plan["sources"]:
+            continue
+        path = stage / u
+        text = path.read_text(encoding="utf-8", errors="surrogateescape")
+        hits = [mk for mk in MARKER_RE.finditer(text) if int(mk[1], 16) in owned]
+        if not hits:
+            continue
+        if any(int(mk[1], 16) in switched for mk in hits):
+            touched.append(u)
+        for mk in reversed(hits):
+            start = text.rfind("\n", 0, mk.start()) + 1
+            end = line_end(text, mk.end())
+            name = marker_definition_name(text, mk.end())
+            if name is not None:
+                pattern = re.compile(r"^[ \t]*[A-Za-z_][\w \t*]*?\b" + re.escape(name) + r"\s*\(", re.M)
+                body = next(((m.start(), definition_end(text, m.start())) for m in pattern.finditer(text, end)
+                             if definition_end(text, m.start()) is not None), None)
+                if body is None:
+                    die(f"rw-clean: {u}: no definition of {name} after FUN_{mk[1].upper()}")
+                end = line_end(text, body[1])
+            text = text[:start] + text[end:]
+            stripped += 1
+        path.write_text(text, encoding="utf-8", errors="surrogateescape", newline="\n")
+    # The units a selection outside the default changed (the 64-bit census does not compare their rule counts then; the
+    # baseline takes the switched counts when the subsystem joins the default). Inside the mirror, so a cached mirror has it.
+    (stage / RW_CLEAN_DIR / RW_CLEAN_STRIPPED).write_text("".join(u + "\n" for u in sorted(touched)), encoding="utf-8", newline="\n")
+    return len(owned), stripped
+
+
+def rw_clean_cmake(plan):
+    """build/rw_clean.cmake: what CMake needs from the selection (the port transcriptions to leave out)."""
+    drop = ";".join(plan["port_sources"])
+    return (f"# Generated by tools/gen_port.py units (config/rw_clean.json). Never edit.\n"
+            f"set(P4_RW_CLEAN_SUBSYSTEMS \"{';'.join(plan['subsystems'])}\")\n"
+            f"set(P4_RW_CLEAN_PORT_DROP \"{drop}\")\n")
+
+
+def rw_clean_governed(plan):
+    """Every unit the switch governs, `<unit> active|inactive`: the census compares an active governed unit
+    only when its baseline has it, and ignores an inactive one (tools/port64/unit64.py --rw-clean-units)."""
+    policy = read_rw_clean_policy()["subsystems"]
+    rows = []
+    for sid, sub in policy.items():
+        on = sid in plan["subsystems"]
+        rows += [f"{u}\t{'inactive' if on else 'active'}" for u in sub["units"]]
+        rows += [f"{u}\t{'active' if on else 'inactive'}" for u in sub["sources"]]
+    return "".join(r + "\n" for r in rows)
 
 
 def read_inactive_movie(root=None):
@@ -2425,6 +2638,8 @@ def override_signature(body, addr8):
 
 
 def apply_overrides(root, mirror_root, units):
+    """Splice overrides/<addr8>.c over their marked definitions, leaving each marker
+    directly before the override's own body (settle_override_marker)."""
     overrides = root / "overrides"
     texts, orig = {}, {}
     excluded_tokens = None
@@ -2509,11 +2724,15 @@ def apply_overrides(root, mirror_root, units):
                 if close is None:
                     die(f"{f.name}: no function definition follows FUN_{m[1].upper()} in {p.relative_to(mirror_root)}")
                 end = line_end(t, close)
-            texts[p] = t[:start] + body.rstrip("\n") + "\n" + t[end:]
+            replaced = marker_definition_name(t, mk_end)
+            asm = INCLUDE_ASM_NAME_RE.search(t, start, end) if replaced is None else None
+            replaced = replaced or (asm[1] if asm else None)
+            body_end = start + len(body.rstrip("\n")) + 1
+            texts[p] = settle_override_marker(t[:start] + body.rstrip("\n") + "\n" + t[end:], mk_end, addr,
+                                              start, body_end, replaced, f.name)
             # A block-scope prototype of the replaced function is a placeholder from the
             # INCLUDE_ASM era. It conflicts with the override's signature, and uses after
             # the definition take its type, so the placeholder is removed.
-            body_end = start + len(body.rstrip("\n")) + 1
             proto = re.compile(r"(?m)^[ \t]+extern[ \t][^;{}\n]*\bfunc_%s[ \t]*\([^;{}]*\)[ \t]*;[ \t]*\n" % m[1])
             texts[p] = texts[p][:body_end] + proto.sub("", texts[p][body_end:])
             sig = override_signature(body, m[1])
@@ -2754,11 +2973,21 @@ def cmd_units(a):
     for u in units:
         if not (decomp / u).is_file():
             die(f"unit {u} is not in the decomp checkout")
+    plan = rw_clean_plan([s for s in re.split(r"[,;\s]+", a.rw_clean or "") if s])
+    for src in plan["sources"] + plan["port_sources"]:
+        if not (ROOT / src).is_file():
+            die(f"config/rw_clean.json: {src} does not exist")
+    units = rw_clean_units(units, plan)
+    rw_clean_owned(plan)
     lines = unit_flags(decomp, build, units)
     write_if_changed(build / "units.txt", "\n".join(lines) + "\n")
     write_if_changed(build / "excluded.txt",
                      "".join(f"{u}\t{why}\n" for u, why in sorted(excluded.items())))
-    print(f"gen_port: units: {len(units)} units, {len(excluded)} excluded")
+    write_if_changed(build / "rw_clean.json", json.dumps(plan, indent=1) + "\n")
+    write_if_changed(build / "rw_clean.cmake", rw_clean_cmake(plan))
+    write_if_changed(build / "rw_clean_units.txt", rw_clean_governed(plan))
+    print(f"gen_port: units: {len(units)} units, {len(excluded)} excluded"
+          + (f"; RenderWare clean subsystems {', '.join(plan['subsystems'])}" if plan["subsystems"] else ""))
 
 
 # A decomp unit that defines a retail-addressed name (`static s32 iGpffffb9e0;`, `f32 fGpffff83bc = 8.1f;`,
@@ -3283,11 +3512,12 @@ def mirror_cache_inputs(decomp, build, mod_hooks):
     port_paths = [p for tree in ("config", "overrides")
                   for p in (ROOT / tree).rglob("*") if p.is_file()]
     port_paths += list((ROOT / "src").rglob("*.c")) + list((ROOT / "include").rglob("*.h"))
+    port_paths += list((ROOT / RW_CLEAN_DIR).rglob("*.h"))
     # Prototype aliases also read ROOT/decomp when --decomp names another tree.
     if (ROOT / "decomp").resolve() != decomp.resolve():
         port_paths += list((ROOT / "decomp/config").glob("*"))
     return {"decomp": str(decomp.resolve()), "build": str(build.resolve()),
-            "mod_hooks": mod_hooks,
+            "mod_hooks": mod_hooks, "rw_clean": rw_clean_selected(build),
             "decomp_files": build_cache.input_files(decomp_paths, root=decomp),
             "port_files": build_cache.input_files(port_paths, root=ROOT),
             "versions": build_cache.versions(__file__, str(ROOT / "tools/mod_codegen.py")),
@@ -3465,8 +3695,15 @@ def generate_mirror(a):
     print(f"gen_port: mirror: removed inactive movie decoder: {inactive_units} units, "
           f"{inactive_functions} mixed-unit functions, {inactive_registrations} registrations")
     contracts.finish()
+    plan = rw_clean_selected(build)
+    compiled = rw_clean_units(units, plan)
+    if plan["subsystems"]:
+        owned_addrs, stripped = rw_clean_apply(stage, plan, compiled)
+        print(f"gen_port: mirror: RenderWare clean subsystems {', '.join(plan['subsystems'])}: {len(plan['sources'])} clean units "
+              f"own {owned_addrs} retail addresses; stripped {stripped} definitions at them from other units; "
+              f"{len(plan['units'])} replaced units not compiled")
     import mod_codegen
-    hooks = mod_codegen.instrument(stage, units, build, sys.modules[__name__], a.mod_hooks)
+    hooks = mod_codegen.instrument(stage, compiled, build, sys.modules[__name__], a.mod_hooks)
     print(f"gen_port: mirror: emitted {hooks} typed mod entry guards after the reviewed mirror passes")
     publish_mirror(stage, build / "decomp")
     shutil.rmtree(stage)
@@ -4203,6 +4440,8 @@ def main():
     c = sub.add_parser("units")
     c.add_argument("--decomp", required=True)
     c.add_argument("--build", required=True)
+    c.add_argument("--rw-clean", default="",
+                   help="RenderWare clean subsystems to compile instead of the units they replace (config/rw_clean.json; CMake P4_RW_CLEAN)")
     c.set_defaults(fn=cmd_units)
 
     m = sub.add_parser("mirror")

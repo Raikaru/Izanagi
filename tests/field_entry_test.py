@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""Production guest-memory field-entry and capture sampler regressions."""
+"""Production guest-memory field-entry and capture sampler regressions, and the per-run RAM dump cap."""
 import json
+import os
 from pathlib import Path
 import shutil
 import subprocess
@@ -56,6 +57,45 @@ class FieldEntryTest(unittest.TestCase):
         self.assertEqual(self.rows[3]["resources"][1]["ids"], [0x400, 0x401])
         self.assertEqual(self.rows[-1]["flip"], 11)
         self.assertEqual(self.rows[-1]["event_flags"][-1], "abc0cafe")
+
+
+class RamDumpCapTest(unittest.TestCase):
+    """2026-11-03: timed dumps (31 MB each) wrote 39 GB to C: in half an hour; a run stops at P4PC_DUMP_RAM_MAX_MB."""
+
+    def setUp(self):
+        compiler = shutil.which("cc") or shutil.which("clang") or shutil.which("gcc")
+        if not compiler:
+            self.skipTest("a native C compiler is required for the RAM dump witness")
+        work = tempfile.TemporaryDirectory()
+        self.addCleanup(work.cleanup)
+        self.directory = Path(work.name)
+        self.binary = self.directory / "ram_dump_cap_test"
+        subprocess.run([compiler, "-std=c11", "-D_POSIX_C_SOURCE=200809L", "-include", str(ROOT / "include/p4pc/compat.h"),
+                        "-I", str(ROOT / "include"), str(ROOT / "tests/ram_dump_cap_test.c"),
+                        str(ROOT / "src/platform/state_dump.c"), "-o", str(self.binary)], check=True)
+
+    def run_dumps(self, cap):
+        env = {key: value for key, value in os.environ.items() if not key.startswith("P4PC_")}
+        env.update(P4PC_DUMP_RAM=str(self.directory / "ram"), P4PC_DUMP_RAM_AT="1,2,3")
+        if cap is not None:
+            env["P4PC_DUMP_RAM_MAX_MB"] = cap
+        return subprocess.run([str(self.binary)], env=env, capture_output=True, text=True, timeout=120)
+
+    def dumps(self):
+        return sorted(path.name for path in self.directory.glob("ram_*.bin"))
+
+    def test_a_run_stops_before_the_dump_that_would_pass_its_cap(self):
+        result = self.run_dumps("62")   # two 31 MB dumps fit, the third does not
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("refusing RAM dump", result.stderr)
+        self.assertIn("P4PC_DUMP_RAM_MAX_MB=62", result.stderr)
+        self.assertEqual(self.dumps(), ["ram_1.bin", "ram_2.bin"])
+
+    def test_the_default_cap_admits_an_ordinary_comparison(self):
+        result = self.run_dumps(None)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.dumps(), ["ram_1.bin", "ram_2.bin", "ram_3.bin"])
+
 
 
 if __name__ == "__main__":

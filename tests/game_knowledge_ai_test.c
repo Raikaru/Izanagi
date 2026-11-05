@@ -137,11 +137,9 @@ int p4_game_elements_ai_native_available(void *subject, const P4GameAiCandidate 
     assert(subject == &action);
     *items = available; *count = available_count; return 0;
 }
-int p4_game_elements_ai_vm_candidate_allowed(void *work, void *subject, void *defender,
-    const P4GameActionFrame *frame)
+int p4_game_elements_ai_vm_candidate_allowed(void *work, void *subject, const P4GameActionFrame *frame)
 {
     assert(subject == &action);
-    assert(defender == target);
     if (!work) return 1;
     for (uint32_t i = 0; i < available_count; ++i)
         if (!memcmp(frame, &available[i].frame, sizeof *frame)) return !!(allowed_mask & (1u << i));

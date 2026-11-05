@@ -188,6 +188,29 @@ static void personas(void)
     assert(persona_xml(&builder, "256", metadata_hex, " extra=\"1\"", error, sizeof error) != P4_TABLE_OK && *error);
     destroy(&builder);
 }
+/* A retail-derived row names the entity's own (row, column) and requests the
+ * actual UNIT input; its value is only read from that input at seal. */
+static void retail_rows(void)
+{
+    const char *xml = "<p4-tables schema=\"1\">"
+        "<element id=\"19\" flags=\"15\" family=\"0\" order=\"0\" key=\"xml:slash\" display-name=\"Slash\" short-name=\"Slash\"/>"
+        "<affinity kind=\"1\" entity=\"1\" profile=\"1\" element=\"19\" channel=\"0\" retail-row=\"1\" retail-element=\"0\"/>"
+        "<affinity kind=\"1\" entity=\"1\" profile=\"1\" element=\"6\" channel=\"0\" value=\"0x08000000\" scalar=\"125\"/>"
+        "</p4-tables>";
+    P4GameTablesDefinitionBuilder builder;
+    P4GameTableXmlTarget target = candidate(&builder); char error[200];
+    assert(p4_game_tables_source_xml(&target, (const uint8_t *)xml, strlen(xml), error, sizeof error) == P4_TABLE_OK && !*error);
+    assert(builder.input_mask & (1u << P4_TABLE_INPUT_UNIT));
+    assert(p4_game_tables_affinity_retail_pending(builder.tables) == 1);
+    assert(p4_game_tables_freeze(builder.tables, 91) == P4_TABLE_NOT_READY);
+    uint8_t enemies[2 * 32] = {0}, personas[32] = {0};
+    enemies[32] = 0x0A; enemies[33] = 0x10; /* Row 1 Phys: resist 50%. */
+    assert(p4_game_tables_affinity_resolve_retail(builder.tables, enemies, sizeof enemies, personas, sizeof personas) == P4_TABLE_OK);
+    assert(p4_game_tables_freeze(builder.tables, 91) == P4_TABLE_OK);
+    const P4AffinityRow *row = p4_game_tables_find_affinity(builder.tables, P4_ENTITY_ENEMY, 1, 1, 19, P4_CHANNEL_DAMAGE);
+    assert(row && row->value == (P4_AFF_RESIST | 50) && row->scalar == 50);
+    destroy(&builder);
+}
 static void invalid(void)
 {
     const char *cases[] = {
@@ -209,7 +232,15 @@ static void invalid(void)
         "<p4-tables schema=\"1\"><string table=\"0\" id=\"1536\" role=\"0\" bytes=\"410\"/></p4-tables>",
         "<p4-tables schema=\"1\"><string table=\"0\" id=\"1536\" role=\"0\" bytes=\"GG00\"/></p4-tables>",
         "<p4-tables schema=\"1\"><string table=\"0\" id=\"1536\" role=\"0\" bytes=\"4100\" extra=\"1\"/></p4-tables>",
-        "<p4-tables schema=\"1\"><string table=\"0\" id=\"1536\" role=\"0\" bytes=\"410a00\"/></p4-tables>"
+        "<p4-tables schema=\"1\"><string table=\"0\" id=\"1536\" role=\"0\" bytes=\"410a00\"/></p4-tables>",
+        /* Retail-derived affinity: both halves, never mixed with an authored value. */
+        "<p4-tables schema=\"1\"><affinity kind=\"1\" entity=\"1\" profile=\"1\" element=\"6\" channel=\"0\" retail-row=\"1\"/></p4-tables>",
+        "<p4-tables schema=\"1\"><affinity kind=\"1\" entity=\"1\" profile=\"1\" element=\"6\" channel=\"0\" retail-element=\"0\"/></p4-tables>",
+        ("<p4-tables schema=\"1\"><affinity kind=\"1\" entity=\"1\" profile=\"1\" element=\"6\" channel=\"0\" retail-row=\"1\" "
+         "retail-element=\"0\" value=\"100\" scalar=\"100\"/></p4-tables>"),
+        ("<p4-tables schema=\"1\"><affinity kind=\"1\" entity=\"1\" profile=\"1\" element=\"6\" channel=\"0\" retail-row=\"1\" "
+         "retail-element=\"0\" scalar=\"100\"/></p4-tables>"),
+        "<p4-tables schema=\"1\"><affinity kind=\"1\" entity=\"1\" profile=\"1\" element=\"6\" channel=\"0\" retail-row=\"1\" retail-element=\"16\"/></p4-tables>"
     };
     for (size_t i = 0; i < sizeof cases / sizeof *cases; ++i) {
         P4GameTablesDefinitionBuilder builder;
@@ -228,7 +259,7 @@ static void invalid(void)
 }
 int main(void)
 {
-    valid(); families(); enemies(); personas(); invalid();
+    valid(); families(); enemies(); personas(); retail_rows(); invalid();
     assert(!p4_packages_memory_usage().resident && !p4_packages_memory_usage().reserved);
     puts("game_table_xml: strict bounded semantic decode, exact native origins, uint32 identities and unpublished-candidate refusal passed; no runtime admission claim");
     return 0;

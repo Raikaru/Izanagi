@@ -38,6 +38,7 @@
 #include "p4pc/guest.h"
 #include "p4pc/platform.h"
 #include "p4pc/frame_alarm_seam.h"
+#include "p4pc/vblank_hook.h"
 #ifdef P4_MOD_GAME_BINDINGS
 #include "p4pc/mod_entry.h"
 #endif
@@ -304,7 +305,12 @@ static void kt_idle(void) {
     }
 }
 
-/* Runs the due timers: VBLANK_START at 60 Hz, then each alarm whose time has come. */
+/* Runs the due timers: VBLANK_START at 60 Hz, then each alarm whose time has come. On a virtual
+ * clock every VBLANK period that has passed first runs p4pc_vblank_period_hook (the mixer renders
+ * that period's audio: the SPU2 plays in real time, so a game update that spans two vsyncs hears
+ * two periods), whether or not the VBLANK interrupt is enabled. */
+void (*p4pc_vblank_period_hook)(void);
+
 static void kt_service_timers(void) {
     uint64_t now;
     int32_t i;
@@ -313,9 +319,14 @@ static void kt_service_timers(void) {
     kt_in_intr = 1;
     now = kt_now_ns();
     if (now >= kt_vsync_next_ns) {
+        uint64_t periods = (now - kt_vsync_next_ns) / KT_VSYNC_NS + 1;
         kt_vsync_next_ns += KT_VSYNC_NS;
         if (kt_vsync_next_ns <= now)
             kt_vsync_next_ns = now + KT_VSYNC_NS;
+        if (kt_virtual_clock() && p4pc_vblank_period_hook != NULL) {
+            while (periods-- > 0)
+                p4pc_vblank_period_hook();
+        }
         p4pc_intc_raise(KT_VBLANK_START);
     }
     for (i = 1; i <= KT_MAX_THREADS; i++) {
@@ -1088,7 +1099,7 @@ void p4pc_vsync_wait(void) {
     p4pc_wait_frame_boundary();
     kt_pace_note();
     #if defined(P4_MOD_GAME_BINDINGS) && defined(P4_MOD_GUARDS)
-    if (p4_mod_event_mask & P4_MOD_FRAME_START_BIT)
+    if ((p4_mod_event_mask & P4_MOD_FRAME_START_BIT) | p4_mod_safe_point)
         p4_mod_event_frame(kt_flips);
     #endif
     kt_frame_cpu_note();

@@ -20,6 +20,7 @@
 #include "p4pc/game_elements_calc_native.h"
 #include "p4pc/game_skills_native.h"
 #include "p4pc/game_tables.h"
+#include "p4pc/game_damage_stage.h"
 #include "datScript_internal.h"
 #include "dat_skill_entry_internal.h"
 #include "dat_enemy_internal.h"
@@ -192,6 +193,129 @@ static void amount_case(u32 skill, u32 channel, u32 outcome, u32 options)
     same(&original, &direct);
     assert(primary_calls <= 1 && !rider_calls);
 }
+/* Final-damage stage over the real equation (game_damage_stage.c linked as
+ * built): no registered modifier is retail; a consulted modifier that leaves
+ * the hit alone changes nothing; challenge + hard-mode modifiers compose. */
+static unsigned stage_consulted;
+static P4GameDamageHit stage_seen;
+static int stage_decline(void *user, const P4GameDamageHit *hit, double *value)
+{
+    (void)user; (void)value; ++stage_consulted; stage_seen = *hit; return 0;
+}
+/* SEVERE DAMAGE: opposite sides by the unit the hit was aimed at. */
+static int stage_severe(void *user, const P4GameDamageHit *hit, double *value)
+{
+    (void)user;
+    if (hit->source_side == hit->origin_side) return 0;
+    double factor = hit->source_side == P4_DAMAGE_SIDE_ENEMY ? 1.5 : 0.75;
+    if (hit->hit_kind == P4_DAMAGE_HIT_CRITICAL || hit->hit_kind == P4_DAMAGE_HIT_WEAK) factor *= 1.25;
+    *value = factor;
+    return 1;
+}
+static int stage_hard_scale(void *user, const P4GameDamageHit *hit, double *value)
+{
+    (void)user;
+    if (hit->target_side != P4_DAMAGE_SIDE_PARTY) return 0;
+    *value = 1.2;
+    return 1;
+}
+static int stage_hard_floor(void *user, const P4GameDamageHit *hit, double *value)
+{
+    (void)user; (void)hit; *value = 3.0; return 1;
+}
+static Receipt stage_run(u8 *target, u32 channel, u32 outcome, u32 hit_kind, u32 options)
+{
+    reset(10, 0);
+    return receipt(datCalcSkillAmount(10, (u8 *)source_unit, target, 3, (u16)outcome, (u16)hit_kind, (s32)options, (u8)channel));
+}
+static void stage_parity(DatSkillEntry *row)
+{
+    static const u8 effects[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+    static const u32 outcomes[] = {1, 0x400, 2}, kinds[] = {1, 2, 4, 16};
+    const P4GameDamageModifierDesc decline = {"test.decline", 0, 0, P4_DAMAGE_MULTIPLY, stage_decline, NULL};
+    unsigned eligible_total = 0;
+    assert(!p4_game_damage_native_active());
+    for (unsigned i = 0; i < sizeof effects; ++i) {
+        row->effectKind = row->spEffectKind = effects[i];
+        row->damageClass = (i & 1) ? 1 : 2;
+        for (u32 channel = 1; channel <= 2; ++channel)
+            for (unsigned o = 0; o < 3; ++o)
+                for (unsigned k = 0; k < 4; ++k)
+                    for (u32 options = 0; options < 2; ++options) {
+                        const Receipt plain = stage_run((u8 *)target_unit, channel, outcomes[o], kinds[k], options);
+                        uint32_t handle = 0;
+                        assert(p4_game_damage_register(&decline, &handle) == P4_DAMAGE_OK);
+                        stage_consulted = 0;
+                        const Receipt observed = stage_run((u8 *)target_unit, channel, outcomes[o], kinds[k], options);
+                        assert(p4_game_damage_unregister(handle) == P4_DAMAGE_OK);
+                        same(&plain, &observed);
+                        const unsigned eligible = channel == 1 && outcomes[o] == 1 && !options && kinds[k] != 16 &&
+                            (effects[i] == 1 || effects[i] == 6 || effects[i] == 12 || effects[i] == 14 || effects[i] == 16);
+                        assert(stage_consulted == eligible);
+                        if (eligible)
+                            assert(stage_seen.stock == -plain.amount && stage_seen.hit_kind == kinds[k] &&
+                                stage_seen.skill_id == 10 && !stage_seen.resolved && !stage_seen.reflected &&
+                                stage_seen.element_valid && stage_seen.element_id == legacy_leaf &&
+                                stage_seen.source_status == initial_source.bad && stage_seen.target_status == initial_target.bad);
+                        eligible_total += eligible;
+                    }
+    }
+    assert(eligible_total == 15 && !p4_game_damage_native_active());
+}
+static void stage_expect(const Receipt *plain, const Receipt *observed, double hard, double severe)
+{
+    double value = (double)-plain->amount;
+    if (hard != 0.0) value *= hard;
+    if (severe != 0.0) value *= severe;
+    value += 3.0;
+    const s32 expected = value < 1.0 ? 1 : value > 32550.0 ? 32550 : (s32)value;
+    assert(plain->amount < 0 && observed->amount == -expected);
+    Receipt rest = *observed; rest.amount = plain->amount;
+    same(plain, &rest); /* the modifiers draw no RNG and touch no unit */
+}
+static void stage_composition(DatSkillEntry *row)
+{
+    row->effectKind = row->spEffectKind = 1; row->damageClass = 1;
+    initial_source.flags = 0; initial_target.flags = 4;
+    const Receipt critical = stage_run((u8 *)target_unit, 1, 1, P4_DAMAGE_HIT_CRITICAL, 0);
+    const Receipt normal = stage_run((u8 *)target_unit, 1, 1, P4_DAMAGE_HIT_NORMAL, 0);
+    p4_game_damage_native_hit_begin(10, 1, 2, 1); /* repelled by enemy 2 back to its party source */
+    const Receipt reflected = stage_run((u8 *)source_unit, 1, 1, P4_DAMAGE_HIT_NORMAL, 0);
+    p4_game_damage_native_hit_end();
+    /* The ailment words are the ones this equation read for the hit. */
+    initial_source.flags = 4; initial_target.flags = 0;
+    initial_source.bad = 0x2u; initial_target.bad = 0x100000u;
+    const Receipt weak = stage_run((u8 *)target_unit, 1, 1, P4_DAMAGE_HIT_WEAK, 0);
+    /* Registered out of order: hard mode's factor (load 1) runs before the
+     * challenge factor (load 2), and its additive floor after both. */
+    const P4GameDamageModifierDesc severe = {"challenge.severe", 0, 2, P4_DAMAGE_MULTIPLY, stage_severe, NULL};
+    const P4GameDamageModifierDesc scale = {"hardmode.scale", 0, 1, P4_DAMAGE_MULTIPLY, stage_hard_scale, NULL};
+    const P4GameDamageModifierDesc floor_add = {"hardmode.floor", 0, 1, P4_DAMAGE_ADD, stage_hard_floor, NULL};
+    const P4GameDamageModifierDesc observe = {"test.observe", 1, 0, P4_DAMAGE_MULTIPLY, stage_decline, NULL};
+    uint32_t handles[4];
+    assert(p4_game_damage_register(&floor_add, &handles[0]) == P4_DAMAGE_OK);
+    assert(p4_game_damage_register(&severe, &handles[1]) == P4_DAMAGE_OK);
+    assert(p4_game_damage_register(&scale, &handles[2]) == P4_DAMAGE_OK);
+    assert(p4_game_damage_register(&observe, &handles[3]) == P4_DAMAGE_OK);
+    Receipt observed = stage_run((u8 *)target_unit, 1, 1, P4_DAMAGE_HIT_WEAK, 0);
+    stage_expect(&weak, &observed, 1.2, 1.875);
+    assert(stage_seen.source_status == 0x2u && stage_seen.target_status == 0x100000u);
+    initial_source.bad = initial_target.bad = 0;
+    initial_source.flags = 0; initial_target.flags = 4;
+    observed = stage_run((u8 *)target_unit, 1, 1, P4_DAMAGE_HIT_CRITICAL, 0);
+    stage_expect(&critical, &observed, 0.0, 0.9375);
+    observed = stage_run((u8 *)target_unit, 1, 1, P4_DAMAGE_HIT_NORMAL, 0);
+    stage_expect(&normal, &observed, 0.0, 0.75);
+    p4_game_damage_native_hit_begin(10, 1, 2, 1);
+    observed = stage_run((u8 *)source_unit, 1, 1, P4_DAMAGE_HIT_NORMAL, 0);
+    p4_game_damage_native_hit_end();
+    stage_expect(&reflected, &observed, 1.2, 0.75); /* scaled once, by the side it was aimed at */
+    /* An estimate of the same self-delivered hit is same-side: hard mode only. */
+    observed = stage_run((u8 *)source_unit, 1, 1, P4_DAMAGE_HIT_NORMAL, 0);
+    stage_expect(&reflected, &observed, 1.2, 0.0);
+    for (unsigned i = 0; i < 4; ++i) assert(p4_game_damage_unregister(handles[i]) == P4_DAMAGE_OK);
+    initial_source.flags = initial_target.flags = 0;
+}
 static void formulas(void)
 {
     for (u32 enemy = 0; enemy < 2; ++enemy) {
@@ -279,12 +403,18 @@ int main(void)
     assert(!primary_calls && !rider_calls && !actual_affinities && skill_uses == 1); /* Fixed amount never consumes a leaf. */
     memcpy(iGpffffb3b8 + 1024 * 40, row, 40); ((DatSkillEntry *)(iGpffffb3b8 + 1024 * 40))->effectKind = 1;
     amount_case(1024, 1, 1, 0);
+    {
+        const DatSkillEntry saved = *row;
+        stage_parity(row);
+        stage_composition(row);
+        *row = saved;
+    }
     expecting_failure = 1; failed_line = 0;
     if (!setjmp(failure)) { frame.skill_id = 11; p4_game_elements_native_amount(10, source_unit, target_unit, 1, 1, 1, 0, 1, &frame, NULL); assert(0); }
     assert(failed_line == 0xf000);
     reset(10, 0); failed_line = 0;
     if (!setjmp(failure)) { datScriptRunCalc(0, (u16 *)source_unit, (u16 *)target_unit, 10, 1); assert(0); }
     assert(failed_line == 0x82 && !(D_00881474[0] & 1) && D_0088146C[0] == 10);
-    puts("game_elements_amount: actual canonical HP/SP equations, ten formulas, state/RNG parity, full-width frames and exact target policy passed (engine/source probes; not native admission)");
+    puts("game_elements_amount: actual canonical HP/SP equations, ten formulas, state/RNG parity, full-width frames, exact target policy and the final-damage stage passed (engine/source probes; not native admission)");
     return 0;
 }

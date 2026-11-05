@@ -11,6 +11,9 @@ extern int p4_battle_sim_renderless;
 /* Return 0 for an ordinary launch, 1 for a configured session, -1 for an
  * invalid explicit request. elf receives the unchanged positional ELF path. */
 int p4_battle_sim_cli(int argc, char **argv, const char **elf);
+/* 1 when the configured session is a declared mod cohort (P4PC_BATTLE_SIM_MODS):
+ * the loader then admits the selected packages exactly as an ordinary launch does. */
+int p4_battle_sim_mod_cohort(void);
 void p4_battle_sim_before_update(void);
 void p4_battle_sim_after_update(int completed);
 uint32_t p4_battle_sim_update_count(void);

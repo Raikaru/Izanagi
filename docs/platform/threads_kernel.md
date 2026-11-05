@@ -98,13 +98,18 @@ VBLANK_START comes from the physical 60 Hz source through `p4pc_intc_raise`. Ord
 handlers stop at a negative result. The first game handler rejects alternating fields
 using **GS CSR.FIELD**, bit 13 at `0x12001000`, not INTC_STAT at `0x1000f000`.
 FIELD advances even while INTC2 is masked. Do not halve VBLANK or add CRI delays to
-reproduce the service cadence: the original field predicate determines it.
+reproduce the service cadence: the original field predicate determines it. Retail evidence:
+the game's field handler (`0x001026b0`) returns -1 when FIELD is clear and 0 otherwise. In a
+retail trace the first handler ran 1063 times and rejected 531 fields, and the next handler ran
+532 times. In the collision 900 battle, retail's `adxt_vsync_cnt` (incremented by
+`ADXM_ExecVint`, which runs behind `kwlnEnableInterrupts`) advanced once per two-VBLANK game update.
 
 `P4PC_VIRTUAL_CLOCK=1` advances scheduler time only when all threads block, jumping to
 the next timer. Repeated polling adds 1 microsecond every 4096 polls so a busy observer
 cannot freeze time forever. `P4PC_TURBO` also selects virtual time. Leave virtual time off
-for interactive play. Virtual audio advances at the flip boundary rather than a real-time
-consumer; see [performance](performance.md#audio-and-virtual-time) and [movies](movies.md).
+for interactive play. Virtual audio advances with VBLANK: every VBLANK period that passes renders
+that period's audio before the chain runs, so a game update spanning two vsyncs (battle) hears
+two periods; see [performance](performance.md#audio-and-virtual-time) and [movies](movies.md).
 The ordinary real-time pacing policy is in [video presentation](video_presentation.md#pacing).
 
 Device completion alarms publish at the [next scheduler frame](disc_cri.md#pc-disc-contract),

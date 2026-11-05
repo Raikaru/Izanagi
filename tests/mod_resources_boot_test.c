@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "p4pc/mod_setting_store.h"
 extern const P4PackageHandler p4_game_tables_sources_boot_provider;
 extern const P4PackageHandler p4_game_tables_items_ui_boot_provider;
 static const P4GameItemsUi *item_ui;
@@ -111,6 +112,7 @@ static int run(int argc, char **argv)
         kwlnProbeHeapBudget(); kwlnInitEngine();
         assert(p4gl_context_is_current());
     } else assert(!p4gl_context_is_current());
+    assert(!p4_package_handler_register(&p4_mod_settings_boot_provider)); /* resource-image `when` */
     assert(!p4_package_handler_register(&p4_resources_images_boot_provider));
     assert(!p4_package_handler_register(&observer));
     if (item_mode) {

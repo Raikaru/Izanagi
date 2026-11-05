@@ -57,6 +57,9 @@ extern uint32_t datCalcMaxSpById(int32_t id);
 extern void datInitDefaultGameState(void);   /* what New Game runs: the party's levels, HP/SP, items, flags */
 extern void hFadeTaskStart(int16_t mode); /* Also used by the optional live fade-in diagnostic. */
 
+void p4pc_shuffle_harness_start(void);          /* src/platform/shuffle_harness.c */
+void p4pc_shuffle_harness_frame(unsigned frame);
+
 enum { SEQ_GAME = 27 };
 
 static int32_t sEncounter = -2;   /* -2 not read yet, -1 off */
@@ -110,6 +113,7 @@ static void startEncounter(int32_t id)
             kwlnTaskDestroyWithHierarchy(logo);
         }
     }
+    p4pc_shuffle_harness_start();   /* P4PC_SHUFFLE: the Shuffle Time this fight ends in (src/platform/shuffle_harness.c) */
     if (!p4_battle_encounter_start((uint32_t)id)) {
         fprintf(stderr, "p4pc: harness: invalid/unavailable encounter %d\n", (int)id);
         exit(2);
@@ -158,6 +162,7 @@ void p4pc_battle_harness_frame(unsigned frame)
         return;
     }
     if (sDone) {
+        p4pc_shuffle_harness_frame(frame);
         {   /* A registered capture has its own state predicate and hard deadline;
              * the fixed-flip fallback keeps its intro-state/nonblack witness. */
             const char *g = getenv("P4PC_BATTLE_GATE");

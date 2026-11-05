@@ -515,7 +515,7 @@ Each row binds to the explicit source handle, and a failed candidate is discarde
 | --- | --- |
 | `element` | `id`, `flags`, `family`, `order`, `key`, `display-name`, `short-name`; optional all-or-none `icon-owner`, `icon-key`, `icon-revision` |
 | `channel` | `id`, `kind`, `key`, `display-name` |
-| `affinity` | `kind`, `entity`, `profile`, `element`, `channel`, `value`, `scalar` |
+| `affinity` | `kind`, `entity`, `profile`, `element`, `channel`, and either `value` and `scalar` or `retail-row` and `retail-element` |
 | `action` | `source-kind`, `source-id`, `component`, `element`, `channel`, `key` |
 | `alias` | `kind`, `entity`, `native-profile`, `profile`, `knowledge`, `key` |
 | `effect` | `source-kind`, `source-id`, `element`, `channel`, `flags`, `key` |
@@ -525,6 +525,26 @@ Each row binds to the explicit source handle, and a failed candidate is discarde
 | `enemy` | `id`, `model-source`, `key`, exact 60-byte `metadata`, 32-byte `affinity`, 232-byte `model` and 164-byte `ai` hex |
 | `persona` | `id`, `model-source`, `key`, exact 14-byte `metadata`, 70-byte `growth`, 88-byte `model`, 4-byte `candidates` and 32-byte `affinity` hex |
 | `string` | `table`, `id`, `role`, `bytes` (game-encoded hex including final NUL) |
+
+An `affinity` row with `retail-row` and `retail-element` (0..15) instead of
+`value`/`scalar` takes the entity's own entry from the selected UNIT input
+(the disc's UNIT.TBL, or a selected replacement of it): row `retail-row`,
+packed column `retail-element` of the enemy (UNIT1) or persona (UNIT2)
+affinity bank of the row's `kind`, read when the builder seals. A percentage
+channel stores the exact `p4_affinity_decode` word with its low 16 bits as
+scalar; a KO channel stores the `p4_affinity_project_ko` projection. Such a
+row requests the UNIT input and has an authored row's key, conflict and
+ownership rules; the source that declares it owns the row, while its value's
+origin is that sealed input, whose SHA-256 is part of
+`p4_game_table_catalog_identity`. Freeze refuses while a row is unresolved. A
+row outside the actual bank, or a word with no form for the row's channel,
+refuses the source with a diagnostic naming the kind, row and element. A
+percentage row needs at most one `P4_AFF_FLAGS` flag; a word carrying retail's
+ailment no-effect flag (0x20 in the packed high byte, read only by
+`datCalcInflictStatus` 0x00238940's 0x27000000 mask) refuses on any channel,
+since no channel models it and a KO projection would invert it. A mod can
+therefore declare "this entity's retail Phys, for Slash" without shipping any
+retail value.
 
 The builder seals exact family inputs and ownership together without guest
 allocation. It is not by itself a boot handler, resource resolver, loaded-image
@@ -710,15 +730,21 @@ original `0x458` record is never repurposed as padding. VM metadata belongs to
 the actual pool slot/generation. Command/element-valued locals own full
 frame/target snapshots rather than aliasing a global or the actor's last result.
 
-ID-target predicate values retain exact action UID/profile proofs; boolean
-proofs keep `OR`/`AND` meaning, and a result about B never authorizes the
-collector's defender C. Final chosen sets are the actual twelve-word target
-record. MY stays fixed-self and FR/EN keep their original eligible-side ANY
-domain and flags. Proof nodes use bounded prepared VM storage, never per-action
-allocation, a pointer-keyed map or native-command/RNG replay; exhaustion is an
-error, not a fallback. Malformed carrier/query state uses Core's controlled
-runtime failure, never a host CRT `abort`. Scoring compares all eleven scalar
-frame members explicitly, without host `memcmp` in a translated unit.
+Script values carry a boolean validity per candidate source frame. `OR`/`AND`
+keep their meaning (a result either operand establishes stays valid), and a
+branch permits only the frames whose prediction matches the path the script
+actually took. Validity is never about a defender: as in the original game,
+the script may ask about unit B and then act on C (a fallback pick, a new
+target after One More, a heal on another ally), so an answer about B neither
+drops C from a selector or scoring pass nor binds the targets the native
+command finally uses. When the script stops, the carrier checks only that the
+action still holds the frame it committed. MY stays fixed-self and FR/EN keep
+their original eligible-side ANY domain and flags. Control scopes use bounded
+prepared VM storage, never per-action allocation, a pointer-keyed map or
+native-command/RNG replay; exhaustion is an error, not a fallback. Malformed
+carrier/query state uses Core's controlled runtime failure, never a host CRT
+`abort`. Scoring compares all eleven scalar frame members explicitly, without
+host `memcmp` in a translated unit.
 
 The canonical 0x001d94d0 side search keeps separate inactive and metadata
 runners over the same body. Expanded searches retain per-frame ANY results over
@@ -752,8 +778,8 @@ Phys0 query refuses. BASE MYHANSYA/KYUSYU/MUKOU/WEAK and wrapper normal/not-norm
 keep their distinct original knowledge/buff ordering, and knowledge reads take
 the route above. With expanded elements off every carrier site runs its
 original body. Expanded routing still requires the `element-route` and
-`element-ui` participants; the isolated role/proof/decision/collector witnesses
-are not battle parity evidence.
+`element-ui` participants; the isolated role/decision/collector witnesses are
+not battle parity evidence.
 ## Element presentation
 
 `p4pc/game_elements_ui.h` holds one owner's ordered layout of at most nine
@@ -863,6 +889,46 @@ Analyze before and after a Slash hit teaches the first column. Only the Camp
 list and persona panel are automated in `mod_element_game`. These are
 mod-witness evidence, not retail references. No other platform or viewport has
 been captured.
+
+## Final damage stage
+
+`p4pc/game_damage_stage.h` is the one place a mod changes ordinary HP damage.
+Hard mode and challenge rules register modifiers there; nothing hooks
+`datCalcSkillAmount` (0x00235520) directly. The stage runs once per eligible
+hit at the end of that function, after the whole retail equation (formula,
+attack/defense/status/passive terms, critical, guard, the 1..31000 work clamp
+and the 95..105% variance) and after the outcome: only a hit that delivers HP
+damage is eligible. Fixed, percentage and scripted (hit kind 16) amounts, SP,
+misses, nulls, drains, healing and `options & 1` estimates never reach it.
+With no modifier registered the function is retail and the stage never runs.
+
+Each modifier is a pure function of the hit: no RNG, no game-state writes, no
+re-entry. It receives the skill, source and target side (party/enemy),
+DatUnit ID and `DatUnit.bad` ailment word, the unit the hit was aimed at, the
+`datCalcHitResult` kind (normal 1, critical 2, weak 4), the resolved element
+leaf when one exists, whether a repel delivered the hit back to its source,
+and whether 001f14f0 is resolving the hit (`resolved`) or the call is an
+estimate (AI target choice). The ailment words are the ones the equation read:
+001f14f0 computes every hit of an action before its packet commit applies any
+ailment, so they exclude this action's own ailments and stay exact per unit
+when a formation repeats an enemy ID. 001f14f0 brackets each resolved hit's HP
+amount call, so a repelled hit keeps the side it was aimed at and is composed
+exactly once. Multi-hit skills compose each resolved hit once.
+
+Order is fixed: declared priority ascending, then multiplicative before
+additive within a priority, then the owning mod's load order, then
+registration order. Values compose in double precision and convert once at
+the end with the retail truncation, clamped to the equation's own range
+(1..32550). A non-finite value or negative factor is ignored for that hit and
+reported once; registration while a hit is composing is refused.
+`P4PC_DAMAGE_TRACE=1` prints every hit, each applied step and the result to
+stderr. The 001f14f0 per-target persona scale still applies after the stage,
+as retail applies it after this function. `game_damage_stage` covers the order,
+single conversion, clamp and refusals. `game_elements_amount` runs the real
+equation: every effect, outcome, channel, hit kind and option is unchanged with
+a modifier that is consulted but leaves the hit alone, and a challenge plus
+hard-mode pair composes as declared, including a repelled hit, without
+drawing RNG.
 
 ## Qualification and availability
 

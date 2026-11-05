@@ -119,3 +119,5 @@ ee78a9276996f5bd7da526a42302a16e71d417401050e93620c0ca188b4d487a  port-scene-sha
 43155b917c007517cddfd9e6f8783ae81ec59c96f98f46dfc6e8cfaab968f8fe  port-wide-shuffle-full-vu0-21-9-nvidia-rtx4080.rgb
 0ef138952b81eb372da36db904011f2015066443ef4dd27197d37c5471628dbc  port-wide-shuffle-full-vu0-16-9-llvmpipe19.rgb
 13cb733b68a47040b49ca9809f72f75f6d2b884e0a10268375963305bab902a4  port-wide-shuffle-full-vu0-21-9-llvmpipe19.rgb
+aeb97538902a86cc2249b4ca4e8c37959519652c96c7714f0e7597f13ea009fa  port-scene-shadow-haze-realtime-voice-nvidia-rtx4080.rgb
+ef90ed8be058297067674bd0f637c5cf1c2e6fab55752602ef5cf492785a7380  port-scene-shadow-haze-realtime-voice-llvmpipe19.rgb

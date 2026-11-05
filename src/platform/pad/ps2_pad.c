@@ -23,6 +23,7 @@
 #include "p4pc/lockstep.h"
 #if defined(P4_MOD_GAME_BINDINGS) && defined(P4_MOD_LUAU)
 #include "p4pc/mod_script.h"
+#include "p4pc/mod_services.h"
 #include "p4pc/platform.h"
 #endif
 
@@ -195,6 +196,9 @@ int32_t func_0042ffa0(int32_t port, int32_t slot, uint8_t *out)
 #if defined(P4_MOD_GAME_BINDINGS) && defined(P4_MOD_LUAU)
     if (p4_mod_input_enabled)
         p4_mod_input_sample(out, p4pc_game_frame_count());
+    /* An exclusive mod camera owns the pad after the mod has sampled it. */
+    if (p4_mod_input_fence)
+        p4_mod_input_fence_apply(out);
 #endif
     p4pc_pad_trace_packet(out);
     tracePad((unsigned)((uint16_t)(out[2] | (out[3] << 8)) ^ 0xffffu));

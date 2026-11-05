@@ -46,7 +46,13 @@ Status getters only observe; the viewer must not make them pump CRI.
   `P4PC_CAPTURE_WINDOW=1` also writes the fitted drawable as `.win.png`.
 - `P4PC_DUMP_TASKS_FRAMES=a,b,c` invokes the game's task-tree dump at those flips.
 - `P4PC_DUMP_RAM=<prefix>` and `P4PC_DUMP_RAM_AT=a,b,c` retain guest memory for
-  `tools/ram_diff.py`. See [numeric diagnosis](numeric_determinism.md).
+  `tools/ram_diff.py`. See [numeric diagnosis](numeric_determinism.md). Each dump is
+  31 MB; a run stops with a message before the dump that would pass
+  `P4PC_DUMP_RAM_MAX_MB` (default 2048, captured-frame dumps included). On the PC,
+  `tools/local_scenes.py`, `tools/local_gates.py` and `tools/local_boot_run.ps1`
+  keep timed dumps in the run's own managed directory (they leave with it for the
+  cold archive), or below `<P4PC_DUMP_ROOT>/<run>/` when that is set; their old
+  D: default failed with the drive on 2026-11-03. Delete dumps once read.
 - `P4PC_FIELD_ENTRY_DUMP` observes field-entry state; selected capture rows are not
   substitutes for readiness. See [disc observers](disc_cri.md#observers-and-regression-coverage).
 - `P4PC_HEAP_CHECK` enables guarded guest allocation; see [heap](threads_kernel.md#startup-and-memory).
@@ -127,6 +133,16 @@ same encounter-start body as the game script. `P4PC_START_BATTLE_AT` is a minimu
 only current HP, still clamped by the game's maximum. Logs expose state/HP/SP, packet lists,
 camera, lights and fades. `P4PC_BATTLE_GATE` tests the registered state/frame conditions;
 a harness encounter is not a complete story-combat witness.
+
+`P4PC_SHUFFLE=pattern:variant` (with `P4PC_START_BATTLE`, `src/platform/shuffle_harness.c`) ends the fight in Shuffle Time
+with that pattern (0..4, `btlShuffleSeq1Run`..`btlShuffleSeq5Run`). It only rewrites the retail roll tables in guest memory
+(the chance by protagonist turns, every decade's pattern weights and the pattern's variant weights), so the game's own
+selection still draws the cards and card count. `first` clears flag 0x1430 and the pattern's flag (0x1431 patterns 0-2,
+0x1432, 0x1433): introduction, tutorial and variant 0. A variant number sets both flags and forces that variant (patterns 0-2
+and 4: 0..2; pattern 3: 0..3). The run exits 0 after the shuffle task's sequence ends (task phase 6) and the task is destroyed,
+and 1 when the task shows another pattern or variant or is destroyed early. `tests/shuffle_gate.sh` adds the walk
+`tests/walks/shuffle_time.walk` (Attack, then the battle driver's Shuffle Time cadence) with mods and packs off; `shuffle_gate_P_V`
+covers all five patterns, `first` and every variant, on i386 and x86_64 (`...64`, also the Windows x64 export).
 
 ### Offline battle batch coordinator
 
@@ -470,7 +486,7 @@ native tasks/menus, not estimated disc duration.
   (a living enemy with Power/Mind Charge), `status:MASK` (the actor's own ailments, e.g.
   `0x8` silence), `afflicted:MASK` (the first living member, in party order, whose ailments
   match, e.g. `0x4` fear before Ghastly Wail; bound), `enemy:ID` (a living enemy with that
-  ID is in the fight, e.g. Escape from the rare unit 138), `buff:MASK` (the actor's own
+  ID is in the fight; bound, e.g. focus a healer or Escape from the rare unit 138), `buff:MASK` (the actor's own
   stat levels with `datCalcHasBuffMask`'s stat bits, any matching; `0x80` is defense
   down after Marakunda), `nobuff:MASK` (none of them matches: re-apply a lapsed -kaja) and
   `foebuff:MASK` (a living enemy's levels match; bound, e.g. Dekaja). A bound ally steers
@@ -503,6 +519,19 @@ native tasks/menus, not estimated disc duration.
   rule: a rule naming an entry the actor's list lacks (a spent Revival Bead, a skill not
   learned) does not apply, so a later rule can name the fallback.
   `p4walk_battle_list_moves` is covered by `walk_battle_rules_test`.
+- `battleturn:KEYS` or `battleturn:COND=KEYS` lines after a `battle:` line give its driver
+  a command tape of up to 256 lines (the next `battle:` clears it): the Nth line supplies
+  the Nth fresh party command, whoever acts, ahead of charge Guard, rules and the
+  `first`/`plan` defaults. COND binds TARGET confirmations: `enemy:ID`, `ally:ID` (a
+  living member) or `dead:ID` (a downed one); an absent bound target fails the walk. A
+  command that does not take (the 600-frame re-arm) retries its line. Past the last line a
+  host's `battle_turn` callback (`P4WalkHost`) may supply more, which is how a search
+  extends a tape; without one the driver's normal input continues. Canonical commands
+  (Circle resets the wheel to Attack): Attack `circle,cross,cross`, Guard `circle,up,cross`,
+  Skill `circle,down,cross,skill:ID,cross,cross`, Item
+  `circle,down,down,down,cross,item:ID,cross,cross`. `walk_battle_rules_test` covers
+  parsing and the tape limit; `walk_choice_test` covers order, Guard priority, the retry
+  and the host continuation.
 - In the results phase (battle state 16) a persona level-up with eight skills asks which
   one to forget, and its Yes/No defaults to No, so the driver's periodic Cross would loop.
   While `shdPersonaSkillSelectSeq` reads input the driver declines the offer through the
@@ -529,10 +558,17 @@ live exterior step 80 and restored player control. It does not cover the laborat
 floors or Shadow Naoto.
 The independent B9F collection gate covers its live step 89, interior door and
 Shadow Naoto's first protagonist COMMAND. It does not join the exterior anchor
-into a continuous traversal of floors B1F–B8F or certify the boss fight.
+into a continuous traversal of floors B1F–B8F. From the same card,
+`collection_naoto_victory_0918` switches Yu to his slot-1 Persona (Atom Smasher,
+Resist Physical) in camp and defeats Shadow Naoto with `battle:` and `battlerule:`
+lines: a Balm of Life for a downed member, Attack while silenced, Yukiko's Me Patra on
+fear, an Amrita on Yu's ailments, Yukiko's Mediarama under 400 HP, a Bead Chain under
+300 HP, Guard while Naoto is charged, otherwise Atom Smasher, Kanji's Zionga and
+Yosuke's Garula. It stops at the post-battle B9F event. The plan wins under both the
+port's earlier ADX voice timing (battle end at flip 66727) and retail's (flip 62082).
 
 October collection legs restart from post-rescue cards; their automatic school
-story and native saves do not turn the unqualified Naoto fight into a victory
+story and native saves are not themselves a Naoto victory
 witness. The exam gate crosses both exam blocks and their intervening Sunday
 evening; it does not require a particular exam grade. The two festival legs use
 separate pristine evening anchors: the first festival day's home save and the
@@ -546,11 +582,18 @@ an entrance witness, not traversal of Heaven or a rescue victory.
 
 The independent Heaven tenth-floor gate checks its live step, closed door and
 Namatame's information topics before the first fresh party COMMAND. It does not
-certify Heaven's earlier floors or a Kunino Sagiri victory.
+certify Heaven's earlier floors. From the same card,
+`collection_kunino_sagiri_victory_1106` switches Yu to his slot-1 Persona (Gigantic
+Fist) in camp and defeats Kunino-sagiri with `battle:` and `battlerule:` lines: a Balm
+of Life for a downed member, Attack while silenced, Yukiko's Me Patra and Yu's Amrita on
+ailments, Yukiko's Mediarama under 400 HP (its Ma-dyne spells after Quad Converge hit
+for up to 440), a Bead Chain under 300 HP, Guard while it is charged, otherwise
+Gigantic Fist, Garudyne, Rampage and Agidyne. It stops at the post-battle Heaven event
+with Namatame.
 
 November's return leg likewise uses an independent post-rescue collection card.
 Its automatic story and native home save do not establish traversal of Heaven's
-preceding floors or a Kunino Sagiri victory.
+preceding floors.
 
 Both hospital branches start from the same requested unchanged MAX18657
 December2 card. The continue branch gives all six observed correct answers
@@ -577,8 +620,9 @@ farewell destination or establish an ending.
 
 The last-day TV collection leg selects Rise's actual Search for Izanami answer
 and requires Ashihara-Nakatsu's exterior step 140, no event and restored player
-control. The separate Path 9 card covers its step 149 portal and the first
-Izanami phase's fresh party COMMAND. Neither gate establishes traversal of the
+control. The separate Path 9 card covers its step 149 portal, the first
+Izanami phase's fresh party COMMAND, one round of Attacks from all four members and
+Yu's second COMMAND. Neither gate establishes traversal of the
 intervening paths, either boss phase's defeat or the true ending. These
 non-saving checkpoints use `completed_walk_gate.sh`, which requires both the
 native field/date goal and completed canonical input; a matching date alone
@@ -629,6 +673,33 @@ unchanged 60000-flip, arena 242:3, June 25 goal, not just a pre-battle field/dat
 This covers the real allocator-layout crash; it does not certify Teddie defeat,
 a native save, or a continuous earlier playthrough. Historical pre-fix binaries
 are negative controls, not a fabricated new use-after-free mutation.
+
+`collection_teddie_victory_0625` plays the same card through the same walk prefix and
+then defeats Shadow Teddie with a searched tape: a `battle:` line and one hundred
+`battleturn:` lines, one per fresh party command, found by the battle simulator's fork
+search on this walk's real state (see [battle simulator](battle_sim.md)). The walk keeps
+every line before its final `waittask:battle:off` byte for byte, because the tape is bound
+to those frames; the battle task ends at flip 77811 and the gate requires the post-battle
+11F field (25:2) on June 25 with completed input.
+
+`collection_kanji_victory_0520` is built the same way from the pristine card2-slot08 card at
+Steamy Bathhouse Hall 11: the boss-door prefix of `collection_kanji_round_0520`, the closest
+rule plan's `battle:` line (Guard while Kanji is charged) and 77 `battleturn:` lines. Shadow
+Kanji's battle task ends at flip 31923 and the gate requires Hall 11 (24:2) on May 20.
+
+`collection_mitsuo_victory_0803` is built the same way from the pristine card3-slot07 card at
+the Void Quest Endgame: the opening walk's prefix (the fight starts on its third Cross), the
+closest rule plan's `battle:` line and 153 `battleturn:` lines. Shadow Mitsuo's battle task
+ends at flip 67805, on Windows x64 as on a Linux host (Linux x64), and the gate requires the
+Endgame field (26:2) on August 3.
+
+Each rescue's `collection_*_aftermath_*` save gate replays its victory walk unchanged and
+continues through the rescue story to the next collection card's date, ending with a native
+living-room save: Kanji to 06/04, Teddie to 06/26, Mitsuo to 08/12, Naoto to 10/05 and
+Kunino-sagiri to 11/20. Each day uses one of four checked macros, chosen by the field, room
+and date index the walk waits for first: a school day goes home through the map, an evening
+in the living room goes upstairs to sleep, a free night sleeps on the futon and a Sunday
+morning leaves the room and goes out until evening.
 
 Sparse `walk_choice` / `walk_tasks` fixtures cover these input-lifetime contracts; they
 are not a claim that an independently timed retail route used the same pad stream.

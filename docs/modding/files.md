@@ -1,4 +1,4 @@
-# File and data mods (API 1.1; accepts 1.0 metadata)
+# File and data mods (API 1.4; accepts 1.0, 1.1, 1.2 and 1.3 metadata)
 
 Mods are opt-in. Installing a directory changes nothing until its id appears in the
 player's `p4pc.ini`:
@@ -105,6 +105,73 @@ use normal nested directories, fit VFS key/path bounds, and contain no devices,
 version suffixes, symlinks, reparse points or special files. Depth is bounded to
 32. Keep installed contents unchanged during play: activation audits a trusted,
 read-only installation, not an adversarial changing filesystem.
+
+## Settings (API 1.2)
+
+A mod declares its persistent Config rows as `[setting <key>]` sections:
+
+```ini
+[setting backlog]
+kind = toggle
+default = off
+label = DIALOGUE BACKLOG
+help = Keeps the last lines of dialogue for review.
+group = UI
+
+[setting description_style]
+kind = choice
+choices = Simple | Exact
+default = Simple
+label = DESCRIPTION STYLE
+apply = live
+```
+
+The key is 1–48 bytes of `[a-z0-9]` followed by `[a-z0-9_.-]`. `kind` is `toggle`
+(choices `off`/`on`, default `off`) or `choice` (2–8 distinct `|`-separated names
+of at most 31 bytes; default the first). `label` is required; `label`, `group`
+(at most 63 bytes) and `help` (at most 511 bytes) are printable ASCII.
+`apply = restart` freezes the value read at admission until the next start: the
+row shows the restart marker and `p4.settings.get` returns that admitted value;
+`live` (the default) reads the stored value every time. Unknown fields, invalid
+defaults or more than 256 settings refuse the mod at admission, and the API 1.2
+requirement is checked there too. Engine packs cannot declare settings.
+
+The MODS hub draws the declared rows on the mod's package page in manifest
+order, below PACKAGE DETAILS, with a heading row whenever `group` changes. The
+rows work while the mod is disabled, so a player can configure a mod before
+enabling it. Values persist in `mod-settings/<mod id>.ini` beside `p4pc.ini`,
+one file per mod, written to a temporary file and atomically replaced; the
+shared `p4pc.ini` is never written. A missing or invalid stored value reads as
+the declared default. With no settings file (`P4PC_CONFIG=none`) values stay at
+their defaults and writes are refused. Native consumers read the admitted value
+with `p4_mod_setting_boot()` (`include/p4pc/mod_setting_store.h`); scripts use
+[`p4.settings`](lua.md#persisted-settings).
+
+A boot section can follow one of the mod's own toggles: `when = <key>` in a
+`[table-source]`, `[resource-image]` or `[element-ui]` section makes it take
+part in this start only while that toggle's admitted value is `on`; off, the
+handler treats the section as absent (an `[element-ui]` gate covers its
+`[element-column]` sections). Such sections are sealed for the whole session,
+so `when` must name a declared `toggle` with `apply = restart`; an undeclared
+key, a choice setting, a live toggle or a repeated `when` refuses the mod at
+admission. The value comes from the same admission snapshot as
+`p4_mod_setting_boot()` (`include/p4pc/mod_setting_gate.h`). A mod therefore
+ships its content enabled-by-toggle without contributing anything while the
+toggle is off:
+
+```ini
+[setting split]
+kind = toggle
+label = PHYSICAL SPLIT
+apply = restart
+
+[table-source p4pc.physsplit:split]
+when = split
+file = data/split.xml
+format = p4-tables-xml
+schema = 1
+revision = 1
+```
 
 ## Shared native registry and Config discovery
 

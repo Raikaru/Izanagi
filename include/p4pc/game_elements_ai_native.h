@@ -114,17 +114,18 @@ int p4_game_elements_ai_native_available(void *source_action,
 int p4_game_elements_ai_native_test(void *target_unit, const P4GameActionFrame *frame,
     uint32_t target_genus, uint32_t policy, uint32_t *value, P4GameAffinityQuery *prediction_query);
 int p4_game_elements_ai_native_query(void *script_work, void *source_action, void *target_action,
-    uint32_t parameter, int32_t selector, uint32_t policy, uint32_t id_domain, uint32_t *value);
+    uint32_t parameter, int32_t selector, uint32_t policy, uint32_t *value);
 int32_t p4_game_elements_ai_query_script(void *script_work, void *source_action, void *target_action,
-    uint32_t parameter, int32_t selector, uint32_t policy, uint32_t id_domain);
+    uint32_t parameter, int32_t selector, uint32_t policy);
 int p4_game_elements_ai_native_plan_begin(void *script_work, void *source_action,
     uint32_t parameter, int32_t selector, P4GameAiQueryPlan *plan);
 int p4_game_elements_ai_native_plan_mask(const P4GameAiQueryPlan *plan,
     void *target_action, uint32_t require_known, uint32_t *mask);
+/* Candidate-source permission only: no result about one target binds which
+ * targets the native command finally uses. */
 int p4_game_elements_ai_native_selection_mask(const P4GameAiQueryPlan *plan,
-    void *target_action, uint32_t mask, uint32_t *allowed_mask);
-int p4_game_elements_ai_native_target_allowed(void *script_work, void *source_action,
-    void *target_action, uint32_t *allowed);
+    uint32_t mask, uint32_t *allowed_mask);
+int p4_game_elements_ai_native_choice_allowed(void *script_work, void *source_action, uint32_t *allowed);
 int p4_game_elements_ai_native_plan_test(const P4GameAiQueryPlan *plan,
     void *target_action, uint32_t mask, uint32_t policy, int32_t rejected, uint32_t *value);
 int p4_game_elements_ai_native_plan_predict(const P4GameAiQueryPlan *plan,
@@ -209,12 +210,11 @@ int p4_game_elements_ai_vm_pending_element(void *script_work,
     const P4GameAiSelection *selection, uint32_t scalar);
 int p4_game_elements_ai_vm_pending_numbers(void *script_work,
     const P4GameActionFrame *actual_query_frame, const uint32_t *words, uint32_t invalid_mask,
-    void *id_defender, uint32_t source_independent); /* NULL defender for MY/original-side ANY. */
+    uint32_t source_independent);
 int p4_game_elements_ai_vm_query_role(void *script_work, void *source_action,
     uint32_t *role);
 int p4_game_elements_ai_vm_candidate_allowed(void *script_work,
-    void *source_action, void *target_action, const P4GameActionFrame *frame);
+    void *source_action, const P4GameActionFrame *frame);
 int p4_game_elements_ai_vm_commit_choice(void *script_work, void *source_action,
     const P4GameActionFrame *frame);
-int p4_game_elements_ai_vm_validate_targets(void *script_work, void *source_action);
 #endif

@@ -1,7 +1,11 @@
 /* Plain-value save snapshots. The native save codec owns transaction ordering;
- * this module never calls Lua or allocates from its commit callbacks. */
+ * this module never calls Lua or allocates from its commit callbacks. Optional
+ * authorize_load/authorize_save run in snapshot mode before any commit, and
+ * published runs from the scheduler safe point after a durable save commit. */
 #include "lua_runtime.h"
 #include "../memcard/mod_save_internal.h"
+#include "p4pc/mod_entry.h"
+#include "p4pc/mod_events.h"
 #include <float.h>
 #include <math.h>
 #include <stdio.h>
@@ -19,8 +23,11 @@ typedef struct Snapshot {
     struct Snapshot *next;
     size_t size;
     int reference;
+    int captured; /* Produced by encode for a save, not decoded from a load. */
     unsigned char bytes[];
 } Snapshot;
+enum { CB_SNAPSHOT=1, CB_LOAD=2, CB_AUTHORIZE_LOAD=3, CB_AUTHORIZE_SAVE=4, CB_PUBLISHED=5 };
+enum { ORIGIN_LOAD=0, ORIGIN_RESET=1 };
 typedef struct P4LuaSave {
     P4LuaMod *mod;
     P4ModSaveRegistration *registration;
@@ -28,7 +35,15 @@ typedef struct P4LuaSave {
     uint32_t schema;
     size_t maximum;
     int callbacks_ref;
+    int authorize_load, authorize_save, published;
+    int staged_origin, origin;
 } P4LuaSave;
+/* One bounded authorization answer: (ok, reason?). Nil/false refuses. */
+typedef struct Authorize {
+    P4LuaSave *save;
+    int callback, reference, ok;
+    char reason[512];
+} Authorize;
 typedef struct Key {
     int type;
     uint64_t bits;
@@ -179,7 +194,7 @@ static int snapshot_invoke(lua_State *L)
     if(e->keys_count>SIZE_MAX/sizeof *e->keys)luaL_error(L,"save snapshot key budget overflow");
     e->result=malloc(sizeof *e->result+e->bytes);
     if(!e->result)luaL_error(L,"cannot allocate save snapshot");
-    *e->result=(Snapshot){.size=e->bytes,.reference=LUA_NOREF};
+    *e->result=(Snapshot){.size=e->bytes,.reference=LUA_NOREF,.captured=1};
     if(e->keys_count){e->keys=malloc(e->keys_count*sizeof *e->keys);if(!e->keys)luaL_error(L,"cannot allocate save key index");}
     memcpy(e->result->bytes,"P4LV",4);put32(e->result->bytes+4,1);e->position=VALUE_HEADER;
     emit(L,e,-1,0);
@@ -229,6 +244,49 @@ static int take(Decode *d,size_t n,const unsigned char **out)
 {
     if(n>d->size-d->position)return -1;
     *out=d->bytes+d->position;d->position+=n;return 0;
+}
+static int authorize_invoke(lua_State *L)
+{
+    Authorize *a=lua_touserdata(L,1);
+    lua_getref(L,a->save->callbacks_ref);
+    lua_rawgeti(L,-1,a->callback);lua_remove(L,-2);
+    int arguments=0;
+    if(a->callback==CB_AUTHORIZE_LOAD){
+        if(a->reference!=LUA_NOREF)lua_getref(L,a->reference);else lua_pushnil(L);
+        arguments=1;
+    }
+    lua_call(L,arguments,2);
+    a->ok=lua_toboolean(L,-2);
+    if(!a->ok){
+        size_t length=0;const char *reason=lua_type(L,-1)==LUA_TSTRING?lua_tolstring(L,-1,&length):NULL;
+        if(reason&&length)snprintf(a->reason,sizeof a->reason,"%.*s",(int)length,reason);
+        else snprintf(a->reason,sizeof a->reason,"refused by mod %s",a->save->mod->info->id);
+    }
+    return 0;
+}
+/* Snapshot-mode invocation: no native calls, no guest mutation. A Lua error or
+ * an exhausted budget refuses; it never authorizes. 0 authorized, -1 refused. */
+static int run_authorize(P4LuaSave *save,int callback,int reference,const P4ModSaveContext *context)
+{
+    P4LuaMod *mod=save->mod;
+    if(!idle(mod)||mod->budget_failed){
+        snprintf(context->error,context->error_capacity,"save authorization requires a healthy idle interpreter");return -1;
+    }
+    Authorize a={.save=save,.callback=callback,.reference=reference};
+    int gc=lua_gc(mod->state,LUA_GCISRUNNING,0);if(gc)lua_gc(mod->state,LUA_GCSTOP,0);
+    int result=p4_lua_invoke(mod,authorize_invoke,&a,0,P4_LUA_STARTUP|P4_LUA_SNAPSHOT);
+    if(gc)lua_gc(mod->state,LUA_GCRESTART,0);
+    if(result){
+        if(mod->budget_failed){mod->budget_failed=0;p4_luau_reset_interrupt(mod->vm);}
+        snprintf(context->error,context->error_capacity,"authorization: %s",p4_lua_error(mod));return -1;
+    }
+    if(!a.ok){snprintf(context->error,context->error_capacity,"%s",a.reason);return -1;}
+    return 0;
+}
+static int authorize_snapshot(const P4ModSaveContext *context,void *user)
+{
+    P4LuaSave *save=user;
+    return save->authorize_save?run_authorize(save,CB_AUTHORIZE_SAVE,LUA_NOREF,context):0;
 }
 static int parse_key(Decode *d,Key *key)
 {
@@ -300,6 +358,8 @@ static int decode_snapshot(const P4ModSaveContext *context,uint32_t schema,P4Mod
     if(!idle(mod)||mod->budget_failed){
         snprintf(context->error,context->error_capacity,"save restore requires a healthy idle interpreter");return -1;
     }
+    /* An empty image is a reset to the New Game defaults, never a player's load. */
+    save->staged_origin=context->image.data?ORIGIN_LOAD:ORIGIN_RESET;
     if(!reader){*out=NULL;return 0;}
     uint64_t length=p4_mod_save_remaining(reader);
     if(schema!=save->schema||length<=VALUE_HEADER||length>save->maximum||length>SIZE_MAX-sizeof(Snapshot)){
@@ -326,16 +386,56 @@ static int decode_snapshot(const P4ModSaveContext *context,uint32_t schema,P4Mod
     }
     snapshot->reference=d.reference;return 0;
 }
-static void commit_snapshot(void *staged,void *user){swap(user,staged);}
+static int validate_snapshot(const P4ModSaveContext *context,void *staged,void *user)
+{
+    P4LuaSave *save=user;
+    /* New Game/session resets share decode/validate; a refusal there would be a
+     * runtime failure, so authorization covers real loads only. */
+    if(!save->authorize_load||!context->image.data)return 0;
+    Snapshot *snapshot=staged;
+    return run_authorize(save,CB_AUTHORIZE_LOAD,snapshot?snapshot->reference:LUA_NOREF,context);
+}
+static void commit_snapshot(void *staged,void *user)
+{
+    P4LuaSave *save=user;Snapshot *snapshot=staged;
+    swap(save,snapshot);
+    if(snapshot&&snapshot->captured){
+        if(save->published)p4_mod_safe_point|=P4_MOD_SAFE_PUBLISHED;
+    }else save->origin=save->staged_origin;
+}
 static void discard_snapshot(void *staged,void *user){dispose(user,staged);}
 static int notify_invoke(lua_State *L)
 {
     P4LuaSave *save=lua_touserdata(L,1);
     lua_getref(L,save->callbacks_ref);
-    lua_rawgeti(L,-1,2);lua_remove(L,-2);
+    lua_rawgeti(L,-1,CB_LOAD);lua_remove(L,-2);
     if(save->current&&save->current->reference!=LUA_NOREF)lua_getref(L,save->current->reference);
     else lua_pushnil(L);
+    lua_pushstring(L,save->origin==ORIGIN_RESET?"reset":"load");
+    lua_call(L,2,0);return 0;
+}
+static int published_invoke(lua_State *L)
+{
+    P4LuaSave *save=lua_touserdata(L,1);
+    lua_getref(L,save->callbacks_ref);
+    lua_rawgeti(L,-1,CB_PUBLISHED);lua_remove(L,-2);
+    /* The committed capture is current until a later save/load replaces it. */
+    if(save->current&&save->current->captured){
+        Decode d={.bytes=save->current->bytes,.size=save->current->size,.position=VALUE_HEADER,.reference=LUA_NOREF};
+        push_value(L,&d,0);
+    }else lua_pushnil(L);
     lua_call(L,1,0);return 0;
+}
+static void published_snapshot(void *user)
+{
+    P4LuaSave *save=user;reclaim(save);
+    if(p4_lua_invoke(save->mod,published_invoke,save,0,P4_LUA_SEMANTIC))
+        p4_mod_failure(save->mod->owner,p4_lua_error(save->mod));
+}
+static int published_safe_point(void)
+{
+    p4_mod_save_published_notify();
+    return p4_mod_save_published_pending();
 }
 static void notify_snapshot(void *user)
 {
@@ -354,27 +454,38 @@ static int register_save(lua_State *L)
     if(mod->save)luaL_error(L,"a mod may register only one save snapshot provider");
     lua_rawgetfield(L,1,"schema");uint32_t schema=(uint32_t)p4_lua_integer(L,-1,1,UINT32_MAX);lua_pop(L,1);
     lua_rawgetfield(L,1,"max_bytes");size_t maximum=(size_t)p4_lua_integer(L,-1,VALUE_HEADER+1,VALUE_MAX_BYTES);lua_pop(L,1);
-    lua_rawgetfield(L,1,"snapshot");luaL_checktype(L,-1,LUA_TFUNCTION);
-    lua_rawgetfield(L,1,"load");luaL_checktype(L,-1,LUA_TFUNCTION);
+    static const char *const optional[]={"authorize_load","authorize_save","published"};
     lua_newtable(L);
-    lua_pushvalue(L,-3);lua_rawseti(L,-2,1);
-    lua_pushvalue(L,-2);lua_rawseti(L,-2,2);
+    lua_rawgetfield(L,1,"snapshot");luaL_checktype(L,-1,LUA_TFUNCTION);lua_rawseti(L,-2,CB_SNAPSHOT);
+    lua_rawgetfield(L,1,"load");luaL_checktype(L,-1,LUA_TFUNCTION);lua_rawseti(L,-2,CB_LOAD);
+    int present[3]={0};
+    for(int i=0;i<3;i++){
+        lua_rawgetfield(L,1,optional[i]);
+        if(!lua_isnil(L,-1)&&!lua_isfunction(L,-1))luaL_error(L,"p4.save.register %s must be a function or nil",optional[i]);
+        present[i]=!lua_isnil(L,-1);
+        lua_rawseti(L,-2,CB_AUTHORIZE_LOAD+i);
+    }
     int callbacks=lua_ref(L,-1);
     P4LuaSave *save=calloc(1,sizeof *save);
     if(!save){lua_unref(L,callbacks);luaL_error(L,"cannot allocate save snapshot provider");}
     save->mod=mod;save->schema=schema;save->maximum=maximum;save->callbacks_ref=callbacks;
+    save->authorize_load=present[0];save->authorize_save=present[1];save->published=present[2];
     P4ModSaveProvider provider={.struct_size=sizeof provider,.abi_version=P4_MOD_SAVE_ABI_VERSION,
         .owner=mod->info->id,.key="lua.value",.schema_version=schema,.flags=P4_MOD_SAVE_REQUIRED,
         .max_bytes=maximum,.user=save,.encode=encode_snapshot,.decode=decode_snapshot,
-        .commit=commit_snapshot,.discard=discard_snapshot};
+        .validate=save->authorize_load?validate_snapshot:NULL,
+        .commit=commit_snapshot,.discard=discard_snapshot,
+        .authorize=save->authorize_save?authorize_snapshot:NULL};
     if(p4_mod_save_register(&provider,&save->registration)){
         lua_unref(L,save->callbacks_ref);free(save);
         luaL_error(L,"cannot register Lua save snapshot provider");
     }
-    if(p4_mod_save_set_notify(save->registration,notify_snapshot)){
+    if(p4_mod_save_set_notify(save->registration,notify_snapshot)||
+       (save->published&&p4_mod_save_set_published(save->registration,published_snapshot))){
         p4_mod_save_unregister(save->registration);lua_unref(L,save->callbacks_ref);free(save);
         luaL_error(L,"cannot register Lua save notification");
     }
+    if(save->published)p4_mod_events_set_published(published_safe_point);
     mod->save=save;return 0;
 }
 void p4_lua_save_library(lua_State *L)

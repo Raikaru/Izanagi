@@ -3,6 +3,7 @@
 #include "guest_test.h"
 #include "p4pc/image.h"
 #include "p4pc/mods.h"
+#include "p4pc/mod_entry.h"
 #include "p4pc/mod_failure.h"
 #include "p4pc/os.h"
 #include "p4pc/platform.h"
@@ -270,6 +271,38 @@ static int witness(int argc,char **argv)
     /* Current semantic use remains as historical provenance even without a block. */
     CHECK(p4_os_is_file_nofollow(sidecar));
     CHECK(!p4_mod_save_unregister(registration));
+    /* Optional authorizers run before any slot byte or commit; a Lua error or a
+     * nil answer refuses. Publication waits for the scheduler frame boundary. */
+    p4_lua_destroy(mod);CHECK(!p4_mod_save_reset_session(error,sizeof error));
+    mod=p4_lua_create(provider);CHECK(mod);
+    run(mod,"value={run=1}; allow_save=false; reason='NO SAVES LEFT'; allow_load=true; explode=false; published=nil; loaded=nil; origin=nil; authorized=nil\n"
+        "p4.save.register{schema=9,max_bytes=128,snapshot=function() return value end,"
+        "load=function(v,o) loaded=v; origin=o end,"
+        "authorize_save=function() if explode then error('boom') end return allow_save,reason end,"
+        "authorize_load=function(v) authorized=v; return allow_load,'RUN IS LOCKED' end,"
+        "published=function(v) published=v end}");
+    size_t kept_size;unsigned char *kept=read_all(sidecar,&kept_size);
+    CHECK(begin_save()!=0&&strstr(error,"NO SAVES LEFT"));
+    run(mod,"allow_save=true; explode=true");CHECK(begin_save()!=0&&strstr(error,"boom"));
+    run(mod,"explode=false; allow_save=nil");CHECK(begin_save()!=0&&strstr(error,"NO SAVES LEFT"));
+    run(mod,"reason=nil");CHECK(begin_save()!=0&&strstr(error,"refused by mod test.luasave"));
+    size_t unchanged_size;unsigned char *unchanged=read_all(sidecar,&unchanged_size);
+    CHECK(unchanged_size==kept_size&&!memcmp(unchanged,kept,kept_size));free(unchanged);free(kept);
+    run(mod,"allow_save=true");CHECK(!begin_save());
+    CHECK(!(p4_mod_safe_point&P4_MOD_SAFE_PUBLISHED));finish_save();
+    CHECK(p4_mod_safe_point&P4_MOD_SAFE_PUBLISHED);run(mod,"assert(published==nil)");
+    p4_mod_event_frame(1);CHECK(!(p4_mod_safe_point&P4_MOD_SAFE_PUBLISHED));
+    run(mod,"assert(published.run==1)");
+    run(mod,"allow_load=false");CHECK(stage_load()!=0&&strstr(error,"RUN IS LOCKED"));
+    run(mod,"assert(authorized.run==1 and loaded==nil)");
+    run(mod,"allow_load=true; value={run=2}");CHECK(!stage_load());commit_load();
+    run(mod,"assert(loaded.run==1 and origin=='load')");
+    run(mod,"allow_load=false; authorized=nil");
+    CHECK(!p4_mod_save_transport_reset(error,sizeof error));p4_mod_save_transport_reset_commit();
+    run(mod,"assert(loaded==nil and origin=='reset' and authorized==nil)");
+    /* An omitted block publishes nothing; restore the earlier no-block generation. */
+    run(mod,"value=nil; published=nil");CHECK(!begin_save());finish_save();
+    CHECK(!(p4_mod_safe_point&P4_MOD_SAFE_PUBLISHED));p4_mod_event_frame(2);run(mod,"assert(published==nil)");
     p4_lua_destroy(mod);p4_package_registry_retire();p4_mod_save_transport_ui(confirm,NULL);
     CHECK(!stage_load()&&warnings==1);p4_mod_save_transport_load_abort();
     free(baseline);

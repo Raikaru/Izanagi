@@ -1,15 +1,21 @@
 /* Lockstep-only disc replay (include/p4pc/lockstep_disc.h, docs/lockstep.md).
  *
  * Retail p4hook --lockstep-disc-trace records each top-level disc read with the game frame of
- * its request and of the first status poll that saw it complete; tools/lockstep_disc.py turns
- * an earlier session's trace into anchor-relative rows classed game (H_Cdvd_UpdateRequests),
- * stream (ADX stream server) or other. Once the qualified anchor is applied, the frame-alarm
+ * its request and of the first status poll that saw it complete, and the VBLANK count of both;
+ * tools/lockstep_disc.py turns an earlier session's trace into anchor-relative rows classed game
+ * (H_Cdvd_UpdateRequests), stream (ADX stream server) or other. Once the replay anchor is
+ * applied (the accepted initial LOAD anchor, or the qualified battle anchor), the frame-alarm
  * seam stands in for the next-frame completion fence of each read (disc reads are its only
  * users). The read is keyed from the VFS read observer: file base name, handle-relative offset
  * and sectors (raw CDVD: LSN and sectors), and classified by its owner. A game-level request
  * takes the next unused game row with that key, must start at the same anchor-relative frame,
  * and completes no earlier than the normal frame boundary and not before the anchor-relative
  * frame retail first observed completion; a device poll in that frame releases it. An ADX
+ * stream server read is held only by an unused stream row with its key that retail requested in
+ * the same anchor-relative frame (a voice that starts where retail started it), and completes
+ * retail's VBLANK count after its request: the stream server polls on VBLANKs, and retail's
+ * update counter often steps once more than its server passes between request and completion
+ * (collision 900's voice: 5 updates, 8 VBLANKs, 4 passes). Any other
  * stream server read completes normally and is only recorded. Unmatched or unowned reads fail
  * the run. Host bytes are still copied at submission: retail consumers read a destination only
  * after observing completion (H_Cdvd_UpdateRequests state 3). port-disc-holds.tsv records every
@@ -32,6 +38,7 @@
 #define DISC_HOLDS 32
 #define DISC_SECTOR 2048
 #define DISC_RECHECK_US (1000000u / 60u)
+#define DISC_VBLANK_NS (1000000000ull / 60u) /* the kernel's VBLANK period (kernel_thread.c KT_VSYNC_NS) */
 #define HCDVD_REQUESTS 0x008D1B84u
 
 /* Held by ADXSTM_ExecServer's test-and-set for its whole pass (src/cri/re4/adx_stmc.c). */
@@ -40,10 +47,11 @@ extern int32_t adxstmf_execsvr_flg;
 enum { DISC_FILE, DISC_CDVD };
 
 typedef struct {
-    int game, used; /* only game rows (retail H_Cdvd requests) are matched */
+    int game, stream, used; /* game rows (retail H_Cdvd requests) and stream rows (ADX stream server) are matched */
     char name[DISC_NAME];
     uint32_t offset, sectors;
     int32_t request, complete; /* anchor-relative retail frames; complete -1: never observed */
+    int32_t vblanks;           /* retail VBLANKs from the request to the poll that saw completion; -1: never */
 } DiscRow;
 
 typedef struct {
@@ -52,6 +60,7 @@ typedef struct {
     uint32_t (*handler)(int32_t, void *);
     void *arg;
     uint32_t request, target;
+    uint64_t due_ns; /* a stream hold: released once the scheduler reaches it, not by frame */
     size_t row;
 } DiscHold;
 
@@ -119,14 +128,15 @@ static void observe_read(const P4VfsOrigin *origin, const void *bytes, size_t si
 
 static void receipt(const DiscHold *hold, uint32_t frame, const char *outcome) {
     const DiscRow *row = &sRows[hold->row];
-    if (fprintf(sReceipt, "%lld\tgame\t%s\t%u\t%u\t%u\t%d\t%d\t%u\t%u\t%s\n",
-                (long long)hold->row, row->name, row->offset, row->sectors, hold->request,
-                row->request, row->complete, frame, frame - hold->request, outcome) < 0 ||
+    if (fprintf(sReceipt, "%lld\t%s\t%s\t%u\t%u\t%u\t%d\t%d\t%u\t%u\t%s\n",
+                (long long)hold->row, row->stream ? "stream" : "game", row->name, row->offset, row->sectors,
+                hold->request, row->request, row->complete, frame, frame - hold->request, outcome) < 0 ||
         fflush(sReceipt))
         disc_fail("writing port-disc-holds.tsv");
 }
 
-/* ADX stream server reads complete at the normal frame boundary; only the request is recorded. */
+/* An ADX stream server read without a retail stream row of the same key and request frame
+ * completes at the normal frame boundary; only the request is recorded. */
 static void stream_receipt(const char *name, uint32_t offset, uint32_t sectors, uint32_t frame) {
     if (fprintf(sReceipt, "-1\tstream\t%s\t%u\t%u\t%u\t-1\t-1\t-1\t-1\tstream-not-held\n",
                 name[0] ? name : "-", offset, sectors, frame) < 0 || fflush(sReceipt))
@@ -161,16 +171,24 @@ static void release(DiscHold *hold, int from_alarm) {
     held.handler(held.id, held.arg);
 }
 
+/* A game read is due in retail's completion frame. A stream read is due at retail's VBLANK count
+ * after its request: the stream server polls on VBLANKs, and retail's update counter steps between
+ * its request and its completing poll once more than its passes do as often as not. */
+static int hold_due(const DiscHold *hold) {
+    if (hold->due_ns != 0) return p4pc_scheduler_time_ns() >= hold->due_ns;
+    return (int32_t)(game_frame() - hold->target) >= 0;
+}
+
 static uint32_t hold_alarm(int32_t id, void *arg) {
     DiscHold *hold = arg;
     (void)id;
     if (!hold->used) return 0;
     hold->boundary = 1;
-    if ((int32_t)(game_frame() - hold->target) >= 0) {
+    if (hold_due(hold)) {
         release(hold, 1);
         return 0;
     }
-    return DISC_RECHECK_US; /* polls in the target frame release it; this covers callers that only wait */
+    return DISC_RECHECK_US; /* polls when it is due release it; this covers callers that only wait */
 }
 
 static int32_t seam_set(uint32_t (*handler)(int32_t, void *), void *arg) {
@@ -206,21 +224,35 @@ static int32_t seam_set(uint32_t (*handler)(int32_t, void *), void *arg) {
     }
     sRead.valid = 0;
     if (sRead.family != DISC_FILE || !hcdvd_request(P4_H2G(arg))) {
-        if (adxstmf_execsvr_flg) {
+        if (!adxstmf_execsvr_flg) {
+            snprintf(why, sizeof why, "%s read %s offset %u sectors %u at port frame %u (anchor+%d) has neither "
+                     "an H_Cdvd request node nor the ADX stream server as owner",
+                     sRead.family == DISC_CDVD ? "raw sector" : "file", sRead.name[0] ? sRead.name : "-",
+                     offset, sectors, frame, relative);
+            disc_fail(why);
+        }
+        /* A stream server read is held only by a retail stream row of the same key that started in
+         * the same anchor-relative frame and completed: a new stream (a voice) starts where retail
+         * started it, and its data arrives as many VBLANKs later as on retail. A read without one
+         * (BGM, whose position follows audio playback) is recorded and completes at the normal
+         * frame boundary. */
+        for (index = 0; index < sRowCount; index++) {
+            const DiscRow *row = &sRows[index];
+            if (!row->used && row->stream && !strcmp(row->name, sRead.name) && row->offset == offset &&
+                row->sectors == sectors && row->request == relative && row->complete >= 0 && row->vblanks > 0)
+                break;
+        }
+        if (index == sRowCount) {
             stream_receipt(sRead.name, offset, sectors, frame);
             return p4pc_set_frame_boundary_alarm(handler, arg);
         }
-        snprintf(why, sizeof why, "%s read %s offset %u sectors %u at port frame %u (anchor+%d) has neither "
-                 "an H_Cdvd request node nor the ADX stream server as owner",
-                 sRead.family == DISC_CDVD ? "raw sector" : "file", sRead.name[0] ? sRead.name : "-",
-                 offset, sectors, frame, relative);
-        disc_fail(why);
-    }
-    for (index = 0; index < sRowCount; index++) {
-        const DiscRow *row = &sRows[index];
-        if (!row->used && row->game && !strcmp(row->name, sRead.name) &&
-            row->offset == offset && row->sectors == sectors)
-            break;
+    } else {
+        for (index = 0; index < sRowCount; index++) {
+            const DiscRow *row = &sRows[index];
+            if (!row->used && row->game && !strcmp(row->name, sRead.name) &&
+                row->offset == offset && row->sectors == sectors)
+                break;
+        }
     }
     if (index == sRowCount) {
         snprintf(why, sizeof why, "unmatched game read %s offset %u sectors %u at port frame %u "
@@ -239,7 +271,11 @@ static int32_t seam_set(uint32_t (*handler)(int32_t, void *), void *arg) {
     }
     if (slot == DISC_HOLDS) disc_fail("more than 32 disc reads held at once");
     sRows[index].used = 1;
-    sHolds[slot] = (DiscHold){1, 0, 0, handler, arg, frame, sAnchor + (uint32_t)sRows[index].complete, index};
+    sHolds[slot] = (DiscHold){1, 0, 0, handler, arg, frame, sAnchor + (uint32_t)sRows[index].complete, 0, index};
+    /* Due half a VBLANK early, so the stream server's poll at retail's VBLANK sees it complete. */
+    if (sRows[index].stream)
+        sHolds[slot].due_ns = p4pc_scheduler_time_ns() + (uint64_t)sRows[index].vblanks * DISC_VBLANK_NS -
+                              DISC_VBLANK_NS / 2;
     sHolds[slot].id = p4pc_set_frame_boundary_alarm(hold_alarm, &sHolds[slot]);
     if (sHolds[slot].id < 0) disc_fail("no kernel alarm for a held read");
     return sHolds[slot].id;
@@ -257,9 +293,8 @@ static void seam_cancel(int32_t id) {
 }
 
 static void seam_poll(void) {
-    const uint32_t frame = game_frame();
     for (size_t slot = 0; slot < DISC_HOLDS; slot++)
-        if (sHolds[slot].used && sHolds[slot].boundary && (int32_t)(frame - sHolds[slot].target) >= 0)
+        if (sHolds[slot].used && (sHolds[slot].boundary || sHolds[slot].due_ns != 0) && hold_due(&sHolds[slot]))
             release(&sHolds[slot], 0);
 }
 
@@ -273,18 +308,20 @@ int p4pc_lockstep_disc_open(const char *directory) {
     table = fopen(source, "r");
     if (!table) disc_fail("cannot open P4PC_LOCKSTEP_DISC_REPLAY");
     if (!fgets(line, sizeof line, table) ||
-        sscanf(line, "# p4pc-disc-replay 1 retail_anchor %u horizon %u", &sRetailAnchor, &sHorizon) != 2)
-        disc_fail("the table header is not p4pc-disc-replay 1");
+        sscanf(line, "# p4pc-disc-replay 2 retail_anchor %u horizon %u", &sRetailAnchor, &sHorizon) != 2)
+        disc_fail("the table header is not p4pc-disc-replay 2");
     while (fgets(line, sizeof line, table)) {
         DiscRow row = {0};
         char family[16], name[128];
         DiscRow *grown;
         if (line[0] == '#' || line[0] == '\n') continue;
-        if (sscanf(line, "%15s %127s %u %u %d %d", family, name, &row.offset, &row.sectors,
-                   &row.request, &row.complete) != 6)
+        /* family file offset sectors request_rel complete_rel layer order vblanks */
+        if (sscanf(line, "%15s %127s %u %u %d %d %*s %*u %d", family, name, &row.offset, &row.sectors,
+                   &row.request, &row.complete, &row.vblanks) != 7)
             disc_fail("malformed table row");
         if (!strcmp(family, "game")) row.game = 1;
-        else if (strcmp(family, "stream") && strcmp(family, "substrate") && strcmp(family, "other"))
+        else if (!strcmp(family, "stream")) row.stream = 1;
+        else if (strcmp(family, "substrate") && strcmp(family, "other"))
             disc_fail("unknown table row class");
         base_name(strcmp(name, "-") ? name : "", row.name);
         grown = realloc(sRows, (sRowCount + 1) * sizeof *sRows);

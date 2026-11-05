@@ -336,7 +336,7 @@ int p4_game_elements_ai_sources_prepare(const P4GameTables *tables, int request,
     if (!prepared->scripts) { free(prepared); return P4_TABLE_NOMEM; }
     prepared->script_count = count;
     int result = P4_TABLE_OK;
-    uint32_t overlap = 0, max_code = 0;
+    uint32_t overlap = 0;
     for (size_t i = 0; i < count; ++i) {
         for (size_t j = 0; j < i; ++j) {
             if (sources[i].source_identity == sources[j].source_identity) {
@@ -351,7 +351,6 @@ int p4_game_elements_ai_sources_prepare(const P4GameTables *tables, int request,
         if (script->local_float_count > prepared->local_float_capacity)
             prepared->local_float_capacity = script->local_float_count;
         if (script->max_control_overlap > overlap) overlap = script->max_control_overlap;
-        if (script->code_count > max_code) max_code = script->code_count;
     }
     if (overlap > UINT32_MAX / P4_GAME_AI_VM_STACK_SLOTS) { result = P4_TABLE_NOMEM; goto failure; }
     prepared->control_capacity = overlap * P4_GAME_AI_VM_STACK_SLOTS;
@@ -359,32 +358,12 @@ int p4_game_elements_ai_sources_prepare(const P4GameTables *tables, int request,
         ((uint64_t)prepared->local_int_capacity + prepared->local_float_capacity) * sizeof(P4AiValueTag) +
         (uint64_t)prepared->control_capacity * sizeof(P4AiControlScope);
     /* Explicit bounded metadata storage, prepared once for the real three-slot
-     * work pool. Per-step proof nodes use this arena, never malloc or a map. */
-    uint64_t roots = (uint64_t)prepared->local_int_capacity + prepared->local_float_capacity +
-        P4_GAME_AI_VM_STACK_SLOTS + prepared->control_capacity + 2u;
-    uint64_t temporaries = ((uint64_t)prepared->control_capacity + P4_GAME_AI_VM_STACK_SLOTS + 16u) *
-        P4_AI_PROOF_SOURCES * 4u;
-    uint64_t nodes = ((uint64_t)max_code + roots) * P4_AI_PROOF_SOURCES + temporaries + 2u;
-    if (nodes > UINT32_MAX || temporaries > UINT32_MAX) { result = P4_TABLE_NOMEM; goto failure; }
-    vm_bytes = (vm_bytes + 7u) & ~(uint64_t)7u;
-    uint64_t node_offset = vm_bytes;
-    vm_bytes += nodes * sizeof(P4AiProofNode);
-    uint64_t scratch_offset = vm_bytes;
-    vm_bytes += nodes * sizeof(uint32_t);
-    uint64_t temporary_offset = vm_bytes;
-    vm_bytes += temporaries * sizeof(uint32_t);
+     * work pool: no per-step malloc or map. */
     vm_bytes = (vm_bytes + 7u) & ~(uint64_t)7u;
     if (vm_bytes > SIZE_MAX / P4_GAME_AI_VM_WORK_SLOTS) { result = P4_TABLE_NOMEM; goto failure; }
-    prepared->proof_capacity = (uint32_t)nodes;
-    prepared->proof_temporary_capacity = (uint32_t)temporaries;
-    prepared->proof_nodes_offset = (size_t)node_offset;
-    prepared->proof_scratch_offset = (size_t)scratch_offset;
-    prepared->proof_temporaries_offset = (size_t)temporary_offset;
     prepared->vm_stride = (size_t)vm_bytes;
-    prepared->vm_arena = malloc(P4_GAME_AI_VM_WORK_SLOTS * prepared->vm_stride);
+    prepared->vm_arena = calloc(P4_GAME_AI_VM_WORK_SLOTS, prepared->vm_stride);
     if (!prepared->vm_arena) { result = P4_TABLE_NOMEM; goto failure; }
-    for (uint32_t i = 0; i < P4_GAME_AI_VM_WORK_SLOTS; ++i)
-        memset(prepared->vm_arena + i * prepared->vm_stride, 0, prepared->proof_nodes_offset);
     prepared->action_size = P4_GAME_AI_ACTION_BYTES + (uint32_t)sizeof(P4AiCarrier);
     *out = prepared;
     return P4_TABLE_OK;

@@ -19,6 +19,7 @@
 #define CALLBACK_FUEL 4096u
 #define FRAME_FUEL 8192u
 #define STARTUP_FUEL 65536u
+#define PRESSURE_STEP_KB 512u
 static P4LuaMod *active[P4_PACKAGE_MAX];
 static int script_phase; /* 0 empty, 1 compiled only, 2 executing init, 3 initialized */
 static const P4LuaNativeBindings *native_bindings;
@@ -69,6 +70,22 @@ static int charge_frame(P4LuaMod *mod)
     if (!mod->frame_fuel) return 0;
     --mod->frame_fuel;
     return 1;
+}
+
+/* Luau's collector advances only on allocation and paces each cycle from the
+ * previous peak, so a large finished job can leave megabytes of garbage that a
+ * later burst of small callback allocations pushes over the cap mid-frame.
+ * Once per flip, at a mod's first outermost entry, take one bounded collector
+ * step while its heap is above half the cap. Outside any frame the interrupt
+ * charges nothing; a heap at or below half does no work at all. */
+static void relieve_memory_pressure(P4LuaMod *mod)
+{
+    uint32_t frame = p4pc_flip_count();
+    if (mod->has_pressure_frame && frame == mod->pressure_frame) return;
+    mod->has_pressure_frame = 1;
+    mod->pressure_frame = frame;
+    if (p4_luau_memory_used(mod->vm) > LUA_MEMORY_LIMIT / 2 && lua_gc(mod->state, LUA_GCISRUNNING, 0))
+        lua_gc(mod->state, LUA_GCSTEP, PRESSURE_STEP_KB);
 }
 
 static int over_budget(P4LuaMod *mod, P4LuaThread *thread)
@@ -148,6 +165,7 @@ int p4_lua_protected(P4LuaMod *mod, lua_State *L, int arguments, int results, in
     }
     if(flags&P4_LUA_SEMANTIC)p4_lua_semantic_use(mod);
     int was_executing = thread->executing;
+    if (!was_executing) relieve_memory_pressure(mod);
     if (!(flags & P4_LUA_STARTUP) && !charge_frame(mod)) {
         mod->budget_failed = 1;
         lua_settop(L, base);
@@ -288,6 +306,8 @@ static void initialize(lua_State *L, void *user)
     p4_lua_events(L); lua_setfield(L, -2, "events");
     p4_lua_input(L); lua_setfield(L, -2, "input");
     p4_lua_files(L); lua_setfield(L, -2, "files");
+    p4_lua_settings(L); lua_setfield(L, -2, "settings");
+    p4_lua_lifecycle(L); lua_setfield(L, -2, "lifecycle");
     p4_lua_save_library(L); lua_setfield(L, -2, "save");
     if (mod->native_bindings) mod->native_bindings->initialize(L);
     lua_setglobal(L, "p4");
@@ -379,6 +399,7 @@ static void destroy_idle_vm(P4LuaMod *mod)
 {
     if (mod == NULL) return;
     p4_lua_save_destroy(mod);
+    free(mod->settings);
     if (mod->vm && mod->native_bindings) mod->native_bindings->before_destroy(mod);
     p4_mod_events_remove_owner(mod->owner);
     p4_mod_hooks_remove_owner(mod->owner);

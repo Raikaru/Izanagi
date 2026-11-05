@@ -35,6 +35,7 @@ src/cri/re4/adx_sjd_dca0.c superseded by linked src/cri/re4/adx_sjd.c: every fun
 src/cri/re4/adx_sjd_dcf0.c superseded by linked src/cri/re4/adx_sjd.c: every function it defines is defined there (duplicate link of ADXSJD_TermSupply, ADXSJD_SetMaxDecSmpl)
 src/cri/re4/adx_dcd.c unplaced data: references __float_nan; retail ADX_GetCoefficient (0x004C54E8) has no load of it, so this unit is not the retail version; retail functions are translated instead
 src/cri/re4/adx_sugc.c GameCube SDK setup: registers device "GCD" with gcCiGetInterface, but retail PS2 setup (0x004D32F8) registers "CDV" (dvci getter 0x004E5A08) and "MFS" (0x004E9E50); retail function is translated instead
+src/cri/re4/adx_tsvr.c GameCube ADXT server: PLAYING turns the renderer's transfer off and PLAYEND_WAIT waits for an empty renderer, where the PS2 server (adxt_ExecHndl 0x004D8698) pads the output joints with silence counted in flush_nsmpl (+0xA8); retail functions are translated instead (src/cri/adxt_svr.c)
 src/cri/re4/sfd_mpv_1a5e8.c alternate inactive software-decoder SFMPV_Init source; production movies use native FFmpeg and config/inactive_movie_decoder.json also removes its reconstructed sfd_mpv.c counterpart
 
 src/promoted/code1_003c_cw119.c alternate copy of code1_003c.c; port-owned func_003cc370 and func_003c95a0 (src/render, src/platform) are also defined here

@@ -389,11 +389,14 @@ static int32_t intc_last(int32_t cause) {
     return 0;
 }
 
+/* GS CSR.FIELD flips on every VBLANK whether or not the INTC cause is enabled (it is GS state), and a
+ * handler that returns a negative value ends the chain for that interrupt, as the PS2 kernel does:
+ * the game's field gate (0x001026b0) relies on both. */
 static void test_intc_chain(void) {
     const uint64_t field = p4pc_gs_csr_read();
     CHECK(p4pc_intc_disable(2) == 0);
     p4pc_intc_raise(2);
-    CHECK(p4pc_gs_csr_read() == field);
+    CHECK(p4pc_gs_csr_read() == (field ^ (1ull << 13)));
     CHECK(p4pc_intc_stat_read() == 0);
     p4pc_intc_raise(2);
     CHECK(p4pc_gs_csr_read() == field);
@@ -404,7 +407,7 @@ static void test_intc_chain(void) {
     intc_chain_result = -1;
     reset_order();
     p4pc_intc_raise(5);
-    CHECK(strcmp(order, "IJ") == 0);
+    CHECK(strcmp(order, "I") == 0);
     CHECK(p4pc_intc_stat_read() == 0);
     intc_chain_result = 0;
     reset_order();

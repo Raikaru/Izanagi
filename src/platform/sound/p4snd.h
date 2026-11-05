@@ -65,7 +65,9 @@ void p4snd_set_user_volume(float gain);
  * once. */
 void p4snd_add_tick_hook(void (*hook)(double seconds));
 
-/* Once per flip on a virtual-clock run (p4_os_virtual_clock): renders that flip's share of samples, with no realtime mixer/pacing thread.
+/* Once per VBLANK period on a virtual-clock run (p4_os_virtual_clock; the kernel's p4pc_vblank_period_hook, which
+ * p4pc_platform_init sets): renders that period's share of samples, with no realtime mixer/pacing thread. A game update
+ * spanning two vsyncs gets two periods.
  * Explicit P4PC_LOCKSTEP_LIVE=1 also sends these samples to a playback-only device; its consumption never advances this clock.
  * Does nothing otherwise, or when no voice has opened the mixer yet. */
 void p4snd_virtual_tick(void);

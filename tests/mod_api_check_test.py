@@ -10,6 +10,7 @@ command = sys.argv[1:separator]
 definitions = Path(sys.argv[separator + 1])
 native_ui_fixture = Path(sys.argv[separator + 2])
 example_fixture = Path(sys.argv[separator + 3])
+bundled_mods = [Path(path) for path in sys.argv[separator + 4:]]
 
 positive = """--!strict
 local scratch: P4GuestBuffer = p4.mem.alloc(64)
@@ -62,7 +63,58 @@ local save_value: P4SaveValue = {count = 1, nested = {enabled = true}}
 p4.save.register({
     schema = 1, max_bytes = 1024,
     snapshot = function(): P4SaveValue return save_value end,
-    load = function(value: P4SaveValue) save_value = value end,
+    load = function(value: P4SaveValue, origin: "load" | "reset") save_value = value end,
+    authorize_save = function() return true end,
+    authorize_load = function(value: P4SaveValue) return false, "locked" end,
+    published = function(value: P4SaveValue) save_value = value end,
+})
+local shown: boolean = p4.ui.status({"CHALLENGE 2 RULES", "CAP 15"})
+p4.ui.status("ONE ROW", "hud")
+p4.ui.status(nil)
+local gate: P4Subscription = p4.authorize.on("fusion", function(context)
+    local kind: number = context.kind
+    return kind > 1, "pair and triangle only"
+end)
+gate:disable()
+p4.authorize.on("encounter", function(context) return context.encounter ~= 0 end)
+p4.events.on("exit", function(e) local tag: "exit" = e.name end)
+local lineup: P4Subscription = p4.battle.formation(function(context): {number}?
+    local first: number = context.party[1]
+    return if first == 1 then {2} else nil
+end)
+lineup:remove()
+local session: number? = p4.lifecycle.session()
+if session then
+    local tagged: boolean = p4.lifecycle.tag("R1:B1")
+    local crashed: boolean?, tag: string? = p4.lifecycle.crashed(session)
+    local consumed: boolean = p4.lifecycle.consume(session)
+end
+local setting = p4.settings.get("feature.enabled")
+local stored: boolean, why: string? = p4.settings.set("run.count", 3)
+p4.settings.set("feature.enabled", setting == true)
+local seconds: number = p4.clock.wall()
+local updates: number = p4.clock.updates() + p4.clock.retail()
+local scene: P4SceneState = p4.scene.state()
+if scene.ready and scene.context == "field" then
+    local queued: boolean, refusal: string? = p4.scene.warp({field = scene.field, room = scene.room, entry = scene.entry})
+end
+local request: P4RequestState, detail: string, outcome: number? = p4.scene.status()
+local encounter: P4EncounterInfo? = p4.encounter.info(p4.encounter.count() - 1)
+if encounter then p4.encounter.launch(encounter.id) end
+local lease: P4CameraLease?, why_not: string?, holder: string? = p4.camera.acquire("free camera")
+if lease then
+    lease:input(true)
+    local pose: P4CameraPose? = lease:get()
+    lease:set({y = 100, pitch = -20, fov = 50})
+    local active: boolean, released_why: string? = lease:active()
+    lease:release()
+end
+local owner: string? = p4.camera.owner()
+for _, group in p4.hud.groups() do p4.hud.hide(group, p4.hud.hidden(group) == false) end
+local nested: P4UIPage = p4.ui.page({
+    key = "nested", title = "Nested", listed = false, count = function() return 0 end,
+    row = function(index: number): P4UIRow return {key = "x", label = "X", kind = "info"} end,
+    find = function(key: string): number? return nil end,
 })
 scratch:release()
 """
@@ -85,6 +137,19 @@ negative = [
     'p4.save.register({schema=1,max_bytes=128,snapshot=function() return buffer.create(2) end,load=function(v) end})',
     'p4.save.register({schema=1,max_bytes=\"large\",snapshot=function() return nil end,load=function(v) end})',
     'p4.ui.claim_service("content-packs")',
+    'p4.settings.set("key", buffer.create(1))',
+    'local n: number = p4.settings.set("key", true)',
+    'p4.authorize.on("made-up-operation", function(c) return true end)',
+    'p4.authorize.on("fusion", function(c) local s: string = c.kind; return true end)',
+    'p4.ui.status(7)',
+    'p4.ui.status("x", "sidebar")',
+    'p4.battle.formation(function(c) return "yosuke" end)',
+    'p4.lifecycle.tag(5)',
+    'p4.hud.hide("made-up-group", true)',
+    'p4.scene.warp({room = 1})',
+    'p4.camera.acquire(7)',
+    'return p4.clock.epoch()',
+    'local pose: P4CameraPose = p4.camera.acquire("x")',
 ]
 
 with tempfile.TemporaryDirectory(prefix="p4-mod-api-check-") as directory:
@@ -104,6 +169,8 @@ with tempfile.TemporaryDirectory(prefix="p4-mod-api-check-") as directory:
     check(positive, 0)
     check(native_ui_fixture.read_text(encoding="utf-8"), 0)
     check(example_fixture.read_text(encoding="utf-8"), 0)
+    for bundled in bundled_mods:
+        check(bundled.read_text(encoding="utf-8"), 0)
     # Every overload retains its literal-name/payload correlation and is
     # usable as a first-class function, despite Analysis' overload complexity.
     events = [

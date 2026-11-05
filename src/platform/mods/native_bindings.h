@@ -13,4 +13,8 @@ typedef struct P4LuaNativeBindings {
 int p4_lua_bind_native(const P4LuaNativeBindings *bindings);
 void p4_lua_ui_initialize(lua_State *state);
 void p4_lua_ui_close(P4LuaMod *mod);
+void p4_lua_authorize_initialize(lua_State *state);
+void p4_lua_authorize_close(P4LuaMod *mod);
+void p4_lua_services_initialize(lua_State *state);
+void p4_lua_services_close(P4LuaMod *mod);
 #endif

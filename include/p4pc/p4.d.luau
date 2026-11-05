@@ -1,4 +1,4 @@
--- API1.1. Luau doubles/bit32/public buffers; never Lua5.4 integers/bytecode.
+-- API1.4. Luau doubles/bit32/public buffers; never Lua5.4 integers/bytecode.
 -- Guest addresses are32-bit values, not host pointers. i64/u64 are8-byte LE
 -- buffers; p4.u64/split64 preserve all bits without numeric64-bit coercion.
 -- Namespace/handle properties and event records are readonly at runtime.
@@ -51,7 +51,12 @@ export type P4SaveSpec = {
     schema: number,
     max_bytes: number,
     snapshot: () -> P4SaveValue,
-    load: (value: P4SaveValue) -> (),
+    load: (value: P4SaveValue, origin: "load" | "reset") -> (),
+    -- Snapshot-mode (no native calls/guest mutation); false/nil refuses.
+    authorize_load: ((value: P4SaveValue) -> (boolean, ...string))?,
+    authorize_save: (() -> (boolean, ...string))?,
+    -- After a save carrying this block committed durably; next frame boundary.
+    published: ((value: P4SaveValue) -> ())?,
 }
 export type P4Subscription = {
     enable: (self: P4Subscription) -> (),
@@ -77,8 +82,32 @@ export type P4MenuCloseEvent = { name: "menu_close", task: number, kind: number 
 export type P4CalendarEvent = { name: "calendar_advance", old_date: number, old_period: number, date: number, period: number }
 export type P4SaveEvent = { name: "save", version: number, data: number, size: number }
 export type P4LoadEvent = { name: "load", version: number, data: number, size: number }
+export type P4ExitEvent = { name: "exit" }
+-- kind: 0 pair, 1 triangle, 2..4 cross spread (4/5/6 materials), 5 twelve-material
+export type P4FusionContext = { name: "fusion", kind: number, materials: number }
+export type P4EncounterContext = { name: "encounter", encounter: number, source: number }
+export type P4FormationContext = { name: "formation", party: {number} }
 export type P4InputAction = "confirm" | "cancel" | "menu" | "help" | "cross" | "circle" | "triangle" | "square"
     | "up" | "down" | "left" | "right" | "start" | "select" | "l1" | "r1" | "l2" | "r2" | "l3" | "r3"
+-- API 1.4 game services. Requests are queued and run at the next frame boundary.
+export type P4SceneState = {
+    context: "none" | "title" | "field" | "dungeon" | "battle" | "event" | "other",
+    sequence: number, ready: boolean, reason: string?,
+    control: boolean, event: boolean, menu: boolean, pending: boolean,
+    field: number, room: number, entry: number?, step: number?,
+}
+export type P4WarpSpec = { field: number, room: number, entry: number?, direction: number? }
+export type P4RequestState = "idle" | "requested" | "battle" | "returning" | "done" | "refused"
+export type P4EncounterInfo = { id: number, enemies: { number }, formation: number, variant: number }
+export type P4CameraPose = { x: number, y: number, z: number, yaw: number, pitch: number, fov: number }
+export type P4CameraLease = {
+    set: (self: P4CameraLease, pose: { x: number?, y: number?, z: number?, yaw: number?, pitch: number?, fov: number? }) -> boolean,
+    get: (self: P4CameraLease) -> P4CameraPose?,
+    active: (self: P4CameraLease) -> (boolean, string?),
+    input: (self: P4CameraLease, exclusive: boolean) -> boolean,
+    release: (self: P4CameraLease) -> (),
+}
+export type P4HudGroup = "field_banner" | "field_map" | "calendar" | "party" | "battle_commands"
 
 export type P4UIRow = {
     key: string, label: string,
@@ -93,6 +122,7 @@ export type P4UIPage = {
 }
 export type P4UIPageSpec = {
     key: string, title: string,
+    listed: boolean?, -- API 1.4: false = reachable by link rows only, not a hub link
     count: () -> number,
     row: (index: number) -> P4UIRow, -- one-based
     find: (key: string) -> number?, -- one-based; nil if removed
@@ -101,6 +131,7 @@ export type P4UIPageSpec = {
 }
 export type P4UIDetailSpec = {
     key: string, title: string, detail: () -> string,
+    listed: boolean?,
     opened: (() -> ())?, closed: (() -> ())?,
 }
 
@@ -144,7 +175,8 @@ declare p4: {
             & (<T>(name: "menu_close", callback: (event: P4MenuCloseEvent) -> ()) -> P4Subscription)
             & (<T>(name: "calendar_advance", callback: (event: P4CalendarEvent) -> ()) -> P4Subscription)
             & (<T>(name: "save", callback: (event: P4SaveEvent) -> ()) -> P4Subscription)
-            & (<T>(name: "load", callback: (event: P4LoadEvent) -> ()) -> P4Subscription),
+            & (<T>(name: "load", callback: (event: P4LoadEvent) -> ()) -> P4Subscription)
+            & (<T>(name: "exit", callback: (event: P4ExitEvent) -> ()) -> P4Subscription),
     },
     input: {
         action: (action: P4InputAction) -> (boolean, boolean, boolean),
@@ -153,6 +185,22 @@ declare p4: {
     files: {
         read: (path: string, maximum: number?) -> buffer,
     },
+    settings: {
+        -- Declared toggles read as booleans and choices as strings; undeclared
+        -- data keys return the stored scalar or nil.
+        get: (key: string) -> (boolean | number | string)?,
+        set: (key: string, value: (boolean | number | string)?) -> (boolean, string?),
+    },
+    -- Port session identity and the crash handler's marker (API 1.3).
+    lifecycle: {
+        session: () -> (number?, string?),
+        tag: (tag: string?) -> (boolean, string?),
+        -- true (and this mod's tag) when the port's crash handler recorded a
+        -- crash in that session, false when it did not, nil and a reason when
+        -- its marker is unreadable.
+        crashed: (session: number) -> (boolean?, string?),
+        consume: (session: number) -> (boolean, string?),
+    },
     save: {
         register: (specification: P4SaveSpec) -> (),
     },
@@ -160,5 +208,36 @@ declare p4: {
         page: (specification: P4UIPageSpec) -> P4UIPage,
         detail: (specification: P4UIDetailSpec) -> P4UIPage,
         back: () -> boolean, close: () -> boolean, active: () -> string?,
+        status: (text: (string | {string})?, placement: ("camp" | "hud")?) -> boolean,
+    },
+    -- Snapshot-mode callbacks (no native calls/mutation); false denies.
+    authorize: {
+        on: ((operation: "fusion", callback: (context: P4FusionContext) -> (boolean, ...string)) -> P4Subscription)
+            & ((operation: "encounter", callback: (context: P4EncounterContext) -> (boolean, ...string)) -> P4Subscription),
+    },
+    -- One projector at a time; snapshot-mode; nil keeps the battle's lineup.
+    battle: {
+        formation: (callback: (context: P4FormationContext) -> {number}?) -> P4Subscription,
+    },
+    -- wall: host monotonic seconds (presentation/timers only, not deterministic);
+    -- updates/retail: deterministic game counters.
+    clock: { wall: () -> number, updates: () -> number, retail: () -> number },
+    scene: {
+        state: () -> P4SceneState,
+        available: (field: number, room: number) -> boolean,
+        warp: (spec: P4WarpSpec) -> (boolean, string?),
+        status: () -> (P4RequestState, string, number?),
+    },
+    encounter: {
+        count: () -> number,
+        info: (id: number) -> P4EncounterInfo?,
+        launch: (id: number) -> (boolean, string?),
+    },
+    -- Render-only view override; (nil, reason, owner) when refused.
+    camera: { acquire: (name: string) -> (P4CameraLease?, string?, string?), owner: () -> string? },
+    hud: {
+        groups: () -> { P4HudGroup },
+        hide: (group: P4HudGroup, hidden: boolean) -> (boolean, string?),
+        hidden: (group: P4HudGroup) -> boolean,
     },
 }

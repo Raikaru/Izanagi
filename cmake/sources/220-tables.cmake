@@ -12,6 +12,8 @@ target_sources(p4port PRIVATE src/platform/mods/game_skills_native.c src/platfor
 target_sources(p4port PRIVATE src/platform/mods/game_elements_native.c
   src/platform/mods/game_elements_affinity.c src/platform/mods/game_elements_action.c
   src/platform/mods/game_elements_route.c)
+# Final-damage stage at 0x00235520; inert until a modifier registers.
+target_sources(p4port PRIVATE src/platform/mods/game_damage_stage.c)
 target_sources(p4port PRIVATE src/platform/mods/game_items_native.c src/platform/mods/game_items_ui.c
   src/platform/mods/game_items_equipment.c src/platform/mods/game_items_battle.c
   src/platform/mods/game_items_list.c src/platform/mods/game_items_shop.c src/platform/mods/game_items_text.c)
@@ -25,7 +27,7 @@ target_sources(p4port PRIVATE src/platform/mods/game_knowledge.c src/platform/mo
   src/platform/mods/game_knowledge_save.c src/platform/mods/game_knowledge_boot.c)
 p4_register_package_boot_provider(p4_game_knowledge_boot_provider)
 target_sources(p4port PRIVATE src/platform/mods/game_elements_ai_sources.c src/platform/mods/game_elements_ai_native.c
-  src/platform/mods/game_elements_ai_vm.c src/platform/mods/game_elements_ai_proof.c
+  src/platform/mods/game_elements_ai_vm.c
   src/platform/mods/game_elements_ai_decision.c src/platform/mods/game_elements_ai_roles.c
   src/platform/mods/game_elements_ai_boot.c)
 p4_register_package_boot_provider(p4_game_elements_ai_boot_provider)

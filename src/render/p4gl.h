@@ -125,6 +125,11 @@ void p4gl_layout_push(int layout);
 void p4gl_layout_queue_begin(uint32_t queue);
 void p4gl_layout_node_begin(const void *node);
 void p4gl_layout_end(void);
+/* Render-only hidden HUD scopes: ordering-table buckets (queue addresses) and
+ * node callback retail-entry ranges whose draws are dropped at the flush.
+ * Copied; an empty set costs one test per scope. Set by the mod services. */
+void p4gl_hud_hidden_set(const uint32_t *queues, unsigned queueCount, const uint32_t (*callbacks)[2],
+                         unsigned callbackCount);
 float p4gl_layout_model_scale(void); /* fitted screen-space EPL models, not world geometry */
 enum {
     P4GL_MODEL_FIT, P4GL_MODEL_COVER,

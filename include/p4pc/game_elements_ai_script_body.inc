@@ -1,7 +1,6 @@
 #ifndef P4PC_GAME_ELEMENTS_AI_SCRIPT_BODY_INC
 #define P4PC_GAME_ELEMENTS_AI_SCRIPT_BODY_INC
 #include "p4pc/game_elements_ai_native.h"
-#include <stdlib.h>
 #include "p4pc/guest.h"
 /* The context accessor returns a guest-address word; preserve that retail ABI. */
 extern int32_t scrGetContext(void);
@@ -28,7 +27,7 @@ extern int32_t scrGetContext(void);
     if (p4_game_elements_ai_native_enabled()) { \
         void *p4_source = (void *)scrGetAiState(); \
         int32_t p4_value = p4_game_elements_ai_query_script(P4_AI_SCRIPT_WORK(), \
-            p4_source, p4_source, 0u, (int32_t)scrGetParamInt(0), (POLICY), 0u); \
+            p4_source, p4_source, 0u, (int32_t)scrGetParamInt(0), (POLICY)); \
         scrSetReturnInt(p4_value); \
         return 1; \
     } \
@@ -40,7 +39,7 @@ extern int32_t scrGetContext(void);
         void *p4_source = (void *)scrGetAiState(); \
         void *p4_target = (void *)btlActionFindById(p4_id & 0x0fffffffu); \
         int32_t p4_value = p4_game_elements_ai_query_script(P4_AI_SCRIPT_WORK(), \
-            p4_source, p4_target, 1u, p4_selector, (POLICY), 1u); \
+            p4_source, p4_target, 1u, p4_selector, (POLICY)); \
         scrSetReturnInt(p4_value); \
         return 1; \
     } \
@@ -80,9 +79,9 @@ static inline int p4_ai_score_same_frame(const P4GameActionFrame *a, const P4Gam
         a->source_id == b->source_id && a->native_options == b->native_options &&
         a->owned_binding == b->owned_binding;
 }
-static inline int p4_ai_score_allowed(void *source, void *target, const P4GameActionFrame *frame)
+static inline int p4_ai_score_allowed(void *source, const P4GameActionFrame *frame)
 {
-    int allowed = p4_game_elements_ai_vm_candidate_allowed(P4_AI_SCRIPT_WORK(), source, target, frame);
+    int allowed = p4_game_elements_ai_vm_candidate_allowed(P4_AI_SCRIPT_WORK(), source, frame);
     if (allowed < 0) p4_game_elements_ai_native_fail();
     return allowed;
 }

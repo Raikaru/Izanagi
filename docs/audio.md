@@ -15,15 +15,15 @@ All sound the port makes goes through one mixer (`src/platform/sound/p4snd_mixer
 
 ## ADX through CRI
 
-CRI's ADXT (`decomp/src/cri/re4/adx_tlk.c` and the stream joint, decoder and ADXRNA code under it) is unchanged. On the PS2 the decoded PCM leaves ADXT through PS2RNA (an SPU2 ring behind an IOP transfer). In the port `ADXRNA_*` (compiled decomp, `re4/adx_rnaa.c`) calls `AXRNA_*`, which `axrna.c` defines:
+CRI's ADXT is the decomp's (`decomp/src/cri/re4/adx_tlk.c` and the stream joint, decoder and ADXRNA code under it) except for the handle server and the inner create, which are translated from the retail asm: `src/cri/adxt_svr.c` (adxt_ExecHndl `0x004d8698` and its state steps; the GameCube `re4/adx_tsvr.c` is excluded) and `adxt_Create` (`0x004d38a8`, `src/cri/adxt_wrap.c`). On the PS2 the decoded PCM leaves ADXT through PS2RNA (an SPU2 ring behind an IOP transfer). In the port `ADXRNA_*` (compiled decomp, `re4/adx_rnaa.c`) calls `AXRNA_*`, which `axrna.c` defines:
 
 | function | behaviour |
 |---|---|
 | `AXRNA_Create(sjo, nch)` | a stream voice with `nch` rings of 0x4000 samples (the retail ring size); `sjo` is ADXT's array of one mono 16-bit stream joint per channel. The decomp's `ADXRNA_Create(nch, sj)` front end is called by ADXT with `(sjo, maxnch, work)`, so the two arguments arrive in that order; either order is accepted |
-| `AXRNA_ExecServer` | for every handle with the transfer on: moves min(ring room, joint data of every channel) samples from each joint's data line (SJ line 1) into the ring and returns the chunks to the free line (line 0) |
+| `AXRNA_ExecServer` | for every handle with the transfer on: moves min(reported room, joint data of every channel) samples from each joint's data line (SJ line 1) into the ring and returns the chunks to the free line (line 0). Every pass then records the voice's played count for the report below |
 | `AXRNA_SetTransSw(sw)` | the server pulls from the joints only while it is on |
 | `AXRNA_SetPlaySw(sw)` | the voice runs while on. Off with the transfer already off is a stop (empties the ring); with it on, a pause |
-| `AXRNA_GetNumData` / `GetNumRoom` | samples buffered / free in the ring. Playing drains `GetNumData` at the stream rate, so ADXT's start condition, `ADXT_GetTime` and the end-of-stream drain behave as on the console |
+| `AXRNA_GetNumData` / `GetNumRoom` | what PS2RNA reports: samples pushed minus those played by the end of the server pass three passes back, and 0x2000 (PS2RNA's 0x4000-byte IOP buffer) minus that. Retail's EE sees the IOP consume a sample three passes after it played; the mixer ring is larger so it can hold the played-but-unreported samples. ADXT's start condition, `ADXT_GetTime` and the end-of-stream drain therefore see what retail's EE sees |
 | `AXRNA_SetSfreq`, `SetNumChan`, `SetOutVol` (1/10 dB), `SetOutPan` (-15..15 per channel), `DiscardData`, `SetBitPerSmpl`, `SetAdjsfreqFlg`, `SetStmHdInfo`, `EntryErrFunc`, `Init`, `Finish`, `Destroy` | stored or forwarded to the voice |
 
 Checks: `tests/axrna_test.c` drives `AXRNA_*` on CRI's own ring joints (SJRBF): the ring accounting ADXT reads, the transfer, play, pause and stop, volume, and that a stream longer than the ring comes out intact.
@@ -39,6 +39,18 @@ The ADXT channel getter has the same symbol-name inversion as the decoder getter
 The `adx_stream_event`, `adx_stream_env`, and `adx_stream_voice` tests run the same WAV/reference-decode checks through the file-server path: `ADXT_StartFname` for event SE and ambience, and an AFS partition plus `ADXT_StartAfs` for voice.
 
 `voiced_event_0417` loads the `saves/story0417` checkpoint and runs `repro_0417_night.walk`: going upstairs starts E176, whose voice wait must release so the story reaches Class 2-2 (field 6 room 6) on 04/18 at flip 25000. It does not prove a futon interaction or after-school free control; `school_0418` continues through the morning contact-information choice and saves after school. `adx_stream_voice` separately captures member 1 of E176's `V176001.AFS` to WAV and compares its PCM with the source ADX decode.
+
+### End of a voice
+
+The PS2 server ends a handle the way `adxt_svr.c` does. PLAYING becomes PLAYEND_WAIT once the decoder has ended and every output joint holds less than 64 bytes; the renderer keeps transferring. Each PLAYEND_WAIT pass pads every output joint with up to `maxdecsmpl` samples of silence and adds them to `flush_nsmpl` (`+0xa8`, cleared by the decoder-information step; retail's sample-time getter `0x004d4630` subtracts it). The handle is PLAYEND when the joints' data plus the renderer's data minus that padding is no longer positive, that is once every real sample has been played. The re4 server instead turned the transfer off and waited for an empty renderer. Retail's inner create leaves no renderer work in front of the file ring, so the battle's two-channel ACSSND voices get a 39-sector ring with a reload threshold of 33; the re4 create gave 31 and 26.
+
+Three things decide the PLAYEND game update, and all three follow the console:
+
+- **Audio.** On a virtual clock the kernel renders each VBLANK period's audio (`p4snd_virtual_tick` as `p4pc_vblank_period_hook`), not one period per flip. Battle runs at two VBLANKs per update, so a 24 kHz voice drains about 800 samples per update, as on retail. Before this the port drained 400, and collision 900's voice (cue 308, 37222 samples) would have ended about 38 updates late. Real-time play is unaffected: the SDL device and the pacer consume in real time.
+- **Server.** The CRI server wake-up (`kwlnEnableInterrupts` -> `ADXM_ExecVint`) sits behind the game's GS-field gate on the VBLANK chain ([kernel](platform/threads_kernel.md#vblank-and-clocks)). The ADXT server therefore runs once per battle update and `adxt_vsync_cnt` advances once per update, as measured on retail.
+- **Renderer report.** PS2RNA reports its IOP buffer (0x4000 bytes, 0x2000 samples) as the EE last heard of it. The IOP side of PS2RNA is not in the decomp, so AXRNA (`src/platform/sound/axrna.c`) models the report from retail's collision 900 voices (24 kHz, 800.8 samples per 30 Hz server pass): the EE hears of consumption in whole 256-sample blocks, as of 2.75 passes (5.5 VBLANKs) back, and the server transfers no more than the reported room. Only a lag in (2.68, 2.78] passes reproduces all of retail's observations: no consumption seen in the third pass after key-on and 768 samples in the fourth, and PLAYEND 50 passes after key-on for the 37222-sample battle voice, 68 for a 51968-sample navigator line and 86 for a 66482-sample one. A plain three-pass lag ended the last one a pass late.
+
+`tests/adxt_playend_test.c` plays a synthetic 24 kHz voice arriving at a fixed update through the retail create and server, on the kernel's own VBLANK chain and virtual audio clock, and checks the PREP, PLAYING and PLAYEND updates and `flush_nsmpl`.
 
 ### File requests and publication
 

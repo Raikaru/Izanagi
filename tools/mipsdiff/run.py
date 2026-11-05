@@ -157,6 +157,13 @@ def wsl_path(p):
     return "/mnt/%s%s" % (m.group(1).lower(), m.group(2)) if m else p
 
 
+def wsl_guard(tool="mipsdiff"):
+    """Refuse (logged) while the PC's WSL maintenance hold is set (tools/local_work.py wsl-hold)."""
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+    import local_work
+    local_work.refuse_while_wsl_held(tool)
+
+
 class Img:
     """Memory image under construction: a bump arena plus explicit retail-address pages."""
 
@@ -284,6 +291,7 @@ def build(entries, callees=(), extra=(), c_impls=None):
     script = os.path.join(d, "build.sh")
     with open(script, "w", newline="\n") as f:
         f.write("\n".join(sh) + "\n")
+    wsl_guard()
     r = subprocess.run(["wsl", "-d", "Debian", "--", "sh", wsl_path(script)], capture_output=True, text=True)
     if r.returncode:
         raise RuntimeError("build failed:\n" + r.stdout + r.stderr)
@@ -322,6 +330,7 @@ def run_cases(harness, index, cases, callees=()):
     outp = os.path.join(d, "result.bin")
     with open(inp, "wb") as f:
         f.write(blob)
+    wsl_guard()
     r = subprocess.run(["wsl", "-d", "Debian", "--", wsl_path(harness), wsl_path(inp), wsl_path(outp)],
                        capture_output=True, text=True)
     if r.returncode:

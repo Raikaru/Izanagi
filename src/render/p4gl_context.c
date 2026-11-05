@@ -541,6 +541,7 @@ static void captureFrame(SDL_Window *window, unsigned frame)
             FILE *df;
 
             snprintf(dpath, sizeof dpath, dump, frame);
+            p4pc_dump_ram_admit(dpath);
             df = fopen(dpath, "wb");
             if (df != NULL) {
                 fwrite(P4_G2H(0x00100000u), 1, 0x02000000u - 0x00100000u, df);

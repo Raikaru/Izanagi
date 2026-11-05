@@ -1,7 +1,19 @@
 #include "p4pc/mod_bindings.h"
 #ifdef P4_MOD_LUAU
 #include "native_bindings.h"
-static const P4LuaNativeBindings game = {p4_lua_ui_initialize, p4_lua_ui_close};
+static void initialize(lua_State *L)
+{
+    p4_lua_ui_initialize(L);
+    p4_lua_authorize_initialize(L);
+    p4_lua_services_initialize(L);
+}
+static void before_destroy(P4LuaMod *mod)
+{
+    p4_lua_services_close(mod);
+    p4_lua_authorize_close(mod);
+    p4_lua_ui_close(mod);
+}
+static const P4LuaNativeBindings game = {initialize, before_destroy};
 #endif
 int p4_mod_game_bindings_init(void)
 {

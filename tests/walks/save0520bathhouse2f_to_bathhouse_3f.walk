@@ -47,8 +47,8 @@ waitstep:22
 log
 timeout:60000
 battleskip:on
-# Autonomic Basalts resist physical attacks and are Wind weak.
-# Set the Wind user's Full Assault before the stair route; Yukiko remains Act Freely.
+# This floor's groups are Ice-weak Monopolizing Cupids and Wind-weak, physical-resistant Autonomic Basalts.
+# Give Yosuke Direct Commands for Garu; Chie is already direct and Yukiko remains Act Freely.
 walk:shadow,250
 press:cross
 waitbtl:menu
@@ -69,13 +69,23 @@ press:cross
 wait:600
 press:down
 wait:20
+press:down
+wait:20
+press:down
+wait:20
+press:down
+wait:20
 press:cross
 wait:100
 press:circle
 wait:100
-# From Attack row 3, three Down presses open Item row 6, not Guard row 2.
-# Repeat owned recovery items while Confusion expires; Yosuke attacks and Chie remains direct.
-battle:first1=circle,down,down,down,cross;first3=circle;plan=cross,cross,cross;skip=0;delay=80
+waitstate:0x00796e64==4
+# Spend no items, so the camp list keeps its order for Goho-M. Yu's Bufu and Yosuke's Garu move one target right
+# after each knockdown, Chie casts Mabufu, and each falls back to the weapon. Yu's Media covers anyone under
+# 100 HP and Yosuke's Dia anyone under 80. The same driver also fights the encounter on the stair route.
+battle:first1=circle,down,cross,skill:26,cross,right,cross,circle,circle,circle,cross,cross;plan1=circle,down,cross,skill:26,cross,right,cross,circle,circle,circle,cross,cross;first3=circle,down,cross,skill:29,cross,cross,circle,circle,circle,cross,cross;plan3=circle,down,cross,skill:29,cross,cross,circle,circle,circle,cross,cross;plan=circle,down,cross,skill:14,cross,right,cross,circle,circle,circle,cross,cross;skip=0;delay=80
+battlerule:hp<100@1=circle,down,cross,skill:195,cross,cross,circle,circle,circle,cross,cross
+battlerule:hp<80@2=circle,down,cross,skill:192,cross,cross,circle,circle,circle,cross,cross
 waittask:battle:off
 skipmsg
 wait:150
@@ -118,7 +128,9 @@ press:down
 wait:20
 press:cross
 wait:300
-# The recovery-item plan depleted Peach Seeds; Goho-M is now the fifth owned consumable.
+# No item was spent: Peach Seed, Medicine, Value Medicine, Soul Drop and Revival Bead precede Goho-M.
+press:down
+wait:20
 press:down
 wait:20
 press:down

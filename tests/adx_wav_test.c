@@ -9,11 +9,12 @@
  *   - the header is a plain 4-bit ADX (type 3) with the rate, channel count and sample total
  *     the check compares against;
  *   - ADXT reaches the playing state and then the end, and the played time (from the first
- *     rendered frame of the voice to the end state) matches total / rate within 100 ms;
+ *     rendered frame of the voice to the end state) matches total / rate within 100 ms (the end
+ *     state follows the last sample by the renderer's report latency, docs/audio.md);
  *   - the waveform is not silent and does not clip (no more than 0.01% of the samples on the rails);
- *   - every output frame between the 2000th and the 2000th from the end equals the reference
- *     decode resampled the way the mixer resamples (linear, stream rate to 48 kHz), within 2
- *     LSB at the stream's gain: no dropped, repeated or reordered samples on the way.
+ *   - every output frame of the voice between its 2000th and its 2000th from the end equals the
+ *     reference decode resampled the way the mixer resamples (linear, stream rate to 48 kHz), within
+ *     2 LSB at the stream's gain: no dropped, repeated or reordered samples on the way.
  *
  * The ADX is P4PC_ADX (a disc path) or BGM/THEME.ADX, the title music. With P4PC_ADX_STREAM (a CRI
  * name such as "VOL:EVE_521.ADX" or "ENV:ENV_346.ADX") the file is not held in a memory joint but streamed
@@ -523,7 +524,9 @@ static int test_main(int argc, char **argv)
             uint32_t idx = 0;
             double frac = 0.0;
             long long j;
-            long long n = endFrame - startFrame;
+            /* the voice's own frames: the end state comes the renderer's report latency later */
+            long long n = endFrame - startFrame < (long long)((double)(total - 1) / step) ?
+                          endFrame - startFrame : (long long)((double)(total - 1) / step);
             double err;
 
             for (j = 0; j < n; j++) {

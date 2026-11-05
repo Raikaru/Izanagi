@@ -3,6 +3,7 @@
 #include "p4pc/game_skills.h"
 #include "p4pc/game_items.h"
 #include "p4pc/gmem.h"
+#include "p4pc/game_enemies_native.h"
 #include <stdio.h>
 
 static uint16_t le16(const uint8_t *bytes)
@@ -72,6 +73,28 @@ static int resolve_action(const P4GameTables *tables, const P4GameSkills *skills
 {
     if (!tables || (!element && !frame)) return P4_TABLE_INVALID;
     if (!p4_game_tables_revision(tables)) return P4_TABLE_NOT_READY;
+    if ((skill_id & 0xffffu) == 0xffffu && !primary) {
+        /* Calculations with no skill, such as 001F6930's per-turn ailment
+         * recovery chance (kind 8, skill -1), resolve the payload alone, as
+         * datCalcStatusElement 0023D740 does when its (s16) skill is -1:
+         * the KO payload is Dark 7, an ailment its own status leaf. */
+        P4GameActionElement declared = {.valid = 1, .component = component};
+        if (component == P4_ACTION_COMPONENT_INSTANT_KO) {
+            if (status_mask != 0x80000u) return P4_TABLE_INVALID;
+            declared.element_id = 7; declared.channel_id = P4_CHANNEL_INSTANT_KO;
+        } else if (component == P4_ACTION_COMPONENT_STATUS) {
+            int result = status_leaf(status_mask, &declared.element_id);
+            if (result) return result;
+            declared.channel_id = P4_CHANNEL_STATUS;
+        } else return P4_TABLE_INVALID;
+        P4GameActionElement resolved;
+        int result = runtime ? p4_game_tables_classify_runtime_action_element(tables, &declared, frame ? &resolved : element) :
+            p4_game_tables_classify_action_element(tables, &declared, frame ? &resolved : element);
+        if (result) return result;
+        if (frame) *frame = (P4GameActionFrame){.element = resolved, .skill_id = skill_id,
+            .source_kind = P4_ACTION_ELEMENT_SKILL, .source_id = skill_id, .native_options = native_options};
+        return P4_TABLE_OK;
+    }
     if (runtime) {
         int result = p4_game_skills_runtime_use(skills, skill_id);
         if (result) return result;
@@ -130,8 +153,8 @@ static int resolve_action(const P4GameTables *tables, const P4GameSkills *skills
                     kind = P4_ACTION_ELEMENT_ENEMY_ATTACK; source = id;
                     binding = p4_game_tables_find_action_element(tables, kind, source, component);
                     if (!binding) {
-                        /* Only a known retail source may index the packed bank. */
-                        if (id >= 336u) return P4_TABLE_NOT_FOUND;
+                        /* Only a published source may index the packed bank. */
+                        if (id >= p4_game_enemies_native_limit()) return P4_TABLE_NOT_FOUND;
                         const uint32_t metadata = P4_G32(0x007644b4u);
                         if (!metadata) return P4_TABLE_NOT_READY;
                         declared.valid = 1; declared.element_id = P4_G8(metadata + id * 60u + 0x38u);

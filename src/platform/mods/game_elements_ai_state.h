@@ -1,7 +1,6 @@
 #ifndef P4PC_GAME_ELEMENTS_AI_STATE_H
 #define P4PC_GAME_ELEMENTS_AI_STATE_H
 #include "p4pc/game_elements_ai.h"
-#include "game_elements_ai_proof.h"
 
 #define P4_AI_EXIT UINT32_MAX
 #define P4_AI_UNUSED_OPCODE UINT16_MAX
@@ -12,6 +11,13 @@
 #define P4_AI_TAG_NUMBER 2u
 #define P4_AI_TAG_COMMAND 3u
 #define P4_AI_PROOF_SOURCES (P4_GAME_AI_CANDIDATE_COUNT + 1u)
+
+/* A live battle action and its unit's identity, so a stored selection names
+ * the same unit when it is used later. */
+typedef struct P4AiTargetFact {
+    P4GameAiOwner owner;
+    P4GameUnitIdentity identity;
+} P4AiTargetFact;
 
 /* Host-only, immutable after CPU preparation except the verified late binding.
  * Calls use their continuation in this CFG: callee control scopes have their
@@ -71,9 +77,6 @@ typedef struct P4AiCarrier {
     uint32_t selected_permission;
     P4GameAiSelection selected;
     uint32_t choice_generation;
-    uint32_t target_proof_vm[P4_GAME_AI_VM_WORK_SLOTS];
-    uint32_t target_proof_node[P4_GAME_AI_VM_WORK_SLOTS];
-    uint32_t target_proof_generation[P4_GAME_AI_VM_WORK_SLOTS];
     uint32_t weighted_valid, weighted_group, weighted_mask;
     uint32_t weighted_candidate[P4_GAME_AI_WEIGHT_ENTRIES];
 } P4AiCarrier;
@@ -85,10 +88,7 @@ typedef struct P4AiVmState {
     uint32_t command_constrained, command_explicit_valid, command_source_unrestricted;
     P4GameActionFrame command_explicit_frame;
     uint32_t command_proofs[P4_AI_PROOF_SOURCES];
-    P4AiProofPool proofs;
-    uint32_t *proof_temporaries;
-    uint32_t proof_temporary_count, proof_temporary_capacity;
-    uint32_t choice_valid, choice_generation, choice_proof;
+    uint32_t choice_valid, choice_generation;
     P4GameActionFrame choice_frame;
     uint32_t target_contract_valid, target_contract_known, target_contract_policy, target_contract_count;
     int32_t target_contract_rejected;
@@ -108,8 +108,6 @@ struct P4GameAiPrepared {
     uint32_t native_work_pool;
     size_t vm_stride;
     uint8_t *vm_arena;
-    uint32_t proof_capacity, proof_temporary_capacity;
-    size_t proof_nodes_offset, proof_scratch_offset, proof_temporaries_offset;
     P4GameAiBankSource bank;
     uint32_t bank_count, bank_native_base, bank_source_used;
     uint32_t bank_player_script, bank_enemy_script;

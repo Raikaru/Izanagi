@@ -1,5 +1,6 @@
 #include "p4pc/mod_resources_boot.h"
 #include "p4pc/content_source.h"
+#include "p4pc/mod_setting_gate.h"
 #include "file_index.h"
 #include "package_memory_internal.h"
 #include "resource_png.h"
@@ -142,15 +143,17 @@ static int prepare_image(const P4PackageProvider *provider, const P4PackageField
     ImageInput image = {0};
     if (!info || !p4_package_provider_selected(provider) || !qualified(key, image.owner))
         return refuse(provider, key, NULL, "expected a bounded lowercase owner:key");
+    size_t gates = 0;
     for (size_t i = 0; i < count; ++i) {
         if (!strcmp(fields[i].key, "file")) file = fields[i].value;
         else if (!strcmp(fields[i].key, "format")) format = fields[i].value;
         else if (!strcmp(fields[i].key, "schema")) schema = fields[i].value;
         else if (!strcmp(fields[i].key, "revision")) revision = fields[i].value;
+        else if (!strcmp(fields[i].key, P4_MOD_SETTING_GATE_FIELD)) ++gates; /* evaluated by prepare() */
         else return refuse(provider, key, file, "unknown declaration field");
     }
     uint32_t schema_number;
-    if (count != 4 || !file || !*file || !format || strcmp(format, "png") ||
+    if (gates > 1 || count - gates != 4 || !file || !*file || !format || strcmp(format, "png") ||
         !decimal(schema, &schema_number) || schema_number != 1 || !decimal(revision, &image.revision))
         return refuse(provider, key, file, "requires file, format=png, schema=1 and nonzero revision");
     const char *actual = actual_file(provider, file);
@@ -214,8 +217,12 @@ static int prepare(void *unused)
             size_t last = first + 1;
             while (last < count && !strcmp(fields[first].section, fields[last].section) &&
                    !strcmp(fields[first].argument, fields[last].argument)) ++last;
-            if (!strcmp(fields[first].section, "resource-image") &&
-                prepare_image(provider, fields + first, last - first)) return -1;
+            if (!strcmp(fields[first].section, "resource-image")) {
+                char reason[192];
+                const int gate = p4_mod_setting_section_gate(provider, fields + first, last - first, reason, sizeof reason);
+                if (gate < 0) return refuse(provider, fields[first].argument, NULL, reason);
+                if (gate && prepare_image(provider, fields + first, last - first)) return -1;
+            }
             first = last;
         }
     }
@@ -274,12 +281,15 @@ int p4_resources_images_session_end(void)
     return P4_RESOURCE_OK;
 }
 static const char *const sections[] = {"resource-image", NULL};
+/* A resource-image's `when` reads this admission's settings snapshot. */
+static const char *const dependencies[] = {P4_MOD_SETTINGS_HANDLER, NULL};
 const P4PackageHandler p4_resources_images_boot_provider = {
     .name = P4_RESOURCES_IMAGES_HANDLER,
     .sections = sections,
     .prepare = prepare,
     .rollback = rollback,
     .boot_phase = P4_PACKAGE_BOOT_RESOURCES,
+    .dependencies = dependencies,
     .finalize_prepare = finalize_prepare,
     .runtime_prepare = runtime_prepare
 };

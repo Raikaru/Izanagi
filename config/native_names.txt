@@ -62,6 +62,7 @@
 0x004D51C0 ADXT_GetOutVol  # retail wrapper of the inner 0x004d51f8 (marker): outvol, 0 and the error text for NULL
 0x004D5488 ADXT_SetSvrFreq  # retail wrapper of the inner 0x004d54c8 (marker): svrfreq (+0x38) and the last-frequency word 0x00724e70
 0x004D5B30 ADXT_ExecServer  # retail wrapper of the inner 0x004d5b58: same phase counter and order (ADXSJD server, the used handles, the renderer server) as re4 ADXT_ExecServer; retail runs the renderer server a second time when the last server frequency (0x00724e70) is below 51 Hz, the default of 60 Hz never does
+0x004D8698 ADXT_ExecHndl  # retail adxt_ExecHndl, translated in src/cri/adxt_svr.c with its state steps (re4/adx_tsvr.c is excluded); re4 ADXT_ExecServer calls it by this name
 0x004D6050 ADXT_Pause  # retail wrapper of the inner 0x004d6090: same pause switch, renderer play switch, vsync rebase and time position as re4 ADXT_Pause (checked against the asm)
 0x004D61C0 ADXT_GetStatPause  # retail wrapper of the inner 0x004d61f8 (marker): the pause byte (+0x72), 0 and the error text for NULL
 0x004D47C8 ADXT_GetTime  # retail ADXT_GetTime (the symbol adxt_GetTime): vsync-based time position with the 60 ms resync and the sample-time mode, checked against re4 ADXT_GetTime instruction by instruction

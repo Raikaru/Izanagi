@@ -7,6 +7,7 @@
 #define P4PC_PAD_SDL_H
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 /* Active-high button bits. */
@@ -72,6 +73,9 @@ void p4pc_pad_autopress_set_origin(unsigned flipAtT, double T);
 void p4pc_pad_inject(unsigned bits, unsigned frames);   /* buttons down for that many flips (harness-driven presses) */
 /* -2 until a walk is parsed; otherwise P4WALK_RUNNING/DONE/FAILED. */
 int p4pc_pad_walk_status(void);
+/* Optional source for the walk's battle driver once its battleturn: lines are spent (P4WalkHost.battle_turn); NULL by default.
+ * The battle simulator's fork search sets it (src/platform/battle_sim/live.c). */
+void p4pc_pad_set_battle_turn_hook(int (*hook)(unsigned n, char *line, size_t size));
 
 /* ORs every scripted press that is down at `now` seconds into the snapshot. */
 void p4pc_pad_autopress_apply(const P4PadAutoPress *list, int count, double now, P4PadSnapshot *out);

@@ -47,6 +47,7 @@ DATA_NAME_RE = re.compile(r"^(?:D|DAT|PTR_DAT|jtbl)_([0-9A-Fa-f]{8})(?:_abs)?$")
 FUNC_NAME_RE = re.compile(r"^(?:func|FUN)_([0-9A-Fa-f]{8})$")
 GP_NAME_RE = re.compile(r"^(?:[if]Gp|gp0x)([0-9A-Fa-f]{8})$")
 OVERRIDE_RE = re.compile(r"^([0-9a-f]{8})\.c$")
+INCLUDE_ASM_NAME_RE = re.compile(r'\bINCLUDE_ASM\(\s*"[^"]*"\s*,\s*([A-Za-z_]\w*)\s*\)')
 # Any `FUN_<ADDR8>` token; the excluded-unit check matches these exactly as a substring test would.
 FUN_TOKEN_RE = re.compile(r"FUN_[0-9A-F]{8}")
 IDENT_RE = re.compile(r"([A-Za-z_]\w*)\s*$")
@@ -235,6 +236,85 @@ def marker_body_name(text, marker_end, addr, syms):
     if name and name in syms and syms[name][0] != addr:
         return None
     return name
+
+
+SIGNATURE_RE = re.compile(r"(?P<ret>[\w\s*]+?)\b(?P<name>\w+)\s*\((?P<args>[^{};]*)\)")
+# String/char literals and comments, whichever starts first, for brace scanning.
+OPAQUE_RE = re.compile(r'"(?:\\.|[^"\\\n])*"|\'(?:\\.|[^\'\\\n])*\'|/\*.*?\*/|//[^\n]*', re.S)
+CONDITIONAL_RE = re.compile(r"#[ \t]*(?:if|ifdef|ifndef|elif|else|endif)\b")
+
+
+def opaque_blanked(text):
+    """Same offsets and newlines, with literals and comments replaced by spaces."""
+    return OPAQUE_RE.sub(lambda match: re.sub(r"[^\n]", " ", match[0]), text)
+
+
+def marked_definition(plain, start, limit, names=None):
+    """The non-static top-level definition named in `names` (any, when None) between
+    start and limit, behind any comments, directives, prototypes, types, data or helper
+    functions. Returns (start, opening, name), "conditional" when a conditional directive
+    precedes it (the active body is not guessed), or None. `plain` is opaque_blanked."""
+    depth, item, conditional, i = 0, start, False, start
+    while i < limit:
+        if depth == 0 and (i == 0 or plain[i - 1] == "\n") and plain[i:i + 256].lstrip(" \t").startswith("#"):
+            end = plain.find("\n", i)
+            while end >= 0 and plain[end - 1] == "\\":
+                end = plain.find("\n", end + 1)
+            end = limit if end < 0 or end > limit else end
+            conditional |= bool(CONDITIONAL_RE.match(plain[i:end].lstrip(" \t")))
+            i = item = end
+            continue
+        c = plain[i]
+        if c == "{":
+            if depth == 0:
+                head = plain[item:i].strip()
+                parsed = SIGNATURE_RE.fullmatch(head)
+                if (parsed and (names is None or parsed["name"] in names) and
+                        not {"static", "extern"} & set(parsed["ret"].split())):
+                    return "conditional" if conditional else (plain.index(head, item), i, parsed["name"])
+            depth += 1
+        elif c == "}":
+            depth -= 1
+            if depth < 0:
+                return None
+            if depth == 0:
+                item = i + 1
+        elif c == ";" and depth == 0:
+            item = i + 1
+        i += 1
+    return None
+
+
+def settle_override_marker(text, marker_end, addr, body_start, body_end, replaced, label):
+    """Every marker consumer (function tables, retail names, the mod hook catalog)
+    reads the definition right after a `// FUN_` marker. An override may open with
+    data, types or helper functions, so after splicing, move the marker line (a
+    comment; the token stream is unchanged) to just before the override's own body:
+    the definition it replaced (its callers' link name), else its first non-static
+    definition when the override renames the body."""
+    line_start = text.rfind("\n", 0, marker_end) + 1
+    line_stop = line_end(text, marker_end)
+    names = {f"func_{addr:08x}", *([replaced] if replaced else [])}
+    if any(int(m[1], 16) == addr for m in MARKER_RE.finditer(text, body_start, body_end)):
+        return text  # The override carries its own marker beside its body.
+    current = marker_definition_name(text, marker_end)
+    if current in names:
+        return text
+    plain = opaque_blanked(text)
+    found = marked_definition(plain, body_start, body_end, names)
+    if found is None and current is not None and marked_definition(plain, body_start, body_end, {current}):
+        return text  # A renamed, non-static body already follows the marker.
+    if found is None:
+        found = marked_definition(plain, body_start, body_end)
+    if not isinstance(found, tuple):
+        die(f"{label}: cannot identify the function this override defines for FUN_{addr:08X}; "
+            "put its definition first, before helpers and data")
+    target = text.rfind("\n", 0, found[0]) + 1
+    settled = text[:line_start] + text[line_stop:target] + text[line_start:line_stop] + text[target:]
+    moved = MARKER_RE.search(settled, line_start + (target - line_stop))
+    if marker_definition_name(settled, moved.end()) != found[2]:
+        die(f"{label}: FUN_{addr:08X} still does not name {found[2]} after moving its marker")
+    return settled
 
 
 # ---------------------------------------------------------------- inputs
@@ -2425,6 +2505,8 @@ def override_signature(body, addr8):
 
 
 def apply_overrides(root, mirror_root, units):
+    """Splice overrides/<addr8>.c over their marked definitions, leaving each marker
+    directly before the override's own body (settle_override_marker)."""
     overrides = root / "overrides"
     texts, orig = {}, {}
     excluded_tokens = None
@@ -2509,11 +2591,15 @@ def apply_overrides(root, mirror_root, units):
                 if close is None:
                     die(f"{f.name}: no function definition follows FUN_{m[1].upper()} in {p.relative_to(mirror_root)}")
                 end = line_end(t, close)
-            texts[p] = t[:start] + body.rstrip("\n") + "\n" + t[end:]
+            replaced = marker_definition_name(t, mk_end)
+            asm = INCLUDE_ASM_NAME_RE.search(t, start, end) if replaced is None else None
+            replaced = replaced or (asm[1] if asm else None)
+            body_end = start + len(body.rstrip("\n")) + 1
+            texts[p] = settle_override_marker(t[:start] + body.rstrip("\n") + "\n" + t[end:], mk_end, addr,
+                                              start, body_end, replaced, f.name)
             # A block-scope prototype of the replaced function is a placeholder from the
             # INCLUDE_ASM era. It conflicts with the override's signature, and uses after
             # the definition take its type, so the placeholder is removed.
-            body_end = start + len(body.rstrip("\n")) + 1
             proto = re.compile(r"(?m)^[ \t]+extern[ \t][^;{}\n]*\bfunc_%s[ \t]*\([^;{}]*\)[ \t]*;[ \t]*\n" % m[1])
             texts[p] = texts[p][:body_end] + proto.sub("", texts[p][body_end:])
             sig = override_signature(body, m[1])

@@ -13,6 +13,7 @@
 #include "p4pc/platform.h"
 #include "p4pc/guest.h"
 #include "p4pc/game_elements.h"
+#include "p4pc/mod_setting_gate.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -232,7 +233,12 @@ static int prepare(void *unused)
             size_t last = first + 1;
             while (last < count && !strcmp(fields[first].section, fields[last].section) &&
                 !strcmp(fields[first].argument, fields[last].argument)) ++last;
-            if (!strcmp(fields[first].section, "table-source") && definition(provider, fields + first, last - first)) return -1;
+            if (!strcmp(fields[first].section, "table-source")) {
+                char reason[192];
+                const int gate = p4_mod_setting_section_gate(provider, fields + first, last - first, reason, sizeof reason);
+                if (gate < 0) return refuse(provider, reason);
+                if (gate && definition(provider, fields + first, last - first)) return -1;
+            }
             first = last;
         }
     }
@@ -349,8 +355,10 @@ int p4_game_tables_boot_session_end(void)
     return result;
 }
 static const char *const sections[] = {"table-source", NULL};
+/* A table-source's `when` reads this admission's settings snapshot. */
+static const char *const dependencies[] = {P4_MOD_SETTINGS_HANDLER, NULL};
 const P4PackageHandler p4_game_tables_sources_boot_provider = {
     .name = P4_GAME_TABLES_BOOT_PROVIDER, .sections = sections,
     .prepare = prepare, .finalize_prepare = finalize_prepare, .publish = publish, .rollback = rollback,
-    .boot_phase = P4_PACKAGE_BOOT_TABLES, .runtime_prepare = runtime_prepare
+    .boot_phase = P4_PACKAGE_BOOT_TABLES, .dependencies = dependencies, .runtime_prepare = runtime_prepare
 };

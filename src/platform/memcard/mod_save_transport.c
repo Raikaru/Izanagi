@@ -186,6 +186,13 @@ int p4_mod_save_transport_loaded(const P4SaveTransaction *transaction,const void
     }
     return 0;
 }
+int p4_mod_save_transport_loaded_untagged(const void *image,size_t size,const char *label,char *error,size_t cap)
+{
+    p4_mod_save_transport_load_abort();
+    if(!image||size<4)return fail(error,cap,"Invalid complete native save image");
+    P4ModSaveImage raw={.data=image,.size=size,.slot=label};
+    return p4_mod_save_stage_image(&raw,NULL,0,&load,error,cap);
+}
 int p4_mod_save_transport_restore(int32_t version,const void *payload,size_t size,char *error,size_t cap)
 {
     if(!load&&!p4_mod_save_needs_codec())return 0;

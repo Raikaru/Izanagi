@@ -84,7 +84,18 @@ def fake_worker():
     assert os.environ["P4PC_ASPECT"] == "4:3"
     assert os.environ["P4PC_RESOLUTION"] == "640x448"
     assert os.environ["P4PC_WINDOW_W"] == "640" and os.environ["P4PC_WINDOW_H"] == "448"
-    assert os.environ["P4PC_VSYNC"] == "off" and os.environ["P4PC_CONFIG"] == "none"
+    assert os.environ["P4PC_VSYNC"] == "off"
+    declared = os.environ.get("P4PC_BATTLE_SIM_MODS")
+    if declared is None:
+        assert os.environ["P4PC_CONFIG"] == "none" and os.environ["P4PC_MODS"] == "0"
+        assert not any(key in os.environ for key in ("P4PC_MOD_WITNESS", "P4PC_MOD_DIR"))
+    else:
+        # A declared cohort: explicit mod witness, the case profile's own Config and the staged packages.
+        assert os.environ["P4PC_MOD_WITNESS"] == "1" and os.environ["P4PC_MODS"] == "1"
+        config = Path(os.environ["P4PC_CONFIG"])
+        assert config.resolve() == (Path.cwd() / "p4pc.ini").resolve()
+        enabled = config.read_text(encoding="ascii").split("enabled=", 1)[1].strip().split(",")
+        packages = Path(os.environ["P4PC_MOD_DIR"])
     assert Path(os.environ["P4PC_SAVE_DIR"]).resolve() == Path.cwd().resolve()
     assert os.environ["P4PC_INPUT"] == "script" and os.environ["P4PC_PACKS"] == "0"
     assert not any(key in os.environ for key in ("P4PC_BOARD_SEED", "P4PC_WALK_SCRIPT", "P4PC_START_BATTLE", "P4PC_LOCKSTEP_DIR"))
@@ -110,6 +121,14 @@ def fake_worker():
         outcome = mode
     else:
         outcome = "win" if index % 2 == 0 else "defeat"
+    reported = None if mode != "retail_names_mods" else {"identity": "0" * 64, "witness": True,
+                                                          "active": [{"id": "x", "version": "1"}]}
+    if declared is not None:
+        active = []
+        for name in enabled:
+            manifest = (packages / name / "mod.ini").read_text(encoding="utf-8")
+            active.append({"id": name, "version": manifest.split("version = ", 1)[1].split("\n", 1)[0]})
+        reported = {"identity": "0" * 64 if mode == "mods_wrong" else declared, "witness": True, "active": active}
     body = {"schema": 1, "outcome": outcome, "terminal_cause": "protagonist_ko" if outcome == "defeat" else "native_terminal",
             "counter_capability": "fake-contract-v1", "trace_capability": "fake-trace-v1", "observer_attached": 1,
             "turns": {"actor_turns": index + 1, "actions": index + 3,
@@ -118,7 +137,8 @@ def fake_worker():
                           "final_party": [{"id": 1, "hp": max(0, 100 - index), "sp": 20}],
                           "initial_party_boundary": "after_restore_before_constructor"},
             "rng": {"additive": {"draws": index + 4}},
-            "worker_environment": {key: os.environ.get(key) for key in ("P4PC_ISO", "SDL_VIDEODRIVER")}}
+            "worker_environment": {key: os.environ.get(key) for key in ("P4PC_ISO", "SDL_VIDEODRIVER")},
+            "mods": reported}
     temporary = result.with_suffix(".tmp")
     temporary.write_text(json.dumps(body), encoding="utf-8")
     os.replace(temporary, result)
@@ -190,6 +210,100 @@ class BattleSimTest(unittest.TestCase):
         self.scenario["entry"]["source"] = {"kind": "declarative", "id": "fake-preparation", "definition": definition}
         return definition
 
+    def mods(self, settings=None):
+        """A declared cohort of one synthetic package (never shipped) and its settings."""
+        package = self.root / "packages" / "test.cohort"
+        package.mkdir(parents=True)
+        (package / "mod.ini").write_text("[mod]\nid = test.cohort\nname = Cohort\nversion = 1.2.3\napi = 1.3\n"
+                                         "priority = 0\norder = 0\n", encoding="utf-8")
+        (package / "main.luau").write_text("--!strict\np4.log(\"COHORT\")\n", encoding="utf-8")
+        self.scenario["mods"] = {"packages": [{"id": "test.cohort", "directory": "packages/test.cohort"}],
+                                 "settings": {"test.cohort": {"mode": "Harder", "adopt_on_load": "on"}}
+                                 if settings is None else settings}
+        return package
+
+    def test_declared_mod_cohort_runs_as_a_non_reference_witness(self):
+        package = self.mods()
+        report = self.batch()
+        self.assertEqual(report["errors"], 0)
+        identity = report["identity"]["mods"]
+        self.assertEqual(identity["packages"], [{"id": "test.cohort", "version": "1.2.3"}])
+        self.assertEqual(identity["identity"], sim.mod_cohort(self.scenario["mods"], self.root)["identity"])
+        self.assertEqual((report["run_mode"], report["mod_witness"], report["reference_eligible"]),
+                         ("mod-witness", True, False))
+        out = self.root / "out"
+        self.assertTrue((out / sim.mod_witness.MARKER).is_file() and (out / sim.mod_witness.RECEIPT).is_file())
+        self.assertEqual(sim.package_files(out / "mods" / "test.cohort", "staged"), sim.package_files(package, "source"))
+        for row in report["runs"]:
+            self.assertEqual(row["result"]["mods"]["identity"], identity["identity"])
+        profile = Path(report["runs"][0]["attempts"][0]["directory"]) / "profile"
+        self.assertEqual((profile / "p4pc.ini").read_text(encoding="ascii"), "[mods]\nenabled=test.cohort\n")
+        self.assertEqual((profile / "mod-settings" / "test.cohort.ini").read_text(encoding="ascii"),
+                         "mode = Harder\nadopt_on_load = on\n")
+        self.assertTrue(all(cohort["contract"]["mods"]["identity"] == identity["identity"]
+                            for cohort in report["measurement_cohorts"]))
+        self.assertIn("not a retail reference", (out / "summary.md").read_text(encoding="utf-8"))
+
+    def test_mod_identity_covers_content_and_settings(self):
+        package = self.mods()
+        first = sim.mod_cohort(self.scenario["mods"], self.root)["identity"]
+        self.scenario["mods"]["settings"]["test.cohort"]["mode"] = "Hard"
+        second = sim.mod_cohort(self.scenario["mods"], self.root)["identity"]
+        (package / "main.luau").write_text("--!strict\n", encoding="utf-8")
+        third = sim.mod_cohort(self.scenario["mods"], self.root)["identity"]
+        self.assertEqual(len({first, second, third}), 3)
+
+    def test_mod_cohort_declarations_are_strict(self):
+        self.mods()
+        changes = [
+            lambda m: m.update(packages=[]),
+            lambda m: m["packages"].append(dict(m["packages"][0])),
+            lambda m: m["packages"][0].update(id="Bad Id"),
+            lambda m: m["packages"][0].update(extra=1),
+            lambda m: m.update(settings={"undeclared.mod": {"mode": "Hard"}}),
+            lambda m: m["settings"]["test.cohort"].update(mode="Hard # comment"),
+            lambda m: m["settings"]["test.cohort"].update({"Bad Key": "on"}),
+            lambda m: m["settings"]["test.cohort"].update(mode=1),
+            lambda m: m.pop("settings"),
+        ]
+        for change in changes:
+            with self.subTest(change=change):
+                scenario = copy.deepcopy(self.scenario)
+                change(scenario["mods"])
+                with self.assertRaises(sim.ScenarioError):
+                    sim.validate_scenario(scenario)
+
+    def test_mod_package_manifest_must_declare_the_package(self):
+        package = self.mods()
+        (package / "mod.ini").write_text("[mod]\nid = other.mod\nversion = 1\n", encoding="utf-8")
+        with self.assertRaisesRegex(sim.ScenarioError, "do not declare"):
+            self.batch()
+        self.assertEqual(self.admissions, 0)
+
+    def test_mod_cohort_result_identity_must_match(self):
+        self.mods()
+        self.mode("mods_wrong")
+        report = self.batch()
+        self.assertEqual(report["errors"], 4)
+        self.assertIn("mod-set identity mismatch", report["runs"][0]["attempts"][0]["error"])
+
+    def test_retail_result_naming_a_mod_set_is_refused(self):
+        self.mode("retail_names_mods")
+        report = self.batch()
+        self.assertEqual(report["errors"], 4)
+        self.assertIn("mod set for a retail scenario", report["runs"][0]["attempts"][0]["error"])
+
+    def test_mod_cohorts_never_pool_with_retail(self):
+        retail = self.batch()
+        self.assertTrue(all(cohort["contract"]["mods"] is None for cohort in retail["measurement_cohorts"]))
+        rows = retail["runs"]
+        modded = copy.deepcopy(rows[0])
+        modded["run_index"] = 99
+        modded["result"]["mods"] = {"identity": "a" * 64, "witness": True, "active": [{"id": "x", "version": "1"}]}
+        report = sim.aggregate(rows + [modded])
+        self.assertEqual(sum(1 for c in report["measurement_cohorts"] if 99 in c["run_indices"]), 1)
+        self.assertTrue(any(c["run_indices"] == [99] for c in report["measurement_cohorts"]))
+
     def test_valid_source_variants(self):
         sim.validate_scenario(self.scenario)
         source = self.scenario["entry"]["source"]
@@ -257,12 +371,15 @@ class BattleSimTest(unittest.TestCase):
     def test_walk_policy_plan_is_battle_lines_only(self):
         self.walk_policy()
         sim.validate_scenario(self.scenario)
+        self.walk_policy("battle:plan=circle,cross,cross\nbattleturn:enemy:261=circle,down,cross,skill:41,cross,cross\n")
+        sim.validate_scenario(self.scenario)
         changes = [(lambda p: p.pop("plan"), "policy.plan: required"),
                    (lambda p: p.update(plan=""), "expected 1..16384"),
                    (lambda p: p.update(plan="b" * 16385), "expected 1..16384"),
                    (lambda p: p.update(plan="battle:plan=cross\twait:1"), "printable ASCII"),
                    (lambda p: p.update(plan="battle:plan=cross\nwalk:0,0"), "line 2"),
                    (lambda p: p.update(plan="battle:"), "line 1"),
+                   (lambda p: p.update(plan="battle:plan=cross\nbattleturn:"), "line 2"),
                    (lambda p: p.update(tape=[{"update": 1, "buttons": 1, "hold": 1}]), "policy.tape: only valid"),
                    (lambda p: p.update(kind="greedy"), "only valid with, the walk policy")]
         for change, message in changes:
@@ -279,6 +396,13 @@ class BattleSimTest(unittest.TestCase):
         fields = struct.unpack("<8s14I", binary[:64])
         self.assertEqual((fields[7], fields[8], fields[11]), (len(plan), len(image), 4))
         self.assertEqual(binary[64 + len(image):], plan.encode("ascii"))
+
+    def test_attentive_policy_is_named_policy_five_without_tape(self):
+        self.scenario["policy"] = {"kind": "attentive", "version": 1}
+        sim.validate_scenario(self.scenario)
+        binary = sim.compile_entry(self.scenario, self.image.read_bytes(), sim.derive_seeds(self.scenario["master_seed"], 0))
+        fields = struct.unpack("<8s14I", binary[:64])
+        self.assertEqual((fields[7], fields[11]), (0, 5))
 
     def test_walk_result_carries_its_plan_identity_only(self):
         base = {"schema": 1, "outcome": "win", "party_policy": {"id": 4, "name": "walk-battle-rules-v1", "latency_updates": 1,

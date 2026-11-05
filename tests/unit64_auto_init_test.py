@@ -117,6 +117,32 @@ class AutoInitTest(unittest.TestCase):
             self.assertEqual(error.exception.code, 1)
             self.assertIn("sample.c: rule abi: baseline 3, now 2", output.getvalue())
 
+    def test_a_refresh_never_records_a_rise_in_record_without_oracle(self):
+        """2026-11-04: the Android baseline was refreshed while a Bionic header conflict broke btlEffect.c's
+        layout oracle (record-without-oracle 7 -> 12); every later check then accepted the broken state."""
+        with tempfile.TemporaryDirectory() as work:
+            directory = Path(work)
+            units = directory / "units"
+            units.mkdir()
+            (units / "btlEffect.c.64.o.census").write_text("layout-asserts=312 record-without-oracle=12\n", encoding="utf-8")
+            (units / "new.c.64.o.census").write_text("record-without-oracle=3\n", encoding="utf-8")
+            baseline = directory / "android.txt"
+            unit64.write_census_file(baseline, [{"major": 18, "patch": False, "units": {
+                "btlEffect.c": {"layout-asserts": 345, "record-without-oracle": 7}}}])
+            before = baseline.read_text(encoding="utf-8")
+            args = SimpleNamespace(dir=str(units), census_baseline=None, census_refresh=str(baseline),
+                                   clang="fixture-clang", active_units=None, baseline=None)
+            with patch.object(unit64, "clang_major", return_value=18), redirect_stdout(io.StringIO()), \
+                    self.assertRaises(SystemExit) as error:
+                unit64.cmd_report(args)
+            self.assertIn("btlEffect.c: record-without-oracle 7 -> 12", str(error.exception.code))
+            self.assertNotIn("new.c", str(error.exception.code))   # a new unit has no earlier count to rise from
+            self.assertEqual(baseline.read_text(encoding="utf-8"), before)
+            (units / "btlEffect.c.64.o.census").write_text("layout-asserts=345 record-without-oracle=7\n", encoding="utf-8")
+            with patch.object(unit64, "clang_major", return_value=18), redirect_stdout(io.StringIO()):
+                unit64.cmd_report(args)
+            self.assertIn("new.c", baseline.read_text(encoding="utf-8"))
+
 
 
 if __name__ == "__main__":

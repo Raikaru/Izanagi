@@ -83,7 +83,7 @@
  *                        foebuff:M   a living enemy's buff levels match a bit of M (Dekaja after its Heat Riser): the first is the bound enemy
  *                        afflicted:M a living party member's ailments have a bit of mask M (0x4: fear after Evil Smile): the first in party
  *                                    order is the bound ally (Me Patra or Amrita cure every ally at once)
- *                        enemy:ID    a living enemy with that native ID is in the fight (e.g. Escape from the rare unit 138)
+ *                        enemy:ID    a living enemy with that native ID is in the fight: it is the bound enemy (focus a healer; Escape from 138)
  *                        weak:E      a living enemy is weak to element E (0 physical, 1 fire, 2 ice, 3 elec, 4 wind, 5 almighty, 6 light,
  *                                    7 dark): the first in the enemy list is the bound enemy
  *                        hits:E      a living enemy takes element E at full strength (not resisted, nulled, repelled or absorbed): the
@@ -98,6 +98,13 @@
  *                      targetN= enemy bindings. The walker notes each rule it applies. A rule whose skill:/item: key names an entry
  *                      missing from the acting character's list (a spent Revival Bead, a skill not learned) does not apply, so a later
  *                      rule can name a fallback (dead@1 with item:0x30F, then dead@1 with item:0x310).
+ *   battleturn:KEYS | battleturn:COND=KEYS  appends one command to the active battle: driver's tape (up to 256; the next battle: line or
+ *                      battle:off clears it). The Nth line supplies the Nth fresh party command of the fight, whoever acts, ahead of guard=,
+ *                      battlerule:, first and plan. COND binds the command's TARGET confirmations like a rule's bound unit: enemy:ID (a
+ *                      living enemy with that native ID), ally:ID (a living party member) or dead:ID (a downed one, for a revive); an
+ *                      absent bound target fails the walk. A command that does not take (the 600-frame re-arm) retries the same line. Past
+ *                      the last line the host's battle_turn callback may supply more (a search driver), else the driver's normal input
+ *                      continues. A fixed tape found offline replays the same presses at the same frames in a gate.
  *   waittask:NAME[:off] wait until the engine task NAME exists (:off: is gone), e.g. Y_FclShopMainProc for the shop menu (the same in retail and the port)
  *   skiptask:NAME[:off][:BUTTON] press BUTTON (default Cross) every 24 frames until task NAME exists (:off: is gone);
  *                      stops before pressing through its menu. E.g. skiptask:cmpMain:triangle opens camp after party-gather finishes.
@@ -163,6 +170,9 @@ typedef struct P4WalkHost {
      * meets the field's ground. */
     int (*nav_blocked)(void *user, float x, float y, float z, float radius);
     int (*nav_ground)(void *user, float x, float z, float y_hi, float y_lo, float *y);
+    /* Optional: the battle driver's command N (0-based) once its battleturn: lines are spent. Write `KEYS` or `COND=KEYS` (battleturn: syntax) to
+     * `line` and return 1, or return 0 for the driver's normal input. Called synchronously when that command is armed. */
+    int (*battle_turn)(void *user, unsigned n, char *line, size_t size);
 } P4WalkHost;
 
 typedef struct P4Walk P4Walk;
@@ -195,11 +205,13 @@ int p4walk_dungeon_digest(const P4WalkHost *host, uint32_t frame, uint32_t every
 
 /* battlerule: (above), exposed so its selection is a testable pure function of a battle snapshot. */
 #define P4WALK_BATTLE_RULE_MAX 16
+#define P4WALK_BATTLE_TURN_MAX 256
 #define P4WALK_BATTLE_KEYS_MAX 32
 #define P4WALK_KEY_SKILL 0x80000000u               /* key flag: skill:ID, the native skill ID in the low 16 bits */
 #define P4WALK_KEY_ITEM 0x40000000u                /* key flag: item:ID, the native item ID in the low 16 bits */
 enum { P4WALK_RULE_DEAD = 1, P4WALK_RULE_HP_BELOW, P4WALK_RULE_SP_BELOW, P4WALK_RULE_CHARGE, P4WALK_RULE_STATUS, P4WALK_RULE_BUFF,
-       P4WALK_RULE_AFFLICTED, P4WALK_RULE_ENEMY, P4WALK_RULE_WEAK, P4WALK_RULE_HITS, P4WALK_RULE_NOBUFF, P4WALK_RULE_FOEBUFF };
+       P4WALK_RULE_AFFLICTED, P4WALK_RULE_ENEMY, P4WALK_RULE_WEAK, P4WALK_RULE_HITS, P4WALK_RULE_NOBUFF, P4WALK_RULE_FOEBUFF,
+       P4WALK_RULE_ALLY };
 typedef struct {
     int kind;                                   /* P4WALK_RULE_* */
     uint32_t value;                             /* hp<N/sp<N: N; charge/enemy: the enemy ID; status/afflicted/buff: the mask; weak/hits: E */
@@ -207,6 +219,9 @@ typedef struct {
     unsigned keys[P4WALK_BATTLE_KEYS_MAX];      /* 1 << P4WalkButton per press */
     int key_count;
 } P4WalkBattleRule;
+/* Parses a battleturn: line, "KEYS" or "COND=KEYS": kind 0 (no binding), P4WALK_RULE_ENEMY, P4WALK_RULE_ALLY or P4WALK_RULE_DEAD with the
+ * native ID in value. 1 on success, 0 on a malformed line. */
+int p4walk_battle_turn_parse(const char *text, P4WalkBattleRule *out);
 typedef struct {
     uint32_t id;                                /* native character or enemy ID */
     uint32_t hp;                                /* DatUnit +8, u16 */

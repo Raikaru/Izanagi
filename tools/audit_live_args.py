@@ -567,6 +567,7 @@ def main():
         os.makedirs(os.path.dirname(out), exist_ok=True)
         elf = os.path.abspath(rn.RETAIL)
         cmd = "mipsel-linux-gnu-objdump -d -m mips:5900 -M reg-names=numeric --start-address=0x100000 --stop-address=0x530000 '%s' > '%s'" % (rn.wsl_path(elf), rn.wsl_path(out))
+        rn.wsl_guard("audit_live_args")
         sys.exit(subprocess.run(["wsl", "-d", "Debian", "--", "sh", "-c", cmd]).returncode)
     sym = load_symbols()
     if a.mirror:

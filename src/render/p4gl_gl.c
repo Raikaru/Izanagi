@@ -352,9 +352,11 @@ int p4gl_gl_prepare_draw(void)
     return observed;
 }
 
-void p4gl_gl_set_draw(int on)
+static int sDrawSuppressed;
+
+static void apply_draw_pointers(void)
 {
-    sDrawOn = on != 0;
+    const int on = sDrawOn && !sDrawSuppressed;
     if (sRealClear == NULL) {
         sRealClear = p4gl_glClear;
         sRealDrawArrays = p4gl_glDrawArrays;
@@ -365,6 +367,22 @@ void p4gl_gl_set_draw(int on)
     p4gl_glDrawArrays = on ? sRealDrawArrays : skipDrawArrays;
     p4gl_glDrawArraysInstanced = on ? sRealDrawArraysInstanced : skipDrawArraysInstanced;
     p4gl_glDrawElements = on ? sRealDrawElements : skipDrawElements;
+}
+
+void p4gl_gl_set_draw(int on)
+{
+    sDrawOn = on != 0;
+    apply_draw_pointers();
+}
+
+/* Render-only suppression for hidden ordering-table scopes (mod HUD groups,
+ * p4gl_im2d.c): clears and draws are dropped like P4PC_TURBO=2's, while the
+ * game's callbacks, glyph/sprite bookkeeping, uploads and state still run. */
+void p4gl_gl_suppress_draw(int suppressed)
+{
+    if (sDrawSuppressed == (suppressed != 0)) return;
+    sDrawSuppressed = suppressed != 0;
+    apply_draw_pointers();
 }
 
 /* P4PC_GLSTATS=1: counts of the GL calls the frames make, printed every 1000 presented frames by p4gl_gl_stats_report (called

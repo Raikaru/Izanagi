@@ -9,10 +9,11 @@ unset(_p4_test_module)
 unset(_p4_test_modules)
 
 # Ordinary and synthetic tests forcibly disable both player settings selectors.
-# The separately admitted example is a real, explicitly enabled mod witness.
+# The separately admitted example and bundled QoL witnesses are real, explicitly
+# enabled mod witnesses.
 get_property(_p4_tests DIRECTORY PROPERTY TESTS)
 foreach(_p4_test IN LISTS _p4_tests)
-  if(NOT _p4_test MATCHES "^mod_example_game(64w|64)?$")
+  if(NOT _p4_test MATCHES "^mod_(example|qol)_game(64w|64)?$")
     set_property(TEST ${_p4_test} APPEND PROPERTY ENVIRONMENT "P4PC_MODS=0" "P4PC_PACKS=0")
   endif()
 endforeach()

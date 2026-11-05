@@ -719,6 +719,46 @@ static int character_repeat_plan(unsigned character) {
     return failed;
 }
 
+static unsigned g_turn_asked = 0xFFFFFFFFu;
+
+static int host_turn(void *user, unsigned n, char *line, size_t size) {
+    (void)user;
+    g_turn_asked = n;
+    if (n != 2) return 0;
+    snprintf(line, size, "enemy:259=r1");
+    return 1;
+}
+
+/* battleturn: lines supply the fresh commands in order ahead of a charge Guard, a retry keeps its line,
+ * then the host's callback (when set) and finally the driver's own input continue. */
+static int battle_turns(int with_host) {
+    Menu menu = {.battle_ready = 1, .action_state = 5, .battle_character = 3,
+                 .enemy_fixture = 1, .enemy_id = 259, .enemy_hp = 100, .enemy_buffs = 0x40000};
+    P4WalkHost host = {read32, NULL, &menu, NULL, NULL, with_host ? host_turn : NULL};
+    P4Walk *w = parse("battle:plan=square;guard=259;skip=0;delay=0\nbattleturn:triangle\nbattleturn:enemy:259=l1\nwaittask:battle:off\n");
+    if (!w) return 1;
+    unsigned seen[8], count = 0, last = 0;
+    int failed = 0;
+    g_turn_asked = 0xFFFFFFFFu;
+    for (unsigned frame = 0; frame < 1000; frame++) {
+        if (frame == 700 || frame == 760) menu.action_state = 1;  /* line 1 at 0 and again at 602 (it did not take), line 2 at 710, then 770 */
+        if (frame == 710 || frame == 770) menu.action_state = 5;
+        if (frame == 990) menu.battle_ready = 0;
+        unsigned held = p4walk_frame(w, &host, frame);
+        if (menu.action_state != 5) held = 0;   /* the driver's Cross through enemy turns */
+        if (held && held != last && count < 8) seen[count++] = held;
+        last = held;
+    }
+    const unsigned want[] = {1u << P4W_TRIANGLE, 1u << P4W_TRIANGLE, 1u << P4W_L1,
+                             with_host ? 1u << P4W_R1 : 1u << P4W_CIRCLE};
+    failed |= count < 4 || p4walk_status(w) != P4WALK_DONE;
+    for (unsigned n = 0; n < 4 && n < count; n++) failed |= seen[n] != want[n];
+    failed |= with_host ? g_turn_asked != 2 : g_turn_asked != 0xFFFFFFFFu;
+    p4walk_free(w);
+    if (failed) fprintf(stderr, "battleturn lost its order, priority over Guard, retry line or host continuation (host %d)\n", with_host);
+    return failed;
+}
+
 static int bound_target(void) {
     /* 0: selected, 1: two spatial moves, 2/3: all-target classes, 4..8:
      * absent/dead/KO/ally/stuck, 9: unbound actor, 10: live duplicate ID,
@@ -792,6 +832,7 @@ int main(void) {
     if (charged_guard()) return 1;
     if (bound_target()) return 1;
     if (character_repeat_plan(1) || character_repeat_plan(3) || character_repeat_plan(8)) return 1;
+    if (battle_turns(0) || battle_turns(1)) return 1;
     if (goal_transition(1, 40, 12) || goal_transition(1, 0x00030017u, 11) ||
         goal_transition(0, 0x00030017u, 11) || goal_scopes_are_fresh()) return 1;
     if (long_battle_plan(1) || long_battle_plan(2) || long_battle_plan(3)) return 1;

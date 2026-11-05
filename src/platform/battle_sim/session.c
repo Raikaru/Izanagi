@@ -10,7 +10,9 @@
 #include "p4pc/battle_prepare.h"
 #include "p4pc/content_digest.h"
 #include "p4pc/game_table_extents.h"
+#include "p4pc/mods.h"
 #include "p4pc/walk_script.h"
+#include "../memcard/mod_save_transport.h"
 #include "../pad/pad_sdl.h"
 #include <inttypes.h>
 #include <stdio.h>
@@ -57,6 +59,8 @@ static struct {
     P4Walk *walk;                  /* policy 4: the ENTRY's battle:/battlerule: plan on the walker's battle driver */
     uint32_t walk_frame;
     char plan_hash[65];
+    int mod_cohort;                /* a declared mod set: explicit mod-witness simulation only */
+    char mod_identity[65];
 } session;
 
 extern void *kwlnTaskGetTaskByName(const void *name);
@@ -112,9 +116,10 @@ static int error(const char *message)
 static void finish(const char *outcome, const char *cause, int code);
 
 /* Policy 4: a walker battle plan (include/p4pc/walk_script.h) drives the party through the same
- * battle driver as gate walks. Only battle:/battlerule: lines, printable ASCII; the worker appends
+ * battle driver as gate walks. Only battle:/battlerule:/battleturn: lines, printable ASCII; the worker appends
  * the waits that keep the driver running until the battle task ends. Inputs come from ENTRY only. */
 #define WALK_POLICY 4u
+#define LAST_POLICY 5u /* policy 5: attentive player (policy.c) */
 #define WALK_PLAN_MAX 16384u
 static uint32_t sim_walk_read32(void *user, uint32_t address)
 {
@@ -136,9 +141,10 @@ static int walk_plan(const char *text, uint32_t size)
         uint32_t stop = start;
         while (stop < size && text[stop] != '\n') stop++;
         const size_t len = stop - start;
-        if (len && !(len > 7 && !memcmp(text + start, "battle:", 7)) && !(len > 11 && !memcmp(text + start, "battlerule:", 11))) {
+        if (len && !(len > 7 && !memcmp(text + start, "battle:", 7)) && !(len > 11 && !memcmp(text + start, "battlerule:", 11)) &&
+            !(len > 11 && !memcmp(text + start, "battleturn:", 11))) {
             free(script);
-            return error("walk battle plan line is not battle: or battlerule:");
+            return error("walk battle plan line is not battle:, battlerule: or battleturn:");
         }
         start = stop + 1;
     }
@@ -210,7 +216,7 @@ static int read_entry(const char *path)
     const uint64_t payload = session.policy == WALK_POLICY ? (uint64_t)session.tape_count : (uint64_t)session.tape_count * 12;
     const uint64_t expected = 64u + (uint64_t)session.save_size + session.rng_size + payload;
     if (session.flags & ~7u || session.encounter > 65535u || !session.limit || !session.boot_limit ||
-        !session.action_limit || session.policy > WALK_POLICY || expected != (uint64_t)length ||
+        !session.action_limit || session.policy > LAST_POLICY || expected != (uint64_t)length ||
         session.rng_size != ((session.flags & 2) ? RNG_WORDS * 4u : 0u)) return error("invalid BattleEntry counts/flags/limits");
     if (session.policy && session.policy != WALK_POLICY && session.tape_count)
         return error("named party policy cannot compete with a controller tape");
@@ -237,6 +243,10 @@ static int read_entry(const char *path)
     return 0;
 }
 
+int p4_battle_sim_mod_cohort(void)
+{
+    return session.mod_cohort;
+}
 static void prepare_finish(const char *outcome, const char *cause, int code);
 int p4_battle_sim_cli(int argc, char **argv, const char **elf)
 {
@@ -249,7 +259,22 @@ int p4_battle_sim_cli(int argc, char **argv, const char **elf)
     }
     if (live > 1 || (live && requested != 1)) return error("live mode requires one battle simulation");
     if (!requested) return 0;
-    if (getenv("P4PC_MOD_WITNESS")) return error("mod witness is incompatible with simulator fidelity");
+    const char *mod_set = getenv("P4PC_BATTLE_SIM_MODS");
+    if (mod_set) {
+        /* A declared mod set runs only as an explicit mod-witness battle
+         * simulation (never preparation, live mode or a retail reference):
+         * the coordinator names the set by its content identity. */
+        int valid = strlen(mod_set) == 64;
+        for (size_t i = 0; valid && i < 64; i++)
+            valid = (mod_set[i] >= '0' && mod_set[i] <= '9') || (mod_set[i] >= 'a' && mod_set[i] <= 'f');
+        if (!valid) return error("P4PC_BATTLE_SIM_MODS must be a lowercase SHA-256 mod-set identity");
+        if (requested != 1 || live) return error("a declared mod set runs only battle simulation");
+        const char *witness = getenv("P4PC_MOD_WITNESS"), *directory = getenv("P4PC_MOD_DIR");
+        if (!witness || strcmp(witness, "1") || !directory || !*directory)
+            return error("a declared mod set requires P4PC_MOD_WITNESS=1 and P4PC_MOD_DIR");
+        session.mod_cohort = 1;
+        memcpy(session.mod_identity, mod_set, sizeof session.mod_identity);
+    } else if (getenv("P4PC_MOD_WITNESS")) return error("mod witness is incompatible with simulator fidelity");
     if (requested == 3) return error("battle simulation and preparation are mutually exclusive");
     session.preparing = requested == 2;
     *elf = NULL;
@@ -279,8 +304,10 @@ int p4_battle_sim_cli(int argc, char **argv, const char **elf)
         "P4PC_MOD_WITNESS",
         "P4PC_TRAP_CONTINUE", "P4PC_OVERRIDE_DIR", "P4PC_LOCKSTEP_REPLAY", "P4PC_LOCKSTEP_LIVE"
     };
-    for (size_t i = 0; i < sizeof incompatible / sizeof *incompatible; i++)
+    for (size_t i = 0; i < sizeof incompatible / sizeof *incompatible; i++) {
+        if (session.mod_cohort && !strcmp(incompatible[i], "P4PC_MOD_WITNESS")) continue;
         if (getenv(incompatible[i])) return error("competing gameplay/automation environment in simulator");
+    }
     if (!getenv("P4PC_SAVE_DIR") || !getenv("P4PC_CONFIG")) return error("simulator requires a private save/config profile");
     FILE *check = fopen(result, "rb");
     if (check) { fclose(check); return error("result exists; refusing overwrite"); }
@@ -295,7 +322,7 @@ int p4_battle_sim_cli(int argc, char **argv, const char **elf)
         return -1;
     }
     const char *const keys[] = { "P4PC_INPUT", "P4PC_MODS", "P4PC_PACKS", "P4PC_VIRTUAL_CLOCK", "P4PC_TURBO", "P4PC_HIDDEN_WINDOW", "SDL_AUDIODRIVER" };
-    const char *const values[] = { "script", "0", "0", "1", "1", "1", "dummy" };
+    const char *const values[] = { "script", session.mod_cohort ? "1" : "0", "0", "1", "1", "1", "dummy" };
     for (size_t i = 0; i < sizeof keys / sizeof *keys; i++) if (environment(keys[i], values[i])) return error("cannot isolate simulator environment");
     if (!session.preparing) {
         session.trace = fopen(trace, "wbx");
@@ -566,6 +593,16 @@ static uint64_t observe(const char *kind, int full_rng)
     session.last_hash = state;
     return rng_hash;
 }
+static void json_text(FILE *f, const char *text)
+{
+    fputc('"', f);
+    for (const unsigned char *p = (const unsigned char *)text; *p; p++) {
+        if (*p == '"' || *p == '\\') fprintf(f, "\\%c", *p);
+        else if (*p < 0x20 || *p >= 0x7f) fprintf(f, "\\u%04x", *p);
+        else fputc(*p, f);
+    }
+    fputc('"', f);
+}
 static void finish(const char *outcome, const char *cause, int code)
 {
     uint64_t rng_hash = session.launched ? observe("terminal", 1) : 0;
@@ -576,6 +613,9 @@ static void finish(const char *outcome, const char *cause, int code)
     uint8_t catalog[32];
     const int expanded = p4_game_table_catalog_identity(catalog);
     if (expanded < 0) { outcome = "engine_error"; cause = "table_catalog_identity_unavailable"; code = 4; }
+    /* A declared mod set names the packages actually active; none fails the run. */
+    const size_t mod_count = session.mod_cohort ? p4_mods_count() : 0;
+    if (session.mod_cohort && !mod_count) { outcome = "engine_error"; cause = "mod_set_unavailable"; code = 4; }
     char path[2048];
     int n = snprintf(path, sizeof path, "%s.tmp", session.result);
     if (n < 0 || (size_t)n >= sizeof path) { error("result path too long"); exit(4); }
@@ -593,11 +633,27 @@ static void finish(const char *outcome, const char *cause, int code)
         for (unsigned i = 0; i < sizeof catalog; i++) fprintf(f, "%02x", catalog[i]);
         fputs("\"},", f);
     }
+    fputs("\"mods\":", f);
+    if (!session.mod_cohort) fputs("null,", f);
+    else {
+        fprintf(f, "{\"identity\":\"%s\",\"witness\":true,\"active\":[", session.mod_identity);
+        for (size_t i = 0; i < mod_count; i++) {
+            const P4PackageInfo *info = p4_mods_info(i);
+            fputs(i ? ",{\"id\":" : "{\"id\":", f);
+            json_text(f, info ? info->id : "");
+            fputs(",\"version\":", f);
+            json_text(f, info ? info->version : "");
+            fputc('}', f);
+        }
+        fputs("]},", f);
+    }
     fprintf(f, "\"result_prompt_capability\":\"%s\",\"result_prompts\":{\"skill_offers_declined\":%u},",
             session.policy ? "periodic_cross_native_skill_offer_decline_v1" : "controller_tape", session.skill_offers_declined);
-    static const char *policy_names[] = {"controller-tape-v1", "greedy-weakness-v1", "cautious-healer-v1", "typical-player-v1", "walk-battle-rules-v1"};
+    static const char *policy_names[] = {"controller-tape-v1", "greedy-weakness-v1", "cautious-healer-v1", "typical-player-v1",
+                                         "walk-battle-rules-v1", "attentive-player-v1"};
     static const char *policy_knowledge[] = {"controller_tape", "observed_damage_weakness_only", "observed_damage_weakness_only",
-                                             "observed_damage_weakness_only", "walker_battle_rules_native_unit_records"};
+                                             "observed_damage_weakness_only", "walker_battle_rules_native_unit_records",
+                                             "observed_damage_weakness_public_charge_guard"};
     fprintf(f, "\"party_policy\":{\"id\":%u,\"name\":\"%s\",\"latency_updates\":%u,\"party_control\":\"%s\",\"knowledge\":\"%s\"",
             session.policy, policy_names[session.policy], session.latency,
             session.policy ? "native_direct_commands" : "source_tactics", policy_knowledge[session.policy]);
@@ -668,7 +724,19 @@ static const char *restore_source(void)
     if (!image) return "entry_guest_allocation";
     memcpy(P4_G2H(image), session.save, session.save_size);
     if (!datSaveVerifyChecksum(0, P4_G2H(image + 4), (int32_t)session.save_size - 4)) return "native_save_checksum";
+    /* A declared mod set sees this restore as the real load it stands for. The
+     * native reset (0x001113b0) reports "reset"; the exact image is then staged
+     * through the save transport like a card read without metadata (no sidecar:
+     * an entry carries no mod blocks), and the native restore (0x0010e710)
+     * proves, commits and announces it. */
     datInitDefaultGameState();
+    if (session.mod_cohort) {
+        char reason[512];
+        if (p4_mod_save_transport_loaded_untagged(session.save, session.save_size, "battle-sim-entry", reason, sizeof reason)) {
+            fprintf(stderr, "p4pc: battle-sim: mod-save load staging: %s\n", reason);
+            return "mod_save_load_staging";
+        }
+    }
     datSaveRestoreImage(0, P4_G2H(image + 4), (int32_t)session.save_size - 4);
     return NULL;
 }

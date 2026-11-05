@@ -89,6 +89,48 @@ class MatchContractsTest(unittest.TestCase):
         self.assertIsNone(gen_port.marker_definition_name(text, markers[0].end()))
         self.assertEqual(gen_port.marker_definition_name(text, markers[1].end()), "real_body")
 
+    def test_override_marker_settles_before_the_body_it_replaced(self):
+        (self.root / "overrides").mkdir()
+        self.unit.write_text(
+            "typedef int s32;\n"
+            "// FUN_00100100\ns32 target(s32 v) { return v; }\n"
+            "// FUN_00100200\nINCLUDE_ASM(\"asm/nonmatchings/unit\", func_00100200);\n"
+            "// FUN_00100300\ns32 kept(s32 v) { return v; }\n"
+            "// FUN_00100400\ns32 original(s32 v) { return v; }\n", encoding="utf-8")
+        overrides = self.root / "overrides"
+        # Data and a static helper before the body it replaces.
+        (overrides / "00100100.c").write_text(
+            "extern s32 D_00700000[];\nstatic s32 table[11];\n"
+            "static s32 helper(s32 v) { return v + table[0]; }\n"
+            "s32 target(s32 v) { return helper(v) + D_00700000[0]; }\n", encoding="utf-8")
+        # An asm-only marker whose address-named body follows a struct type.
+        (overrides / "00100200.c").write_text(
+            "typedef struct { s32 a; } Pair;\ns32 func_00100200(Pair *p) { return p->a; }\n", encoding="utf-8")
+        # Includes and comments already resolve: nothing moves.
+        (overrides / "00100300.c").write_text(
+            "#include <stddef.h>\n/* note */\ns32 kept(s32 v) { return v + 1; }\n", encoding="utf-8")
+        # A renamed body (bound by its own port symbol) is left where it is.
+        (overrides / "00100400.c").write_text(
+            "extern s32 elsewhere(void);\ns32 renamed(s32 v) { return v + elsewhere(); }\n", encoding="utf-8")
+        gen_port.apply_overrides(self.root, self.mirror, ["src/unit.c"])
+        text = self.unit.read_text(encoding="utf-8")
+        names = {int(m[1], 16): gen_port.marker_definition_name(text, m.end()) for m in gen_port.MARKER_RE.finditer(text)}
+        self.assertEqual(names, {0x100100: "target", 0x100200: "func_00100200", 0x100300: "kept", 0x100400: "renamed"})
+        self.assertIn("static s32 helper(s32 v) { return v + table[0]; }\n// FUN_00100100\ns32 target", text)
+        self.assertIn("typedef struct { s32 a; } Pair;\n// FUN_00100200\ns32 func_00100200", text)
+        self.assertIn("// FUN_00100300\n#include <stddef.h>", text)
+        # Only the comment moved: removing every marker gives the plain splice.
+        plain = gen_port.MARKER_RE.sub("", text)
+        self.assertIn("extern s32 D_00700000[];\nstatic s32 table[11];\nstatic s32 helper", plain)
+
+    def test_override_without_an_identifiable_body_fails_the_mirror(self):
+        (self.root / "overrides").mkdir()
+        self.unit.write_text("// FUN_00100100\nint target(int v) { return v; }\n", encoding="utf-8")
+        (self.root / "overrides/00100100.c").write_text(
+            "static int table[2];\nstatic int only_helpers(int v) { return table[v]; }\n", encoding="utf-8")
+        with self.assertRaises(SystemExit):
+            gen_port.apply_overrides(self.root, self.mirror, ["src/unit.c"])
+
     def test_inactive_movie_cut_removes_bodies_tables_and_markers_only(self):
         cold = self.mirror / "src/cold.c"
         cold.write_text("void software_decoder(void) {}\n", encoding="utf-8")

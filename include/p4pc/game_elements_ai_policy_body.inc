@@ -1,7 +1,6 @@
 #ifndef P4PC_GAME_ELEMENTS_AI_POLICY_BODY_INC
 #define P4PC_GAME_ELEMENTS_AI_POLICY_BODY_INC
 #include "p4pc/game_elements_ai_native.h"
-#include <stdlib.h>
 /* Included only after the translated unit's generic callback type and native
  * declarations. This identity map is shared by side-ANY and target selectors;
  * base-affinity predicates must never become wrapper/normal predicates. */

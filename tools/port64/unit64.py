@@ -294,6 +294,19 @@ def cmd_report(a):
             if not have:
                 sys.exit(f"cannot run {a.clang} --version: the baseline records the compiler's major")
             sections = read_census_file(path) if os.path.exists(path) else []
+            if sections:
+                # record-without-oracle counts records the compiler's layout dump did not cover: a rise means the oracle failed
+                # on that unit (2026-11-04: a Bionic header conflict made btlEffect.c's oracle fail, and the refresh recorded 12
+                # instead of 7). That is a defect to fix, never a baseline.
+                old = dict(sections[0]["units"])
+                if have != sections[0]["major"]:
+                    old.update(next((s["units"] for s in sections[1:] if s["major"] == have), {}))
+                rises = [f"{u}: record-without-oracle {old[u].get('record-without-oracle', 0)} -> {c['record-without-oracle']}"
+                         for u, c in sorted(now.items()) if u in old
+                         and c.get("record-without-oracle", 0) > old[u].get("record-without-oracle", 0)]
+                if rises:
+                    sys.exit(f"refusing to refresh {path}: the layout oracle covers fewer records in {len(rises)} units "
+                             f"(fix the unit's oracle compile first):\n  " + "\n  ".join(rises[:60]))
             if sections and sections[0]["major"] != have:
                 # another compiler than the baseline's: only the units whose counts differ (the layout oracle is the compiler's own record dump) are kept, as a patch
                 full = sections[0]["units"]

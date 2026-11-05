@@ -687,7 +687,7 @@ static int SDLCALL pacer_main(void *arg)
     return 0;
 }
 
-/* The flip's share of audio on a virtual-clock run: 48000 / (60000 / 1001) samples, the remainder carried. */
+/* One VBLANK period's share of audio on a virtual-clock run: 48000 / (60000 / 1001) samples, the remainder carried. */
 void p4snd_virtual_tick(void)
 {
     int frames;

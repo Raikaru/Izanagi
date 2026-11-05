@@ -19,6 +19,13 @@ typedef struct P4ModSaveCapture {
 int p4_mod_save_capture_stage(P4ModSaveWriter *, void *staged);
 /* Install one post-native-commit notification on a live VM registration. */
 int p4_mod_save_set_notify(P4ModSaveRegistration *, void (*notify)(void *));
+/* Install one durable-publication notification. It is queued only when a
+ * committed capture carried this registration's emitted block. */
+int p4_mod_save_set_published(P4ModSaveRegistration *, void (*published)(void *));
+/* Game-thread safe point only (never inside the native memcard write): runs the
+ * queued publication notifications; a busy codec leaves them queued. */
+int p4_mod_save_published_pending(void);
+void p4_mod_save_published_notify(void);
 /* Pure codec/ownership boundary. A successful NULL result is wholly retail.
  * Image memory is borrowed only for this call, never retained by providers. */
 int p4_mod_save_capture_image(const P4ModSaveImage *, P4ModSaveCapture **out,

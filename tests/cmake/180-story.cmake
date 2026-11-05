@@ -376,7 +376,18 @@ set_tests_properties(collection_kanji_eligor_0520 PROPERTIES SKIP_RETURN_CODE 77
 add_test(NAME collection_kanji_supplies_0521 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 50000 20:1,5/21 playthrough0520eligor collection0520eligor_to_funded_tv0521.walk)
 set_tests_properties(collection_kanji_supplies_0521 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
 
-# Independent collection card2-slot09 begins after the unqualified Kanji fight.
+# Pristine collection card2-slot08 (Hall 11): the boss door, Shadow Kanji's first COMMAND and one round of
+# Attacks to Yu's second COMMAND. Boss setup coverage only, not the rescue.
+add_test(NAME collection_kanji_round_0520 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/completed_walk_gate.sh" $<TARGET_FILE:p4pc> 8000 241:2,5/20 playthrough0520bathhouse11 collection0520_bathhouse11_to_kanji_round.walk)
+set_tests_properties(collection_kanji_round_0520 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600)
+# The same card: Shadow Kanji's defeat with a searched battleturn: tape, to the post-battle Hall 11 event.
+add_test(NAME collection_kanji_victory_0520 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/completed_walk_gate.sh" $<TARGET_FILE:p4pc> 34000 24:2,5/20 playthrough0520bathhouse11 collection0520_bathhouse11_to_kanji_victory.walk)
+set_tests_properties(collection_kanji_victory_0520 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600)
+# The same card past the victory: the rescue story and every day to June 4's home save (card2-slot09's date).
+add_test(NAME collection_kanji_aftermath_0604 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 90000 7:2,6/4 playthrough0520bathhouse11 collection0520_bathhouse11_to_kanji_aftermath0604.walk)
+set_tests_properties(collection_kanji_aftermath_0604 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 1200 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
+
+# Independent collection card2-slot09 begins after the collection player's own Kanji fight.
 # Its descendants cover the reunion and following school day, not the rescue.
 add_test(NAME collection_sunday_0605 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 30000 7:2,6/5 playthrough0604postkanji night_sleep_to_holiday.walk)
 set_tests_properties(collection_sunday_0605 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
@@ -420,6 +431,12 @@ set_tests_properties(collection_marukyu_entry_0625_linux PROPERTIES SKIP_RETURN_
 # reach Teddie's first fresh protagonist COMMAND. This is not Teddie defeat.
 add_test(NAME marukyu_allocator COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/marukyu_allocator_gate.sh" $<TARGET_FILE:p4pc>)
 set_tests_properties(marukyu_allocator PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 900)
+# The same card: Shadow Teddie's defeat with a searched battleturn: tape, to the post-battle 11F event.
+add_test(NAME collection_teddie_victory_0625 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/completed_walk_gate.sh" $<TARGET_FILE:p4pc> 82000 25:2,6/25 playthrough0625marukyu11f collection0625_marukyu11f_to_teddie_victory.walk)
+set_tests_properties(collection_teddie_victory_0625 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 1200)
+# The same card past the victory: the rescue story and June 26's home save (card2-slot16's date).
+add_test(NAME collection_teddie_aftermath_0626 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 92000 7:2,6/26 playthrough0625marukyu11f collection0625_marukyu11f_to_teddie_aftermath0626.walk)
+set_tests_properties(collection_teddie_aftermath_0626 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 1200 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
 
 # Independent post-Marukyu collection card2-slot16; no rescue claim.
 add_test(NAME collection_school_story_0627 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 30000 7:2,6/27 playthrough0626postmarukyu collection0626_to_school0627.walk)
@@ -462,8 +479,14 @@ set_tests_properties(collection_voidquest_entry_0803_linux PROPERTIES SKIP_RETUR
 # Pristine card3-slot07: Mitsuo introduction and fresh protagonist command only.
 add_test(NAME collection_voidquest_opening_0803 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/voidquest_opening_gate.sh" $<TARGET_FILE:p4pc>)
 set_tests_properties(collection_voidquest_opening_0803 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600)
+# The same card: Shadow Mitsuo's defeat with a searched battleturn: tape, to the post-battle Endgame event.
+add_test(NAME collection_mitsuo_victory_0803 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/completed_walk_gate.sh" $<TARGET_FILE:p4pc> 70000 26:2,8/3 playthrough0803voidquest collection0803_voidquest_to_mitsuo_victory.walk)
+set_tests_properties(collection_mitsuo_victory_0803 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 1200)
+# The same card past the victory: the rescue story and the summer days to August 12's home save (card3-slot08's date).
+add_test(NAME collection_mitsuo_aftermath_0812 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 114000 7:2,8/12 playthrough0803voidquest collection0803_voidquest_to_mitsuo_aftermath0812.walk)
+set_tests_properties(collection_mitsuo_aftermath_0812 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 1800 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
 
-# Independent post-Void Quest card3-slot08; this does not certify Mitsuo's defeat.
+# Independent post-Void Quest card3-slot08 (Mitsuo's defeat and the days before it are collection_mitsuo_aftermath_0812).
 add_test(NAME collection_summer_break_0814 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 30000 7:2,8/14 playthrough0812summer night_sleep_to_holiday.walk)
 set_tests_properties(collection_summer_break_0814 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
 
@@ -495,8 +518,14 @@ set_tests_properties(collection_secretlab_entrance_0918 PROPERTIES SKIP_RETURN_C
 # Independent card3-slot15: B9F interior and Shadow Naoto opening, not victory.
 add_test(NAME collection_shadow_naoto_opening_0918 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/naoto_opening_gate.sh" $<TARGET_FILE:p4pc>)
 set_tests_properties(collection_shadow_naoto_opening_0918 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600)
+# The same card: a camp Persona switch, then Shadow Naoto's defeat with walker battle rules, to the post-battle B9F event.
+add_test(NAME collection_naoto_victory_0918 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/completed_walk_gate.sh" $<TARGET_FILE:p4pc> 70000 27:2,9/18 playthrough0918lab9f collection0918_lab9f_to_naoto_victory.walk)
+set_tests_properties(collection_naoto_victory_0918 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 900)
+# The same card past the victory: the rescue story and every day to October 5's home save (card3-slot16's date).
+add_test(NAME collection_naoto_aftermath_1005 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 132000 7:2,10/5 playthrough0918lab9f collection0918_lab9f_to_naoto_aftermath1005.walk)
+set_tests_properties(collection_naoto_aftermath_1005 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 1800 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
 
-# Independent post-rescue collection card3-slot16, not a Naoto victory witness.
+# Independent post-rescue collection card3-slot16 (the rescue and the days before it are collection_naoto_aftermath_1005).
 add_test(NAME collection_return_1006 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 30000 7:2,10/6 playthrough1005evening collection1005_to_return1006.walk)
 set_tests_properties(collection_return_1006 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
 
@@ -539,8 +568,14 @@ set_tests_properties(collection_heaven_entrance_1106 PROPERTIES SKIP_RETURN_CODE
 # Independent card4-slot09: real Heaven10 door/story, not Kunino Sagiri victory.
 add_test(NAME collection_kunino_sagiri_opening_1106 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/kunino_sagiri_opening_gate.sh" $<TARGET_FILE:p4pc>)
 set_tests_properties(collection_kunino_sagiri_opening_1106 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600)
+# The same card: a camp Persona switch, then Kunino-sagiri's defeat with walker battle rules, to the post-battle event.
+add_test(NAME collection_kunino_sagiri_victory_1106 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/completed_walk_gate.sh" $<TARGET_FILE:p4pc> 92000 28:2,11/6 playthrough1106heaven10f collection1106_heaven10f_to_kunino_sagiri_victory.walk)
+set_tests_properties(collection_kunino_sagiri_victory_1106 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 1200)
+# The same card past the victory: the rescue story and every day to November 20's home save (card4-slot10's date).
+add_test(NAME collection_kunino_sagiri_aftermath_1120 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 140000 7:2,11/20 playthrough1106heaven10f collection1106_heaven10f_to_kunino_sagiri_aftermath1120.walk)
+set_tests_properties(collection_kunino_sagiri_aftermath_1120 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 1800 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
 
-# Independent post-rescue card4-slot10, not a Kunino Sagiri victory witness.
+# Independent post-rescue card4-slot10 (the rescue and the days before it are collection_kunino_sagiri_aftermath_1120).
 add_test(NAME collection_return_1121 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 30000 7:2,11/21 playthrough1120evening collection1120_to_return1121.walk)
 set_tests_properties(collection_return_1121 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
 
@@ -613,7 +648,7 @@ set_tests_properties(collection_attendant_0320 PROPERTIES SKIP_RETURN_CODE 77 LA
 add_test(NAME collection_yomotsu_entrance_0320 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/completed_walk_gate.sh" $<TARGET_FILE:p4pc> 12000 30:2,3/20 playthrough0320tv collection0320_tv_to_yomotsu_entrance.walk)
 set_tests_properties(collection_yomotsu_entrance_0320 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600)
 
-# Independent card5-slot06: Path 9 portal and first-phase Izanami COMMAND, not victory.
+# Independent card5-slot06: Path 9 portal, first-phase Izanami COMMAND and one round of Attacks, not victory.
 add_test(NAME collection_izanami_opening_0320 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/completed_walk_gate.sh" $<TARGET_FILE:p4pc> 15000 247:2,3/20 playthrough0320yomotsu9f collection0320_yomotsu9f_to_izanami.walk)
 set_tests_properties(collection_izanami_opening_0320 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600)
 

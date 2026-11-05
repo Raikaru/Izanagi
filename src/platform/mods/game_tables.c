@@ -1,4 +1,5 @@
 #include "game_tables_runtime_internal.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -6,7 +7,12 @@
 
 typedef struct Element { P4ElementDesc desc; char owner[OWNER_SIZE]; } Element;
 typedef struct Channel { P4AffinityChannelDesc desc; char owner[OWNER_SIZE]; } Channel;
-typedef struct Affinity { P4AffinityRow row; char owner[OWNER_SIZE]; } Affinity;
+/* retail_pending: the value is the entity's own retail entry (row, column),
+ * read from the sealed UNIT bank before freeze; never an authored value. */
+typedef struct Affinity {
+    P4AffinityRow row; char owner[OWNER_SIZE];
+    uint32_t retail_row, retail_element, retail_pending;
+} Affinity;
 typedef struct ActionElement { P4ActionElementBinding binding; char owner[OWNER_SIZE]; } ActionElement;
 typedef struct AffinityAlias { P4AffinityProfileAlias alias; char owner[OWNER_SIZE]; } AffinityAlias;
 typedef struct AffinityEffect { P4AffinityEffectBinding effect; char owner[OWNER_SIZE]; } AffinityEffect;
@@ -359,17 +365,87 @@ int p4_game_tables_channel(P4GameTables *t, const char *owner, const P4AffinityC
     if (rc) return rc;
     Channel *c = &t->channels[t->channels_count++]; c->desc = *d; strcpy(c->owner, owner); return P4_TABLE_OK;
 }
-int p4_game_tables_affinity(P4GameTables *t, const char *owner, const P4AffinityRow *row)
+static int add_affinity(P4GameTables *t, const char *owner, const P4AffinityRow *row,
+    uint32_t pending, uint32_t retail_row, uint32_t retail_element)
 {
     if (!t || !row || !identifier(owner, OWNER_SIZE) || !strcmp(owner, "p4")) return P4_TABLE_INVALID;
     if (t->frozen) return P4_TABLE_FROZEN;
-    if (row->entity_kind > P4_ENTITY_ENEMY || row->scalar > 65535u) return P4_TABLE_INVALID;
+    if (row->entity_kind > P4_ENTITY_ENEMY || (!pending && row->scalar > 65535u) ||
+        (pending && retail_element >= 16u)) return P4_TABLE_INVALID;
     Affinity key = {0}; key.row = *row;
     for (size_t i = 0; i < t->affinities_count; ++i)
         if (!affinity_compare(&key, &t->affinities[i])) return P4_TABLE_CONFLICT;
     int rc = reserve((void **)&t->affinities, &t->affinities_capacity, t->affinities_count + 1, sizeof *t->affinities);
     if (rc) return rc;
-    Affinity *a = &t->affinities[t->affinities_count++]; a->row = *row; strcpy(a->owner, owner); return P4_TABLE_OK;
+    Affinity *a = &t->affinities[t->affinities_count++];
+    a->row = *row; strcpy(a->owner, owner);
+    if (pending) a->row.value = a->row.scalar = 0;
+    a->retail_row = retail_row; a->retail_element = retail_element; a->retail_pending = pending;
+    return P4_TABLE_OK;
+}
+int p4_game_tables_affinity(P4GameTables *t, const char *owner, const P4AffinityRow *row)
+{
+    return add_affinity(t, owner, row, 0, 0, 0);
+}
+int p4_game_tables_affinity_retail(P4GameTables *t, const char *owner, const P4AffinityRow *row,
+    uint32_t retail_row, uint32_t retail_element)
+{
+    return add_affinity(t, owner, row, 1, retail_row, retail_element);
+}
+size_t p4_game_tables_affinity_retail_pending(const P4GameTables *t)
+{
+    size_t count = 0;
+    for (size_t i = 0; t && i < t->affinities_count; ++i) count += t->affinities[i].retail_pending != 0;
+    return count;
+}
+int p4_game_tables_affinity_resolve_retail(P4GameTables *t,
+    const uint8_t *enemy_bank, size_t enemy_size, const uint8_t *persona_bank, size_t persona_size)
+{
+    if (!t) return P4_TABLE_INVALID;
+    if (t->frozen) return P4_TABLE_FROZEN;
+    /* Validate every pending row first: a refusal resolves nothing. */
+    for (size_t i = 0; i < t->affinities_count; ++i) {
+        const Affinity *a = &t->affinities[i];
+        if (!a->retail_pending) continue;
+        const uint8_t *bank = a->row.entity_kind == P4_ENTITY_ENEMY ? enemy_bank : persona_bank;
+        const size_t size = a->row.entity_kind == P4_ENTITY_ENEMY ? enemy_size : persona_size;
+        const char *kind = a->row.entity_kind == P4_ENTITY_ENEMY ? "enemy" : "persona";
+        if (!bank || size % 32u || a->retail_row >= size / 32u) {
+            fprintf(stderr, "p4pc: %s retail affinity row %u is outside the selected UNIT input (%zu rows)\n",
+                kind, (unsigned)a->retail_row, bank && !(size % 32u) ? size / 32u : (size_t)0);
+            return P4_TABLE_NOT_FOUND;
+        }
+        const Channel *channel = channel_find(t, a->row.channel_id);
+        if (!channel) return P4_TABLE_NOT_FOUND;
+        const uint8_t *entry = bank + (size_t)a->retail_row * 32u + (size_t)a->retail_element * 2u;
+        const uint16_t packed = (uint16_t)(entry[0] | entry[1] << 8);
+        const uint32_t decoded = p4_affinity_decode(packed), flags = decoded & P4_AFF_FLAGS;
+        /* No channel models a flag outside P4_AFF_FLAGS, notably retail's
+         * ailment no-effect flag (0x20, read only by datCalcInflictStatus
+         * 00238940's 0x27000000 mask); projecting it as KO would invert it.
+         * A percentage row also keeps freeze's one-flag rule. */
+        if ((decoded & ~(P4_AFF_FLAGS | 65535u)) ||
+            (channel->desc.kind != P4_CHANNEL_KO && (flags & (flags - 1u)))) {
+            fprintf(stderr, "p4pc: %s retail affinity row %u element %u word 0x%04x has no %s form\n",
+                kind, (unsigned)a->retail_row, (unsigned)a->retail_element, (unsigned)packed,
+                channel->desc.kind == P4_CHANNEL_KO ? "KO" : "percentage");
+            return P4_TABLE_INVALID;
+        }
+    }
+    for (size_t i = 0; i < t->affinities_count; ++i) {
+        Affinity *a = &t->affinities[i];
+        if (!a->retail_pending) continue;
+        const uint8_t *bank = a->row.entity_kind == P4_ENTITY_ENEMY ? enemy_bank : persona_bank;
+        const uint8_t *entry = bank + (size_t)a->retail_row * 32u + (size_t)a->retail_element * 2u;
+        const uint32_t decoded = p4_affinity_decode((uint16_t)(entry[0] | entry[1] << 8));
+        if (channel_find(t, a->row.channel_id)->desc.kind == P4_CHANNEL_KO) {
+            p4_affinity_project_ko(decoded, &a->row.value, &a->row.scalar);
+        } else {
+            a->row.value = decoded; a->row.scalar = decoded & 65535u;
+        }
+        a->retail_pending = 0;
+    }
+    return P4_TABLE_OK;
 }
 int p4_game_tables_action_element(P4GameTables *t, const char *owner, const P4ActionElementBinding *binding)
 {
@@ -426,6 +502,7 @@ int p4_game_tables_freeze(P4GameTables *t, uint32_t revision)
     for (size_t i = 0; i < t->elements_count; ++i)
         if (!element_find(t, t->elements[i].desc.family)) return P4_TABLE_NOT_FOUND;
     for (size_t i = 0; i < t->affinities_count; ++i) {
+        if (t->affinities[i].retail_pending) return P4_TABLE_NOT_READY;
         const P4AffinityRow *a = &t->affinities[i].row;
         const Element *e = element_find(t, a->element_id);
         const Channel *c = channel_find(t, a->channel_id);

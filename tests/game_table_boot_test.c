@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "p4pc/mod_setting_store.h"
 extern const P4PackageHandler p4_game_tables_sources_boot_provider;
 static const P4GameTablesBootProduct *cpu_product, *runtime_product;
 static unsigned prepares, publishes, runtime_prepares, reads;
@@ -188,8 +189,11 @@ int main(int argc, char **argv)
     expected_category = !strcmp(mode, "bound-category");
     expected_item_only = !strcmp(mode, "item-only");
     expected_skill_only = !strcmp(mode, "skill-only");
-    expected_active = !strcmp(mode, "good") || expected_families || expected_category || expected_item_only || expected_skill_only;
-    int success = expected_active || !strcmp(mode, "empty");
+    /* gated-on/off: a table-source `when` toggle admitted on or off; gated-live
+     * names an apply=live toggle, which a sealed boot section must refuse. */
+    expected_active = !strcmp(mode, "good") || !strcmp(mode, "gated-on") || expected_families || expected_category ||
+        expected_item_only || expected_skill_only;
+    int success = expected_active || !strcmp(mode, "empty") || !strcmp(mode, "gated-off");
     if (expected_category) assert(!p4_game_tables_boot_action_preparer_register(prepare_action, &action_slot));
     static const P4PackageClient client = {.diagnostic_name = "table source fixture", .manifest_name = "mod.ini",
         .section = "[mod]", .kind = P4_PACKAGE_MOD};
@@ -198,6 +202,7 @@ int main(int argc, char **argv)
         .boot_phase = P4_PACKAGE_BOOT_UI, .dependencies = dependencies, .runtime_prepare = runtime_prepare};
     assert(!p4_package_handler_register(&observer)); /* Registration order is deliberately reversed. */
     assert(!p4_package_handler_register(&p4_game_tables_sources_boot_provider));
+    assert(!p4_package_handler_register(&p4_mod_settings_boot_provider)); /* table-source `when` */
     assert(!p4_package_reads_observe(observed, NULL));
     P4PackageRegistry *registry = NULL;
     if (strcmp(mode, "empty")) assert(!p4_package_registry_load(&registry, &client, argv[2], "source.owner"));

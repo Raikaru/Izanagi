@@ -16,10 +16,9 @@ int p4_game_elements_ai_vm_query_role(void *work, void *source, uint32_t *role)
 {
     (void)work; assert(source == &actor); *role = P4_GAME_AI_QUERY_UNQUALIFIED; return 0;
 }
-int p4_game_elements_ai_vm_candidate_allowed(void *work, void *source, void *target,
-    const P4GameActionFrame *frame)
+int p4_game_elements_ai_vm_candidate_allowed(void *work, void *source, const P4GameActionFrame *frame)
 {
-    (void)work; (void)target; (void)frame; assert(source == &actor); return 1;
+    (void)work; (void)frame; assert(source == &actor); return 1;
 }
 int p4_game_elements_ai_native_source_record(void *source, const uint8_t **out)
 {

@@ -1211,6 +1211,15 @@ class Rewriter:
                 self.skip.add(peeled["id"])                       # the storage already holds the guest address
                 self.census["ptr2int-folded-read"] += 1
                 return
+            if self.null_offset(inner):
+                # `(s32)&((T *)0)->field`: a byte offset into T, the same number on both sides; converted as an integer, never by p4_h2g.
+                # Through a pointer-wide type (every target of the rewrite is 64-bit), spelled out: the text is compiled as cpp-output.
+                self.census["ptr2int-null-offset"] += 1
+                if implicit:
+                    self.wrap_node(x, f"(({t})(unsigned long long)(", "))", depth)
+                else:
+                    self.wrap_node(inner, "(unsigned long long)(", ")", depth + 1)
+                return
             o, cl = self.h2g(ic, inner)
             if implicit:
                 self.wrap_node(x, f"(({t})" + o, cl + ")", depth)
@@ -1399,12 +1408,31 @@ class Rewriter:
         return n
 
     def is_ptr_as_int(self, node):
-        """an explicit cast of a pointer to an integer (m2c's `(s32)base`): the guest address of the pointer"""
+        """an explicit cast of a pointer to an integer (m2c's `(s32)base`): the guest address of the pointer; a null-based offset is not one"""
         n = self.peel(node)
         if n.get("kind") != "CStyleCastExpr" or not n.get("inner") or self.pclass(self.qt(n)) != "int":
             return False
         c = self.clq(self.qt(self.peel(n["inner"][0])))
-        return bool(c["ok"] and c["levels"] >= 1 and not c["dims"])
+        return bool(c["ok"] and c["levels"] >= 1 and not c["dims"]) and not self.null_offset(n["inner"][0])
+
+    def null_offset(self, node):
+        """an address computed from a null pointer constant: `&((T *)0)->field` (MEMBER_OFFSET, the decomp's offsetof), through any member,
+        subscript, no-op cast or `+`/`-` step. Its value is a byte offset into T, not a host pointer; p4_h2g could only guess that from the number."""
+        n = node
+        while True:
+            k, inner = n.get("kind"), n.get("inner") or []
+            if not inner:
+                return False
+            if n.get("castKind") == "NullToPointer":
+                return True
+            if k == "ParenExpr" or (k in ("ImplicitCastExpr", "CStyleCastExpr") and n.get("castKind") in ("NoOp", "BitCast", "ArrayToPointerDecay")):
+                n = inner[0]
+            elif (k == "UnaryOperator" and n.get("opcode") == "&") or k == "MemberExpr":
+                n = inner[0]                              # `->`: the base pointer; `.`: the base record, itself null-based or not
+            elif (k == "ArraySubscriptExpr" or (k == "BinaryOperator" and n.get("opcode") in ("+", "-"))) and len(inner) == 2:
+                n = inner[1] if self.clq(self.qt(inner[1]))["levels"] and not self.clq(self.qt(inner[0]))["levels"] else inner[0]
+            else:
+                return False
 
     def guest_sum(self, x, lhs, rhs, depth, compound=False):
         """`ptr + (s32)other_ptr`: an m2c base-plus-offset kept in a pointer (`p = (u8 *)(index * 4); p += (s32)base;`) is a sum of two

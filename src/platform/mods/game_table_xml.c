@@ -146,13 +146,25 @@ static int record(Parser *parser)
         result = p4_game_tables_channel(target->builder->tables, target->owner, &value);
         entry.domain = P4_TABLE_SOURCE_CHANNEL; entry.ids[0] = value.id; strcpy(entry.key, value.key);
     } else if (!strcmp(node->name, "affinity")) {
+        /* Either an authored value+scalar or the entity's own retail entry
+         * (retail-row, retail-element), resolved from the selected UNIT bank
+         * at seal. Never both. */
         P4AffinityRow value = {0};
+        const char *retail_row = take(node, "retail-row"), *retail_element = take(node, "retail-element");
+        uint32_t row_index = 0, column = 0;
+        const int retail = retail_row || retail_element;
         if (!field(node, "kind", &value.entity_kind) || !field(node, "entity", &value.entity_id) ||
             !field(node, "profile", &value.profile_id) || !field(node, "element", &value.element_id) ||
-            !field(node, "channel", &value.channel_id) || !field(node, "value", &value.value) || !field(node, "scalar", &value.scalar))
-            return fail(parser, "Invalid affinity fields");
+            !field(node, "channel", &value.channel_id) ||
+            (retail ? !number(retail_row, &row_index) || !number(retail_element, &column) ||
+                take(node, "value") || take(node, "scalar") :
+                !field(node, "value", &value.value) || !field(node, "scalar", &value.scalar)))
+            return fail(parser, "Invalid affinity fields (value+scalar or retail-row+retail-element)");
         if (!all_used(node)) return fail(parser, "Unknown affinity attribute");
-        result = p4_game_tables_affinity(target->builder->tables, target->owner, &value);
+        if (retail) {
+            result = p4_game_tables_builder_request_input(target->builder, P4_TABLE_INPUT_UNIT);
+            if (!result) result = p4_game_tables_affinity_retail(target->builder->tables, target->owner, &value, row_index, column);
+        } else result = p4_game_tables_affinity(target->builder->tables, target->owner, &value);
         entry.domain = P4_TABLE_SOURCE_AFFINITY; entry.ids[0] = value.entity_kind; entry.ids[1] = value.entity_id;
         entry.ids[2] = value.profile_id; entry.ids[3] = value.element_id; entry.ids[4] = value.channel_id;
         entry.revision = target->builder->registry_revision;

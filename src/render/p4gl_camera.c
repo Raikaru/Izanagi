@@ -12,7 +12,9 @@
 #include "p4pc/capture_state.h"
 #include "p4pc/battle_live.h"
 #include "p4gl_gl.h"
-#include "../platform/sound/p4snd.h"
+#if defined(P4_MOD_GAME_BINDINGS) && defined(P4_MOD_LUAU)
+#include "p4pc/mod_services.h"
+#endif
 
 /* RwCameraClearMode bits (rwcore.h:4584-4585). */
 #define P4_CAMERA_CLEAR_IMAGE 0x1u
@@ -94,6 +96,11 @@ void p4gl_aspect_camera_begin(void *camera)
     P4RwRaster *raster;
     float x;
 
+#if defined(P4_MOD_GAME_BINDINGS) && defined(P4_MOD_LUAU)
+    /* A mod camera lease replaces the view first; the Hor+ window below then
+     * widens the leased view like any other. Restored in reverse at END. */
+    if (p4_mod_camera_override) p4_mod_camera_view(camera, 1);
+#endif
     if (sAspectWidth == 1.0f) return;
     if (sAspectDepth == P4_CAMERA_STACK) {
         fprintf(stderr, "p4gl: widescreen camera nesting exceeds device stack\n");
@@ -119,17 +126,21 @@ void p4gl_aspect_camera_begin(void *camera)
 
 void p4gl_aspect_camera_end(void *camera)
 {
-    if (sAspectWidth == 1.0f) return;
-    if (sAspectDepth == 0 || sAspectStack[sAspectDepth - 1].camera != camera) {
-        fprintf(stderr, "p4gl: unbalanced widescreen camera update\n");
-        abort();
+    if (sAspectWidth != 1.0f) {
+        if (sAspectDepth == 0 || sAspectStack[sAspectDepth - 1].camera != camera) {
+            fprintf(stderr, "p4gl: unbalanced widescreen camera update\n");
+            abort();
+        }
+        sAspectDepth--;
+        if (sAspectStack[sAspectDepth].changed) {
+            memcpy((uint8_t *)camera + 104, &sAspectStack[sAspectDepth].viewX, sizeof(float));
+            memcpy((uint8_t *)camera + 112, &sAspectStack[sAspectDepth].recipX, sizeof(float));
+            camera_dirty(camera);
+        }
     }
-    sAspectDepth--;
-    if (sAspectStack[sAspectDepth].changed) {
-        memcpy((uint8_t *)camera + 104, &sAspectStack[sAspectDepth].viewX, sizeof(float));
-        memcpy((uint8_t *)camera + 112, &sAspectStack[sAspectDepth].recipX, sizeof(float));
-        camera_dirty(camera);
-    }
+#if defined(P4_MOD_GAME_BINDINGS) && defined(P4_MOD_LUAU)
+    if (p4_mod_camera_override) p4_mod_camera_view(camera, 0);
+#endif
 }
 
 /* The camera whose update is open (src/render/p4gl_atomic.c reads its view matrix). */
@@ -469,7 +480,6 @@ int32_t func_003f79b0(void *pOut, void *pInOut, int32_t nI)
     p4gl_context_present();
     p4pc_lockstep_presented();
     if (p4_battle_live_active) p4_battle_live_after_present();
-    p4snd_virtual_tick();
     p4pc_vsync_wait();
     return 1;
 }

@@ -463,8 +463,17 @@ comparisons must establish full state equality (`docs/lockstep.md`).
 
 These are the retained PC capture phases; nominal flips remain the existing
 ±600 sanity bounds, not replacement predicates. Rain uses center25100,
-TV-world entrance75594 and Shadow haze110560. No timing-model removal widens
-an image/camera bound or changes an ordinary controller recipe.
+TV-world entrance71778 and Shadow haze103408. No timing-model removal widens
+an image/camera bound or changes an ordinary controller recipe. The last two
+were 75594 and 110560 until story voices stopped playing at half speed in
+30 fps scenes (audio now renders per VBLANK, as the SPU2 plays;
+[audio](audio.md#end-of-a-voice)). The same capture states now come that much
+earlier on the walk. The tunnel frame is unchanged (port frames 0%). The haze
+noise is in another phase at the same dialogue state: the 0.201% from the old
+x64 port frames lies entirely in the haze around Shadow Yosuke, while
+portraits, text and the room are identical, and the NVIDIA retail MAD moves
+from 1.545% to 1.524%. Its port frames are therefore the new
+`port-scene-shadow-haze-realtime-voice-*` pins.
 
 The historical Rain savestate retains rowelapsed69, while the established PC
 registration uses249. All three rain-emitter parameter records through+0x3c
@@ -559,7 +568,7 @@ The held `apollo_game_floors.txt` and `apollo_heaven_floors.txt` are retained wi
 
 Shuffle Time's six-card preview followed by a 3x4 grid with five tries is a real retail mode, not by itself corrupted card rendering: `btlShuffleSeq4Run` (0037DA60), selected by mode 3 from `btlShuffleRollBelow` (0036E920). Live port RAM has average defeated-enemy level 28, mode/submode/count `(3,0,6)`; the equivalent retail Marukyu battle rolls `(1,1,4)`. Both have the identical probability row at `D_0064E610`: `[30,30,30,10,0]`. A different legal random outcome must not be "fixed" by forcing four cards or forcing the mode. The drawing context is task work **plus 0x70**: its mode/submode/count fields therefore live at task work +0x1F36C/+0x1F370/+0x1F374, not +0x1F2FC directly.
 
-The native scene runner exercised the Entrance and seats retail gates successfully; their limits remain 3.8% and 3.0%. The initial corridor-start fog calibration repeated at 5.3998% on NVIDIA (ten runs, spread 0.0000) versus 6.0273% on Linux llvmpipe. That old gate and its limits are retired, not kept beside the canonical corpus moment: `scene_near_fog` now uses 3.73% NVIDIA / 4.15% Linux full-frame limits and a 3.35% regional limit (section 11.2). The capture-comparison figures above are measured from retained PNGs. Private references are installed beside the retail inputs on a Linux host, a second Linux host, a third Linux host and Windows; no captures, savestates or reference RGB bytes belong in git.
+The native scene runner exercised the Entrance and seats retail gates successfully; their limits remain 3.8% and 3.0%. The initial corridor-start fog calibration repeated at 5.3998% on NVIDIA (ten runs, spread 0.0000) versus 6.0273% on Linux llvmpipe. That old gate and its limits are retired, not kept beside the canonical corpus moment: `scene_near_fog` now uses 3.73% NVIDIA / 4.15% Linux full-frame limits and a 3.35% regional limit (section 11.2). The capture-comparison figures above are measured from retained PNGs. Private references are installed beside the retail inputs on two Linux hosts and Windows; no captures, savestates or reference RGB bytes belong in git.
 
 ### 11.2 Corpus moments reached by normal story input
 
@@ -573,8 +582,8 @@ The riverbank's wrong rain/fog was an ordering defect, not a calendar-table or c
 | Riverbank, 04/16 morning, Yosuke “Yo!” | Fogged outdoor geometry and characters/shadows; 112-triangle colour filter, display-raster bloom, dialogue/HUD. | 1.216% / 1.245% | `scene_riverbank_vignette`, 1.30%; full camera/procedure/weather check, replacing the viewer-only 8.8% gate. |
 | Rain, 04/12 morning, Nanako “You keep going straight from here.” | Three matrix rain PTanks, outdoor/character/shadow materials, colour filter and display-raster bloom, portrait/message/HUD. | 2.672% / 2.921% at capture 25100 after the minimum asynchronous-load ordering and matrix-dimension correction. | `scene_rain`, 3.0%; full camera/procedure/weather check. |
 | Arcana rank-up, 04/16 morning, `155_commu_open` | Outdoor materials/shadows; darkening filter and display-frame feedback; additive sparkle billboards and halo alpha-mask/feedback pairs. | 3.593% / 2.101%; full camera/procedure/weather check. Increasing Linux history from 150 to 1200 drawn frames moves MAD only 0.000275 percentage points, excluding a warm-up explanation. | `scene_arcana_rankup_sparkles`, replacing the viewer-only 13.4% gate. |
-| TV-world tunnel, 04/14 after school | Opaque grey screen fill; repeated screen-space contour/ring triangles with alpha-mask passes and RGB-separated edges. | 1.569% / 1.565% at normal-play capture 75594. The earlier 29% was a different animation flip, not a missing pass. | `scene_tv_world_enter`, 1.65%; field/date/weather/procedure plus active screen-space compositor state. |
-| Shadow Yosuke haze, 04/15 after school, “Screw the shopping district...” | Room/characters/shadows, two haze PTanks, mask/display-feedback/noise/filter tail, portrait/dialogue/HUD. | 1.539% / 1.589% at capture 110560. | `scene_shadow_haze`, 1.65%; full camera/procedure/weather check. |
+| TV-world tunnel, 04/14 after school | Opaque grey screen fill; repeated screen-space contour/ring triangles with alpha-mask passes and RGB-separated edges. | 1.569% / 1.565% at normal-play capture 75594. The same state is reached at 71778 since voices play in real time; Windows 1.556% there. The earlier 29% was a different animation flip, not a missing pass. | `scene_tv_world_enter`, 1.65%; field/date/weather/procedure plus active screen-space compositor state. |
+| Shadow Yosuke haze, 04/15 after school, “Screw the shopping district...” | Room/characters/shadows, two haze PTanks, mask/display-feedback/noise/filter tail, portrait/dialogue/HUD. | 1.539% / 1.589% at capture 110560. The same state is reached at 103408 since voices play in real time; Windows 1.524% there. | `scene_shadow_haze`, 1.65%; full camera/procedure/weather check. |
 | Near-fog, real 04/11 dream corridor near its end | Fog/glow billboards, alpha-mask/frame-feedback pairs, shadows, FldNoise and colour filter. | Fresh canonical retail capture: full-frame 4.064% / 3.676%; upper-fog region `(0,0,640,200)` 3.293% / 2.884%. | Canonical `scene_near_fog`, replacing both the viewer-only gate and the old corridor-start `scene_story_near_fog` timing. Full-frame limit 4.15%, upper-fog limit 3.35%. |
 
 **Only active image state is compared.** The tunnel's `cldDungeonIn` compositor covers the entire image with an opaque 640x480 fill before drawing its screen-space rings. Retail's frame-1 state still has the field camera at identity, while the faster port has installed the Junes background camera; that camera cannot contribute a pixel under the fill. The gate therefore checks the real compositor task (state 1, within five animation frames of retail's 104), in addition to field/date/weather/procedure, rather than constraining an unused background camera. No camera or compositor state is written.

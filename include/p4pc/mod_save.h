@@ -55,6 +55,10 @@ typedef struct P4ModSaveProvider {
     void (*commit)(void *staged, void *user);
     /* Tolerates NULL. Never called on an already committed result. */
     void (*discard)(void *staged, void *user);
+    /* Optional capture precondition. Every registered provider's authorize runs
+     * before ANY provider encodes; nonzero refuses the whole save before a byte
+     * of the image/sidecar is written. Context image is the borrowed capture. */
+    int (*authorize)(const P4ModSaveContext *, void *user);
 } P4ModSaveProvider;
 
 /* Game thread only. Registration copies metadata, not callback/user ownership.

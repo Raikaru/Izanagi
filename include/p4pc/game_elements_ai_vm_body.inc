@@ -2,7 +2,6 @@
 #define P4PC_GAME_ELEMENTS_AI_VM_BODY_INC
 #include "p4pc/game_elements_ai_native.h"
 #include "p4pc/gmem.h"
-#include <stdlib.h>
 
 /* One explicitly owned scratch object per scoped interpreter invocation, not a
  * per-op/per-action allocation and not unknown padding in a real script work.

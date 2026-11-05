@@ -1,8 +1,11 @@
 /* 00235520: one canonical original amount equation for both native ABIs.
- * Owning frame/query are caller-local; unchanged mode never creates a frame. */
+ * Owning frame/query are caller-local; unchanged mode never creates a frame.
+ * An eligible HP hit then passes through the final-damage stage, which never
+ * runs while no modifier is registered. */
 #include "p4pc/game_elements_calc_native.h"
 #include "p4pc/game_skills_native.h"
 #include "p4pc/game_enemies_native.h"
+#include "p4pc/game_damage_stage_native.h"
 /* Later0023df70 is also called by the following status routine in this unit. */
 extern s32 datCalcUsesWeaponProperties(s32 skillId);
 static s32 p4_calc_amount(u32 skillId, u8 *source, u8 *target, u16 hitCount, u16 outcome, u16 hitKind, s32 options, u8 channel, const P4GameActionFrame *p4_frame, const P4GameAffinityQuery *p4_query, P4GameActionFrame *p4_storage);
@@ -547,6 +550,17 @@ static s32 p4_calc_amount(u32 skillId, u8 *source, u8 *target, u16 hitCount,
         healing = 0;
         damage = 0;
         break;
+    }
+    /* Final-damage stage: the retail non-fixed HP equation's delivered
+     * damage (not fixed/percentage/scripted kind 16, SP, drain or null). The
+     * ailment words are the ones the equation read: 001f14f0 computes every
+     * hit of an action before its packet commit applies any ailment. */
+    if (damage > 0 && fixed == 0 && !(options & 1) && hitKind != 16 && channel == 1 &&
+        p4_game_damage_native_active()) {
+        const u32 leafValid = p4_frame ? p4_frame->element.valid != 0u : rawElement >= 0;
+        damage = p4_game_damage_native_amount(skillId, (*(u16 *)source & 4) != 0, sourceRecord->id, sourceRecord->bad,
+            (*(u16 *)target & 4) != 0, ((DatUnit *)target)->id, targetStatus, hitKind, leafValid,
+            !leafValid ? 0u : p4_frame ? p4_frame->element.element_id : (u32)rawElement, damage);
     }
     if (damage > 0) {
         healing = -damage;

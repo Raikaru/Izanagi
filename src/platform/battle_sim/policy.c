@@ -1,6 +1,11 @@
 /* Tool party policies. Native menus validate/commit every choice and native
  * target collectors determine legality. No damage preview, affinity-table read,
- * speculative state mutation, rollback, host RNG or Lua is used here. */
+ * speculative state mutation, rollback, host RNG or Lua is used here.
+ * 1 greedy, 2 cautious, 3 typical, 5 attentive: a careful player who guards
+ * while an enemy is visibly charged (public DatUnit +0x14 & 0xC0000), keeps the
+ * protagonist above 70% and allies above 50%, revives, explores elements to find
+ * weaknesses, remembers elements a target was seen absorbing or nulling, and
+ * focuses the last damaged enemy and any enemy seen healing its side. */
 #include "p4pc/battle_sim.h"
 #include "p4pc/battle_events.h"
 #include "p4pc/game_table_extents.h"
@@ -26,10 +31,15 @@ static struct {
     Choice choice;
     struct {
         uint32_t unit_uid, tried, weak;
+        uint32_t unchanged, bad; /* attentive: shown no damage once / absorbed or nulled (public outcome) */
         uint16_t native_id;
         uint8_t valid;
     } knowledge[64];
     unsigned next_knowledge;
+    /* Attentive (5) only, from observed hits: the enemy the party last damaged,
+     * and enemies seen healing an ally. */
+    uint32_t focus_uid, healer_uid[8];
+    unsigned healers;
 } policy;
 
 extern int32_t btlTargetCheckCommandAvailability(void *action, int64_t kind);
@@ -76,6 +86,7 @@ static unsigned knowledge_slot(uint32_t uid, uint16_t id, int create)
     policy.knowledge[i].unit_uid = uid;
     policy.knowledge[i].native_id = id;
     policy.knowledge[i].tried = policy.knowledge[i].weak = 0;
+    policy.knowledge[i].unchanged = policy.knowledge[i].bad = 0;
     policy.knowledge[i].valid = 1;
     return i;
 }
@@ -84,9 +95,18 @@ static void observe_hit(const P4BattleHit *event, void *context)
     (void)context;
     /* These are deliberately the only outcome fields fed into policy memory.
      * Enemy exact HP/SP, hidden stats/affinities, input and RNG stay excluded. */
-    if (event->source.side != 0 || event->target.side != 1 || event->skill_id >= policy.skill_rows) return;
+    if (event->skill_id >= policy.skill_rows) return;
     const uint32_t row = policy.skill_base + event->skill_id * 0x28u;
+    if (event->source.side == 1 && event->target.side == 1) {
+        if (policy.mode != 5 || !is_healing(P4_G8(row + 0x11))) return;
+        for (unsigned i = 0; i < policy.healers; i++)
+            if (policy.healer_uid[i] == event->source.unit_uid) return;
+        if (policy.healers < 8) policy.healer_uid[policy.healers++] = event->source.unit_uid;
+        return;
+    }
+    if (event->source.side != 0 || event->target.side != 1) return;
     if (!is_damage(P4_G8(row + 0x11))) return; /* KO channels are not damage knowledge. */
+    policy.focus_uid = event->target.unit_uid;
     const uint32_t battle = GP(0xb3ac);
     if (!battle) return;
     uint32_t action = P4_G32(battle + 0x174);
@@ -98,6 +118,13 @@ static void observe_hit(const P4BattleHit *event, void *context)
         const uint32_t bit = UINT32_C(1) << element;
         policy.knowledge[slot].tried |= bit; /* Attempted is not an affinity inference. */
         if (event->target_flags & 4u) policy.knowledge[slot].weak |= bit; /* Native WEAK, not CRITICAL. */
+        /* What the screen shows: the target healed (absorb), or twice took no
+         * damage (null; once could be a miss). */
+        if (event->hp_after > event->hp_before) policy.knowledge[slot].bad |= bit;
+        else if (event->hp_after == event->hp_before) {
+            if (policy.knowledge[slot].unchanged & bit) policy.knowledge[slot].bad |= bit;
+            policy.knowledge[slot].unchanged |= bit;
+        }
         return;
     }
 }
@@ -117,7 +144,7 @@ int p4_battle_policy_begin(uint32_t mode, uint32_t latency)
     policy.mode = mode;
     policy.latency = latency;
     if (!mode) return 1;
-    if (mode > 3) { policy.error = "unsupported_native_party_policy"; return 0; }
+    if (mode > 3 && mode != 5) { policy.error = "unsupported_native_party_policy"; return 0; }
     if (!p4_game_table_extent_rows(0x007644a8u, 0x28, &policy.skill_base, &policy.skill_rows)) {
         policy.error = "native_policy_skill_catalog_unavailable"; return 0;
     }
@@ -147,7 +174,16 @@ static int64_t target_utility(uint32_t target, uint32_t row, int32_t element)
             if (element >= 0 && element < 32) {
                 const uint32_t bit = UINT32_C(1) << element;
                 if (slot < 64 && (policy.knowledge[slot].weak & bit)) score += 3000;
-                else if (slot == 64 || !(policy.knowledge[slot].tried & bit)) score += policy.mode == 1 ? 160 : 60;
+                /* A target seen absorbing or nulling the element is worth nothing:
+                 * it cancels its own share of a spread instead of vetoing it. */
+                else if (policy.mode == 5 && slot < 64 && (policy.knowledge[slot].bad & bit)) return -score;
+                else if (slot == 64 || !(policy.knowledge[slot].tried & bit)) score += policy.mode == 1 || policy.mode == 5 ? 160 : 60;
+            }
+            if (policy.mode == 5) {
+                const uint32_t uid = P4_G32(unit + 0xa8);
+                if (uid == policy.focus_uid) score += 400;
+                for (unsigned i = 0; i < policy.healers; i++)
+                    if (policy.healer_uid[i] == uid) score += 700;
             }
             return score;
         }
@@ -165,11 +201,17 @@ static int64_t target_utility(uint32_t target, uint32_t row, int32_t element)
     const uint32_t status = P4_G32(record + 12), mask = P4_G32(row + 0x1c);
     const unsigned removes_status = P4_G8(row + 0x18) == 2;
     if (!hp && removes_status && (mask & 0x80000u)) return policy.mode == 1 ? 9000 : 30000;
-    const unsigned heal_threshold = policy.mode == 1 ? 20 : policy.mode == 2 ? (id == 1 ? 60 : 45) : (id == 1 ? 45 : 35);
-    if (hp && is_healing(hp_effect) && hp_percent <= heal_threshold)
+    const unsigned heal_threshold = policy.mode == 1 ? 20 : policy.mode == 2 ? (id == 1 ? 60 : 45) :
+                                    policy.mode == 5 ? (id == 1 ? 70 : 50) : (id == 1 ? 45 : 35);
+    if (hp && is_healing(hp_effect) && hp_percent <= heal_threshold) {
+        /* A small fixed heal (a quarter of the ally's HP or less) is not worth
+         * a turn unless the ally is critical. */
+        if (policy.mode == 5 && hp_effect == 5 && hp_percent > 25 &&
+            (uint32_t)(power > 0 ? power : 0) * 4u <= datCalcMaxHpById((int16_t)id)) return 300;
         return (policy.mode == 1 ? 7000 : 24000) + (100 - hp_percent) * 20 + (id == 1 ? 500 : 0);
+    }
     if (removes_status && (status & mask)) return policy.mode == 1 ? 100 : 14000;
-    if (hp && is_healing(sp_effect) && sp_percent < (policy.mode == 2 ? 35u : 20u)) return 9000 + (100 - sp_percent) * 10;
+    if (hp && is_healing(sp_effect) && sp_percent < (policy.mode == 2 || policy.mode == 5 ? 35u : 20u)) return 9000 + (100 - sp_percent) * 10;
     const uint32_t buff = P4_G32(row + 0x20);
     if (hp && buff && !datCalcHasBuffMask(P4_G2H(record), (int32_t)buff)) return policy.mode == 1 ? 60 : 260;
     return 0;
@@ -194,7 +236,7 @@ static void consider(uint32_t actor, uint16_t skill, uint16_t item, uint16_t whe
     const uint16_t actor_id = P4_G16(unit + 0xa4);
     const unsigned sp_percent = percent(P4_G16(record + 10), datCalcMaxSpById((int16_t)actor_id));
     int64_t penalty = cost_kind == 1 ? (int64_t)cost * (policy.mode == 1 ? 1 : 4) : (int64_t)cost * (policy.mode == 1 ? 2 : 5);
-    if (policy.mode == 3 && cost_kind == 2 && sp_percent < 30) penalty += (int64_t)cost * 60;
+    if ((policy.mode == 3 || policy.mode == 5) && cost_kind == 2 && sp_percent < 30) penalty += (int64_t)cost * 60;
     const unsigned choices = group ? 1 : count;
     for (unsigned i = 0; i < choices; i++) {
         const uint32_t target = P4_G32(policy.scratch + i * 4);
@@ -209,6 +251,20 @@ static void consider(uint32_t actor, uint16_t skill, uint16_t item, uint16_t whe
             policy.choice = (Choice){score, target, uid, skill, item, wheel, menu_index};
         }
     }
+}
+/* Any living enemy showing the public charge state (Power/Mind Charge). */
+static int enemy_charged(void)
+{
+    const uint32_t battle = GP(0xb3ac);
+    if (!battle) return 0;
+    uint32_t action = P4_G32(battle + 0x174);
+    for (unsigned n = 0; action && n < 12; n++, action = P4_G32(action + 0x450)) {
+        const uint32_t unit = P4_G32(action + 0x30);
+        if (!unit || P4_G8(unit + 0xa2) != 1) continue;
+        const uint32_t record = P4_G32(unit + 0xa64);
+        if (record && !(P4_G32(record + 12) & 0x80000u) && (P4_G32(record + 0x14) & 0xC0000u)) return 1;
+    }
+    return 0;
 }
 static void choose(uint32_t panel, uint32_t actor)
 {
@@ -237,7 +293,10 @@ static void choose(uint32_t panel, uint32_t actor)
         const uint32_t unit = P4_G32(actor + 0x30);
         const uint16_t id = P4_G16(unit + 0xa4);
         const unsigned hp = percent(P4_G16(record + 8), datCalcMaxHpById((int16_t)id));
-        const int64_t score = policy.mode != 1 && hp < 20 ? 450 : 10;
+        int64_t score = policy.mode != 1 && hp < 20 ? 450 : 10;
+        /* A visible charge is the boss's warning: below reviving and healing a
+         * low ally, above any attack. */
+        if (policy.mode == 5 && enemy_charged()) score = 20000;
         if (score > policy.choice.score) policy.choice = (Choice){.score = score, .wheel = WHEEL_GUARD};
     }
     if (policy.choice.score == INT64_MIN) policy.error = "native_policy_has_no_legal_command";

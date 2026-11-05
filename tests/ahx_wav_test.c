@@ -10,7 +10,7 @@
  * Checks, against the AHX header and an independent decoder:
  *   - the header is a one channel AHX (coding 0x10 or 0x11);
  *   - the sound reaches the playing state and then the end, and the played time matches total / rate
- *     within 100 ms;
+ *     within 100 ms, plus the renderer's report latency at the end;
  *   - the waveform is not silent and (nearly) does not clip;
  *   - the output equals the reference within the difference of fixed point and float arithmetic. The
  *     reference is libavcodec's MPEG audio layer II decoder: the AHX frames are layer II frames (MPEG-2
@@ -352,13 +352,16 @@ static int play_one(const char *adxPath, const char *wavPath)
         return 1;
     }
 
-    /* duration: from the first frame the voice played to the end state */
+    /* duration: from the first frame the voice played to the end state. The end state comes after
+     * the last sample by the renderer's report latency, as on the PS2 (docs/audio.md, "End of a
+     * voice"): 2.75 server passes (one per 1/60 s tick here) and up to one 256-sample block. */
     {
         double played = (double)(endFrame - startFrame) / P4SND_RATE;
         double want = (double)total / rate;
+        double report = 2.75 / 60.0 + 256.0 / rate;
 
         fprintf(stderr, "ahx_wav_test: played %.3f s, header %.3f s\n", played, want);
-        if (fabs(played - want) > 0.1) {
+        if (played - want < -0.1 || played - want > 0.1 + report) {
             fail("played time differs from the header duration");
         }
     }

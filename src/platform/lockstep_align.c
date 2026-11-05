@@ -22,11 +22,13 @@ typedef struct AlignRuntime {
     size_t patch_capacity;
     uint64_t pads, frames, gates;
     uint32_t effect_call;
+    P4AlignEmitters emitters, presented;
     int began, dumped_boot, restore_pending, patched;
 } AlignRuntime;
 static AlignRuntime *sAlign;
 int p4pc_align_rng_calls_enabled;
 int p4pc_align_battle_guard;
+int p4pc_align_emitters_enabled;
 static void align_fail(const char *why) {
     fprintf(stderr,"p4pc: state-aligned lockstep: %s\n",why);
     exit(4);
@@ -42,6 +44,7 @@ static void align_close(void) {
     if (sAlign->events) fclose(sAlign->events);
     p4pc_align_rng_calls_enabled=0;
     p4pc_align_battle_guard=0;
+    p4pc_align_emitters_enabled=0;
     if (sAlign->rng_calls) fclose(sAlign->rng_calls);
     if (sAlign->effect_calls) fclose(sAlign->effect_calls);
     if (sAlign->event_frames) fclose(sAlign->event_frames);
@@ -73,8 +76,7 @@ int p4pc_align_init(const char *directory, FILE *replay) {
     if (!SDL_CreateDirectory(path)) align_fail(SDL_GetError());
     const char *source=getenv("P4PC_LOCKSTEP_ALIGNMENT_REPLAY");
     if (source) snprintf(sAlign->replay_directory,sizeof sAlign->replay_directory,"%s",source);
-    if (p4pc_lockstep_disc_open(sAlign->directory) && !battle_anchor)
-        align_fail("the disc replay holds reads only after a battle qualification anchor");
+    p4pc_lockstep_disc_open(sAlign->directory);
     snprintf(path,sizeof path,"%s/port-trace.bin",sAlign->directory);
     sAlign->trace=align_open(path,"wb");
     if (fwrite("P4ALTR2\n",1,8,sAlign->trace)!=8) align_fail("writing trace header");
@@ -101,6 +103,7 @@ int p4pc_align_init(const char *directory, FILE *replay) {
         p4pc_align_rng_calls_enabled=1;
     }
     sAlign->input.file=replay;
+    p4pc_align_emitters_enabled=1;
     return 1;
 }
 uint32_t *p4pc_align_rng(void) { return sAlign ? sAlign->rng : NULL; }
@@ -123,6 +126,9 @@ void p4pc_align_field_effect_step(const void *task) {
     const P4WalkHost host={.read32=align_rng_word};
     if (!p4la_field_effect_task_idle(&host,P4_H2G(task)))
         align_fail("field effect update during battle qualification");
+}
+void p4pc_align_emitter_advance(const void *emitter) {
+    if (sAlign) p4la_emitter_seen(&sAlign->emitters,P4_H2G(emitter));
 }
 void p4pc_align_rng_call(uint32_t draw, const void *caller) {
     const P4WalkHost host={.read32=align_rng_word};
@@ -250,6 +256,9 @@ static uint32_t align_reply(const P4WalkHost *host, const uint32_t marker[8]) {
     return status;
 }
 void p4pc_align_boundary(const P4WalkHost *host, const uint32_t marker[8]) {
+    /* Emitters advanced by the update that produced this presentation. */
+    sAlign->presented=sAlign->emitters;
+    sAlign->emitters.count=sAlign->emitters.overflow=0;
     if (sAlign->rng_calls && fflush(sAlign->rng_calls)) align_fail("flushing RNG call trace");
     if (sAlign->effect_calls && fflush(sAlign->effect_calls)) align_fail("flushing effect RNG call trace");
     if (sAlign->event_frames && (!p4la_event_frame(sAlign->event_frames,host) ||
@@ -268,6 +277,9 @@ void p4pc_align_boundary(const P4WalkHost *host, const uint32_t marker[8]) {
     }
     if (marker[1]!=P4LA_READY) return;
     snprintf(path,sizeof path,"%s/port-before.ram",folder); align_dump(path);
+    snprintf(path,sizeof path,"%s/port-emitters.tsv",folder);
+    if (!p4la_emitters_write(path,&sAlign->presented,p4la_word(host,P4LS_GAME_FRAME)))
+        align_fail("writing the boundary update's advanced emitters");
     align_event("ready",host,marker);
     const uint32_t status=align_reply(host,marker);
     if (!status) align_fail("boundary equality/proof failed; no state was resynchronized");
@@ -277,6 +289,9 @@ void p4pc_align_boundary(const P4WalkHost *host, const uint32_t marker[8]) {
         p4pc_align_battle_guard=1;
         p4pc_lockstep_disc_activate(p4la_word(host,P4LS_GAME_FRAME));
     }
+    /* Outside battle qualification the disc replay starts at the accepted initial LOAD anchor. */
+    if (status==1u && marker[0]==0u && !sAlign->tracker.battle_qualification_id)
+        p4pc_lockstep_disc_activate(p4la_word(host,P4LS_GAME_FRAME));
     if (status==4u) { if (p4_battle_live_lockstep_boundary()) exit(4); p4pc_exit(0); }
     if (status==5u) exit(4);
     if (status!=1u && status!=2u && status!=6u) align_fail("unknown boundary response");

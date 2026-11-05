@@ -1,5 +1,6 @@
 #include "lua_runtime.h"
 #include "p4pc/mod_events.h"
+#include <string.h>
 
 typedef struct LuaEvent {
     P4LuaMod *mod;
@@ -35,7 +36,9 @@ static int event_callback(const P4ModEvent *event, void *user)
     P4LuaMod *mod = handler->mod;
     EventInvocation invocation = {handler, event};
     int status = p4_lua_invoke(mod, invoke_event, &invocation, 0, P4_LUA_SEMANTIC);
-    if (status) p4_mod_failure(mod->owner, p4_lua_error(mod));
+    /* The orderly quit proceeds regardless: an exit callback error is logged
+     * (p4_lua_protected already printed it), never turned into recovery UI. */
+    if (status && strcmp(event->name, "exit")) p4_mod_failure(mod->owner, p4_lua_error(mod));
     return 0;
 }
 

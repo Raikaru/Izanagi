@@ -1,0 +1,63 @@
+Third-party software in this package
+====================================
+
+This program is a port of the game's code to PC. Persona 4 itself, its code, data and
+trademarks belong to Atlus / SEGA; this package contains none of it and needs your own
+disc image.
+
+The port's own code is MIT-licensed (licenses/p4pc-MIT.txt). Code reconstructed from the
+retail game (decompiled or translated functions) is not licensed by the port's authors;
+see licenses/NOTICE.txt.
+
+FFmpeg libraries (usr/lib/libavcodec.so.*, libavutil.so.*, libswscale.so.*)
+  FFmpeg @FFMPEG_VER@, https://ffmpeg.org, GNU Lesser General Public License version 2.1 or
+  later (licenses/FFmpeg-LGPL-2.1.txt). Built from the unmodified release tarball
+  ffmpeg-@FFMPEG_VER@.tar.xz (https://ffmpeg.org/releases/ffmpeg-@FFMPEG_VER@.tar.xz, sha256
+  @FFMPEG_SHA@) with --disable-gpl --disable-nonfree and only these components
+  enabled: libavcodec (MPEG-2 video decoder and parser, ADX audio decoder) and
+  libswscale. The configure options and build recipe are in the port's source
+  (ci/win32/build_deps.sh, triple x86_64-linux-gnu). The libraries are separate shared
+  objects: you may replace them with your own build of FFmpeg @FFMPEG_VER@ of the same ABI,
+  which is what the LGPL asks of a program that uses them. usr/bin/p4pc contains no
+  FFmpeg code. Complete sources and build recipe are in usr/share/p4pc/source.
+
+SDL3 (usr/lib/libSDL3.so.*)
+  Simple DirectMedia Layer @SDL_VER@, https://libsdl.org, zlib license
+  (licenses/SDL3-zlib.txt). Unmodified release build.
+
+LodePNG 20261006: zlib license (licenses/LodePNG-zlib.txt).
+
+cgltf 1.15 (Johannes Kuhlmann): MIT license (licenses/cgltf-MIT.txt).
+
+Luau 0.744 (when enabled)
+  MIT, including inherited Lua notices: licenses/Luau-MIT.txt and
+  licenses/Lua-MIT.txt. The exact vendored source and local patches are in
+  usr/share/p4pc/source/luau-source.tar.gz.
+
+GCC libstdc++ and libgcc (when the C++ adapter is linked)
+  Statically linked; GPL version 3 with GCC Runtime Library Exception:
+  licenses/GCC-GPL-3.0.txt and licenses/GCC-runtime-exception.txt.
+  The actual toolchain archive hashes, Debian source packages, versions and
+  source archive location are in usr/share/p4pc/source/runtime-provenance.txt.
+
+dlmalloc (Doug Lea): public domain.
+
+miniz 3.0.2 (licenses/miniz-MIT.txt) and yxml (licenses/yxml-MIT.txt): MIT.
+
+fdlibm (Sun Microsystems), in the translated libm cores: licenses/fdlibm-Sun.txt.
+
+CRI middleware headers from recvx-decomp (AshfordFamily): MIT, licenses/recvx-decomp-MIT.txt.
+
+Parts of the renderer follow sky2hook by tge-was-taken, reused with the author's
+permission.
+
+AppImage runtime
+  type2-runtime fedfad51acc2860b2916a1eef32ba4a500ff31ef (MIT), with statically
+  linked libfuse 3.15.0 (LGPL 2.1), squashfuse 0.5.2 (BSD), musl (MIT),
+  zstd (BSD) and zlib (zlib). Full notices are in licenses/. Runtime and
+  libfuse/squashfuse sources, the libfuse patch and build scripts are included in
+  usr/share/p4pc/source. To modify/relink the LGPL runtime, extract runtime-source,
+  follow its BUILD.md (Alpine 3.21 Docker build), replace libfuse with your modified
+  source in scripts/common/install-dependencies.sh and rebuild. Repack this
+  extracted AppDir using appimagetool --runtime-file <rebuilt-runtime>. You may
+  also run AppRun directly without the AppImage runtime.

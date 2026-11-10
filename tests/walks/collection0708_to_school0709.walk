@@ -1,0 +1,32 @@
+# Independent pristine collection card3-slot01, July 8 evening.
+# Stop advancing the automatic overnight story at the school transition.
+timeout:20000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+walk:314,-360,25
+face:100
+wait:20
+press:cross
+wait:40
+timeout:40000
+skipfield:6:6
+waitstate16:0x00797b7a==99
+skipmsg
+timeout:6000
+walk:-360,600,70
+press:cross
+wait:600
+press:cross
+wait:600
+press:left:12
+wait:400
+press:cross
+wait:1500
+press:cross
+wait:600
+log

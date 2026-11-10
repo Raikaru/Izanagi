@@ -1,0 +1,21 @@
+# Real 04/15 evening checkpoint -> Igor's first Velvet Room message 16, row 0.
+# Same legal upstairs entry as the river walk; no weather, event, message or camera writes.
+timeout:6000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+timeout:40000
+waitcontrol:on
+wait:30
+walk:314,-360,25
+face:100
+wait:20
+press:cross
+wait:40
+skipfield:8:3
+skipevtmsg:16:0
+wait:600

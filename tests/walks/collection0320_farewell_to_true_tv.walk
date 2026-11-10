@@ -1,0 +1,159 @@
+# Independent pristine collection card5-slot02, March 20 in Shopping District South after every
+# farewell. The true-ending trigger: refuse to go home at the Junes elevator (No, "I'm not finished
+# yet", stop by the food court), the food court discussion ("There is something...", "My uncle,
+# Dojima."), Dojima at the Samegawa riverbed ("I want to talk to you.", "The weird attendant?",
+# "I looked sick?", "It might be important."), the Velvet Room, the gas-station attendant (as in
+# collection0320_attendant_to_tv.walk), then Junes, the TV and a save at the Entrance.
+timeout:20000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+timeout:20000
+waitcontrol:on
+press:square
+waitchoice
+choose:2
+wait:300
+press:down
+wait:20
+press:cross
+timeout:12000
+skipfield:9:4
+skipmsg
+waitcontrol:on
+wait:60
+walk:-300,0,60
+push:-500,0,12
+press:cross
+timeout:6000
+choose:2                  # do not go home
+choose:1                  # "I'm not finished yet"
+choose:1                  # stop by the food court
+timeout:60000
+choose:1
+choose:1
+timeout:60000
+skipmsg
+waitcontrol:on
+# Samegawa riverbed: Dojima (Nanako stands west of him).
+press:square
+waitchoice
+choose:2
+wait:300
+press:down
+wait:20
+press:cross
+timeout:12000
+skipfield:10:1
+skipmsg
+waitcontrol:on
+press:square
+waitchoice
+choose:1
+timeout:8000
+skipfield:10:2
+skipmsg
+waitcontrol:on
+plan:on
+timeout:6000
+walk:-282,-16,120
+plan:off
+push:-282,-16,10
+press:cross
+timeout:20000
+choose:2
+choose:2
+choose:1
+choose:3
+choose:1
+timeout:30000
+skipmsg
+waitcontrol:on
+# Back to Shopping District South and the Velvet Room door.
+press:square
+waitchoice
+choose:2
+wait:300
+press:up
+wait:20
+press:up
+wait:20
+press:cross
+timeout:12000
+skipfield:8:2
+skipmsg
+waitcontrol:on
+plan:on
+timeout:8000
+walk:-300,-2495,80
+plan:off
+face:270
+push:-600,-2495,15
+press:cross
+timeout:30000
+skipmsg
+waitfield:8:2
+waitcontrol:on
+# The gas-station attendant.
+plan:on
+timeout:8000
+walk:-594,-813,150
+plan:off
+push:-594,-813,10
+press:cross
+timeout:20000
+choose:2
+choose:2
+choose:3
+choose:2
+choose:2
+choose:3
+choose:1                  # "What do you mean?"
+choose:1                  # "To end everything."
+timeout:60000
+skipmsg
+waitcontrol:on
+# Junes food court: Enter the TV.
+press:square
+waitchoice
+choose:2
+wait:300
+press:down
+wait:20
+press:cross
+timeout:12000
+skipfield:9:4
+skipmsg
+waitcontrol:on
+wait:60
+walk:-300,0,60
+push:-500,0,12
+press:cross
+timeout:24000
+choose:1
+waitchoice
+wait:200
+choose:3
+timeout:30000
+skipfield:20:1
+skipmsg
+# Save at the entrance butterfly.
+timeout:6000
+walk:-455,387,60
+push:-700,620,12
+wait:30
+press:cross
+wait:600
+press:cross
+wait:600
+press:left:12
+wait:400
+press:cross
+wait:1500
+press:cross
+wait:600
+log

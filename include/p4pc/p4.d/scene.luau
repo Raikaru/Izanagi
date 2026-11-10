@@ -1,0 +1,3 @@
+--!capability scene@1
+--!covers p4.scene
+-- p4.scene.state, available, warp and status (API 1.4).

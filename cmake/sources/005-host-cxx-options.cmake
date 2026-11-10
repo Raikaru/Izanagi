@@ -1,0 +1,6 @@
+option(P4PC_LUAU "Build the standalone sandboxed Luau provider and tests" ON)
+option(P4PC_CONTENT_PACKS "Build optional content-pack decoders" ON)
+include(cmake/host-cxx.cmake)
+if(P4PC_LUAU OR P4PC_CONTENT_PACKS)
+  p4_host_cxx_enable()
+endif()

@@ -1,0 +1,49 @@
+# Requested unchanged MAX18657 December2 card, also used by the continue branch.
+# Complete the throw-Namatame bad ending through Save new cycle data?, untouched.
+# GameClearDraw resets the native calendar to index9; this is not a story April10.
+timeout:60000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+waitstate16:0x00797b7a==245
+walk:314,-360,25
+face:100
+wait:20
+press:cross
+wait:40
+# Sleep; prove anything; Teddie can stay; Risette doll; calm Kanji down.
+waitchoice
+choose:1
+waitchoice
+choose:1
+waitchoice
+choose:1
+waitchoice
+choose:3
+waitchoice
+choose:2
+# Reassure Nanako twice; ask Adachi for the room; question Namatame.
+waitchoice
+choose:1
+waitchoice
+choose:1
+waitchoice
+choose:2
+waitchoice
+choose:1
+# First critical fork: Push the bastard in. Confirm: Do it already.
+waitchoice
+choose:1
+waitchoice
+choose:1
+# March21's bad-route Dojima reply: remain silent.
+waitchoice
+choose:3
+# Stop before any input to the native new-cycle save prompt; no card write.
+skiptask:GameClearDraw
+waittask:shdWNDProc
+log

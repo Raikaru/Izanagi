@@ -1,0 +1,35 @@
+# Pristine collection card3-slot07 -> Void Quest battle intro and ordinary attacks.
+# Controller input only; no HP, RNG, skill, event or camera writes, no victory claim.
+timeout:20000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+waitfield:26:2
+waitstate16:0x00797b7a==124
+log
+walk:0,1200,70
+push:0,1600,35
+press:cross
+skiptask:battle
+wait:1200
+press:cross
+wait:300
+press:cross
+wait:300
+press:cross
+wait:300
+press:cross
+wait:300
+press:cross
+wait:300
+press:cross
+waitbtl:menu:1
+log
+battle:plan=cross;skip=0;delay=80
+wait:1200
+battle:off
+log

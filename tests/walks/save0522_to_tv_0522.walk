@@ -1,0 +1,54 @@
+# From story0522: go into town, select Junes from the real city map, gather the party, enter the TV and save.
+timeout:6000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+press:square
+wait:30
+log
+choose:2
+choose:1
+timeout:12000
+# The city map is the live "L map" task, not an SMap field-root ID.
+waittask:L map
+wait:600
+# The departure map starts on Dojima Residence (row 5); Junes is two rows above it.
+press:up
+wait:30
+press:up
+wait:30
+press:cross
+skipfield:9:4
+skipmsg
+wait:60
+# Reuse the qualified Junes party-gathering / TV-entry interaction.
+walk:-300,0,60
+push:-500,0,12
+press:cross
+timeout:24000
+choose:1
+choose:3
+skipfield:20:1
+skipmsg
+waitstate:0x00797890==2
+waitstate:0x0079b68c==2126
+timeout:6000
+walk:-455,387,60
+wait:70
+push:-700,620,12
+wait:30
+press:cross
+wait:600
+press:cross
+wait:600
+press:left:12
+wait:400
+press:cross
+wait:1500
+press:cross
+wait:600
+log

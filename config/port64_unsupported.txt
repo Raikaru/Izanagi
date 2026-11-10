@@ -1,0 +1,2 @@
+# Constructs the 64-bit rewrite (tools/port64/gptr_rewrite.py) does not handle yet, one per line as `what @ file:line` (tools/port64/unit64.py report).
+# ctest port64_mirror fails on a construct that is not listed here. M1 left none.

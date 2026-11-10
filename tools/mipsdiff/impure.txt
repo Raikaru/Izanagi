@@ -1,0 +1,11 @@
+# Natives ovdiff never calls: host I/O, GL, threads, allocators with host-side state.
+# `<addr8> reason` or `~name-prefix reason`. A function that reaches one is skipped (status "impure").
+~p4gl_ host OpenGL device
+~p4pc_ port platform layer
+~SDL_ host SDL
+~sce host file/kernel layer
+~H_Cdvd host file layer
+0040afb0 host OpenGL device (RwIm2DRenderLine, p4gl_im2d.c)
+0040b230 host OpenGL device (RwIm2DRenderTriangle, p4gl_im2d.c)
+0040c0f0 host OpenGL device (RwIm2DRenderPrimitive, p4gl_im2d.c)
+0040d0a0 host OpenGL device (RwIm2DRenderIndexedPrimitive, p4gl_im2d.c)

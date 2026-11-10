@@ -1,0 +1,3 @@
+--!capability battle.formation@1
+--!covers p4.battle.formation
+-- p4.battle.formation: one party projector at battle start (API 1.3).

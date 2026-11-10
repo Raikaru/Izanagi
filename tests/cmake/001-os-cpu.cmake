@@ -1,0 +1,5 @@
+add_executable(os_cpu_time_test os_cpu_time_test.c ${P4_OS_SRC})
+target_compile_definitions(os_cpu_time_test PRIVATE ${P4_PORT_DEFINES})
+target_link_libraries(os_cpu_time_test m)
+add_test(NAME os_cpu_time COMMAND os_cpu_time_test)
+set_tests_properties(os_cpu_time PROPERTIES TIMEOUT 10)

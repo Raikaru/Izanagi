@@ -1,0 +1,57 @@
+# From Class 2-2: town map to Dojima's actual front door, sleep, save after the next school's events.
+timeout:12000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+press:square
+wait:300
+press:down
+press:down
+press:down
+press:cross
+wait:600
+# Town map: School 0, Shopping District 1, Junes 2, Flood Plain 3, Dojima Residence 4.
+press:down
+press:down
+press:down
+press:down
+press:cross
+# The map lands outside (7:1). Enter actual area 3400: x-168..183, z-311..106.
+walk:0,330,40
+push:0,-100,35
+press:cross
+choose:1
+skipfield:7:2
+skipmsg
+log
+# Reuse the measured residence-to-bed route and save after the next school's events.
+walk:314,-360,25
+face:100
+wait:20
+press:cross
+wait:40
+skipmsg
+wait:30
+press:down:200
+wait:30
+press:cross
+wait:40
+timeout:40000
+skipmsg
+timeout:6000
+walk:-360,600,70
+press:cross
+wait:600
+press:cross
+wait:600
+press:left:12
+wait:400
+press:cross
+wait:1500
+press:cross
+wait:600
+log

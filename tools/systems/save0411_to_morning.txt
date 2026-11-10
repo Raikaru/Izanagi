@@ -1,0 +1,34 @@
+# The 04/11 GameFAQs save (Hiro Blaze, Dojima living room, saves/card slot 1) -> the futon -> the fog dream -> its door -> the tutorial battle -> 04/12 morning (calendar day change) -> breakfast -> school. PortTrace3's save0411_to_dream.walk + dream_to_morning.walk.
+# The GameFAQs 18664 save (04/11, Dojima living room) loaded through the title (P4PC_AUTOPRESS_LOAD=0, frame 0 = the load confirm): the slot browser,
+# Yes, "Load successful", then the stairs -> Your Room -> futon -> the fog dream.
+timeout:90000
+wait:140
+press:cross               # the slot
+wait:140
+press:cross               # Yes
+wait:140
+press:cross               # Load successful
+skipmsg                   # the load's Help window, until the player is free
+wait:30
+walk:314,-360,25          # the foot of the stairs (the CHECK icon)
+wait:20
+press:cross               # go upstairs
+wait:40
+skipmsg                   # "This is the room you're borrowing from Dojima..."
+wait:30
+press:down:200            # to the wall by the futon (Your Room: x -16..240, z -184..133)
+wait:30
+press:cross               # CHECK the futon: "The futon has been prepared", Help, "Go to sleep?" (Yes is the default)
+wait:40
+skipmsg                   # Cross through the prompts, the sleep, up to the first control in the dream
+
+# The fog dream: the corridor to its door, the door (per4DungeonDoor, x 8400, z 1800, Cross within 250 units), the tutorial battle,
+# the wake-up on 04/12, breakfast, the walk to school and the school day: Cross through every message and event until the player is free.
+waitcontrol:on
+walk:8160,1989,60         # the corridor runs along -Z from z 24000; messages on the way are skipped (autoskip)
+walk:8400,1989,40         # the end of the corridor
+wait:20
+press:cross               # the door
+wait:60
+timeout:60000
+skipmsg

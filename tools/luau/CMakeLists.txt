@@ -1,0 +1,145 @@
+cmake_minimum_required(VERSION 3.20)
+# Also usable without the retail/decomp checkout: cmake -S tools/luau -B ...
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+  project(p4pc_luau LANGUAGES C CXX)
+  enable_testing()
+  set(P4_LUAU_STANDALONE TRUE)
+endif()
+get_filename_component(P4_LUAU_ROOT "${CMAKE_CURRENT_LIST_DIR}/../.." ABSOLUTE)
+include("${P4_LUAU_ROOT}/cmake/host-cxx.cmake")
+include("${P4_LUAU_ROOT}/cmake/wine-tests.cmake")
+# No game forced includes, ABI rewriting, EE float launcher or inherited -m32.
+set_property(DIRECTORY PROPERTY COMPILE_OPTIONS "")
+set_property(DIRECTORY PROPERTY LINK_OPTIONS "")
+if(NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  message(FATAL_ERROR "Luau profiles require clang/clang++ (C++17)")
+endif()
+
+function(p4_luau_profile suffix)
+  set(flags ${ARGN})
+  set(vendor "${P4_LUAU_ROOT}/third_party/luau")
+  foreach(component Common Ast Bytecode Compiler VM Config Analysis)
+    # Every .cpp in these pinned component directories belongs to that component;
+    # CodeGen, Inliner, Require, CLI and experimental external deps are excluded.
+    file(GLOB sources CONFIGURE_DEPENDS "${vendor}/${component}/src/*.cpp")
+    add_library(p4_luau_${component}${suffix} STATIC ${sources})
+    target_include_directories(p4_luau_${component}${suffix} PUBLIC "${vendor}/${component}/include")
+    p4_host_cxx_target(p4_luau_${component}${suffix} ${flags})
+    target_compile_definitions(p4_luau_${component}${suffix} PRIVATE NDEBUG)
+  endforeach()
+  target_link_libraries(p4_luau_Ast${suffix} PUBLIC p4_luau_Common${suffix})
+  target_link_libraries(p4_luau_Bytecode${suffix} PUBLIC p4_luau_Common${suffix})
+  target_link_libraries(p4_luau_Compiler${suffix} PUBLIC p4_luau_Ast${suffix} p4_luau_Bytecode${suffix})
+  target_link_libraries(p4_luau_VM${suffix} PUBLIC p4_luau_Common${suffix})
+  target_link_libraries(p4_luau_Config${suffix} PUBLIC p4_luau_Ast${suffix} PRIVATE p4_luau_Compiler${suffix} p4_luau_VM${suffix})
+  target_link_libraries(p4_luau_Analysis${suffix} PUBLIC p4_luau_Ast${suffix} p4_luau_Config${suffix}
+    PRIVATE p4_luau_Compiler${suffix} p4_luau_VM${suffix})
+  target_compile_options(p4_luau_VM${suffix} PRIVATE -fno-exceptions)
+  target_compile_definitions(p4_luau_VM${suffix} PUBLIC LUA_USE_LONGJMP=1
+    "$<$<COMPILE_LANGUAGE:CXX>:LUA_API=extern \"C\">")
+  target_compile_definitions(p4_luau_Compiler${suffix} PUBLIC
+    "$<$<COMPILE_LANGUAGE:CXX>:LUACODE_API=extern \"C\">")
+
+  add_library(p4_luau${suffix} STATIC "${P4_LUAU_ROOT}/src/platform/mods/luau_c.cpp")
+  target_include_directories(p4_luau${suffix} PUBLIC "${P4_LUAU_ROOT}/include")
+  p4_host_cxx_target(p4_luau${suffix} ${flags})
+  target_link_libraries(p4_luau${suffix} PUBLIC p4_luau_VM${suffix} p4_luau_Compiler${suffix})
+  p4_host_cxx_runtime(p4_luau${suffix} "${suffix}" ${flags})
+  target_link_options(p4_luau_Analysis${suffix} INTERFACE ${flags})
+
+  add_executable(p4_luau_check${suffix} "${P4_LUAU_ROOT}/tools/luau_check.cpp")
+  p4_host_cxx_target(p4_luau_check${suffix} ${flags})
+  target_link_libraries(p4_luau_check${suffix} PRIVATE p4_luau_Analysis${suffix} p4_luau${suffix})
+  add_executable(luau_sandbox_test${suffix} "${P4_LUAU_ROOT}/tests/luau_sandbox_test.c")
+  target_compile_options(luau_sandbox_test${suffix} PRIVATE ${flags} -O2 -g1)
+  target_link_libraries(luau_sandbox_test${suffix} PRIVATE p4_luau${suffix})
+  # Headless mod-only qualification: bundled mods' Luau in this pinned VM with
+  # a synthetic p4 fixture (no game, no budget) and the shared native digest.
+  add_executable(luau_script_runner${suffix} "${P4_LUAU_ROOT}/tests/luau_script_runner.c"
+    "${P4_LUAU_ROOT}/src/platform/content_digest.c")
+  target_compile_options(luau_script_runner${suffix} PRIVATE ${flags} -O2 -g1)
+  target_link_libraries(luau_script_runner${suffix} PRIVATE p4_luau${suffix})
+  foreach(kind probe baseline)
+    add_executable(p4_luau_size_${kind}${suffix} EXCLUDE_FROM_ALL "${P4_LUAU_ROOT}/tools/luau_size_probe.c")
+    target_compile_options(p4_luau_size_${kind}${suffix} PRIVATE ${flags} -O2 -g1)
+    target_link_libraries(p4_luau_size_${kind}${suffix} PRIVATE p4_luau${suffix})
+  endforeach()
+  target_compile_definitions(p4_luau_size_baseline${suffix} PRIVATE P4_LUAU_SIZE_BASELINE=1)
+  if(suffix STREQUAL "64w")
+    set_target_properties(p4_luau_check${suffix} luau_sandbox_test${suffix} luau_script_runner${suffix}
+      p4_luau_size_probe${suffix} p4_luau_size_baseline${suffix} PROPERTIES
+      SUFFIX ".exe")
+    find_program(P4_LUAU_WINE NAMES wine64 wine)
+    if(NOT P4_LUAU_WINE)
+      message(STATUS "Luau64w runtime tests skipped: Wine unavailable; provider and test binaries remain enabled")
+      return()
+    endif()
+    add_test(NAME luau_sandbox${suffix} COMMAND "${P4_LUAU_WINE}" "$<TARGET_FILE:luau_sandbox_test${suffix}>")
+  else()
+    add_test(NAME luau_sandbox${suffix} COMMAND luau_sandbox_test${suffix})
+  endif()
+  set_tests_properties(luau_sandbox${suffix} PROPERTIES LABELS "host" TIMEOUT 20
+    ENVIRONMENT "P4PC_INPUT=script;P4PC_MODS=0;P4PC_PACKS=0")
+  if(suffix STREQUAL "64")
+    set_property(TEST luau_sandbox${suffix} APPEND PROPERTY LABELS port64)
+  elseif(suffix STREQUAL "64w")
+    set_tests_properties(luau_sandbox${suffix} PROPERTIES LABELS "host;port64win"
+      FIXTURES_REQUIRED wine64_ready)
+    set_property(TEST luau_sandbox${suffix} APPEND PROPERTY ENVIRONMENT
+      WINEDEBUG=-all "WINEPREFIX=${CMAKE_BINARY_DIR}/tests/wine64prefix")
+    p4_wine_scale_timeouts(luau_sandbox${suffix})
+  endif()
+  find_package(Python3 COMPONENTS Interpreter REQUIRED)
+  get_target_property(emulator p4_luau_check${suffix} CROSSCOMPILING_EMULATOR)
+  if(NOT emulator)
+    set(emulator "")
+  endif()
+  if(suffix STREQUAL "64w")
+    set(emulator "${P4_LUAU_WINE}")
+  endif()
+  # The seeded randomizer's engine, vectors and run lifecycle: the same pinned
+  # digests on every target (Linux i386/x86_64/AArch64 under its emulator,
+  # Windows x64 under Wine); a determinism witness, not a gameplay receipt.
+  add_test(NAME mod_randomizer_engine${suffix} COMMAND "${Python3_EXECUTABLE}"
+    "${P4_LUAU_ROOT}/tests/mod_randomizer_engine_test.py" -- ${emulator} "$<TARGET_FILE:luau_script_runner${suffix}>")
+  set_tests_properties(mod_randomizer_engine${suffix} PROPERTIES LABELS "host" TIMEOUT 120
+    ENVIRONMENT "P4PC_INPUT=script;P4PC_MODS=0;P4PC_PACKS=0;P4PC_ISO=")
+  if(suffix STREQUAL "64")
+    set_property(TEST mod_randomizer_engine${suffix} APPEND PROPERTY LABELS port64)
+  elseif(suffix STREQUAL "64w")
+    set_tests_properties(mod_randomizer_engine${suffix} PROPERTIES LABELS "host;port64win"
+      FIXTURES_REQUIRED wine64_ready)
+    set_property(TEST mod_randomizer_engine${suffix} APPEND PROPERTY ENVIRONMENT
+      WINEDEBUG=-all "WINEPREFIX=${CMAKE_BINARY_DIR}/tests/wine64prefix")
+    p4_wine_scale_timeouts(mod_randomizer_engine${suffix})
+  endif()
+  if(NOT CMAKE_CROSSCOMPILING OR suffix STREQUAL "64w")
+    add_test(NAME luau_analysis${suffix} COMMAND "${Python3_EXECUTABLE}"
+      "${P4_LUAU_ROOT}/tests/luau_check_test.py" ${emulator} "$<TARGET_FILE:p4_luau_check${suffix}>")
+    set_tests_properties(luau_analysis${suffix} PROPERTIES LABELS "host" TIMEOUT 30
+      ENVIRONMENT "P4PC_INPUT=script;P4PC_MODS=0;P4PC_PACKS=0")
+    if(suffix STREQUAL "64")
+      set_property(TEST luau_analysis${suffix} APPEND PROPERTY LABELS port64)
+    elseif(suffix STREQUAL "64w")
+      set_tests_properties(luau_analysis${suffix} PROPERTIES LABELS "host;port64win"
+        FIXTURES_REQUIRED wine64_ready)
+      set_property(TEST luau_analysis${suffix} APPEND PROPERTY ENVIRONMENT
+        WINEDEBUG=-all "WINEPREFIX=${CMAKE_BINARY_DIR}/tests/wine64prefix")
+      p4_wine_scale_timeouts(luau_analysis${suffix})
+    endif()
+  endif()
+endfunction()
+
+if(P4_LUAU_STANDALONE)
+  p4_luau_profile("")
+else()
+  p4_host_cxx_profiles(p4_luau_profile)
+  foreach(suffix "" 64 64w)
+    if(TARGET p4_luau${suffix})
+      set(host_args --host-lib "$<TARGET_FILE:p4_luau${suffix}>"
+        --host-lib "$<TARGET_FILE:p4_luau_VM${suffix}>"
+        --host-lib "$<TARGET_FILE:p4_luau_Compiler${suffix}>")
+      set(P4_LUAU_HOST_ARGS${suffix} ${host_args} PARENT_SCOPE)
+    endif()
+  endforeach()
+endif()

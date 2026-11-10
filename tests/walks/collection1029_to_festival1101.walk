@@ -1,0 +1,31 @@
+# Independent collection card4-slot07, October29 evening.
+# Follow the remaining festival/trip story to November1's classroom native save.
+timeout:60000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+waitstate16:0x00797b7a==211
+walk:314,-360,25
+face:100
+wait:20
+press:cross
+wait:40
+skipmsg
+waitfield:6:6
+waitstate16:0x00797b7a==214
+walk:-360,600,70
+press:cross
+wait:600
+press:cross
+wait:600
+press:left:12
+wait:400
+press:cross
+wait:1500
+press:cross
+wait:600
+log

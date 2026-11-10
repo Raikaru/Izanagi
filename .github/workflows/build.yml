@@ -1,0 +1,233 @@
+# Builds, tests and packages the port: Linux and Windows in the p4pc-ci image (ci/Dockerfile), macOS on GitHub's Macs (ci/macos/). No game
+# data is used or available here: the build reads config/retail_fnptr_words.txt, and the tests that need the disc skip.
+# A pushed tag v* also attaches the Windows x64 zip, the Linux x86_64 AppImage and the macOS arm64 and x86_64 zips to its GitHub release.
+name: build
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  IMAGE: p4pc-ci
+  # docker/build-push-action would upload a build-record artifact per build; the release job wants only the packages.
+  DOCKER_BUILD_RECORD_UPLOAD: false
+
+jobs:
+  image:
+    name: CI image
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          df -h /
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      # Built once per workflow run; every layer goes to the GitHub Actions cache, so later runs and the jobs
+      # below reuse it instead of downloading and building the toolchain and libraries again.
+      - name: Build and cache the CI image
+        uses: docker/build-push-action@v6
+        with:
+          context: ci
+          tags: ${{ env.IMAGE }}
+          cache-from: type=gha,scope=p4pc-ci
+          cache-to: type=gha,scope=p4pc-ci,mode=max
+
+  test:
+    name: Build and test (Linux, Windows)
+    needs: image
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    steps:
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          df -h /
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - uses: docker/setup-buildx-action@v3
+      - name: CI image (from the cache the image job filled)
+        uses: docker/build-push-action@v6
+        with:
+          context: ci
+          tags: ${{ env.IMAGE }}
+          load: true
+          cache-from: type=gha,scope=p4pc-ci
+      - uses: actions/cache@v4
+        with:
+          path: .ccache
+          key: ccache-test-${{ github.sha }}
+          restore-keys: ccache-test-
+      - name: Configure, build everything, run the tests that need no game files
+        run: |
+          docker run --rm -v "$PWD:/src" -v "$PWD/.ccache:/ccache" -w /src "$IMAGE" sh -euc '
+            git config --global --add safe.directory "*"
+            cmake -S . -B build -G Ninja \
+              -DCMAKE_C_COMPILER=/opt/llvm-mingw/bin/clang \
+              -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+              -DP4_PORT64=ON -DP4_PORT64_LINK=ON -DP4_PORT64_OPT=O2 -DP4_PORT64W_OPT=O2 -DP4_CENSUS_CHECK=ON
+            cmake --build build -- -k 0
+            sh tools/ci_tests.sh build
+          '
+
+  package:
+    name: Package ${{ matrix.target }}
+    needs: image
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: windows-x64
+            script: tools/package_win.sh
+          - target: linux-x86_64
+            script: tools/package_linux.sh
+    steps:
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          df -h /
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+      - uses: docker/setup-buildx-action@v3
+      - name: CI image (from the cache the image job filled)
+        uses: docker/build-push-action@v6
+        with:
+          context: ci
+          tags: ${{ env.IMAGE }}
+          load: true
+          cache-from: type=gha,scope=p4pc-ci
+      - uses: actions/cache@v4
+        with:
+          path: .ccache
+          key: ccache-${{ matrix.target }}-${{ github.sha }}
+          restore-keys: ccache-${{ matrix.target }}-
+      - name: Build and package
+        env:
+          SCRIPT: ${{ matrix.script }}
+        run: |
+          docker run --rm -v "$PWD:/src" -v "$PWD/.ccache:/ccache" -w /src -e SCRIPT "$IMAGE" sh -euc '
+            git config --global --add safe.directory "*"
+            sh "$SCRIPT" --out dist
+          '
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p4pc-${{ matrix.target }}
+          path: dist/*
+          if-no-files-found: error
+
+  # macOS (docs/platform/macos.md): built natively on GitHub's hosted Macs, Apple silicon and Intel, with the pinned clang, SDL3, FFmpeg and
+  # ANGLE of ci/macos/build_deps.sh. The tests labelled port64 (the build's own; those that need the disc skip), the GL context smoke (on
+  # Apple silicon an OpenGL ES context on ANGLE's Metal back end is required; the Intel runners have no Metal device, so there the game's
+  # fallback to Apple's desktop OpenGL must draw), then the app bundle in a zip.
+  macos:
+    name: macOS ${{ matrix.arch }} (build, test, package)
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: arm64
+            runner: macos-latest
+            smoke: P4PC_REQUIRE_GLES=1 P4PC_REQUIRE_GL_RENDERER=Metal
+          - arch: x86_64
+            runner: macos-15-intel
+            smoke: ""   # ES where ANGLE has a display, else the desktop OpenGL fallback: either must draw
+    env:
+      DEPS: ${{ github.workspace }}/build/macos-deps
+      P4PC_DL_CACHE: ${{ github.workspace }}/build/dl-cache
+      P4PC_BUILD_CACHE_DIR: ${{ github.workspace }}/build/rewrite-cache
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+      - name: Ninja
+        run: |
+          python3 -m venv "$RUNNER_TEMP/venv"
+          "$RUNNER_TEMP/venv/bin/pip" install --quiet ninja
+          echo "$RUNNER_TEMP/venv/bin" >> "$GITHUB_PATH"
+          sw_vers; xcrun --sdk macosx --show-sdk-path; cmake --version | head -n 1
+          # the identity of the rewrite cache's toolchain (tools/build_cache.py): the pinned dependencies, the SDK and the architecture
+          echo "P4PC_BUILD_TOOLCHAIN_ID=sha256:$({ cat ci/macos/build_deps.sh; xcrun --sdk macosx --show-sdk-version; uname -m; } | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_ENV"
+      - uses: actions/cache@v4
+        with:
+          path: build/macos-deps
+          key: macos-deps-${{ matrix.arch }}-${{ hashFiles('ci/macos/build_deps.sh') }}
+      - name: Clang, SDL3, FFmpeg and ANGLE (ci/macos/build_deps.sh)
+        run: sh ci/macos/build_deps.sh "$DEPS"
+      - uses: actions/cache@v4
+        with:
+          path: build/rewrite-cache
+          key: macos-rewrite-${{ matrix.arch }}-${{ github.sha }}
+          restore-keys: macos-rewrite-${{ matrix.arch }}-
+      - name: Configure and build the 64-bit targets
+        run: |
+          sh ci/macos/configure.sh "$DEPS" build/macos -DP4_CENSUS_CHECK=ON
+          cmake --build build/macos --target p4_x64 -- -k 0
+      - name: Tests that need no game files
+        run: ctest --test-dir build/macos -j "$(sysctl -n hw.ncpu)" --timeout 900 --output-on-failure -L '^port64$'
+      - name: GL context smoke
+        run: |
+          set -o pipefail
+          env ${{ matrix.smoke }} ctest --test-dir build/macos -R '^gles_context_smoke64$' -V 2>&1 | tee build/macos/gles-smoke.log
+          grep -q 'gles_context_smoke: OK' build/macos/gles-smoke.log   # drawn, not skipped
+          mkdir -p smoke && cp build/macos/gles-smoke.log build/macos/64_gles_context_smoke.png smoke/
+          # Apple's own OpenGL asked for directly (P4PC_GL_API=gl), beside it
+          P4PC_GL_API=gl ctest --test-dir build/macos -R '^gles_context_smoke64$' -V 2>&1 | tee build/macos/gles-smoke-desktop.log
+          grep -q 'gles_context_smoke: OK' build/macos/gles-smoke-desktop.log
+          cp build/macos/gles-smoke-desktop.log smoke/ && cp build/macos/64_gles_context_smoke.png smoke/64_gles_context_smoke_desktop.png
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: macos-${{ matrix.arch }}-gl-smoke
+          path: smoke/*
+          if-no-files-found: warn
+      - name: Package
+        run: sh tools/package_macos.sh --deps "$DEPS" --build build/macos --out dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p4pc-macos-${{ matrix.arch }}
+          path: dist/*
+          if-no-files-found: error
+
+  release:
+    name: Attach packages to the release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [test, package, macos]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          pattern: p4pc-*
+          merge-multiple: true
+      - name: Create or update the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          ls -l dist
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist/* --clobber --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create "$TAG" dist/* --repo "$GITHUB_REPOSITORY" --title "$TAG" --generate-notes
+          fi

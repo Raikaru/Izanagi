@@ -1,0 +1,8 @@
+waitcontrol:on
+wait:30
+walk:314,-360,25
+wait:20
+press:cross
+wait:40
+timeout:80000
+skipmsg

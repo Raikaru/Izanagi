@@ -1,0 +1,95 @@
+# p4pc.hardmode tuning. Every number here is our own design value, not data
+# copied from the game: each multiplier scales the value the game itself
+# computes for that enemy, so the player's disc stays the source of every base
+# stat, reward and skill. Change these numbers to retune; bump `revision` when
+# you do, so a save records which tuning its run started with.
+#
+# Syntax: `# comment`, `[section]`, `key = value`. Numbers are decimal, or
+# hexadecimal with 0x. Unknown sections or keys, missing keys and values
+# outside their limits stop the mod with an error rather than being ignored.
+
+revision = 1
+
+# An encounter is a boss encounter when its formation flags (the first word of
+# its 0x18-byte ENCOUNT.TBL row) share a bit with this mask. In the retail
+# table, 0x2 is set on every boss-type formation (the story bosses, the
+# dungeon floor bosses such as Avenger Knight, the Reaper, the optional bosses
+# and one tutorial battle) and on no ordinary formation. Units summoned during
+# the battle inherit the encounter's class.
+[classes]
+boss_flags = 0x0002
+
+# Per difficulty and class: hp, sp, st, ma, en, ag, lu scale the enemy's maximum
+# HP/SP (its starting HP/SP follows) and its five stats (St, Ma, En, Ag, Lu).
+# exp and yen scale its battle rewards. Results are rounded to the nearest
+# whole number and kept inside the game's own limits: stats 1..99, HP/SP
+# 1..65535, rewards 0..65535. Limits: 0.25..4.0 for each multiplier.
+#
+# No difficulty makes any enemy weaker than the original game. Hard keeps every
+# ordinary enemy as the original game made it and gives bosses 10% more HP/SP
+# and 5% more St/Ma. Harder is the intended experience: ordinary fights take a
+# little longer and hit harder, bosses gain 20% HP and hit 10% harder, and
+# ordinary rewards rise with the extra effort so that the redesign does not need
+# extra grinding. Calibrated in the battle simulator (a difficulty may never win
+# a boss more often than the original game; see the design's simulator table)
+# and, still to come, by playtests.
+
+[hard]
+ordinary.hp = 1.00
+ordinary.sp = 1.00
+ordinary.st = 1.00
+ordinary.ma = 1.00
+ordinary.en = 1.00
+ordinary.ag = 1.00
+ordinary.lu = 1.00
+ordinary.exp = 1.00
+ordinary.yen = 1.00
+boss.hp = 1.10
+boss.sp = 1.10
+boss.st = 1.05
+boss.ma = 1.05
+boss.en = 1.00
+boss.ag = 1.00
+boss.lu = 1.00
+boss.exp = 1.00
+boss.yen = 1.00
+
+[harder]
+ordinary.hp = 1.15
+ordinary.sp = 1.15
+ordinary.st = 1.10
+ordinary.ma = 1.10
+ordinary.en = 1.00
+ordinary.ag = 1.05
+ordinary.lu = 1.00
+ordinary.exp = 1.15
+ordinary.yen = 1.15
+boss.hp = 1.20
+boss.sp = 1.15
+boss.st = 1.10
+boss.ma = 1.10
+boss.en = 1.00
+boss.ag = 1.05
+boss.lu = 1.00
+boss.exp = 1.00
+boss.yen = 1.00
+
+# Enemy support discipline, for enemies driven by the game's own weighted AI
+# tables, in ordinary encounters only (boss encounters are never changed). The
+# game's pick, and its one random draw,
+# always happen first. If it picked an HP-recovery skill while every living
+# ally is above skip_heal_above of its maximum HP, the enemy uses the
+# highest-weight other entry of that same table group instead. If it picked
+# anything else while a living ally is below rescue_below, and that group has
+# an HP-recovery entry, it heals instead. Limits: 0..1, rescue_below below
+# skip_heal_above; rescue_below 0 turns the rescue off. It is off: in the battle
+# simulator, enemies that spend turns rescuing allies make fights easier.
+[ai]
+skip_heal_above = 0.60
+rescue_below = 0.00
+
+# Optional per-enemy overrides replace the class value for one enemy ID and
+# one difficulty, for example:
+#   [enemy 258]
+#   harder.hp = 1.00
+# None are set in this revision.

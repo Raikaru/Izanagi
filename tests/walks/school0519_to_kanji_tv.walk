@@ -1,0 +1,53 @@
+# From story0519: obtain Naoto's clue, let the Fox help, enter the TV, and save.
+timeout:20000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+press:square
+wait:300
+press:down
+press:down
+press:down
+press:cross
+wait:600
+press:down
+press:down
+press:cross
+skipfield:9:4
+skipmsg
+log
+# Scene-list-3 actor 0x0C00 is the young man at -212,248.
+walk:-80,248,45
+push:-212,248,6
+press:cross
+skipmsg
+log
+walk:-300,0,60
+push:-500,0,12
+press:cross
+choose:1
+# The first Food Court selection is the Fox introduction, not the meeting menu.
+# 1: "Let's let it help." Then the ordinary meeting menu's 3 is "Enter the TV."
+choose:1
+choose:3
+skipfield:20:1
+skipmsg
+log
+walk:-455,387,60
+push:-700,620,12
+wait:30
+press:cross
+wait:600
+press:cross
+wait:600
+press:left:12
+wait:400
+press:cross
+wait:1500
+press:cross
+wait:600
+log

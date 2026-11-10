@@ -1,0 +1,746 @@
+/* SPDX-License-Identifier: LicenseRef-reconstructed */
+/* 0x003a0aa0 func_003a0aa0 src/promoted/code1_003a.c - romwright draft, unreviewed */
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+unsigned long long FUN_003a0aa0(int param_1)
+
+{
+  unsigned char bVar1;
+  int *piVar2;
+  unsigned int *puVar3;
+  unsigned int uVar4;
+  unsigned int uVar5;
+  int iVar6;
+  unsigned char bVar7;
+  unsigned char auVar8 [16];
+  long lVar9;
+  unsigned char auVar10 [16];
+  unsigned char auVar11 [16];
+  unsigned char auVar12 [16];
+  unsigned char auVar13 [16];
+  unsigned char auVar14 [16];
+  unsigned char auVar15 [16];
+  unsigned char auVar16 [16];
+  unsigned char auVar17 [16];
+  unsigned char auVar18 [16];
+  unsigned char auVar19 [16];
+  unsigned char auVar20 [16];
+  unsigned char auVar21 [16];
+  unsigned char auVar22 [16];
+  unsigned char auVar23 [16];
+  unsigned char auVar24 [16];
+  unsigned char auVar25 [16];
+  unsigned char auVar26 [16];
+  unsigned int *puVar27;
+  unsigned int in_zero_lo;
+  unsigned int in_zero_hi;
+  unsigned int in_zero_udw;
+  unsigned int in_zero_udw_00;
+  unsigned int uVar28;
+  unsigned int in_v0_udw;
+  unsigned int in_v0_udw_00;
+  unsigned long long extraout_v0_udw;
+  unsigned char auVar29 [16];
+  unsigned char auVar30 [16];
+  unsigned char auVar31 [16];
+  unsigned char auVar32 [16];
+  unsigned long long extraout_v0_udw_00;
+  unsigned char auVar33 [16];
+  unsigned char auVar34 [16];
+  unsigned char auVar35 [16];
+  unsigned char auVar36 [16];
+  unsigned int *puVar37;
+  unsigned long long uVar38;
+  unsigned long long uVar39;
+  unsigned long long in_v1_udw;
+  unsigned char auVar40 [16];
+  unsigned long long uVar56;
+  unsigned char auVar41 [16];
+  unsigned char auVar42 [16];
+  unsigned char auVar43 [16];
+  unsigned char auVar44 [16];
+  unsigned char auVar45 [16];
+  unsigned char auVar46 [16];
+  unsigned char auVar47 [16];
+  unsigned char auVar48 [16];
+  unsigned char auVar49 [16];
+  unsigned char auVar50 [16];
+  unsigned char auVar51 [16];
+  unsigned char auVar52 [16];
+  unsigned char auVar53 [16];
+  unsigned char auVar54 [16];
+  unsigned char auVar55 [16];
+  unsigned long long in_a0_udw;
+  unsigned char auVar57 [16];
+  unsigned long long uVar68;
+  unsigned char auVar58 [16];
+  unsigned char auVar59 [16];
+  unsigned char auVar60 [16];
+  unsigned char auVar61 [16];
+  unsigned char auVar62 [16];
+  unsigned char auVar63 [16];
+  unsigned char auVar64 [16];
+  unsigned char auVar65 [16];
+  unsigned char auVar66 [16];
+  unsigned char auVar67 [16];
+  unsigned char auVar69 [16];
+  unsigned char auVar70 [16];
+  unsigned char auVar71 [16];
+  unsigned long long uVar74;
+  unsigned char auVar72 [16];
+  unsigned char auVar73 [16];
+  unsigned char auVar75 [16];
+  unsigned char auVar76 [16];
+  unsigned char auVar77 [16];
+  unsigned char auVar78 [16];
+  unsigned char auVar79 [16];
+  unsigned char auVar80 [16];
+  unsigned char auVar81 [16];
+  unsigned long long in_t0_udw;
+  unsigned char auVar82 [16];
+  unsigned char auVar83 [16];
+  unsigned char auVar84 [16];
+  unsigned char auVar85 [16];
+  unsigned long long in_t1_udw;
+  unsigned long long in_t2_udw;
+  unsigned char auVar86 [16];
+  unsigned long long in_t3_udw;
+  unsigned char auVar87 [16];
+  unsigned char auVar88 [16];
+  unsigned char auVar89 [16];
+  unsigned long long in_t4_udw;
+  unsigned char auVar90 [16];
+  unsigned char auVar91 [16];
+  unsigned long long in_t5_udw;
+  unsigned long long in_t6_udw;
+  unsigned char auVar92 [16];
+  unsigned char auVar93 [16];
+  unsigned int in_t7_udw;
+  unsigned int in_t7_udw_00;
+  long lVar94;
+  unsigned char in_s0_qw [16];
+  unsigned long long uVar97;
+  unsigned char auVar95 [16];
+  unsigned char auVar96 [16];
+  unsigned long long *puVar98;
+  unsigned long long *puVar99;
+  long lVar100;
+  unsigned char auVar101 [16];
+  unsigned char in_s5_qw [16];
+  unsigned char auVar102 [16];
+  unsigned int uVar103;
+  unsigned int in_s6_udw;
+  unsigned int in_s6_udw_00;
+  unsigned int in_s7_udw;
+  unsigned int in_s7_udw_00;
+  unsigned int in_s8_udw;
+  unsigned int in_s8_udw_00;
+  int uStack_60;
+  unsigned int uStack_5c;
+  unsigned int uStack_58;
+  unsigned int uStack_54;
+  unsigned int uStack_50;
+  unsigned int uStack_4c;
+  unsigned int uStack_48;
+  unsigned int uStack_40;
+  unsigned int uStack_3c;
+  unsigned int uStack_38;
+  unsigned int uStack_30;
+  unsigned int uStack_2c;
+  unsigned int uStack_28;
+  unsigned long long uStack_18;
+  unsigned long long uStack_10;
+  unsigned long long uStack_8;
+  
+  uVar74 = DAT_007649b0;
+  piVar2 = *(int **)(*(int *)(param_1 + 0x2c) + 8);
+  puVar3 = (unsigned int *)*piVar2;
+  uVar97 = in_s0_qw._8_8_;
+  lVar94 = (long)(int)puVar3;
+  piVar2 = *(int **)((int)piVar2 + DAT_007646d0);
+  lVar9 = *(long *)(piVar2 + 0x1c);
+  uVar28 = (unsigned int)lVar9;
+  uVar103 = (unsigned int)((unsigned long long)lVar9 >> 0x20);
+  lVar100 = (long)piVar2[0x10];
+  uVar56 = *(unsigned long long *)(piVar2 + 0x1a);
+  auVar76._8_8_ = 0;
+  auVar76._0_8_ = in_s5_qw._8_8_;
+  auVar88 = auVar76 << 0x40;
+  if (lVar9 == 0x1000000) {
+    uVar28 = (unsigned int)DAT_007649d0;
+    uVar103 = (unsigned int)((unsigned long long)DAT_007649d0 >> 0x20);
+  }
+  uVar38 = *(unsigned long long *)(piVar2 + 0x1e);
+  uStack_8 = 0;
+  puVar99 = (unsigned long long *)*piVar2;
+  puVar98 = (unsigned long long *)piVar2[1];
+  uVar5 = (unsigned int)DAT_007649c0;
+  if ((puVar99 == (unsigned long long *)0x0) || (puVar98 == (unsigned long long *)0x0)) {
+    if (puVar99 == (unsigned long long *)0x0) {
+      puVar99 = (unsigned long long *)&uStack_60;
+    }
+    if (puVar98 == (unsigned long long *)0x0) {
+      puVar98 = (unsigned long long *)&uStack_60;
+    }
+    uStack_38 = 0x3f800000;
+    uStack_4c = 0x3f800000;
+    uStack_60 = 0x3f800000;
+    uStack_50 = 0;
+    uStack_58 = 0;
+    uStack_5c = 0;
+    uStack_3c = 0;
+    uStack_40 = 0;
+    uStack_54 = uStack_54 | 0x20003;
+    uStack_48 = 0;
+    uStack_28 = 0;
+    uStack_2c = 0;
+    uStack_30 = 0;
+  }
+  uStack_10 = 0;
+  uStack_18 = 0;
+  DAT_00764a38 = 0;
+  if ((lVar94 != 0) && (FUN_0040f480(*puVar3), (*(unsigned char *)(*(int *)lVar94 + 0x23) & 0xf) != 6)) {
+    DAT_00764a38 = 1;
+  }
+  if (lVar100 != 0) {
+    FUN_0040f480(*(unsigned int *)lVar100);
+    FUN_0040f570(*(unsigned int *)lVar100,1);
+  }
+  if (lVar94 != 0) {
+    FUN_0040f570(*(unsigned int *)lVar94,0);
+  }
+  if ((lVar100 != 0) && (*(int *)(*(int *)lVar100 + DAT_00764a28 + 0x58) == 0)) {
+    FUN_0040f570(*(int *)lVar100,1);
+  }
+  if ((lVar94 != 0) && (*(int *)(*(int *)lVar94 + DAT_00764a28 + 0x58) == 0)) {
+    FUN_0040f570(*(int *)lVar94,0);
+  }
+  if (lVar94 != 0) {
+    DAT_00763cd8 = DAT_00763cd8 | 0x10;
+    DAT_00764a3c = *(unsigned int *)lVar94;
+    FUN_00410370(*(unsigned int *)lVar94,(int)&uStack_10 + 4,&uStack_10);
+    FUN_00410390(*(unsigned int *)lVar94,0x7649e0,*(unsigned char *)((unsigned int *)lVar94 + 0x14));
+    DAT_007649d8 = (unsigned long long)((*(unsigned int *)((int)lVar94 + 0x50) & 0xf00) == 0x300);
+    if ((*(unsigned int *)((int)lVar94 + 0x50) & 0xf000) == 0x3000) {
+      DAT_007649d8 = DAT_007649d8 | 4;
+    }
+  }
+  else {
+    DAT_00764a3c = 0;
+    DAT_00763cd8 = DAT_00763cd8 & 0xffffffffffffffef;
+  }
+  DAT_007649c0 = DAT_007649c0 | 1;
+  if (lVar100 != 0) {
+    FUN_00410370(*(unsigned int *)lVar100,(int)&uStack_18 + 4,&uStack_18);
+    FUN_00410390(*(unsigned int *)lVar100,&uStack_8,*(unsigned char *)((unsigned int *)lVar100 + 0x14));
+    uVar4 = *(unsigned int *)((int)lVar100 + 0x50);
+    auVar73._8_8_ = auVar88._8_8_;
+    auVar79._8_8_ = 0;
+    auVar79._0_8_ = auVar73._8_8_;
+    auVar88 = auVar79 << 0x40;
+    if ((uVar4 & 0xf00) == 0x300) {
+      auVar73._0_8_ = 1;
+      auVar88 = auVar73;
+    }
+    if ((uVar4 & 0xf000) == 0x3000) {
+      auVar88._0_8_ = auVar88._0_8_ | 4;
+    }
+  }
+  if ((((lVar94 != 0) && (*(int *)(*(int *)lVar94 + 0x14) < 9)) && (lVar100 != 0)) &&
+     (*(int *)(*(int *)lVar100 + 0x14) < 9)) {
+    DAT_00764a3c = 0xffffffff;
+  }
+  FUN_003f3eb0(0,0x27);
+  puVar3 = DAT_00764974;
+  auVar20._8_8_ = 0;
+  auVar20._0_8_ = in_a0_udw;
+  auVar48._8_8_ = in_v1_udw;
+  auVar48._0_8_ = 0x10000021;
+  auVar79 = _pcpyld(auVar20 << 0x40,auVar48);
+  auVar63._8_8_ = in_a0_udw;
+  auVar63._0_8_ = 0x6c0a03bc;
+  auVar49._8_8_ = in_v1_udw;
+  auVar49._0_8_ = 0x1000101;
+  auVar86._8_8_ = in_t2_udw;
+  auVar86._0_8_ = 0x3d;
+  auVar76 = _ppacw(auVar63,auVar49);
+  *DAT_00764974 = auVar79._0_4_;
+  puVar3[1] = auVar79._4_4_;
+  puVar3[2] = auVar79._8_4_;
+  puVar3[3] = auVar79._12_4_;
+  puVar27 = DAT_00764974;
+  auVar80._8_8_ = auVar79._8_8_;
+  auVar21._8_8_ = 0;
+  auVar21._0_8_ = in_a0_udw;
+  auVar22._8_8_ = 0;
+  auVar22._0_8_ = in_v1_udw;
+  auVar73 = _ppacw(auVar21 << 0x40,auVar22 << 0x40);
+  auVar76 = _ppacw(auVar76,auVar73);
+  DAT_00764974[4] = auVar76._0_4_;
+  DAT_00764974[5] = auVar76._4_4_;
+  DAT_00764974[6] = auVar76._8_4_;
+  DAT_00764974[7] = auVar76._12_4_;
+  auVar75._8_8_ = auVar76._8_8_;
+  auVar50._8_8_ = in_v1_udw;
+  auVar50._0_8_ = 0x1000000000008002;
+  auVar81._8_8_ = in_t5_udw;
+  auVar81._0_8_ = 0xe;
+  auVar79 = _pcpyld(auVar81,auVar50);
+  auVar102._4_4_ = uVar103;
+  auVar102._0_4_ = uVar28;
+  auVar102._8_4_ = in_s6_udw;
+  auVar102._12_4_ = in_s6_udw_00;
+  auVar76 = _pcpyld(auVar86,auVar102);
+  auVar92._8_8_ = in_t6_udw;
+  auVar92._0_8_ = 0x412;
+  auVar87._8_8_ = in_t3_udw;
+  auVar87._0_8_ = 6;
+  auVar82._8_8_ = in_t0_udw;
+  auVar82._0_8_ = 0x50000006;
+  auVar23._4_4_ = in_s6_udw_00;
+  auVar23._0_4_ = in_s6_udw;
+  auVar23._8_8_ = 0;
+  auVar83 = _ppacw(auVar82,auVar23 << 0x40);
+  auVar73 = _ppacw(auVar83,auVar73);
+  auVar84._8_8_ = auVar83._8_8_;
+  auVar90._8_8_ = in_t4_udw;
+  auVar90._0_8_ = 0x1000000000008005;
+  auVar84._0_8_ = 0x43;
+  auVar25._8_4_ = in_t7_udw_00;
+  auVar25._0_8_ =
+       CONCAT44(in_t7_udw,
+                (((*(unsigned char *)(param_1 + 0x28) & 1) << 5) | 600 | (unsigned int)*(unsigned char *)(param_1 + 0x29)) <<
+                0xf) | 0x30004000;
+  auVar25._12_4_ = 0;
+  auVar83 = _pcpyld(auVar92,auVar25 << 0x20);
+  DAT_00764974[8] = auVar83._0_4_;
+  DAT_00764974[9] = auVar83._4_4_;
+  DAT_00764974[10] = auVar83._8_4_;
+  DAT_00764974[0xb] = auVar83._12_4_;
+  auVar85._8_8_ = in_t5_udw;
+  auVar85._0_8_ = 0xe;
+  auVar91 = _pcpyld(auVar85,auVar90);
+  DAT_00764974[0xc] = auVar79._0_4_;
+  DAT_00764974[0xd] = auVar79._4_4_;
+  DAT_00764974[0xe] = auVar79._8_4_;
+  DAT_00764974[0xf] = auVar79._12_4_;
+  auVar93._8_8_ = auVar83._8_8_;
+  auVar93._0_8_ = uStack_10;
+  auVar96._8_8_ = in_t5_udw;
+  auVar96._0_8_ = 9;
+  auVar102 = _pcpyld(auVar96,auVar88);
+  auVar101._8_8_ = in_t5_udw;
+  auVar101._0_8_ = 0x48;
+  auVar11._4_4_ = (int)((unsigned long long)uVar38 >> 0x20);
+  auVar11._0_4_ = (uVar5 & 0x70000) | (unsigned int)uVar38;
+  auVar11._8_4_ = in_s8_udw;
+  auVar11._12_4_ = in_s8_udw_00;
+  auVar101 = _pcpyld(auVar101,auVar11);
+  auVar24._4_4_ = in_v0_udw_00;
+  auVar24._0_4_ = in_v0_udw;
+  auVar26._8_4_ = in_v0_udw;
+  auVar26._0_8_ = uVar74;
+  auVar26._12_4_ = in_v0_udw_00;
+  auVar95._8_8_ = uVar97;
+  auVar95._0_8_ = 0x4f;
+  auVar10._8_4_ = in_s7_udw;
+  auVar10._0_8_ = uVar56;
+  auVar10._12_4_ = in_s7_udw_00;
+  auVar85 = _pcpyld(auVar84,auVar10);
+  auVar80._0_8_ = 0x6c0103fa01000404;
+  auVar88 = _pcpyld(auVar87,auVar93);
+  DAT_00764974[0x10] = auVar88._0_4_;
+  DAT_00764974[0x11] = auVar88._4_4_;
+  DAT_00764974[0x12] = auVar88._8_4_;
+  DAT_00764974[0x13] = auVar88._12_4_;
+  auVar89._8_8_ = auVar88._8_8_;
+  auVar89._0_8_ = DAT_007649d0;
+  auVar96 = _pcpyld(auVar95,auVar26);
+  auVar24._8_8_ = 0;
+  auVar81 = _pcpyld(auVar80,auVar24 << 0x40);
+  auVar88 = _pcpyld(auVar86,auVar89);
+  DAT_00764974[0x14] = auVar88._0_4_;
+  DAT_00764974[0x15] = auVar88._4_4_;
+  DAT_00764974[0x16] = auVar88._8_4_;
+  DAT_00764974[0x17] = auVar88._12_4_;
+  DAT_00764974[0x18] = auVar79._0_4_;
+  DAT_00764974[0x19] = auVar79._4_4_;
+  DAT_00764974[0x1a] = auVar79._8_4_;
+  DAT_00764974[0x1b] = auVar79._12_4_;
+  auVar64._8_8_ = auVar79._8_8_;
+  auVar64._0_8_ = uStack_18;
+  auVar83._8_8_ = in_t1_udw;
+  auVar83._0_8_ = 7;
+  auVar88 = _pcpyld(auVar83,auVar64);
+  DAT_00764974[0x1c] = auVar88._0_4_;
+  DAT_00764974[0x1d] = auVar88._4_4_;
+  DAT_00764974[0x1e] = auVar88._8_4_;
+  DAT_00764974[0x1f] = auVar88._12_4_;
+  DAT_00764974[0x20] = auVar76._0_4_;
+  DAT_00764974[0x21] = auVar76._4_4_;
+  DAT_00764974[0x22] = auVar76._8_4_;
+  DAT_00764974[0x23] = auVar76._12_4_;
+  auVar57._8_8_ = auVar88._8_8_;
+  auVar65._0_8_ = *puVar99;
+  auVar65._8_8_ = auVar57._8_8_;
+  auVar51._8_8_ = auVar76._8_8_;
+  auVar51._0_8_ = *puVar98;
+  auVar76 = _pcpyld(auVar51,auVar65);
+  DAT_00764974[0x24] = auVar76._0_4_;
+  DAT_00764974[0x25] = auVar76._4_4_;
+  DAT_00764974[0x26] = auVar76._8_4_;
+  DAT_00764974[0x27] = auVar76._12_4_;
+  auVar66._0_8_ = puVar98[2];
+  auVar66._8_8_ = auVar57._8_8_;
+  auVar52._8_8_ = auVar76._8_8_;
+  auVar52._0_8_ = puVar99[2];
+  auVar76 = _pcpyld(auVar66,auVar52);
+  DAT_00764974[0x28] = auVar76._0_4_;
+  DAT_00764974[0x29] = auVar76._4_4_;
+  DAT_00764974[0x2a] = auVar76._8_4_;
+  DAT_00764974[0x2b] = auVar76._12_4_;
+  auVar67._0_8_ = puVar98[6];
+  auVar67._8_8_ = auVar57._8_8_;
+  auVar53._8_8_ = auVar76._8_8_;
+  auVar53._0_8_ = puVar99[6];
+  auVar76 = _pcpyld(auVar67,auVar53);
+  DAT_00764974[0x2c] = auVar76._0_4_;
+  DAT_00764974[0x2d] = auVar76._4_4_;
+  DAT_00764974[0x2e] = auVar76._8_4_;
+  DAT_00764974[0x2f] = auVar76._12_4_;
+  DAT_00764974[0x30] = auVar73._0_4_;
+  DAT_00764974[0x31] = auVar73._4_4_;
+  DAT_00764974[0x32] = auVar73._8_4_;
+  DAT_00764974[0x33] = auVar73._12_4_;
+  DAT_00764974[0x34] = auVar91._0_4_;
+  DAT_00764974[0x35] = auVar91._4_4_;
+  DAT_00764974[0x36] = auVar91._8_4_;
+  DAT_00764974[0x37] = auVar91._12_4_;
+  DAT_00764974[0x38] = auVar85._0_4_;
+  DAT_00764974[0x39] = auVar85._4_4_;
+  DAT_00764974[0x3a] = auVar85._8_4_;
+  DAT_00764974[0x3b] = auVar85._12_4_;
+  DAT_00764974[0x3c] = auVar102._0_4_;
+  DAT_00764974[0x3d] = auVar102._4_4_;
+  DAT_00764974[0x3e] = auVar102._8_4_;
+  DAT_00764974[0x3f] = auVar102._12_4_;
+  DAT_00764974[0x40] = auVar101._0_4_;
+  DAT_00764974[0x41] = auVar101._4_4_;
+  DAT_00764974[0x42] = auVar101._8_4_;
+  DAT_00764974[0x43] = auVar101._12_4_;
+  auVar54._8_8_ = auVar76._8_8_;
+  auVar54._0_8_ = uStack_8;
+  auVar91._8_8_ = in_t5_udw;
+  auVar91._0_8_ = 0x15;
+  auVar76 = _pcpyld(auVar91,auVar54);
+  DAT_00764974[0x44] = auVar76._0_4_;
+  DAT_00764974[0x45] = auVar76._4_4_;
+  DAT_00764974[0x46] = auVar76._8_4_;
+  DAT_00764974[0x47] = auVar76._12_4_;
+  DAT_00764974[0x48] = auVar96._0_4_;
+  DAT_00764974[0x49] = auVar96._4_4_;
+  DAT_00764974[0x4a] = auVar96._8_4_;
+  DAT_00764974[0x4b] = auVar96._12_4_;
+  puVar3 = DAT_00764974 + 0x4c;
+  DAT_00764974 = DAT_00764974 + 0x4c;
+  *puVar3 = auVar81._0_4_;
+  puVar27[0x4d] = auVar81._4_4_;
+  puVar27[0x4e] = auVar81._8_4_;
+  puVar27[0x4f] = auVar81._12_4_;
+  puVar3 = DAT_00764974;
+  auVar40._8_8_ = auVar76._8_8_;
+  DAT_00764974 = DAT_00764974 + 4;
+  bVar7 = *(char *)(param_1 + 0x47) != -1;
+  DAT_00764a34 = (unsigned int)bVar7;
+  if (bVar7 || DAT_00764a38 != 0) {
+    DAT_00763cd8 = DAT_00763cd8 | 0x40;
+  }
+  else {
+    DAT_00763cd8 = DAT_00763cd8 & 0xffffffffffffffbf;
+  }
+  auVar16._8_8_ = 0;
+  auVar16._0_8_ = auVar85._8_8_;
+  auVar40._0_8_ = 0xfc007fffffffffff;
+  auVar8._4_4_ = in_zero_hi;
+  auVar8._0_4_ = in_zero_lo;
+  auVar8._8_4_ = in_zero_udw;
+  auVar8._12_4_ = in_zero_udw_00;
+  auVar76 = _pcpyld(auVar8,auVar40);
+  uVar56 = auVar76._8_8_;
+  auVar77._8_8_ = auVar81._8_8_;
+  auVar77._4_4_ = DAT_0088cb28._4_4_;
+  auVar77._0_4_ = (unsigned int)DAT_0088cb28;
+  auVar57._0_8_ = 0x6c0103fb01000404;
+  uVar39 = DAT_00763cd8 & 0x10;
+  auVar75._0_8_ =
+       (CONCAT44(DAT_0088cb20._4_4_,(unsigned int)DAT_0088cb20) & auVar76._0_8_) |
+       (((long)(int)((unsigned int)DAT_00763cd8 | (unsigned int)*(unsigned char *)(param_1 + 0x29)) & 0x7ffU) << 0x2f);
+  auVar88 = _pcpyld(auVar77,auVar75);
+  DAT_0088cb20._0_4_ = auVar88._0_4_;
+  auVar76 = _pcpyld(auVar57,auVar16 << 0x40);
+  DAT_0088cb20._4_4_ = auVar88._4_4_;
+  DAT_0088cb28._0_4_ = auVar88._8_4_;
+  DAT_0088cb28._4_4_ = auVar88._12_4_;
+  *DAT_00764974 = (unsigned int)DAT_0088cb20;
+  puVar3[5] = auVar88._4_4_;
+  puVar3[6] = auVar88._8_4_;
+  puVar3[7] = auVar88._12_4_;
+  puVar3[8] = auVar76._0_4_;
+  puVar3[9] = auVar76._4_4_;
+  puVar3[10] = auVar76._8_4_;
+  puVar3[0xb] = auVar76._12_4_;
+  DAT_00764974 = DAT_00764974 + 8;
+  uVar68 = auVar76._8_8_;
+  if (uVar39 == 0) {
+    uVar28 = 0x3b808081;
+  }
+  else {
+    uVar28 = 0x3b011b50;
+  }
+  FUN_003cc560(uVar28,param_1 + 0x44);
+  puVar3 = DAT_00764974;
+  auVar17._8_8_ = 0;
+  auVar17._0_8_ = uVar68;
+  auVar41._8_8_ = uVar56;
+  auVar41._0_8_ = 0x6c0103fc01000404;
+  auVar76 = _pcpyld(auVar41,auVar17 << 0x40);
+  *DAT_00764974 = auVar76._0_4_;
+  puVar3[1] = auVar76._4_4_;
+  puVar3[2] = auVar76._8_4_;
+  puVar3[3] = auVar76._12_4_;
+  DAT_00764974 = DAT_00764974 + 4;
+  FUN_003cc680(*(unsigned int *)(param_1 + 0x1c),*(unsigned int *)(param_1 + 0x3c));
+  puVar3 = DAT_00764974;
+  bVar1 = *(unsigned char *)(param_1 + 0x28);
+  auVar29._8_8_ = extraout_v0_udw;
+  auVar29._0_8_ = 0x6c0303fd01000404;
+  auVar18._8_8_ = 0;
+  auVar18._0_8_ = auVar76._8_8_;
+  auVar79 = _pcpyld(auVar29,auVar18 << 0x40);
+  *DAT_00764974 = auVar79._0_4_;
+  puVar3[1] = auVar79._4_4_;
+  puVar3[2] = auVar79._8_4_;
+  puVar3[3] = auVar79._12_4_;
+  auVar88 = _DAT_0088cbb0;
+  auVar76 = _DAT_0088cb90;
+  puVar3 = DAT_00764974;
+  uVar39 = (unsigned long long)bVar1 & 7;
+  auVar69._8_8_ = auVar79._8_8_;
+  if (((DAT_00764a84 != 0) && ((bVar1 & 4) == 0)) || ((DAT_00763d00 != 0 && ((bVar1 & 4) != 0)))) {
+    uVar39 = uVar39 | 8;
+    DAT_00764974[4] = DAT_0088cbb0;
+    puVar3[5] = auVar88._4_4_;
+    puVar3[6] = auVar88._8_4_;
+    puVar3[7] = auVar88._12_4_;
+    auVar76 = _DAT_0088cbc0;
+    puVar3[8] = DAT_0088cbc0;
+    puVar3[9] = auVar76._4_4_;
+    puVar3[10] = auVar76._8_4_;
+    puVar3[0xb] = auVar76._12_4_;
+    uVar56 = auVar76._8_8_;
+    auVar76 = auVar88;
+    puVar3 = DAT_00764974;
+  }
+  else {
+    DAT_00764974[4] = DAT_0088cb90;
+    puVar3[5] = auVar76._4_4_;
+    puVar3[6] = auVar76._8_4_;
+    puVar3[7] = auVar76._12_4_;
+    auVar88 = _DAT_0088cba0;
+    puVar3[8] = DAT_0088cba0;
+    puVar3[9] = auVar88._4_4_;
+    puVar3[10] = auVar88._8_4_;
+    puVar3[0xb] = auVar88._12_4_;
+    uVar56 = auVar88._8_8_;
+    puVar3 = DAT_00764974;
+  }
+  DAT_00764974 = puVar3 + 0xc;
+  auVar58._8_8_ = auVar76._8_8_;
+  DAT_00764a7c = 0;
+  uVar68 = 0;
+  if (DAT_00764a2c == 3) {
+    uVar68 = 0x20;
+    DAT_00764a7c = 0x20;
+  }
+  auVar42._8_8_ = uVar56;
+  auVar42._0_8_ = uVar39;
+  auVar58._0_8_ = ((unsigned long long)DAT_00764a80 << 0x20) | uVar68;
+  auVar76 = _pcpyld(auVar58,auVar42);
+  *DAT_00764974 = auVar76._0_4_;
+  puVar3[0xd] = auVar76._4_4_;
+  puVar3[0xe] = auVar76._8_4_;
+  puVar3[0xf] = auVar76._12_4_;
+  puVar3 = DAT_00764974;
+  DAT_00764974 = DAT_00764974 + 4;
+  auVar43._8_8_ = auVar76._8_8_;
+  if (*(int *)(param_1 + 0x40) != 0) {
+    auVar12._8_8_ = 0;
+    auVar12._0_8_ = auVar43._8_8_;
+    auVar30._8_8_ = extraout_v0_udw;
+    auVar30._0_8_ = 0x5000000400000000;
+    auVar76 = _pcpyld(auVar30,auVar12 << 0x40);
+    *DAT_00764974 = auVar76._0_4_;
+    puVar3[5] = auVar76._4_4_;
+    puVar3[6] = auVar76._8_4_;
+    puVar3[7] = auVar76._12_4_;
+    auVar69._0_8_ = 0xe;
+    auVar31._8_8_ = auVar76._8_8_;
+    auVar59._8_8_ = auVar58._8_8_;
+    auVar59._0_8_ = 0x47;
+    auVar31._0_8_ = 0x1000000000008003;
+    auVar76 = _pcpyld(auVar69,auVar31);
+    puVar3[8] = auVar76._0_4_;
+    puVar3[9] = auVar76._4_4_;
+    puVar3[10] = auVar76._8_4_;
+    puVar3[0xb] = auVar76._12_4_;
+    auVar43._0_8_ = 0x14;
+    auVar70._8_8_ = auVar69._8_8_;
+    auVar70._0_8_ = DAT_007649c0;
+    auVar32._8_8_ = auVar76._8_8_;
+    auVar32._0_8_ = 8;
+    auVar76 = _pcpyld(auVar59,auVar70);
+    puVar3[0xc] = auVar76._0_4_;
+    puVar3[0xd] = auVar76._4_4_;
+    puVar3[0xe] = auVar76._8_4_;
+    puVar3[0xf] = auVar76._12_4_;
+    auVar60._8_8_ = auVar76._8_8_;
+    auVar60._0_8_ = DAT_007649e0;
+    auVar76 = _pcpyld(auVar43,auVar60);
+    puVar3[0x10] = auVar76._0_4_;
+    puVar3[0x11] = auVar76._4_4_;
+    puVar3[0x12] = auVar76._8_4_;
+    puVar3[0x13] = auVar76._12_4_;
+    auVar44._8_8_ = auVar76._8_8_;
+    auVar44._0_8_ = DAT_007649d8;
+    auVar76 = _pcpyld(auVar32,auVar44);
+    puVar3[0x14] = auVar76._0_4_;
+    puVar3[0x15] = auVar76._4_4_;
+    puVar3[0x16] = auVar76._8_4_;
+    puVar3[0x17] = auVar76._12_4_;
+  }
+  else {
+    auVar70._0_8_ = (long)(int)DAT_00764974;
+    auVar70._8_8_ = auVar69._8_8_;
+    *DAT_00764974 = in_zero_lo;
+    puVar3[5] = in_zero_hi;
+    puVar3[6] = in_zero_udw;
+    puVar3[7] = in_zero_udw_00;
+    auVar35._8_8_ = extraout_v0_udw;
+    auVar35._0_8_ = 0x5000000200000000;
+    auVar15._8_8_ = 0;
+    auVar15._0_8_ = auVar43._8_8_;
+    puVar3[8] = in_zero_lo;
+    puVar3[9] = in_zero_hi;
+    puVar3[10] = in_zero_udw;
+    puVar3[0xb] = in_zero_udw_00;
+    auVar76 = _pcpyld(auVar35,auVar15 << 0x40);
+    puVar3[0xc] = auVar76._0_4_;
+    puVar3[0xd] = auVar76._4_4_;
+    puVar3[0xe] = auVar76._8_4_;
+    puVar3[0xf] = auVar76._12_4_;
+    auVar60._8_8_ = auVar58._8_8_;
+    auVar60._0_8_ = 0xe;
+    auVar36._8_8_ = auVar76._8_8_;
+    auVar55._8_8_ = auVar43._8_8_;
+    auVar55._0_8_ = 0x1000000000008001;
+    auVar76 = _pcpyld(auVar60,auVar55);
+    puVar3[0x10] = auVar76._0_4_;
+    puVar3[0x11] = auVar76._4_4_;
+    puVar3[0x12] = auVar76._8_4_;
+    puVar3[0x13] = auVar76._12_4_;
+    auVar36._0_8_ = 0x47;
+    auVar44._8_8_ = auVar76._8_8_;
+    auVar44._0_8_ = DAT_007649c0;
+    auVar76 = _pcpyld(auVar36,auVar44);
+    puVar3[0x14] = auVar76._0_4_;
+    puVar3[0x15] = auVar76._4_4_;
+    puVar3[0x16] = auVar76._8_4_;
+    puVar3[0x17] = auVar76._12_4_;
+  }
+  DAT_00764974 = DAT_00764974 + 0x14;
+  auVar46._8_8_ = auVar44._8_8_;
+  *(unsigned char *)(param_1 + 0x2b) =
+       (unsigned char)((int)(*(unsigned char *)(param_1 + 0x28) & 0x20) >> 5) |
+       (unsigned char)((int)(*(unsigned char *)(param_1 + 0x28) & 0x18) >> 2);
+  puVar3 = DAT_00764974;
+  uVar56 = auVar60._8_8_;
+  puVar37 = (unsigned int *)(*(int *)(*(int *)(param_1 + 4) + 0x18) + (unsigned int)*(unsigned char *)(param_1 + 0x2b) * 4);
+  auVar46._0_8_ = (long)(int)puVar37;
+  uVar5 = *puVar37;
+  if (DAT_00764a78 != uVar5) {
+    auVar13._8_8_ = 0;
+    auVar13._0_8_ = auVar70._8_8_;
+    auVar70 = auVar13 << 0x40;
+    auVar45._0_8_ = ((unsigned long long)uVar5 << 0x20) | 0x50000000;
+    auVar45._8_8_ = auVar46._8_8_;
+    auVar46 = _pcpyld(auVar70,auVar45);
+    *DAT_00764974 = auVar46._0_4_;
+    puVar3[1] = auVar46._4_4_;
+    puVar3[2] = auVar46._8_4_;
+    puVar3[3] = auVar46._12_4_;
+    DAT_00764974 = DAT_00764974 + 4;
+    DAT_00764a78 = uVar5;
+  }
+  puVar3 = DAT_00764974;
+  auVar78._8_8_ = auVar77._8_8_;
+  uVar39 = auVar46._8_8_;
+  auVar71._8_8_ = auVar70._8_8_;
+  iVar6 = **(int **)(param_1 + 0x30);
+  auVar78._0_8_ = (((long)*(int *)(*(int *)(param_1 + 4) + 0x14) | 0x2000000U) << 0x20) | 0x3000000;
+  auVar71._0_8_ = ((unsigned long long)*(unsigned int *)(iVar6 + 0x20) << 0x20) | 0x50000000;
+  auVar76 = _pcpyld(auVar78,auVar71);
+  *DAT_00764974 = auVar76._0_4_;
+  puVar3[1] = auVar76._4_4_;
+  puVar3[2] = auVar76._8_4_;
+  puVar3[3] = auVar76._12_4_;
+  DAT_00764974 = DAT_00764974 + 4;
+  do {
+    DI();
+    SYNC(0x10);
+  } while ((Status & 0x10000) != 0);
+  *(int *)(iVar6 + 0x18) = *(int *)(iVar6 + 0x18) + 1;
+  EI();
+  *(int *)(iVar6 + 0x1c) = *(int *)(iVar6 + 0x1c) + 1;
+  if (*(int *)(iVar6 + 0x1c) == 1) {
+    FUN_003f36a0();
+  }
+  uVar74 = auVar76._8_8_;
+  FUN_003f3eb0(0,3);
+  puVar3 = DAT_00764974;
+  auVar19._8_8_ = 0;
+  auVar19._0_8_ = uVar39;
+  auVar33._8_8_ = extraout_v0_udw_00;
+  auVar33._0_8_ = 0x50000002;
+  auVar14._8_8_ = 0;
+  auVar14._0_8_ = auVar78._8_8_;
+  auVar88 = _ppacw(auVar33,auVar19 << 0x40);
+  auVar72._8_8_ = uVar74;
+  auVar72._0_8_ = 0xe;
+  auVar61._8_8_ = uVar56;
+  auVar61._0_8_ = 0x10000002;
+  auVar76 = _ppacw(auVar14 << 0x40,auVar61);
+  auVar76 = _ppacw(auVar88,auVar76);
+  *DAT_00764974 = auVar76._0_4_;
+  puVar3[1] = auVar76._4_4_;
+  puVar3[2] = auVar76._8_4_;
+  puVar3[3] = auVar76._12_4_;
+  auVar62._8_8_ = uVar56;
+  auVar62._0_8_ = 0x3d;
+  auVar34._8_8_ = auVar76._8_8_;
+  auVar34._0_8_ = 0x1000000000008001;
+  auVar76 = _pcpyld(auVar72,auVar34);
+  puVar3[4] = auVar76._0_4_;
+  puVar3[5] = auVar76._4_4_;
+  puVar3[6] = auVar76._8_4_;
+  puVar3[7] = auVar76._12_4_;
+  auVar47._8_8_ = uVar39;
+  auVar47._0_8_ = DAT_007649d0;
+  auVar76 = _pcpyld(auVar62,auVar47);
+  puVar3[8] = auVar76._0_4_;
+  puVar3[9] = auVar76._4_4_;
+  puVar3[10] = auVar76._8_4_;
+  puVar3[0xb] = auVar76._12_4_;
+  DAT_00764974 = DAT_00764974 + 0xc;
+  return 1;
+}

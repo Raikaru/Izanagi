@@ -1,0 +1,19 @@
+# From native ng2-s8 (Castle 1F, 04/17); mirror the landed home_0417 tail.
+timeout:60000
+battle:first=cross,cross,cross;plan=cross,cross,cross;skip=0;delay=80
+battleskip:on
+plan:on
+walk:goal
+press:cross
+wait:600
+skipmsg
+wait:600
+battleskip:off
+plan:off
+walk:0,2500,80
+push:0,1000,60
+timeout:40000
+skipfield:7:2
+skipmsg
+log
+wait:600

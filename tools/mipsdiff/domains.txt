@@ -1,0 +1,6 @@
+# <addr8> <arg index> <lo> <hi>: the values the game can pass for an argument whose type allows more; the generator draws it from [lo, hi]
+# ThunderTextureForIndex(kind, ...): kind indexes the five-entry thunder texture table (kAssertFail halts the game otherwise)
+004988c0 0 0 4
+# ACS volume curves (src/cri/acs.c): the level in dB*10 the game passes is -960 (silence) to 0, the linear level 0 to 0x316938 (3238200); anything else is outside what the retail soft-float helpers were run on
+004bdc20 1 -960 0
+004bdaf0 1 0 3238200

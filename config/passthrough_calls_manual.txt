@@ -1,0 +1,4 @@
+# Pass-through arguments read from the retail asm by hand, for sites tools/verify_passthrough.py cannot prove (same columns as
+# passthrough_calls.txt).
+# No active rows: the complete audited input chains are expressed upstream.
+# The guarded 00513380 reconstruction also has its real input; its PS2 ASM fallback remains.

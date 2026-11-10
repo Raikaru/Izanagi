@@ -1,0 +1,485 @@
+# Float note: natives run in the EE float mode (MXCSR round toward zero, guard-bit adder and nearest div/sqrt from tools/ee_float_cc.py, docs/porting.md).
+# Not in the list: functions whose random cases overflow past FLT_MAX in a host libm binding (acos) where the EE clamps, and the others that left when the
+# float mode went in and did not come back (they saturate or cancel in ways the harness cannot tell from a bug).
+# (Keep addresses out of comment lines: the list reader takes any 8-digit hex token.)
+# Functions ovdiff checks on every build (tests/CMakeLists.txt ovdiff_subset): each matched the retail code exactly in
+# every valid case of a 40-case sweep when this list was made (python tools/mipsdiff/report.py <sweep.tsv> --subset).
+00100230  # kwlnProbeHeapBudget
+00390350  # func_00390350
+00394d70  # func_00394d70
+00395100  # func_00395100
+003962e0  # func_003962e0
+00396c00  # func_00396c00
+003985b0  # func_003985b0
+00398d20  # func_00398d20
+003999a0  # func_003999a0
+0039ac80  # func_0039ac80
+0039b720  # func_0039b720
+0039f0e0  # func_0039f0e0
+003a2950  # func_003a2950
+003a3500  # func_003a3500
+003b31a0  # func_003b31a0
+003b3f50  # func_003b3f50
+003b4230  # func_003b4230
+003b5160  # func_003b5160
+003b5d20  # func_003b5d20
+003b61e0  # func_003b61e0
+003b64c0  # func_003b64c0
+003b6e70  # func_003b6e70
+003b7ca0  # func_003b7ca0
+003b8d40  # func_003b8d40
+003bb330  # func_003bb330
+003bbea0  # func_003bbea0
+003bc400  # func_003bc400
+003bc880  # func_003bc880
+003bd160  # func_003bd160
+003c2a80  # func_003c2a80
+003c49a0  # func_003c49a0
+003cac30  # func_003cac30
+003ce050  # func_003ce050
+003ce2e0  # func_003ce2e0
+003ce840  # func_003ce840
+003d0140  # func_003d0140
+003d20d0  # func_003d20d0
+003d39a0  # func_003d39a0
+003d51c0  # func_003d51c0
+003d5840  # func_003d5840
+003d65e0  # func_003d65e0
+003d68b0  # func_003d68b0
+003d77f0  # func_003d77f0
+003d7c50  # func_003d7c50
+003d8760  # func_003d8760
+003dc370  # func_003dc370
+003dd990  # func_003dd990
+003dddf0  # func_003dddf0
+003de110  # func_003de110
+003e0680  # func_003e0680
+003f0c10  # func_003f0c10
+003f1520  # func_003f1520
+00412ca0  # func_00412ca0
+00413350  # func_00413350
+00414a30  # func_00414a30
+00416df0  # func_00416df0
+0043dc50  # func_0043dc50
+00487c30  # ParticleUpdateScaled
+0048a810  # mdlEffectCatmullRomVU
+0048b340  # mdlEffectUpdateParticleTrail
+00495f80  # ThunderBoltWriteRows
+00498650  # ThunderPairedWriteRows
+00499730  # RingRebuildStrip
+0049a1a0  # RingUpdateRowColourAlt
+0049b690  # FlashRadialEmitQuads
+0049cd10  # FlashEvolvingRadialPackColors
+0049e150  # FlashTexturedEmitDirectionalQuads
+0049f820  # FlashBoxPackColors
+004a0c00  # FlashAgedBoxEmitQuads
+004a2310  # FunnelWindUpdateStrip
+# AHX decoder (src/cri/ahx.c, adx_hdr.c), 40 exact cases each
+004d94a8
+004d9b20
+004d9cd8
+004d9d48
+004d9a58
+004d97c8
+004d9768
+004da630
+004da748
+004da768
+004da850
+004da9d8
+004da1f8
+004d9348
+004d9528
+004d9e10
+004d9ef0
+004d9f50
+004da018
+004da050
+004ddc10
+004ddd40
+004ddda0
+004dd678
+004dd768
+004dd840
+004dd620
+004dd718
+004dd9c8
+004dda30
+004dda88
+004c9f20
+004c9fe0
+004ca000
+004ca0f0
+004da468
+004da4a0
+004de140
+004de148
+004de150
+004de158
+004de160
+004d9aa8
+004d9a90
+004d9d68
+004de088
+004de318
+004de5c0
+004de998
+004de9f8
+004deb38
+004deb58
+004dec30
+004ded60
+004dee48
+004deec0
+004defa0
+004defe8
+004df068
+004df098
+004df0c8
+004df128
+004df1a0
+004df220
+004df260
+004df320
+004df3c0
+004df418
+004df470
+004df4c8
+004df5b0
+004df800
+004df850
+004dfc98
+004dfcd8
+004dfd78
+004dfdc8
+004dfe38
+004dfe60
+004dff78
+004dfff0
+004e0058
+004e00d8
+004e0158
+004e01c0
+004e0308
+004e04b0
+004e0598
+004e05d8
+004e05e8
+004e05f0
+004e05f8
+004e0600
+004e0610
+004e0620
+004e0628
+004e0658
+004e0688
+004e0690
+004e06f0
+004e0728
+004e0730
+004e0778
+004e0b30
+004e0b80
+004e0c60
+004e0db0
+004d3bc0
+004ea780
+004ea7f8
+004ea8c8
+004eb020
+004eb158
+004eb180
+004d4170
+004d4778
+004c9b80
+# collision callbacks (host shape: the float distance is the third parameter), name compare / ADX AC3 dispatchers, hierarchy and texture rows: 40 exact cases each
+00392a50  # func_00392a50
+00394870  # func_00394870
+003bbbe0  # func_003bbbe0
+004c1a68  # func_004c1a68
+004c1ab8  # func_004c1ab8
+004c1a98  # ADXB_SetAc3DecSmpl
+003d0460  # func_003d0460
+003d86a0  # func_003d86a0
+003ebbf0  # func_003ebbf0
+00440bb8  # func_00440bb8 (qsort)
+00399320  # func_00399320
+00399450  # func_00399450
+0039a8a0  # func_0039a8a0
+0039f050  # func_0039f050
+003bb5b0  # func_003bb5b0
+00395290  # func_00395290
+0048a340  # mdlEffectAxisAngleBasisVU
+001d5130  # btlFormationAttachRotation
+0038fb50  # func_0038fb50
+00390520  # func_00390520
+00392bf0  # func_00392bf0
+00393900  # func_00393900
+003941e0  # func_003941e0
+00394e70  # func_00394e70
+00394fd0  # func_00394fd0
+003954b0  # func_003954b0
+00395bd0  # func_00395bd0
+003961f0  # func_003961f0
+00396890  # HAnimDestructor
+00396940  # func_00396940
+00396e80  # func_00396e80
+00397c40  # func_00397c40
+00398410  # func_00398410
+00398890  # func_00398890
+003990a0  # func_003990a0
+00399470  # func_00399470
+00399bf0  # func_00399bf0
+0039a910  # func_0039a910
+0039ab20  # func_0039ab20
+0039ae90  # func_0039ae90
+0039af40  # func_0039af40
+0039b2c0  # func_0039b2c0
+0039b830  # func_0039b830
+0039b8d0  # func_0039b8d0
+0039ba80  # PDSRegistryCreatePipes
+0039bb70  # PDSRegistryGetPipe
+003a1730  # func_003a1730
+003a1c40  # func_003a1c40
+003a2290  # func_003a2290
+003a2770  # func_003a2770
+003a29f0  # func_003a29f0
+003a2bb0  # func_003a2bb0
+003a5180  # func_003a5180
+003a9c70  # func_003a9c70
+003b3240  # func_003b3240
+003b3570  # func_003b3570
+003b4020  # func_003b4020
+003b4120  # func_003b4120
+003b42e0  # func_003b42e0
+003b4c10  # func_003b4c10
+003b4ff0  # func_003b4ff0
+003b5650  # func_003b5650
+003b5820  # func_003b5820
+003b5ac0  # func_003b5ac0
+003b5bf0  # func_003b5bf0
+003b5fb0  # func_003b5fb0
+003b6020  # func_003b6020
+003b6390  # func_003b6390
+003b6420  # func_003b6420
+003b6540  # func_003b6540
+003b65d0  # func_003b65d0
+003b71b0  # func_003b71b0
+003b7290  # func_003b7290
+003b7680  # func_003b7680
+003b8050  # func_003b8050
+003b85e0  # func_003b85e0
+003b88c0  # func_003b88c0
+003b8930  # func_003b8930
+003b8ad0  # func_003b8ad0
+003b8e50  # func_003b8e50
+003b90b0  # func_003b90b0
+003b9a40  # func_003b9a40
+003bb0d0  # func_003bb0d0
+003bb210  # func_003bb210
+003bb3a0  # func_003bb3a0
+003bbf80  # func_003bbf80
+003bc150  # func_003bc150
+003bc620  # func_003bc620
+003bc740  # func_003bc740
+003bc9c0  # func_003bc9c0
+003bcbe0  # func_003bcbe0
+003bce50  # func_003bce50
+003bd6b0  # func_003bd6b0
+003be180  # func_003be180
+003bee80  # func_003bee80
+003c0f20  # func_003c0f20
+003c1ea0  # func_003c1ea0
+003c2630  # func_003c2630
+003c3ae0  # func_003c3ae0
+003c4220  # func_003c4220
+003c4390  # func_003c4390
+003c4a80  # func_003c4a80
+003c6080  # func_003c6080
+003c7d90  # func_003c7d90
+003c8200  # func_003c8200
+003c9640  # func_003c9640
+003caef0  # func_003caef0
+003cc250  # func_003cc250
+003cc500  # func_003cc500
+003cdfa0  # func_003cdfa0
+003ce170  # func_003ce170
+003ce230  # func_003ce230
+003ce3a0  # func_003ce3a0
+003ce560  # func_003ce560
+003cf070  # func_003cf070
+003cfff0  # func_003cfff0
+003d0230  # func_003d0230
+003d0790  # func_003d0790
+003d2010  # func_003d2010
+003d3130  # func_003d3130
+003d3780  # func_003d3780
+003d5000  # func_003d5000
+003d5130  # func_003d5130
+003d53c0  # func_003d53c0
+003d5710  # func_003d5710
+003d5790  # func_003d5790
+003d59d0  # func_003d59d0
+003d5bc0  # func_003d5bc0
+003d5e90  # func_003d5e90
+003d6350  # func_003d6350
+003d6680  # func_003d6680
+003d6790  # func_003d6790
+003d7490  # func_003d7490
+003d75b0  # func_003d75b0
+003d76d0  # func_003d76d0
+003d7ac0  # func_003d7ac0
+003d7b40  # func_003d7b40
+003d81d0  # func_003d81d0
+003d8300  # func_003d8300
+003d9f30  # func_003d9f30
+003db360  # func_003db360
+003db550  # func_003db550
+003db630  # func_003db630
+003dbbc0  # func_003dbbc0
+003dbe40  # func_003dbe40
+003dc510  # func_003dc510
+003dc610  # func_003dc610
+003dc740  # func_003dc740
+003dd390  # func_003dd390
+003dd430  # func_003dd430
+003dd620  # func_003dd620
+003dd760  # func_003dd760
+003dda50  # func_003dda50
+003ddca0  # func_003ddca0
+003ddf80  # func_003ddf80
+003ddfd0  # func_003ddfd0
+003de020  # func_003de020
+003de280  # func_003de280
+003de2d0  # func_003de2d0
+003de4d0  # func_003de4d0
+003de740  # func_003de740
+003deea0  # func_003deea0
+003e0e20  # func_003e0e20
+003e18c0  # func_003e18c0
+003e22c0  # func_003e22c0
+003e41e0  # func_003e41e0
+003e8920  # func_003e8920
+003e9eb0  # func_003e9eb0
+003f0510  # func_003f0510
+003f0de0  # func_003f0de0
+003f1240  # func_003f1240
+003f13b0  # func_003f13b0
+003f1600  # func_003f1600
+003f1ce0  # func_003f1ce0
+003f6910  # func_003f6910
+003f6990  # func_003f6990
+003fd940  # func_003fd940
+003fdd10  # func_003fdd10
+003fddc0  # func_003fddc0
+003fdf20  # func_003fdf20
+00398970
+0039b080
+003c8920
+0048cdf0
+00414820
+00392650  # func_00392650
+003d6170  # func_003d6170
+003fe1f0  # func_003fe1f0
+004010c0  # func_004010c0
+00401450  # func_00401450
+00401b80  # func_00401b80
+00407bd0  # func_00407bd0
+00407c10  # func_00407c10
+00407d10  # func_00407d10
+00411740  # func_00411740
+004117b0  # func_004117b0
+004125e0  # func_004125e0
+00412e90  # func_00412e90
+00413290  # func_00413290
+00413410  # func_00413410
+004140f0  # func_004140f0
+004142b0  # func_004142b0
+00414930  # func_00414930
+00414c10  # func_00414c10
+00414ef0  # func_00414ef0
+00414fd0  # func_00414fd0
+00415070  # func_00415070
+004156e0  # func_004156e0
+00416bc0  # func_00416bc0
+00417310  # func_00417310
+00417470  # func_00417470
+00418df8  # func_00418df8
+00418f50  # func_00418f50
+00422920  # func_00422920
+00426670  # func_00426670
+0042fb50  # func_0042fb50
+0042ffa0  # func_0042ffa0
+00430210  # func_00430210
+00431928  # func_00431928
+00431b58  # func_00431b58
+00432e18  # func_00432e18
+00432ec0  # func_00432ec0
+00432ee8  # func_00432ee8
+0043c6a0  # func_0043c6a0
+0043ece8  # func_0043ece8
+0043ed08  # func_0043ed08
+0043f778  # func_0043f778
+00442948  # func_00442948
+00442de8  # func_00442de8
+00443010  # func_00443010
+00449938  # func_00449938
+0044db98  # func_0044db98
+0044dc50  # func_0044dc50
+0044dca8  # func_0044dca8
+0044ddf0  # func_0044ddf0
+0044de80  # func_0044de80
+0044e1c0  # func_0044e1c0
+0044e410  # func_0044e410
+0044e508  # func_0044e508
+00485870  # mdlEffectFlushTreeFrame
+00487fb0  # ParticleProjectVertices
+0048a150  # mdlEffectBuildBasisRows
+0048a980  # effMiscMatrixToQuatVU
+0048abd0  # mdlEffectSamplePackedColor
+0048b220  # mdlEffectSampleKeyState
+004938e0  # TrackUpdateSlots
+004956b0  # ThunderBoltUpdateStrip
+004968a0  # ThunderOrbitBoltUpdateStrip
+00497460  # ThunderOrbitBoltWriteRows
+00497ce0  # ThunderPairedUpdateStrip
+00498f10  # RingRebuildCircle
+004992a0  # RingUpdateRowColour
+00499a30  # RingUpdateLineSegment
+00499e40  # RingRebuildCircleScaled
+0049aa30  # FlashRotatingEmitQuads
+0049b2b0  # FlashRotatingPackColors
+0049bff0  # FlashRadialPackColors
+0049c3d0  # FlashEvolvingRadialEmitQuads
+0049d360  # FlashEvolvingRadialEmitDirectionalQuads
+0049db20  # FlashTexturedPackColors
+0049e920  # FlashCenteredStripPackColors
+0049ef50  # FlashCenteredStripEmitQuads
+0049fbf0  # FlashBoxEmitQuads
+004a05f0  # FlashAgedBoxPackColors
+004a14a0  # FlashQuadCopyPackColors
+004a2c90  # FunnelWindPackColors
+004a3640  # FallingFunnelWindUpdateStrip
+004a4000  # FallingFunnelWindPackColors
+004a4a10  # SpiralWindUpdateStrip
+004a52b0  # SpiralWindPackColors
+004a5fc0  # EffSpriteUpdate
+004a93d0  # effBlurFilterUpdateScreenRect
+004a9690  # effBlurFilterUpdateRectFromScale
+004a9bd0  # effBlurFilterStepSlotsA
+004a9fd0  # effBlurFilterStepSlotsC
+003d6950  # func_003d6950
+003d6d50  # func_003d6d50
+003d6e80  # func_003d6e80
+003d9760  # func_003d9760
+003dc490  # func_003dc490
+003df9f0  # func_003df9f0
+004165a0  # func_004165a0
+003e4030  # func_003e4030
+00396520  # func_00396520
+# Native combat element routes (PortTables): retail-named overrides at their dispatch/call addresses; every valid case of a 400-case sweep matched the retail code exactly
+00244f60  # datScriptRunCalc
+00245030  # datScriptCalcFloat
+0023e6f0  # datCalcResolveSkillHit
+002411a0  # datCalcHitResult
+00241bc0  # datCalcSkillAppliesToTarget

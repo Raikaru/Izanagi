@@ -1,0 +1,46 @@
+# From story0520tv (05/20 at the TV-world Entrance, party Yosuke, Chie and Yukiko): enter the discovered Bathhouse
+# as save0520tv_to_bathhouse_1f.walk does, then climb the generated 1F (step 21) and 2F (step 22) to 3F (step 23)
+# without fighting: the planner routes to each floor's stairs and every encounter is escaped (Yu: Escape, four
+# Down presses below Attack; while Teddie searches, cancel back to the wheel and Guard, then request Escape again
+# on the next turn, as collection0625_tv_to_marukyu3f.walk does; the others Guard). For the randomizer's
+# reconstructed-anchor witness: the floors' encounter tables and Shadows are the run's, the outcome of a fight is not
+# what it measures.
+timeout:6000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+walk:93,470,50
+push:93,580,8
+wait:20
+press:cross
+choose:1
+skipfield:24:1
+skipmsg
+waitstep:20
+log
+plan:on
+walk:0,-400,40
+push:0,-700,12
+press:cross
+# The first floor is the default answer if the entrance offers a floor selector.
+skipfield:41:0
+skipmsg
+waitstep:21
+log
+timeout:30000
+battle:first=circle,up,cross;plan=circle,up,cross;first1=circle,down,down,down,down,cross,circle,circle,circle,up,cross;plan1=circle,down,down,down,down,cross,circle,circle,circle,up,cross;skip=0;delay=80
+walk:goal,40
+press:cross
+skipmsg
+waitstep:22
+log
+walk:goal,40
+press:cross
+skipmsg
+waitstep:23
+waitcontrol:on
+log

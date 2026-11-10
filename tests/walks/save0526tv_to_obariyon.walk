@@ -1,0 +1,129 @@
+# From story0526tv: register the improved Personas, fuse Senri/Omoikane/Orobas into physical-strong Obariyon, assign and save.
+# Fool-rank bonus reaches level 15; replace Sonic Punch with Silence Boost while retaining inherited Tarunda.
+timeout:10000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+waitstate:0x0079b68c==1886
+walk:400,500,50
+face:90
+wait:20
+press:cross
+skip:900
+press:circle
+wait:100
+press:circle
+wait:100
+press:circle
+wait:600
+log
+# Preserve the earned Persona records through the actual Compendium before any fusion.
+press:down
+wait:20
+press:cross
+wait:600
+log
+press:down
+wait:20
+press:cross
+wait:600
+log
+# Register all three improved records before consuming any materials.
+press:square
+wait:600
+choose:1
+wait:600
+press:cross
+wait:300
+# Register-all returns directly to the Compendium submenu. One Circle returns to the main menu, where Up selects Fuse.
+press:circle
+wait:100
+press:up
+wait:20
+press:cross
+wait:600
+# The actual fusion-type carousel moves right from Normal Spread to Triangle Spread.
+press:right
+wait:20
+press:cross
+wait:600
+# Senri 14 is the first card in the actual six-Persona roster.
+press:cross
+wait:600
+# Selection keeps its row: Omoikane is row two, then Orobas is the next row.
+press:down
+wait:20
+press:down
+wait:20
+press:cross
+wait:600
+press:down
+wait:20
+press:cross
+wait:600
+# The real preview is physical/fire-strong Obariyon 13 with inherited Patra, Sukunda and Tarunda. Confirm the fusion.
+press:cross
+wait:600
+press:cross
+skip:1800
+# Fool-rank bonus reaches level 15 and fills the skill list. Replace the offered Sonic Punch, preserving inherited Tarunda.
+press:cross
+wait:100
+choose:1
+wait:600
+skip:300
+wait:600
+# Back out through the fusion menus to the actual TV entrance.
+press:circle
+wait:100
+press:circle
+wait:100
+press:circle
+wait:100
+press:circle
+wait:600
+skipmsg
+waitcontrol:on
+# Explicitly assign the newly inserted first-slot Obariyon before the physical guardian.
+press:triangle
+wait:100
+press:down
+wait:20
+press:down
+wait:20
+press:down
+wait:20
+press:cross
+wait:600
+press:cross
+wait:100
+press:cross
+wait:100
+press:circle
+wait:100
+press:circle
+wait:100
+press:circle
+wait:600
+waitcontrol:on
+waitstate:0x00797f88==0
+waitstate:0x00797f8c==0x00190001
+walk:-455,387,60
+wait:70
+push:-700,620,12
+wait:30
+press:cross
+wait:600
+press:cross
+wait:600
+press:left:12
+wait:400
+press:cross
+wait:1500
+press:cross
+wait:600
+log

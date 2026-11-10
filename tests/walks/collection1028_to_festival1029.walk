@@ -1,0 +1,34 @@
+# Independent collection card4-slot06, October28 evening.
+# Follow the first festival day to October29's native home save.
+timeout:60000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+waitstate16:0x00797b7a==210
+walk:314,-360,25
+face:100
+wait:20
+press:cross
+wait:40
+skipmsg
+waitfield:7:2
+waitstate16:0x00797b7a==211
+walk:0,200,40
+walk:103,-20,25
+push:103,-217,25
+wait:900
+press:cross
+wait:600
+press:cross
+wait:600
+press:left:12
+wait:400
+press:cross
+wait:1500
+press:cross
+wait:600
+log

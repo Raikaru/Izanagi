@@ -1,0 +1,185 @@
+# Retail mirror from story0521: the same earned purchases, with a centred and faced Junes approach before the TV-world save.
+# Wallet: 4706 + materials 15790 - armor 17400 + replaced armor 1450 - escapes 3800 = 746 yen; no calendar advance.
+timeout:10000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+press:square
+wait:300
+press:down
+press:down
+press:down
+press:cross
+wait:600
+press:down
+press:cross
+skipfield:8:2
+skipmsg
+walk:500,150,60
+# Reuse the qualified Saturday west-sidewalk route from save0423_to_tv_0423.walk.
+walk:-350,-2200,100
+walk:-350,-3100,60
+push:-750,-3100,12
+press:cross
+wait:1200
+log
+press:cross
+wait:600
+log
+# Sell all earned materials, not the equipment or expendables tabs.
+press:down
+press:down
+press:down
+press:cross
+wait:600
+log
+press:cross
+choose:1
+wait:600
+# The accumulated Castle/Bathhouse materials unlock several recipes; finish all real merchant announcements.
+skip:3600
+press:circle
+wait:300
+log
+# Root cursor remains Sell item (3); Buy armor is two rows above it.
+press:up
+press:up
+press:cross
+wait:300
+# Party order is Yu, Yosuke, Chie, Yukiko.
+press:down
+press:down
+press:down
+press:cross
+wait:600
+log
+# Buy, equip, and sell the replaced joining blouse, matching the qualified three-confirmation purchase sequence.
+press:cross
+choose:1
+choose:1
+choose:1
+wait:600
+waitstate:0x00796fac==0x010a004d
+log
+# Return to the character selector and select Yu; the newly unlocked Lion Happi is male-only.
+press:circle
+wait:300
+press:up
+press:up
+press:up
+press:cross
+wait:600
+log
+# Lion Happi is the new male-only stock (78 defense / 16 evasion, 14400 yen).
+press:cross
+choose:1
+choose:1
+choose:1
+wait:600
+waitstate:0x00797574==0x010e0001
+waitstate:0x0079b68c==4546
+log
+# Armor list -> character selector -> root -> leave confirmation.
+press:circle
+wait:300
+press:circle
+wait:300
+press:circle
+wait:300
+press:cross
+wait:600
+skipfield:8:2
+skipmsg
+# Stay on the already qualified west sidewalk, northward to Shiroku.
+walk:-350,-3100,60
+walk:-300,-5150,80
+walk:-550,-5150,30
+press:cross
+timeout:20000
+wait:1200
+press:cross
+wait:600
+press:cross
+wait:300
+# This return visit has no first-visit "Please buy a lot." page: two Crosses after entry open the catalogue.
+# A third Cross would select Medicine before navigation; Goho-M is still row 10.
+press:down
+press:down
+press:down
+press:down
+press:down
+press:down
+press:down
+press:down
+press:down
+press:down
+press:cross
+wait:300
+# Four escapes cost 3800; retain the existing four Value Medicines.
+press:up
+wait:30
+press:up
+wait:30
+press:up
+wait:30
+press:cross
+choose:1
+wait:600
+log
+press:circle
+wait:300
+press:circle
+wait:300
+press:cross
+wait:600
+skipfield:8:2
+skipmsg
+waitstate:0x00797890==4
+waitstate:0x00797880==0x400
+waitstate:0x0079b68c==746
+# Return through Junes without advancing the calendar.
+walk:-350,-2200,100
+walk:500,150,60
+# The native finite long push stopped at (898.88,247.21), outside the slanted Junes quad despite its broad AABB.
+# Align inside its left edge before the short eastward approach; do not patch contact or the event rectangle.
+walk:800,150,30
+face:90
+push:1100,150,8
+press:cross
+wait:600
+choose:1
+wait:600
+press:down
+press:cross
+timeout:12000
+skipfield:9:4
+skipmsg
+wait:60
+walk:-300,0,60
+push:-500,0,12
+press:cross
+timeout:24000
+choose:1
+choose:3
+skipfield:20:1
+skipmsg
+timeout:6000
+walk:-455,387,60
+wait:70
+push:-700,620,12
+wait:30
+press:cross
+wait:600
+press:cross
+wait:600
+press:left:12
+wait:400
+press:cross
+wait:1500
+press:cross
+wait:600
+log

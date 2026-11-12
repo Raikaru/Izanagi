@@ -1,0 +1,3 @@
+--!capability table-source.status@1
+--!covers section:table-source.status
+-- Table-source status-ailment rows define battle-scoped side ailments.

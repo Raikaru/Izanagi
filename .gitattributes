@@ -1,0 +1,4 @@
+* text=auto eol=lf
+
+# Semantic registries and versioned licence/build documentation use normal merges.
+# Union merges can resurrect deleted rows or silently retain both versions of an edit.

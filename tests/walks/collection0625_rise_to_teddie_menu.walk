@@ -1,0 +1,61 @@
+# Pristine collection card2-slot15, 06/25 Marukyu 11F.
+# Reproduce allocator compatibility across Rise cleanup and the following event.
+# Checkpoint: first protagonist COMMAND menu of the following Teddie encounter.
+# No Teddie victory claim. Original payload SHA256:
+# 87e74d057767aeac220a19acc2d211dd9ca9b3990639de9a21257bde73dc1934
+timeout:18000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+waitfield:25:2
+waitstate16:0x00797b7a==85
+press:triangle
+wait:100
+press:down
+wait:20
+press:down
+wait:20
+press:down
+wait:20
+press:cross
+wait:600
+press:cross
+wait:600
+press:down
+wait:20
+press:down
+wait:20
+press:down
+wait:20
+press:down
+wait:20
+press:cross
+wait:100
+press:circle
+wait:70
+press:circle
+wait:70
+press:circle
+wait:70
+press:circle
+wait:70
+waitstate16:0x00797f8e==19
+waitstate16:0x00797f98==195
+waitfield:25:2
+log
+walk:0,-1400,70
+push:0,-1800,12
+press:cross
+waitbtl:menu:1
+battle:first6=circle,down,cross,down,cross,cross,cross,circle,circle,circle,up,cross;first3=circle,up,cross;plan3=circle,up,cross;plan=circle,down,cross,cross,cross,circle,circle,circle,up,cross;target2=260;target6=260;delay=200
+timeout:40000
+waittask:battle:off
+battle:off
+skiptask:battle
+waitbtl:menu:1
+battle:off
+log

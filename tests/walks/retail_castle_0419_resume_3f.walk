@@ -1,0 +1,24 @@
+# Retail fixture: fresh mkcard image of story0419tv, --walk-game after LOAD GAME.
+# Resume the remembered 3F and --walk-save /work/states/story-castle3f0419.p2s.
+timeout:6000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+walk:93,470,50
+push:93,580,8
+wait:20
+press:cross
+choose:1
+skipfield:23:1
+skipmsg
+walk:0,200,40
+press:cross
+choose:2
+skipfield:40:0
+skipmsg
+waitstep:8
+log

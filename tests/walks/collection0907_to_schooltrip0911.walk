@@ -1,0 +1,33 @@
+# Independent pristine collection card3-slot11, September 7 evening.
+# Follow the school trip, then save natively at home on September 11 evening.
+timeout:40000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+walk:314,-360,25
+face:100
+wait:20
+press:cross
+wait:40
+skipmsg
+log
+waitstate16:0x00797b7a==163
+walk:0,200,40
+walk:103,-20,25
+push:103,-217,25
+wait:900
+press:cross
+wait:600
+press:cross
+wait:600
+press:left:12
+wait:400
+press:cross
+wait:1500
+press:cross
+wait:600
+log

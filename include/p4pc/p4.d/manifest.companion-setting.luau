@@ -1,0 +1,3 @@
+--!capability manifest.companion-setting@1
+--!covers section:table-source.companion section:table-source.companion-setting section:resource-image.companion section:resource-image.companion-setting section:element-ui.companion section:element-ui.companion-setting
+-- mod.ini boot-section gates on a companion: `companion = <id>` and `companion-setting = <key>=<value>` in [table-source], [resource-image] and [element-ui] (docs/modding/files.md).

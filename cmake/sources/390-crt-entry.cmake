@@ -1,0 +1,17 @@
+foreach(target p4pc main p4pc_viewer)
+  if(TARGET ${target})
+    p4_crt_entry(${target} "${P4_GEN}/objects.txt" ${P4_CRT_FLAGS} ${P4_HOST_LIB_ARGS})
+  endif()
+endforeach()
+foreach(target p4pc64 p4pc_viewer64)
+  if(TARGET ${target})
+    p4_crt_entry(${target} "${P4_GEN}/objects64.txt" ${P4_HOSTLIB_ARGS64})
+  endif()
+endforeach()
+foreach(target p4pc64w p4pc_viewer64w)
+  if(TARGET ${target})
+    p4_crt_entry(${target} "${P4_GEN}/objects64w.txt" ${P4W_CRT_HOST_ARGS})
+  endif()
+endforeach()
+
+

@@ -1,0 +1,3 @@
+--!capability files@1
+--!covers p4.files
+-- p4.files.read: the winning VFS bytes of a disc path (API 1.0).

@@ -1,0 +1,148 @@
+# From story0426trained5: earned Media, Omoikane Tarunda, Senri Fire Null, battle rules for Ice on Yukiko and the Prince, Chie's charge Guard.
+timeout:10000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+# Camp merges all held Personas' skills in ID order: Media (195) is one Down after Dia (192).
+press:triangle
+wait:100
+press:cross
+wait:100
+press:cross
+wait:100
+press:down
+wait:100
+press:cross
+wait:100
+press:cross
+wait:100
+press:circle
+wait:70
+press:circle
+wait:70
+press:circle
+wait:70
+press:circle
+wait:70
+# Lead with Omoikane for Tarunda, then switch to fire-null Senri in battle.
+wait:120
+press:triangle
+wait:100
+press:down
+press:down
+press:down
+press:cross
+wait:600
+press:cross
+wait:100
+press:down
+wait:20
+press:down
+press:cross
+wait:100
+press:circle
+wait:70
+press:circle
+wait:70
+press:circle
+wait:70
+walk:0,2200,50
+push:0,1700,20
+press:cross
+battle:off
+waitbtl:menu
+log
+# The measured opening wheel is on Attack. Skill is one Down, not Cross.
+press:down
+wait:30
+press:cross
+wait:100
+# Omoikane: Zio, Sukunda, Tarunda, Dia.
+press:down
+wait:20
+press:down
+wait:20
+press:cross
+wait:30
+press:cross
+wait:300
+waitbtl:menu
+wait:100
+# Skill -> Persona. The roster is current Omoikane, then Senri.
+press:down
+wait:30
+press:cross
+wait:100
+press:down
+wait:30
+press:cross
+wait:100
+# Persona -> Tactics; Chie is the second companion. Direct Commands is row 4.
+press:up
+wait:20
+press:up
+wait:20
+press:up
+wait:20
+press:up
+wait:20
+press:cross
+wait:600
+press:down
+wait:20
+press:cross
+wait:600
+press:down
+wait:20
+press:down
+wait:20
+press:down
+wait:20
+press:down
+wait:20
+press:cross
+wait:100
+press:circle
+wait:100
+# Rules from here: Yu (Senri, Fire Null) casts Bufu, Media for anyone under 90 HP, and falls back to his weapon without SP;
+# Chie (Direct Commands) casts Bufu, falls back to her weapon, and Guards while Shadow Yukiko (258) is charged for
+# Burn to Ashes; Yosuke stays Heal/Support. Both strike Yukiko until she summons the Ice-weak, healing Charming Prince
+# (269) on her second turn, then the Prince until it falls, then Yukiko again.
+battle:first1=circle,down,cross,skill:26,cross,cross,circle,circle,circle,cross,cross;plan1=circle,down,cross,skill:26,cross,cross,circle,circle,circle,cross,cross;plan=circle,down,cross,skill:26,cross,cross,circle,circle,circle,cross,cross;skip=0;delay=80;target1=258;target3=258;guard=258:3
+battlerule:hp<90@1=circle,down,cross,skill:195,cross,cross,circle,circle,circle,cross,cross
+battleskip:on
+timeout:40000
+waitbtl:menu:3
+waitbtl:menu:1
+log
+battle:first1=circle,down,cross,skill:26,cross,cross,circle,circle,circle,cross,cross;plan1=circle,down,cross,skill:26,cross,cross,circle,circle,circle,cross,cross;plan=circle,down,cross,skill:26,cross,cross,circle,circle,circle,cross,cross;skip=0;delay=80;target1=269;target3=269;guard=258:3
+battlerule:hp<90@1=circle,down,cross,skill:195,cross,cross,circle,circle,circle,cross,cross
+waitbtl:dead:269
+log
+# Yukiko is then the only target, so no binding is needed (an ally-target Soul Drop could not satisfy one):
+# Yu opens with Rakunda and drinks a Soul Drop below 8 SP.
+battle:first1=circle,down,cross,skill:215,cross,cross,circle,circle,circle,cross,cross;plan1=circle,down,cross,skill:26,cross,cross,circle,circle,circle,cross,cross;plan=circle,down,cross,skill:26,cross,cross,circle,circle,circle,cross,cross;skip=0;delay=80;guard=258:3
+battlerule:sp<8@1=circle,down,down,down,cross,item:0x30B,cross,cross,circle,circle,circle,cross,cross
+battlerule:hp<90@1=circle,down,cross,skill:195,cross,cross,circle,circle,circle,cross,cross
+log
+waittask:battle:off
+skipmsg
+log
+# The rescue plays through the Dojima dinner and 04/27's morning into Class 2-2.
+timeout:15000
+walk:-360,600,70
+press:cross
+wait:600
+press:cross
+wait:600
+press:left:12
+wait:400
+press:cross
+wait:1500
+press:cross
+wait:600
+log

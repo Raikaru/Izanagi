@@ -1,0 +1,16 @@
+# P4PC_START_BATTLE=532: select Rakukaja and reach its ally-target selector.
+# The retail counterpart starts from ng-dreambtl.p2s with the same Attack wheel.
+timeout:6000
+waitbtl:menu
+press:down
+wait:30
+press:cross
+wait:30
+press:down
+wait:20
+press:down
+wait:20
+press:cross
+wait:300
+log
+wait:300

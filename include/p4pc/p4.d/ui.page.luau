@@ -1,0 +1,3 @@
+--!capability ui.page@1
+--!covers p4.ui.page p4.ui.detail p4.ui.back p4.ui.close p4.ui.active
+-- p4.ui.page, detail, back, close and active: hosted MODS pages, including unlisted pages (API 1.0, 1.4).

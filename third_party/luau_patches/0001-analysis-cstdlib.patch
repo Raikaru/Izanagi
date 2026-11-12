@@ -1,0 +1,17 @@
+From: Persona4-PC host adapter maintainers
+Subject: [PATCH] Analysis: include the header that declares std::abs(int)
+
+Luau 0.744, commit 32c28089305f488f901aaf1dbf3fd1cb65fa3d11.
+libc++ 23 (llvm-mingw 20261006) no longer provides the integer std::abs
+through unrelated transitive headers. No behavioral or ABI change.
+
+--- a/third_party/luau/Analysis/src/TableLiteralInference.cpp
++++ b/third_party/luau/Analysis/src/TableLiteralInference.cpp
+@@ -14,6 +14,7 @@
+ #include "Luau/ToString.h"
+ #include "Luau/TypeUtils.h"
+ #include "Luau/Unifier2.h"
++#include <cstdlib>
+ 
+ LUAU_FASTFLAGVARIABLE(LuauBidirectionalInferenceBetterLambdaHandling)
+ 

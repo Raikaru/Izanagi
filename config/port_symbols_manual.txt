@@ -1,0 +1,25 @@
+# Hand-placed names, read with config/port_symbols.txt (which tools/retail_symbols.py regenerates).
+# One name per line: `name 0xADDR data|func  # evidence`. The evidence is the retail caller and what it does.
+# World native stream callbacks. The retail wrappers at 0x003cb780..0x003cb810 are writeGeometryNative
+# (j 0x3ce3a0), readGeometryNative (jal 0x3ce560, result tested with movz), sizeGeometryNative (j 0x3ce840),
+# writeWorldSectorNative (j 0x3ce9e0), readWorldSectorNative (jal 0x3cebb0, movz) and sizeWorldSectorNative (j 0x3ceeb0).
+_rpGeometryNativeWrite 0x003CE3A0 func  # tail call of writeGeometryNative (0x003cb780), a1 = the object
+_rpGeometryNativeSize 0x003CE840 func  # tail call of sizeGeometryNative (0x003cb7c0)
+_rpWorldSectorNativeWrite 0x003CE9E0 func  # tail call of writeWorldSectorNative (0x003cb7d0)
+_rpWorldSectorNativeSize 0x003CEEB0 func  # tail call of sizeWorldSectorNative (0x003cb810)
+# ImagePathForAllFullNames (retail 0x003eab70) calls this first: true for a leading backslash or `X:`.
+_rwpathisabsolute 0x003E50A0 func  # first jal of ImagePathForAllFullNames; tests '\\' and a drive-letter colon
+# Retail RpWorldPluginAttach (0x003ca430): eight RwEngineRegisterPlugin calls (0x3e8930), then 0x003cb900
+# (_rpWorldObjRegisterExtensions), 0x003bfdf0 (_rpClumpRegisterExtensions) and, last before the return, this.
+_rxWorldDevicePluginAttach 0x003D4C70 func  # last call of RpWorldPluginAttach, as in baworld.c; func_003d4c70 is compiled C
+# RenderWare world module records (RwModuleInfo: globalsOffset, numInstances), written by the retail plugin open/close
+# callbacks that RpWorldPluginAttach (0x003ca430) registers and read by the named world code (RWxxxGLOBAL):
+clumpModule 0x007647B0 data  # 0x003bfd00 stores a1 at gp-18752 (gp 0x007690F0)
+lightModule 0x007647C0 data  # 0x003c3e90 stores a1 at gp-18736 (gp 0x007690F0)
+materialModule 0x007647D0 data  # 0x003c4040 stores a1 at gp-18720, numInstances at gp-18716 (gp 0x007690F0)
+sectorModule 0x007647E8 data  # 0x003c8ca0 counts numInstances at gp-18692 (the record is 8 bytes below) (gp 0x007690F0)
+worldModule 0x007647F0 data  # 0x003c95a0 stores a1 at gp-18688 (gp 0x007690F0)
+worldObjModule 0x00764808 data  # 0x003ca5a0 stores a1 at gp-18664 (gp 0x007690F0)
+# RenderWare plugin registries the decomp does not place (the others are in its symbol list): the retail RegisterPlugin wrappers pass these addresses, so the named world code shares them (config/mirror_fixes.txt makes the decomp's copies extern).
+clumpTKList 0x0070AF90 data  # size 0x2c, RpClump
+worldTKList 0x0070B060 data  # size 0x70, RpWorld

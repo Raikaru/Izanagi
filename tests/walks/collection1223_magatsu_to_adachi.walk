@@ -1,0 +1,22 @@
+# Independent pristine card4-slot16, Magatsu Inaba's final fixed field.
+# Cover step129's real Adachi approach and first party COMMAND, not victory.
+# This does not certify earlier floors or the following Ameno-sagiri encounter.
+timeout:30000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+waitfield:29:2
+waitstep:129
+waitstate16:0x00797b7a==266
+# Route the bent approach, stopping before Adachi's interaction blocks the path.
+plan:on
+walk:0,2800,80
+push:0,2000,25
+press:cross
+skiptask:battle
+waitbtl:menu
+log

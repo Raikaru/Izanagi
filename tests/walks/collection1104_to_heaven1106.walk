@@ -1,0 +1,65 @@
+# Independent pristine card4-slot08, November4 after school.
+# Cover the abduction investigation and real Heaven entrance, not dungeon floors.
+timeout:60000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+waitstate16:0x00797b7a==217
+# Existing school shortcut: town, then home.
+press:square
+wait:300
+press:down
+press:down
+press:down
+press:cross
+wait:600
+press:down
+press:down
+press:down
+press:down
+press:cross
+skipfield:7:1
+skipmsg
+walk:0,330,40
+push:0,-100,35
+press:cross
+choose:1
+# Automatic event field IDs can be stale during the rendered home/police scenes.
+skipfield:7:2
+skipfield:9:1
+# Tell Dojima the truth; reassure Nanako; tell the police-room whole truth.
+waitchoice
+choose:1
+waitchoice
+choose:1
+waitchoice
+choose:1
+# Hurry; a friend of Dojima's; a delivery truck; do everything we can.
+waitchoice
+choose:3
+waitchoice
+choose:2
+waitchoice
+choose:3
+waitchoice
+choose:1
+# Acknowledge the actual Fool9 overlay, not a guessed-duration text skip.
+skiptask:cmmRankUp
+skiptask:cmmRankUp:off
+# Junes: Enter the TV, not the first answer's repeating situation briefing.
+waitchoice
+choose:3
+# Heaven's briefing: I'll need all of you.
+waitchoice
+choose:2
+skipmsg
+waitfield:28:1
+waitstep:100
+waitstate16:0x00797b7a==219
+waitcontrol:on
+waitmsg:closed
+log

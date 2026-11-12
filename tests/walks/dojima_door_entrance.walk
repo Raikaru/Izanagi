@@ -1,0 +1,10 @@
+timeout:400
+walk:455,-120,15
+wait:10
+push:548,-146,30
+log
+press:cross
+wait:90
+log
+skipmsg
+log

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="us-ascii"?>
+<!-- p4pc.hardmode boss Technical windows (design 4.D): one Technical-set ailment
+     slot per principal boss becomes normal (100%) over Physical Split's enemy
+     profiles. Status slots by datCalcStatusElement 0x0023D740 (Panic 8, Fear 10,
+     Rage 11), channel 2 = status. Must name the same enemies and ailments as
+     [windows] in files/DATA/HARDMODE/TUNING.TXT. -->
+<p4-tables schema="1">
+<!-- Avenger Knight: Panic. -->
+<affinity kind="1" entity="310" profile="310" element="8" channel="2" value="100" scalar="100"/>
+<!-- Shadow Yukiko: Fear, until Freeze exists. -->
+<affinity kind="1" entity="258" profile="258" element="10" channel="2" value="100" scalar="100"/>
+<!-- Shadow Kanji: Rage. -->
+<affinity kind="1" entity="259" profile="259" element="11" channel="2" value="100" scalar="100"/>
+</p4-tables>

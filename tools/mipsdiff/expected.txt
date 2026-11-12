@@ -1,0 +1,6 @@
+# Overrides that intentionally do not do what retail does: ovdiff reports their mismatch as a documented
+# difference and does not fail on it. `<addr8> reason`.
+0040fcd0 RpSkyTexCacheRasterLock: retail manages the GS texture-memory ring, the port has none and returns 1
+0039f050 x86_64 only: the native calls the trap stub func_0039e740 with the arguments it has (one); the stub logs four, and the argument registers past the first hold leftovers (i386: zeroed stack words)
+003e00f0 x86_64 only: a random word given as the provider is no function; the native stores its adapter's word (providers round-trip)
+003e3f80 x86_64 only: random words given as providers are no functions; the native stores adapters' words (providers round-trip)

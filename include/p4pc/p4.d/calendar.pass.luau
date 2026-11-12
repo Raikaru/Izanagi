@@ -1,0 +1,3 @@
+--!capability calendar.pass@2
+--!covers p4.calendar.pass
+-- Pass the current time slot through the game's calendar sequence; refused while p4.calendar.hold() names a hold.

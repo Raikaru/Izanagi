@@ -1,0 +1,3 @@
+--!capability manifest.require@1
+--!covers section:require
+-- mod.ini [require <id>] sections: admission requires another package at a minimum version and setting values; the hub locks them.

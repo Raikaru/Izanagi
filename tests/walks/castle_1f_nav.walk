@@ -1,0 +1,31 @@
+# Yukiko's Castle 1F (field 40 room 0), planned over the field's collision world (the port; retail's hook has no collision tests): the chest, a Shadow
+# (the fight is played by the battle driver, Shuffle Time included), the stairs and the 2F landing. Continues save0415_to_castle.walk at the Castle gate
+# (free control, field 23 room 1); the floor is generated from the frame counter, so any seed works (P4PC_BOARD_SEED=0x296ec gives retail's).
+#   port: P4PC_BATTLE_FIRST=cross,cross,cross P4PC_BATTLE_DRIVER=cross,cross,cross P4PC_BATTLE_SKIP=0
+battleskip:on
+timeout:6000
+walk:0,200,40
+press:cross
+wait:200
+skipfield:40:0
+timeout:12000
+skipmsg
+wait:60
+timeout:40000
+walk:obj:0x2bfc,150        # the chest (id 2bfc on this seed; the object ids are in the CHECK dump)
+push:14298,19354,40
+press:cross
+wait:200
+skipmsg
+waitcontrol:on
+wait:60
+walk:shadow,60             # a Shadow: the fight is driven, Shuffle Time follows
+wait:150
+skipmsg
+waitcontrol:on
+wait:60
+walk:goal,60               # the live upstairs trigger; Cross takes the stairs.
+wait:60
+press:cross
+wait:300
+log

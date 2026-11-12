@@ -1,0 +1,71 @@
+# From story0418tv: Search for Yukiko, climb 1F and the story's 2F corridor,
+# assert Castle 3F (step 8), then Goho-M out and save the next short checkpoint.
+timeout:6000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+# The dungeon navigator is the NPC at (93,580), not the central Quit-exploring CHECK.
+walk:93,470,50
+push:93,580,8
+wait:20
+press:cross
+choose:1
+skipmsg
+walk:0,200,40
+press:cross
+timeout:12000
+skipfield:40:0
+skipmsg
+battle:first=cross,cross,cross;plan=cross,cross,cross;skip=0;delay=20
+battleskip:on
+plan:on
+timeout:40000
+walk:goal
+press:cross
+wait:600
+choose:2                  # Teddie's battle tutorial: understood, not repeat.
+skipmsg
+walk:0,-3470,80
+push:0,-4200,60
+press:cross
+wait:600
+skipmsg
+waitstep:8
+log
+# Goho-M is fifth in this checkpoint's Item list (Peach Seed, Medicine,
+# Soul Drop, Revival Bead, Goho-M). Use the game's own escape prompt.
+battle:off
+battleskip:off
+plan:off
+press:triangle
+wait:300
+press:down
+press:cross
+wait:300
+press:down
+press:down
+press:down
+press:down
+press:cross
+timeout:12000
+skipfield:20:1
+skipmsg
+# Save at the entrance butterfly, facing the interaction area's centre.
+walk:-455,387,60
+push:-700,620,12
+wait:30
+press:cross
+wait:600
+press:cross
+wait:600
+press:left:12
+wait:400
+press:cross
+wait:1500
+press:cross
+wait:600
+log

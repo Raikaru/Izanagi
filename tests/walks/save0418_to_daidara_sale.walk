@@ -1,0 +1,77 @@
+# From the 04/18 after-school checkpoint (story0418: save0417_to_school_0418.walk, the classroom butterfly),
+# loaded with P4PC_AUTOPRESS_LOAD=0: the town map to the shopping district (the story0419/0421 route), Daidara
+# (west side at z=-3100), sell every material, read the new items Daidara can make, open Yu's accessory list and
+# leave. The shop is a native menu, not a live field root: never skipfield into it. Used by
+# tests/mod_randomizer_dungeon_test.py to see Daidara's list after a material sale (which item each material's
+# unlock gives). Timed for the first free visit, which shows the Help about selling Materials first.
+timeout:6000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+press:square
+wait:300
+press:down
+press:down
+press:down
+press:cross
+wait:600
+press:down
+press:cross
+skipfield:8:2
+skipmsg
+# The street's proven legs (save0419_to_tv_0419 to Shiroku, then save0421_to_tv_0421's way north to Daidara).
+walk:500,150,60
+walk:0,150,60
+walk:0,-5100,70
+walk:0,-3100,60
+walk:-350,-3100,60
+push:-750,-3100,12
+press:cross               # talk to Daidara
+timeout:20000
+wait:500
+press:cross               # the first visit's Help: selling Materials
+wait:400
+press:cross               # the greeting
+wait:500
+# The Shop Menu: Buy weapon / Buy armor / Buy accessory / Sell item / Talk / Leave.
+press:down
+wait:40
+press:down
+wait:40
+press:down
+wait:40
+press:cross               # Sell item
+wait:500
+press:cross               # Sell all materials
+wait:300
+choose:1                  # Yes
+wait:400
+press:cross               # Daidara's reaction, then "<item> has been added to the list of items for sale."
+wait:400
+press:cross
+wait:400
+press:cross
+wait:400
+press:cross
+wait:400
+log
+press:circle              # back to the Shop Menu (Sell item)
+wait:400
+press:up
+wait:40
+press:cross               # Buy accessory
+wait:400
+press:cross               # for A (Yu): the list the game rebuilds from the unlock gates
+wait:500
+log
+press:circle
+wait:300
+press:circle
+wait:300
+press:circle              # leave
+wait:600
+log

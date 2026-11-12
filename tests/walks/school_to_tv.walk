@@ -1,0 +1,48 @@
+# From a Class 2-2 after-school checkpoint; the gate supplies its card and date.
+# Square -> Go into town -> Junes, then gather the investigation team.
+timeout:6000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+press:square
+wait:300
+press:down
+press:down
+press:down
+press:cross
+wait:600
+press:down
+press:down
+press:cross
+timeout:12000
+skipfield:9:4
+skipmsg
+wait:60
+walk:-300,0,60             # stand before the elevator, not inside its collision.
+push:-500,0,12
+press:cross
+timeout:24000
+choose:1                  # Go up to the food court.
+choose:3                  # Confirm situation / weather / Enter the TV.
+skipfield:20:1
+skipmsg
+# Save at the entrance butterfly: the next gate starts inside the TV world.
+timeout:6000
+walk:-455,387,60
+push:-700,620,12           # face the save area's centre, beyond the left rail.
+wait:30
+press:cross
+wait:600
+press:cross
+wait:600
+press:left:12
+wait:400
+press:cross
+wait:1500
+press:cross
+wait:600
+log

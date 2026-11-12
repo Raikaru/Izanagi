@@ -1,0 +1,3 @@
+--!capability authorize.fusion@1
+--!covers operation:fusion
+-- p4.authorize.on("fusion") (API 1.3).

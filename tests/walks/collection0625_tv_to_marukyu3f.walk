@@ -1,0 +1,54 @@
+# Independent pristine collection card2-slot14, June 25 at the TV-world Entrance.
+# Enter Marukyu Striptease at the navigator spot, cross the seats to the stage, choose
+# Enter, and climb 1F (step 41) and 2F (step 42) to the fixed 3F (62:2, step 43).
+# Yu is alone. Every encounter is escaped: Escape is four Down presses below Attack;
+# while Teddie searches ("Be patient") cancel back to the wheel and Guard, then request
+# Escape again on the next turn. The floors are generated: tests/dungeon_digest_gate.sh
+# holds the walk to the dungeon digest the Windows x64 and Linux x64 builds recorded.
+timeout:20000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+waitstate16:0x00797b7a==85
+walk:93,470,50
+push:93,580,8
+wait:20
+press:cross
+timeout:20000
+skipfield:25:1
+skipmsg
+waitfield:25:1
+waitcontrol:on
+press:up:120
+wait:30
+press:up:120
+wait:30
+press:up:120
+wait:30
+press:up:120
+wait:30
+press:cross
+waitchoice
+choose:1
+skipmsg
+waitfield:42:0
+waitstep:41
+log
+plan:on
+battle:first1=circle,down,down,down,down,cross,circle,circle,circle,up,cross;plan=circle,down,down,down,down,cross,circle,circle,circle,up,cross;skip=0;delay=80
+walk:goal,80
+press:cross
+skipmsg
+waitstep:42
+log
+walk:goal,80
+press:cross
+skipmsg
+waitfield:62:2
+waitstep:43
+waitcontrol:on
+log

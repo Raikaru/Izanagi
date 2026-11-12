@@ -1,0 +1,32 @@
+# Mod-witness only (p4pc.challenge STRICT IRONMAN): from a castle Entrance checkpoint on
+# 04/20, enter the castle, take the first floor choice and touch the nearest Shadow, then
+# leave the battle at its first command menu: the battle stays open (unresolved) until
+# the witness ends the process.
+timeout:6000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+walk:93,470,50
+push:93,580,8
+wait:20
+press:cross
+choose:1
+skipfield:23:1
+skipmsg
+walk:0,200,40
+press:cross
+choose:1
+skipmsg
+wait:120
+log
+timeout:60000
+walk:shadow,250
+press:cross
+wait:150
+waitbtl:menu
+log
+wait:60000

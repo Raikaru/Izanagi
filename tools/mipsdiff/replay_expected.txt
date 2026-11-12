@@ -1,0 +1,165 @@
+# Functions whose ovdiff -R replay differs for a documented harness reason, not a native bug: `<addr8> reason`.
+# A function with bad calls listed here is reported as "documented difference" and does not fail the run.
+00100220 PS2 kernel syscall 0x23: result is retail kernel state
+004214c0 PS2 kernel syscall 0x10: result is retail kernel state
+00421500 PS2 kernel syscall 0x12: result is retail kernel state
+00421510 PS2 kernel syscall 0x13: result is retail kernel state
+00421520 PS2 kernel syscall 0x14: result is retail kernel state
+00421530 PS2 kernel syscall 0x15: result is retail kernel state
+00421540 PS2 kernel syscall 0x16: result is retail kernel state
+00421550 PS2 kernel syscall 0x17: result is retail kernel state
+00421580 PS2 kernel syscall 0xffe6: result is retail kernel state
+00421590 PS2 kernel syscall 0xffe5: result is retail kernel state
+004215a0 PS2 kernel syscall 0xffe4: result is retail kernel state
+004215b0 PS2 kernel syscall 0xffe3: result is retail kernel state
+004215e0 PS2 kernel syscall 0x20: result is retail kernel state
+00421600 PS2 kernel syscall 0x22: result is retail kernel state
+00421610 PS2 kernel syscall 0x23: result is retail kernel state
+00421620 PS2 kernel syscall 0x24: result is retail kernel state
+00421650 PS2 kernel syscall 0x27: result is retail kernel state
+00421660 PS2 kernel syscall 0x28: result is retail kernel state
+00421670 PS2 kernel syscall 0x29: result is retail kernel state
+00421680 PS2 kernel syscall 0xffd6: result is retail kernel state
+00421690 PS2 kernel syscall 0x2b: result is retail kernel state
+004216a0 PS2 kernel syscall 0xffd4: result is retail kernel state
+004216b0 PS2 kernel syscall 0x2d: result is retail kernel state
+004216c0 PS2 kernel syscall 0xffd2: result is retail kernel state
+004216d0 PS2 kernel syscall 0x2f: result is retail kernel state
+004216e0 PS2 kernel syscall 0x30: result is retail kernel state
+004216f0 PS2 kernel syscall 0xffcf: result is retail kernel state
+00421700 PS2 kernel syscall 0x32: result is retail kernel state
+00421710 PS2 kernel syscall 0x33: result is retail kernel state
+00421720 PS2 kernel syscall 0xffcc: result is retail kernel state
+00421730 PS2 kernel syscall 0x35: result is retail kernel state
+00421740 PS2 kernel syscall 0xffca: result is retail kernel state
+00421750 PS2 kernel syscall 0x37: result is retail kernel state
+00421760 PS2 kernel syscall 0xffc8: result is retail kernel state
+00421770 PS2 kernel syscall 0x39: result is retail kernel state
+00421780 PS2 kernel syscall 0xffc6: result is retail kernel state
+004217e0 PS2 kernel syscall 0x40: result is retail kernel state
+004217f0 PS2 kernel syscall 0x41: result is retail kernel state
+00421800 PS2 kernel syscall 0x42: result is retail kernel state
+00421810 PS2 kernel syscall 0xffbd: result is retail kernel state
+00421820 PS2 kernel syscall 0x44: result is retail kernel state
+00421830 PS2 kernel syscall 0x45: result is retail kernel state
+00421a60 PS2 kernel syscall 0x64: result is retail kernel state
+00421b80 PS2 kernel syscall 0x76: result is retail kernel state
+0042b3e0 PS2 kernel syscall 0x56: result is retail kernel state
+004c74f8 port seam (host VFS): not the CD/ROFS drivers
+004c7560 port seam (host VFS): not the CD/ROFS drivers
+004c78c8 port seam (host VFS): not the CD/ROFS drivers
+004c7ef8 port seam (host VFS): not the CD/ROFS drivers
+004c7f30 port seam (host VFS): not the CD/ROFS drivers
+004c7f80 port seam (host VFS): not the CD/ROFS drivers
+004c8770 port seam (host VFS): not the CD/ROFS drivers
+004c9068 port seam (host VFS): not the CD/ROFS drivers
+004c9858 port seam (host VFS): not the CD/ROFS drivers
+004c9888 port seam (host VFS): not the CD/ROFS drivers
+004f1a08 port seam (host VFS): not the CD/ROFS drivers
+004f2260 port seam (host VFS): not the CD/ROFS drivers
+004f2398 port seam (host VFS): not the CD/ROFS drivers
+004f2460 port seam (host VFS): not the CD/ROFS drivers
+004f85c0 port seam (host VFS): not the CD/ROFS drivers
+004f8648 port seam (host VFS): not the CD/ROFS drivers
+004c85a0 port seam (host VFS): not the CD/ROFS drivers
+004c9010 port seam (host VFS): not the CD/ROFS drivers
+004c9820 port seam (host VFS): not the CD/ROFS drivers
+0042f200 port seam (host VFS): not the CD/ROFS drivers
+0043ece8 port seam (host kernel/heap model): not the PS2 kernel
+0043ef80 port seam (host kernel/heap model): not the PS2 kernel
+00431cb8 port seam (host memory card folder): not the IOP mc server
+00431d78 port seam (host memory card folder): not the IOP mc server
+00431f28 port seam (host memory card folder): not the IOP mc server
+00432e18 port seam (host memory card folder): not the IOP mc server
+00432ec0 port seam (host memory card folder): not the IOP mc server
+0042ffa0 port seam (SDL pad): reads host input, not the IOP pad driver
+00430018 port seam (SDL pad): reads host input, not the IOP pad driver
+00430630 port seam (SDL pad): reads host input, not the IOP pad driver
+00422390 port seam (host kernel model): not the PS2 kernel
+00429d10 port seam (sound driver commands): no IOP sound server
+00429d90 port seam (sound driver commands): no IOP sound server
+0043c180 port seam (sound driver commands): no IOP sound server
+0043c230 port seam (sound driver commands): no IOP sound server
+0043c3b0 port seam (sound driver commands): no IOP sound server
+0043c470 port seam (sound driver commands): no IOP sound server
+0043c518 port seam (sound driver commands): no IOP sound server
+0043c5e8 port seam (sound driver commands): no IOP sound server
+00424708 port seam (sound driver commands): no IOP sound server
+003f6a10 port seam (OpenGL device layer): not the GS raster code
+003f73d0 port seam (OpenGL device layer): not the GS raster code
+003f79b0 port seam (OpenGL device layer): not the GS raster code
+003fc5f0 port seam (OpenGL device layer): not the GS raster code
+003fd230 port seam (OpenGL device layer): not the GS raster code
+003fd460 port seam (OpenGL device layer): not the GS raster code
+003fd520 port seam (OpenGL device layer): not the GS raster code
+003f7a60 port seam (OpenGL device layer): not the GS raster code
+003f98a0 port seam (OpenGL device layer): not the GS raster code
+# Render: the retail body builds a GIF / VU1 packet; the port sets GL state or draws directly (the source comment says so)
+001852f0 render seam: retail appends a GIF packet, the port sets the GL frame mask (p4gl_mdleffect)
+00185370 render seam: retail appends a GIF packet, the port sets the GL frame mask (p4gl_mdleffect)
+00489f80 render seam: retail appends a GIF packet pair, the port sets the GL frame mask (p4gl_mdleffect)
+0048a000 render seam: retail appends a GIF packet pair, the port sets the GL frame mask (p4gl_mdleffect)
+003a2290 render seam: the port draws the PTank particle arrays directly, no VU1 instance step (p4gl_ptank)
+003cf140 render seam: retail builds the sky2 DMA packet, the port draws the atomic with OpenGL (p4gl_atomic)
+003cf610 render seam: retail runs the sky2 DMA draw, the port draws the atomic with OpenGL (p4gl_atomic)
+# Documented in the native's own source comment
+00393900 retail leaves a stale register in v0 on the callback-stopped path (source comment); the only caller ignores it
+003b88c0 intentional no-op: retail returns a0 junk (source comment)
+# Host replacements of retail library / drive behaviour
+0042e7c8 sceCdSync: the host disc image is never busy, retail reports the drive busy
+00446e88 vprintf: the port prints to the host stdout, retail formats into the reent's stdout buffer
+# Value-representation differences, interpreter-confirmed (-E reproduces the retail value)
+00484b30 returns a 128-bit value: the i386 host ABI returns it through a hidden pointer, retail in $v0/$v1
+# Hardware registers
+001026b0 hardware seam: retail reads GS CSR.FIELD at 0x12001000; the port reads its logical VBLANK field, whose phase is not restored by direct function replay
+# Host kernel model (PortCriC-2's analysis, docs/override_diff.md)
+0042ba20 DIntr/EIntr: the port keeps the SR enable bit in a host variable, retail reads COP0 SR; the recorded state differs
+0042ba70 DIntr/EIntr: the port keeps the SR enable bit in a host variable, retail reads COP0 SR; the recorded state differs
+004226a8 GetThreadId: the port's thread table lacks the recorded retail thread ids
+004cb548 ChangeThreadPriority: the port's thread table lacks the recorded retail thread ids
+004d3850 returns the adxt_obj pool slot, a host pointer, where retail returns a .bss address
+# Port-replaced hardware / middleware state (owners' analysis)
+00509268 the port replaces Sofdec's player state: returns a host object, not the 0x0074430C slot (src/movie)
+005097e8 the port replaces Sofdec's player state: returns a host object, not the 0x0074430C slot (src/movie)
+0050d4d0 the port replaces Sofdec's player state (src/movie)
+005208c8 the port replaces Sofdec's IPU / player state (src/movie)
+00100350 kwlnInitIop: the IOP module / RPC state of the boot call is the host's
+003d30b0 port change documented in the source: retail validates the configuration first and returns without touching the block
+004cbe08 CRI thread creation: the port's thread table numbers threads from 1, retail's boot call got ids 5..8
+004cbf68 CRI thread creation: the port's thread table numbers threads from 1, retail's boot call got ids 5..8
+004cbff0 CRI thread creation: the port's thread table numbers threads from 1, retail's boot call got ids 5..8
+004cc078 CRI thread creation: the port's thread table numbers threads from 1, retail's boot call got ids 5..8
+004cc218 CRI thread creation: the port's thread table numbers threads from 1, retail's boot call got ids 5..8
+004903c0 recording lacks state: the retail code in the interpreter (replay -E) gives the native's values on the recorded pages (mdlEffectSampleKeyState reads key tables the page set misses)
+00498f10 the call's page set misses the page of the frame behind the ring geometry (0x14a1000 is recorded for call 3 only): RpGeometryLock gets NULL, which retail's kernel low RAM tolerates and the host does not
+0049ef50 same as 00498f10 (FlashCenteredStripEmitQuads: RpGeometryLock on the owner's geometry)
+003bfae0 func_003ed850 (frame sync, retail has no null test on the parent) reaches a NULL parent because the frame chain's pages are not all recorded; the other calls: interpreter agrees with the native
+# Seams found by golden11 (CLAIMS.md owners; the port replaces the hardware, IOP or driver behaviour)
+004010c0 render seam: fpSystem, the RenderWare device dispatcher, is the OpenGL device (src/render/p4gl_device.c)
+00422328 kernel seam: the EnableIntc wrapper keeps the interrupt enable in a host variable
+0042eae0 file seam: sceCdInit mounts the host ISO and returns 1, retail returns the drive state 2
+0042e2b8 file seam: the layer-aware file search runs on the host ISO, which a replay does not mount
+0042f6f8 pad seam: scePadInit starts SDL, retail the IOP pad driver
+0042fb50 pad seam: scePadPortOpen, the keyboard / gamepad, not the IOP pad driver
+00430180 pad seam: scePadGetReqState reports the request complete
+00430f80 audio seam: sceSdRemote (libsd client) goes to the host mixer, retail to the IOP
+0043bcb8 audio seam: the SPU heap allocation is the host mixer's
+0043c010 audio seam: the sdr client start is the host mixer's
+004c6fa8 file seam: the ADXF device attach reads the host VFS
+004f2798 file seam: ROFS_SetDir has no per-volume list on the host VFS
+004e58a0 returns a host adxi pool object where retail returns a .bss address (src/cri/adxi_rpc.c)
+00418b18 kernel seam: AddIntcHandler returns the host kernel model's handle id (retail 10, the port 2)
+004ef060 SJUNI_GetNumData sums the chunk chain of a line: golden11 call 64 starts at the chain node 0x0073aaa0, whose page (0x0073a000, only 0x0073a7a0+0x80 is recorded) is not in the call's memory, so the native reads a zero node (length 0) where retail read length 0x4000; the code is the retail asm line for line (func_004ef0a8)
+004ef310 SJUNI_PutChunk pops the free node 0x0073aaa0 from the pool at 0x0074203c: golden11 call 256 does not record that node's page, so its next pointer reads 0 natively (pool becomes 0x0073aaa0 + 0 instead of retail's 0x0073aab0, the node's next); the pool page is the same unrecorded one as 004ef060
+00446ed8 vsprintf (PortFiles) takes the va_list of a retail-compiled caller: the recorded list is a PS2 argument area (8 byte slots), the host vsprintf reads it as a 32 bit x86 list (4 byte slots), so the second argument 0xff is read as the high word 0 ('0000' against '00ff'); in the port every caller is x86 code with an x86 va_list, no PS2 list reaches it
+00486400 two words at 0x01295234/0x0129523c of the recorded call differ (cause not identified; the interpreter on retail is exact): see triage.txt
+00486330 same as 00486400
+004861f0 same as 00486400 (the interpreter run of this one has no valid call)
+# PortPromotedA2's analysis of golden11 (the natives are exact against the retail asm in mipsdiff)
+003de110 replay-unmodelable: the default device's open slot (+0x4C) holds a recorder-side value, not a code address, so retail's open callback cannot run natively
+003c8dd0 the call chain reaches RwFrameGetLTM with a null frame: retail reads PS2 low RAM there, the port does not map it (a native crash, not a defect of this override)
+# PortAsmC-2's analysis: RwEngineRegisterPlugin (func_003e8930) returns the running total of a static registry (engineTKList 0x0070B760);
+# a real native boot gives retail's offsets (4,0x11d -> 0x58c ...), the replay's page for it holds the initial total 0x12c
+00390520 replay artefact: the plugin registry's running total (0x0070B760) is its initial value in the replay, not retail's at frame 198
+003999a0 replay artefact: the plugin registry's running total (0x0070B760) is its initial value in the replay, not retail's at frame 198
+003bd160 replay artefact: the plugin registry's running total (0x0070B760) is its initial value in the replay, not retail's at frame 198

@@ -1,0 +1,3 @@
+--!capability events.field_leave@1
+--!covers event:field_leave
+-- p4.events.on("field_leave") (API 1.0).

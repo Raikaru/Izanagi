@@ -1,0 +1,77 @@
+# mod_item_game battle leg (tests/mod_item_game_test.py): reload the shop leg's save (slot 2), Entrance > Rise > the club >
+# Marukyu 1F, the nearest Shadow; everyone guards while the enemies act, Yu strikes once with the added sword (attack 1)
+# and escapes, so the leg never reaches a victory or Shuffle Time.
+timeout:16000
+wait:140
+press:down
+wait:30
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+wait:300
+skipmsg
+waitcontrol:on
+wait:120
+walk:22,530,12
+wait:20
+press:down:30
+wait:30
+press:cross
+wait:200
+press:cross
+wait:200
+press:cross
+wait:200
+press:down
+wait:30
+press:cross
+wait:200
+press:cross
+wait:200
+press:cross
+wait:200
+press:cross
+wait:200
+press:cross
+wait:200
+press:cross
+wait:200
+press:cross
+wait:200
+wait:200
+press:up:120
+wait:40
+press:up:120
+wait:40
+press:up:120
+wait:40
+press:up:120
+wait:40
+press:cross
+wait:150
+press:cross
+wait:150
+press:cross
+wait:200
+press:cross
+wait:200
+waitcontrol:on
+wait:60
+log
+walk:shadow
+# The card's companions take Direct Commands, and each actor's wheel remembers its last command: every plan starts
+# with Circle (back to Attack). Everyone guards (Up is Guard) while the enemies act for a while.
+battle:first=circle,up,cross;plan=circle,up,cross;delay=120
+waittask:battle
+wait:2400
+# Yu attacks once, then Escape (four Down from Attack) until the party leaves; the companions keep guarding.
+battle:first1=circle,cross,cross;plan1=circle,down,down,down,down,cross;first=circle,up,cross;plan=circle,up,cross;delay=120
+waittask:battle:off
+battle:off
+log
+skipmsg
+waitcontrol:on
+wait:60
+log

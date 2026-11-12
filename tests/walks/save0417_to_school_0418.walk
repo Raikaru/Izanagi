@@ -1,0 +1,38 @@
+# From the 04/17 evening checkpoint (story0417), loaded with P4PC_AUTOPRESS_LOAD=0.
+# 04/18 early morning: asking Chie straight out repeats the question without enough Courage.
+# Pick "Say it's for the investigation" instead; after school, save at the classroom butterfly.
+timeout:6000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+timeout:40000
+waitcontrol:on
+wait:30
+walk:314,-360,25
+face:100
+wait:20
+press:cross
+wait:40
+skipfield:6:6
+choose:1                  # The first morning question.
+choose:1                  # Yosuke's teasing question.
+choose:2                  # Chie's contact information: the investigation, not Courage.
+skipmsg
+# Class 2-2's save point (area 3402, script 111).
+timeout:6000
+walk:-360,600,70
+press:cross
+wait:600
+press:cross
+wait:600
+press:left:12
+wait:400
+press:cross
+wait:1500
+press:cross
+wait:600
+log

@@ -1,0 +1,29 @@
+# New Game through the real first night and tutorial battle, stopping on Nanako's 04/12 rainy-walk dialogue.
+# Same route/input phase as newgame_to_0413.walk up to the dream door; no field, camera or script-state overrides.
+timeout:40000
+skipmsg
+waitcontrol:on
+wait:30
+walk:314,-360,25
+wait:20
+press:cross
+wait:40
+skipmsg
+wait:30
+press:down:200
+wait:30
+press:cross
+wait:40
+skipmsg
+waitcontrol:on
+walk:8160,1989,60
+walk:8400,1989,40
+wait:20
+press:cross
+wait:60
+timeout:60000
+# Release Cross as Nanako opens her first page, then let the text finish. The duration follows the normal story route.
+skip:6550
+wait:300
+log
+exit

@@ -1,0 +1,55 @@
+# Independent post-rescue collection leg: June 5 living room to June 6 reunion and home save.
+# The TV deductions use 2,3,2; Yukiko's memory question uses 1.
+# This neither wins Kanji nor extends the New Game chain.
+# Read-only dialogue probe: stop generating Cross at the actual Aiya field transition.
+timeout:12000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+press:square
+wait:600
+choose:2
+wait:1200
+press:cross
+skipfield:7:1
+skipmsg
+walk:0,330,40
+push:0,-100,35
+press:cross
+choose:1
+skipfield:7:2
+skipmsg
+walk:314,-360,25
+face:100
+wait:20
+press:cross
+wait:40
+timeout:40000
+skipfield:9:1
+choose:2
+choose:3
+choose:2
+choose:1
+skipfield:7:2
+skipmsg
+waitstate16:0x00797b7a==66
+waitfield:7:2
+walk:0,200,40
+walk:103,-20,25
+push:103,-217,25
+wait:900
+press:cross
+wait:600
+press:cross
+wait:600
+press:left:12
+wait:400
+press:cross
+wait:1500
+press:cross
+wait:600
+log

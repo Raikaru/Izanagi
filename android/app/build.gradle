@@ -1,0 +1,75 @@
+// The APK of the Persona 4 PC port. Gradle only packages: libmain.so and its libraries are built with the NDK toolchain file (the NDK,
+// not AGP's CMake integration, because the port's tables step needs the decomp tree and the whole host-library set) into p4.libs, and
+// SDL's Java classes come from the SDL release that built libSDL3.so (p4.sdkJava, copied by ci/android/build_deps.sh).
+//   gradle -p android assembleDebug -Pp4.abi=x86 -Pp4.libs=<dir with <abi>/lib*.so> -Pp4.sdlJava=<SDL android-project java dir>
+plugins {
+    id 'com.android.application'
+}
+
+def p4Abi = project.findProperty('p4.abi') ?: 'x86'
+def p4Libs = project.findProperty('p4.libs') ?: "${rootDir}/../build/android/libs"
+def p4SdlJava = project.findProperty('p4.sdlJava') ?: "${rootDir}/../build/android/deps/sdl-java/app/src/main/java"
+def gitValue = { args ->
+    def output = new ByteArrayOutputStream()
+    exec {
+        workingDir "${rootDir}/.."
+        commandLine(['git'] + args)
+        standardOutput = output
+    }
+    output.toString('UTF-8').trim()
+}
+def p4VersionName = project.findProperty('p4.versionName') ?: gitValue(['describe', '--always', '--tags', '--long'])
+def p4VersionCode = (project.findProperty('p4.versionCode') ?: gitValue(['rev-list', '--count', 'HEAD'])).toInteger()
+def p4Unsigned = project.findProperty('p4.unsigned') == 'true'
+
+android {
+    namespace 'org.p4pc.game'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'org.p4pc.game'
+        minSdk 24
+        targetSdk 34
+        versionCode p4VersionCode
+        versionName p4VersionName
+        manifestPlaceholders = [p4AppLabel: 'Persona 4']
+        ndk { abiFilters p4Abi }
+    }
+
+    sourceSets {
+        main {
+            java.srcDirs = ['src/main/java', p4SdlJava]
+            jniLibs.srcDirs = [p4Libs]
+            assets.srcDirs += ["${rootDir}/../build/android/package-assets"]
+        }
+    }
+
+    buildTypes {
+        debug {
+            applicationIdSuffix '.debug'
+            versionNameSuffix '-debug'
+            manifestPlaceholders = [p4AppLabel: 'P4PC Debug']
+            if (p4Unsigned) signingConfig null
+        }
+        // Explicit, private bridge for migrating a legacy same-ID debug install.
+        // Ordinary phone tests must never use it or the release application ID.
+        migration {
+            initWith debug
+            applicationIdSuffix ''
+            versionNameSuffix '-migration'
+            manifestPlaceholders = [p4AppLabel: 'Persona 4 (migration)']
+            signingConfig = null
+        }
+        release {
+            // Unsigned output: the private release key never leaves the packaging PC.
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}

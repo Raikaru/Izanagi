@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="us-ascii"?>
+<!-- Approved skill-rebalance-design families 1, 2, 2b, 3, 5 and 7 (2026-11-05).
+     Named-field deltas apply over the composed retail or Golden SKILL rows.
+     Multi-hit physicals use split (HP effect kind 14): each hit deals the
+     formula damage divided by the hits rolled against that target, so the total
+     is one tier hit; the target's hit/critical outcome is still rolled once and
+     each hit keeps its own variance. Niflheim and Thunder Reign await their
+     optional Freeze/Shock riders and guards.
+     F5-D1: single-target physical ailment riders take a 45% base rate (Golden
+     35; Poison Arrow already 45). The native chance formula, Guard, immunity
+     and boss rules are unchanged; all-target riders keep Golden's rates.
+     F1: medium singles power 80; all-target light/medium/heavy power 26/51/102
+     and SP 6/12/18. -->
+<p4-table-deltas schema="1">
+<!-- F1-a: Agilao, Garula, Bufula, Zionga. -->
+<skill-delta id="0x02" power="80"/>
+<skill-delta id="0x0F" power="80"/>
+<skill-delta id="0x1B" power="80"/>
+<skill-delta id="0x28" power="80"/>
+<!-- F1-b light: Maragi, Magaru, Mabufu, Mazio. -->
+<skill-delta id="0x04" power="26" cost="6"/>
+<skill-delta id="0x11" power="26" cost="6"/>
+<skill-delta id="0x1D" power="26" cost="6"/>
+<skill-delta id="0x2A" power="26" cost="6"/>
+<!-- F1-b medium: Maragion, Magarula, Mabufula, Mazionga. -->
+<skill-delta id="0x05" power="51" cost="12"/>
+<skill-delta id="0x12" power="51" cost="12"/>
+<skill-delta id="0x1E" power="51" cost="12"/>
+<skill-delta id="0x2B" power="51" cost="12"/>
+<!-- F1-b heavy: Maragidyne, Magarudyne, Mabufudyne, Maziodyne. -->
+<skill-delta id="0x06" power="102" cost="18"/>
+<skill-delta id="0x13" power="102" cost="18"/>
+<skill-delta id="0x1F" power="102" cost="18"/>
+<skill-delta id="0x2C" power="102" cost="18"/>
+<!-- F2 single-hit, no-rider physicals: power and HP percentage. -->
+<skill-delta id="0x78" power="50" cost="6"/><!-- Bash -->
+<skill-delta id="0x79" power="50" cost="6"/><!-- Cleave -->
+<skill-delta id="0x7A" power="50" cost="6"/><!-- Assault Dive -->
+<skill-delta id="0x7B" power="45" cost="6"/><!-- Sonic Punch -->
+<skill-delta id="0x84" power="190" cost="16"/><!-- Gigantic Fist -->
+<skill-delta id="0x8C" power="320" cost="20"/><!-- God's Hand -->
+<skill-delta id="0x8E" power="285" cost="20"/><!-- Primal Force -->
+<skill-delta id="0x90" power="120" cost="11"/><!-- Power Slash -->
+<skill-delta id="0x92" power="200" cost="16"/><!-- Brave Blade -->
+<skill-delta id="0x95" power="40" cost="6"/><!-- Single Shot -->
+<skill-delta id="0x96" power="55" cost="6"/><!-- Skewer -->
+<skill-delta id="0xA8" power="95" cost="11"/><!-- Black Spot -->
+<skill-delta id="0xA9" power="170" cost="16"/><!-- Rainy Death -->
+<skill-delta id="0xAF" power="300" cost="16"/><!-- Vile Assault; keeps Down bonus -->
+<!-- F2b approved identity rows: power, HP percentage, accuracy and crit.
+     Fatal End has no Fear rider; Cruel Attack keeps its native Down bonus. -->
+<skill-delta id="0x80" power="95" cost="11" accuracy="92" critical="20"/><!-- Fatal End -->
+<skill-delta id="0x81" power="80" cost="11" accuracy="95" critical="30"/><!-- Mighty Swing -->
+<skill-delta id="0x83" power="70" cost="15" accuracy="90" critical="10"/><!-- Heat Wave -->
+<skill-delta id="0x86" power="65" cost="15" accuracy="88" critical="20"/><!-- Deathbound -->
+<skill-delta id="0x8A" power="245" cost="20" accuracy="95" critical="40"/><!-- Heaven's Blade -->
+<skill-delta id="0x8F" power="200" cost="28" accuracy="92" critical="13"/><!-- Vorpal Blade -->
+<skill-delta id="0x91" power="70" cost="15" accuracy="95" critical="5"/><!-- Gale Slash -->
+<skill-delta id="0x93" power="85" cost="15" accuracy="85" critical="5"/><!-- Herculean Strike -->
+<skill-delta id="0x94" power="145" cost="22" accuracy="90" critical="8"/><!-- Vicious Strike -->
+<skill-delta id="0xAE" power="100" cost="11" accuracy="99" critical="5"/><!-- Cruel Attack -->
+<!-- F2 single-hit ailment-rider physicals with F5-D1's rider rate. Poison Arrow
+     takes its 2b identity row (P3-8). -->
+<skill-delta id="0x97" power="45" cost="6" ailment-rate="45"/><!-- Poison Skewer, Poison -->
+<skill-delta id="0x9B" power="45" cost="6" ailment-rate="45"/><!-- Skull Cracker, Panic -->
+<skill-delta id="0x9F" power="45" cost="6" ailment-rate="45"/><!-- Muzzle Shot -->
+<skill-delta id="0xA3" power="85" cost="11" ailment-rate="45"/><!-- Cell Breaker, Enervation -->
+<skill-delta id="0x98" power="75" cost="11" accuracy="95" critical="5" ailment-rate="45"/><!-- Poison Arrow, Poison -->
+<!-- F2 single-hit all-target ailment physicals: preserve each composed
+     row's status, rate, accuracy, critical and delivery. Atom Smasher is
+     the multi-hit member below and keeps its native all-target rider too. -->
+<skill-delta id="0x99" power="140" cost="22"/><!-- Blight -->
+<skill-delta id="0x9A" power="125" cost="22"/><!-- Virus Wave -->
+<skill-delta id="0x9C" power="70" cost="15"/><!-- Mind Slice -->
+<skill-delta id="0x9E" power="70" cost="15"/><!-- Crazy Chain -->
+<skill-delta id="0xA0" power="70" cost="15"/><!-- Seal Bomb -->
+<skill-delta id="0xA4" power="70" cost="15"/><!-- Mustard Bomb -->
+<skill-delta id="0xA6" power="70" cost="15"/><!-- Navas Nebula -->
+<!-- F2 multi-hit physicals: split, approved power and HP percentage. Hit ranges,
+     accuracy and crit stay native except the F2b rows below them.
+     Rampage is the 75-accuracy party row; the 300-power 0xB0 row is not F2's. -->
+<skill-delta id="0x7C" power="55" cost="6" split="1"/><!-- Double Fangs, 2 hits -->
+<skill-delta id="0x7D" power="55" cost="6" split="1"/><!-- Kill Rush, 1-3 -->
+<skill-delta id="0x7F" power="55" cost="6" split="1"/><!-- Twin Shot, 2 -->
+<skill-delta id="0x9D" power="45" cost="6" split="1" ailment-rate="45"/><!-- Hysterical Slap, 2; Rage rider -->
+<skill-delta id="0xA1" power="45" cost="6" split="1" ailment-rate="45"/><!-- Arm Chopper, 2; Fear rider -->
+<skill-delta id="0xA5" power="45" cost="6" split="1" ailment-rate="45"/><!-- Brain Shake, 1-3; Exhaust rider -->
+<skill-delta id="0x82" power="115" cost="11" split="1"/><!-- Torrent Shot, 2-4 -->
+<skill-delta id="0xAB" power="55" cost="8" split="1"/><!-- Rampage, all, 1-3 -->
+<skill-delta id="0x7E" power="50" cost="8" split="1"/><!-- Swift Strike, all, 1-2 -->
+<skill-delta id="0xA2" power="55" cost="15" split="1"/><!-- Atom Smasher, all, 1-2; Fear rider -->
+<skill-delta id="0x85" power="75" cost="15" split="1"/><!-- Blade of Fury, all, 2-4 -->
+<skill-delta id="0xAC" power="220" cost="22" split="1"/><!-- Aeon Rain, all, 1-3 -->
+<skill-delta id="0xAD" power="330" cost="28" split="1"/><!-- Agneyastra, all, 1-3 -->
+<skill-delta id="0xAA" power="330" cost="28" split="1"/><!-- Hassou Tobi, all, 8 -->
+<!-- F2b multi-hit identity rows (P3-5, P3-8): Tempest Slash 1-4 and Myriad
+     Arrows 2-5 hits; Arrow Rain and Akasha Arts keep their ranges. -->
+<skill-delta id="0x89" power="100" cost="11" accuracy="95" critical="10" min-hits="1" max-hits="4" split="1"/><!-- Tempest Slash -->
+<skill-delta id="0x8B" power="160" cost="22" accuracy="87" critical="5" min-hits="2" max-hits="5" split="1"/><!-- Myriad Arrows -->
+<skill-delta id="0x87" power="195" cost="22" accuracy="80" critical="5" split="1"/><!-- Arrow Rain, all, 2 -->
+<skill-delta id="0x88" power="160" cost="22" accuracy="85" critical="10" split="1"/><!-- Akasha Arts, all, 1-2 -->
+<!-- P3 identity: severe Fire/Wind, fixed HP drain. Cost type and native
+     accuracy remain unchanged; Life Drain's kind 13 uses power as fixed HP. -->
+<skill-delta id="0x08" power="325" cost="30"/><!-- Ragnarok -->
+<skill-delta id="0x15" power="325" cost="30"/><!-- Panta Rhei -->
+<skill-delta id="0x65" power="35" cost="3"/><!-- Life Drain -->
+<!-- F3 and P3-3: Almighty ladder and Morning Star's distinct identity. -->
+<skill-delta id="0x33" power="55" cost="18"/><!-- Megido -->
+<skill-delta id="0x34" power="110" cost="27"/><!-- Megidola -->
+<skill-delta id="0x35" power="165" cost="40"/><!-- Megidolaon -->
+<skill-delta id="0x37" power="255" cost="40"/><!-- Black Viper -->
+<skill-delta id="0x38" power="204" cost="45"/><!-- Morning Star -->
+<!-- Family 7, F7-D1/D2 (skill-rebalance-design.md section 10): native
+     max-HP percentages, with Divine Grace, and approved group-heal costs. -->
+<skill-delta id="0xC0" max-heal="25"/><!-- Dia; 3 SP unchanged -->
+<skill-delta id="0xC1" max-heal="50"/><!-- Diarama; 6 SP unchanged -->
+<skill-delta id="0xC3" max-heal="22" cost="12"/><!-- Media -->
+<skill-delta id="0xC4" max-heal="42" cost="24"/><!-- Mediarama -->
+<!-- Family 7, F7-D2 (skill-rebalance-design.md section 10): full heals
+     retain their composed 100%-of-max effect and all metadata except SP cost. -->
+<skill-delta id="0xC2" cost="12"/><!-- Diarahan -->
+<skill-delta id="0xC5" cost="36"/><!-- Mediarahan -->
+</p4-table-deltas>

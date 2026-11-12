@@ -1,0 +1,14 @@
+# Load the seed's first slot through the title (P4PC_AUTOPRESS_LOAD=0, frame 0 = the load
+# confirm) and stop once the player is free: the start of the bundled QoL mod's menu witnesses
+# (tests/mod_qol_game_test.py), whose P4PC_MENU_SCRIPT waits for this walk with `walkdone`.
+timeout:6000
+wait:140
+press:cross               # the slot
+wait:140
+press:cross               # Yes
+wait:140
+press:cross               # Load successful
+skipmsg                   # the load's Help window, until the player is free
+timeout:30000
+waitcontrol:on
+wait:120

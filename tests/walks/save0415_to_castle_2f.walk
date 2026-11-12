@@ -1,0 +1,79 @@
+# From the port-made save of the 04/15 evening (saves/story0415, see tests/story_gate.sh --make-save; loaded through the title with
+# P4PC_AUTOPRESS_LOAD=0, frame 0 = the load confirm) through Castle 1F's fights to the 2F landing on 04/17.
+# Plays 04/15 night, 04/16's events and 04/17's police/Daidara visit before entering the castle.
+timeout:6000
+wait:140
+press:cross               # the slot
+wait:140
+press:cross               # Yes
+wait:140
+press:cross               # Load successful
+skipmsg                   # the load's Help window, until the player is free
+timeout:40000
+# 04/15 night: stairs, futon
+waitcontrol:on
+wait:30
+walk:314,-360,25          # the foot of the stairs (the CHECK icon)
+face:100                  # toward the trigger (area x 227..584 z -476..-282): Cross needs it within the cone
+wait:20
+press:cross               # go upstairs
+wait:40
+skipmsg
+wait:30
+press:down:200            # to the wall by the futon
+wait:30
+press:cross               # CHECK the futon, "Go to sleep?" Yes
+wait:40
+skipmsg                   # the night, 04/16 (school, Junes, the rain) up to the evening in the living room
+# 04/16 evening: the front door (area 3400, `door_entrance`) is still shut; upstairs, and the story takes the player on
+waitcontrol:on
+wait:30
+walk:314,-360,25
+face:100
+wait:20
+press:cross
+wait:40
+skipfield:8:4             # the Midnight Channel, 04/17, the police station, then Daidara (field 8 room 4)
+# Advance the talk only until the shop task appears, not for a fixed load-dependent duration.
+skiptask:Y_FclShopMainProc
+wait:90
+press:circle:10
+wait:90
+press:circle:10
+wait:90
+press:circle:10
+wait:90
+press:circle:10
+wait:90
+waittask:Y_FclShopMainProc:off
+skipmsg                   # the rest of the scene, until the player is free in the shopping district
+# The street's east end: the bus stop (area 3406, `basutei`), then east past it onto the exit (area 3400, `call_lmap`: Cross opens the map and picks Junes)
+timeout:20000
+walk:661,250,40
+push:1000,150,60
+wait:10
+press:cross
+skipfield:9:1             # Junes (field 9 room 1)
+# Junes: Yosuke, Chie and Teddie at the TV (f009_001, f020_001), through it into Yukiko's Castle (field 23): the gate, free control
+skipmsg
+
+# Into the castle (the gate's door area, then field 40 room 0 = 1F, a generated floor), through its three shadow fights to the stairs, up to the 2F
+# landing (field 23 room 3) where Teddie's scene ends and the player is free. The planner routes over the floor's cell grid (plan:on); the battle
+# driver plays Cross-only (the wheel's first command is Attack), Shuffle Time included; battleskip:on keeps a walk going through the fights.
+timeout:6000
+walk:0,200,40
+press:cross
+wait:200
+skipfield:40:0
+timeout:12000
+skipmsg
+plan:on
+battleskip:on
+battle:first=cross,cross,cross;plan=cross,cross,cross;skip=0;delay=20
+timeout:30000
+walk:goal
+press:cross
+wait:600
+timeout:12000
+skipmsg
+wait:600

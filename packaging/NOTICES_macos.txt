@@ -1,0 +1,61 @@
+Third-party software in this package
+====================================
+
+This program is a port of the game's code to PC. Persona 4 itself, its code, data and
+trademarks belong to Atlus / SEGA; this package contains none of it and needs your own
+disc image.
+
+The port's own code is MIT-licensed (licenses/p4pc-MIT.txt). Code reconstructed from the
+retail game (decompiled or translated functions) is not licensed by the port's authors;
+see licenses/NOTICE.txt.
+
+FFmpeg libraries (Persona 4 PC.app/Contents/Frameworks/libavcodec.*.dylib, libavutil.*.dylib,
+libswscale.*.dylib)
+  FFmpeg @FFMPEG_VER@, https://ffmpeg.org, GNU Lesser General Public License version 2.1 or
+  later (licenses/FFmpeg-LGPL-2.1.txt). Built from the unmodified release tarball
+  ffmpeg-@FFMPEG_VER@.tar.xz (https://ffmpeg.org/releases/ffmpeg-@FFMPEG_VER@.tar.xz, sha256
+  @FFMPEG_SHA@) with --disable-gpl --disable-nonfree and only these components
+  enabled: libavcodec (MPEG-2 video decoder and parser, ADX audio decoder) and
+  libswscale. Complete sources and the build recipe are in source/
+  (ffmpeg-@FFMPEG_VER@.tar.xz and build_deps.sh). The libraries are separate dylibs: you may replace them
+  with your own build of FFmpeg @FFMPEG_VER@ of the same ABI (install name
+  @rpath/<library>), which is what the LGPL asks of a program that uses them. The
+  program, Contents/MacOS/p4pc, contains no FFmpeg code.
+
+SDL3 (Contents/Frameworks/libSDL3.0.dylib)
+  Simple DirectMedia Layer @SDL_VER@, https://libsdl.org, zlib license
+  (licenses/SDL3-zlib.txt). Unmodified release build.
+
+ANGLE (Contents/Frameworks/libEGL.dylib, libGLESv2.dylib)
+  The OpenGL ES implementation on Metal the game draws with. Chromium's build of
+  ANGLE (BSD 3-clause), unmodified, taken from Electron @ELECTRON_VER@ for macOS
+  (https://github.com/electron/electron/releases,
+  electron-v@ELECTRON_VER@-darwin-@ELECTRON_ARCH@.zip, sha256 @ELECTRON_SHA@). Its
+  licence and those of the code it contains are in licenses/LICENSES.chromium.html
+  (Chromium's notice file from the same release); Electron's own licence is
+  licenses/Electron-LICENSE.txt.
+
+LodePNG 20261006: zlib license (licenses/LodePNG-zlib.txt).
+
+cgltf 1.15 (Johannes Kuhlmann): MIT license (licenses/cgltf-MIT.txt).
+
+Luau 0.744 (when enabled)
+  MIT, including inherited Lua notices: licenses/Luau-MIT.txt and
+  licenses/Lua-MIT.txt. The exact vendored source and local patches are in
+  source/luau-source.tar.gz.
+
+The C and C++ runtime are macOS's own (libSystem, libc++); nothing of them is
+shipped. The compiler and SDK versions are recorded in source/runtime-provenance.txt.
+
+dlmalloc (Doug Lea): public domain.
+Okumura LZARI and Ross Ridge mymc, adapted in the MAX save importer: public domain.
+
+miniz 3.0.2 (licenses/miniz-MIT.txt) and yxml (licenses/yxml-MIT.txt): MIT.
+
+fdlibm (Sun Microsystems), in the translated libm cores: licenses/fdlibm-Sun.txt.
+newlib stdio/stdlib (UC Berkeley, AT&T), adapted in the translated EE stdio cores: BSD, licenses/newlib-BSD.txt.
+
+CRI middleware headers from recvx-decomp (AshfordFamily): MIT, licenses/recvx-decomp-MIT.txt.
+
+Parts of the renderer follow sky2hook by tge-was-taken, reused with the author's
+permission.

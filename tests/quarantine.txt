@@ -1,0 +1,1 @@
+# gate owner expiry-UTC reason (expiry is exclusive; gates still run)

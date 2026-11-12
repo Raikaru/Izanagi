@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="us-ascii"?>
+<!-- Freeze and Shock (design 4.F). Enemy-to-party riders roll half the chance
+     (enemy-scale 50). Every boss row below is immune to both (the 0x01000000 null
+     flag): bosses cannot be frozen or shocked in v1 (guard F-G3), including
+     Shadow Yukiko, who keeps her Fear window instead. -->
+<p4-tables schema="1">
+<element id="24" flags="4" family="24" order="24" key="p4pc.hardmode:freeze" display-name="Freeze" short-name="Frz"/>
+<element id="25" flags="4" family="25" order="25" key="p4pc.hardmode:shock" display-name="Shock" short-name="Shk"/>
+<status-ailment element="24" flags="15" cure-mask="0x16" default-from="2" crit-bonus="100" enemy-scale="50" key="p4pc.hardmode:freeze-ailment"/>
+<status-ailment element="25" flags="7" cure-mask="0x16" default-from="3" crit-bonus="100" transfer="25" enemy-scale="50" key="p4pc.hardmode:shock-ailment"/>
+<status-rider skill="0x01A" element="24" rate="10" key="p4pc.hardmode:freeze-bufu"/>
+<status-rider skill="0x01B" element="24" rate="12" key="p4pc.hardmode:freeze-bufula"/>
+<status-rider skill="0x01C" element="24" rate="15" key="p4pc.hardmode:freeze-bufudyne"/>
+<status-rider skill="0x01D" element="24" rate="6" key="p4pc.hardmode:freeze-mabufu"/>
+<status-rider skill="0x01E" element="24" rate="8" key="p4pc.hardmode:freeze-mabufula"/>
+<status-rider skill="0x01F" element="24" rate="10" key="p4pc.hardmode:freeze-mabufudyne"/>
+<status-rider skill="0x020" element="24" rate="10" key="p4pc.hardmode:freeze-cocytus-pain"/>
+<status-rider skill="0x021" element="24" rate="60" key="p4pc.hardmode:freeze-niflheim"/>
+<status-rider skill="0x022" element="24" rate="10" key="p4pc.hardmode:freeze-bloody-rain"/>
+<status-rider skill="0x027" element="25" rate="10" key="p4pc.hardmode:shock-zio"/>
+<status-rider skill="0x028" element="25" rate="12" key="p4pc.hardmode:shock-zionga"/>
+<status-rider skill="0x029" element="25" rate="15" key="p4pc.hardmode:shock-ziodyne"/>
+<status-rider skill="0x02A" element="25" rate="6" key="p4pc.hardmode:shock-mazio"/>
+<status-rider skill="0x02B" element="25" rate="8" key="p4pc.hardmode:shock-mazionga"/>
+<status-rider skill="0x02C" element="25" rate="10" key="p4pc.hardmode:shock-maziodyne"/>
+<status-rider skill="0x02D" element="25" rate="10" key="p4pc.hardmode:shock-narukami"/>
+<status-rider skill="0x02E" element="25" rate="60" key="p4pc.hardmode:shock-thunder-reign"/>
+<status-rider skill="0x168" element="25" rate="10" key="p4pc.hardmode:shock-fanatical-spark"/>
+<affinity kind="1" entity="258" profile="258" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="317" profile="317" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="269" profile="269" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="269" profile="269" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="272" profile="272" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="272" profile="272" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="273" profile="273" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="273" profile="273" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="257" profile="257" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="257" profile="257" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="258" profile="258" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="259" profile="259" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="259" profile="259" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="260" profile="260" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="260" profile="260" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="261" profile="261" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="261" profile="261" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="262" profile="262" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="262" profile="262" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="263" profile="263" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="263" profile="263" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="264" profile="264" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="264" profile="264" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="265" profile="265" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="265" profile="265" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="266" profile="266" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="266" profile="266" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="267" profile="267" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="267" profile="267" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="270" profile="270" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="270" profile="270" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="271" profile="271" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="271" profile="271" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="274" profile="274" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="274" profile="274" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="274" profile="320" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="274" profile="320" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="274" profile="321" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="274" profile="321" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="274" profile="322" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="274" profile="322" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="274" profile="323" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="274" profile="323" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="274" profile="324" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="274" profile="324" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="274" profile="325" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="274" profile="325" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="274" profile="326" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="274" profile="326" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="274" profile="327" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="274" profile="327" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="288" profile="288" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="288" profile="288" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="289" profile="289" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="289" profile="289" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="290" profile="290" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="290" profile="290" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="291" profile="291" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="291" profile="291" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="292" profile="292" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="292" profile="292" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="293" profile="293" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="293" profile="293" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="294" profile="294" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="294" profile="294" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="295" profile="295" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="295" profile="295" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="296" profile="296" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="296" profile="296" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="297" profile="297" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="297" profile="297" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="304" profile="304" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="304" profile="304" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="305" profile="305" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="305" profile="305" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="306" profile="306" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="306" profile="306" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="307" profile="307" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="307" profile="307" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="308" profile="308" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="308" profile="308" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="309" profile="309" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="309" profile="309" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="310" profile="310" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="310" profile="310" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="311" profile="311" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="311" profile="311" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="312" profile="312" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="312" profile="312" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="313" profile="313" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="313" profile="313" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="314" profile="314" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="314" profile="314" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="315" profile="315" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="315" profile="315" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="316" profile="316" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="316" profile="316" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="317" profile="317" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="318" profile="318" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="318" profile="318" element="25" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="319" profile="319" element="24" channel="2" value="0x01000064" scalar="100"/>
+<affinity kind="1" entity="319" profile="319" element="25" channel="2" value="0x01000064" scalar="100"/>
+</p4-tables>

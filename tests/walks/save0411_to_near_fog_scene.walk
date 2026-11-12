@@ -1,0 +1,32 @@
+# Real 04/11 living-room checkpoint -> the near end of the fog dream's corridor.
+# The stairs/futon inputs are the existing save0411_to_dream.walk route.
+# Stop automatic dialogue skipping before the last corridor approach, turn back and recenter with the game's Circle camera control.
+timeout:6000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+wait:30
+walk:314,-360,25
+wait:20
+press:cross
+wait:40
+skipmsg
+wait:30
+press:down:200
+wait:30
+press:cross
+wait:40
+skipmsg
+timeout:40000
+waitcontrol:on
+walk:8640,6500,30
+autoskip:off
+walk:8640,3944,12
+face:0
+press:circle
+wait:180
+log

@@ -1,0 +1,85 @@
+# Independent pristine collection card4-slot14, 12/05 in Shopping District South during the
+# information search. Asking the shopping woman (North) both questions completes it; name Adachi
+# at Aiya, question him, sleep through 12/06's story and save at home that evening.
+timeout:20000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+timeout:20000
+waitcontrol:on
+press:square
+waitchoice
+choose:1
+timeout:8000
+skipfield:8:1
+skipmsg
+waitcontrol:on
+log
+plan:on
+timeout:8000
+walk:-1131,-3788,150
+plan:off
+push:-1131,-3788,10
+press:cross
+wait:60
+timeout:3000
+waitchoice
+choose:1
+timeout:6000
+skipmsg
+log
+plan:on
+timeout:8000
+walk:-1131,-3788,150
+plan:off
+push:-1131,-3788,10
+press:cross
+wait:60
+timeout:3000
+waitchoice
+choose:2
+# The meeting at Aiya, then name the culprit: Someone else > Someone else > Tohru Adachi.
+timeout:60000
+choose:5
+choose:4
+choose:3
+choose:1                  # "It's him, all right."
+# Question Adachi: Saki's interrogation, when Yamano vanished, then the warning letter.
+choose:2
+choose:1
+choose:3
+timeout:120000
+skipmsg
+waitfield:7:2
+waitcontrol:on
+# Go to bed; 12/06's story ends at home in the evening.
+timeout:20000
+walk:314,-360,25
+face:100
+wait:20
+press:cross
+wait:40
+timeout:80000
+skipmsg
+waitstate16:0x00797b7a==249
+waitcontrol:on
+# Save at home.
+timeout:6000
+walk:103,-20,25
+push:103,-217,25
+wait:900
+press:cross
+wait:600
+press:cross
+wait:600
+press:left:12
+wait:400
+press:cross
+wait:1500
+press:cross
+wait:600
+log

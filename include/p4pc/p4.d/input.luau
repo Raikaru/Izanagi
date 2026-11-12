@@ -1,0 +1,3 @@
+--!capability input@1
+--!covers p4.input
+-- p4.input.action and sticks (API 1.0).

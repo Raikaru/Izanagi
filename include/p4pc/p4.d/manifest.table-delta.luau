@@ -1,0 +1,3 @@
+--!capability manifest.table-delta@4
+--!covers section:table-delta
+-- mod.ini [table-delta]: named-field changes to skill rows (revision 2: hit counts and split damage; revision 3: ailment rate; revision 4: max-HP healing with Divine Grace) and party learnsets, composed after every derived producer.

@@ -1,0 +1,10 @@
+# The fog dream: the corridor to its door, the door (per4DungeonDoor, x 8400, z 1800, Cross within 250 units), the tutorial battle,
+# the wake-up on 04/12, breakfast, the walk to school and the school day: Cross through every message and event until the player is free.
+waitcontrol:on
+walk:8160,1989,60         # the corridor runs along -Z from z 24000; messages on the way are skipped (autoskip)
+walk:8400,1989,40         # the end of the corridor
+wait:20
+press:cross               # the door
+wait:60
+timeout:60000
+skipmsg

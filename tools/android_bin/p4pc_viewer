@@ -1,0 +1,3 @@
+#!/bin/sh
+# Shim for the gate scripts: runs the program on the Android device (tools/android_prog.py).
+exec "${P4PC_PYTHON:-python}" "$(dirname "$0")/../android_prog.py" run p4pc_viewer "$@"

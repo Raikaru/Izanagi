@@ -1,0 +1,3 @@
+--!capability events.frame_start@1
+--!covers event:frame_start
+-- p4.events.on("frame_start") (API 1.0).

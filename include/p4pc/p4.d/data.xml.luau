@@ -1,0 +1,3 @@
+--!capability data.xml@1
+--!covers file:data/edits.xml
+-- data/edits.xml: the data-only twin of data.luau's edits, the same rows, names, fields and layer rules (docs/modding/systems/data-and-edits.md).

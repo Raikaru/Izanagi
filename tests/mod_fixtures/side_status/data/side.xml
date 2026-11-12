@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="us-ascii"?>
+<p4-tables schema="1">
+<element id="26" flags="12" family="26" order="26" key="witness.side-status:numb" display-name="Numb" short-name="Nmb"/>
+<status-ailment element="26" flags="7" cure-mask="0x16" default-from="3" crit-bonus="100" key="witness.side-status:numb-ailment"/>
+</p4-tables>

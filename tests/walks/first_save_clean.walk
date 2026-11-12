@@ -1,0 +1,23 @@
+# New Game events (AUTOPRESS cross/start) until the first control in the Dojima living room
+timeout:40000
+skipmsg                   # the opening events, then the Help window: Cross until the player is free
+# Dojima living room (04/11 evening) -> stairs -> Your Room -> futon -> "Go to sleep? Yes" -> the fog dream, controllable.
+# Retail: p4hook --walk FILE (from the state ng-livingroom). Port: P4PC_WALK_SCRIPT=FILE after the New Game events.
+# Coordinates are world units read from the player's matrix (task `rotate pc`, work + 0x48): living room x -313..459, z -270..222.
+waitcontrol:on
+wait:30
+timeout:3000
+autoskip:off
+walk:314,-360,25
+walk:350,30,30
+walk:0,30,30
+walk:140,-140,30
+push:103,-217,150
+wait:900
+press:cross
+wait:600
+press:cross
+wait:1500
+press:cross
+wait:600
+log

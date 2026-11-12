@@ -1,0 +1,44 @@
+# From an Entrance checkpoint: leave the TV, sleep, and save after school.
+# The gate supplies the input card and expected next-school-day date.
+timeout:6000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+walk:0,-100,40
+press:cross
+choose:1
+timeout:20000
+skipfield:7:2
+skipmsg
+log
+walk:314,-360,25
+face:100
+wait:20
+press:cross
+wait:40
+skipmsg
+wait:30
+press:down:200
+wait:30
+press:cross
+wait:40
+timeout:40000
+skipmsg
+# Save at the classroom butterfly after the next school's morning events.
+timeout:6000
+walk:-360,600,70
+press:cross
+wait:600
+press:cross
+wait:600
+press:left:12
+wait:400
+press:cross
+wait:1500
+press:cross
+wait:600
+log

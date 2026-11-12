@@ -1,0 +1,170 @@
+# The retail-free part of the land check's shards (tools/ci_shard.sh): x64 (the Linux x86_64 build and its port64 tests) and win32 (the
+# 32-bit Windows build and its host tests under Wine) in the p4pc-ci image, a64 (the Linux AArch64 build and its tests) natively on an ARM
+# runner in ci/Dockerfile.arm64's image, mobile (the Android arm64 generation and census) with the pinned NDK, and, on a branch whose name
+# ends in -macos (a land that changes the rewriter or its census), the macOS census of both architectures on GitHub's Macs. The private
+# land queue pushes one candidate's public tree as a branch land/<id>, reads each shard's result.json (kept one day) and deletes the
+# branch and the run; tests that need the game skip here and run in the private check. On main the same shards keep their compiler
+# caches warm for those branches: caches written on a land/<id> branch would be visible to that branch only.
+name: land
+
+on:
+  push:
+    branches: [main, 'land/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  shard:
+    name: Land shard ${{ matrix.shard }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - shard: x64
+            runner: ubuntu-24.04
+            dockerfile: Dockerfile
+            image: p4pc-land-ci
+            ccache: ccache-test-
+          - shard: win32
+            runner: ubuntu-24.04
+            dockerfile: Dockerfile
+            image: p4pc-land-ci
+            ccache: ccache-test-
+          - shard: a64
+            runner: ubuntu-24.04-arm
+            dockerfile: Dockerfile.arm64
+            image: p4pc-land-ci-arm64
+            ccache: ccache-land-a64-
+          - shard: mobile
+            runner: ubuntu-24.04
+            dockerfile: Dockerfile
+            image: p4pc-land-ci
+            ccache: ccache-land-mobile-
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      # The image is published once per ci/ tree as ghcr.io/<owner>/<image>:<tree>: the Dockerfiles start from a moving
+      # debian:trixie-slim, so a layer cache misses whenever that tag moves and every check would rebuild it (7 minutes).
+      - name: CI image (ghcr.io, built and published when ci/ changed)
+        env:
+          GH_ACTOR: ${{ github.actor }}
+          GH_TOKEN: ${{ github.token }}
+          IMAGE: ${{ matrix.image }}
+          DOCKERFILE: ${{ matrix.dockerfile }}
+        run: |
+          tag=ghcr.io/$(echo "$GITHUB_REPOSITORY_OWNER" | tr 'A-Z' 'a-z')/$IMAGE:$(git rev-parse HEAD:ci)
+          echo "$GH_TOKEN" | docker login ghcr.io -u "$GH_ACTOR" --password-stdin
+          if docker pull --quiet "$tag"; then
+            docker tag "$tag" p4pc-ci
+          else
+            docker build --quiet -t p4pc-ci -f "ci/$DOCKERFILE" ci
+            docker tag p4pc-ci "$tag"
+            docker push --quiet "$tag" || echo "::warning::could not publish $tag"
+          fi
+          docker image inspect --format '{{.Id}}' p4pc-ci
+      - uses: actions/cache/restore@v4
+        with:
+          path: .ccache
+          key: ccache-land-${{ matrix.shard }}-${{ github.sha }}
+          restore-keys: |
+            ccache-land-${{ matrix.shard }}-
+            ${{ matrix.ccache }}
+      # mobile: the NDK ci/android/Dockerfile pins, from the runner's Android SDK, and SDL3/FFmpeg for Android cached per build script.
+      - name: Android NDK (ci/android/Dockerfile's version)
+        if: matrix.shard == 'mobile'
+        run: |
+          version=$(sed -n 's/^ARG NDK_VERSION=//p' ci/android/Dockerfile)
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "ndk;$version" > /dev/null
+          echo "NDK=$ANDROID_HOME/ndk/$version" >> "$GITHUB_ENV"
+          mkdir -p .android-cache
+      - uses: actions/cache/restore@v4
+        if: matrix.shard == 'mobile'
+        with:
+          path: .android-cache
+          key: android-deps-${{ hashFiles('ci/android/build_deps.sh') }}
+      - name: Shard ${{ matrix.shard }} (tools/ci_shard.sh)
+        env:
+          SHARD: ${{ matrix.shard }}
+        run: |
+          P4PC_IMAGE_ID=$(docker image inspect --format '{{.Id}}' p4pc-ci)
+          export P4PC_IMAGE_ID
+          set --
+          if [ "$SHARD" = mobile ]; then
+            set -- -v "$NDK:/opt/ndk" -e ANDROID_NDK_HOME=/opt/ndk -v "$PWD/.android-cache:/android-cache" -e P4PC_ANDROID_CACHE=/android-cache
+          fi
+          docker run --rm -v "$PWD:/src" -v "$PWD/.ccache:/ccache" -w /src -e SHARD -e P4PC_IMAGE_ID "$@" p4pc-ci sh -euc '
+            git config --global --add safe.directory "*"
+            sh tools/ci_shard.sh "$SHARD" build/land-$SHARD land-result
+          '
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: land-${{ matrix.shard }}
+          path: land-result/
+          retention-days: 1
+          if-no-files-found: error
+      - uses: actions/cache/save@v4
+        if: always() && github.ref == 'refs/heads/main'
+        with:
+          path: .ccache
+          key: ccache-land-${{ matrix.shard }}-${{ github.sha }}
+      - uses: actions/cache/save@v4
+        if: always() && github.ref == 'refs/heads/main' && matrix.shard == 'mobile'
+        with:
+          path: .android-cache
+          key: android-deps-${{ hashFiles('ci/android/build_deps.sh') }}
+
+  macos:
+    name: Land shard macos-${{ matrix.arch }}
+    if: endsWith(github.ref_name, '-macos')
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: arm64
+            runner: macos-latest
+          - arch: x86_64
+            runner: macos-15-intel
+    env:
+      DEPS: ${{ github.workspace }}/build/macos-deps
+      P4PC_DL_CACHE: ${{ github.workspace }}/build/dl-cache
+      P4PC_BUILD_CACHE_DIR: ${{ github.workspace }}/build/rewrite-cache
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Ninja
+        run: |
+          python3 -m venv "$RUNNER_TEMP/venv"
+          "$RUNNER_TEMP/venv/bin/pip" install --quiet ninja
+          echo "$RUNNER_TEMP/venv/bin" >> "$GITHUB_PATH"
+          echo "P4PC_BUILD_TOOLCHAIN_ID=sha256:$({ cat ci/macos/build_deps.sh; xcrun --sdk macosx --show-sdk-version; uname -m; } | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_ENV"
+      # The build workflow's caches on main (build.yml): the pinned clang, SDL3, FFmpeg and ANGLE, and the rewrite cache.
+      - uses: actions/cache/restore@v4
+        with:
+          path: build/macos-deps
+          key: macos-deps-${{ matrix.arch }}-${{ hashFiles('ci/macos/build_deps.sh') }}
+      - name: Clang, SDL3, FFmpeg and ANGLE (ci/macos/build_deps.sh)
+        run: sh ci/macos/build_deps.sh "$DEPS"
+      - uses: actions/cache/restore@v4
+        with:
+          path: build/rewrite-cache
+          key: macos-rewrite-${{ matrix.arch }}-${{ github.sha }}
+          restore-keys: macos-rewrite-${{ matrix.arch }}-
+      - name: Census (tools/ci_shard.sh macos)
+        run: sh tools/ci_shard.sh macos build/land-macos land-result
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: land-macos-${{ matrix.arch }}
+          path: land-result/
+          retention-days: 1
+          if-no-files-found: error

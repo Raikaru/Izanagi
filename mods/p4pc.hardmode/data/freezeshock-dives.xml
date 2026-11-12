@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="us-ascii"?>
+<p4-tables schema="1">
+<status-rider skill="700" element="24" rate="15" key="p4pc.hardmode:freeze-frost-dive"/>
+<status-rider skill="701" element="25" rate="15" key="p4pc.hardmode:shock-thunder-dive"/>
+</p4-tables>

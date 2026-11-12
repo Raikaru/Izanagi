@@ -1,0 +1,48 @@
+# RenderWare clean math (src/rwclean, docs/rw_clean.md): its retail-addressed functions (ctest rwclean_ovdiff_math).
+# Not listed (their retail code needs the started engine, which ovdiff does not build): _rwMatrixOpen, RwMatrixCreate,
+# RwMatrixDestroy and RwV3dTransformPoint(s)/Vector(s); the study's i386 engine harness (docs/rw_clean.md) and the game
+# gates cover them.
+003dc490  # RtQuatConvertFromMatrix x-dominant helper
+003dc510  # RtQuatConvertFromMatrix y-dominant helper
+003dc590  # RtQuatConvertFromMatrix z-dominant helper
+003dc610  # RtQuatConvertFromMatrix
+003dc740  # RtQuatRotate
+003dcb40  # RtQuatTransformVectors
+003df440  # _rwColorOpen
+003df460  # _rwColorClose
+003df8c0  # MatrixMultiply
+003df9f0  # RwMatrixOrthoNormalize
+003dff20  # MatrixInvertGeneric
+003e00f0  # _rwMatrixSetMultFn
+003e0130  # _rwMatrixDeterminant
+003e0180  # _rwMatrixOrthogonalError
+003e01e0  # _rwMatrixNormalError
+003e0250  # _rwMatrixClose
+003e0380  # RwEngineGetMatrixTolerances
+003e03b0  # RwEngineSetMatrixTolerances
+003e03e0  # RwMatrixOptimize
+003e05d0  # RwMatrixUpdate
+003e05f0  # RwMatrixMultiply
+003e0670  # rwcMatrixOrthoNormalizeEntry
+003e0680  # RwMatrixRotateOneMinusCosineSine
+003e0870  # RwMatrixRotate
+003e0960  # RwMatrixInvert
+003e0a90  # RwMatrixScale
+003e0c90  # RwMatrixTranslate
+003e0e20  # RwMatrixTransform
+003e3d00  # VectorMultPoints
+003e3dc0  # VectorMultPoint
+003e3e60  # VectorMultVectors
+003e3f00  # VectorMultVector
+003e3f80  # _rwVectorSetMultFn
+003e4030  # rwcV3dNormalizeReciprocal
+003e40b0  # RwV3dNormalize
+003e4180  # RwV3dLength
+003e41b0  # RwV2dLength
+003e41e0  # RwV2dNormalize
+003e5110  # RwBBoxCalculate
+00402390  # rwcVu0MatrixMultiply
+00402410  # rwcVu0TransformPoint
+00402470  # rwcVu0TransformPoints
+00402510  # rwcVu0TransformVector
+00402570  # rwcVu0TransformVectors

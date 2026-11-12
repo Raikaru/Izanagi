@@ -1,0 +1,11 @@
+/* 001067f0: retail IDs retain their exact ELF string pointer map unless a
+ * package renamed the item (game_table_derived.h item names). */
+#include "p4pc/game_items_native.h"
+u32 datGetItemNameId(s16 itemId)
+{
+    if (p4_game_tables_items_native_id_is_new((u32)(itemId)))
+        return p4_game_tables_items_native_name((u32)itemId);
+    const u32 renamed = p4_game_tables_derived_item_name_stream((u32)itemId);
+    if (renamed) return renamed;
+    return D_005E2200[itemId];
+}

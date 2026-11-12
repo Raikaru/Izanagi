@@ -1,0 +1,50 @@
+# Requested pristine CBS18506 March 20 save, not a substituted collection card.
+# Cover the live Heaven10 approach, native Margaret defeat and post-event control.
+# The collection starts here; preceding Heaven traversal is not claimed.
+timeout:30000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+waitfield:28:2
+waitstep:110
+waitstate16:0x00797b7a==353
+# The door is already open; approaching Margaret starts her real event.
+push:0,-10000,300
+press:cross
+skiptask:battle
+waitbtl:menu
+# The card leaves Naoto on Act Freely. Set Direct Commands through real Tactics:
+# selected Naoto row, then fifth option. Changing tactics does not spend a turn.
+press:circle
+press:up
+press:up
+press:cross
+press:cross
+press:down
+press:down
+press:down
+press:down
+press:cross
+press:circle
+press:circle
+waitbtl:menu:1
+# Saved skills: Lucifer Megidolaon, Chie God's Hand, Naoto Vorpal Blade.
+# Yukiko starts on Agidyne: three Down select Salvation. Repeat healing with
+# the preserved native cursor; ordinary Attack is the in-menu cost fallback.
+# Guard actual Power/Mind Charge without consuming any first skill plan.
+battle:first4=circle,down,cross,down,down,down,cross,cross,cross,circle,circle,circle,cross,cross;plan=circle,down,cross,cross,cross,circle,circle,circle,cross,cross;guard=274;delay=200
+# An absent/unlinked enemy is not a kill: require native enemy274 zero u16 HP.
+waitbtl:dead:274
+log
+waittask:battle:off
+battle:off
+# Advance the actual post-victory event, then require free Heaven10 control.
+skipmsg
+waitfield:28:2
+waitstate16:0x00797b7a==353
+waitstep:110
+log

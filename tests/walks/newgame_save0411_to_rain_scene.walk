@@ -1,0 +1,46 @@
+# New Game to the 04/11 living room, save there, then the real first night and tutorial battle,
+# stopping on Nanako's 04/12 rainy-walk dialogue. The save point is the collection walks' 04/11
+# living-room save (collection0410_newcycle_to_home0411.walk); a fresh card needs two confirms.
+# The route after it is newgame_to_rain_scene.walk's.
+timeout:40000
+skipmsg
+waitcontrol:on
+waitmsg:closed
+log
+timeout:6000
+walk:0,200,40
+walk:103,-20,25
+push:103,-217,25
+wait:900
+press:cross               # the save point: SAVE on a fresh card's first file
+wait:600
+press:cross               # save: SDKMEMCARD_SAVE OK
+wait:900
+log
+timeout:40000
+skipmsg
+waitcontrol:on
+wait:30
+walk:314,-360,25
+wait:20
+press:cross
+wait:40
+skipmsg
+wait:30
+press:down:200
+wait:30
+press:cross
+wait:40
+skipmsg
+waitcontrol:on
+walk:8160,1989,60
+walk:8400,1989,40
+wait:20
+press:cross
+wait:60
+timeout:60000
+# Release Cross as Nanako opens her first page, then let the text finish. The duration follows the normal story route.
+skip:6550
+wait:300
+log
+exit

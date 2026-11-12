@@ -1,0 +1,3 @@
+--!capability manifest.element-prompt@1
+--!covers section:element-prompt
+-- mod.ini [element-prompt analyze-ailments|analyze-affinities]: the Analyze page-flip prompt images.

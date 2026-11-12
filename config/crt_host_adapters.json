@@ -1,0 +1,1481 @@
+{
+  "version": 1,
+  "sources": {
+    "src/cri/adxi_rpc.c": {
+      "reason": "Native sound-backend diagnostics only: fprintf/stderr results are ignored; guest transport and sample counters do not read formatted bytes or stream status. Opt-in PROF spans use the host clock, thread identity and environment only for ignored diagnostic records; no timing, parser or stream result enters RPC buffers or guest state. The common span helper restores native errno and Windows LastError on every initialized/active return, including outside the logging window. Diagnostic caller pairs include actual Win64, Linux ELF64 and Linux i386 time64 clock boundaries observed in batch24210; no unexercised ABI closure is inferred.",
+      "calls": {
+        "__error": ["func_004258b0", "p4adxi_pump", "p4pc_prof_span_begin"],
+        "__stderrp": ["func_004258b0", "p4adxi_pump", "rna_cmd", "sj_cmd", "sjx_cmd"],
+        "GetCurrentThreadId": ["func_004258b0", "p4adxi_pump"],
+        "GetLastError": ["func_004258b0", "p4adxi_pump", "p4pc_prof_span_begin"],
+        "QueryPerformanceCounter": ["func_004258b0", "p4adxi_pump", "p4pc_prof_span_begin"],
+        "QueryPerformanceFrequency": ["func_004258b0", "p4adxi_pump", "p4pc_prof_span_begin"],
+        "SetLastError": ["func_004258b0", "p4adxi_pump", "p4pc_prof_span_begin"],
+        "_errno": ["func_004258b0", "p4adxi_pump", "p4pc_prof_span_begin"],
+        "__errno_location": ["func_004258b0", "p4adxi_pump", "p4pc_prof_span_begin"],
+        "__errno": ["func_004258b0", "p4adxi_pump", "p4pc_prof_span_begin"],
+        "clock_gettime": ["func_004258b0", "p4adxi_pump", "p4pc_prof_span_begin"],
+        "__clock_gettime64": ["func_004258b0", "p4adxi_pump", "p4pc_prof_span_begin"],
+        "pthread_self": ["func_004258b0", "p4adxi_pump"],
+        "getenv": ["p4pc_prof_span_begin"],
+        "strtoull": ["p4pc_prof_span_begin"],
+        "__acrt_iob_func": [
+          "func_004258b0",
+          "p4adxi_pump",
+          "log_bad",
+          "rna_cmd",
+          "sj_cmd",
+          "sjx_cmd"
+        ],
+        "fprintf": [
+          "func_004258b0",
+          "p4adxi_pump",
+          "rna_cmd",
+          "sj_cmd",
+          "sjx_cmd",
+          "log_bad"
+        ],
+        "memcpy": [
+          "func_004258b0"
+        ],
+        "memset": [
+          "p4adxi_reset"
+        ],
+        "stderr": [
+          "func_004258b0",
+          "p4adxi_pump",
+          "rna_cmd",
+          "sj_cmd",
+          "sjx_cmd"
+        ]
+      }
+    },
+    "src/crt.c": {
+      "reason": "Host process startup/shutdown, opt-in FPU diagnostics and environment selection before guest entry; no host pointer, formatter result or comparison magnitude enters game state.",
+      "calls": {
+        "__stderrp": ["func_0043dc60", "game_main", "p4pc_kernel_pre_init", "p4pc_start"],
+        "__acrt_iob_func": [
+          "func_0043dc60",
+          "game_main",
+          "p4pc_kernel_pre_init",
+          "p4pc_start"
+        ],
+        "exit": [
+          "func_0043dc60",
+          "game_main",
+          "p4pc_start"
+        ],
+        "fprintf": [
+          "func_0043dc60",
+          "game_main",
+          "p4pc_start"
+        ],
+        "fwrite": [
+          "p4pc_kernel_pre_init",
+          "p4pc_start"
+        ],
+        "getenv": [
+          "p4pc_kernel_pre_init"
+        ],
+        "memset": [
+          "p4pc_kernel_pre_init"
+        ],
+        "stderr": [
+          "func_0043dc60",
+          "game_main",
+          "p4pc_kernel_pre_init",
+          "p4pc_start"
+        ],
+        "strcmp": [
+          "p4pc_kernel_pre_init"
+        ]
+      }
+    },
+    "src/image.c": {
+      "reason": "Host image loading and trap diagnostics: successful file reads copy the user-selected ELF bytes verbatim into RAM; bounded retail segment offsets fit signed 32-bit long. The loader's stream-status and errno calls only retry interrupted transfers or reject EOF/I/O errors; they do not calculate guest CRT values. I/O/error text controls host admission or fatal diagnostics, not a game parser or computed game value. errno access and strerror remain the same fatal loader diagnostics when inlined into fail_read or p4pc_load_image. Win32 fail_why obtains only the native stderr stream through __acrt_iob_func, and p4pc_load_image's compiler-emitted fwrite is the inlined fixed map_ee_regs diagnostic to that stream. Trap configuration compares only equality with the external environment literal 1; no strcmp magnitude or guest value is consumed.",
+      "calls": {
+        "__error": ["fail", "read_at"],
+        "__stderrp": ["fail", "fail_why", "p4pc_load_image", "p4pc_trap_args", "report_traps"],
+        "__errno": ["fail_read", "p4pc_load_image", "read_at"],
+        "__acrt_iob_func": [
+          "fail",
+          "fail_why",
+          "p4pc_load_image",
+          "p4pc_trap_args",
+          "report_traps"
+        ],
+        "_errno": [
+          "fail",
+          "read_at"
+        ],
+        "__errno_location": [
+          "fail",
+          "fail_read",
+          "p4pc_load_image",
+          "read_at"
+        ],
+        "abort": [
+          "p4pc_trap_args"
+        ],
+        "atexit": [
+          "p4pc_trap_configure"
+        ],
+        "clearerr": [
+          "read_at"
+        ],
+        "exit": [
+          "fail",
+          "fail_read",
+          "fail_why",
+          "p4pc_load_image"
+        ],
+        "fclose": [
+          "p4pc_load_image"
+        ],
+        "feof": [
+          "fail_read",
+          "read_at"
+        ],
+        "ferror": [
+          "fail_read",
+          "read_at"
+        ],
+        "fprintf": [
+          "fail",
+          "fail_read",
+          "fail_why",
+          "map_ram",
+          "p4pc_load_image",
+          "p4pc_trap_args",
+          "report_traps"
+        ],
+        "fread": [
+          "p4pc_load_image",
+          "read_at"
+        ],
+        "fseek": [
+          "p4pc_load_image",
+          "read_at"
+        ],
+        "fwrite": [
+          "map_ee_regs",
+          "p4pc_load_image",
+          "p4pc_trap_args"
+        ],
+        "getenv": [
+          "p4pc_trap_configure"
+        ],
+        "stderr": [
+          "fail",
+          "fail_read",
+          "fail_why",
+          "map_ee_regs",
+          "map_ram",
+          "p4pc_load_image",
+          "p4pc_trap_args",
+          "report_traps"
+        ],
+        "strcmp": [
+          "p4pc_trap_args",
+          "p4pc_trap_configure"
+        ],
+        "strerror": [
+          "fail",
+          "fail_read",
+          "p4pc_load_image"
+        ]
+      }
+    },
+    "src/movie/adx_dec.c": {
+      "reason": "Native FFmpeg decoder object, PCM/input queues and mutex storage; allocation addresses remain in native P4Adx fields and are never guest addresses. Guest-facing audio consumes decoded sample bytes, not CRT pointer ordering. Opt-in PROF span clocks/thread IDs/environment bounds feed only ignored host stderr records, never decoded PCM, guest state or decoder decisions; native errno and Windows LastError are restored on all initialized/active helper exits. Diagnostic caller pairs include actual Win64, Linux ELF64 and Linux i386 time64 clock boundaries observed in batch24210, not inferred permissions for other ABIs.",
+      "calls": {
+        "__error": ["p4pc_prof_span_begin", "p4pc_prof_span_end"],
+        "__stderrp": ["p4pc_prof_span_end"],
+        "GetCurrentThreadId": ["p4pc_prof_span_end"],
+        "GetLastError": ["p4pc_prof_span_begin", "p4pc_prof_span_end"],
+        "QueryPerformanceCounter": ["p4pc_prof_span_begin", "p4pc_prof_span_end"],
+        "QueryPerformanceFrequency": ["p4pc_prof_span_begin", "p4pc_prof_span_end"],
+        "SetLastError": ["p4pc_prof_span_begin", "p4pc_prof_span_end"],
+        "__acrt_iob_func": ["p4pc_prof_span_end"],
+        "_errno": ["p4pc_prof_span_begin", "p4pc_prof_span_end"],
+        "__errno_location": ["p4adx_feed", "p4adx_pull", "p4pc_prof_span_begin", "p4pc_prof_span_end"],
+        "__errno": ["p4adx_feed", "p4adx_pull", "p4pc_prof_span_begin", "p4pc_prof_span_end"],
+        "clock_gettime": ["p4adx_feed", "p4adx_pull", "p4pc_prof_span_begin", "p4pc_prof_span_end"],
+        "__clock_gettime64": ["p4adx_feed", "p4adx_pull", "p4pc_prof_span_begin", "p4pc_prof_span_end"],
+        "pthread_self": ["p4adx_feed", "p4adx_pull", "p4pc_prof_span_end"],
+        "stderr": ["p4adx_feed", "p4adx_pull", "p4pc_prof_span_end"],
+        "fprintf": ["p4adx_feed", "p4adx_pull", "p4pc_prof_span_end"],
+        "getenv": ["p4pc_prof_span_begin"],
+        "strtoull": ["p4pc_prof_span_begin"],
+        "av_channel_layout_default": [
+          "open_decoder"
+        ],
+        "av_frame_alloc": [
+          "open_decoder"
+        ],
+        "av_frame_free": [
+          "p4adx_close"
+        ],
+        "av_frame_unref": [
+          "p4adx_feed"
+        ],
+        "av_mallocz": [
+          "open_decoder"
+        ],
+        "av_new_packet": [
+          "p4adx_feed"
+        ],
+        "av_packet_alloc": [
+          "open_decoder"
+        ],
+        "av_packet_free": [
+          "p4adx_close"
+        ],
+        "av_packet_unref": [
+          "p4adx_feed"
+        ],
+        "avcodec_alloc_context3": [
+          "open_decoder"
+        ],
+        "avcodec_find_decoder": [
+          "open_decoder"
+        ],
+        "avcodec_free_context": [
+          "p4adx_close"
+        ],
+        "avcodec_open2": [
+          "open_decoder"
+        ],
+        "avcodec_receive_frame": [
+          "p4adx_feed"
+        ],
+        "avcodec_send_packet": [
+          "p4adx_feed"
+        ],
+        "calloc": [
+          "p4adx_open"
+        ],
+        "free": [
+          "p4adx_close"
+        ],
+        "memcpy": [
+          "open_decoder",
+          "p4adx_feed",
+          "p4adx_pull"
+        ],
+        "memmove": [
+          "p4adx_feed",
+          "p4adx_pull"
+        ],
+        "pthread_mutex_destroy": [
+          "p4adx_close"
+        ],
+        "pthread_mutex_init": [
+          "p4adx_open"
+        ],
+        "pthread_mutex_lock": [
+          "p4adx_available",
+          "p4adx_feed",
+          "p4adx_pull",
+          "p4adx_total"
+        ],
+        "pthread_mutex_unlock": [
+          "p4adx_available",
+          "p4adx_feed",
+          "p4adx_pull",
+          "p4adx_total"
+        ],
+        "realloc": [
+          "p4adx_feed"
+        ]
+      }
+    },
+    "src/movie/mpeg2_dec.c": {
+      "reason": "Native FFmpeg contexts, frame queues and MPEG/IPU scratch storage only. Addresses remain native decoder state; guest frame data is copied bytewise through the separate guest-buffer seam.",
+      "calls": {
+        "av_frame_alloc": [
+          "drain",
+          "p4mpeg2_open"
+        ],
+        "av_frame_clone": [
+          "p4mpeg2_frame_hold"
+        ],
+        "av_frame_free": [
+          "p4mpeg2_close",
+          "p4mpeg2_frame_release",
+          "p4mpeg2_receive",
+          "p4mpeg2_reset"
+        ],
+        "av_frame_move_ref": [
+          "drain"
+        ],
+        "av_new_packet": [
+          "p4mpeg2_send_unit"
+        ],
+        "av_packet_alloc": [
+          "p4mpeg2_open"
+        ],
+        "av_packet_free": [
+          "p4mpeg2_close"
+        ],
+        "av_packet_unref": [
+          "p4mpeg2_send_unit"
+        ],
+        "av_parser_close": [
+          "p4mpeg2_close"
+        ],
+        "av_parser_init": [
+          "p4mpeg2_open"
+        ],
+        "av_parser_parse2": [
+          "p4mpeg2_feed",
+          "p4mpeg2_flush"
+        ],
+        "avcodec_alloc_context3": [
+          "p4mpeg2_open"
+        ],
+        "avcodec_find_decoder": [
+          "p4mpeg2_open"
+        ],
+        "avcodec_flush_buffers": [
+          "p4mpeg2_end_sequence",
+          "p4mpeg2_reset"
+        ],
+        "avcodec_free_context": [
+          "p4mpeg2_close"
+        ],
+        "avcodec_open2": [
+          "p4mpeg2_open"
+        ],
+        "avcodec_receive_frame": [
+          "drain"
+        ],
+        "avcodec_send_packet": [
+          "p4mpeg2_end_sequence",
+          "p4mpeg2_feed",
+          "p4mpeg2_flush",
+          "p4mpeg2_send_unit"
+        ],
+        "calloc": [
+          "p4mpeg2_open"
+        ],
+        "free": [
+          "p4mpeg2_build_yuv_table",
+          "p4mpeg2_close"
+        ],
+        "malloc": [
+          "p4mpeg2_build_yuv_table"
+        ],
+        "memcpy": [
+          "p4mpeg2_send_unit"
+        ],
+        "memmove": [
+          "p4mpeg2_receive"
+        ],
+        "realloc": [
+          "drain",
+          "p4mpeg2_to_ipu_rgb32"
+        ],
+        "sws_freeContext": [
+          "p4mpeg2_close",
+          "p4mpeg2_to_rgba"
+        ],
+        "sws_getCachedContext": [
+          "p4mpeg2_frame_to_rgba_ipu",
+          "p4mpeg2_to_ipu_rgb32"
+        ],
+        "sws_getCoefficients": [
+          "p4mpeg2_frame_to_rgba_ipu",
+          "p4mpeg2_to_ipu_rgb32",
+          "p4mpeg2_to_rgba"
+        ],
+        "sws_getContext": [
+          "p4mpeg2_to_rgba"
+        ],
+        "sws_scale": [
+          "p4mpeg2_frame_to_rgba_ipu",
+          "p4mpeg2_to_ipu_rgb32",
+          "p4mpeg2_to_rgba"
+        ],
+        "sws_setColorspaceDetails": [
+          "p4mpeg2_frame_to_rgba_ipu",
+          "p4mpeg2_to_ipu_rgb32",
+          "p4mpeg2_to_rgba"
+        ]
+      }
+    },
+    "src/movie/sfd_demux.c": {
+      "reason": "Native demultiplexer object and byte queue; addresses remain native VFS/decoder bookkeeping, never guest heap words.",
+      "calls": {
+        "calloc": [
+          "sfd_demux_open"
+        ],
+        "free": [
+          "sfd_demux_close",
+          "sfd_demux_open"
+        ],
+        "malloc": [
+          "sfd_demux_open"
+        ],
+        "memmove": [
+          "ensure"
+        ]
+      }
+    },
+    "src/movie/movie_upload.c": {
+      "reason": "Native RGBA fallback scratch, environment setting and retained Android colour-table diagnostics; realloc addresses stay in the native static buffer, not guest decoder state.",
+      "calls": {
+        "fprintf": [
+          "gpu_convert"
+        ],
+        "fwrite": [
+          "gpu_convert"
+        ],
+        "getenv": [
+          "gpu_convert"
+        ],
+        "memset": [
+          "p4pc_movie_upload"
+        ],
+        "realloc": [
+          "p4pc_movie_upload"
+        ],
+        "stderr": [
+          "gpu_convert"
+        ]
+      }
+    },
+    "src/movie/mwply.c": {
+      "reason": "Native decoder handles, temporary tiled frames and diagnostic paths; guest p->buf uses p4pc_heap_realloc, not host realloc. Temporary host bytes are copied to that guest buffer, then freed; no host pointer/order or formatting result escapes. Bionic's pass_object_size snprintf helper delegates those same native paths/diagnostics to vsnprintf; its destination remains native. Pattern-init memset in ply_open_stream fills only native alt[300] with 0xff before bounded snprintf; retained ELF32 disassembly proves the stack destination and 300-byte span.",
+      "calls": {
+        "vsnprintf": ["_ZL8snprintfPcU17pass_object_size1mPKcz"],
+        "fopen": [
+          "p4pc_mwply_get_cur_frm"
+        ],
+        "fflush": [
+          "p4pc_mwply_get_cur_frm"
+        ],
+        "fopen64": [
+          "p4pc_mwply_get_cur_frm"
+        ],
+        "fprintf": [
+          "p4pc_mwply_get_cur_frm"
+        ],
+        "free": [
+          "p4pc_mwply_fill_tiled"
+        ],
+        "getenv": [
+          "p4pc_movie_start",
+          "p4pc_mwply_get_cur_frm"
+        ],
+        "malloc": [
+          "p4pc_mwply_fill_tiled"
+        ],
+        "memcpy": [
+          "p4pc_mwply_fill_tiled"
+        ],
+        "memset": [
+          "func_00509268",
+          "func_005097e8",
+          "p4pc_mwply_get_cur_frm",
+          "ply_open_stream"
+        ],
+        "snprintf": [
+          "p4pc_movie_start",
+          "ply_open_stream"
+        ],
+        "strcmp": [
+          "p4pc_movie_start"
+        ]
+      }
+    },
+    "src/movie/sfmpvp.c": {
+      "reason": "Native MPEG unit assembly scratch only; Work objects and guest video buffers use the guest heap, and P4_H2G stores only those guest allocations. Host realloc addresses remain in unit/unit_cap.",
+      "calls": {
+        "__moddi3": [
+          "SFMPVP_DecodeFrmSj",
+          "viBufAddDMA",
+          "viBufRestartDMA"
+        ],
+        "free": [
+          "SFMPVP_DecodeFrmSj"
+        ],
+        "memcpy": [
+          "SFMPVP_DecodeFrmSj",
+          "copy2area",
+          "sfmpvp_PutVibuf"
+        ],
+        "realloc": [
+          "SFMPVP_DecodeFrmSj"
+        ]
+      }
+    },
+    "src/render/p4gl_atomic.c": {
+      "reason": "Native mesh/index/range/scratch arrays and ignored GL diagnostics. Guest lights/textures are read by address; host allocations populate native mesh caches and never guest allocation slots. Bionic strlen/snprintf-family helpers operate on the same valid native shader/cache names and native diagnostic buffers; no result enters guest fields.",
+      "calls": {
+        "__stderrp": ["p4gl_atomic_draw"],
+        "__vsnprintf_chk": ["_ZL8snprintfPcU17pass_object_size1mPKcz"],
+        "__acrt_iob_func": [
+          "p4gl_atomic_draw"
+        ],
+        "calloc": [
+          "p4gl_atomic_draw"
+        ],
+        "fprintf": [
+          "p4gl_atomic_draw"
+        ],
+        "free": [
+          "p4gl_atomic_context_lost",
+          "p4gl_atomic_draw",
+          "skin_upload"
+        ],
+        "fwrite": [
+          "p4gl_atomic_draw"
+        ],
+        "malloc": [
+          "p4gl_atomic_draw",
+          "skin_upload"
+        ],
+        "memcpy": [
+          "p4gl_atomic_draw"
+        ],
+        "memset": [
+          "p4gl_atomic_draw"
+        ],
+        "snprintf": [
+          "p4gl_atomic_draw"
+        ],
+        "stderr": [
+          "p4gl_atomic_draw"
+        ],
+        "strlen": [
+          "p4gl_atomic_draw"
+        ]
+      }
+    },
+    "src/render/p4gl_camera.c": {
+      "reason": "Ignored native renderer diagnostics and fatal unsupported-camera handling only; no formatted bytes/counts become guest camera values.",
+      "calls": {
+        "__stderrp": ["p4gl_aspect_camera_begin", "p4gl_aspect_camera_end", "p4gl_camera_object_matrix", "p4gl_camera_projection"],
+        "__acrt_iob_func": [
+          "p4gl_aspect_camera_begin",
+          "p4gl_aspect_camera_end",
+          "p4gl_camera_object_matrix",
+          "p4gl_camera_projection"
+        ],
+        "abort": [
+          "p4gl_aspect_camera_begin",
+          "p4gl_aspect_camera_end"
+        ],
+        "fprintf": [
+          "p4gl_camera_object_matrix",
+          "p4gl_camera_projection"
+        ],
+        "fwrite": [
+          "p4gl_aspect_camera_begin",
+          "p4gl_aspect_camera_end"
+        ],
+        "stderr": [
+          "p4gl_aspect_camera_begin",
+          "p4gl_aspect_camera_end",
+          "p4gl_camera_object_matrix",
+          "p4gl_camera_projection"
+        ]
+      }
+    },
+    "src/render/p4gl_context.c": {
+      "reason": "Native SDL/context, presentation, capture paths and host-only renderer settings. Parsers affect presentation controls, not guest numeric fields. resolutionAdjust uses strcmp and compiler-emitted bcmp/memcmp only for equality against fixed resolution strings, so comparison magnitude is never observed. Capture storage and formatter results remain native; guest RAM is read only for requested dumps. Android internal-storage lookup selects only the host PNG capture directory, and its error path prints/exits on the host. Bionic's pass_object_size formatter retains those same native destinations. Retained ELF32 pattern-init memset sites in p4gl_context_present fill only inlined captureFrame path[512]/dpath[512] and captureWindow path[600] native stack buffers with 0xff before bounded formatting and host file/PNG output. The no-device early return also causes O2 to outline captureWindow, swapWindow and p4gl_api_explicit: captureWindow frees only capturePixels' host malloc storage and formats a native path; PNG failure diagnostics/exit, SDL swap/error queries and API environment selection remain the same host boundaries. p4gl_context_open_device, the RenderWare device's OPEN, only prints the failure, shows it in a message box on a player's run and exits on the host when no GL context opens.",
+      "calls": {
+        "__stderrp": ["applySettings", "capturePixels", "captureWindow", "context_recover", "p4gl_context_open", "p4gl_context_open_device", "p4gl_context_present", "setSwapInterval"],
+        "SDL_GetAndroidInternalStoragePath": ["writeCapturePng"],
+        "__vsnprintf_chk": ["_ZL8snprintfPcU17pass_object_size1mPKcz"],
+        "__acrt_iob_func": [
+          "applySettings",
+          "capturePixels",
+          "captureWindow",
+          "context_recover",
+          "p4gl_context_open",
+          "p4gl_context_open_device",
+          "p4gl_context_present",
+          "setSwapInterval"
+        ],
+        "atof": [
+          "p4gl_context_present"
+        ],
+        "atoi": [
+          "p4gl_context_open",
+          "p4gl_context_present"
+        ],
+        "fopen": [
+          "p4gl_context_present"
+        ],
+        "sscanf": [
+          "p4gl_context_present"
+        ],
+        "bcmp": [
+          "resolutionAdjust"
+        ],
+        "memcmp": ["resolutionAdjust"],
+        "SDL_Delay": [
+          "settingsPresent"
+        ],
+        "SDL_GL_CreateContext": [
+          "context_recover",
+          "p4gl_context_open"
+        ],
+        "SDL_GL_DestroyContext": [
+          "context_recover",
+          "p4gl_context_close",
+          "p4gl_context_open"
+        ],
+        "SDL_GL_GetCurrentContext": [
+          "context_recover",
+          "p4gl_context_is_current",
+          "p4gl_device_ready"
+        ],
+        "SDL_GL_GetProcAddress": [
+          "p4gl_context_present"
+        ],
+        "SDL_GL_MakeCurrent": [
+          "context_recover",
+          "p4gl_context_open"
+        ],
+        "SDL_GL_ResetAttributes": [
+          "p4gl_context_open"
+        ],
+        "SDL_GL_SetAttribute": [
+          "p4gl_api_set_attributes_desktop",
+          "p4gl_context_open"
+        ],
+        "SDL_GL_SetSwapInterval": [
+          "setSwapInterval"
+        ],
+        "SDL_GL_SwapWindow": [
+          "p4gl_context_present",
+          "settingsPresent",
+          "swapWindow"
+        ],
+        "SDL_GetCurrentDisplayMode": [
+          "setSwapInterval"
+        ],
+        "SDL_GetDisplayForWindow": [
+          "setSwapInterval"
+        ],
+        "SDL_GetError": [
+          "applySettings",
+          "context_recover",
+          "p4gl_context_open",
+          "p4gl_context_present",
+          "settingsPresent",
+          "swapWindow"
+        ],
+        "SDL_GetWindowFlags": [
+          "applySettings",
+          "p4gl_context_present",
+          "settingsPresent"
+        ],
+        "SDL_GetWindowSize": [
+          "applySettings"
+        ],
+        "SDL_GetWindowSizeInPixels": [
+          "p4gl_context_menu_bounds",
+          "p4gl_context_open",
+          "p4gl_context_present",
+          "renderSize",
+          "settingsPresent",
+          "updateAspect"
+        ],
+        "SDL_MinimizeWindow": [
+          "p4gl_context_present"
+        ],
+        "SDL_ResetHint": [
+          "p4gl_api_set_attributes_desktop",
+          "p4gl_context_open"
+        ],
+        "SDL_RestoreWindow": [
+          "p4gl_context_present"
+        ],
+        "SDL_SetHint": [
+          "p4gl_context_open"
+        ],
+        "SDL_SetWindowFullscreen": [
+          "applySettings",
+          "p4gl_context_present"
+        ],
+        "SDL_SetWindowResizable": [
+          "applySettings"
+        ],
+        "SDL_SetWindowSize": [
+          "applySettings",
+          "p4gl_context_present"
+        ],
+        "SDL_ShowSimpleMessageBox": [
+          "p4gl_context_open_device"
+        ],
+        "SDL_setenv_unsafe": [
+          "p4gl_context_open"
+        ],
+        "__isoc99_sscanf": [
+          "p4gl_context_present"
+        ],
+        "exit": [
+          "captureWindow",
+          "p4gl_context_open_device",
+          "p4gl_context_present",
+          "settingsPresent",
+          "writeCapturePng"
+        ],
+        "fclose": [
+          "p4gl_context_present"
+        ],
+        "fflush": [
+          "p4gl_context_present"
+        ],
+        "fopen64": [
+          "p4gl_context_present"
+        ],
+        "fprintf": [
+          "applySettings",
+          "capturePixels",
+          "captureWindow",
+          "context_recover",
+          "p4gl_context_open",
+          "p4gl_context_open_device",
+          "p4gl_context_present",
+          "setSwapInterval",
+          "writeCapturePng"
+        ],
+        "free": [
+          "capturePixels",
+          "captureWindow",
+          "p4gl_context_present"
+        ],
+        "fwrite": [
+          "context_recover",
+          "p4gl_context_open",
+          "p4gl_context_open_device",
+          "p4gl_context_present",
+          "settingsPresent"
+        ],
+        "getenv": [
+          "applySettings",
+          "p4gl_api_explicit",
+          "p4gl_api_wants_es",
+          "p4gl_context_open",
+          "p4gl_context_present",
+          "setSwapInterval"
+        ],
+        "malloc": [
+          "capturePixels"
+        ],
+        "memcpy": [
+          "capturePixels"
+        ],
+        "memset": [
+          "captureWindow",
+          "p4gl_context_present"
+        ],
+        "snprintf": [
+          "aspectFormat",
+          "captureWindow",
+          "movieFitFormat",
+          "p4gl_context_capture_next",
+          "p4gl_context_present",
+          "resolutionAdjust"
+        ],
+        "stderr": [
+          "applySettings",
+          "capturePixels",
+          "captureWindow",
+          "context_recover",
+          "p4gl_context_open",
+          "p4gl_context_open_device",
+          "p4gl_context_present",
+          "setSwapInterval",
+          "settingsPresent",
+          "writeCapturePng"
+        ],
+        "strchr": [
+          "p4gl_context_present"
+        ],
+        "strcmp": [
+          "p4gl_api_wants_es",
+          "p4gl_context_open"
+        ],
+        "strncmp": [
+          "p4gl_context_present"
+        ],
+        "strstr": [
+          "p4gl_context_present",
+          "settingsPresent",
+          "swapWindow"
+        ],
+        "strtod": [
+          "p4gl_context_present"
+        ],
+        "strtol": [
+          "p4gl_context_open",
+          "p4gl_context_present"
+        ],
+        "strtoul": [
+          "p4gl_context_present"
+        ]
+      }
+    },
+    "src/render/p4gl_device.c": {
+      "reason": "Native GL-device fatal diagnostics only; stream counts do not return to game state.",
+      "calls": {
+        "__stderrp": ["p4gl_std_unassigned"],
+        "__acrt_iob_func": [
+          "p4gl_std_unassigned"
+        ],
+        "abort": [
+          "p4gl_std_unassigned"
+        ],
+        "fwrite": [
+          "p4gl_std_unassigned"
+        ],
+        "stderr": [
+          "p4gl_std_unassigned"
+        ]
+      }
+    },
+    "src/render/p4gl_gl.c": {
+      "reason": "Native GL capability strings, shader configuration and host diagnostics. sscanf reads driver version or bounded host gate-file tokens; no retail input uses this parser. Bionic checked strchr/strlen read the same bounded native gate-file strings, and its snprintf wrapper writes only native shader diagnostics. Pattern-init memset in p4gl_gl_compile_shader fills native GLchar log[1024]; the same bounded stack buffer goes to GetShaderInfoLog. Compiler-emitted bcmp compares native cached GL state for equality, never exposing its magnitude to guest state. Observed232164a4 Win64 draw/buffer/clear/copy/blit/flush/readback/error wrapper fprintf calls record opt-in elapsed API time only; stream results never control GL calls, return values or pixels. The5913dc4a Linux ELF64 fopen64 boundary in p4gl_gl_load opens only that operator-selected diagnostic CSV.",
+      "calls": {
+        "__stderrp": ["p4gl_gate_limit", "p4gl_gl_compile_shader", "p4gl_gl_load", "p4gl_gl_stats_report", "probe_edge_rule", "probe_output_rounding", "xBlitFramebuffer", "xClear", "xCopyTexSubImage2D", "xDrawArrays", "xDrawArraysInstanced", "xDrawElements", "xTexImage2D", "xTexSubImage2D"],
+        "__strchr_chk": ["p4gl_gate_limit"],
+        "__vsnprintf_chk": ["_ZL8snprintfPcU17pass_object_size1mPKcz"],
+        "__acrt_iob_func": [
+          "p4gl_gate_limit",
+          "p4gl_gl_compile_shader",
+          "p4gl_gl_load",
+          "p4gl_gl_stats_report",
+          "probe_edge_rule",
+          "probe_output_rounding",
+          "xBlitFramebuffer",
+          "xClear",
+          "xCopyTexSubImage2D",
+          "xDrawArrays",
+          "xDrawArraysInstanced",
+          "xDrawElements",
+          "xTexImage2D",
+          "xTexSubImage2D"
+        ],
+        "fflush": ["p4gl_gl_stats_report"],
+        "fopen": [
+          "p4gl_gate_limit",
+          "p4gl_gl_load"
+        ],
+        "sscanf": [
+          "p4gl_gate_limit",
+          "p4gl_gl_load"
+        ],
+        "SDL_GL_GetProcAddress": [
+          "p4gl_gl_load"
+        ],
+        "SDL_strcasecmp": [
+          "p4gl_gl_load"
+        ],
+        "__isoc99_sscanf": [
+          "p4gl_gate_limit",
+          "p4gl_gl_load"
+        ],
+        "exit": [
+          "p4gl_gl_load"
+        ],
+        "fclose": [
+          "p4gl_gate_limit"
+        ],
+        "fgets": [
+          "p4gl_gate_limit"
+        ],
+        "fopen64": [
+          "p4gl_gate_limit",
+          "p4gl_gl_load"
+        ],
+        "fprintf": [
+          "cBlitFramebuffer",
+          "cBufferData",
+          "cClear",
+          "cCopyTexSubImage2D",
+          "cDrawArrays",
+          "cDrawArraysInstanced",
+          "cDrawElements",
+          "cFlush",
+          "cGetError",
+          "cReadPixels",
+          "cCompileShader",
+          "cLinkProgram",
+          "cTexImage2D",
+          "cTexSubImage2D",
+          "p4gl_gate_limit",
+          "p4gl_gl_compile_shader",
+          "p4gl_gl_hitch_api",
+          "p4gl_gl_load",
+          "p4gl_gl_stats_report",
+          "probe_edge_rule",
+          "probe_output_rounding",
+          "xBlitFramebuffer",
+          "xClear",
+          "xCopyTexSubImage2D",
+          "xDrawArrays",
+          "xDrawArraysInstanced",
+          "xDrawElements",
+          "xTexImage2D",
+          "xTexSubImage2D"
+        ],
+        "fwrite": [
+          "p4gl_gl_load"
+        ],
+        "getenv": [
+          "p4gl_gate_limit",
+          "p4gl_gl_load",
+          "p4gl_gl_prepare_draw",
+          "probe_output_rounding"
+        ],
+        "memset": [
+          "p4gl_gl_compile_shader",
+          "p4gl_gl_context_reset",
+          "p4gl_gl_load",
+          "wLinkProgram"
+        ],
+        "setvbuf": ["p4gl_gl_load"],
+        "snprintf": [
+          "p4gl_gate_limit",
+          "p4gl_gl_load"
+        ],
+        "stderr": [
+          "p4gl_gate_limit",
+          "p4gl_gl_compile_shader",
+          "p4gl_gl_load",
+          "p4gl_gl_stats_report",
+          "probe_edge_rule",
+          "probe_output_rounding",
+          "xBlitFramebuffer",
+          "xClear",
+          "xCopyTexSubImage2D",
+          "xDrawArrays",
+          "xDrawArraysInstanced",
+          "xDrawElements",
+          "xTexImage2D",
+          "xTexSubImage2D"
+        ],
+        "strchr": [
+          "p4gl_gate_limit"
+        ],
+        "strcmp": [
+          "p4gl_gate_limit",
+          "p4gl_gl_load",
+          "probe_output_rounding"
+        ],
+        "strlen": [
+          "p4gl_gate_limit",
+          "p4gl_gl_load"
+        ],
+        "strncmp": [
+          "p4gl_gl_load"
+        ]
+      }
+    },
+    "src/render/p4gl_im2d.c": {
+      "reason": "Native vertex/index/shader assembly storage and diagnostic strings only. Layout-stack diagnostics/abort enforce a port-only scope invariant; no result returns to game state. floorf is exact finite-binary32 floor for native cell recognition (not an approximate transcendental); it writes only native CellCandidate bounds. No host allocation pointer or formatter output is written into guest vertices. Bionic checked strlen and pass_object_size formatting are the same native shader/diagnostic operations, not game formatting.",
+      "calls": {
+        "__stderrp": ["cell_build", "func_0040c0f0", "func_0040d0a0", "im2d_draw", "link_program", "p4gl_layout_begin", "p4gl_layout_end", "p4gl_layout_push", "p4gl_layout_queue_begin", "p4gl_movie_draw", "p4gl_texture_bind_sampler", "p4gl_title_photo_draw"],
+        "__vsnprintf_chk": ["_ZL8snprintfPcU17pass_object_size1mPKcz"],
+        "__acrt_iob_func": [
+          "cell_build",
+          "func_0040c0f0",
+          "func_0040d0a0",
+          "im2d_draw",
+          "link_program",
+          "p4gl_layout_begin",
+          "p4gl_layout_end",
+          "p4gl_layout_push",
+          "p4gl_layout_queue_begin",
+          "p4gl_movie_draw",
+          "p4gl_texture_bind_sampler",
+          "p4gl_title_photo_draw"
+        ],
+        "SDL_GetWindowSizeInPixels": [
+          "p4gl_target_pixel_size"
+        ],
+        "abort": [
+          "p4gl_layout_begin",
+          "p4gl_layout_end",
+          "p4gl_layout_push",
+          "p4gl_layout_queue_begin",
+          "p4gl_title_photo_draw"
+        ],
+        "floorf": [
+          "cell_rectangle"
+        ],
+        "fprintf": [
+          "func_0040c0f0",
+          "func_0040d0a0",
+          "p4gl_movie_draw"
+        ],
+        "free": [
+          "compile_stage",
+          "im2d_draw",
+          "p4gl_im2d_context_lost",
+          "select_program"
+        ],
+        "fwrite": [
+          "cell_build",
+          "im2d_draw",
+          "link_program",
+          "p4gl_layout_begin",
+          "p4gl_layout_end",
+          "p4gl_layout_push",
+          "p4gl_layout_queue_begin",
+          "p4gl_texture_bind_sampler",
+          "p4gl_title_photo_draw"
+        ],
+        "malloc": [
+          "compile_stage",
+          "im2d_draw",
+          "select_program"
+        ],
+        "memcpy": [
+          "compile_stage",
+          "im2d_draw"
+        ],
+        "memset": [
+          "p4gl_im2d_context_lost"
+        ],
+        "realloc": [
+          "cell_append_rect",
+          "cell_append_triangle",
+          "im2d_draw"
+        ],
+        "snprintf": [
+          "im2d_draw",
+          "select_program"
+        ],
+        "stderr": [
+          "cell_build",
+          "func_0040c0f0",
+          "func_0040d0a0",
+          "im2d_draw",
+          "link_program",
+          "p4gl_layout_begin",
+          "p4gl_layout_end",
+          "p4gl_layout_push",
+          "p4gl_layout_queue_begin",
+          "p4gl_movie_draw",
+          "p4gl_texture_bind_sampler",
+          "p4gl_title_photo_draw"
+        ],
+        "strlen": [
+          "compile_stage",
+          "im2d_draw",
+          "select_program"
+        ]
+      }
+    },
+    "src/render/p4gl_im3d.c": {
+      "reason": "Native clip/line/index arrays and ignored renderer diagnostics; their addresses remain native caches.",
+      "calls": {
+        "__stderrp": ["draw_common", "p4gl_clip_draw_triangles", "p4gl_im3d_draw", "p4gl_im3d_transform"],
+        "__acrt_iob_func": [
+          "draw_common",
+          "p4gl_clip_draw_triangles",
+          "p4gl_im3d_draw",
+          "p4gl_im3d_transform"
+        ],
+        "fprintf": [
+          "p4gl_clip_draw_triangles",
+          "p4gl_im3d_draw",
+          "p4gl_im3d_transform"
+        ],
+        "fwrite": [
+          "draw_common",
+          "p4gl_im3d_transform"
+        ],
+        "realloc": [
+          "draw_common",
+          "p4gl_im3d_transform"
+        ],
+        "stderr": [
+          "draw_common",
+          "p4gl_clip_draw_triangles",
+          "p4gl_im3d_draw",
+          "p4gl_im3d_transform"
+        ]
+      }
+    },
+    "src/render/p4gl_image.c": {
+      "reason": "Byte copies only; guest-visible image storage is allocated by the guest heap seam.",
+      "calls": {
+        "memcpy": [
+          "_rwSkyRasterSetImage",
+          "func_00407ff0"
+        ]
+      }
+    },
+    "src/render/p4gl_native.c": {
+      "reason": "Native texture decode/palette/swizzle scratch; data is uploaded/copied into separately owned raster storage, never exposed as a guest allocation address. Pattern-init memset in func_003fd940 fills only native palette[256*4] with 0xff; retained ELF32 disassembly proves the 1024-byte stack span subsequently passed to p4gl_nativetex_decode.",
+      "calls": {
+        "__stderrp": ["func_003fd940", "rasterFail"],
+        "__acrt_iob_func": [
+          "func_003fd940",
+          "rasterFail"
+        ],
+        "fprintf": [
+          "func_003fd940",
+          "rasterFail"
+        ],
+        "free": [
+          "func_003fd940"
+        ],
+        "fwrite": [
+          "func_003fd940"
+        ],
+        "malloc": [
+          "func_003fd940"
+        ],
+        "memcpy": [
+          "func_003fd940"
+        ],
+        "memset": [
+          "func_003fd940"
+        ],
+        "stderr": [
+          "func_003fd940",
+          "rasterFail"
+        ]
+      }
+    },
+    "src/render/p4gl_nativetex.c": {
+      "reason": "Native swizzle inversion/padding scratch; allocation addresses are local temporaries and are freed before return.",
+      "calls": {
+        "free": [
+          "p4gl_nativetex_decode"
+        ],
+        "malloc": [
+          "p4gl_nativetex_decode"
+        ],
+        "memcpy": [
+          "p4gl_nativetex_decode",
+          "p4gl_nativetex_decode_ct32"
+        ],
+        "memset": [
+          "p4gl_nativetex_decode"
+        ]
+      }
+    },
+    "src/render/p4gl_profile.c": {
+      "reason": "Opt-in native GPU timestamp-query diagnostics only. calloc/free own the host GpuTrace/query-bank bookkeeping, never guest allocation slots; strcmp compares a driver extension name with a fixed native literal. SDL counters, native uint64 counter division (__udivdi3 on i386) and resolved GL entry points are observer inputs only. atexit registers a host-only CSV tail receipt which makes no GL calls. stdio accesses an operator-selected native CSV file or ignored stderr diagnostics; no pointer, clock, formatted text or return value is written into guest state. Entries name actual optimized ELF32/ELF64/COFF64 object callers, including inlined clock/status helpers; fopen64 in p4gl_profile_init is observed in5913dc4a Linux ELF64.",
+      "calls": {
+        "__stderrp": ["p4gl_profile_init"],
+        "SDL_GL_GetProcAddress": ["p4gl_profile_init"],
+        "SDL_GetPerformanceCounter": ["p4gl_profile_frame_end", "p4gl_profile_now_ns", "p4gl_profile_touch"],
+        "SDL_GetPerformanceFrequency": ["p4gl_profile_frame_end", "p4gl_profile_now_ns", "p4gl_profile_touch"],
+        "__acrt_iob_func": ["p4gl_profile_init"],
+        "__udivdi3": ["p4gl_profile_frame_end", "p4gl_profile_now_ns", "p4gl_profile_touch"],
+        "atexit": ["p4gl_profile_init"],
+        "calloc": ["p4gl_profile_init"],
+        "fclose": ["p4gl_profile_close", "p4gl_profile_init", "trace_exit"],
+        "fflush": ["p4gl_profile_frame_end", "p4gl_profile_init"],
+        "fopen": ["p4gl_profile_init"],
+        "fopen64": ["p4gl_profile_init"],
+        "fprintf": ["consume", "p4gl_profile_close", "p4gl_profile_frame_end", "p4gl_profile_init", "trace_exit"],
+        "free": ["p4gl_profile_close", "p4gl_profile_init"],
+        "fwrite": ["p4gl_profile_init"],
+        "getenv": ["p4gl_profile_init"],
+        "setvbuf": ["p4gl_profile_init"],
+        "stderr": ["p4gl_profile_init"],
+        "strcmp": ["p4gl_profile_init"]
+      }
+    },
+    "src/render/p4gl_ptank.c": {
+      "reason": "Native expanded quad/index arrays and ignored diagnostics only. Rotation uses retail float sinf/cosf; no host transcendental or allocation address contributes to guest state.",
+      "calls": {
+        "__stderrp": ["p4gl_ptank_draw"],
+        "__acrt_iob_func": [
+          "p4gl_ptank_draw"
+        ],
+        "fprintf": [
+          "p4gl_ptank_draw"
+        ],
+        "fwrite": [
+          "p4gl_ptank_draw"
+        ],
+        "realloc": [
+          "ensure_capacity"
+        ],
+        "stderr": [
+          "p4gl_ptank_draw"
+        ]
+      }
+    },
+    "src/render/p4gl_raster.c": {
+      "reason": "Host calloc/malloc allocate temporary blank/RGBA upload bytes only. Guest palette and cpPixels allocations use p4pc_heap_calloc; P4_H2G stores those guest pointers, never the temporary host buffers.",
+      "calls": {
+        "__stderrp": ["func_003f98a0", "targetPrepare", "uploadRaster"],
+        "__acrt_iob_func": [
+          "func_003f98a0",
+          "targetPrepare",
+          "uploadRaster"
+        ],
+        "calloc": [
+          "p4gl_raster_image_texture",
+          "uploadRgba8"
+        ],
+        "fprintf": [
+          "func_003f98a0",
+          "targetPrepare",
+          "uploadRaster"
+        ],
+        "free": [
+          "p4gl_raster_image_texture",
+          "uploadRaster",
+          "uploadRgba8"
+        ],
+        "malloc": [
+          "uploadRaster"
+        ],
+        "stderr": [
+          "func_003f98a0",
+          "targetPrepare",
+          "uploadRaster"
+        ]
+      }
+    },
+    "src/render/p4gl_readback.c": {
+      "reason": "Host capture/reference-image storage and file I/O only; readback/comparison results are native diagnostics, not guest game inputs.",
+      "calls": {
+        "__stderrp": ["p4gl_readback_configure_checked", "p4gl_readback_rgba", "p4gl_readback_target_create", "p4gl_reference_mad"],
+        "__acrt_iob_func": [
+          "p4gl_readback_configure_checked",
+          "p4gl_readback_rgba",
+          "p4gl_readback_target_create",
+          "p4gl_reference_mad"
+        ],
+        "fopen": [
+          "p4gl_reference_mad"
+        ],
+        "fclose": [
+          "p4gl_reference_mad"
+        ],
+        "fopen64": [
+          "p4gl_reference_mad"
+        ],
+        "fprintf": [
+          "p4gl_readback_configure_checked",
+          "p4gl_readback_rgba",
+          "p4gl_readback_target_create",
+          "p4gl_reference_mad"
+        ],
+        "fread": [
+          "p4gl_reference_mad"
+        ],
+        "free": [
+          "p4gl_readback_rgba",
+          "p4gl_reference_mad"
+        ],
+        "fseek": [
+          "p4gl_reference_mad"
+        ],
+        "ftell": [
+          "p4gl_reference_mad"
+        ],
+        "malloc": [
+          "p4gl_readback_rgba",
+          "p4gl_reference_mad"
+        ],
+        "memcpy": [
+          "p4gl_readback_rgba"
+        ],
+        "stderr": [
+          "p4gl_readback_configure_checked",
+          "p4gl_readback_rgba",
+          "p4gl_readback_target_create",
+          "p4gl_reference_mad"
+        ]
+      }
+    },
+    "src/render/p4gl_state.c": {
+      "reason": "Native draw logging, capture controls and host-authored environment ranges only. String/parser/formatter results select or describe native diagnostics, never retail parser results. Bionic's pass_object_size snprintf helper writes that same native draw-log buffer through checked vsnprintf. Pattern-init memset in p4gl_drawlog fills only native line[1024] with 0xff; retained ELF32 disassembly shows the same stack buffer passed to bounded snprintf and the native draw-line logger.",
+      "calls": {
+        "__stderrp": ["p4gl_drawlog", "p4gl_gs_alpha_apply", "p4gl_gs_log_draw"],
+        "__vsnprintf_chk": ["_ZL8snprintfPcU17pass_object_size1mPKcz"],
+        "__acrt_iob_func": [
+          "p4gl_drawlog",
+          "p4gl_gs_alpha_apply",
+          "p4gl_gs_log_draw"
+        ],
+        "atoi": [
+          "p4gl_drawlog"
+        ],
+        "fprintf": [
+          "p4gl_drawlog",
+          "p4gl_gs_alpha_apply",
+          "p4gl_gs_log_draw"
+        ],
+        "fputs": [
+          "p4gl_drawlog"
+        ],
+        "getenv": [
+          "p4gl_drawlog",
+          "p4gl_gs_log_on",
+          "p4gl_gs_skip"
+        ],
+        "memset": [
+          "p4gl_drawlog"
+        ],
+        "snprintf": [
+          "p4gl_drawlog"
+        ],
+        "stderr": [
+          "p4gl_drawlog",
+          "p4gl_gs_alpha_apply",
+          "p4gl_gs_log_draw"
+        ],
+        "strchr": [
+          "p4gl_drawlog"
+        ],
+        "strcmp": [
+          "p4gl_drawlog"
+        ],
+        "strtol": [
+          "p4gl_drawlog",
+          "p4gl_gs_skip"
+        ],
+        "strtoul": [
+          "p4gl_gs_log_on"
+        ]
+      }
+    },
+    "src/render/p4gl_yuv.c": {
+      "reason": "Ignored native YUV-renderer diagnostics only.",
+      "calls": {
+        "__stderrp": ["p4gl_raster_set_yuv420"],
+        "__acrt_iob_func": [
+          "p4gl_raster_set_yuv420"
+        ],
+        "fprintf": [
+          "p4gl_yuv_table_rows"
+        ],
+        "fwrite": [
+          "p4gl_raster_set_yuv420",
+          "p4gl_yuv_table_rows"
+        ],
+        "stderr": [
+          "p4gl_raster_set_yuv420",
+          "p4gl_yuv_table_rows"
+        ]
+      }
+    },
+    "src/render/p4tmx.c": {
+      "reason": "Native TMX decode/upload scratch; allocation addresses are not guest object fields. Pattern-init memset in p4tmx_decode fills only native pal[256*4] with 0xff; retained ELF32 disassembly proves the 1024-byte stack span used by subsequent indexed palette writes.",
+      "calls": {
+        "free": [
+          "p4tmx_free"
+        ],
+        "memset": [
+          "p4tmx_decode"
+        ],
+        "malloc": [
+          "p4tmx_decode"
+        ]
+      }
+    },
+    "src/viewer/p4png.c": {
+      "reason": "Native PNG output scratch and host output FILE operations; pixel bytes are read from capture storage and no CRT result is a game value.",
+      "calls": {
+        "fopen": [
+          "p4png_write_rgba"
+        ],
+        "fclose": [
+          "p4png_write_rgba"
+        ],
+        "fopen64": [
+          "p4png_write_rgba"
+        ],
+        "free": [
+          "p4png_write_rgba"
+        ],
+        "fwrite": [
+          "p4png_chunk_begin",
+          "p4png_chunk_end",
+          "p4png_deflate_put",
+          "p4png_put",
+          "p4png_write_rgba"
+        ],
+        "malloc": [
+          "p4png_write_rgba"
+        ],
+        "memcpy": [
+          "p4png_feed"
+        ]
+      }
+    },
+    "src/loader.c": {
+      "reason": "Host bootstrap diagnostics only; the user-selected retail image and explicit command-line arguments are external inputs, not computed CRT game values. UCRT FILE access supplies those diagnostic streams; compiler-emitted __main performs native process constructor initialization, not a game CRT computation. Retained ELF32 pattern-init disassembly proves both main memset sites fill only the native elf[1100] executable-path stack buffer with 0xff; the no-argument branch passes that same span to bounded p4iso_prepare before host image loading, never to guest RAM. --help (usage) prints fixed usage text and the program name from argv[0] to stdout and returns before any image, disc or settings access.",
+      "calls": {
+        "__stderrp": ["main"],
+        "__stdoutp": ["main", "usage"],
+        "__acrt_iob_func": ["main", "usage"],
+        "__main": ["main"],
+        "fprintf": ["main", "p4pc_main", "usage"],
+        "memset": ["main"],
+        "stderr": ["main", "p4pc_main"],
+        "stdout": ["main", "p4pc_main", "usage"]
+      }
+    },
+    "src/viewer/p4pc_viewer.c": {
+      "reason": "Standalone developer model-viewer frontend: host capture names, diagnostics and native draw-window/MAD controls only. Numeric values entering guest fields, dates, player/camera coordinates or guest-frame counts use the retail parsers; the synthetic camera's radius uses retail sqrtf. AArch64 frame_camera zeroes its native Bounds stack object and inlines f32_at as three four-byte copies from the guest camera view window into native stack floats. Host malloc is restricted to native input/capture scratch; bytes may be copied into guest allocations, never host pointers. Explicit main pairs cover the same operations when i386 inlines viewer_main. UCRT FILE access serves those same diagnostics, and compiler-emitted __main initializes the native process constructors. UCRT atoi/atof are only the existing native draw-window and MAD controls; fopen opens the same host viewer input as glibc fopen64.",
+      "calls": {
+        "__stderrp": ["main", "make_ptank", "viewer_main", "write_frame"],
+        "__acrt_iob_func": ["frame_camera", "main", "make_ptank", "viewer_main", "write_frame"],
+        "__main": ["main"],
+        "__vsnprintf_chk": ["_ZL8snprintfPcU17pass_object_size1mPKcz"],
+        "atof": ["write_frame"],
+        "atoi": ["drawWindow"],
+        "exit": ["viewer_entry"],
+        "fclose": ["main", "viewer_main"],
+        "fopen": ["main", "viewer_main"],
+        "fopen64": ["main", "viewer_main"],
+        "fprintf": ["frame_camera", "main", "make_ptank", "p4pc_viewer_main", "viewer_main", "write_frame"],
+        "free": ["main", "viewer_main", "write_frame"],
+        "fwrite": ["main", "viewer_main"],
+        "getenv": ["drawWindow", "main", "viewer_main", "write_frame"],
+        "malloc": ["main", "viewer_main", "write_frame"],
+        "memcpy": ["bounds_atomic", "frame_camera", "main", "make_ptank", "ptr_at", "viewer_main"],
+        "memset": ["frame_camera", "main", "viewer_main"],
+        "snprintf": ["main", "viewer_main"],
+        "stderr": ["frame_camera", "main", "make_ptank", "p4pc_viewer_main", "viewer_main", "write_frame"],
+        "strchr": ["main", "viewer_main"],
+        "strcmp": ["main", "viewer_main"],
+        "strncmp": ["main", "viewer_main"],
+        "strtod": ["write_frame"],
+        "strtol": ["drawWindow"]
+      }
+    },
+    "src/movie/p4pc_sfdview.c": {
+      "reason": "Standalone movie-inspection frontend, never called by the game: host CLI parsing, directory listing, captures and diagnostics only. Win32 main's atoi parses only external argv frame-count/step controls (clamped before use), never a guest numeric field. __acrt_iob_func supplies native diagnostic FILE streams; compiler-emitted __main initializes native process constructors before that standalone frontend, not game CRT state.",
+      "calls": {
+        "__acrt_iob_func": ["main"],
+        "__main": ["main"],
+        "atoi": ["main"],
+        "fprintf": ["main"],
+        "free": ["list_dir", "main"],
+        "fwrite": ["main"],
+        "getenv": ["main"],
+        "memset": ["main"],
+        "printf": ["list_dir", "main"],
+        "putchar": ["main"],
+        "realloc": ["list_dir", "main"],
+        "snprintf": ["list_dir", "main"],
+        "stderr": ["main"],
+        "strcasecmp": ["list_dir"],
+        "strcmp": ["main"],
+        "strlen": ["list_dir"],
+        "strrchr": ["list_dir"],
+        "strtol": ["main"]
+      }
+    }
+  }
+}

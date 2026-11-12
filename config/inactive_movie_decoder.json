@@ -1,0 +1,38 @@
+{
+  "reason": "Production movie playback is H_Cdvd_StartPlayback -> p4pc_movie_start -> native SFD demux and FFmpeg libavcodec on every profile. These reconstructed software MPV bodies and their dependency-closed mixed-unit callers have no remaining production ingress. Keep the six native MWPLY forwarders, native create/status/destroy, passive frame helpers and the separate original PS2 IPU implementation. See docs/platform/crt_boundary.md.",
+  "units": [
+    "src/cri/re4/mpv_bdec.c", "src/cri/re4/mpv_cdec.c", "src/cri/re4/mpv_cmc.c",
+    "src/cri/re4/mpv_dec.c", "src/cri/re4/mpv_deli.c", "src/cri/re4/mpv_deli_error_4b18.c",
+    "src/cri/re4/mpv_deli_get_4a98.c", "src/cri/re4/mpv_deli_reset_49f0.c", "src/cri/re4/mpv_emp.c",
+    "src/cri/re4/mpv_err.c", "src/cri/re4/mpv_err_callbacks_b370.c", "src/cri/re4/mpv_hdec.c",
+    "src/cri/re4/mpv_hdec_empty_4d00.c", "src/cri/re4/mpv_hdec_leaf_05070.c",
+    "src/cri/re4/mpv_hdec_leaf_fbed0.c", "src/cri/re4/mpv_hdec_leaf_fc048.c",
+    "src/cri/re4/mpv_lib.c", "src/cri/re4/mpv_lib_leaf_00f68.c", "src/cri/re4/mpv_lib_leaf_06f40.c",
+    "src/cri/re4/mpv_m2v.c", "src/cri/re4/mpv_mc.c", "src/cri/re4/mpv_mcy.c",
+    "src/cri/re4/mpv_umc.c", "src/cri/re4/mpv_vlc.c", "src/cri/re4/mpvabdec.c"
+  ],
+  "functions": {
+    "src/cri/re4/mwsfdcre.c": ["mwPlyGetHdrInf", "MWSFCRE_DestroySfd", "mwSfdDestroy", "mwsfcre_SetSfdCond", "mwPlyCreateSofdec", "MWSFCRE_ResetSfdHn", "mwsfcre_CreateSfd"],
+    "src/cri/re4/mwsfdlib.c": ["mwPlySfdInit"],
+    "src/cri/re4/mwsfdply.c": ["mwPlyStartFnameRange", "mwSfdStop", "mwSfdStopDec", "mwSfdStartSj", "mwSfdStartMem", "mwSfdStartFnameSub", "mwSfdStartFname"],
+    "src/cri/re4/mwsfdsfx.c": ["MWSFTAG_CreateAinfSj"],
+    "src/cri/re4/sfd_cre.c": ["sfcre_SetSfdHdrInf", "sfcre_AnalySfdHdr", "sfcre_AnalyMpv", "sfcre_AnalyMps", "sfcre_AnalyCreInf", "SFD_AnalyCreInf"],
+    "src/cri/re4/sfd_mpv.c": ["SFD_SetMpvCond", "SFMPV_SaveCond", "SFMPV_RestoreCond", "SFMPV_Init", "SFMPV_Finish", "SFMPV_ExecServer", "sfmpv_ExecServerSub", "sfmpv_DecUsrHdr", "sfmpv_GetActiveSize", "sfmpv_NeedSafeDlmRefresh", "sfmpv_DecodeOneUnit", "sfmpv_Concat", "sfmpv_DecodePicAtr", "sfmpv_IsSkip", "sfmpv_IsEmptySkip", "sfmpv_DecodeFrm", "sfmpv_GoDdelim", "SFMPV_Create", "SFMPV_Destroy", "SFMPV_Seek", "sfmpv_SeekVhdr", "sfmpv_SkipEndcode", "sfmpv_BsearchDlm", "sfmpv_SearchDlm"],
+    "src/cri/re4/sfd_ply.c": ["sfply_ResetHn", "sfply_StopHn", "SFD_Stop", "SFD_Destroy"]
+  },
+  "registrations": {
+    "src/cri/re4/mwsfdcre.c": ["mwsfd_mps_trsetup", "mwsfd_mpv_trsetup", "mwsfd_vonlysfd_trsetup", "mwsfd_if", "mwsfd_sfdmps_crepara", "mwsfd_sfdmpv_crepara", "mwsfd_vonlysfd_crepara"],
+    "src/cri/re4/mwsfdlib.c": ["mwsfd_trentry", "mwsfd_initsfdpara"],
+    "src/cri/re4/sfd_mpv.c": ["SFD_tr_vd_mpv"]
+  },
+  "markers": {
+    "src/cri/re4/sfd_cre.c": ["00516078"],
+    "src/cri/re4/sfd_mpv.c": ["0051a1c0", "0051a278", "0051a300", "0051a6d0", "0051a6f0", "0051ba98"],
+    "src/cri/re4/sfd_ply.c": ["00522ff8"]
+  },
+  "retired_words": {
+    "00760450": "0051a5e8",
+    "00760454": "0051a6d0",
+    "00760458": "0051a6f0"
+  }
+}

@@ -1,0 +1,3 @@
+--!capability core@1
+--!covers p4.api_version p4.language p4.language_version p4.id p4.log p4.u64 p4.split64
+-- p4.api_version, language, language_version, id, log, u64 and split64 (API 1.0).

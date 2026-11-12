@@ -1,0 +1,15 @@
+# Compiled functions that a marker or a symbol places at a retail address but that are not the retail
+# function there. Lines: 0xADDR name  # evidence. gen_port stops resolving the address to `name`: a
+# port translation named func_<addr8> takes it, otherwise the address is a trap (loud if reached).
+# The name still links by name for the decomp's own C callers. Found by the marker audit
+# (tools/asm_worklist.py --marker-audit); reachability from the retail call graph (jal/j, lui+addiu
+# address pairs and data words over the whole image) joined with the pcsx2-hook block coverage.
+0x0050D840 mwPlyGetNumTotalDec  # RE4 body differs from retail. No callers, pairs or data words in retail (library API nothing calls).
+0x0050DCD0 mwPlyGetNumSkipEmptyB  # RE4 body differs from retail. Only caller mwPlyGetPlyInf (0x0050ddf8), which nothing calls.
+0x0050EA58 mwPlyFxCnvFrmZ16  # RE4 body differs from retail. No callers, pairs or data words in retail.
+0x0050EB08 mwPlyFxCnvFrmZ32  # RE4 body differs from retail. No callers, pairs or data words in retail.
+0x00510310 mwPlyGetSlFname  # RE4 body differs from retail. No callers, pairs or data words in retail.
+0x00525180 SFD_GetPlyInf  # RE4 body differs from retail. Callers are the mwPlyGetNumSkipDec / mwPlyGetNumDropFrm / mwPlyGetPlyInf / mwPlyGetFlowInf getters, which nothing calls.
+0x00527180 SFTRN_Init  # RE4 body differs from retail. Retail: mwPlyInitSfdFx -> mwPlySfdInit -> SFLIB_Init; the port replaces mwPlyInitSfdFx by the no-op seam (config/mirror_fixes.txt, p4pc_mwply_init).
+0x004C6F08 ADXT_ExecFsSvr  # Wrong marker: retail 0x004c6f08 is the ROFS device removal under the SVM lock (func_004c6f08, src/platform/files/adxf_fsvr.c), not the file server pass. ADXT_ExecFsSvr stays bound at 0x004C9D48 (native_names.txt).
+0x004C0E40 isInitialized  # decomp u8 return leaves garbage above AL on x86 (golden12: native eax 0x00922e00 against retail 0); retail 0x004c0e40 is `0 < W32(svr, 0xa4)` returning a full int, func_004c0e40 in src/cri/acs.c. isInitialized still links by name for the decomp's own C callers (u8 contexts).

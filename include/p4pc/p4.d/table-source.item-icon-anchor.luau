@@ -1,0 +1,3 @@
+--!capability table-source.item-icon-anchor@1
+--!covers section:table-source.item-icon-anchor
+-- Derived weapon rows may explicitly inherit native icon selection from their retail anchor.

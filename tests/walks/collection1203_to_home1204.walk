@@ -1,0 +1,76 @@
+# Independent pristine collection card4-slot12, December 3 evening after sparing Namatame.
+# December 4: the Junes deduction (Teddie is missing; there's something else; the warning
+# letter; Namatame didn't write it), Namatame's hospital questions and the home save.
+timeout:20000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+waitstate16:0x00797b7a==246
+walk:314,-360,25
+face:100
+wait:20
+press:cross
+wait:40
+timeout:60000
+# Sleep; Igor: you can solve this mystery.
+waitchoice
+choose:1
+waitchoice
+choose:1
+skipfield:9:1
+waitchoice
+choose:1
+waitchoice
+choose:2
+waitchoice
+choose:3
+waitchoice
+choose:3
+skiptask:cmmRankUp
+skiptask:cmmRankUp:off
+# Ask Namatame all six questions; each asked question leaves the menu.
+waitchoice
+choose:1
+waitchoice
+choose:1
+waitchoice
+choose:1
+waitchoice
+choose:1
+waitchoice
+choose:1
+waitchoice
+choose:1
+# What's done is done; that's our plan.
+waitchoice
+choose:1
+waitchoice
+choose:1
+skiptask:cmmRankUp
+skiptask:cmmRankUp:off
+skipfield:7:2
+skipmsg
+waitfield:7:2
+waitstate16:0x00797b7a==247
+waitcontrol:on
+waitmsg:closed
+timeout:6000
+walk:0,200,40
+walk:103,-20,25
+push:103,-217,25
+wait:900
+press:cross
+wait:600
+press:cross
+wait:600
+press:left:12
+wait:400
+press:cross
+wait:1500
+press:cross
+wait:600
+log

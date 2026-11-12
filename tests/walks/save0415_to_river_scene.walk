@@ -1,0 +1,24 @@
+# Real 04/15 evening checkpoint -> first 04/16 Yosuke greeting at the riverbank.
+# Same controller route as save0415_to_street.walk; release Cross during the first river greeting.
+# No weather, event or camera overrides. The first greeting remains open for comparison.
+timeout:6000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+timeout:40000
+waitcontrol:on
+wait:30
+walk:314,-360,25
+face:100
+wait:20
+press:cross
+wait:40
+# This first upstairs event goes directly through the Velvet Room and into 04/16 morning.
+# The field root stays Your Room during scripted scenes, so skipfield cannot select the river.
+skip:4280
+wait:600
+log

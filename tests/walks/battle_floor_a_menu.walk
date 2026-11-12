@@ -1,0 +1,6 @@
+# Retain the floor-A gate's timed introduction through its final Cross at 1200.
+# Then advance only real Help text and stop at the fresh COMMAND menu, without attacks.
+timeout:4000
+wait:1208
+waitbtl:menu
+log

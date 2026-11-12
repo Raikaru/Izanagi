@@ -1,0 +1,3 @@
+--!capability lifecycle@1
+--!covers p4.lifecycle
+-- p4.lifecycle.session, tag, crashed and consume (API 1.3).

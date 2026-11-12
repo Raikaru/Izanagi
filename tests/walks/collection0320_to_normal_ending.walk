@@ -1,0 +1,48 @@
+# Independent pristine collection card5-slot02, March 20 in the shopping district.
+# Leave for the farewell map's Dojima Residence and go home: the departure, the
+# normal ending and its credits; answer Save new cycle data? Yes and overwrite the card.
+timeout:20000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+waitstate16:0x00797b7a==353
+press:square
+waitchoice
+choose:2
+wait:300
+# The map cursor starts on Central Shopping District; Dojima Residence is three rows down.
+press:down
+wait:20
+press:down
+wait:20
+press:down
+wait:20
+press:cross
+skipfield:7:1
+skipmsg
+walk:0,330,40
+push:0,-100,35
+press:cross
+choose:1
+timeout:200000
+skiptask:GameClearDraw
+waittask:shdWNDProc
+wait:300
+# Save new cycle data? Yes; the carry-over notice; Save where? the loaded slot; overwrite Yes.
+press:left:12
+wait:120
+press:cross
+wait:600
+press:cross
+wait:600
+press:cross
+wait:600
+press:left:12
+wait:120
+press:cross
+wait:1500
+log

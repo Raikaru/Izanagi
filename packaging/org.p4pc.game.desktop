@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Persona 4
+Comment=Native port; requires your own Persona 4 USA PS2 disc image
+Exec=p4pc %f
+Icon=org.p4pc.game
+Categories=Game;RolePlaying;
+Terminal=false

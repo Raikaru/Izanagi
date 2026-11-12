@@ -1,0 +1,73 @@
+# Independent pristine collection card5-slot04, March 20 in Shopping District South after the
+# food court discussion and Dojima at the riverbed. The gas-station attendant: "Isn't this where I
+# first...?", "Do you know Namatame?", "Did those two come here?", "Did you do anything to them?",
+# "What did you do to me?", "Did you give me the power?"; Izanami's reveal, then Junes, the TV
+# and a save at the Entrance.
+timeout:20000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+timeout:20000
+waitcontrol:on
+plan:on
+timeout:8000
+walk:-594,-813,150
+plan:off
+push:-594,-813,10
+press:cross
+timeout:20000
+choose:2
+choose:2
+choose:3
+choose:2
+choose:2
+choose:3
+choose:1                  # "What do you mean?"
+choose:1                  # "To end everything."
+timeout:60000
+skipmsg
+waitcontrol:on
+# Junes food court: Enter the TV.
+press:square
+waitchoice
+choose:2
+wait:300
+press:down
+wait:20
+press:cross
+timeout:12000
+skipfield:9:4
+skipmsg
+waitcontrol:on
+wait:60
+walk:-300,0,60
+push:-500,0,12
+press:cross
+timeout:24000
+choose:1
+waitchoice
+wait:200
+choose:3
+timeout:30000
+skipfield:20:1
+skipmsg
+# Save at the entrance butterfly.
+timeout:6000
+walk:-455,387,60
+push:-700,620,12
+wait:30
+press:cross
+wait:600
+press:cross
+wait:600
+press:left:12
+wait:400
+press:cross
+wait:1500
+press:cross
+wait:600
+log

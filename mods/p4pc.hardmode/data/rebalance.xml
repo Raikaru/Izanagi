@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="us-ascii"?>
+<!-- p4pc.hardmode spell rebalance, skill-rebalance-design family 1 (approved 2026-11-05).
+     Named-field deltas over the composed SKILL rows (tables.md "Table deltas"), so the
+     values apply over Golden's rows as over the disc's.
+     F1-a: the medium single-target spells' power 100 -> 80 (light 40 and heavy 160 keep
+     theirs), so both tier steps are x1.41. Their SP stays.
+     F1-b (F1-D1): each all-target spell deals 0.80x the same tier's single-target damage
+     per target and costs 1.5x its SP: light power 26 / 6 SP, medium 51 / 12, heavy
+     102 / 18 (damage follows the square root of power). -->
+<p4-table-deltas schema="1">
+<!-- F1-a: Agilao, Garula, Bufula, Zionga. -->
+<skill-delta id="0x02" power="80"/>
+<skill-delta id="0x0F" power="80"/>
+<skill-delta id="0x1B" power="80"/>
+<skill-delta id="0x28" power="80"/>
+<!-- F1-b light: Maragi, Magaru, Mabufu, Mazio. -->
+<skill-delta id="0x04" power="26" cost="6"/>
+<skill-delta id="0x11" power="26" cost="6"/>
+<skill-delta id="0x1D" power="26" cost="6"/>
+<skill-delta id="0x2A" power="26" cost="6"/>
+<!-- F1-b medium: Maragion, Magarula, Mabufula, Mazionga. -->
+<skill-delta id="0x05" power="51" cost="12"/>
+<skill-delta id="0x12" power="51" cost="12"/>
+<skill-delta id="0x1E" power="51" cost="12"/>
+<skill-delta id="0x2B" power="51" cost="12"/>
+<!-- F1-b heavy: Maragidyne, Magarudyne, Mabufudyne, Maziodyne. -->
+<skill-delta id="0x06" power="102" cost="18"/>
+<skill-delta id="0x13" power="102" cost="18"/>
+<skill-delta id="0x1F" power="102" cost="18"/>
+<skill-delta id="0x2C" power="102" cost="18"/>
+</p4-table-deltas>

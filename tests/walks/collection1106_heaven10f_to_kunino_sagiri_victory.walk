@@ -1,0 +1,66 @@
+# Independent pristine collection card4-slot09, Heaven's 10th Paradise.
+# Switch Yu to his slot-1 Persona in camp (id 138: Gigantic Fist), open the door, play the real event and defeat
+# Kunino-sagiri (encounter 520) with walker battle rules (native skill and item IDs): Balm of Life for a downed member,
+# Attack while silenced, Yukiko's Me Patra and Yu's Amrita on ailments, Yukiko's Mediarama under 400 HP, a Bead Chain
+# under 300 HP, Guard while it is charged, otherwise Gigantic Fist, Garudyne, Rampage and Agidyne.
+# Stops at the post-battle Heaven event. Not the preceding Heaven floors.
+timeout:30000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+waitfield:28:2
+waitstep:110
+waitstate16:0x00797b7a==219
+press:triangle
+wait:100
+press:down
+wait:20
+press:down
+wait:20
+press:down
+wait:20
+press:cross
+wait:600
+press:cross
+wait:600
+press:down
+wait:20
+press:cross
+wait:100
+press:circle
+wait:70
+press:circle
+wait:70
+press:circle
+wait:70
+press:circle
+wait:70
+waitstate16:0x00797f8e==138
+waitfield:28:2
+log
+wait:60
+push:0,-10000,120
+press:cross
+# Open the door, establish his name, hear both information topics, demand release.
+choose:1
+choose:1
+choose:1
+choose:2
+choose:3
+battle:plan1=circle,down,cross,skill:132,cross,cross,circle,circle,circle,cross,cross;plan2=circle,down,cross,skill:16,cross,cross,circle,circle,circle,cross,cross;plan3=circle,down,cross,skill:171,cross,cross,circle,circle,circle,cross,cross;plan4=circle,down,cross,skill:3,cross,cross,circle,circle,circle,cross,cross;plan=circle,cross,cross;skip=0;delay=40;guard=264
+battlerule:dead@1,2,3,4=circle,down,down,down,cross,item:784,cross,cross,circle,circle,circle,cross,cross
+battlerule:status:0x8=circle,cross,cross
+battlerule:afflicted:0x3F@4=circle,down,cross,skill:200,cross,cross,circle,circle,circle,cross,cross
+battlerule:afflicted:0x3F@1=circle,down,down,down,cross,item:793,cross,cross,circle,circle,circle,cross,cross
+battlerule:hp<400@4=circle,down,cross,skill:196,cross,cross,circle,circle,circle,cross,cross
+battlerule:hp<300@1,2,3=circle,down,down,down,cross,item:778,cross,cross,circle,circle,circle,cross,cross
+timeout:120000
+skiptask:battle
+waittask:battle:off
+log
+waitfield:28:2
+log

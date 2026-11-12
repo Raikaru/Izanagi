@@ -1,0 +1,3 @@
+--!capability ui.status@1
+--!covers p4.ui.status
+-- p4.ui.status: a short status line on the Camp menu (API 1.3) or the field HUD (API 1.4).

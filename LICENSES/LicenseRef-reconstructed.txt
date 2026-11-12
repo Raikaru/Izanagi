@@ -1,0 +1,12 @@
+LicenseRef-reconstructed: no licence granted
+
+Files marked with this identifier reproduce or translate code of the retail
+Shin Megami Tensei: Persona 4 (USA) executable, of the middleware statically
+linked into it (CRI, RenderWare) or of its runtime libraries: decompiled C,
+instruction-for-instruction translations, and machine drafts.
+
+The Izanagi contributors do not own that code and grant no licence to it.
+Whatever rights exist in it belong to its original authors. The MIT licence
+in LICENSE does not apply to these files. Where the original code is
+available under its own licence (fdlibm, newlib, GCC's libgcc), that licence
+and its notice apply instead, as recorded in NOTICE and THIRD_PARTY.md.

@@ -1,0 +1,20 @@
+# Independent pristine collection card3-slot15, Secret Laboratory B9F.
+# Cover the interior door/event and first Shadow Naoto protagonist COMMAND.
+# This does not certify preceding laboratory floors or a Naoto victory.
+timeout:30000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+waitfield:27:2
+waitstep:89
+waitstate16:0x00797b7a==170
+walk:0,-1450,60
+push:0,-1050,16
+press:cross
+skiptask:battle
+waitbtl:menu:1
+log

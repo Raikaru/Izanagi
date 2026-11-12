@@ -1,0 +1,48 @@
+# RenderWare extern storage that the port defines (tools/gen_port.py).
+#
+# The decomp declares each name `extern` and nothing defines it. The port
+# defines it as port-owned storage in configure. A name moves to
+# config/port_symbols.txt only when retail code is shown to use a fixed address
+# for it; its line here then goes. A name the decomp starts to define, or stops
+# declaring, fails configure/tables: remove it here.
+#
+# One C identifier per line. The comment gives the decomp's declaration
+# (decomp commit ffb64503, pinned by this repo's decomp/ submodule).
+#
+# Evidence for the names below (audit when RwEngineInstance moved to retail 0x008872E0):
+# - No file in the decomp's src/ or include/ outside src/renderware, src/rw and
+#   include/rw uses any of them, so only RenderWare code reads these, and all of it
+#   shares the one port definition.
+# - tools/retail_symbols.py placed none: only 6 of the 113 functions that touch
+#   them byte-match retail in the object set available, and every site in the
+#   others is skipped.
+# - config/symbol_data_addrs.txt and the retail link map give no address for any.
+# Retail RenderWare code may still reference some at a fixed address; that stays
+# unproven until a retail site decodes. Re-run the audit before adding a name.
+LogoImageRatio  # src/renderware/core/bacamval.c: extern const RwReal LogoImageRatio;
+LogoRaster  # src/renderware/core/bacamval.c: extern RwRaster *LogoRaster;
+LogoRasterHeight  # src/renderware/core/bacamval.c: extern const RwInt32 LogoRasterHeight;
+LogoRasterWidth  # src/renderware/core/bacamval.c: extern const RwInt32 LogoRasterWidth;
+_rpAtomicFreeList  # src/renderware/world/baclump.c: extern RwFreeList _rpAtomicFreeList;
+_rpAtomicFreeListBlockSize  # src/renderware/world/baclump.c: extern RwInt32 _rpAtomicFreeListBlockSize;
+_rpAtomicFreeListPreallocBlocks  # src/renderware/world/baclump.c: extern RwInt32 _rpAtomicFreeListPreallocBlocks;
+_rpClumpFreeList  # src/renderware/world/baclump.c: extern RwFreeList _rpClumpFreeList;
+_rpClumpFreeListBlockSize  # src/renderware/world/baclump.c: extern RwInt32 _rpClumpFreeListBlockSize;
+_rpClumpFreeListPreallocBlocks  # src/renderware/world/baclump.c: extern RwInt32 _rpClumpFreeListPreallocBlocks;
+_rpLightFreeList  # src/renderware/world/balight.c: extern RwFreeList _rpLightFreeList;
+_rpLightFreeListBlockSize  # src/renderware/world/balight.c: extern RwInt32 _rpLightFreeListBlockSize;
+_rpLightFreeListPreallocBlocks  # src/renderware/world/balight.c: extern RwInt32 _rpLightFreeListPreallocBlocks;
+_rpLightTieFreeList  # src/renderware/world/baworobj.c: extern RwFreeList _rpLightTieFreeList;
+_rpLightTieFreeListBlockSize  # src/renderware/world/baworobj.c: extern RwInt32 _rpLightTieFreeListBlockSize;
+_rpLightTieFreeListPreallocBlocks  # src/renderware/world/baworobj.c: extern RwInt32 _rpLightTieFreeListPreallocBlocks;
+_rpMaterialFreeList  # src/renderware/world/bamateri.c: extern RwFreeList _rpMaterialFreeList;
+_rpMaterialFreeListBlockSize  # src/renderware/world/bamateri.c: extern RwInt32 _rpMaterialFreeListBlockSize;
+_rpMaterialFreeListPreallocBlocks  # src/renderware/world/bamateri.c: extern RwInt32 _rpMaterialFreeListPreallocBlocks;
+_rpTieFreeList  # src/renderware/world/baworobj.c: extern RwFreeList _rpTieFreeList;
+_rpTieFreeListBlockSize  # src/renderware/world/baworobj.c: extern RwInt32 _rpTieFreeListBlockSize;
+_rpTieFreeListPreallocBlocks  # src/renderware/world/baworobj.c: extern RwInt32 _rpTieFreeListPreallocBlocks;
+_rpWorldListFreeList  # src/renderware/world/baworld.c: extern RwFreeList _rpWorldListFreeList;
+_rwImageFormatFreeListBlockSize  # src/renderware/core/baimage.c: extern RwInt32 _rwImageFormatFreeListBlockSize;
+clumpExtOffset  # src/renderware/world/baworobj.c: extern RwInt32 clumpExtOffset;
+lastSeenSectExtraData  # src/renderware/world/babinwor.c: extern RwUInt32 lastSeenSectExtraData;
+lastSeenSectRightsPluginId  # src/renderware/world/babinwor.c: extern RwUInt32 lastSeenSectRightsPluginId;

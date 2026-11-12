@@ -1,0 +1,87 @@
+# Triage of ovdiff mismatches: `<addr8> <class> <note>`; see tools/mipsdiff/report.py for the classes.
+# fixed: real translation bugs the sweep found (overrides corrected in the same change)
+003cf070 fixed PS2AllPipelineNodeInit stored 0x00100404 in the DMA tag template; retail is `lui 0x100; ori 0x404` = 0x01000404
+003ed960 fixed basync frame sync cleared flag bits 1 and 2 (`& ~6`); retail `li -6; and` clears bits 0 and 2 (`& ~5`)
+003dcc70 fixed slerp prepare stored the parallel flag out[9] as the float 1.0/0.0; retail stores the integer 1/0 and tests it as an integer
+003f13b0 fixed palette quantizer push returned 0 for a leaf; retail returns the node (kept in 168(sp)), so the parent never merged its leaves
+# intentional: documented in the override's own comment
+00143ba0 intentional movie frame upload goes to the GL raster (movie_upload.c), not GS upload packets
+003a3670 intentional rpPTankSkyAllocCallBack sizes only the arrays the GL particle draw reads, not the retail DMA chains and VU1 rings
+003a3e90 intentional rpPTankSkyCreateCallBack builds the port's tank record, not the retail packet records
+# host: acceptable host differences (EE truncating float arithmetic, NaN/Inf/denormals, float-to-int saturation, libm)
+00395bd0 host animation key interpolation: float results within a few ulps (EE truncation)
+003d6950 host keyframe blend: float results within a few ulps (EE truncation)
+003d6d50 host keyframe blend with an angle wrap: float results differ at the 1e-4 level (EE truncation, libm)
+003dc510 host quaternion from matrix: NaN/Inf/denormal inputs (EE clamps, IEEE propagates NaN)
+003dc590 host quaternion from matrix: NaN/Inf/denormal inputs (EE clamps, IEEE propagates NaN)
+003dc610 host RtQuatConvertFromMatrix: float results within a few ulps
+003dcb40 host RtQuatTransformVectors: NaN/Inf inputs (EE clamps)
+003df9f0 host RwMatrixOrthoNormalize: results that cancel to about 1e-23 differ in the last bits
+003f0510 host palette colour: float to int of an out-of-range value saturates on the EE, gives INT_MIN on x86
+003f03f0 host palette variance: overflow to Inf on the host, Fmax on the EE
+0048abd0 host packed colour: float to int saturation in the alpha byte (EE saturates, x86 gives INT_MIN)
+004a93d0 host packed colour byte off by one after an ulp difference before the float-to-int conversion
+004a9fd0 host a denormal result the EE flushes to zero
+004b1290 host Euler angles to quaternion: libm sin/cos against the retail polynomials, about 3e-5 relative
+003e05f0 host RwMatrixMultiply: unaligned operand (retail lqc2/sqc2 mask the low 4 bits, the native helper uses aligned SSE accesses)
+# benign: the retail return value is a stale register
+004f9770 benign returns the unmasked byte sum (v0 after the last addu), callers ignore it; the override returns the stored byte
+004f9910 benign returns a1[0] (v0 left over from the last xor), callers ignore it; the override returns the stored byte
+00486840 harness mdlEffectAimDirection (a native callee) dereferences the active camera from kwlnGetCamera; needs a real RwCamera
+00486970 harness same camera dependence as 00486840
+004956b0 harness same camera dependence (crash at +4 of a null camera frame)
+004968a0 harness same camera dependence (crash at +4 of a null camera frame)
+003f1600 open palette quantizer index assignment: retail returns 5 where the native returns 0x00010001 for the same trie (idx handling or the depth-2 recursion differs)
+004ae0a0 open one pointer-valued word differs by one byte address (0x...c35f vs 0x...c360): an off-by-one in an address computation
+004aa960 open a packed colour/alpha byte differs by one (0x42 vs 0x43) after an ulp difference or a rounding step
+004aab50 open same one-off byte as 004aa960
+004f98a8 open RSU block permutation returns 0x19f where the native returns 0x9f (unmasked byte sum; like 004f9770 probably benign)
+004db558 host AHX matrixing: retail lq masks the low 4 address bits, the native reads the halfwords where they are; real callers pass 32-byte aligned data (aligned cases are exact)
+004dacb8 harness AHX dequantiser: a random granule index or scale pointer reads outside the arena; the native faults where the interpreter reads another page (every other case is exact)
+004da2e8 harness AHX group decode: the native runs the synthesis on random pointers and faults
+004e0458 harness AIX decoder create: a random track count of 0x10000 copies words from past the arena (each side reads its own page)
+004df708 harness AIX player state 1 start: every random handle sends the native into a callee with a wild pointer (the stream start and the SJ calls on random handles)
+004e0268 harness AIX player status poll: calls ADXT_GetStat on random track handles, which fault natively
+004e1100 harness AIX decoder loop step: the random handle's stream joint is a wild pointer (unaligned access on the first joint call)
+004ea740 harness PL2 error function setter: the PL2 lock callee (0x004ea710) is not modelled by the interpreter
+004ea7c8 harness PL2 init: the PL2 lock callee (0x004ea710) is not modelled by the interpreter
+004ea880 harness PL2 create: the PL2 lock callee (0x004ea710) is not modelled by the interpreter; the inner 0x004ea8c8 is exact
+004eac58 harness PL2 block encode: the PL2 lock callee (0x004ea710) is not modelled by the interpreter; the inner 0x004eacb8 is exact
+004d3c08 harness PL2 ADXT create: the native ADXT_Create runs on uninitialised ADXT/ADXB tables in the harness and returns a half-built handle that the attach then dereferences
+# fixed by the second ovdiff round: the native differed from retail only for inputs the game never passes, but it was a faithful-translation error
+0039b8d0 fixed list append compared the entry count signed; retail's loop index is unsigned (sltu), so a count above 0x7FFFFFFF looped over a long list (the native skipped it and wrote through items[count])
+003de020 fixed RwFseek loaded the seek slot before testing the origin; retail reads it only on the three valid origins, so the native read memory the retail code never touches for an invalid origin
+00415070 fixed RxHeapCreate omitted retail's unsigned clamp of the rounded size to 128 (it matters when the rounding wraps)
+003b90b0 fixed spline matrix zeroing looped over n*n floats; retail calls memset(m, 0, n*n*4), whose byte count wraps like the allocation size
+# harness: the function needs state the harness does not build
+003e05f0 harness the native bound to 0x003e05f0 is the decomp's generic RwMatrixMultiply (bamatrix.c), which dispatches through the RW engine's matrix function table; the override file is inactive (its unit is excluded), so the retail VU0 code is compared with code that needs an initialised engine
+00486840 harness reads the active camera and its frame (a minimal camera is built in the arena) and returns a 128-bit value in registers the native reports differently
+00486970 harness same as 00486840
+004f98a8 benign RSU block permutation returns the unmasked byte sum (v0 after the last addu), callers ignore it
+# third round
+00414820 fixed RxHeap slot pool: on a failed realloc retail reports the error, takes the 32 slots back and returns NULL (the override retried forever), and after a successful growth it hands the slot out without testing the capacity again
+003cf610 intentional PS2AllNodeBody is replaced by the GL atomic draw (p4gl_atomic_draw crashes on random input, as the replay of 003cf140 shows by design: retail opens a sky2 DMA packet, the port does not)
+00418b18 harness the INTC enable/handler calls it makes are the port's kernel model (src/platform/ps2_kernel.c), whose state is host statics that are not restored between the interpreter run and the native run, so the second run sees the first run's state
+003c9300 harness recursive destroy of a random node graph: the native recursion overflows the 256 KiB private native stack (crash on its guard page, 0x30000fe0) where the interpreted run ends earlier at the step limit
+003ed850 harness recursive frame sync over a random frame graph, same stack-guard crash as 003c9300 (0x30000ffc)
+003f07d0 harness palquant_new_node allocates from the free list at ctx+0x4004 through _rwFreeListAllocReal; the harness has no free list there (needs an RW engine free list)
+003f1030 harness descends the palette trie (func_003f0de0 reads node[7+k] of random nodes): needs a consistent trie built by func_003f13b0
+003f17e0 harness same trie dependence (crash in func_003f13b0 on a random child pointer)
+003e9d50 harness RwMatrixRotate calls _rwInvSqrt, which reads the vector module's table (built by the engine's open step); the table is not there
+# the former open mismatches, closed to a cause
+00415bc0 fixed RtAnim compressed keyframe interpolation: the slerp used libm acos/sin and a 0.999 lerp threshold; retail inlines its own acos and sin polynomials and lerps from 0x3f7fbe77 (0.99924), so results differed by 1e-6 absolute (golden calls: 9 of 12 differed, tiny components by up to 1.5%); p4_anim_acos/p4_anim_sin/p4_anim_slerp now follow the retail polynomials op for op (host float proven). Golden replay: native against retail differs in 9 of 12 calls by the EE's truncation under cancellation (translations of about 100 cancelling against the offset: one ulp of 100 is 8e-6); the interpreter running the retail code on the same 12 calls (replay -E) is exact or within tolerance on all 12, so the interpreter is faithful and the difference is EE rounding, not a translation error
+004165a0 fixed RtAnim uncompressed keyframe blend, the same slerp as 00415bc0 (host float proven)
+00398970 harness a thin wrapper callee (func_003df240 tail-calls the stream write) reads none of a1..a3 itself, so ovdiff passed it only a0; callees now always get four integer arguments (ok 40/40)
+0039b080 harness the same thin-wrapper callee arguments (ok 40/40)
+003c8920 harness func_003c54a0 is a `void` decomp wrapper that tail-calls the allocator slot, so the interpreter run kept v0 = 0 where the native returned the block; sigs.py now types a void function after `#pragma tailcall on` as returning the value (ok 40/40)
+004bd230 host the VU0 rsqrt/div/mul results of a (near) zero-length axis are saturated by p4_vu0_fixup; the proof pass now applies the same (host float proven)
+0048cdf0 host the same float-to-int difference as 0048c4e0
+00392650 host a3 is a random arena word used as the hit callback; the native executes it as x86 code, the interpreter refuses the call (golden: ok on all 7 recorded calls)
+004861f0 harness the effect vtable index (*(u16 *)(record + 4)) is random: outside the real table the word is an unpatched retail pointer (0x380158 here), which the interpreter runs as MIPS code and the native jumps into as x86; the game's indices stay inside the patched table (golden replay of its 12 calls needs the heap pages, pending)
+004988c0 harness with the kind constrained to the five textures (tools/mipsdiff/domains.txt) the first callback, ThunderGeometryCreatePadded, needs a live RW engine (it crashes on its own); no golden calls
+0048a460 harness random cases never reach a valid engine vector slot: RwV3dTransformPoint (003e42a0) reads the vector module offset from random data and crashes. The recorded calls are exact through the port's VU0 vectorASMMultPointSingle (src/platform/rw_skytran.c), and calls whose camera page was not recorded are inconclusive
+0048a510 harness the same random-case crash as 0048a460; the recorded calls are exact or, without the camera page, inconclusive
+0048a650 harness the same random-case crash as 0048a460; no recorded call holds the page of the camera's frame (camera +4), which it reads for the eye position, so every recorded call is inconclusive
+0048c4e0 harness random cases reach float-to-int saturation (the EE gives 0x7fffffff, x86 0x80000000) and a crash in mdlEffectUpdateParticleTrail whose address differs between the runs; the golden calls are exact (replay: 6 of 6 after the VU0 truncation fix)
+0048abd0 fixed the VU0 macro-mode helpers (include/p4pc/vu0.h) rounded to nearest where the EE/VU0 FMAC truncates toward zero: golden call 1 of 0048abd0 returned 0xaff6a575 against retail 0xaff5a574 (one ulp in two colour lanes); p4_vu0_mul/add/sub/madd/msub/mulq/itof/sqrt/rsqrt now truncate each operation on the exact result (and read denormal operands as zero), replay 12 of 12 exact; every VU0 override gains it (0048cdf0, 0048e2f0, 003bfae0 now within tolerance)
+00486400 fixed effect child dispatch (mdlEffectSetChildScales, also 00486330 and 004861f0): retail has no null test on a child's primitive (+0x90) and reads the halfword at address 4 and the word at address 8 of the EE kernel's low memory, then calls the kind-0 slot (mdlEffectPrimitiveDataNoop/00484540, both empty); the port crashed at address 4 (golden11 call 1 frame 2444: the second child has no primitive). A null primitive now reads a zero record. Open: after that the three golden calls still differ in two words at 0x01295234/0x0129523c (retail 2.0/20.0, native 1.0/0.0, swapped between the scale and rotation functions) whose writer I did not identify; the interpreter on retail (replay -E) is exact for 00486400 and 00486330

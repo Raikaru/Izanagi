@@ -1,0 +1,5658 @@
+{
+  "aggregate_classification": [
+    {
+      "address": "00112300",
+      "after": [
+        "datEntryDrawRow",
+        "v",
+        "qfBp",
+        "d"
+      ],
+      "before": [
+        "datEntryDrawRow",
+        "v",
+        "ifBp",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 0,
+          "port64_integer_lowering": "Vec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Vec2f"
+        }
+      ]
+    },
+    {
+      "address": "00112610",
+      "after": [
+        "datEntryDrawBadges",
+        "v",
+        "qfBpii",
+        "d"
+      ],
+      "before": [
+        "datEntryDrawBadges",
+        "v",
+        "ifBpii",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 0,
+          "port64_integer_lowering": "Vec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Vec2f"
+        }
+      ]
+    },
+    {
+      "address": "00112830",
+      "after": [
+        "datEntryDrawStatValue",
+        "v",
+        "qfBpi",
+        "d"
+      ],
+      "before": [
+        "datEntryDrawStatValue",
+        "v",
+        "ifBpi",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 0,
+          "port64_integer_lowering": "Vec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Vec2f"
+        }
+      ]
+    },
+    {
+      "address": "001130c0",
+      "after": [
+        "datEntryDrawCount",
+        "v",
+        "qfBpi",
+        "d"
+      ],
+      "before": [
+        "datEntryDrawCount",
+        "v",
+        "ifBpi",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 0,
+          "port64_integer_lowering": "Vec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Vec2f"
+        }
+      ]
+    },
+    {
+      "address": "00113280",
+      "after": [
+        "datEntryDrawFlagIcon",
+        "v",
+        "qfihii",
+        "d"
+      ],
+      "before": [
+        "datEntryDrawFlagIcon",
+        "v",
+        "ifihii",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 0,
+          "port64_integer_lowering": "Vec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Vec2f"
+        }
+      ]
+    },
+    {
+      "address": "00113790",
+      "after": [
+        "datEntryDrawByKind",
+        "v",
+        "qBpif",
+        "d"
+      ],
+      "before": [
+        "datEntryDrawByKind",
+        "v",
+        "iBpif",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 0,
+          "port64_integer_lowering": "Vec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Vec2f"
+        }
+      ]
+    },
+    {
+      "address": "00113800",
+      "after": [
+        "datEntryDrawIdName",
+        "v",
+        "qfBpi",
+        "d"
+      ],
+      "before": [
+        "datEntryDrawIdName",
+        "v",
+        "ifBpi",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 0,
+          "port64_integer_lowering": "Vec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Vec2f"
+        }
+      ]
+    },
+    {
+      "address": "001138c0",
+      "after": [
+        "ShdSkill_DrawDescriptor",
+        "v",
+        "qfBpi",
+        "d"
+      ],
+      "before": [
+        "ShdSkill_DrawDescriptor",
+        "v",
+        "ifBpi",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 0,
+          "port64_integer_lowering": "Vec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Vec2f"
+        }
+      ]
+    },
+    {
+      "address": "00113e30",
+      "after": [
+        "ShdSkill_DrawEntryName",
+        "v",
+        "qfBpi",
+        "d"
+      ],
+      "before": [
+        "ShdSkill_DrawEntryName",
+        "v",
+        "ifBpi",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 0,
+          "port64_integer_lowering": "Vec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Vec2f"
+        }
+      ]
+    },
+    {
+      "address": "00113ef0",
+      "after": [
+        "ShdSkill_DrawListSlot",
+        "v",
+        "qfBpBf",
+        "d"
+      ],
+      "before": [
+        "ShdSkill_DrawListSlot",
+        "v",
+        "ifBpBf",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 0,
+          "port64_integer_lowering": "Vec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Vec2f"
+        }
+      ]
+    },
+    {
+      "address": "00114460",
+      "after": [
+        "ShdSkill_DrawDetailFrame",
+        "v",
+        "qfBpf",
+        "d"
+      ],
+      "before": [
+        "ShdSkill_DrawDetailFrame",
+        "v",
+        "ifBpf",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 0,
+          "port64_integer_lowering": "Vec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Vec2f"
+        }
+      ]
+    },
+    {
+      "address": "00114dc0",
+      "after": [
+        "ShdSkill_DrawIcon",
+        "v",
+        "qfiHi",
+        "d"
+      ],
+      "before": [
+        "ShdSkill_DrawIcon",
+        "v",
+        "ifiHi",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 0,
+          "port64_integer_lowering": "Vec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Vec2f"
+        }
+      ]
+    },
+    {
+      "address": "00114e50",
+      "after": [
+        "ShdSkill_DrawSelectionFrame",
+        "v",
+        "qfBH",
+        "d"
+      ],
+      "before": [
+        "ShdSkill_DrawSelectionFrame",
+        "v",
+        "ifBH",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 0,
+          "port64_integer_lowering": "Vec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Vec2f"
+        }
+      ]
+    },
+    {
+      "address": "00115c40",
+      "after": [
+        "shdPersonaDrawByMode",
+        "v",
+        "qBpf",
+        "d"
+      ],
+      "before": [
+        "shdPersonaDrawByMode",
+        "v",
+        "iBpf",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 0,
+          "port64_integer_lowering": "Vec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Vec2f"
+        }
+      ]
+    },
+    {
+      "address": "00115cb0",
+      "after": [
+        "shdPersonaDrawRowNumber",
+        "v",
+        "qfBp",
+        "d"
+      ],
+      "before": [
+        "shdPersonaDrawRowNumber",
+        "v",
+        "ifBp",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 0,
+          "port64_integer_lowering": "Vec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Vec2f"
+        }
+      ]
+    },
+    {
+      "address": "00115dc0",
+      "after": [
+        "shdPersonaDrawRowName",
+        "v",
+        "qfBp",
+        "d"
+      ],
+      "before": [
+        "shdPersonaDrawRowName",
+        "v",
+        "ifBp",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 0,
+          "port64_integer_lowering": "Vec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Vec2f"
+        }
+      ]
+    },
+    {
+      "address": "00115e90",
+      "after": [
+        "shdPersonaDrawDetailPanel",
+        "v",
+        "qfBp",
+        "d"
+      ],
+      "before": [
+        "shdPersonaDrawDetailPanel",
+        "v",
+        "ifBp",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 0,
+          "port64_integer_lowering": "Vec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Vec2f"
+        }
+      ]
+    },
+    {
+      "address": "00116820",
+      "after": [
+        "shdPersonaDrawAffinityPanel",
+        "v",
+        "qfBpp",
+        "d"
+      ],
+      "before": [
+        "shdPersonaDrawAffinityPanel",
+        "v",
+        "ifBpp",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 0,
+          "port64_integer_lowering": "Vec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Vec2f"
+        }
+      ]
+    },
+    {
+      "address": "00116d40",
+      "after": [
+        "shdPersonaDrawGaugeBar",
+        "v",
+        "qfBBBhi",
+        "d"
+      ],
+      "before": [
+        "shdPersonaDrawGaugeBar",
+        "v",
+        "ifBBBhi",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 0,
+          "port64_integer_lowering": "Vec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Vec2f"
+        }
+      ]
+    },
+    {
+      "address": "00117310",
+      "after": [
+        "shdPersonaDrawDigits",
+        "v",
+        "qfiiii",
+        "d"
+      ],
+      "before": [
+        "shdPersonaDrawDigits",
+        "v",
+        "ifiiii",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 0,
+          "port64_integer_lowering": "Vec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Vec2f"
+        }
+      ]
+    },
+    {
+      "address": "001187b0",
+      "after": [
+        "shdPersonaDrawPanelSprites",
+        "v",
+        "pqBqf",
+        "d"
+      ],
+      "before": [
+        "shdPersonaDrawPanelSprites",
+        "v",
+        "piBqf",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 1,
+          "port64_integer_lowering": null,
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "PersonaPanelPosition"
+        }
+      ]
+    },
+    {
+      "address": "0011e390",
+      "after": [
+        "shdPersonaDispCtlSetDrawOffset",
+        "v",
+        "pq",
+        "d"
+      ],
+      "before": [
+        "shdPersonaDispCtlSetDrawOffset",
+        "v",
+        "pi",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 1,
+          "port64_integer_lowering": "Vec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Vec2f"
+        }
+      ]
+    },
+    {
+      "address": "0011fd50",
+      "after": [
+        "datPanelDrawByKind",
+        "v",
+        "qfipi",
+        "d"
+      ],
+      "before": [
+        "datPanelDrawByKind",
+        "v",
+        "ifipi",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 0,
+          "port64_integer_lowering": "Vec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Vec2f"
+        }
+      ]
+    },
+    {
+      "address": "0011fdf0",
+      "after": [
+        "datPanelDrawCompareIcon",
+        "v",
+        "qfipi",
+        "d"
+      ],
+      "before": [
+        "datPanelDrawCompareIcon",
+        "v",
+        "ifipi",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 0,
+          "port64_integer_lowering": "Vec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Vec2f"
+        }
+      ]
+    },
+    {
+      "address": "001203a0",
+      "after": [
+        "drawUnitStatusPanel",
+        "v",
+        "qfipii",
+        "d"
+      ],
+      "before": [
+        "drawUnitStatusPanel",
+        "v",
+        "ifipii",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 0,
+          "port64_integer_lowering": "Vec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Vec2f"
+        }
+      ]
+    },
+    {
+      "address": "00120ae0",
+      "after": [
+        "drawNumberSprites",
+        "v",
+        "qfiii",
+        "d"
+      ],
+      "before": [
+        "drawNumberSprites",
+        "v",
+        "ifiii",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 0,
+          "port64_integer_lowering": "Vec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Vec2f"
+        }
+      ]
+    },
+    {
+      "address": "00130ce0",
+      "after": [
+        "radarDrawEntryCard",
+        "v",
+        "pqip",
+        "d"
+      ],
+      "before": [
+        "radarDrawEntryCard",
+        "v",
+        "piip",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 1,
+          "port64_integer_lowering": null,
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "PackedVec2f"
+        }
+      ]
+    },
+    {
+      "address": "00135520",
+      "after": [
+        "radarDrawHeaderFrame",
+        "v",
+        "pqBH",
+        "d"
+      ],
+      "before": [
+        "radarDrawHeaderFrame",
+        "v",
+        "piBH",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 1,
+          "port64_integer_lowering": null,
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "PackedVec2f"
+        }
+      ]
+    },
+    {
+      "address": "0013b370",
+      "after": [
+        "radarDrawSecondSpritePair",
+        "v",
+        "pqi",
+        "d"
+      ],
+      "before": [
+        "radarDrawSecondSpritePair",
+        "v",
+        "pii",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 1,
+          "port64_integer_lowering": "Vec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Vec2f"
+        }
+      ]
+    },
+    {
+      "address": "0013b420",
+      "after": [
+        "radarDrawSkillCard",
+        "v",
+        "pqip",
+        "d"
+      ],
+      "before": [
+        "radarDrawSkillCard",
+        "v",
+        "piip",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 1,
+          "port64_integer_lowering": "Vec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Vec2f"
+        }
+      ]
+    },
+    {
+      "address": "001424b0",
+      "after": [
+        "radarDrawText",
+        "v",
+        "qfBpi",
+        "d"
+      ],
+      "before": [
+        "radarDrawText",
+        "v",
+        "ifBpi",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 0,
+          "port64_integer_lowering": "Float2_0014",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Float2_0014"
+        }
+      ]
+    },
+    {
+      "address": "001427c0",
+      "after": [
+        "radarDrawPolygon",
+        "v",
+        "qfip",
+        "d"
+      ],
+      "before": [
+        "radarDrawPolygon",
+        "v",
+        "ifip",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 0,
+          "port64_integer_lowering": "Float2_0014",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Float2_0014"
+        }
+      ]
+    },
+    {
+      "address": "0021b630",
+      "after": [
+        "btlPanelDrawQuad",
+        "v",
+        "fffffffffi",
+        "d"
+      ],
+      "before": [
+        "btlPanelDrawQuad",
+        "v",
+        "fffffffff?",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "i",
+          "before": "?",
+          "bytes": 4,
+          "parameter": 9,
+          "port64_integer_lowering": null,
+          "reason": "Semantic record width and native register/memory class.",
+          "type": "union ColorWord"
+        }
+      ]
+    },
+    {
+      "address": "002b0b10",
+      "after": [
+        "smapDrawQuad",
+        "v",
+        "pqfffBfibi",
+        "d"
+      ],
+      "before": [
+        "smapDrawQuad",
+        "v",
+        "pifffBfibi",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 1,
+          "port64_integer_lowering": "YVec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "YVec2f"
+        }
+      ]
+    },
+    {
+      "address": "002b10a0",
+      "after": [
+        "smapSetPosition",
+        "v",
+        "pq",
+        "d"
+      ],
+      "before": [
+        "smapSetPosition",
+        "v",
+        "pi",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 1,
+          "port64_integer_lowering": "YVec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "YVec2f"
+        }
+      ]
+    },
+    {
+      "address": "002b2830",
+      "after": [
+        "smapCreateOverlay",
+        "p",
+        "pqffi",
+        "d"
+      ],
+      "before": [
+        "smapCreateOverlay",
+        "p",
+        "piffi",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 1,
+          "port64_integer_lowering": "YVec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "YVec2f"
+        }
+      ]
+    },
+    {
+      "address": "002b4fe0",
+      "after": [
+        "mapSymbolTargetCreate",
+        "i",
+        "iqi",
+        "d"
+      ],
+      "before": null,
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 1,
+          "port64_integer_lowering": "Vec2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Vec2"
+        }
+      ]
+    },
+    {
+      "address": "002b5c90",
+      "after": [
+        "fclSpriteSpawnChild",
+        "i",
+        "iq",
+        "d"
+      ],
+      "before": null,
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 1,
+          "port64_integer_lowering": "f2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "f2"
+        }
+      ]
+    },
+    {
+      "address": "002b5db0",
+      "after": [
+        "fclSpriteSetPositionBounds",
+        "v",
+        "pq?",
+        "d"
+      ],
+      "before": [
+        "fclSpriteSetPositionBounds",
+        "v",
+        "pii",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 1,
+          "port64_integer_lowering": "f2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "f2"
+        },
+        {
+          "after": "?",
+          "before": "i",
+          "bytes": 16,
+          "parameter": 2,
+          "port64_integer_lowering": null,
+          "reason": "Record boundary exceeds eight bytes or has unresolved layout; explicitly unsupported.",
+          "type": "FclBoundsPacket"
+        }
+      ]
+    },
+    {
+      "address": "002b5e90",
+      "after": [
+        "fclSpriteStartMove",
+        "v",
+        "pqqi",
+        "d"
+      ],
+      "before": [
+        "fclSpriteStartMove",
+        "v",
+        "piii",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 1,
+          "port64_integer_lowering": "f2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "f2"
+        },
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 2,
+          "port64_integer_lowering": "f2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "f2"
+        }
+      ]
+    },
+    {
+      "address": "002b5ef0",
+      "after": [
+        "fclSpriteStartBoundsMove",
+        "v",
+        "pqq??i",
+        "d"
+      ],
+      "before": [
+        "fclSpriteStartBoundsMove",
+        "v",
+        "piiiii",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 1,
+          "port64_integer_lowering": "f2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "f2"
+        },
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 2,
+          "port64_integer_lowering": "f2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "f2"
+        },
+        {
+          "after": "?",
+          "before": "i",
+          "bytes": 16,
+          "parameter": 3,
+          "port64_integer_lowering": null,
+          "reason": "Record boundary exceeds eight bytes or has unresolved layout; explicitly unsupported.",
+          "type": "FclBoundsPacket"
+        },
+        {
+          "after": "?",
+          "before": "i",
+          "bytes": 16,
+          "parameter": 4,
+          "port64_integer_lowering": null,
+          "reason": "Record boundary exceeds eight bytes or has unresolved layout; explicitly unsupported.",
+          "type": "FclBoundsPacket"
+        }
+      ]
+    },
+    {
+      "address": "002b5fd0",
+      "after": [
+        "fclSpriteStartBoundsMoveFade",
+        "v",
+        "pqq??ih",
+        "d"
+      ],
+      "before": [
+        "fclSpriteStartBoundsMoveFade",
+        "v",
+        "piiiiih",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 1,
+          "port64_integer_lowering": "f2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "f2"
+        },
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 2,
+          "port64_integer_lowering": "f2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "f2"
+        },
+        {
+          "after": "?",
+          "before": "i",
+          "bytes": 16,
+          "parameter": 3,
+          "port64_integer_lowering": null,
+          "reason": "Record boundary exceeds eight bytes or has unresolved layout; explicitly unsupported.",
+          "type": "FclBoundsPacket"
+        },
+        {
+          "after": "?",
+          "before": "i",
+          "bytes": 16,
+          "parameter": 4,
+          "port64_integer_lowering": null,
+          "reason": "Record boundary exceeds eight bytes or has unresolved layout; explicitly unsupported.",
+          "type": "FclBoundsPacket"
+        }
+      ]
+    },
+    {
+      "address": "002b69b0",
+      "after": [
+        "fclSpriteStartPositionTask",
+        "v",
+        "pqqiih",
+        "d"
+      ],
+      "before": [
+        "fclSpriteStartPositionTask",
+        "v",
+        "piiiih",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 1,
+          "port64_integer_lowering": "f2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "f2"
+        },
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 2,
+          "port64_integer_lowering": "f2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "f2"
+        }
+      ]
+    },
+    {
+      "address": "002b69f0",
+      "after": [
+        "fclSpriteStartPositionAt",
+        "v",
+        "hqqiih",
+        "d"
+      ],
+      "before": [
+        "fclSpriteStartPositionAt",
+        "v",
+        "hiiiih",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 1,
+          "port64_integer_lowering": "f2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "f2"
+        },
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 2,
+          "port64_integer_lowering": "f2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "f2"
+        }
+      ]
+    },
+    {
+      "address": "002b6be0",
+      "after": [
+        "fclSpriteActivateTask",
+        "v",
+        "pqif",
+        "d"
+      ],
+      "before": [
+        "fclSpriteActivateTask",
+        "v",
+        "piif",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 1,
+          "port64_integer_lowering": "f2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "f2"
+        }
+      ]
+    },
+    {
+      "address": "002b6c30",
+      "after": [
+        "fclSpriteCreate",
+        "v",
+        "hqfi",
+        "d"
+      ],
+      "before": [
+        "fclSpriteCreate",
+        "v",
+        "hifi",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 1,
+          "port64_integer_lowering": "f2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "f2"
+        }
+      ]
+    },
+    {
+      "address": "002b77d0",
+      "after": [
+        "fclSpriteStartShowHide",
+        "v",
+        "hqhifhbhhhi",
+        "d"
+      ],
+      "before": [
+        "fclSpriteStartShowHide",
+        "v",
+        "hihifhbhhhi",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 1,
+          "port64_integer_lowering": "f2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "f2"
+        }
+      ]
+    },
+    {
+      "address": "002b8200",
+      "after": [
+        "fclSpriteSetAppearance",
+        "v",
+        "pqifff",
+        "d"
+      ],
+      "before": [
+        "fclSpriteSetAppearance",
+        "v",
+        "piifff",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 1,
+          "port64_integer_lowering": "f2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "f2"
+        }
+      ]
+    },
+    {
+      "address": "002b8270",
+      "after": [
+        "fclSpriteStartPosition",
+        "v",
+        "pqqiii",
+        "d"
+      ],
+      "before": [
+        "fclSpriteStartPosition",
+        "v",
+        "piiiii",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 1,
+          "port64_integer_lowering": "f2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "f2"
+        },
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 2,
+          "port64_integer_lowering": "f2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "f2"
+        }
+      ]
+    },
+    {
+      "address": "002b83e0",
+      "after": [
+        "fclSpriteStartEntrance",
+        "v",
+        "pqiiBBffiibb",
+        "d"
+      ],
+      "before": [
+        "fclSpriteStartEntrance",
+        "v",
+        "piiiBBffiibb",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 1,
+          "port64_integer_lowering": "FclVec2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "FclVec2"
+        }
+      ]
+    },
+    {
+      "address": "002ba080",
+      "after": [
+        "nmMesWindowShowNumber",
+        "v",
+        "phhqiiifib",
+        "d"
+      ],
+      "before": [
+        "nmMesWindowShowNumber",
+        "v",
+        "phhiiiifib",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 3,
+          "port64_integer_lowering": "FclVec2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "FclVec2"
+        }
+      ]
+    },
+    {
+      "address": "002ba5d0",
+      "after": [
+        "nmMesWindowSetNumber",
+        "v",
+        "phiqifq",
+        "d"
+      ],
+      "before": [
+        "nmMesWindowSetNumber",
+        "v",
+        "phiiifq",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 3,
+          "port64_integer_lowering": "FclVec2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "FclVec2"
+        }
+      ]
+    },
+    {
+      "address": "002caa10",
+      "after": [
+        "fclShopDrawNumber",
+        "v",
+        "qfiihpi",
+        "d"
+      ],
+      "before": [
+        "fclShopDrawNumber",
+        "v",
+        "ifiihpi",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 0,
+          "port64_integer_lowering": "Vec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Vec2f"
+        }
+      ]
+    },
+    {
+      "address": "002cacd0",
+      "after": [
+        "fclDrawNumber",
+        "v",
+        "qfiihiiiiii",
+        "d"
+      ],
+      "before": [
+        "fclDrawNumber",
+        "v",
+        "ifiihiiiiii",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 0,
+          "port64_integer_lowering": "Vec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Vec2f"
+        }
+      ]
+    },
+    {
+      "address": "002e0080",
+      "after": [
+        "fclShopDrawItemText",
+        "v",
+        "pbqp",
+        "d"
+      ],
+      "before": [
+        "fclShopDrawItemText",
+        "v",
+        "pbip",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 2,
+          "port64_integer_lowering": "Vec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Vec2f"
+        }
+      ]
+    },
+    {
+      "address": "002e0620",
+      "after": [
+        "fclObjStartPosition",
+        "v",
+        "pqqiih",
+        "d"
+      ],
+      "before": [
+        "fclObjStartPosition",
+        "v",
+        "piiiih",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 1,
+          "port64_integer_lowering": "FclVec2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "FclVec2"
+        },
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 2,
+          "port64_integer_lowering": "FclVec2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "FclVec2"
+        }
+      ]
+    },
+    {
+      "address": "002e0b20",
+      "after": [
+        "fclDrawEquipSprite",
+        "v",
+        "iqfiBip",
+        "d"
+      ],
+      "before": [
+        "fclDrawEquipSprite",
+        "v",
+        "iifiBip",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 1,
+          "port64_integer_lowering": "FclVec2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "FclVec2"
+        }
+      ]
+    },
+    {
+      "address": "002e0be0",
+      "after": [
+        "fclDrawResourceSprite",
+        "v",
+        "iqfiBip",
+        "d"
+      ],
+      "before": [
+        "fclDrawResourceSprite",
+        "v",
+        "iifiBip",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 1,
+          "port64_integer_lowering": "FclVec2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "FclVec2"
+        }
+      ]
+    },
+    {
+      "address": "002e0ca0",
+      "after": [
+        "fclDrawEquipHelpSprite",
+        "v",
+        "iqfiBip",
+        "d"
+      ],
+      "before": [
+        "fclDrawEquipHelpSprite",
+        "v",
+        "iifiBip",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 1,
+          "port64_integer_lowering": "FclVec2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "FclVec2"
+        }
+      ]
+    },
+    {
+      "address": "00304410",
+      "after": [
+        "fclCombinePickCandidateId",
+        "H",
+        "?h",
+        "d"
+      ],
+      "before": [
+        "fclCombinePickCandidateId",
+        "H",
+        "ih",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "?",
+          "before": "i",
+          "bytes": 48,
+          "parameter": 0,
+          "port64_integer_lowering": null,
+          "reason": "Record boundary exceeds eight bytes or has unresolved layout; explicitly unsupported.",
+          "type": "FclCombineRecipe"
+        }
+      ]
+    },
+    {
+      "address": "003147e0",
+      "after": [
+        "fclCombineDrawListRow",
+        "v",
+        "pbqhhb",
+        "d"
+      ],
+      "before": [
+        "fclCombineDrawListRow",
+        "v",
+        "pbihhb",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 2,
+          "port64_integer_lowering": "FclVec2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "FclVec2"
+        }
+      ]
+    },
+    {
+      "address": "00314ef0",
+      "after": [
+        "fclCombineDrawListRowPlain",
+        "v",
+        "pbqhhb",
+        "d"
+      ],
+      "before": [
+        "fclCombineDrawListRowPlain",
+        "v",
+        "pbihhb",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 2,
+          "port64_integer_lowering": "FclVec2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "FclVec2"
+        }
+      ]
+    },
+    {
+      "address": "00317900",
+      "after": [
+        "fclCombineDrawEntryCell",
+        "v",
+        "pqqbhhh",
+        "d"
+      ],
+      "before": [
+        "fclCombineDrawEntryCell",
+        "v",
+        "piibhhh",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 1,
+          "port64_integer_lowering": "FclVec2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "FclVec2"
+        },
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 2,
+          "port64_integer_lowering": "FclVec2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "FclVec2"
+        }
+      ]
+    },
+    {
+      "address": "003191c0",
+      "after": [
+        "fclCombinePartyRow",
+        "v",
+        "pqiihhbb",
+        "d"
+      ],
+      "before": [
+        "fclCombinePartyRow",
+        "v",
+        "piiihhbb",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 1,
+          "port64_integer_lowering": "FclVec2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "FclVec2"
+        }
+      ]
+    },
+    {
+      "address": "0031ac10",
+      "after": [
+        "fclCombineDrawPersonaRow",
+        "v",
+        "pqbbihhbbB",
+        "d"
+      ],
+      "before": [
+        "fclCombineDrawPersonaRow",
+        "v",
+        "pibbihhbbB",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 1,
+          "port64_integer_lowering": "FclVec2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "FclVec2"
+        }
+      ]
+    },
+    {
+      "address": "0031c2b0",
+      "after": [
+        "fclCombineDrawPersonaCard",
+        "v",
+        "phqq",
+        "d"
+      ],
+      "before": [
+        "fclCombineDrawPersonaCard",
+        "v",
+        "phii",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 2,
+          "port64_integer_lowering": "FclVec2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "FclVec2"
+        },
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 3,
+          "port64_integer_lowering": "FclVec2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "FclVec2"
+        }
+      ]
+    },
+    {
+      "address": "0031cce0",
+      "after": [
+        "fclCombineDrawPersonaCardAlt",
+        "v",
+        "phqq",
+        "d"
+      ],
+      "before": [
+        "fclCombineDrawPersonaCardAlt",
+        "v",
+        "phii",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 2,
+          "port64_integer_lowering": "FclVec2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "FclVec2"
+        },
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 3,
+          "port64_integer_lowering": "FclVec2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "FclVec2"
+        }
+      ]
+    },
+    {
+      "address": "0031e5b0",
+      "after": [
+        "fclCombineDrawSlotFields",
+        "v",
+        "pqhbiii",
+        "d"
+      ],
+      "before": [
+        "fclCombineDrawSlotFields",
+        "v",
+        "pihbiii",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 1,
+          "port64_integer_lowering": "FclVec2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "FclVec2"
+        }
+      ]
+    },
+    {
+      "address": "0031fa20",
+      "after": [
+        "fclCombineDrawSlotLabels",
+        "v",
+        "pqhb",
+        "d"
+      ],
+      "before": [
+        "fclCombineDrawSlotLabels",
+        "v",
+        "pihb",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 1,
+          "port64_integer_lowering": "FclVec2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "FclVec2"
+        }
+      ]
+    },
+    {
+      "address": "00324f80",
+      "after": [
+        "fclCombineDrawSlotFrames",
+        "v",
+        "pqib",
+        "d"
+      ],
+      "before": [
+        "fclCombineDrawSlotFrames",
+        "v",
+        "piib",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 1,
+          "port64_integer_lowering": "FclVec2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "FclVec2"
+        }
+      ]
+    },
+    {
+      "address": "0032c660",
+      "after": [
+        "fclCombineSlidePanelColumn",
+        "v",
+        "piqqii",
+        "d"
+      ],
+      "before": [
+        "fclCombineSlidePanelColumn",
+        "v",
+        "piiiii",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 2,
+          "port64_integer_lowering": "FclVec2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "FclVec2"
+        },
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 3,
+          "port64_integer_lowering": "FclVec2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "FclVec2"
+        }
+      ]
+    },
+    {
+      "address": "00330e50",
+      "after": [
+        "fclCombineDrawResourceAt",
+        "v",
+        "iqfiBiffp",
+        "d"
+      ],
+      "before": [
+        "fclCombineDrawResourceAt",
+        "v",
+        "iifiBiffp",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 1,
+          "port64_integer_lowering": "FclVec2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "FclVec2"
+        }
+      ]
+    },
+    {
+      "address": "0033d3e0",
+      "after": [
+        "fclBustupObjStartPosition",
+        "v",
+        "pqqiih",
+        "d"
+      ],
+      "before": [
+        "fclBustupObjStartPosition",
+        "v",
+        "piiiih",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 1,
+          "port64_integer_lowering": "F2_0033",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "F2_0033"
+        },
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 2,
+          "port64_integer_lowering": "F2_0033",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "F2_0033"
+        }
+      ]
+    },
+    {
+      "address": "0033d420",
+      "after": [
+        "fclBustupObjStartPositionMode",
+        "v",
+        "pqqibih",
+        "d"
+      ],
+      "before": [
+        "fclBustupObjStartPositionMode",
+        "v",
+        "piiibih",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 1,
+          "port64_integer_lowering": "F2_0033",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "F2_0033"
+        },
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 2,
+          "port64_integer_lowering": "F2_0033",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "F2_0033"
+        }
+      ]
+    },
+    {
+      "address": "0033d630",
+      "after": [
+        "fclBustupDrawRotatingBand",
+        "f",
+        "qhfBb",
+        "d"
+      ],
+      "before": [
+        "fclBustupDrawRotatingBand",
+        "f",
+        "ihfBb",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 0,
+          "port64_integer_lowering": "F2_0033",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "F2_0033"
+        }
+      ]
+    },
+    {
+      "address": "0033e540",
+      "after": [
+        "fclCombineStartMove",
+        "v",
+        "pqqhh",
+        "d"
+      ],
+      "before": [
+        "fclCombineStartMove",
+        "v",
+        "piihh",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 1,
+          "port64_integer_lowering": "F2_0033",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "F2_0033"
+        },
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 2,
+          "port64_integer_lowering": "F2_0033",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "F2_0033"
+        }
+      ]
+    },
+    {
+      "address": "0033fb10",
+      "after": [
+        "cmbCardSetPosition",
+        "v",
+        "pbq",
+        "d"
+      ],
+      "before": [
+        "cmbCardSetPosition",
+        "v",
+        "pbi",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 2,
+          "port64_integer_lowering": "CmbVec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "CmbVec2f"
+        }
+      ]
+    },
+    {
+      "address": "0033fb90",
+      "after": [
+        "cmbCardApplySlotTransform",
+        "v",
+        "pbqf",
+        "d"
+      ],
+      "before": [
+        "cmbCardApplySlotTransform",
+        "v",
+        "pbif",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 2,
+          "port64_integer_lowering": "CmbVec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "CmbVec2f"
+        }
+      ]
+    },
+    {
+      "address": "0033fc00",
+      "after": [
+        "cmbCardStartMove",
+        "v",
+        "pbqqh",
+        "d"
+      ],
+      "before": [
+        "cmbCardStartMove",
+        "v",
+        "pbiih",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 2,
+          "port64_integer_lowering": "CmbVec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "CmbVec2f"
+        },
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 3,
+          "port64_integer_lowering": "CmbVec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "CmbVec2f"
+        }
+      ]
+    },
+    {
+      "address": "003482d0",
+      "after": [
+        "cmbCardEffSetPosition",
+        "v",
+        "pqqH",
+        "d"
+      ],
+      "before": [
+        "cmbCardEffSetPosition",
+        "v",
+        "piiH",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 1,
+          "port64_integer_lowering": "CmbVec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "CmbVec2f"
+        },
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 2,
+          "port64_integer_lowering": "CmbVec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "CmbVec2f"
+        }
+      ]
+    },
+    {
+      "address": "003489c0",
+      "after": [
+        "cmbCardEffSpawnSprite",
+        "v",
+        "p?ffffiHi",
+        "d"
+      ],
+      "before": [
+        "cmbCardEffSpawnSprite",
+        "v",
+        "piffffiHi",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "?",
+          "before": "i",
+          "bytes": 12,
+          "parameter": 1,
+          "port64_integer_lowering": null,
+          "reason": "Record boundary exceeds eight bytes or has unresolved layout; explicitly unsupported.",
+          "type": "CmbVec3f"
+        }
+      ]
+    },
+    {
+      "address": "00348a90",
+      "after": [
+        "cmbCardEffSetTween",
+        "v",
+        "p?ffffiHi?ffffi",
+        "d"
+      ],
+      "before": [
+        "cmbCardEffSetTween",
+        "v",
+        "piffffiHiiffffi",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "?",
+          "before": "i",
+          "bytes": 12,
+          "parameter": 1,
+          "port64_integer_lowering": null,
+          "reason": "Record boundary exceeds eight bytes or has unresolved layout; explicitly unsupported.",
+          "type": "CmbVec3f"
+        },
+        {
+          "after": "?",
+          "before": "i",
+          "bytes": 12,
+          "parameter": 9,
+          "port64_integer_lowering": null,
+          "reason": "Record boundary exceeds eight bytes or has unresolved layout; explicitly unsupported.",
+          "type": "CmbVec3f"
+        }
+      ]
+    },
+    {
+      "address": "0034b820",
+      "after": [
+        "fclCombineSetSprite",
+        "v",
+        "pqhif",
+        "d"
+      ],
+      "before": [
+        "fclCombineSetSprite",
+        "v",
+        "pihif",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 1,
+          "port64_integer_lowering": "FclVec2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "FclVec2"
+        }
+      ]
+    },
+    {
+      "address": "0034c270",
+      "after": [
+        "nLineDrawSet",
+        "v",
+        "qiif",
+        "d"
+      ],
+      "before": [
+        "nLineDrawSet",
+        "v",
+        "iiif",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 0,
+          "port64_integer_lowering": "Vec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Vec2f"
+        }
+      ]
+    },
+    {
+      "address": "0034c500",
+      "after": [
+        "nLineDrawRecords",
+        "v",
+        "pqi",
+        "d"
+      ],
+      "before": [
+        "nLineDrawRecords",
+        "v",
+        "pii",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 1,
+          "port64_integer_lowering": "Vec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Vec2f"
+        }
+      ]
+    },
+    {
+      "address": "0034c860",
+      "after": [
+        "nLineDrawEffect",
+        "v",
+        "pqi",
+        "d"
+      ],
+      "before": [
+        "nLineDrawEffect",
+        "v",
+        "pii",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 1,
+          "port64_integer_lowering": "Vec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Vec2f"
+        }
+      ]
+    },
+    {
+      "address": "0034f9d0",
+      "after": [
+        "sdkSpriteDrawFooter",
+        "v",
+        "qfBii",
+        "d"
+      ],
+      "before": [
+        "sdkSpriteDrawFooter",
+        "v",
+        "ifBii",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 0,
+          "port64_integer_lowering": "FclVec2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "FclVec2"
+        }
+      ]
+    },
+    {
+      "address": "003552d0",
+      "after": [
+        "datScreenWipeSetOffset",
+        "v",
+        "pq",
+        "d"
+      ],
+      "before": [
+        "datScreenWipeSetOffset",
+        "v",
+        "pi",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 1,
+          "port64_integer_lowering": "Float2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Float2"
+        }
+      ]
+    },
+    {
+      "address": "003561d0",
+      "after": [
+        "datGridEffectDrawCell",
+        "v",
+        "qifffi",
+        "d"
+      ],
+      "before": [
+        "datGridEffectDrawCell",
+        "v",
+        "iifffi",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 0,
+          "port64_integer_lowering": "Vec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Vec2f"
+        }
+      ]
+    },
+    {
+      "address": "0035bd20",
+      "after": [
+        "datPortraitDirectionBlend",
+        "f",
+        "qqq",
+        "d"
+      ],
+      "before": [
+        "datPortraitDirectionBlend",
+        "f",
+        "iii",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 0,
+          "port64_integer_lowering": "Float2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Float2"
+        },
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 1,
+          "port64_integer_lowering": "Float2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Float2"
+        },
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 2,
+          "port64_integer_lowering": "Float2",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Float2"
+        }
+      ]
+    },
+    {
+      "address": "00364320",
+      "after": [
+        "shdDrawNumberText",
+        "v",
+        "qfii",
+        "d"
+      ],
+      "before": [
+        "shdDrawNumberText",
+        "v",
+        "ifii",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 0,
+          "port64_integer_lowering": "Vec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Vec2f"
+        }
+      ]
+    },
+    {
+      "address": "00364c90",
+      "after": [
+        "shdDrawRotatedRect",
+        "v",
+        "qfifffi",
+        "d"
+      ],
+      "before": [
+        "shdDrawRotatedRect",
+        "v",
+        "ififffi",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 0,
+          "port64_integer_lowering": "Vec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Vec2f"
+        }
+      ]
+    },
+    {
+      "address": "00364fb0",
+      "after": [
+        "shdDrawWedge",
+        "v",
+        "qfifii",
+        "d"
+      ],
+      "before": [
+        "shdDrawWedge",
+        "v",
+        "ififii",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 0,
+          "port64_integer_lowering": "Vec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Vec2f"
+        }
+      ]
+    },
+    {
+      "address": "003657d0",
+      "after": [
+        "shdDrawRotatingQuad",
+        "v",
+        "qfiffi",
+        "d"
+      ],
+      "before": [
+        "shdDrawRotatingQuad",
+        "v",
+        "ififfi",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 0,
+          "port64_integer_lowering": "Vec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Vec2f"
+        }
+      ]
+    },
+    {
+      "address": "00365ac0",
+      "after": [
+        "shdDrawRectOutline",
+        "v",
+        "qfifffi",
+        "d"
+      ],
+      "before": [
+        "shdDrawRectOutline",
+        "v",
+        "ififffi",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 0,
+          "port64_integer_lowering": "Vec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Vec2f"
+        }
+      ]
+    },
+    {
+      "address": "00365f00",
+      "after": [
+        "shdDrawRadialFan",
+        "v",
+        "qfiiffiffi",
+        "d"
+      ],
+      "before": [
+        "shdDrawRadialFan",
+        "v",
+        "ifiiffiffi",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 0,
+          "port64_integer_lowering": "Vec2f",
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "Vec2f"
+        }
+      ]
+    },
+    {
+      "address": "00367210",
+      "after": [
+        "sflDataDrawEntry",
+        "v",
+        "qfip",
+        "d"
+      ],
+      "before": [
+        "sflDataDrawEntry",
+        "v",
+        "ifip",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 0,
+          "port64_integer_lowering": null,
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "P4Pair"
+        }
+      ]
+    },
+    {
+      "address": "003675f0",
+      "after": [
+        "sflDataDrawSpritePair",
+        "v",
+        "qfi",
+        "d"
+      ],
+      "before": [
+        "sflDataDrawSpritePair",
+        "v",
+        "ifi",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 0,
+          "port64_integer_lowering": null,
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "PairBits"
+        }
+      ]
+    },
+    {
+      "address": "00367940",
+      "after": [
+        "sflDataDrawPartyEntry",
+        "v",
+        "qfip",
+        "d"
+      ],
+      "before": [
+        "sflDataDrawPartyEntry",
+        "v",
+        "ifip",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 0,
+          "port64_integer_lowering": null,
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "P4Pair"
+        }
+      ]
+    },
+    {
+      "address": "00450a50",
+      "after": [
+        "sdkDbprtDrawText",
+        "v",
+        "iqfp",
+        "d"
+      ],
+      "before": [
+        "sdkDbprtDrawText",
+        "v",
+        "iifp",
+        "d"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 1,
+          "port64_integer_lowering": null,
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "PackedVec2f"
+        }
+      ]
+    },
+    {
+      "address": "00450dd0",
+      "after": [
+        "sdkDbprtPrint",
+        "v",
+        "qfp?",
+        "o"
+      ],
+      "before": [
+        "sdkDbprtPrint",
+        "v",
+        "ifp?",
+        "o"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 0,
+          "port64_integer_lowering": null,
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "PackedVec2f"
+        }
+      ]
+    },
+    {
+      "address": "00450e80",
+      "after": [
+        "sdkDbprtPrintColor",
+        "v",
+        "iqfp?",
+        "o"
+      ],
+      "before": [
+        "sdkDbprtPrintColor",
+        "v",
+        "iifp?",
+        "o"
+      ],
+      "records": [
+        {
+          "after": "q",
+          "before": "i",
+          "bytes": 8,
+          "parameter": 1,
+          "port64_integer_lowering": null,
+          "reason": "Packed EE GP value; two i386 words for >4 bytes.",
+          "type": "PackedVec2f"
+        }
+      ]
+    }
+  ],
+  "retained_markerless_definition": {
+    "address": "003e0870",
+    "name": "RwMatrixRotate",
+    "reason": "Real symbol_addrs entry and split-line RenderWare definition; retained through generic discovery, not a manual pin.",
+    "signature": "p ppfi"
+  },
+  "source_refresh": [
+    {
+      "address": "0010d480",
+      "after": [
+        "datBattleUnitLoadCompleteNoop",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "001a7710",
+      "after": null,
+      "before": [
+        "btlActionSkillInit",
+        "v",
+        "-",
+        "d"
+      ],
+      "original_generator_current_source": null,
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "001ac6f0",
+      "after": [
+        "btlActionErrorInit",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "btlActionErrorInit",
+        "v",
+        "-",
+        "d"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "001acf40",
+      "after": [
+        "btlActionWaitInit",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "btlActionWaitInit",
+        "v",
+        "-",
+        "d"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "001ad540",
+      "after": [
+        "btlActionEscapeInit",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "btlActionEscapeInit",
+        "v",
+        "-",
+        "d"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "001af9d0",
+      "after": [
+        "btlActionPacketInit",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "btlActionPacketInit",
+        "v",
+        "-",
+        "d"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "001b5da0",
+      "after": [
+        "btlMainResultInit",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "btlMainResultInit",
+        "v",
+        "-",
+        "d"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "001b5ec0",
+      "after": [
+        "btlMainTestInit",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "btlMainTestInit",
+        "v",
+        "-",
+        "d"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "001c0e40",
+      "after": [
+        "btlCameraMoveHomeUpdate",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "btlCameraMoveHomeUpdate",
+        "v",
+        "-",
+        "d"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "001c6b50",
+      "after": [
+        "btlCameraOrbitTightUpdateNoop",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "001c6ba0",
+      "after": [
+        "btlCameraSkillExecOneUpdateNoop",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "001c6be0",
+      "after": [
+        "btlCameraResetToDefaultUpdateNoop",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "btlCameraResetToDefaultUpdateNoop",
+        "v",
+        "-",
+        "d"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "001c7500",
+      "after": [
+        "btlCameraFrameTransitionUpdateNoop",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "btlCameraFrameTransitionUpdateNoop",
+        "v",
+        "-",
+        "d"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "001c7770",
+      "after": [
+        "btlCameraActionUnitPoseUpdateNoop",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "btlCameraActionUnitPoseUpdateNoop",
+        "v",
+        "-",
+        "d"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "001cc5c0",
+      "after": [
+        "btlCameraFreshPoseUpdateNoop",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "btlCameraFreshPoseUpdateNoop",
+        "v",
+        "-",
+        "d"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "001cca50",
+      "after": [
+        "btlCameraTargetUpdateNoop",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "btlCameraTargetUpdateNoop",
+        "v",
+        "-",
+        "d"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "001ce420",
+      "after": [
+        "btlAct_ENCOUNT",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "001d6a60",
+      "after": [
+        "btlEffectInitializeNodeSystem",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "btlEffectInitializeNodeSystem",
+        "v",
+        "-",
+        "d"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "001f9be0",
+      "after": [
+        "btlVoiceUpdateNoop",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "btlVoiceUpdateNoop",
+        "v",
+        "-",
+        "d"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "001f9cd0",
+      "after": [
+        "btlTargetSpecialHitNoop",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "btlTargetSpecialHitNoop",
+        "v",
+        "-",
+        "d"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "00244100",
+      "after": [
+        "datCalcFormulaNoop",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "datCalcFormulaNoop",
+        "v",
+        "-",
+        "d"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "00278610",
+      "after": null,
+      "before": [
+        "itfMesWindowSetStyle",
+        "i",
+        "ih",
+        "d"
+      ],
+      "original_generator_current_source": null,
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "00278640",
+      "after": [
+        "itfMesWindowApplyStyle",
+        "v",
+        "iii",
+        "d"
+      ],
+      "before": [
+        "itfMesWindowApplyStyle",
+        "v",
+        "ihi",
+        "d"
+      ],
+      "original_generator_current_source": [
+        "itfMesWindowApplyStyle",
+        "v",
+        "iii",
+        "d"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "002a27c0",
+      "after": [
+        "yTimeTrackAppendKey",
+        "i",
+        "fiiiiiBBh",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "003bf930",
+      "after": [
+        "_rpAtomicResyncInterpolatedSphere",
+        "v",
+        "p",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "003c2130",
+      "after": [
+        "RpGeometryTriangleSetVertexIndices",
+        "p",
+        "ppHHH",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "003c91d0",
+      "after": [
+        "_rpWorldSectorDeinstanceAll",
+        "v",
+        "p",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "003d6f90",
+      "after": [
+        "func_003d6f90",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "003d6fa0",
+      "after": [
+        "func_003d6fa0",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "003df7e0",
+      "after": [
+        "_rwSListDestroyEndEntries",
+        "v",
+        "pi",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "003e0130",
+      "after": [
+        "_rwMatrixDeterminant",
+        "f",
+        "p",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "003e0180",
+      "after": [
+        "_rwMatrixOrthogonalError",
+        "f",
+        "p",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "003e01e0",
+      "after": [
+        "_rwMatrixNormalError",
+        "f",
+        "p",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "003e1230",
+      "after": [
+        "_RwFreeListFree",
+        "v",
+        "p",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "003e1c30",
+      "after": [
+        "_rwMemoryClose",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "003e1f50",
+      "after": [
+        "_rwResourcesPurge",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "003e4520",
+      "after": [
+        "_rwResHeapFree",
+        "v",
+        "p",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "003e8180",
+      "after": [
+        "RwCameraSetNearClipPlane",
+        "p",
+        "pf",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "003e81c0",
+      "after": [
+        "RwCameraSetFarClipPlane",
+        "p",
+        "pf",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "003ec6a0",
+      "after": [
+        "RwRasterLock",
+        "p",
+        "pBi",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "003efd20",
+      "after": [
+        "_rwObjectHasFrameSetFrame",
+        "v",
+        "pp",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "003efda0",
+      "after": [
+        "_rwObjectHasFrameReleaseFrame",
+        "v",
+        "p",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "0040d160",
+      "after": [
+        "func_0040d160",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "0040df40",
+      "after": [
+        "func_0040df40",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "0040f1b0",
+      "after": [
+        "func_0040f1b0",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "00410420",
+      "after": [
+        "RwIm3DTransform",
+        "p",
+        "pipi",
+        "o"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "004104d0",
+      "after": [
+        "RwIm3DEnd",
+        "i",
+        "-",
+        "o"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "00410520",
+      "after": [
+        "RwIm3DRenderIndexedPrimitive",
+        "i",
+        "ipi",
+        "o"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "004106a0",
+      "after": [
+        "RwIm3DRenderPrimitive",
+        "i",
+        "i",
+        "o"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "00410800",
+      "after": [
+        "RwIm3DRenderTriangle",
+        "i",
+        "iii",
+        "o"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "00410930",
+      "after": [
+        "RwIm3DRenderLine",
+        "i",
+        "ii",
+        "o"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "00410f50",
+      "after": [
+        "_rxPacketDestroy",
+        "v",
+        "p",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "00411670",
+      "after": [
+        "_rxPipelineDestroy",
+        "v",
+        "p",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "00415920",
+      "after": [
+        "func_00415920",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "00415940",
+      "after": [
+        "func_00415940",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "00421600",
+      "after": [
+        "func_00421600",
+        "i",
+        "ii",
+        "o"
+      ],
+      "before": [
+        "func_00421600",
+        "i",
+        "ip",
+        "o"
+      ],
+      "original_generator_current_source": [
+        "func_00421600",
+        "i",
+        "ii",
+        "o"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "00422920",
+      "after": [
+        "func_00422920",
+        "i",
+        "ii",
+        "o"
+      ],
+      "before": [
+        "func_00422920",
+        "i",
+        "ip",
+        "o"
+      ],
+      "original_generator_current_source": [
+        "func_00422920",
+        "i",
+        "ii",
+        "o"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "00456150",
+      "after": [
+        "H_Cdvd_ReadSync",
+        "v",
+        "p",
+        "o"
+      ],
+      "before": [
+        "H_Cdvd_ReadSync",
+        "v",
+        "p",
+        "d"
+      ],
+      "original_generator_current_source": [
+        "H_Cdvd_ReadSync",
+        "v",
+        "p",
+        "o"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "00481390",
+      "after": [
+        "TnUploadStreamTagged",
+        "v",
+        "p",
+        "d"
+      ],
+      "before": [
+        "TnUploadStreamTagged",
+        "p",
+        "p",
+        "d"
+      ],
+      "original_generator_current_source": [
+        "TnUploadStreamTagged",
+        "v",
+        "p",
+        "d"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004bd688",
+      "after": null,
+      "before": [
+        "func_004bd688",
+        "v",
+        "p",
+        "d"
+      ],
+      "original_generator_current_source": null,
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004c54d8",
+      "after": [
+        "func_004c54d8",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "004c7228",
+      "after": [
+        "func_004c7228",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "004c8400",
+      "after": [
+        "func_004c8400",
+        "p",
+        "-",
+        "o"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "func_004c8400",
+        "p",
+        "-",
+        "o"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004c8458",
+      "after": [
+        "func_004c8458",
+        "p",
+        "-",
+        "o"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "func_004c8458",
+        "p",
+        "-",
+        "o"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004c84f0",
+      "after": [
+        "func_004c84f0",
+        "i",
+        "ppp",
+        "o"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "func_004c84f0",
+        "i",
+        "ppp",
+        "o"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004c85a0",
+      "after": [
+        "func_004c85a0",
+        "p",
+        "pp",
+        "o"
+      ],
+      "before": [
+        "func_004c85a0",
+        "p",
+        "pi",
+        "o"
+      ],
+      "original_generator_current_source": [
+        "func_004c85a0",
+        "p",
+        "pp",
+        "o"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004c85e8",
+      "after": [
+        "func_004c85e8",
+        "p",
+        "pp",
+        "o"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "func_004c85e8",
+        "p",
+        "pp",
+        "o"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004c8688",
+      "after": [
+        "func_004c8688",
+        "i",
+        "pppii",
+        "o"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "func_004c8688",
+        "i",
+        "pppii",
+        "o"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004c8830",
+      "after": [
+        "func_004c8830",
+        "i",
+        "pii",
+        "o"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "func_004c8830",
+        "i",
+        "pii",
+        "o"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004c89f0",
+      "after": [
+        "func_004c89f0",
+        "v",
+        "p",
+        "o"
+      ],
+      "before": [
+        "adxf_CloseSjStm",
+        "v",
+        "i",
+        "d"
+      ],
+      "original_generator_current_source": [
+        "func_004c89f0",
+        "v",
+        "p",
+        "o"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004c8bd0",
+      "after": [
+        "func_004c8bd0",
+        "i",
+        "pip",
+        "o"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "func_004c8bd0",
+        "i",
+        "pip",
+        "o"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004c8d28",
+      "after": [
+        "func_004c8d28",
+        "i",
+        "pip",
+        "o"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "func_004c8d28",
+        "i",
+        "pip",
+        "o"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004c8e80",
+      "after": [
+        "func_004c8e80",
+        "i",
+        "pip",
+        "o"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "func_004c8e80",
+        "i",
+        "pip",
+        "o"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004c90e0",
+      "after": [
+        "func_004c90e0",
+        "i",
+        "p",
+        "o"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "func_004c90e0",
+        "i",
+        "p",
+        "o"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004c9208",
+      "after": [
+        "func_004c9208",
+        "i",
+        "p",
+        "o"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "func_004c9208",
+        "i",
+        "p",
+        "o"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004c92d0",
+      "after": [
+        "func_004c92d0",
+        "v",
+        "p",
+        "o"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "func_004c92d0",
+        "v",
+        "p",
+        "o"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004c9478",
+      "after": [
+        "func_004c9478",
+        "i",
+        "pii",
+        "o"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "func_004c9478",
+        "i",
+        "pii",
+        "o"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004c95c8",
+      "after": [
+        "func_004c95c8",
+        "i",
+        "p",
+        "o"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "func_004c95c8",
+        "i",
+        "p",
+        "o"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004c9630",
+      "after": [
+        "func_004c9630",
+        "i",
+        "p",
+        "o"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "func_004c9630",
+        "i",
+        "p",
+        "o"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004c96a8",
+      "after": [
+        "func_004c96a8",
+        "i",
+        "p",
+        "o"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "func_004c96a8",
+        "i",
+        "p",
+        "o"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004c9768",
+      "after": [
+        "func_004c9768",
+        "i",
+        "pp",
+        "o"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "func_004c9768",
+        "i",
+        "pp",
+        "o"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004c97f0",
+      "after": [
+        "func_004c97f0",
+        "i",
+        "p",
+        "o"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "func_004c97f0",
+        "i",
+        "p",
+        "o"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004c9c20",
+      "after": [
+        "func_004c9c20",
+        "v",
+        "pi",
+        "o"
+      ],
+      "before": [
+        "ADXF_SetReqRdSct",
+        "v",
+        "ii",
+        "d"
+      ],
+      "original_generator_current_source": [
+        "func_004c9c20",
+        "v",
+        "pi",
+        "o"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004cb198",
+      "after": [
+        "func_004cb198",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "004cddc0",
+      "after": [
+        "adxsjd_decode_prep",
+        "v",
+        "i",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "004d18b0",
+      "after": null,
+      "before": [
+        "func_004d18b0",
+        "v",
+        "p",
+        "d"
+      ],
+      "original_generator_current_source": null,
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004d18c8",
+      "after": [
+        "func_004d18c8",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "004d1e58",
+      "after": [
+        "func_004d1e58",
+        "v",
+        "pppii",
+        "o"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "func_004d1e58",
+        "v",
+        "pppii",
+        "o"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004d1ec8",
+      "after": [
+        "func_004d1ec8",
+        "v",
+        "pppii",
+        "o"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "func_004d1ec8",
+        "v",
+        "pppii",
+        "o"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004d21a0",
+      "after": [
+        "func_004d21a0",
+        "i",
+        "pi",
+        "o"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "func_004d21a0",
+        "i",
+        "pi",
+        "o"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004d21e8",
+      "after": [
+        "func_004d21e8",
+        "i",
+        "pi",
+        "o"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "func_004d21e8",
+        "i",
+        "pi",
+        "o"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004d2840",
+      "after": [
+        "adxstmf_stat_exec",
+        "v",
+        "i",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "004d2d38",
+      "after": [
+        "func_004d2d38",
+        "i",
+        "p",
+        "o"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "func_004d2d38",
+        "i",
+        "p",
+        "o"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004d2dc8",
+      "after": [
+        "func_004d2dc8",
+        "v",
+        "pi",
+        "o"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "func_004d2dc8",
+        "v",
+        "pi",
+        "o"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004d2fa8",
+      "after": [
+        "func_004d2fa8",
+        "i",
+        "pp",
+        "o"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "func_004d2fa8",
+        "i",
+        "pp",
+        "o"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004d2fe8",
+      "after": [
+        "func_004d2fe8",
+        "i",
+        "pp",
+        "o"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "func_004d2fe8",
+        "i",
+        "pp",
+        "o"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004d3228",
+      "after": [
+        "func_004d3228",
+        "v",
+        "p",
+        "o"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "func_004d3228",
+        "v",
+        "p",
+        "o"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004d3258",
+      "after": [
+        "func_004d3258",
+        "v",
+        "p",
+        "o"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "func_004d3258",
+        "v",
+        "p",
+        "o"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004d7968",
+      "after": [
+        "adxt_stat_decinfo",
+        "v",
+        "i",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "004df318",
+      "after": [
+        "func_004df318",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "004e2108",
+      "after": null,
+      "before": [
+        "cvFsSeek",
+        "i",
+        "pii",
+        "d"
+      ],
+      "original_generator_current_source": null,
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004e22f8",
+      "after": null,
+      "before": [
+        "cvFsGetStat",
+        "i",
+        "p",
+        "d"
+      ],
+      "original_generator_current_source": null,
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004e2750",
+      "after": null,
+      "before": [
+        "cvFsGetNumTr",
+        "i",
+        "p",
+        "d"
+      ],
+      "original_generator_current_source": null,
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004e3448",
+      "after": [
+        "func_004e3448",
+        "q",
+        "p",
+        "o"
+      ],
+      "before": [
+        "func_004e3448",
+        "q",
+        "p",
+        "d"
+      ],
+      "original_generator_current_source": [
+        "func_004e3448",
+        "q",
+        "p",
+        "o"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004e9908",
+      "after": [
+        "func_004e9908",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "004e9a58",
+      "after": [
+        "LSC_ExecServer",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "004f13c0",
+      "after": [
+        "func_004f13c0",
+        "i",
+        "pii",
+        "o"
+      ],
+      "before": [
+        "func_004f13c0",
+        "i",
+        "pii",
+        "d"
+      ],
+      "original_generator_current_source": [
+        "func_004f13c0",
+        "i",
+        "pii",
+        "o"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004f1418",
+      "after": null,
+      "before": [
+        "func_004f1418",
+        "v",
+        "p",
+        "d"
+      ],
+      "original_generator_current_source": null,
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004f1430",
+      "after": null,
+      "before": [
+        "func_004f1430",
+        "v",
+        "pip",
+        "d"
+      ],
+      "original_generator_current_source": null,
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004f1448",
+      "after": null,
+      "before": [
+        "func_004f1448",
+        "v",
+        "p",
+        "d"
+      ],
+      "original_generator_current_source": null,
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004f1460",
+      "after": [
+        "func_004f1460",
+        "i",
+        "p",
+        "o"
+      ],
+      "before": [
+        "func_004f1460",
+        "i",
+        "p",
+        "d"
+      ],
+      "original_generator_current_source": [
+        "func_004f1460",
+        "i",
+        "p",
+        "o"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004f14b0",
+      "after": null,
+      "before": [
+        "func_004f14b0",
+        "v",
+        "p",
+        "d"
+      ],
+      "original_generator_current_source": null,
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004f14c8",
+      "after": null,
+      "before": [
+        "func_004f14c8",
+        "i",
+        "p",
+        "d"
+      ],
+      "original_generator_current_source": null,
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004f14e0",
+      "after": [
+        "func_004f14e0",
+        "q",
+        "p",
+        "o"
+      ],
+      "before": [
+        "func_004f14e0",
+        "q",
+        "p",
+        "d"
+      ],
+      "original_generator_current_source": [
+        "func_004f14e0",
+        "q",
+        "p",
+        "o"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004f53c0",
+      "after": [
+        "func_004f53c0",
+        "i",
+        "pippi",
+        "o"
+      ],
+      "before": [
+        "func_004f53c0",
+        "i",
+        "pippi",
+        "d"
+      ],
+      "original_generator_current_source": [
+        "func_004f53c0",
+        "i",
+        "pippi",
+        "o"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004f8548",
+      "after": [
+        "func_004f8548",
+        "p",
+        "-",
+        "o"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "func_004f8548",
+        "p",
+        "-",
+        "o"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004f8570",
+      "after": [
+        "func_004f8570",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "004f9a58",
+      "after": null,
+      "before": [
+        "SVM_Unlock",
+        "v",
+        "-",
+        "d"
+      ],
+      "original_generator_current_source": null,
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004f9a70",
+      "after": null,
+      "before": [
+        "func_004e4190",
+        "v",
+        "-",
+        "d"
+      ],
+      "original_generator_current_source": null,
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "004f9ae0",
+      "after": [
+        "func_004f9ae0",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "004fb748",
+      "after": [
+        "func_004fb748",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "005015d8",
+      "after": [
+        "func_005015d8",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "00506d80",
+      "after": [
+        "func_00506d80",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "005072c0",
+      "after": [
+        "func_005072c0",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "005072c8",
+      "after": [
+        "func_005072c8",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "005083c0",
+      "after": [
+        "MWSFCRE_SetSupplySj",
+        "v",
+        "i",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "00509010",
+      "after": [
+        "MWSFCRE_DestroySfd",
+        "v",
+        "i",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "0050a008",
+      "after": [
+        "mwPlySetFrmSync",
+        "v",
+        "ii",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "0050a1c0",
+      "after": [
+        "mwPlyGetCurFrm",
+        "v",
+        "pp",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "0050aae0",
+      "after": [
+        "mwPlyRelCurFrm",
+        "v",
+        "i",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "0050b3f8",
+      "after": [
+        "mwPlyInitSfdFx",
+        "v",
+        "p",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "0050c508",
+      "after": [
+        "mwPlyStartAfs",
+        "v",
+        "iii",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "0050c7f0",
+      "after": [
+        "mwPlyStartFnameRange",
+        "v",
+        "ipii",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "0050cdd8",
+      "after": [
+        "func_0050cdd8",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "0050cde0",
+      "after": [
+        "mwPlySetAudioSw",
+        "v",
+        "ii",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "0050d088",
+      "after": [
+        "mwPlySetAudioCh",
+        "v",
+        "ii",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "0050d1a0",
+      "after": [
+        "mwPlySetVideoCh",
+        "v",
+        "ii",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "0050d458",
+      "after": [
+        "mwPlySetLimitTime",
+        "v",
+        "ii",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "0050d5c0",
+      "after": [
+        "mwPlySetSyncMode",
+        "v",
+        "ii",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "0050dd28",
+      "after": [
+        "mwPlySetEmptyBpicSkip",
+        "v",
+        "ii",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "0050ddf8",
+      "after": [
+        "mwPlyGetPlyInf",
+        "v",
+        "ip",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "0050dee8",
+      "after": [
+        "mwPlyGetFlowInf",
+        "v",
+        "ip",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "0050e0d0",
+      "after": [
+        "mwPlySetSpeed",
+        "v",
+        "ii",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "0050e140",
+      "after": [
+        "mwPlySetFloatSpeed",
+        "v",
+        "ii",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "0050ea58",
+      "after": [
+        "mwPlyFxCnvFrmZ16",
+        "v",
+        "ip",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "0050eb08",
+      "after": [
+        "mwPlyFxCnvFrmZ32",
+        "v",
+        "ip",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "0050ebb8",
+      "after": [
+        "mwPlyFxSetCompoMode",
+        "v",
+        "ii",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "0050ed78",
+      "after": [
+        "mwPlyFxGetOutBufPitchHeight",
+        "v",
+        "ipp",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "0050eec8",
+      "after": [
+        "mwPlyFxSetOutZscale",
+        "v",
+        "ii",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "0050ef98",
+      "after": [
+        "mwPlyFxSetOutZoffset",
+        "v",
+        "ii",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "0050f538",
+      "after": [
+        "func_0050f538",
+        "i",
+        "iff",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "func_0050f538",
+        "i",
+        "iff",
+        "d"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "0050f7a8",
+      "after": [
+        "MWSFD_MakeTblZ16",
+        "v",
+        "ip",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "0050f848",
+      "after": [
+        "MWSFD_MakeTblZ32",
+        "v",
+        "ip",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "0050fa78",
+      "after": [
+        "mwPlySetCnvBottomUp",
+        "v",
+        "ii",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "0050fd60",
+      "after": [
+        "mwPlyEntryFname",
+        "v",
+        "pp",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "0050fe20",
+      "after": [
+        "mwPlyStartSeamless",
+        "v",
+        "p",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "0050fec0",
+      "after": [
+        "mwPlySetLpFlg",
+        "v",
+        "pi",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "0050ff20",
+      "after": [
+        "mwPlyStartFnameLp",
+        "v",
+        "pp",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "0050ffc8",
+      "after": [
+        "mwPlyReleaseLp",
+        "v",
+        "p",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "00510028",
+      "after": [
+        "mwPlyReleaseSeamless",
+        "v",
+        "p",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "00510090",
+      "after": [
+        "mwPlyEntryAfs",
+        "v",
+        "pii",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "00510158",
+      "after": [
+        "mwPlyStartAfsLp",
+        "v",
+        "pii",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "005101e8",
+      "after": [
+        "mwPlyEntryFnameRange",
+        "v",
+        "ppii",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "00510270",
+      "after": [
+        "mwPlyStartFnameRangeLp",
+        "v",
+        "ppii",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "005104c0",
+      "after": [
+        "mwPlyLinkStm",
+        "v",
+        "pi",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "005120b0",
+      "after": [
+        "func_005120b0",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "00513380",
+      "after": null,
+      "before": [
+        "sfadxt_IsDecoded",
+        "i",
+        "p",
+        "o"
+      ],
+      "original_generator_current_source": null,
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "00517d80",
+      "after": [
+        "func_00517d80",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "00519de8",
+      "after": [
+        "func_00519de8",
+        "v",
+        "-",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "0052ac20",
+      "after": [
+        "SFX_MakeTblZ16",
+        "v",
+        "pp",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "0052ac98",
+      "after": [
+        "SFX_MakeTblZ32",
+        "v",
+        "pp",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    },
+    {
+      "address": "0052bbd8",
+      "after": [
+        "func_0052bbd8",
+        "i",
+        "iff",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": [
+        "func_0052bbd8",
+        "i",
+        "iff",
+        "d"
+      ],
+      "reason": [
+        "Regenerating the original generator against current source changes this declaration/discovery row; predates aggregate classification."
+      ]
+    },
+    {
+      "address": "0052c790",
+      "after": [
+        "SFXZ_SetZclip",
+        "v",
+        "pii",
+        "d"
+      ],
+      "before": null,
+      "original_generator_current_source": null,
+      "reason": [
+        "Current symbol-table-backed named discovery and split-return definition parsing resolve the actual C definition."
+      ]
+    }
+  ],
+  "source_revision": "e79ce2dad5c1bd5addc2cc2f74afbf4ae21737ee"
+}

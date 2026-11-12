@@ -1,0 +1,8 @@
+# Shuffle Time gate (tests/shuffle_gate.sh): P4PC_START_BATTLE with P4PC_SHUFFLE (src/platform/shuffle_harness.c). Attack until the fight
+# is won; in Shuffle Time the driver alternates a cursor move and Cross every 45 frames, which plays every pattern (a flipped card cannot be
+# flipped again), and persona=modal answers a Persona card's status window. The harness exits once the shuffle task is gone.
+timeout:30000
+battle:plan=cross;skip=0;delay=20;persona=modal
+waittask:battle_shuffle
+waittask:battle_shuffle:off
+wait:600

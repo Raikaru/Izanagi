@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="us-ascii"?>
+<!-- p4pc.hardmode gear (design 7, H3): Slash/Strike/Pierce Wards (one-leaf resist through
+     Physical Split equipment effect rows) and Linings (one-leaf damage reduction through
+     damage-cover rows; no Down/weakness change). Rows derive from the player's own ITEMTBL
+     anchors at seal (tables.md "Derived items"); names, prices, gates and effects are ours.
+     Daidara lists a derived row as it lists its anchor: the Linings follow the normally
+     stocked Chain Mail anchor, and the Pierce Ward the normally stocked Headband, without
+     its stat bonus. The Slash and Strike Wards are T2 (design 7.4: one-leaf reduction) and
+     wait for Marukyu Striptease: their first
+     gate is three Idle Stone Iron (0x52B, first dropped on the Striptease floors) sold to
+     Daidara. IDs 1700..1705 are provisional. -->
+<p4-tables schema="1">
+<item id="1700" key="p4pc.hardmode:ward-slash" derive="0x204" price="4000" moon-gates="0x52b03,0x50000" icon-owner="p4pc.physsplit" icon-key="p4pc.physsplit:slash-icon" icon-revision="1"/>
+<string table="0" id="1700" role="0" bytes="536c617368205761726400"/>
+<string table="0" id="1700" role="1" bytes="48616c76657320536c6173682064616d6167652074616b656e2e00"/>
+<effect source-kind="1" source-id="1700" element="19" channel="0" flags="268435456" key="p4pc.hardmode:ward-slash-effect"/>
+<item id="1701" key="p4pc.hardmode:ward-strike" derive="0x204" price="4000" moon-gates="0x52b03,0x50000" icon-owner="p4pc.physsplit" icon-key="p4pc.physsplit:strike-icon" icon-revision="1"/>
+<string table="0" id="1701" role="0" bytes="537472696b65205761726400"/>
+<string table="0" id="1701" role="1" bytes="48616c76657320537472696b652064616d6167652074616b656e2e00"/>
+<effect source-kind="1" source-id="1701" element="20" channel="0" flags="268435456" key="p4pc.hardmode:ward-strike-effect"/>
+<item id="1702" key="p4pc.hardmode:ward-pierce" derive="0x27A" stat-bonus="0,0,0,0,0" price="4000" icon-owner="p4pc.physsplit" icon-key="p4pc.physsplit:pierce-icon" icon-revision="1"/>
+<string table="0" id="1702" role="0" bytes="506965726365205761726400"/>
+<string table="0" id="1702" role="1" bytes="48616c766573205069657263652064616d6167652074616b656e2e00"/>
+<effect source-kind="1" source-id="1702" element="21" channel="0" flags="268435456" key="p4pc.hardmode:ward-pierce-effect"/>
+<item id="1703" key="p4pc.hardmode:lining-cleave" derive="0x10A" price="7500" icon-owner="p4pc.physsplit" icon-key="p4pc.physsplit:slash-icon" icon-revision="1"/>
+<string table="0" id="1703" role="0" bytes="436c65617665204c696e696e6700"/>
+<string table="0" id="1703" role="1" bytes="41726d6f722e205265647563657320536c6173682064616d6167652074616b656e206279203130252e00"/>
+<damage-cover source-kind="1" source-id="1703" element="19" channel="0" percent="10" family="p4pc.hardmode:lining" key="p4pc.hardmode:lining-cleave-cover"/>
+<item id="1704" key="p4pc.hardmode:lining-pummel" derive="0x10A" price="7500" icon-owner="p4pc.physsplit" icon-key="p4pc.physsplit:strike-icon" icon-revision="1"/>
+<string table="0" id="1704" role="0" bytes="50756d6d656c204c696e696e6700"/>
+<string table="0" id="1704" role="1" bytes="41726d6f722e205265647563657320537472696b652064616d6167652074616b656e206279203130252e00"/>
+<damage-cover source-kind="1" source-id="1704" element="20" channel="0" percent="10" family="p4pc.hardmode:lining" key="p4pc.hardmode:lining-pummel-cover"/>
+<item id="1705" key="p4pc.hardmode:lining-stab" derive="0x10A" price="7500" icon-owner="p4pc.physsplit" icon-key="p4pc.physsplit:pierce-icon" icon-revision="1"/>
+<string table="0" id="1705" role="0" bytes="53746162204c696e696e6700"/>
+<string table="0" id="1705" role="1" bytes="41726d6f722e2052656475636573205069657263652064616d6167652074616b656e206279203130252e00"/>
+<damage-cover source-kind="1" source-id="1705" element="21" channel="0" percent="10" family="p4pc.hardmode:lining" key="p4pc.hardmode:lining-stab-cover"/>
+</p4-tables>

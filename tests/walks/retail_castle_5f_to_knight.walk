@@ -1,0 +1,109 @@
+# Yukiko's Castle 5F (field 60 room 1, a placed map with FOUR WARPS, no generated floor) from the arrival at the start (3600, 21200) to the east door
+# of Avenger Knight: the retail route (p4hook --walk-game from the savestate story-castle5f0420.p2s; the same commands run in the port).
+# The field script's warps (area -> script -> destination, found by moving the player onto each area with p4hook --poke on the player matrix):
+#   3400 corridor east end (8918..9090, 15219..15937)  warp_006f_01 -> (3603, 11297)   [the corridor loops back; the way on is north from there]
+#   3403 (3207..4004, 10108..10294)                    warp_006f_04 -> (7902,  5995)
+#   3402 (8897..9083,  5674..6339)                     warp_006f_03 -> (14388, 10291)
+#   3401 (14029..14762, 11311..11477) behind gate 280a warp_006f_02 -> (10071, 15607)   [EAST of the corridor's gates: the way past the loop]
+#   3404 (4444..5124, 17328..17451)                    warp_006f_start (does not move the player; the first corridor walk passes its edge)
+#   37ff (8653..9290, 3222..4167) is the stairs up; the east door (obj 2808/280b at 14900, 12000) is the boss.
+# From (10071, 15607) the way is wall-bound: east along z 15400, then to (14010, 14640), the gate 2809 at (14395, 13212) (it opens by touching), the door.
+# Shadows roam the floor: the battle driver plays every fight (battleskip:on lets the walks wait through them).
+timeout:6000
+wait:60
+timeout:60000
+battle:first=cross,cross,cross;plan=cross,cross,cross;skip=0;delay=20
+battleskip:on
+plan:on
+plan:off
+walk:3750,20650,130
+walk:3750,20350,130
+walk:3750,20150,130
+walk:3750,19850,130
+walk:3850,19650,130
+walk:3950,19350,130
+walk:3750,19450,130
+walk:4050,19050,130
+walk:4150,18850,130
+walk:4250,18650,130
+walk:4450,18450,130
+walk:4550,18250,130
+walk:4650,18050,130
+walk:4650,17650,130
+walk:4750,17450,130
+walk:4750,17150,130
+walk:4950,16950,130
+walk:4850,16850,130
+walk:4950,16650,130
+walk:4950,16350,130
+walk:4950,16150,130
+walk:5050,15950,130
+walk:4950,16250,130
+walk:4950,16150,130
+walk:5050,15850,130
+walk:5150,15850,130
+walk:5150,15450,130
+walk:4950,15750,130
+walk:5050,15650,130
+walk:5150,15650,130
+walk:5300,15600,230
+push:5300,15600,45
+press:cross
+wait:200
+walk:5250,15650,130
+walk:5250,15550,130
+walk:5850,15550,130
+walk:6150,15550,130
+walk:6250,15450,130
+walk:6550,15450,130
+walk:6750,15450,130
+walk:7050,15450,130
+walk:7350,15450,130
+walk:7550,15450,130
+walk:7850,15450,130
+walk:8050,15450,130
+walk:8350,15450,130
+walk:8550,15450,130
+walk:8850,15450,130
+timeout:6000
+walk:8800,15450,100
+push:9300,15450,40       # the corridor's east end, area 3400 (warp_006f_01): back to (3603,11297)
+wait:400
+waitcontrol:on
+wait:60
+log
+walk:3600,10600,100
+push:3600,10000,40   # area 3403 (warp_006f_04) -> (7902,5995)
+wait:400
+waitcontrol:on
+wait:60
+log
+walk:8600,6000,100
+push:9300,6000,40     # area 3402 (warp_006f_03) -> (14388,10291)
+wait:400
+waitcontrol:on
+wait:60
+log
+walk:14400,11050,60
+push:14400,11800,40  # through gate 280a into area 3401 (warp_006f_02) -> (10071,15607)
+wait:400
+waitcontrol:on
+wait:60
+log
+walk:12400,15400,130
+walk:13280,14830,130
+walk:13650,14640,100
+walk:14010,14640,60
+walk:14395,13212,60      # gate 2809
+wait:200
+waitcontrol:on
+wait:60
+log
+walk:14794,12029,60      # the east door (2808) is at (14900,12000)
+log
+push:15400,12000,30     # Cross at the door: 'Open the door and enter?'
+press:cross
+wait:300
+waitbtl:menu
+wait:10
+log

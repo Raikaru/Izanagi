@@ -1,0 +1,9 @@
+sky2hook (https://github.com/tge-was-taken/sky2hook), by tge-was-taken
+
+Parts of the renderer in src/render/ follow sky2hook, each marked with a comment
+naming the sky2hook source file it came from. sky2hook has no LICENSE file; its
+author granted reuse in issue #2 of the Persona4-Decompilation repository,
+2026-10-17
+(https://github.com/Raikaru/Persona4-Decompilation/issues/2#issuecomment-6234440298):
+
+    "In regards to licensing sky2hook, feel free to reuse parts of it."

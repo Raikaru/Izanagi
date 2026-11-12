@@ -1,0 +1,26 @@
+# Independent pristine collection card4-slot09, Heaven's 10th Paradise.
+# Cover the real closed door/event and first fresh party COMMAND, not victory.
+# This does not certify the preceding Heaven floors or the separate abduction leg.
+timeout:30000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+waitfield:28:2
+waitstep:110
+waitstate16:0x00797b7a==219
+wait:60
+push:0,-10000,120
+press:cross
+# Open the door, establish his name, hear both information topics, demand release.
+choose:1
+choose:1
+choose:1
+choose:2
+choose:3
+skiptask:battle
+waitbtl:menu
+log

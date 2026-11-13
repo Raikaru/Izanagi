@@ -87,7 +87,9 @@ Movie task skip/end rules are in [movies](movies.md).
 state (PRESS ANY BUTTON state 7, menu state 9), moves to NEW GAME and confirms. Its
 confirm sets the AUTOPRESS script clock to T, matching retail `--script-after-newgame T`.
 `P4PC_AUTOPRESS_LOAD=T` selects LOAD GAME the same way. State-driven selection avoids
-assuming title loading takes a fixed number of flips. The retained New Game schedule is:
+assuming title loading takes a fixed number of flips. `P4PC_TITLE_WATCH_OPENING=1` makes
+either driver let the opening movie play to its natural end instead of pressing Start
+through it (mod witnesses of movie completion). The retained New Game schedule is:
 
 ```text
 start@600:2,start@1100:2,down@1500:2,cross@1560:2,cross@2300:2/150,start@6500:2/300
@@ -505,7 +507,9 @@ native tasks/menus, not estimated disc duration.
   skill row in `iGpffffb3c4`), Guard removing a weakness, and the Break and Wall buff
   levels, so a Wall or Break counts the turn it lands. `p4walk_enemy_affinity` is the pure
   combination; `walk_battle_rules_test` covers it with the boss and shadow rows.
-- A battle key may be `skill:ID` (a native skill ID) once the acting character's Skill
+- A battle key may be `skill:ID` (a native skill ID: a retail active one below 0x1B8, or an
+  added one from 576 to 4095, which the port's list model admits through `p4_game_skill_active`
+  as the native list does) once the acting character's Skill
   list is open, or `item:ID` (a native item ID, 0x301–0x3FF) once the Item list is open,
   e.g. `circle,down,cross,skill:195,cross`: the driver presses Down or Up, the shorter
   way around the wrapping list, from the row the list opens on to that entry.
@@ -613,7 +617,10 @@ defeats Adachi with `battle:` and `battlerule:` lines: a Balm of Life for any do
 member, Yukiko's Me Patra on fear (`afflicted:0x4`, before Ghastly Wail), a Bead
 Chain under 250 HP, Guard while Adachi is charged, otherwise Ziodyne, Agidyne and
 Bufudyne, every skill and item chosen by native ID. It stops at Ameno-sagiri's first
-COMMAND, without claiming its defeat. A separate post-Magatsu evening card covers
+COMMAND. `collection_ameno_sagiri_victory_1223` continues from that COMMAND with a
+searched tape of 89 `battleturn:` lines (searched under retail-timed ADX voices, 000618):
+Ameno-sagiri's battle task ends at flip 77226, the story returns home, and the gate saves
+in the 12/24 living room, card5-slot01's date. A separate post-Magatsu evening card covers
 Christmas and the PS2 calendar's automatic jump to March20. That leg stops on the
 native world map (`L map` and its symbol task, no active event); it does not select a
 farewell destination or establish an ending.
@@ -623,10 +630,21 @@ and requires Ashihara-Nakatsu's exterior step 140, no event and restored player
 control. The separate Path 9 card covers its step 149 portal, the first
 Izanami phase's fresh party COMMAND, one round of Attacks from all four members and
 Yu's second COMMAND. Neither gate establishes traversal of the
-intervening paths, either boss phase's defeat or the true ending. These
+intervening paths. These
 non-saving checkpoints use `completed_walk_gate.sh`, which requires both the
 native field/date goal and completed canonical input; a matching date alone
 must not pass a stalled tape.
+
+`collection_izanami_victory_0320` replays a searched tape of 139 `battleturn:` lines on
+the Path 9 card: Izanami (267) holds at 1 HP through Izanami Endure, becomes
+Izanami-no-Okami (270) in the same battle, and her Thousand Curses ends the fight with
+the scripted forced-defeat flag (battle task off at flip 58267). The story then revives
+Yu for a final battle alone, where his Skill list holds only Myriad Truths (skill 277);
+one cast wins it at flip 66298, and the gate requires Yomotsu Hirasaka's exterior (30:1)
+on March 20. `collection_true_ending_0320` continues from there through the epilogue
+and staff roll to the new-cycle prompt and answers it as the normal ending does (native
+Save OK, calendar index 9). The tape was searched under retail-timed ADX voices (000618);
+under the port's earlier voice timing the fight diverges.
 
 Margaret's independent victory gate uses the requested unchanged CBS18506 card,
 not a replacement collection save. Its open Heaven10 approach starts the real

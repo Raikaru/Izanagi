@@ -5,17 +5,43 @@
  * while an enemy is visibly charged (public DatUnit +0x14 & 0xC0000), keeps the
  * protagonist above 70% and allies above 50%, revives, explores elements to find
  * weaknesses, remembers elements a target was seen absorbing or nulling, and
- * focuses the last damaged enemy and any enemy seen healing its side. */
+ * focuses the last damaged enemy and any enemy seen healing its side.
+ * 6 attentive with Persona ratings: attentive, and at the protagonist's command it
+ * first changes to the stocked Persona whose rating (a scenario-pinned table, one
+ * value per retail element 0..7) is best for a weakness it has seen on a living
+ * enemy, else best overall, when that beats the current Persona's.
+ * 7 technical: attentive, plus Technical windows. It probes an enemy with each
+ * Technical-set ailment at most twice, remembers an ailment it saw land, inflicts
+ * a known one on a target not already suffering it, and prefers the element
+ * paired with an ailment the target shows (Fire/Rage, Ice/Fear, Elec/Silence,
+ * Wind/Panic) unless that element is a known weakness.
+ * 8 strategic candidate: technical (all of 7's observed-ailment and Technical
+ * reasoning), plus the rules of include/p4pc/battle_strategy.h: a
+ * direction-pure buff/debuff (raise on a member, lower on an enemy) not yet held
+ * is worth more in a durable fight, never two without a party damage decision
+ * between; a fixed heal loses the missing HP it leaves uncovered; and the
+ * protagonist changes, once per command, to a stocked Persona whose own listed,
+ * exactly priced skills score clearly better for this decision. */
 #include "p4pc/battle_sim.h"
 #include "p4pc/battle_events.h"
 #include "p4pc/game_table_extents.h"
+#include "policy_items.h"
 #include "p4pc/gmem.h"
+#include "p4pc/battle_strategy.h"
+#include "p4pc/game_cost_stage_native.h"
+#include "p4pc/game_skills_native.h"
 #include <limits.h>
 #include <stdint.h>
+#include <string.h>
 
 #define GP(off) P4_GPDATA(uint32_t, off)
 
-enum { WHEEL_ATTACK = 3, WHEEL_SKILL = 4, WHEEL_ITEM = 6, WHEEL_GUARD = 2 };
+enum { WHEEL_ATTACK = 3, WHEEL_SKILL = 4, WHEEL_PERSONA = 5, WHEEL_ITEM = 6, WHEEL_GUARD = 2 };
+#define ATTENTIVE(mode) ((mode) == 5 || (mode) == 6 || (mode) == 7 || (mode) == 8)
+#define TECHNICAL(mode) ((mode) == 7 || (mode) == 8)
+#define STRATEGIC(mode) ((mode) == 8)
+#define TECHNICAL_AILMENTS 0x1Eu /* Rage 0x02, Fear 0x04, Silence 0x08, Panic 0x10 */
+#define RATINGS_MAX 512u
 typedef struct Choice {
     int64_t score;
     uint32_t target;
@@ -32,6 +58,7 @@ static struct {
     struct {
         uint32_t unit_uid, tried, weak;
         uint32_t unchanged, bad; /* attentive: shown no damage once / absorbed or nulled (public outcome) */
+        uint32_t vulnerable, probed, probed2; /* technical: ailments seen landing / attempted once / twice */
         uint16_t native_id;
         uint8_t valid;
     } knowledge[64];
@@ -40,7 +67,19 @@ static struct {
      * and enemies seen healing an ally. */
     uint32_t focus_uid, healer_uid[8];
     unsigned healers;
+    /* Strategic (8): the protagonist already changed Persona for this command; this decision's durable-fight fact;
+     * the encounter's setup tempo and the enemy units of the last decision (a new set restarts both). */
+    int switched, durable;
+    P4StrategyTempo tempo;
+    uint32_t field_uid[12];
+    unsigned field_count;
 } policy;
+/* Mode 6's Persona ratings (p4_battle_policy_set_ratings): ascending Persona ids, one signed rating per retail element. */
+static struct {
+    uint16_t id[RATINGS_MAX];
+    int8_t value[RATINGS_MAX][8];
+    unsigned count;
+} ratings;
 
 extern int32_t btlTargetCheckCommandAvailability(void *action, int64_t kind);
 extern int32_t datCalcThresholdTrigger(void *unit, int32_t skill);
@@ -55,6 +94,10 @@ extern uint16_t btlSkillClassifyTargets(void *action, void *selection, uint16_t 
 extern void btlEffectCollectTargetUnits(void *action, void *selection, uint32_t sides, uint32_t filters, uint32_t status);
 extern void btlFormationEntrySetSelected(int32_t selection, uint64_t *key);
 extern void p4pc_pad_inject(unsigned bits, unsigned frames);
+extern void *datPersonaRosterSlot(int16_t slot);
+extern int32_t datPersonaGetLeadSlot(void);
+extern uint16_t datPersonaCountValidMembers(void);
+extern uint16_t *datPersonaGetSkillsByPcId(uint16_t pc_id);
 
 static uint64_t action_uid(uint32_t action)
 {
@@ -87,6 +130,7 @@ static unsigned knowledge_slot(uint32_t uid, uint16_t id, int create)
     policy.knowledge[i].native_id = id;
     policy.knowledge[i].tried = policy.knowledge[i].weak = 0;
     policy.knowledge[i].unchanged = policy.knowledge[i].bad = 0;
+    policy.knowledge[i].vulnerable = policy.knowledge[i].probed = policy.knowledge[i].probed2 = 0;
     policy.knowledge[i].valid = 1;
     return i;
 }
@@ -98,13 +142,19 @@ static void observe_hit(const P4BattleHit *event, void *context)
     if (event->skill_id >= policy.skill_rows) return;
     const uint32_t row = policy.skill_base + event->skill_id * 0x28u;
     if (event->source.side == 1 && event->target.side == 1) {
-        if (policy.mode != 5 || !is_healing(P4_G8(row + 0x11))) return;
+        if (!ATTENTIVE(policy.mode) || !is_healing(P4_G8(row + 0x11))) return;
         for (unsigned i = 0; i < policy.healers; i++)
             if (policy.healer_uid[i] == event->source.unit_uid) return;
         if (policy.healers < 8) policy.healer_uid[policy.healers++] = event->source.unit_uid;
         return;
     }
     if (event->source.side != 0 || event->target.side != 1) return;
+    if (TECHNICAL(policy.mode) && P4_G8(row + 0x18) == 1 && (P4_G32(row + 0x1c) & TECHNICAL_AILMENTS)) {
+        /* The ailment icon a hit leaves is public. Attempts are counted where the
+         * policy commits to them (choose), since an immune target may show no hit. */
+        const unsigned slot = knowledge_slot(event->target.unit_uid, event->target.native_id, 1);
+        policy.knowledge[slot].vulnerable |= event->added_status & P4_G32(row + 0x1c) & TECHNICAL_AILMENTS;
+    }
     if (!is_damage(P4_G8(row + 0x11))) return; /* KO channels are not damage knowledge. */
     policy.focus_uid = event->target.unit_uid;
     const uint32_t battle = GP(0xb3ac);
@@ -144,7 +194,8 @@ int p4_battle_policy_begin(uint32_t mode, uint32_t latency)
     policy.mode = mode;
     policy.latency = latency;
     if (!mode) return 1;
-    if (mode > 3 && mode != 5) { policy.error = "unsupported_native_party_policy"; return 0; }
+    if (mode > 3 && !ATTENTIVE(mode)) { policy.error = "unsupported_native_party_policy"; return 0; }
+    if (mode == 6 && !ratings.count) { policy.error = "native_policy_persona_ratings_missing"; return 0; }
     if (!p4_game_table_extent_rows(0x007644a8u, 0x28, &policy.skill_base, &policy.skill_rows)) {
         policy.error = "native_policy_skill_catalog_unavailable"; return 0;
     }
@@ -158,6 +209,26 @@ int p4_battle_policy_begin(uint32_t mode, uint32_t latency)
 const char *p4_battle_policy_error(void)
 {
     return policy.error;
+}
+
+/* Technical (7): the ailment and Technical-element share of a skill on an enemy.
+ * The target's ailment word is what its status icons show. */
+static int64_t technical_utility(uint32_t target, uint32_t unit, uint16_t id, uint32_t row, int32_t element)
+{
+    if (!TECHNICAL(policy.mode)) return 0;
+    static const uint32_t paired[5] = {0, 0x02, 0x04, 0x08, 0x10}; /* Fire Rage, Ice Fear, Elec Silence, Wind Panic */
+    const uint32_t status = P4_G32(record_of(target) + 0xC);
+    const unsigned slot = knowledge_slot(P4_G32(unit + 0xa8), id, 0);
+    int64_t score = 0;
+    const uint32_t mask = P4_G8(row + 0x18) == 1 ? P4_G32(row + 0x1c) & TECHNICAL_AILMENTS : 0;
+    if (mask && !(status & mask)) {
+        if (slot < 64 && (policy.knowledge[slot].vulnerable & mask)) score += 2600;
+        else if (slot == 64 || !(policy.knowledge[slot].probed2 & mask)) score += 500;
+    }
+    if (is_damage(P4_G8(row + 0x11)) && element >= 1 && element <= 4 && (status & paired[element]) &&
+        (slot == 64 || !(policy.knowledge[slot].weak & (UINT32_C(1) << element))))
+        score += 1500;
+    return score;
 }
 
 static int64_t target_utility(uint32_t target, uint32_t row, int32_t element)
@@ -176,21 +247,26 @@ static int64_t target_utility(uint32_t target, uint32_t row, int32_t element)
                 if (slot < 64 && (policy.knowledge[slot].weak & bit)) score += 3000;
                 /* A target seen absorbing or nulling the element is worth nothing:
                  * it cancels its own share of a spread instead of vetoing it. */
-                else if (policy.mode == 5 && slot < 64 && (policy.knowledge[slot].bad & bit)) return -score;
-                else if (slot == 64 || !(policy.knowledge[slot].tried & bit)) score += policy.mode == 1 || policy.mode == 5 ? 160 : 60;
+                else if (ATTENTIVE(policy.mode) && slot < 64 && (policy.knowledge[slot].bad & bit)) return -score;
+                else if (slot == 64 || !(policy.knowledge[slot].tried & bit)) score += policy.mode == 1 || ATTENTIVE(policy.mode) ? 160 : 60;
             }
-            if (policy.mode == 5) {
+            if (ATTENTIVE(policy.mode)) {
                 const uint32_t uid = P4_G32(unit + 0xa8);
                 if (uid == policy.focus_uid) score += 400;
                 for (unsigned i = 0; i < policy.healers; i++)
                     if (policy.healer_uid[i] == uid) score += 700;
             }
-            return score;
+            return score + technical_utility(target, unit, id, row, element);
         }
         /* Current buff levels/icons are public. This reads no base defense. */
         const uint32_t mask = P4_G32(row + 0x20);
-        if (mask && !datCalcHasBuffMask(P4_G2H(record_of(target)), (int32_t)mask)) return policy.mode == 1 ? 80 : 240;
-        return 0;
+        const int64_t technical = technical_utility(target, unit, id, row, element);
+        if (mask && !datCalcHasBuffMask(P4_G2H(record_of(target)), (int32_t)mask)) {
+            const int64_t inherited = policy.mode == 1 ? 80 : 240;
+            if (!STRATEGIC(policy.mode)) return inherited + technical;
+            return p4_strategy_setup_value(mask, P4_STRATEGY_ENEMY, policy.durable, &policy.tempo, inherited) + technical;
+        }
+        return technical;
     }
     if (side != 0 || id < 1 || id > 10) return 0;
     if (is_damage(hp_effect)) return -20000; /* Do not voluntarily damage an ally. */
@@ -202,18 +278,26 @@ static int64_t target_utility(uint32_t target, uint32_t row, int32_t element)
     const unsigned removes_status = P4_G8(row + 0x18) == 2;
     if (!hp && removes_status && (mask & 0x80000u)) return policy.mode == 1 ? 9000 : 30000;
     const unsigned heal_threshold = policy.mode == 1 ? 20 : policy.mode == 2 ? (id == 1 ? 60 : 45) :
-                                    policy.mode == 5 ? (id == 1 ? 70 : 50) : (id == 1 ? 45 : 35);
+                                    ATTENTIVE(policy.mode) ? (id == 1 ? 70 : 50) : (id == 1 ? 45 : 35);
     if (hp && is_healing(hp_effect) && hp_percent <= heal_threshold) {
         /* A small fixed heal (a quarter of the ally's HP or less) is not worth
          * a turn unless the ally is critical. */
-        if (policy.mode == 5 && hp_effect == 5 && hp_percent > 25 &&
+        if (ATTENTIVE(policy.mode) && hp_effect == 5 && hp_percent > 25 &&
             (uint32_t)(power > 0 ? power : 0) * 4u <= datCalcMaxHpById((int16_t)id)) return 300;
-        return (policy.mode == 1 ? 7000 : 24000) + (100 - hp_percent) * 20 + (id == 1 ? 500 : 0);
+        const int64_t inherited = (policy.mode == 1 ? 7000 : 24000) + (100 - hp_percent) * 20 + (id == 1 ? 500 : 0);
+        if (!STRATEGIC(policy.mode)) return inherited;
+        /* Strategic: the HP a fixed heal restores is its description's amount (effect 5, power). */
+        return p4_strategy_heal_value(inherited, hp_effect == 5, (uint32_t)(power > 0 ? power : 0), hp,
+                                      datCalcMaxHpById((int16_t)id));
     }
     if (removes_status && (status & mask)) return policy.mode == 1 ? 100 : 14000;
-    if (hp && is_healing(sp_effect) && sp_percent < (policy.mode == 2 || policy.mode == 5 ? 35u : 20u)) return 9000 + (100 - sp_percent) * 10;
+    if (hp && is_healing(sp_effect) && sp_percent < (policy.mode == 2 || ATTENTIVE(policy.mode) ? 35u : 20u)) return 9000 + (100 - sp_percent) * 10;
     const uint32_t buff = P4_G32(row + 0x20);
-    if (hp && buff && !datCalcHasBuffMask(P4_G2H(record), (int32_t)buff)) return policy.mode == 1 ? 60 : 260;
+    if (hp && buff && !datCalcHasBuffMask(P4_G2H(record), (int32_t)buff)) {
+        const int64_t inherited = policy.mode == 1 ? 60 : 260;
+        if (!STRATEGIC(policy.mode)) return inherited;
+        return p4_strategy_setup_value(buff, P4_STRATEGY_PARTY, policy.durable, &policy.tempo, inherited);
+    }
     return 0;
 }
 static void consider(uint32_t actor, uint16_t skill, uint16_t item, uint16_t wheel, uint16_t menu_index)
@@ -236,7 +320,7 @@ static void consider(uint32_t actor, uint16_t skill, uint16_t item, uint16_t whe
     const uint16_t actor_id = P4_G16(unit + 0xa4);
     const unsigned sp_percent = percent(P4_G16(record + 10), datCalcMaxSpById((int16_t)actor_id));
     int64_t penalty = cost_kind == 1 ? (int64_t)cost * (policy.mode == 1 ? 1 : 4) : (int64_t)cost * (policy.mode == 1 ? 2 : 5);
-    if ((policy.mode == 3 || policy.mode == 5) && cost_kind == 2 && sp_percent < 30) penalty += (int64_t)cost * 60;
+    if ((policy.mode == 3 || ATTENTIVE(policy.mode)) && cost_kind == 2 && sp_percent < 30) penalty += (int64_t)cost * 60;
     const unsigned choices = group ? 1 : count;
     for (unsigned i = 0; i < choices; i++) {
         const uint32_t target = P4_G32(policy.scratch + i * 4);
@@ -266,9 +350,198 @@ static int enemy_charged(void)
     }
     return 0;
 }
+int p4_battle_policy_set_ratings(const uint8_t *data, size_t size)
+{
+    ratings.count = 0;
+    if (!data || size < 12 || memcmp(data, "P4AFFRT1", 8)) return 0;
+    const uint32_t count = (uint32_t)data[8] | (uint32_t)data[9] << 8 | (uint32_t)data[10] << 16 | (uint32_t)data[11] << 24;
+    if (!count || count > RATINGS_MAX || size != 12 + (size_t)count * 10) return 0;
+    for (uint32_t i = 0; i < count; i++) {
+        const uint8_t *row = data + 12 + i * 10;
+        ratings.id[i] = (uint16_t)(row[0] | row[1] << 8);
+        if (i && ratings.id[i] <= ratings.id[i - 1]) return 0;
+        for (unsigned element = 0; element < 8; element++) ratings.value[i][element] = (int8_t)row[2 + element];
+    }
+    ratings.count = count;
+    return 1;
+}
+/* A stocked Persona's value: its best (signed) rating among the elements in `weak` (seen WEAK on a living enemy),
+ * else its best rating overall; INT_MIN when the table does not name it, so an unlisted Persona never wins. */
+static int persona_value(uint16_t id, uint32_t weak)
+{
+    unsigned low = 0, high = ratings.count;
+    while (low < high) {
+        const unsigned mid = (low + high) / 2;
+        if (ratings.id[mid] < id) low = mid + 1;
+        else high = mid;
+    }
+    if (low == ratings.count || ratings.id[low] != id) return INT_MIN;
+    int best = INT_MIN;
+    for (unsigned element = 0; element < 8; element++)
+        if ((!weak || (weak & (1u << element))) && ratings.value[low][element] > best) best = ratings.value[low][element];
+    return best;
+}
+static uint16_t roster_id(int16_t slot)
+{
+    void *record = datPersonaRosterSlot(slot);
+    return record ? P4_G16(P4_H2G(record) + 2) : 0;
+}
+/* Mode 6: the protagonist first changes Persona, through the native wheel and swap list, when a stocked Persona's
+ * value is strictly higher than the current one's; ties keep the current Persona, then the lowest row. Weakness
+ * knowledge covers the retail elements 0..7 only (an expanded leaf is ignored here). */
+static void choose_persona(uint32_t actor)
+{
+    const uint32_t unit = P4_G32(actor + 0x30);
+    if (!unit || P4_G16(unit + 0xa4) != 1 || !btlTargetCheckCommandAvailability(P4_G2H(actor), 5)) return;
+    uint32_t weak = 0;
+    const uint32_t battle = GP(0xb3ac);
+    uint32_t action = battle ? P4_G32(battle + 0x174) : 0;
+    for (unsigned n = 0; action && n < 12; n++, action = P4_G32(action + 0x450)) {
+        const uint32_t enemy = P4_G32(action + 0x30);
+        if (!enemy || P4_G8(enemy + 0xa2) != 1) continue;
+        const uint32_t record = P4_G32(enemy + 0xa64);
+        if (!record || (P4_G32(record + 12) & 0x80000u)) continue;
+        const unsigned slot = knowledge_slot(P4_G32(enemy + 0xa8), P4_G16(enemy + 0xa4), 0);
+        if (slot < 64) weak |= policy.knowledge[slot].weak & 0xffu;
+    }
+    const int32_t lead = datPersonaGetLeadSlot();
+    const unsigned count = datPersonaCountValidMembers();
+    int best_value = persona_value(roster_id((int16_t)lead), weak), best_row = -1;
+    for (unsigned row = 0; row < count; row++) {
+        if ((int32_t)row == lead) continue;
+        const uint16_t id = roster_id((int16_t)row);
+        const int value = id ? persona_value(id, weak) : INT_MIN;
+        if (value > best_value) { best_value = value; best_row = (int)row; }
+    }
+    if (best_row >= 0) policy.choice = (Choice){.score = INT64_MAX, .wheel = WHEEL_PERSONA, .menu_index = (uint16_t)best_row};
+}
+/* Strategic (8): what the party has seen of each enemy on the field (public KO state, observed hits). */
+static int strategic_durable(void)
+{
+    P4StrategyEnemy enemies[12];
+    unsigned count = 0;
+    const uint32_t battle = GP(0xb3ac);
+    uint32_t action = battle ? P4_G32(battle + 0x174) : 0;
+    for (unsigned n = 0; action && n < 12; n++, action = P4_G32(action + 0x450)) {
+        const uint32_t enemy = P4_G32(action + 0x30);
+        if (!enemy || P4_G8(enemy + 0xa2) != 1) continue;
+        const uint32_t record = P4_G32(enemy + 0xa64);
+        const unsigned slot = knowledge_slot(P4_G32(enemy + 0xa8), P4_G16(enemy + 0xa4), 0);
+        enemies[count].living = record && !(P4_G32(record + 12) & 0x80000u);
+        enemies[count].tried = slot < 64 ? policy.knowledge[slot].tried : 0;
+        enemies[count].weak = slot < 64 ? policy.knowledge[slot].weak : 0;
+        count++;
+    }
+    return p4_strategy_durable(enemies, count);
+}
+/* Strategic (8): a new set of enemy units (a chained encounter's next wave) restarts the encounter's setup tempo
+ * and the protagonist's change allowance. */
+static void strategic_field(void)
+{
+    uint32_t field[12];
+    unsigned count = 0;
+    const uint32_t battle = GP(0xb3ac);
+    uint32_t action = battle ? P4_G32(battle + 0x174) : 0;
+    for (unsigned n = 0; action && n < 12; n++, action = P4_G32(action + 0x450)) {
+        const uint32_t enemy = P4_G32(action + 0x30);
+        if (enemy && P4_G8(enemy + 0xa2) == 1) field[count++] = P4_G32(enemy + 0xa8);
+    }
+    if (p4_strategy_new_encounter(policy.field_uid, policy.field_count, field, count)) {
+        policy.tempo = (P4StrategyTempo){0};
+        policy.switched = 0;
+    }
+    if (!count) return;
+    memcpy(policy.field_uid, field, count * sizeof field[0]);
+    policy.field_count = count;
+}
+static int holds_skill(uint32_t list, uint16_t skill)
+{
+    for (unsigned i = 0; i < 8; i++)
+        if (P4_G16(list + i * 2) == skill) return 1;
+    return 0;
+}
+/* Strategic (8): the best score this decision would have with the stocked Persona at `slot`, from the skills its
+ * battle Skill list would show (btlSelectionRefreshList 00207140: DatPersonaRecord skills at +0x0C that are nonzero,
+ * p4_game_skill_active and flags01 bit 2) and whose cost the active Persona's pricing reports exactly
+ * (p4_strategy_switch_priceable), so the threshold check below is the one the reopened list applies. */
+static int64_t persona_skill_best(uint32_t actor, int16_t slot)
+{
+    void *host = datPersonaRosterSlot(slot);
+    const uint16_t *active = datPersonaGetSkillsByPcId(1);
+    if (!host || !active) return INT64_MIN;
+    const uint32_t persona = P4_H2G(host), active_list = P4_H2G(active), record = record_of(actor);
+    const int cost_stage = p4_game_cost_native_active();
+    const Choice current = policy.choice;
+    policy.choice = (Choice){.score = INT64_MIN};
+    for (unsigned i = 0; i < 8 && !policy.error; i++) {
+        const uint16_t skill = P4_G16(persona + 0x0C + i * 2);
+        /* An added skill outside the loaded catalog is not a reason to change Persona. */
+        if (!skill || skill >= policy.skill_rows || !p4_game_skill_active(skill)) continue;
+        const uint32_t row = policy.skill_base + skill * 0x28u;
+        if (!(P4_G8(row + 1) & 2)) continue;
+        if (!p4_strategy_switch_priceable(P4_G8(row + 3), (P4_G8(row) & 0x10) != 0, cost_stage,
+                                          holds_skill(active_list, P4_STRATEGY_SPELL_MASTER),
+                                          holds_skill(persona + 0x0C, P4_STRATEGY_SPELL_MASTER)))
+            continue;
+        if (!datCalcThresholdTrigger(P4_G2H(record), skill)) consider(actor, skill, 0, WHEEL_SKILL, (uint16_t)i);
+    }
+    const int64_t best = policy.choice.score;
+    policy.choice = current;
+    return best;
+}
+/* Strategic (8): after the current Persona's decision is scored, the protagonist changes through the native wheel and
+ * swap list to the stocked Persona (lowest row on ties) whose own skills beat it by the margin, at most once per
+ * command: the native swap reopens the panel, and that next decision does not change again. The swap list
+ * (00202c60: btlSelectionInit(work + 0x144, ..., datPersonaCountValidMembers()) and its commit's
+ * datPersonaRosterSlot(row)) uses roster slot = row over the valid count, and refuses the lead's row; a NULL slot in
+ * that range is never chosen, and a slot past it is not on the list. */
+static void strategic_persona(uint32_t actor)
+{
+    const uint32_t unit = P4_G32(actor + 0x30);
+    if (policy.switched || !unit || P4_G16(unit + 0xa4) != 1 || !btlTargetCheckCommandAvailability(P4_G2H(actor), 5))
+        return;
+    const int32_t lead = datPersonaGetLeadSlot();
+    const unsigned count = datPersonaCountValidMembers();
+    int64_t best = INT64_MIN;
+    int best_row = -1;
+    for (unsigned row = 0; row < count && !policy.error; row++) {
+        if ((int32_t)row == lead || !roster_id((int16_t)row)) continue;
+        const int64_t value = persona_skill_best(actor, (int16_t)row);
+        if (value > best) { best = value; best_row = (int)row; }
+    }
+    if (policy.error || best_row < 0 || !p4_strategy_switch(policy.choice.score, best, policy.switched)) return;
+    policy.switched = 1;
+    policy.choice = (Choice){.score = INT64_MAX, .wheel = WHEEL_PERSONA, .menu_index = (uint16_t)best_row};
+}
+/* Strategic (8): a committed non-Persona decision ends the protagonist's command and moves the setup tempo. */
+static void strategic_commit(uint32_t actor)
+{
+    if (policy.choice.wheel == WHEEL_PERSONA) return;
+    const uint32_t unit = P4_G32(actor + 0x30);
+    if (unit && P4_G16(unit + 0xa4) == 1) policy.switched = 0;
+    unsigned kind = P4_STRATEGY_COMMIT_OTHER;
+    if (policy.choice.wheel == WHEEL_ATTACK) kind = P4_STRATEGY_COMMIT_DAMAGE;
+    else if ((policy.choice.wheel == WHEEL_SKILL || policy.choice.wheel == WHEEL_ITEM) && policy.choice.target &&
+             policy.choice.skill < policy.skill_rows) {
+        const uint32_t row = policy.skill_base + policy.choice.skill * 0x28u;
+        const uint32_t target = P4_G32(policy.choice.target + 0x30);
+        if (is_damage(P4_G8(row + 0x11))) kind = P4_STRATEGY_COMMIT_DAMAGE;
+        else if (target && p4_strategy_setup_direction(P4_G32(row + 0x20), P4_G8(target + 0xa2)))
+            kind = P4_STRATEGY_COMMIT_SETUP;
+    }
+    p4_strategy_tempo_commit(&policy.tempo, kind);
+}
 static void choose(uint32_t panel, uint32_t actor)
 {
     policy.choice = (Choice){.score = INT64_MIN};
+    if (policy.mode == 6) {
+        choose_persona(actor);
+        if (policy.choice.wheel == WHEEL_PERSONA) return;
+    }
+    if (STRATEGIC(policy.mode)) {
+        strategic_field();
+        policy.durable = strategic_durable();
+    }
     const uint32_t record = record_of(actor);
     if (btlTargetCheckCommandAvailability(P4_G2H(actor), 1))
         consider(actor, (uint16_t)datCalcDefaultSkillId(P4_G2H(record)), 0, WHEEL_ATTACK, 0);
@@ -282,9 +555,10 @@ static void choose(uint32_t panel, uint32_t actor)
     }
     if (btlTargetCheckCommandAvailability(P4_G2H(actor), 3)) {
         const unsigned count = P4_G16(panel + 0x5a6);
-        if (count > 256) { policy.error = "native_policy_expanded_item_menu_unqualified"; return; }
+        const P4GameItemBattleRow *items = p4_battle_policy_item_rows((uint8_t *)P4_G2H(panel), count);
+        if (!items) { policy.error = "native_policy_item_menu_capacity"; return; }
         for (unsigned i = 0; i < count; i++) {
-            const uint16_t item = P4_G16(panel + 0x1a6 + i * 4);
+            const uint16_t item = (uint16_t)items[i].id;
             const uint16_t skill = datCalcUnderlyingSkillId((int64_t)item);
             consider(actor, skill, item, WHEEL_ITEM, (uint16_t)i);
         }
@@ -296,10 +570,23 @@ static void choose(uint32_t panel, uint32_t actor)
         int64_t score = policy.mode != 1 && hp < 20 ? 450 : 10;
         /* A visible charge is the boss's warning: below reviving and healing a
          * low ally, above any attack. */
-        if (policy.mode == 5 && enemy_charged()) score = 20000;
+        if (ATTENTIVE(policy.mode) && enemy_charged()) score = 20000;
         if (score > policy.choice.score) policy.choice = (Choice){.score = score, .wheel = WHEEL_GUARD};
     }
+    if (STRATEGIC(policy.mode) && !policy.error) strategic_persona(actor);
     if (policy.choice.score == INT64_MIN) policy.error = "native_policy_has_no_legal_command";
+    else if (TECHNICAL(policy.mode) && policy.choice.target && policy.choice.skill < policy.skill_rows) {
+        /* Technical: this decision is an ailment attempt on its single target. */
+        const uint32_t row = policy.skill_base + policy.choice.skill * 0x28u;
+        const uint32_t mask = P4_G8(row + 0x18) == 1 ? P4_G32(row + 0x1c) & TECHNICAL_AILMENTS : 0;
+        if (mask) {
+            const uint32_t unit = P4_G32(policy.choice.target + 0x30);
+            const unsigned slot = knowledge_slot(P4_G32(unit + 0xa8), P4_G16(unit + 0xa4), 1);
+            if (policy.knowledge[slot].probed & mask) policy.knowledge[slot].probed2 |= mask;
+            policy.knowledge[slot].probed |= mask;
+        }
+    }
+    if (STRATEGIC(policy.mode) && !policy.error && policy.choice.score != INT64_MIN) strategic_commit(actor);
 }
 static void select_row(uint32_t selection, unsigned index)
 {
@@ -343,6 +630,14 @@ int p4_battle_policy_input(uint32_t selection)
         (selection == panel + 0xa8 && policy.choice.wheel == WHEEL_ITEM)) {
         select_row(selection, policy.choice.menu_index);
         return policy.error ? 0 : 2;
+    }
+    if (selection == panel + 0x144 && policy.choice.wheel == WHEEL_PERSONA) {
+        /* The native swap handler commits the change (unk_6c 5) and reopens this actor's command panel; the next
+         * decision is a new one, against the changed Persona's skills. */
+        select_row(selection, policy.choice.menu_index);
+        if (policy.error) return 0;
+        policy.pending = 0;
+        return 2;
     }
     policy.error = "native_policy_unexpected_submenu";
     return 0;

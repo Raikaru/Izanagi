@@ -18,6 +18,12 @@ card loaded through the memory-card screen:
   stats     tests/mod_practice_stats.script: P05 protagonist HP/SP and social
             points, a P06 level change with that level's minimum EXP, and a
             P09 lead Persona stat edit plus an added Persona, with read-back
+  weather   tests/mod_practice_weather.script: a P04 weather override, then a
+            P01 warp so the next field loads with it
+  pace      tests/mod_practice_pace.script (real time, no virtual clock): P15 4x
+            held at 1x by the Config and by a warp's scene change and resumed at
+            the next ready field, L3 restoring 1x; while above 1x the mixer
+            renders exactly one VBLANK period of audio per period
 """
 import argparse
 import os
@@ -124,6 +130,36 @@ def stats(text):
     assert match and int(match.group(2)) == int(match.group(1)) + 1, "persona add missing"
 
 
+def weather(text):
+    assert "PRACTICE_SETTING weather=true" in text and "PRACTICE_SESSION marked by P04" in text
+    applied = re.findall(r"PRACTICE_APPLY weather code=(\d+) before=(\d+) after=(\d+)", text)
+    assert len(applied) == 1, applied
+    code, before, after = (int(value) for value in applied[0])
+    assert after == code and code == (before + 2) % 3, applied
+    assert "PRACTICE_RESULT warp REQUESTED target=7:1" in text and "PRACTICE_REQUEST warp done arrived" in text
+
+
+def pace(text):
+    assert "PRACTICE_SETTING pace=true" in text and "PRACTICE_PACE set 4 SET 4X" in text
+    assert "PRACTICE_PACE now 1x held: menus run at 1x" in text
+    assert ("PRACTICE_PACE now 1x held: a scene change runs at 1x" in text or
+            "PRACTICE_PACE now 1x held: waiting for a ready field or battle" in text), "the warp did not hold 1x"
+    assert "PRACTICE_PACE restored 1x" in text
+    changes = [(int(rate), int(periods)) for rate, periods in
+               re.findall(r"p4pc: practice speed (\d+)/4 \(was \d+/4\) at flip \d+, paced VBLANK periods (\d+)", text)]
+    rates = [rate for rate, _ in changes]
+    assert len(rates) >= 4 and rates[0] == 16 and rates[-1] == 4, rates
+    assert all(a != b for a, b in zip(rates, rates[1:])), rates
+    audio = [int(n) for n in re.findall(r"p4snd: (?:muted, rendering per VBLANK period|device plays in real time) at (\d+) frames rendered", text)]
+    assert len(audio) == len(rates), (audio, rates)
+    for index in range(0, len(rates) - 1, 2):
+        periods = changes[index + 1][1] - changes[index][1]
+        rendered = audio[index + 1] - audio[index]
+        expected = periods * 48000 * 1001 // 60000
+        # A device callback already rendering when the mixer switched adds at most one chunk.
+        assert abs(rendered - expected) <= 1024, (periods, rendered, expected)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path, required=True)
@@ -158,7 +194,7 @@ def main():
         cases = (
             ("services", ROOT / "tests/mod_fixtures", "witness.game-services",
              # The closing Config check is the harness's own pass condition.
-             LOAD + ",wait7000,settings-touch:600:24,wait240,settings-check:open",
+             LOAD + ",wait7000,settings-open,wait240,settings-check:open",
              {"P4PC_BATTLE_DRIVER": "cross,cross,cross"}),
             ("editors", ROOT / "mods", "p4pc.practice",
              (ROOT / "tests/mod_practice_editors.script").read_text(encoding="utf-8").strip(), {}),
@@ -171,6 +207,11 @@ def main():
              {"P4PC_BATTLE_DRIVER": "cross,cross,cross"}),
             ("stats", ROOT / "mods", "p4pc.practice",
              (ROOT / "tests/mod_practice_stats.script").read_text(encoding="utf-8").strip(), {}),
+            ("weather", ROOT / "mods", "p4pc.practice",
+             (ROOT / "tests/mod_practice_weather.script").read_text(encoding="utf-8").strip(), {}),
+            # Practice speed is real-time play only: no virtual clock.
+            ("pace", ROOT / "mods", "p4pc.practice",
+             (ROOT / "tests/mod_practice_pace.script").read_text(encoding="utf-8").strip(), {"P4PC_VIRTUAL_CLOCK": None}),
         )
         # P4PC_PRACTICE_CASES=a,b reruns only those cases.
         selected = [name for name in os.environ.get("P4PC_PRACTICE_CASES", "").split(",") if name]
@@ -183,7 +224,12 @@ def main():
             config = case / "p4pc.ini"
             config.write_text("[mods]\nenabled=%s\n" % enabled, encoding="utf-8")
             env = dict(common, P4PC_CONFIG=str(config), P4PC_MOD_DIR=str(mods), P4PC_SAVE_DIR=str(card.parent),
-                       P4PC_SCENE_ARTIFACTS=str(case), P4PC_MENU_SCRIPT=script, **extra)
+                       P4PC_SCENE_ARTIFACTS=str(case), P4PC_MENU_SCRIPT=script)
+            for key, value in extra.items():
+                if value is None:
+                    env.pop(key, None)
+                else:
+                    env[key] = value
             text = run(args, env, case, label)
             if label == "services":
                 services(text)
@@ -195,8 +241,12 @@ def main():
                 display(text)
             elif label == "travel":
                 travel(text)
-            else:
+            elif label == "stats":
                 stats(text)
+            elif label == "weather":
+                weather(text)
+            else:
+                pace(text)
             print(f"mod_practice_game: {label} PASS")
         outcome = "pass"
         print(f"mod_practice_game: PASS mod_witness=true reference_eligible=false evidence={work}")

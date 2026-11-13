@@ -122,8 +122,9 @@ static void admission(void)
     }
     memset(descriptor, 0, sizeof descriptor);
     word(descriptor + 4, 0x765ff0);
-    assert(!p4_game_table_admission_check_packed(descriptor, "battle/OTHER.TBL", (const uint8_t *)"x", 1, &failed));
-    p4_game_table_admission_packed(descriptor, "battle/OTHER.TBL", (const uint8_t *)"x", 1, observe_receipt);
+    uint8_t other[] = {'x'};
+    assert(!p4_game_table_admission_check_packed(descriptor, "battle/OTHER.TBL", other, 1, &failed));
+    p4_game_table_admission_packed(descriptor, "battle/OTHER.TBL", other, 1, observe_receipt);
     assert(unchecked_calls == 2);
     assert(!p4_game_table_admission_unstage(inputs, P4_TABLE_INPUT_COUNT));
     assert(!p4_game_table_admission_unstage(inputs, P4_TABLE_INPUT_COUNT));

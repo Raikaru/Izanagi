@@ -1,7 +1,10 @@
 /* One predicate body for production and isolated boundary witnesses. Native
  * publication/actor lifetime validation belongs to the calling bridge.
  * Verified against001DA230..001DA2F0,001DB360 and001DB9F0: BASE flags,
- * wrapper normal flags, unknown-first return, then buff/physical gates. */
+ * wrapper normal flags, unknown-first return, then buff/physical gates. The
+ * physical gate also sees a granted Counter (game_passive_grant_native.h), as
+ * 001DB360's own route does. */
+#include "p4pc/game_passive_grant_native.h"
 static int p4_ai_predicate_affinity(void *unit, const P4GameActionFrame *frame,
     uint32_t wrapper, uint32_t literal_profile, uint32_t *word)
 {
@@ -52,7 +55,9 @@ static int p4_ai_test_frame(void *unit, const P4GameActionFrame *frame,
     if ((policy == P4_GAME_AI_TEST_NORMAL || policy == P4_GAME_AI_TEST_NORMAL_NO_GATE) &&
         p4_game_action_element_is_physical(element)) {
         if (genus == 1u) {
-            if (P4_G16(P4_H2G(unit)) & 0x100u) { *value = 0u; return P4_TABLE_OK; }
+            if ((P4_G16(P4_H2G(unit)) & 0x100u) || P4_PASSIVE_COUNTER_GRANTED(unit)) {
+                *value = 0u; return P4_TABLE_OK;
+            }
         } else {
             const uint16_t *skills = (const uint16_t *)datCalcSkillList(unit);
             uint32_t count = datCalcGetTableLength(unit);
@@ -61,6 +66,7 @@ static int p4_ai_test_frame(void *unit, const P4GameActionFrame *frame,
                     *value = 0u; return P4_TABLE_OK;
                 }
             }
+            if (P4_PASSIVE_COUNTER_GRANTED(unit)) { *value = 0u; return P4_TABLE_OK; }
         }
     }
     uint32_t affinity;

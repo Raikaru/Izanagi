@@ -1,5 +1,6 @@
 #!/bin/sh
-# Packages the Windows x64 player build: p4pc64w.exe, the DLLs it loads, a README, the licence notices and the Luau source, as one zip.
+# Packages the Windows x64 player build: p4pc64w.exe, the DLLs it loads, p4mod.exe (the modder's CLI, docs/modding/p4mod.md) with
+# the p4.d.luau and capability index it reads, a README, the licence notices and the Luau source, as one zip.
 #
 #   sh tools/package_win.sh [--build DIR] [--out DIR] [--jobs N] [--version NAME]
 #
@@ -41,14 +42,19 @@ command -v ccache >/dev/null && launcher="-DCMAKE_C_COMPILER_LAUNCHER=ccache -DC
 # shellcheck disable=SC2086
 cmake -S "$root" -B "$build" -G Ninja -DCMAKE_C_COMPILER="$lin_cc" $launcher -DP4_DECOMP="$root/decomp" \
   -DP4_PORT64=ON -DP4_PORT64_LINK=ON -DP4_PORT64_OPT=O2 -DP4_PORT64W_OPT=O2 -DP4_PORT64_JOBS="$jobs" -DP4_CENSUS_CHECK=ON
-cmake --build "$build" --target p4pc64w -j "$jobs"
+cmake --build "$build" --target p4pc64w p4mod64w -j "$jobs"
 win=$build/win64
 sh "$here/package_runtime_provenance.sh" windows x86_64-w64-mingw32 "$win/runtime-provenance.txt"
 
 # 2. The files: the exe and every DLL beside it.
 rm -rf "$stage"; mkdir -p "$stage/$name/licenses" "$stage/$name/source" "$stage/$name/examples/mods" "$stage/check"
 cp "$win/$exe" "$win"/*.dll "$stage/$name/"
+mod_tool=$build/tools/luau/p4mod64w
+cp "$mod_tool/p4mod64w.exe" "$stage/$name/p4mod.exe"
+cp "$mod_tool/p4.d.luau" "$mod_tool/p4mod-capabilities.txt" "$stage/$name/"
 cp -R "$root/examples/mods/p4pc.example" "$stage/$name/examples/mods/"
+# Bundled mods, installed read-only beside the exe and disabled until chosen in MODS.
+! git -C "$root" cat-file -e HEAD:mods 2>/dev/null || git -C "$root" archive HEAD mods | tar -xf - -C "$stage/$name"
 
 # 3. Text, licences, sources, version (Windows line ends for the text a player opens).
 ffver=$(sed -n 's/^FFMPEG_VER=//p' "$root/ci/win32/build_deps.sh")
@@ -63,12 +69,18 @@ cp "$root"/third_party/licenses/*.txt "$stage/$name/licenses/"
 cp "$root/third_party/miniz/LICENSE" "$stage/$name/licenses/miniz-MIT.txt"
 tar -C "$root" -czf "$stage/$name/source/luau-source.tar.gz" third_party/luau third_party/luau_patches
 cp "$win/runtime-provenance.txt" "$stage/$name/source/runtime-provenance.txt"
+# The FFmpeg source tarball and build recipe ship with the package, as on Linux/Android:
+# the exact tarball ci/win32/build_deps.sh pins, fetched and sha256-checked again here.
+curl -fL --retry 6 --retry-all-errors --retry-delay 10 "https://ffmpeg.org/releases/ffmpeg-$ffver.tar.xz" -o "$stage/$name/source/ffmpeg-$ffver.tar.xz"
+echo "$ffsha  $stage/$name/source/ffmpeg-$ffver.tar.xz" | sha256sum -c -
+cp "$root/ci/win32/build_deps.sh" "$stage/$name/source/"
 printf '%s, commit %s\r\nbuilt %s (%s)\r\n' "$version" "$sha" "$(date -u +%Y-%m-%dT%H:%MZ)" "$arch" > "$stage/$name/VERSION.txt"
 
 # 4. Checks: imports, then the FFmpeg licence check against the DLLs that ship.
 echo "package_win: imports of $exe:"
 python3 "$here/pe_imports.py" "$stage/$name/$exe" | tr -d '\r' | tee "$stage/check/imports.txt"
 python3 "$here/check_package_imports.py" "$stage/$name/$exe" "$stage/$name"
+python3 "$here/check_package_imports.py" "$stage/$name/p4mod.exe" "$stage/$name"
 cp "$win/ffmpeg_license_test64w.exe" "$stage/$name/ffmpeg_license_test.exe"
 (
   unset DISPLAY WAYLAND_DISPLAY

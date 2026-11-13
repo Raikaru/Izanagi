@@ -134,7 +134,7 @@ static const char kAtomicFragmentSource[] =
     "uniform float uAlphaRef;\n"
     "uniform int uAlphaInvert;\n"
     "bool alphaPasses(float a) {\n"
-    "    float t = a * 128.0;\n"
+    "    float t = p4GsAlpha(a);\n"
     "    if (uAlphaFunc == 8) return false;\n"
     "    if (uAlphaFunc == 2) return t < uAlphaRef;\n"
     "    if (uAlphaFunc == 3) return t <= uAlphaRef;\n"
@@ -167,7 +167,7 @@ static const char kAtomicFragmentSource[] =
     "                    clamp((uFogEnd - vFogZ) / max(uFogEnd - uFogStart, 1e-3), 0.0, 1.0));\n"
     "    }\n"
     "#ifdef P4_ROUND_BIAS\n"
-    "    c.rgb = max(c.rgb - 0.5 / 255.0, 0.0);\n"
+    "    c.rgb = p4GsTruncate(c.rgb);\n"
     "#endif\n"
     "    fragColor = c;\n"
     "}\n";

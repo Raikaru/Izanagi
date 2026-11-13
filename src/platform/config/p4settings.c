@@ -625,7 +625,7 @@ int p4_settings_event(const SDL_Event *event)
             startX = x;
             startY = y;
         }
-        return active || (tracking && x >= 544 && y < 48);
+        return active;
     }
     if (event->type == SDL_EVENT_FINGER_UP) {
         float x, y;

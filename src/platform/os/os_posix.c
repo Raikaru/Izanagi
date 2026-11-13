@@ -451,6 +451,24 @@ int p4_os_rmdir(const char *path) { return rmdir(path); }
 int p4_os_rename(const char *from, const char *to) { return rename(from, to); }
 int p4_os_replace_file(const char *from, const char *to) { return rename(from, to); }
 int p4_os_sync_file(FILE *stream) { return fflush(stream) || fsync(fileno(stream)) ? -1 : 0; }
+int p4_os_replace_file_durable(const char *from, const char *to)
+{
+    char directory[4096];
+    const char *slash = strrchr(to, '/');
+    size_t length = slash ? (slash == to ? 1 : (size_t)(slash - to)) : 1;
+    if (length >= sizeof directory) {
+        errno = ENAMETOOLONG;
+        return -1;
+    }
+    memcpy(directory, slash ? to : ".", length);
+    directory[length] = 0;
+    if (rename(from, to)) return -1;
+    int fd = open(directory, O_RDONLY | O_DIRECTORY | O_CLOEXEC);
+    if (fd < 0) return -1;
+    int bad = fsync(fd);
+    close(fd);
+    return bad ? -1 : 0;
+}
 
 int p4_os_directory_lock(const char *path, uintptr_t token[2]) {
     if (!path || !token || token[0] || token[1]) { errno = EINVAL; return -1; }

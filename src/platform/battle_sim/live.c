@@ -57,7 +57,11 @@ static struct {
     LiveUnit terminal_units[2][12];
     unsigned terminal_counts[2];
     int pending, selected, task_begun, bound, seen, terminal_seen, published;
-    int qualification_terminal_present;
+    int qualification; /* P4PC_LOCKSTEP_BATTLE_ANCHOR: a lockstep battle qualification run */
+    uint32_t update_flip; /* flip count when the current update began */
+    /* A qualification's terminal update: "presented" when its own RASTERSHOWRASTER (func_003f79b0, run by a task inside
+     * kwlnRunFrame) advanced the flip count during it, "unpresented" when it did not. NULL outside qualification. */
+    const char *terminal_presentation;
     const char *failure, *battle_cause, *battle_outcome;
 } live;
 
@@ -676,11 +680,13 @@ static int publish(const char *outcome, const char *cause, const uint32_t *conte
             live.updates, live.fight_updates, live.entry.encounter, live.entry.mode, live.entry.occurrence);
     if (live.selected) fprintf(file, "\"%s\"", live.ram_sha); else fputs("null", file);
     fprintf(file, ",\"fight_terminal\":");
-    if (live.terminal_seen)
-        fprintf(file, "{\"native_result\":%u,\"outcome\":\"%s\",\"cause\":\"%s\",\"update\":%u,\"flip\":%u,\"game_frame\":%u,\"additive_draws\":%u}",
+    if (live.terminal_seen) {
+        fprintf(file, "{\"native_result\":%u,\"outcome\":\"%s\",\"cause\":\"%s\",\"update\":%u,\"flip\":%u,\"game_frame\":%u,\"additive_draws\":%u,\"presentation\":",
                 live.terminal, live.battle_outcome, live.battle_cause, live.terminal_update,
                 live.terminal_flip, live.terminal_frame, live.terminal_draws);
-    else fputs("null", file);
+        if (live.terminal_presentation) fprintf(file, "\"%s\"}", live.terminal_presentation);
+        else fputs("null}", file);
+    } else fputs("null", file);
     fputs(",\"terminal_linked_units\":", file);
     if (live.terminal_seen) write_units(file, live.terminal_units, live.terminal_counts);
     else fputs("null", file);
@@ -723,11 +729,6 @@ void p4_battle_live_before_present(void)
     if (p4pc_flip_count() >= live.entry.occurrence)
         finish("update_limit", "absolute_flip_limit", 3, NULL);
 }
-void p4_battle_live_after_present(void)
-{
-    if (live.qualification_terminal_present && live.terminal_seen)
-        finish(live.battle_outcome, live.battle_cause, 0, NULL);
-}
 int p4_battle_live_start(const char *entry, const char *result, const char *trace)
 {
     uint8_t bytes[64];
@@ -741,7 +742,7 @@ int p4_battle_live_start(const char *entry, const char *result, const char *trac
     if (getenv("P4PC_LOCKSTEP_BATTLE_ANCHOR")) {
         if ((live.entry.mode != 2 && live.entry.mode != 4) || live.entry.occurrence != 1 || live.entry.completion != 1 ||
             !exact_env("P4PC_LOCKSTEP_STATE_ALIGNED", "1")) return bad("invalid_battle_qualification");
-        live.qualification_terminal_present = 1;
+        live.qualification = 1;
     }
     if (getenv("P4PC_BATTLE_FORK") && !battle_fork_start(getenv("P4PC_BATTLE_FORK")))
         return bad("invalid_battle_fork");
@@ -773,8 +774,7 @@ int p4_battle_live_start(const char *entry, const char *result, const char *trac
 }
 void p4_battle_live_before_update(void)
 {
-    if (live.qualification_terminal_present && live.terminal_seen)
-        finish("engine_error", "terminal_frame_was_not_presented", 4, NULL);
+    live.update_flip = p4pc_flip_count();
     if (live.failure) finish("engine_error", live.failure, 4, NULL);
     if (live.updates >= live.entry.route_limit) finish("update_limit", "route_update_limit", 3, NULL);
     if (live.entry.mode == 3) {
@@ -861,7 +861,12 @@ void p4_battle_live_after_update(int completed)
             fprintf(live.trace, "{\"kind\":\"fight_terminal\",\"native_result\":%u,\"update\":%u,\"flip\":%u,\"game_frame\":%u,\"additive_draws\":%u}\n",
                     terminal, live.updates, live.terminal_flip, live.terminal_frame, live.terminal_draws);
             if (ferror(live.trace)) finish("engine_error", "terminal_trace_write", 4, NULL);
-            if (live.entry.completion == 1 && !live.qualification_terminal_present)
+            /* The terminal update's own presentation already happened inside it, before this end-of-update observation,
+             * so a qualification ends here too; its strict fingerprint is the flip taken during this update, and the
+             * state that changed after that flip is the battle_update record above. */
+            if (live.qualification)
+                live.terminal_presentation = live.terminal_flip > live.update_flip ? "presented" : "unpresented";
+            if (live.entry.completion == 1)
                 finish(live.battle_outcome, live.battle_cause, 0, NULL);
         }
     }
@@ -914,7 +919,7 @@ static int battle_fork_start(const char *dir)
 #ifdef P4_BATTLE_FORK
     char path[1200];
     if (!dir[0] || strlen(dir) >= sizeof battle_fork.dir - 80 || live.entry.mode == 3 || live.entry.completion != 1 ||
-        live.qualification_terminal_present || getenv("P4PC_LOCKSTEP_REPLAY")) return 0;
+        live.qualification || getenv("P4PC_LOCKSTEP_REPLAY")) return 0;
     strcpy(battle_fork.dir, dir);
     strcpy(battle_fork.node, "root");
     struct stat root;
@@ -1017,35 +1022,37 @@ static int fork_turn(unsigned n, char *line, size_t size)
         return 0;
     }
     fork_checkpoint_record(n);
-    for (;;) {
-        FILE *in = fopen(control, "r"); /* blocks until the driver opens the FIFO */
-        if (!in) _exit(4);
-        while (fgets(command, sizeof command, in)) {
-            command[strcspn(command, "\r\n")] = '\0';
-            if (!strcmp(command, "exit")) _exit(0);
-            if (strncmp(command, "fork ", 5)) continue;
-            char *name = command + 5, *turn = strchr(name, ' ');
-            if (!turn || turn == name || (size_t)(turn - name) >= sizeof battle_fork.node) continue;
-            *turn++ = '\0';
-            if (strspn(name, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.") != strlen(name) ||
-                strlen(turn) >= size) continue;
-            char node[1200];
-            if (!fork_path(node, sizeof node, name, NULL) || mkdir(node, 0755)) continue;
-            const pid_t child = fork();
-            if (child == 0) {
-                fclose(in);
-                if (!fork_become(name)) _exit(4);
-                strcpy(line, turn);
-                return 1;
-            }
-            char marker[1200];
-            FILE *note = fork_path(marker, sizeof marker, name, child < 0 ? "fork_failed" : "pid") ? fopen(marker, "wb") : NULL;
-            if (note) {
-                fprintf(note, "%ld\n", (long)child);
-                fclose(note);
-            }
+    /* Opened read-write, so the checkpoint itself always holds a read end: a driver's write never lands while only a
+     * just-forked child's inherited read end is open (the pipe would drop it when the child closes that end), and the
+     * stream never reaches end of file, so it is opened once. */
+    const int control_fd = open(control, O_RDWR);
+    FILE *in = control_fd >= 0 ? fdopen(control_fd, "r") : NULL;
+    if (!in) _exit(4);
+    while (fgets(command, sizeof command, in)) {
+        command[strcspn(command, "\r\n")] = '\0';
+        if (!strcmp(command, "exit")) _exit(0);
+        if (strncmp(command, "fork ", 5)) continue;
+        char *name = command + 5, *turn = strchr(name, ' ');
+        if (!turn || turn == name || (size_t)(turn - name) >= sizeof battle_fork.node) continue;
+        *turn++ = '\0';
+        if (strspn(name, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.") != strlen(name) ||
+            strlen(turn) >= size) continue;
+        char node[1200];
+        if (!fork_path(node, sizeof node, name, NULL) || mkdir(node, 0755)) continue;
+        const pid_t child = fork();
+        if (child == 0) {
+            fclose(in);
+            if (!fork_become(name)) _exit(4);
+            strcpy(line, turn);
+            return 1;
         }
-        fclose(in);
+        char marker[1200];
+        FILE *note = fork_path(marker, sizeof marker, name, child < 0 ? "fork_failed" : "pid") ? fopen(marker, "wb") : NULL;
+        if (note) {
+            fprintf(note, "%ld\n", (long)child);
+            fclose(note);
+        }
     }
+    _exit(4);
 }
 #endif

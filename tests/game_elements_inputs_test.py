@@ -9,8 +9,10 @@ from game_skills_test import packed
 from iso_fixture import disc
 
 
-def input_disc(*, effective_ai=False):
-    """Actual producer bank layout shared by element and table-source cases."""
+def input_disc(*, effective_ai=False, encount=None, party=None, item=None):
+    """Actual producer bank layout shared by element and table-source cases.
+    encount replaces the five ENCOUNT.TBL blocks, party replaces PERSONA.TBL's
+    party block (span 2) (effective_ai only), and item replaces ITEMTBL.BIN."""
     metadata = bytearray(440 * 40)
     metadata[0] = 2
     metadata[11 * 40 + 0x1E] = 8
@@ -28,11 +30,13 @@ def input_disc(*, effective_ai=False):
     if effective_ai:
         # Structurally genuine packed source spans; these opaque synthetic BF
         # payloads do NOT claim executable AI/parser or native-source proof.
-        banks["BATTLE/PERSONA.TBL"] = packed((bytes(16),) * 6)
-        banks["BATTLE/ENCOUNT.TBL"] = packed((bytes(16),) * 5)
+        banks["BATTLE/PERSONA.TBL"] = packed(tuple(party if i == 2 and party is not None else bytes(16)
+                                                   for i in range(6)))
+        banks["BATTLE/ENCOUNT.TBL"] = packed(encount or (bytes(16),) * 5)
         banks["BATTLE/MODEL.TBL"] = packed((bytes(16),) * 3)
         banks["BATTLE/AICALC.TBL"] = packed(tuple(bytes(164 if i == 8 else 16) for i in range(11)))
-    item = struct.pack("<4I", 1536, 0, 0, 0) + bytes(1536 * 68)
+    if item is None:
+        item = struct.pack("<4I", 1536, 0, 0, 0) + bytes(1536 * 68)
     return disc({"DATA": {"INIT/ITEMTBL.BIN": item}, "BTL": banks})
 
 

@@ -15,6 +15,11 @@ typedef uint8_t u8; typedef int8_t s8; typedef uint16_t u16; typedef int16_t s16
 typedef uint32_t u32; typedef int32_t s32; typedef float f32;
 #include "p4pc/game_elements_calc_native.h"
 #include "p4pc/game_skills_native.h"
+#include "p4pc/game_knowledge_native.h"
+#include "p4pc/game_chance_stage.h"
+#include "p4pc/game_chance_stage_native.h"
+#include "p4pc/game_hit_stage.h"
+#include "p4pc/mod_entry.h"
 typedef struct DatUnit {
     u16 flags, id, id2; u8 level, pad07; u16 hp, sp; u32 bad; u8 rest[0x20];
 } DatUnit;
@@ -43,6 +48,15 @@ static unsigned enabled, random_calls, source_calls, native_affinity_calls, lega
 static u32 random_state, affinity, ko_light, ko_dark, attack_element, guard, fixed_skill, equip_property, counter_property, current_skill = 10;
 static u16 listed_skills[8];
 static u32 held_count;
+static u16 rescue_character = 1, social_rank;
+uint32_t p4_mod_authorize_mask;
+static int protection_allowed = 1, protection_calls;
+int p4_mod_authorize_battle_protection_item(int character, int item, int element)
+{
+    assert(character == rescue_character && item == 0x340 && (element == 6 || element == 7));
+    ++protection_calls;
+    return protection_allowed;
+}
 static void *expected_action_source;
 static uint64_t trace;
 static void mark(u32 x) { trace = trace * UINT64_C(1099511628211) ^ x; }
@@ -72,6 +86,12 @@ uint32_t p4_game_elements_native_element_affinity(void *unit, const P4GameAction
 { assert(unit == &target_unit && frame->element.element_id == expected_frame.element.element_id && frame->element.channel_id == expected_frame.element.channel_id); ++native_affinity_calls; mark(100); return affinity; }
 int p4_game_elements_native_profile_affinity(void *unit, uint32_t leaf, uint32_t channel, uint32_t component, uint32_t *out)
 { assert(unit == &target_unit && channel == P4_CHANNEL_INSTANT_KO && component == P4_ACTION_COMPONENT_INSTANT_KO); ++native_affinity_calls; mark(100 + leaf); *out = leaf == 6 ? ko_light : ko_dark; return P4_TABLE_OK; }
+/* Landed-ailment observation for Analyze; outside the traced retail order. */
+static unsigned observe_calls;
+static P4GameActionFrame observed_frame;
+static u16 target_flags;
+int p4_game_knowledge_native_observe(void *defender, const P4GameActionFrame *frame)
+{ assert(defender == &target_unit && frame); ++observe_calls; observed_frame = *frame; return P4_TABLE_OK; }
 static u8 *byteAddressAdd(u32 offset, u8 *base) { return base + offset; }
 static s32 datCalcIsGuarding(u16 *unit) { (void)unit; mark(10); return (s32)guard; }
 static s32 datCalcGetElementAffinity(u8 *unit, s32 element)
@@ -86,11 +106,11 @@ static s32 datCalcHasRequestedSkill(DatUnit *unit, s32 id)
 { assert(unit == &source_unit); mark(7000 + (u32)id); return 0; }
 static s32 datItemElement(s16 item) { (void)item; return (s32)attack_element; }
 static s32 datGetEquippedItemByUnit(s16 id, s16 slot) { (void)id; (void)slot; return 1; }
-static u8 *datPersonaGetSkillsByPcId(s32 id) { assert(id == 1); mark(8000); return (u8 *)listed_skills; }
+static u8 *datPersonaGetSkillsByPcId(s32 id) { assert(id == rescue_character); mark(8000); return (u8 *)listed_skills; }
 static s32 datItemGrantedSkill(s16 id) { assert(id == 1); mark(8001); return 0; }
 static s32 datItemCount(s32 id) { assert(id == 0x340); mark(8002); return (s32)held_count; }
-static s32 cmmCommunityForArcana(s16 id) { (void)id; abort(); }
-static s32 cmmCommunityRecordValue(u16 id) { (void)id; abort(); }
+static s32 cmmCommunityForArcana(s16 id) { assert(id == rescue_character); return id; }
+static s32 cmmCommunityRecordValue(u16 id) { assert(id == rescue_character); return social_rank; }
 static s32 datCalcHasFixedSkill(u8 *unit, s32 id) { (void)unit; mark(1000 + (u32)id); return fixed_skill == (u32)id; }
 static s32 datCalcCountEquipmentProperty(u8 *unit, s32 id) { (void)unit; mark(2000 + (u32)id); return counter_property == (u32)id; }
 static s32 datCalcHasEquipmentProperty(u8 *unit, s32 id) { (void)unit; mark(3000 + (u32)id); return equip_property == (u32)id; }
@@ -106,10 +126,36 @@ static s32 datScriptRunCalc(u32 kind, u16 *source, u16 *target, u16 skill, s32 p
 }
 int32_t p4_game_elements_calculation_run(uint32_t kind, void *source, void *target, uint32_t skill, int32_t parameter, const P4GameActionFrame *frame, const P4GameAffinityQuery *query)
 { assert(kind == DAT_SCRIPT_CALC_HIT_RATE && source == &source_unit && target == &target_unit && skill == current_skill && !parameter && frame && !query); mark(6000); return 75; }
+/* The chance stage asks for the party source's active persona record only
+ * while it has a modifier. */
+static unsigned persona_reads;
+static u16 datPersonaGetRecordId(u16 party) { assert(party == source_unit.id); ++persona_reads; return 0x2a; }
+static u8 datPersonaGetLevelByPcId(u16 party) { assert(party == source_unit.id); ++persona_reads; return 31; }
+/* It reports the target's afflictions this battle, read only while it has a
+ * modifier. */
+static unsigned affliction_reads;
+uint32_t p4_game_afflictions_native_count(const void *unit) { assert(unit == &target_unit); ++affliction_reads; return 3; }
 #include "../overrides/0023e6f0.c"
 #include "../overrides/002411a0.c"
 #include "../overrides/00241bc0.c"
 #include "../overrides/00238940.c"
+static P4GameChanceHit chance_seen;
+static unsigned chance_calls;
+static double chance_factor;
+static int chance_modifier(void *user, const P4GameChanceHit *hit, double *value)
+{ (void)user; chance_seen = *hit; ++chance_calls; *value = chance_factor; return 1; }
+static P4GameHitQuery hit_seen;
+static unsigned hit_calls;
+static double hit_factor;
+static int hit_modifier(void *user, const P4GameHitQuery *query, double *value)
+{ (void)user; hit_seen = *query; ++hit_calls; *value = hit_factor; return 1; }
+/* Passive grants (game_passive_grant_native.h): the fixture's one granted
+ * skill on the source; 00242990 asks only while something is granted. */
+uint32_t p4_game_passive_live;
+static u32 granted_skill;
+static unsigned grant_queries;
+int p4_game_passive_native_unit(const void *unit, uint32_t skill)
+{ assert(unit == &source_unit); ++grant_queries; return skill == granted_skill; }
 #include "../overrides/00242990.c"
 typedef struct Receipt { s32 result; DatUnit source, target; u32 rng, calls; uint64_t trace; } Receipt;
 static Receipt run(unsigned route, u32 leaf, u32 family, u32 flags, u32 channel, u32 buffs, u32 aff, u32 fixed, u32 equip, u32 counter, u32 options, int weapon)
@@ -174,7 +220,7 @@ static Receipt status_case(unsigned route, u32 status, u32 leaf, u32 family, u32
     DatSkillEntry *entry = (DatSkillEntry *)(metadata + current_skill * 40);
     entry->mode18 = selection; entry->statusMask = status;
     metadata[current_skill * 40 + 0x19] = rate;
-    source_unit.id = 1; target_unit.id = 2;
+    source_unit.id = 1; target_unit.id = 2; target_unit.flags = target_flags;
     enabled = route; affinity = word; attack_element = family; guard = 0;
     expected_status_mask = selection == 3 ? (((0x1234u * 1664525u + 1013904223u) % 2u) ? 0x20u : 0x2u) : status;
     expected_frame = (P4GameActionFrame){.element = {1, leaf, 29, flags, family, P4_ACTION_COMPONENT_DAMAGE}, .skill_id = current_skill, .native_options = options};
@@ -191,7 +237,7 @@ static Receipt substitution_case(unsigned route, u32 leaf, u32 family, u16 liste
     memset(metadata, 0, METADATA_BYTES); memset(elements, 0, ELEMENT_BYTES);
     memset(listed_skills, 0, sizeof listed_skills); listed_skills[0] = listed;
     metadata[current_skill * 40 + 0x24] = category; elements[current_skill * 2] = (u8)family;
-    source_unit.id = 1; source_unit.flags = unit_flags; enabled = route; held_count = items; attack_element = family;
+    source_unit.id = rescue_character; source_unit.flags = unit_flags; enabled = route; held_count = items; attack_element = family;
     expected_frame = (P4GameActionFrame){.element = {1, leaf, 29, P4_ELEMENT_AFFINITY, family, P4_ACTION_COMPONENT_DAMAGE}, .skill_id = current_skill};
     expected_status_mask = 0x80000u; expected_action_source = &target_unit;
     expected_status_frame = (P4GameActionFrame){.element = {1, leaf, P4_CHANNEL_INSTANT_KO, P4_ELEMENT_AFFINITY, family, P4_ACTION_COMPONENT_INSTANT_KO}, .skill_id = current_skill, .owned_binding = bound};
@@ -309,6 +355,21 @@ int main(void)
     assert(retail_random.result == tagged_random.result && retail_random.trace == tagged_random.trace &&
         retail_random.rng == tagged_random.rng && retail_random.calls == tagged_random.calls &&
         tagged_random.calls == 2 && native_affinity_calls == 1);
+    /* A routed ailment that lands on an enemy is observed once; immunity, a
+     * missed roll, a KO payload, a party target and the retail route are not. */
+    target_flags = 4; observe_calls = 0;
+    Receipt landed = status_case(1, 0x20u, 9, 9, P4_ELEMENT_AFFINITY, 100, 0, 100, 1);
+    assert(landed.result == 0x20 && observe_calls == 1 && observed_frame.element.element_id == 9 &&
+        observed_frame.element.component == P4_ACTION_COMPONENT_STATUS);
+    Receipt immune = status_case(1, 0x20u, 9, 9, P4_ELEMENT_AFFINITY, 0x01000064u, 0, 100, 1);
+    Receipt missed = status_case(1, 0x20u, 9, 9, P4_ELEMENT_AFFINITY, 0x10000032u, 0, 0, 1);
+    Receipt ko = status_case(1, 0x80000u, 7, 7, P4_ELEMENT_AFFINITY, 100, 0, 100, 1);
+    Receipt retail_landed = status_case(0, 0x20u, 9, 9, P4_ELEMENT_AFFINITY, 100, 0, 100, 1);
+    assert(!immune.result && !missed.result && missed.calls == 1 && ko.result == 0x80000 &&
+        retail_landed.result == 0x20 && observe_calls == 1);
+    target_flags = 0;
+    Receipt party = status_case(1, 0x20u, 9, 9, P4_ELEMENT_AFFINITY, 100, 0, 100, 1);
+    assert(party.result == 0x20 && observe_calls == 1);
     const u16 replacements[] = {0, 0x20f, 0x210, 0x211, 0x212, 0x221, 0x222, 0x231, 0x232};
     for (u32 family = 0; family < 19; ++family)
         for (size_t i = 0; i < sizeof replacements / sizeof replacements[0]; ++i)
@@ -332,6 +393,116 @@ int main(void)
     assert(light_damage.result == -1 && !source_calls);
     Receipt default_ko = substitution_case(1, 7, 6, 0x221, 0, 0, 0, 0x80000, 0);
     assert(default_ko.result == 0x221 && source_calls == 2);
-    puts("game_elements_hit: actual hit, critical, applicability and status retail/tagged probes passed; not native gameplay qualification");
+    /* Each of the eight searches sees a granted passive exactly as one in a
+     * slot: the same substitution, RNG draws and engine calls. Nothing granted
+     * asks nothing. */
+    for (u32 family = 0; family < 19; ++family)
+        for (size_t i = 1; i < sizeof replacements / sizeof replacements[0]; ++i)
+            for (u32 items = 0; items < 2; ++items) {
+                p4_game_passive_live = 0; granted_skill = 0; grant_queries = 0;
+                Receipt slot = substitution_case(1, family, family, replacements[i], items, 0, 0, 0x80000, 1);
+                assert(!grant_queries);
+                p4_game_passive_live = 1; granted_skill = replacements[i];
+                Receipt granted = substitution_case(1, family, family, 0, items, 0, 0, 0x80000, 1);
+                assert(slot.result == granted.result && slot.rng == granted.rng && slot.calls == granted.calls);
+            }
+    p4_game_passive_live = 0; granted_skill = 0;
+    /* Item authorization occurs before the native fallback searches. Denial
+     * leaves the stock untouched and does not suppress passive or social rescue. */
+    for (u32 family = 6; family <= 7; ++family) {
+        p4_mod_authorize_mask = 0;
+        protection_calls = 0;
+        protection_allowed = 0;
+        Receipt available = substitution_case(1, family, family, 0, 1, 0, 0, 0x80000, 1);
+        assert(available.result == 0x154 && held_count == 1 && !protection_calls);
+        p4_mod_authorize_mask = P4_MOD_AUTH_BATTLE_PROTECTION_ITEM_BIT;
+        Receipt denied = substitution_case(1, family, family, 0, 1, 0, 0, 0x80000, 1);
+        assert(denied.result == -1 && held_count == 1 && protection_calls == 1);
+        Receipt passive = substitution_case(1, family, family, 0x210, 1, 0, 0, 0x80000, 1);
+        assert(passive.result == 0x210 && held_count == 1);
+        Receipt immunity = substitution_case(1, family, family, family == 6 ? 0x221 : 0x222, 1, 0, 0, 0x80000, 1);
+        assert(immunity.result == (family == 6 ? 0x221 : 0x222) && held_count == 1);
+        rescue_character = 2; social_rank = 9;
+        Receipt social = substitution_case(1, family, family, 0, 1, 0, 0, 0x80000, 1);
+        assert(social.result == 0x20f && held_count == 1);
+        rescue_character = 1; social_rank = 0;
+        protection_allowed = 1;
+        Receipt allowed = substitution_case(1, family, family, 0, 1, 0, 0, 0x80000, 1);
+        assert(allowed.result == 0x154 && held_count == 1);
+        protection_calls = 0;
+        Receipt empty = substitution_case(1, family, family, 0, 0, 0, 0, 0x80000, 1);
+        assert(empty.result == -1 && !protection_calls);
+        protection_calls = 0;
+        Receipt enemy = substitution_case(1, family, family, 0, 1, 4, 0, 0x80000, 1);
+        assert(enemy.result == -1 && !protection_calls && held_count == 1);
+    }
+    p4_mod_authorize_mask = 0;
+    /* Status/KO chance stage: the native truncated chance (45 from the ratio
+     * of products at 100% affinity) is composed before the 0..99 clamp and the
+     * single RpRandom() draw. An identity modifier changes nothing. */
+    {
+        const u32 roll = (0x1234u * 1664525u + 1013904223u) % 100u;
+        const P4GameChanceModifierDesc desc = {"test.chance", 0, 0, P4_CHANCE_MULTIPLY, chance_modifier, NULL};
+        uint32_t handle = 0;
+        for (u32 kind = 0; kind < 2; ++kind)
+            for (u32 options = 0; options < 2; ++options) {
+                const u32 status = kind ? 0x80000u : 0x20u;
+                Receipt plain = status_case(1, status, 9, 9, P4_ELEMENT_AFFINITY, 100, options, 75, 1);
+                assert(p4_game_chance_register(&desc, &handle) == P4_DAMAGE_OK);
+                const double factors[] = {1.0, 2.0, 0.0, 3.0};
+                for (size_t f = 0; f < sizeof factors / sizeof factors[0]; ++f) {
+                    chance_factor = factors[f]; chance_calls = persona_reads = affliction_reads = 0;
+                    Receipt staged = status_case(1, status, 9, 9, P4_ELEMENT_AFFINITY, 100, options, 75, 1);
+                    s32 rate = (s32)(45.0 * factors[f]);
+                    rate = rate > 99 ? 99 : rate < 0 ? 0 : rate;
+                    assert(chance_calls == 1 && staged.calls == plain.calls && staged.rng == plain.rng);
+                    assert(staged.result == ((s32)roll < rate ? (s32)status : 0));
+                    if (factors[f] == 1.0) assert(staged.result == plain.result && staged.trace == plain.trace);
+                    assert(chance_seen.stock == 45 && chance_seen.statuses == status && chance_seen.item == options &&
+                        chance_seen.component == (kind ? P4_CHANCE_COMPONENT_INSTANT_KO : P4_CHANCE_COMPONENT_AILMENT) &&
+                        chance_seen.source_side == P4_DAMAGE_SIDE_PARTY && chance_seen.target_id == 2 &&
+                        chance_seen.source_persona == (options ? 0u : 0x2au) && chance_seen.afflictions == 3 &&
+                        chance_seen.source_persona_level == (options ? 0u : 31u) && persona_reads == (options ? 0u : 2u) &&
+                        affliction_reads == 1);
+                }
+                /* A guaranteed rate (100 or more) never reaches the stage. */
+                chance_calls = affliction_reads = 0;
+                (void)status_case(1, status, 9, 9, P4_ELEMENT_AFFINITY, 100, options, 100, 1);
+                assert(!chance_calls && !affliction_reads);
+                assert(p4_game_chance_unregister(handle) == P4_DAMAGE_OK && !p4_game_chance_native_active());
+            }
+    }
+    /* Hit stage: a rolled hit's chance (75 from the formula, inside the 50..99
+     * clamp) and a critical chance (35 from the scaled ratio) pass it before
+     * their compare. An identity modifier changes nothing, 0 never succeeds,
+     * 100 always does, and the RNG draw count never changes. */
+    {
+        const P4GameHitModifierDesc desc = {"test.hit", 0, 0, P4_HIT_MULTIPLY, hit_modifier, NULL};
+        const u32 flags = P4_ELEMENT_PHYSICAL | P4_ELEMENT_OFFENSIVE | P4_ELEMENT_AFFINITY;
+        uint32_t handle = 0;
+        current_skill = 1;
+        Receipt plain = run(1, 0, 0, flags, 0, 0, 100, 0, 0, 0, 0, 1);
+        Receipt plain_critical = critical_case(1, 0, 0, flags, 100, 1, 1, 0);
+        assert(p4_game_hit_register(&desc, &handle) == P4_DAMAGE_OK);
+        const double factors[] = {1.0, 0.0, 3.0};
+        for (size_t f = 0; f < sizeof factors / sizeof factors[0]; ++f) {
+            hit_factor = factors[f]; hit_calls = 0;
+            Receipt staged = run(1, 0, 0, flags, 0, 0, 100, 0, 0, 0, 0, 1);
+            assert(hit_calls == 1 && hit_seen.roll == P4_HIT_ACCURACY && hit_seen.stock == 75 &&
+                hit_seen.skill_id == 1 && hit_seen.source_side == P4_DAMAGE_SIDE_PARTY && hit_seen.source_id == 1 &&
+                hit_seen.target_side == P4_DAMAGE_SIDE_PARTY && hit_seen.target_id == 2);
+            assert(staged.rng == plain.rng && staged.calls == plain.calls);
+            assert(staged.result == (f == 0 ? plain.result : f == 1 ? 4 : 1));
+            if (f == 0) assert(staged.trace == plain.trace);
+            hit_calls = 0;
+            Receipt critical = critical_case(1, 0, 0, flags, 100, 1, 1, 0);
+            assert(hit_calls == 1 && hit_seen.roll == P4_HIT_CRITICAL && hit_seen.stock == 35 &&
+                hit_seen.target_side == P4_DAMAGE_SIDE_ENEMY);
+            assert(critical.rng == plain_critical.rng && critical.calls == plain_critical.calls);
+            assert(critical.result == (f == 0 ? plain_critical.result : f == 1 ? 1 : 2));
+        }
+        assert(p4_game_hit_unregister(handle) == P4_DAMAGE_OK && !p4_game_hit_native_active());
+    }
+    puts("game_elements_hit: actual hit, critical, applicability, status, chance-stage and hit-stage retail/tagged probes passed; not native gameplay qualification");
     return 0;
 }

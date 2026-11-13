@@ -3,6 +3,8 @@
 #include "p4pc/lockstep_align_runtime.h"
 #include "p4pc/battle_live.h"
 #include "p4pc/lockstep_disc.h"
+#include "p4pc/lockstep_filer_replay.h"
+#include "p4pc/lockstep_uninit.h"
 #include "p4pc/lockstep_align_input.h"
 #include "p4pc/crt.h"
 #include "p4pc/guest.h"
@@ -15,7 +17,7 @@ typedef struct AlignRuntime {
     P4AlignTrace trace_buffer;
     P4AlignRestore restore;
     P4AlignInput input;
-    FILE *trace, *events, *rng_calls, *effect_calls, *event_frames, *packet_frames;
+    FILE *trace, *events, *rng_calls, *effect_calls, *event_frames, *packet_frames, *message_frames;
     char directory[1024], replay_directory[1024];
     uint32_t rng[P4LA_RNG_WORDS];
     uint32_t *patch;
@@ -49,6 +51,7 @@ static void align_close(void) {
     if (sAlign->effect_calls) fclose(sAlign->effect_calls);
     if (sAlign->event_frames) fclose(sAlign->event_frames);
     if (sAlign->packet_frames) fclose(sAlign->packet_frames);
+    if (sAlign->message_frames) fclose(sAlign->message_frames);
     free(sAlign->input.batch); free(sAlign->patch); free(sAlign); sAlign=NULL;
 }
 int p4pc_align_init(const char *directory, FILE *replay) {
@@ -77,6 +80,8 @@ int p4pc_align_init(const char *directory, FILE *replay) {
     const char *source=getenv("P4PC_LOCKSTEP_ALIGNMENT_REPLAY");
     if (source) snprintf(sAlign->replay_directory,sizeof sAlign->replay_directory,"%s",source);
     p4pc_lockstep_disc_open(sAlign->directory);
+    p4pc_lockstep_filer_open(sAlign->directory);
+    p4pc_lockstep_uninit_open(sAlign->directory);
     snprintf(path,sizeof path,"%s/port-trace.bin",sAlign->directory);
     sAlign->trace=align_open(path,"wb");
     if (fwrite("P4ALTR2\n",1,8,sAlign->trace)!=8) align_fail("writing trace header");
@@ -100,6 +105,9 @@ int p4pc_align_init(const char *directory, FILE *replay) {
         snprintf(path,sizeof path,"%s/port-battle-packets.tsv",sAlign->directory);
         sAlign->packet_frames=align_open(path,"w");
         if (!p4la_packet_header(sAlign->packet_frames)) align_fail("writing battle packet trace header");
+        snprintf(path,sizeof path,"%s/port-message-window.tsv",sAlign->directory);
+        sAlign->message_frames=align_open(path,"w");
+        if (!p4la_message_header(sAlign->message_frames)) align_fail("writing message-window trace header");
         p4pc_align_rng_calls_enabled=1;
     }
     sAlign->input.file=replay;
@@ -265,6 +273,8 @@ void p4pc_align_boundary(const P4WalkHost *host, const uint32_t marker[8]) {
         fflush(sAlign->event_frames))) align_fail("writing actual event-player state");
     if (sAlign->packet_frames && (!p4la_packet_frame(sAlign->packet_frames,host) ||
         fflush(sAlign->packet_frames))) align_fail("writing actual battle packet state");
+    if (sAlign->message_frames && (!p4la_message_frame(sAlign->message_frames,host) ||
+        fflush(sAlign->message_frames))) align_fail("writing actual message-window state");
     if (!p4la_trace(&sAlign->trace_buffer,sAlign->trace,host,marker,sAlign->rng,&sAlign->restore)) align_fail("writing full RNG/clock trace");
     char folder[1100],path[1200];
     snprintf(folder,sizeof folder,"%s/%u",sAlign->directory,marker[0]);
@@ -288,10 +298,14 @@ void p4pc_align_boundary(const P4WalkHost *host, const uint32_t marker[8]) {
     if (status==6u) {
         p4pc_align_battle_guard=1;
         p4pc_lockstep_disc_activate(p4la_word(host,P4LS_GAME_FRAME));
+        p4pc_lockstep_filer_activate(p4la_word(host,P4LS_GAME_FRAME));
     }
     /* Outside battle qualification the disc replay starts at the accepted initial LOAD anchor. */
-    if (status==1u && marker[0]==0u && !sAlign->tracker.battle_qualification_id)
+    if (status==1u && marker[0]==0u && !sAlign->tracker.battle_qualification_id) {
         p4pc_lockstep_disc_activate(p4la_word(host,P4LS_GAME_FRAME));
+        p4pc_lockstep_filer_activate(p4la_word(host,P4LS_GAME_FRAME));
+        p4pc_lockstep_uninit_activate(p4la_word(host,P4LS_GAME_FRAME));
+    }
     if (status==4u) { if (p4_battle_live_lockstep_boundary()) exit(4); p4pc_exit(0); }
     if (status==5u) exit(4);
     if (status!=1u && status!=2u && status!=6u) align_fail("unknown boundary response");

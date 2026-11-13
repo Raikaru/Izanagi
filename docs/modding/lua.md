@@ -1,4 +1,4 @@
-# Luau hooks, memory and events
+# Luau API reference
 
 The scripting language is the pinned **Luau 0.744** interpreter and source
 compiler, vendored with its MIT licence. There is no Lua 5.4 compatibility layer,
@@ -8,20 +8,40 @@ not accepted. Each mod owns its VM, globals, allocator, scratch and subscription
 Installation never enables a mod. [File mods](files.md) describes discovery,
 API-version checks, global ordering and the restart-required selection boundary.
 
+Raw hooks and guest memory are documented separately in
+[Advanced](advanced/raw-luau.md). Start with the
+[first-mod tutorial](start/first-mod.md) for a semantic API example.
+
 The bundled [`p4pc.example`](../../examples/mods/p4pc.example) is inert until
-copied to the configured mod root and explicitly enabled. It hooks the actual
-time-slot setter, reads and writes a small private numeric guest layout, and
-logs its counter. It snapshots a plain number into its required save-sidecar
-block and restores that number into fresh guest scratch when a save is loaded.
+copied to the configured mod root and explicitly enabled. It shows the three
+layers together:
+
+- **File:** it ships `files/DATA/MOD_EXAMPLE.TXT`, published through the same
+  VFS as the disc, and logs the winning bytes returned by `p4.files.read`.
+- **Hook and memory:** it hooks the actual time-slot setter, reads and writes a
+  small private numeric guest layout, and logs its counter. It snapshots a plain
+  number into its required save-sidecar block and restores that number into
+  fresh guest scratch when a save is loaded.
+- **Config:** its `[setting counting]` toggle is a native row under MODS, on by
+  default. The hook reads it at each call, so turning it off holds the counter
+  at once.
 
 `mod_example_game[64|64w]` is an opt-in, real-executable witness, registered
 only with `P4PC_MOD_WITNESS_TESTS=ON`. Supply `P4PC_ISO`, `P4PC_ELF` and a
 private-readable `P4PC_EXAMPLE_SEED` containing the story0415 card; run it
 headlessly through local study admission with `P4PC_INPUT=script`,
 `P4PC_MOD_WITNESS=1`, `P4PC_MODS=1` and `P4PC_PACKS=0`. It copies the seed,
-drives the actual time-slot hook and two game saves, reloads in a fresh process,
-and checks the authenticated sidecar, required provider and restored counter. Outputs are
-tagged non-reference witness artifacts; this is not a retail comparison.
+drives the actual time-slot hook and two game saves, and reloads in a fresh
+process with the toggle turned off in `mod-settings/p4pc.example.ini`. It checks
+the file read, the authenticated sidecar, required provider, the restored
+counter, and that the hook still runs but holds the restored value while the
+toggle is off. On Android, pass `--driver python tools/android_prog.py run p4pc`
+to [`tests/mod_example_game_test.py`](../../tests/mod_example_game_test.py) with
+the isolated debug app set up by `android_prog.py setup`. It copies the mod
+root, settings and card to the device and holds the shared phone lock
+(`P4PC_PHONE_LOCK` must name it; set it empty for a private emulator). Outputs
+are tagged non-reference witness artifacts; this is not a
+retail comparison.
 
 ## Sandbox, budgets and lifetime
 
@@ -44,6 +64,14 @@ one. These deterministic interpreter budgets are not millisecond CPU deadlines
 and cannot preempt a native C builtin.
 Budget failure is sticky across script `pcall` and coroutine boundaries.
 
+`p4.budget()` (`budget@1`) returns how many units the current invocation may still
+use: the smallest remaining fuel of its nested callback frames and, outside
+initialization, of this presentation frame. Long work (a randomizer generating
+a run) can run in a coroutine resumed from `frame_start` callbacks and yield
+when the value falls below a margin. The number is advisory pacing, not a
+measurement: it may differ between builds and platforms, so a result must never
+depend on where the work was split.
+
 Callbacks run on the native game thread. Each native coroutine incarnation gets
 its own protected Luau callback stack. A native original that schedules another
 game coroutine must not cause the second callback to reuse a suspended stack.
@@ -52,7 +80,9 @@ native call restores the correct interpreter segment. Synchronous native service
 callbacks prohibit `p4.call` and continuations rather than permitting an unsafe
 native yield.
 
-Lua executes under its own nearest-rounding floating-point environment. Typed
+Lua executes under its own nearest-rounding floating-point environment, without
+flushing denormals, on every platform, so `string.format` and arithmetic agree
+between Windows, Linux and Android. Typed
 native calls restore the caller's game environment; native changes to that
 environment survive the eventual return to the game, including error paths.
 An escaping init/hook/event error preserves its bounded diagnostic for the native
@@ -242,6 +272,210 @@ wrong value types. Declared rows are already adjusted by the native hub. Writes
 do not mark a save as modded; record a setting in the mod's own save block when
 a save must remember it.
 
+A declared setting that an admitted mod names in its
+[`[require]`](files.md#requirements-api-16) section is locked for the rest of
+the run: `set` returns `false, "locked: required by <name>"` and changes
+nothing, because admission checked the value that mod relies on.
+
+`p4.mods.required(id)` (capability `mods.required@1`) describes one of the mod's own declared
+requirements:
+
+```luau
+local split = p4.mods.required("p4pc.physsplit")
+-- { version = "1.2", settings = { split = true } }
+```
+
+`version` is the admitted requirement's manifest version and `settings` holds
+the current values of the settings this mod's `[require]` section names (toggles
+as booleans, choices as names, as `p4.settings.get` reads them). An id the mod
+did not declare raises an error rather than returning nil, so a typo fails
+loudly. It only reads, so it is legal in every callback, including synchronous
+UI callbacks and save snapshots; record the version in the mod's own save block
+when a save must remember which requirement it was made with.
+
+## Party records (`party.record@1`)
+
+`p4.party` reads and changes a playable character's combat progression: the
+Persona record of party ids 2..10 (Yosuke 2, Chie 3, Yukiko 4, Rise 5, Kanji 6,
+Naoto 7, Teddie 8). A character's level is its Persona's level, so its HP and SP
+maxima follow it. The protagonist (id 1) is deliberately excluded: his level and
+EXP are his own record's, not a Persona's, and his Personas are the roster's,
+which fusion, the compendium and Social Links own.
+
+```luau
+local r = p4.party.record(2)  -- {persona, level, exp, stats = {5}, skills = {...}} or nil
+local ok, why = p4.party.set(2, {persona = r.persona, level = 1, exp = 0,
+    stats = {3, 2, 2, 3, 2}, skills = {r.skills[1]}})
+```
+
+`set` checks the whole record before anything changes: the Persona stays the
+record's own, the level is 1..99, EXP lies in that level's band of this Persona's
+own curve, each stat is 1..99, and the skills are unique IDs of the active
+(including expanded) skill registry filling the first slots. A refused `set`
+returns `false, reason` and changes nothing. An accepted one is queued and
+applied at the next frame safe point outside battle, revalidated against the
+record as it is then; a write that no longer fits fails into mod recovery,
+never a partial write. Current HP/SP are lowered to the new maxima. Calls during
+a battle, in synchronous UI/action callbacks or in save snapshots are refused,
+and a second mod's write to an id with a pending write is refused; the same
+mod's second write replaces its pending one. Writes and `p4.give.skill`/
+`p4.give.exp` for one character apply in call order
+(`docs/modding/systems/actions.md`): a write waits for the gives to that
+Persona asked for before it, and gives asked for after it wait for it. A write
+also waits while the game's skill-choice panel shows that Persona (the panel
+holds a copy of its skills and writes it back when answered). Writes to other
+ids are not held. A `set` is semantic use of the mod for the save.
+
+## Persona stock and Social Links (`persona.stock@1`, `social.rank@1`)
+
+`p4.persona.stock()` returns Yu's carried Personas in roster slot order. Each
+entry is a read-only table:
+
+- `slot` is 1-based, and `lead` is true for the equipped Persona.
+- `persona` and `arcana` use the game's own numbers (`arcana` as
+  `datPersonaGetArcana` 0x00109280 reads it).
+- `level`, `exp`, `stats` (St Ma En Ag Lu) and `skills` (learned IDs in slot
+  order) are copied from the roster record.
+- `registered` is true when the compendium holds that Persona, and
+  `registered_level` is the level of the compendium copy (0 when unregistered),
+  so a mod can warn before consuming an unregistered or stronger Persona.
+
+`p4.social.rank(arcana)` returns the rank, 0..10, of the Social Link with that
+arcana, as the game itself answers (`cmmCommunityValueForArcana` 0x00107890).
+It is 0 when that link has no record yet.
+
+Both functions only copy scalars out of the game's records. Nothing is written,
+no game RNG is drawn and no guest pointer is kept, so they are legal in every
+callback mode, including synchronous UI callbacks, save snapshots and
+authorizers.
+
+## Story progression (`story.dungeon_cleared@1`)
+
+`p4.story.dungeon_cleared(dungeon)` reads the current save's rescue-clear flag
+for dungeon 1..7. Dungeon 1 is Yukiko's Castle. The argument must be an integer
+in that range; other values raise an error. This is the game's saved progression
+flag, not the party's level or a test of the current floor. It reads the current
+game state without changing it or consuming RNG, and can be used in synchronous
+callbacks and save snapshots. Observe it after the relevant save or new game is
+loaded. This API does not expose flag writes.
+
+## Weapon fusion transaction (`forge@1`)
+
+`p4.forge.commit{character, persona, vessel, item, fee, signature?}` asks the
+game to turn one carried Persona into a weapon. It consumes the Persona, one
+unequipped vessel weapon and `fee` yen, and adds one `item`. Everything is
+checked before anything is queued:
+
+- `character` is a recruited fighting party member (1 Yu, 2 Yosuke, 3 Chie,
+  4 Yukiko, 6 Kanji, 7 Naoto, 8 Teddie).
+- `persona` is carried and not the equipped (lead) Persona, and it is not the
+  last one.
+- `vessel` and `item` are weapons (equipment band 0) that `character` may
+  equip, and differ. At least one unequipped `vessel` is owned, and fewer than
+  99 of `item`. Expanded item IDs work through the item tables.
+- `fee` is at most the money held.
+
+A failed check returns `false, reason` and queues nothing. Otherwise it returns
+`true`, and the request (one at a time across all mods) applies at the next
+frame safe point outside battle:
+
+1. The `weapon_fusion` authorizer is asked at stage 1 (commit). A denial spends
+   nothing.
+2. Recruitment is checked again; if the character is no longer recruited, the
+   request is refused without spending. The remaining checks also run against
+   the current state; a request that no longer fits them is the mod's failure,
+   never a partial forge.
+3. The Persona is removed the way fusion removes a material that is not the
+   lead (`datPersonaRemoveRosterMemberById` 0x0010AD80). Then the vessel and
+   the fee are taken and the item is added.
+
+`p4.forge.result()` then returns the outcome once, as `{outcome = "forged" |
+"refused", reason?, character, persona, vessel, item, fee, signature}`, and nil
+until there is one. `p4.forge.pending()` is true while the request waits.
+
+`commit` is refused in synchronous UI callbacks and save snapshots; call it
+from an ordinary event callback such as `frame_start`. A queued forge records
+semantic use of the mod. The log line
+`forge by owner N: character C persona P vessel V -> item I (fee F)` marks each
+forge.
+
+`p4.forge.vessel(character, item)` (capability `forge.vessel@1`) returns how
+many unequipped copies of `item` `commit` would accept as the vessel for
+`character`: the count when `character` is recruited and `item` is a weapon
+that fighting `character` may equip, and 0 for anything else. It is commit's own vessel check, so it never
+reads the item's display name: a weapon another mod renamed to a placeholder
+still counts, while `p4.inventory.count` refuses such an item. Arguments are
+IDs in commit's ranges (character 1-8, item 1-32765); others raise an error.
+It changes nothing but, like `commit`, is refused in synchronous UI callbacks
+and save snapshots.
+
+## Equipment exchange (`equipment@1`)
+
+`p4.equipment.get(character, slot)` returns the item a party member wears in a
+slot (0 weapon, 1 armor, 2 accessory), or 0 for none. It only copies a value
+and is legal in every callback.
+
+`p4.equipment.equip{character, slot, item}` puts one held `item` on
+`character`, and the item it replaces returns to the items, as the Camp
+equipment menu does. Everything is checked before anything is queued:
+
+- `character` is a fighting party member (1 Yu, 2 Yosuke, 3 Chie, 4 Yukiko,
+  6 Kanji, 7 Naoto, 8 Teddie) who has joined (`datMemberIsUnlocked`
+  0x00353DC0).
+- `item` is in the item table and is equipment of `slot` that `character` may
+  equip, as the menu lists it: equipment band (`datIdBand`) and character
+  permission (`datEntryHasFlag`). An expanded item must also pass the item
+  tables' own equipment check and be usable now. It is not already in that
+  slot, and at least one is held.
+- The replaced item, if any, is in the item table and fewer than 99 are held.
+  The menu silently drops a replaced item when 99 are held; the exchange refuses
+  instead, so nothing the player owns is lost.
+
+`p4.equipment.check{character, slot, item}` runs the same checks without
+queueing and returns the item that would be replaced (0 for none), or `nil,
+reason`. A failed `equip` returns `false, reason` and queues nothing.
+Otherwise it returns `true`, and the request (one at a time across all mods)
+applies at the next frame safe point outside battle, after a weapon fusion:
+
+1. The request is checked again against the state as it is then. A request
+   that no longer fits is refused whole and nothing is written.
+2. The menu's own commit (0x0013D5D0): the replaced item's count rises by one,
+   the item is assigned (`datAssignEquippedItem` 0x00106D40), then its count
+   drops by one.
+
+`p4.equipment.result()` then returns the outcome once, as `{outcome =
+"equipped" | "refused", reason?, character, slot, item, previous}`, and nil
+until there is one; `previous` is the replaced item (0 for none).
+`p4.equipment.pending()` is true while the request waits.
+
+`check` and `equip` are refused in synchronous UI callbacks and save
+snapshots. A queued exchange records semantic use of the mod. The log line
+`equip by owner N: character C slot S item I (replaced P)` marks each exchange.
+
+## Velvet Room command (`velvet.command@1`)
+
+`p4.velvet.command{page, label, operation?}` gives the Velvet Room one mod
+command and returns an enable/disable/remove subscription. Only one mod can
+hold it at a time; a second registration is refused.
+
+- `page` is a page handle from `p4.ui.page`, or its global key.
+- `label` is RAW font text of 1 to 47 bytes.
+- `operation` may only be `"weapon_fusion"`. The command is then offered only
+  while that authorizer allows stage 0 (offer). It is asked once each time the
+  root list settles, so a denial is logged once per visit, not every frame.
+
+When the Velvet root's three-row list is waiting for input, a hint row is drawn
+under it: `SQUARE (<key>)  <label>`, where `<key>` is the first keyboard key
+bound to Square. Square, which the root list never reads, then opens `page` in
+the real Config task created under the Velvet task, in the hosted mode of
+`docs/platform/settings.md` "Hosted flows". The root reads no input until the
+page closes (Back, Esc, `page_back()` or `page_close()` on its top view), then
+takes input as before. The log lines `Velvet command opened page K` and
+`Velvet command page closed` mark each visit.
+
+Removing, disabling or replacing the command is refused while its page is open.
+With no command registered the Velvet Room is unchanged.
+
 ## Session lifecycle and crash markers (API 1.3)
 
 `p4.lifecycle` tells a later launch whether an earlier one ended in a crash
@@ -275,6 +509,196 @@ A later launch deletes empty markers and keeps the newest 16 recorded crashes
 until they are consumed. `session`, `tag` and `consume` are disk writes,
 refused, like `p4.settings.set`, in synchronous UI/action callbacks and save
 snapshots.
+
+## Element queries
+
+`p4.elements` (API 1.5) answers which element a skill or weapon actually uses
+once table mods have added or rebound elements ([Tables](tables.md)). It is
+game-only and read-only: every answer comes from the frozen active element
+snapshot through the same pure resolvers the battle uses, so it never marks a
+table row as used and is legal in synchronous UI callbacks.
+
+```luau
+if p4.elements.active() then
+    local e = p4.elements.of_skill(0x79)   -- {key, name, short, kind} or nil
+    if e and e.weapon then ... end         -- Attack-style skill: ask of_weapon
+end
+local cached = p4.elements.revision()      -- changes when the snapshot changes
+```
+
+`active()` is `false` when no mod expands elements; the retail tables then hold
+the answer, and `of_skill`/`of_weapon` return `nil`. Otherwise `of_skill(id)`
+returns the skill's damage element after every provider's binding as
+`{key = "p4:fire", name = "Fire", short = "Fire", kind = "magic"}`, with `kind`
+one of `physical`, `magic`, `almighty` or `status`. A skill that takes its
+user's weapon element (Attack and its follow-ups, unless a provider bound the
+skill itself) returns `{weapon = true}`. `of_weapon(item)` returns the
+equipment's element the same way. Unknown, inactive or out-of-range IDs and
+skills without an element return `nil`, never an error. `revision()` is `0`
+with no active snapshot and changes whenever one is published; the snapshot
+is fixed for a session, so labels can be cached against it.
+
+## Audio volumes
+
+`p4.audio` (API 1.5) sets the port mixer's volume per category: `music`,
+`effects`, `voice` and `movie`. It is game-only mixer state, not game state:
+nothing is written to guest memory, no save is tagged, and the calls are legal
+in synchronous UI callbacks.
+
+```luau
+local percent = p4.audio.volume("music")            -- 0..100, default 100
+p4.audio.set_volume("voice", 60)                    -- true, or false if refused
+p4.audio.tag_adxt(handle, "voice")                  -- from a hook on an ADXT start
+```
+
+Sample voices (the sound driver's effects) count as `effects`, movie audio as
+`movie`, and every ADX stream as `music` until `tag_adxt(handle, category)`
+names the category of the stream an ADXT handle (its guest address) plays;
+it returns `false` when the handle's renderer word names no live renderer.
+
+Each mod has its own volume per category, and `volume` returns the caller's.
+The mixer uses the product of every mod's factor, so one mod never silently
+overrides another; the port logs the combined value whenever it is not 100%.
+The result multiplies inside the mix, after the game's own volumes and under
+the player's master volume in Config, which stays authoritative and scales the
+whole output. At 100 every sample is exactly as before. A mod's volumes return
+to 100 when its VM is torn down (failure recovery, shutdown) and are process
+state: a mod sets them again when it starts and puts them back to 100 when its
+feature is turned off. An unknown category or a volume outside 0..100 raises
+an error.
+
+## Artifacts (`artifacts@1`)
+
+`p4.artifacts` keeps a mod's own files in `mod-artifacts/<mod id>/` beside
+`p4pc.ini`, for output a player may want to keep or share (a spoiler log, a
+manifest) and for caches the mod can always rebuild.
+
+```luau
+local ok, why = p4.artifacts.write("runs/1f2e/spoiler.txt", text) -- string or buffer
+local bytes = p4.artifacts.read("runs/1f2e/layer.bin")           -- buffer, or nil, reason
+local where = p4.artifacts.folder()                              -- for display; nil without one
+```
+
+A path is 1 to 8 `/`-separated names of `A-Z a-z 0-9 _ . -`, at most 128 bytes:
+no empty, `.` or `..` name, no leading or trailing dot, no Windows device name
+(`CON`, `PRN`, `AUX`, `NUL`, `COM1`..`COM9`, `LPT1`..`LPT9`, with any
+extension) and no name that differs only by case from an entry already in its
+folder. Invalid paths are argument errors. `write` creates the folders it needs
+without following links or reparse points (an existing one refuses the write),
+writes a temporary file and atomically replaces the target before it returns
+`true`; anything else returns `false, reason` with nothing changed. Quotas are
+checked before writing: 4 MiB per file, 256 files and 64 MiB per mod. `read`
+returns the bytes (at most `maximum`, default 4 MiB) of a file in the mod's own
+folder, or `nil, reason`. Without a settings file (`P4PC_CONFIG=none`) writes
+are refused and reads find nothing. Like `p4.settings.set`, `write` is a
+synchronous disk write refused in synchronous UI/action callbacks and save
+snapshots; files do not mark saves as modded.
+
+## Published contracts
+
+`p4.contract` (capability `contract@1`) lets a mod hand plain read-only data to the mods that
+declared it in `[require]` or [`[companion]`](files.md#companions-api-16):
+
+```luau
+-- p4pc.hardmode's main.luau
+p4.contract.publish("run-profile", 1, { tier = "harder", physsplit = "1.2" })
+
+-- a mod with [companion p4pc.hardmode]
+local profile, version = p4.contract.read("p4pc.hardmode", "run-profile")
+if profile and version == 1 then ... end
+```
+
+`publish(name, version, value)` is legal only while `main.luau` runs, so every
+contract exists before any callback. The name follows the setting key syntax,
+`version` is a positive 32-bit integer the publisher chooses for its own data
+layout, and `value` follows the [`p4.save`](#save-provenance) value rules
+(booleans, finite numbers, strings and acyclic tables without metatables), at
+most 64 KiB encoded. The core keeps a frozen copy: a name is published once, a
+mod publishes at most 16 contracts, and they disappear when its VM is torn down.
+
+`read(owner, name)` returns a fresh copy whose tables are read-only, plus its
+version, or nil when the owner is not admitted (an absent companion) or never
+published that name. Reading an owner the mod did not declare raises an error.
+Requirements and companions run `main.luau` first, so their contracts are
+already there when a dependent's `main.luau` runs. Reads are legal in every
+callback, including synchronous UI callbacks and save snapshots; nothing about a
+contract is saved, so record what a save must remember in the mod's own block.
+## Battle command panel
+
+`p4.battle` (`battle.menu@1`) reads and steers the battle command panel while it waits
+for the controlled party member's own input; party AI (tactics) turns, Rush,
+enemy turns, all-out attack prompts and the battle simulator never count. Every
+request goes through the game's own panel flow: nothing is pressed on the pad
+and nothing happens without the game's own next step.
+
+```luau
+local menu = p4.battle.menu()        -- nil unless a panel waits for input
+if menu and menu.panel == "commands" then
+    p4.battle.choose("skill")        -- as if Skill were selected and confirmed
+elseif menu and menu.panel == "skills" then
+    p4.battle.point(2)               -- move the cursor to the second skill
+    p4.battle.aim(enemy.unit)        -- that skill's target selection starts there
+end
+local units = p4.battle.units()      -- {party = {...}, enemies = {...}} or nil
+```
+
+`menu()` returns `{panel, cursor, first, count, page, unit, action, id,
+command?, skills?, items?}`: the panel is `commands`, `skills`, `items`,
+`tactics` or `persona`; rows are 1-based; `unit`/`action` are the actor's guest
+addresses and `id` its character ID; the commands panel names the `command` at
+the cursor, the commands and skills panels list the actor's skill IDs in the
+skills panel's row order and the items panel its item IDs. `choose(name)` (commands panel: `analyze`, `tactics`,
+`guard`, `attack`, `skill`, `persona`, `item`, `escape`) moves the cursor there
+and makes the panel's next input read a confirm, so the game's own availability
+check, sound and next panel follow; an unavailable command is refused by the
+game as if the player had pressed it. `point(row)` moves a list panel's cursor
+(and its first visible row). `aim(unit)` makes that unit the default of the
+waiting action's next target selection when the game offers it as a
+candidate; the player still confirms or moves it. `units()` lists the battle's
+units as `{unit, id, data}` (BtlUnit, character or enemy ID, DatUnit).
+
+Reads are legal anywhere. `choose`, `point` and `aim` raise errors in
+synchronous UI callbacks and save snapshots, and return `false, reason` when no
+matching panel waits. One mod drives a wait: the first whose request is
+accepted; others get `false` and the driver's id until that panel's wait ends.
+A mod's use is recorded for save provenance only when the player confirms a
+panel it changed, never for reads or for requests that changed nothing.
+Nothing observes the panel until a mod first calls `menu`, `choose`, `point`
+or `aim`: the native observers are created disabled when the first mod VM
+initializes, so that first call, from any callback (a hook, or `frame_start`
+while `p4.clock.updates` observes `kwlnRunFrame`), only enables them.
+
+### Enemy action substitution
+
+`p4.battle.substitute(action, skill)` (capability `battle.substitute@1`) lets a
+mod replace the command an enemy is about to use, from inside a `before` hook on
+`btlAICommandSetActionCode` (`0x001de640`, signature `vppH`) for that call's own
+action:
+
+```luau
+p4.hook(0x1de640, "vppH", "before", function(context)
+    if wants_charge then
+        local ok, why = p4.battle.substitute(context.args[1], 227) -- Power Charge
+    end
+end)
+```
+
+Only skills that need no individual target qualify: one that targets its user,
+or one that hits every unit its sides collect, so the game's own collector
+supplies the targets. With Physical Split or other expanded elements active,
+the enemy AI carrier authorizes the substitution first
+(`p4_game_elements_ai_native_substitute`). That is what lets the next decode of
+this action accept a command the enemy's own table group or script did not
+offer; the original random draw and decision stand. With no expanded-element
+mod active (the usual case), there is no carrier: the call checks only the
+skill and its target scope, and the retail decode simply uses the rewritten
+`args[3]`. On success the call returns `true` and the hook's `args[3]` already
+holds the new skill. An inactive skill or one with another target scope
+returns `false` plus the reason, and so does a carrier refusal ("the enemy AI
+carrier refused the substitution"). A call outside a `before` hook on
+`0x001de640` (an `after` or `replace` hook included), for another action, or
+from a synchronous UI/action callback or save snapshot raises an error. Save
+provenance is recorded by the hook's own dispatch, not by this call.
 
 ## Native Config pages
 
@@ -353,9 +777,9 @@ inside the real adjust provider. Use it only in the isolated mod-test lane to
 exercise native recovery with a live UI callback; the scripted recovery choice
 and resulting persisted selector change require their own actual receipts.
 
-### Status rows (API 1.3)
+### Status rows (Camp: API 1.3; HUD: API 1.4)
 
-`p4.ui.status(text, placement)` replaces this mod's status rows with one line
+`p4.ui.status(text, placement)` (API 1.3 for Camp; API 1.4 for HUD) replaces
 (a string) or several (a table of strings); `p4.ui.status(nil)` clears them.
 `placement` is `"camp"` (the default: the native Camp root; two rows in a band
 above the menu header, then two above the bottom help line) or
@@ -366,16 +790,145 @@ mod's previous rows; a later-loaded mod never displaces an earlier one. Lines
 use the same RAW native glyphs as pages, 1 to 47 bytes each, and are validated
 and copied when set; drawing never calls Lua, and with no rows nothing is drawn
 or allocated. A Camp line wider than its 470-pixel band is narrowed to fit.
-Four rows plus the CONFIG corner stay within the native font manager's per-frame
-capacity (at most 5 text runs and 194 glyph nodes of its 256 and 1024).
+Four rows stay within the native font manager's per-frame
+capacity (at most 4 text runs and 188 glyph nodes of its 256 and 1024).
 HUD lines (API 1.4) are drawn every presented frame by the mod services'
 `mainDrawFrameUpdate` (0x102550) seam into the last ordering-table bucket,
 after every gameplay producer and the screen fades, so they stay visible over
 fields, battles, menus and fade-outs and are never hidden by `p4.hud.hide`.
 They start below any Camp rows the Camp root drew in the same frame and are
 plain native text at three quarters of the native size, at most 300 canvas
-pixels wide. The seam is enabled only while a HUD row exists.
+pixels wide. The seam is enabled only while a HUD row, an overlay HUD item or
+an overlay screen item exists; status rows draw first, then overlay HUD items,
+then screen items, all in ordering bucket 0xd7, and none is affected by
+`p4.hud.hide`. In a frame that draws a row or item the layer opens by clearing
+the depth buffer: the battle command phase writes a nearer depth with its Z-only
+TV outline before the last bucket, which used to hide every row and item there
+(they draw with the depth test on), and nothing in a frame draws after that
+bucket. A frame that draws none leaves the render list untouched.
 The rows disappear when the mod's VM shuts down.
+
+### Native sprites and overlays
+
+Overlays (capabilities `ui.sprite@1` and `ui.overlay@1`; the `screen` context
+is `ui.overlay@2`) put positioned native text and authored sprites where the
+native context draws its own, so a mod's marker looks like the game's
+([art families](ui_art.md)). They are the native replacement for status rows,
+which stay unchanged.
+
+```luau
+local badge = assert(p4.ui.sprite("badge", {x = 0, y = 0, w = 111, h = 21}))
+local camp = assert(p4.ui.overlay({context = "camp", fade = true, items = {
+    {key = "badge", sprite = badge, x = 22, y = 64},
+    {key = "cap", text = "CAP 15", x = 30, y = 92, plate = true},
+}}))
+camp:set("cap", "CAP 16")     -- validated and copied; drawn from the next frame
+camp:show("badge", false)
+```
+
+`p4.ui.sprite(image, {x, y, w, h})` names this mod's own
+`[resource-image <mod id>:<image>]` and a rectangle inside it. The image must be
+a power-of-two atlas (as retail sprite packs are): the native sprite path divides
+texel rectangles by the raster size, which equals the texture only then. It
+returns a readonly handle with `width` and `height`, or nil and a reason (no
+such frozen image, not power-of-two, no free sprite). Each handle is a synthetic
+one-record `SdkSpritePack` in port-owned guest memory whose raster is the
+pinned P4Resources image; retail packs and records are never touched. VM
+shutdown removes the sprite immediately, but a pack already in the draw queue
+keeps its image pinned until the next ordering-table clear. Retired packs count
+against the limit of 32 sprites across all mods until that clear.
+
+`p4.ui.overlay{context, fade?, items}` registers 1 to 8 items in one context:
+
+| Context | Drawn | Queue |
+| --- | --- | --- |
+| `camp` | the Camp root's idle state (cmpMainTaskStep, beside the status rows) | Camp's centered table 0xb1 |
+| `hud` | while the player walks a field or dungeon: hidden under menus, events, messages and battles, like the native field HUD (`mainDrawFrameUpdate` seam, enabled only while a HUD item or row exists) | last ordering bucket 0xd7 |
+| `screen` (`ui.overlay@2`) | every presented frame, never hidden and never faded (`fade = true` is an error): for markers that must stay visible over menus, events and battles, as status rows do | last ordering bucket 0xd7, after `hud` |
+
+Each item has a local `key`, canvas `x`/`y` (640x448) and exactly one of `text`
+(1 to 47 RAW glyph bytes, font 1) or `sprite`. Optional: `align`
+(`left`/`center`/`right` about `x`), `color` (0xRRGGBB text colour or sprite
+tint, default white), `alpha` (0..255), `scale` (native size 1, up to 8),
+`visible`, and for text `plate` (the status rows' native rounded plate) and
+`width` (narrow a wider line to this many canvas pixels). `fade = true` fades
+the items in over the native menus' 10 updates whenever the context begins
+(the Camp root opening, or the player regaining control in the field). Every item is validated before any is registered; an
+invalid item raises an error and nothing is registered. Capacity: 16 items
+across all mods, and 4 text items per context, so with four status rows a
+field frame (HUD and screen items) stays within 12 text runs and
+564 glyph nodes of the font manager's 256 and 1024. A registration that does not fit returns nil and a
+reason and registers nothing. A native queue callback invokes `sdkSpriteDrawNow`
+(0x25ea20) with the native tint, alpha, scale and depth. No separately allocated
+sprite sample is left behind if the frame's queue is cleared without drawing.
+
+The handle's `:set(key, text)`, `:show(key, visible)` and `:remove()` change
+only presentation state. Both constructors and the methods are refused in save
+snapshot callbacks, allowed in synchronous UI callbacks (they call no native
+code) and are not semantic use. Drawing never calls Lua; with no item nothing
+is drawn, allocated or queued. Everything a mod registered is removed when its
+VM shuts down.
+
+The authored [`ui_overlay` fixture](../../tests/mod_fixtures/ui_overlay/main.luau)
+uses a Camp badge from a power-of-two atlas, a plated Camp line, a HUD line and
+a plated screen marker. `mod_overlay_game[64|64w]` (registered only with
+`P4PC_MOD_WITNESS_TESTS`, run under `P4PC_MOD_WITNESS=1`) captures the field and
+the Camp root with the fixture installed but disabled and then enabled. It
+requires the overlay rectangles to change, the HUD line to be absent under Camp
+and the screen marker to be present in both. It is mod-witness evidence, never a
+retail reference.
+
+### Native rows
+
+Some native menus lay out a fixed set of rows with hard-coded positions per row
+count. `p4.ui.native_row` (capability `ui.native_row@1`) adds a mod row to such
+a menu so it looks, moves, sounds and answers input exactly like the retail
+rows. The first host is the Velvet Room's fusion card list (`"velvet_fusion"`).
+
+```luau
+local art = "card" -- [resource-image <mod id>:card], a 256x128 atlas
+local card = assert(p4.ui.native_row({
+    host = "velvet_fusion", key = "weapon", page = forge,
+    symbol = assert(p4.ui.sprite(art, {x = 0, y = 0, w = 72, h = 77})),
+    label = assert(p4.ui.sprite(art, {x = 80, y = 0, w = 99, h = 31})),
+    small = assert(p4.ui.sprite(art, {x = 80, y = 40, w = 72, h = 18})),
+}))
+card:enable(offered)          -- hide the card while an authorizer denies it
+```
+
+The Velvet card list takes one mod card. It sits after the fusion spreads and
+before Fusion Forecast, Talk and Back, so the list holds up to ten cards. The
+card's art follows the Velvet card families ([UI art](ui_art.md)): a 72x77
+symbol, a large label of at most 99x31 and a small label of at most 72x18, from
+the mod's own power-of-two atlas. A mod row that does not fit these is
+refused (nil and a reason), and so is a second one.
+
+How the card behaves:
+
+- **Layout.** Cards slide in, highlight, take the selection mark and fade like
+  the retail cards, from the same layout tables. Ten cards use a wider arc of
+  the same shape.
+- **Confirm.** Cross opens the row's `page` (a page or detail handle of the
+  same mod), hosted in the Velvet task's own Config child. The root reads no
+  input until the page closes. The cards then slide back in with the cursor on
+  the mod card.
+- **Refusal.** A page that cannot open plays the native refusal cue and the
+  list stays.
+- **Enable.** `card:enable(false)` drops the card the next time the list is
+  laid out. `card:present()` tells whether a list currently shows it, and
+  `card:remove()` unregisters it.
+
+Natively the list has nine `commandRows`. The tenth is a port-owned side row
+that the card-list overrides read through `p4_native_rows_velvet_row`
+(`include/p4pc/native_rows.h`). The card draws from a port-owned copy of the
+loaded `facility/velvet01.spr` records with the card's records appended,
+installed as the fcl sprite pool's pack. Retail records and packs are never
+written. With no enabled mod card, every override runs its retail path and the
+menu is byte-identical to retail.
+
+Rows are presentation. They are refused in save-snapshot callbacks and are
+not semantic use (the hosted page's own callbacks are). They are removed when
+the VM shuts down, before the mod's pages and sprites.
 
 ## Operation authorizers (API 1.3)
 
@@ -400,11 +953,21 @@ and the game is unchanged.
 
 | Operation | Seam | Context |
 | --- | --- | --- |
-| `fusion` | Velvet Room fusion command rows (0x2ecfc0): a denied kind is not offered | kind (0 pair, 1 triangle, 2..4 cross spread with 4/5/6 materials, 5 twelve materials), materials |
+| `fusion` | Velvet Room fusion command rows (0x2ecfc0): a denied kind is not offered; the root menu's roster pair fusion (flag 0x1305, 0x2e7ac0) is not entered | kind (0 pair, 1 triangle, 2..4 cross spread with 4/5/6 materials, 5 twelve materials, 6 roster pair), materials |
 | `encounter` | `p4.encounter.launch` (API 1.4), at the frame boundary before any teardown | encounter, source (1 = `p4.encounter.launch`) |
+| `battle_protection_item` | Before a held party item is selected as a Light/Dark death-protection replacement in battle (`authorize.battle_protection_item@1`). A denial skips the item before inventory spending and continues the native passive and social-link checks. It does not restrict ordinary item commands or field item use. | character (party ID), item (native item ID), element (6 Light, 7 Dark) |
+| `weapon_fusion` | the Velvet Room WEAPON FUSION command (capability `authorize.weapon_fusion@1`). Stage 0 (offer) is asked before its row is shown; a denial hides the row. Stage 1 (commit) is asked at the forge safe point before revalidation, fee or consumption; a denial spends nothing and the forge page shows the reason. Queueing a forge validates it before this commit-stage decision. The `fusion` operation never covers it. | stage (0 offer, 1 commit), character (party character ID), vessel (item ID; 0 at offer), persona (Persona ID; 0 at offer), signature (0 or 1) |
+| `retry` (capability `authorize.retry@1`) | a lost field battle, once per defeat, before the `p4.battle.defeat` handler is asked (below) | encounter, source (1 field script encounter, 0 shadow touched on the field) |
 
 Unknown operations are refused. Browsing and compendium rows of the Velvet Room
 are not fusion and are never gated.
+
+Challenge's initially-off **NO WEAPON FUSION** rule denies both stages while
+the run is active. Its value is fixed when the run is armed and restored from
+the run's save; older Challenge saves without this rule retain it off. It is
+independent of **NO FUSION**, which restricts Persona fusion instead. The
+restriction is prepared against the semantic Forge provider and does not
+constitute an in-game or hardware qualification.
 
 `p4.battle.formation(callback)` registers the one battle formation projector;
 a second registration while one exists is refused. When a battle creates its
@@ -414,11 +977,60 @@ order (1 Yu, 2 Yosuke, 3 Chie, 4 Yukiko, 6 Kanji, 7 Naoto, 8 Teddie), and
 returns nil to keep it or 1 to 4 unique IDs (1..10) to fight instead. The
 encounter's party array is not rewritten, so its retail owner still releases
 it; a character the battle did not set up uses one unit wrapper made the first
-time it is needed and kept for the process. The projection changes only who
-fights: story party, field units, recruitment and control settings are
+time it is needed and kept for the process. A lineup without Yu gives his
+leader role (the battle's first selected action) to its first fighter, logged
+as `battle leader role given to unit N`. The ally AI asks for the
+protagonist's action without checking he is present (script command 0x207B,
+0x1e6d20); in such a lineup that request answers with the leader-role
+action, and any other unresolved request answers -1 instead of reading
+through NULL. The ally AI also ranks the protagonist's HP and ailments by his
+character ID alone (script commands 0x205A, 0x1e1530, and 0x205D, 0x1e1800);
+in such a lineup those queries ask about the leader-role fighter instead, so
+allies rank, heal and cure the leader by its own HP and ailments, with the
+protagonist's cure priority and attack gate, and a dead leader answers as a
+dead Yu would. Queries by any other character ID, including the AI's own-unit
+identity, are unchanged. The turn-start counter used by the victory Shuffle Time
+chance (0x1a06d0, 0x1ef7e0) counts that leader's eligible ordinary turns when
+Yu is absent, under the same gates as Yu; a present Yu retains his retail count.
+The projection changes only who fights: story party, field units, recruitment and control settings are
 untouched, and anything else (who receives commands, defeat handling, EXP) is
 the mod's to arrange through hooks. Like authorizers, the callback runs in
 snapshot mode; an error or an invalid lineup enters mod recovery.
+
+`p4.battle.defeat(callback)` (capability `battle.defeat@1`) registers the one
+handler that answers a lost field battle before its Game Over; a second
+registration while one exists is refused. A field battle ends in
+`FldEvent_FieldToBattle` (0x172e00) state 12, which starts the Game Over
+procedure when the field leader's group (`D_007EF9F8`) is defeated (KO bit
+0x80000 or HP 0). Before that state runs, the callback receives a readonly
+`{name = "defeat", encounter, source, polls, allowed, reason, party}`:
+`source` is `field` for a field script's encounter request (0x174680: story
+bosses such as the Avenger Knight) or `collision` for a shadow touched on the
+field; `polls` counts the earlier calls for this defeat; `allowed` is false,
+with the `reason`, when a `retry` authorizer refused or the battle start was
+not recorded; `party` lists the fighters' battle-start `{id, hp, sp, ailments}`.
+It returns:
+
+| Answer | What the game does |
+| --- | --- |
+| `nil` | the Game Over runs now, exactly as retail |
+| `"hold"` | the state becomes 9 (states 6..9 only advance), so the next frame asks again at state 10; after 18000 holds the Game Over runs |
+| `"retry"` | the battle-start snapshot is copied back and the state becomes 10, which calls `btlTaskCreate` (0x192e90) with the same setup: the same encounter starts again at the same place. A retry that is not `allowed` is refused and the Game Over runs |
+
+The snapshot is taken in a native observer before `btlTaskCreate` builds each
+battle: the ten playable characters' 0x30-byte DatUnit records (HP, SP, the
+ailment word, buffs, tactics) and every 0x12C-byte enemy group of the setup
+(summons are added into and removed from it in place). A field battle's groups
+belong to the field, so they are still live after the loss. Items used,
+Analyze knowledge, the random generator and everything else are kept as the
+lost battle left them; the lost battle grants no rewards, the retried one its
+own. Script-sequence battles (`btlScriptStartEncounter`, 0x1932f0) and
+`p4.encounter.launch` never reach this state and keep their own outcome. The
+callback runs like an event callback (it may draw overlays, read
+`p4.input.action` and log); an error enters the native mod recovery. Both
+observers are created disabled with the first handler and run only while an
+enabled handler exists; the native log names every answer
+(`p4pc: mods: battle defeat: ...`).
 
 ## Game services (API 1.4)
 
@@ -427,7 +1039,11 @@ Queries work in any callback. Requests, camera leases and HUD hides change the
 running game or what it draws: they raise an error in synchronous UI callbacks
 and save snapshots, and record semantic use of the mod. A request is validated
 when it is made and carried out by the game thread at the next scheduler frame
-boundary, before `frame_start` subscribers run, never inside a hook or task.
+boundary, before `frame_start` subscribers run, never inside a mod's hook
+callback or a task. That boundary is still inside the game's frame
+(`kwlnRunFrame`): while `p4.clock.updates` observes that function, the boundary
+and every `frame_start` callback run inside its native hook dispatch, where no
+native hook can be added.
 Nothing here hooks or runs per frame until a mod first uses a service: the
 native seams are created disabled when the first mod VM initializes.
 
@@ -462,6 +1078,12 @@ field root state 13, the player in control and none of the above in progress.
 The first `p4.scene` query starts observing field entries
 (`K_SeqFieldRecordStart`, 0x170220) for the rest of the process.
 
+`p4.scene.player_position()` (`scene.player-position@1`) returns the player's
+horizontal world coordinates `x, z` in a ready field or floor, or `nil` when
+the position is unavailable. Coordinates are local to the current field and
+room; check `p4.scene.state()` before interpreting them. This is a read-only
+query and never moves the player.
+
 `p4.scene.warp{field=, room=, entry=0, direction=0}` returns `true` when queued
 or `false, reason`. It requires a ready fixed field (sequence 9), field and room
 0..999 with a `field/pack/fFFF_RRR.p00` resource on the disc, and no other
@@ -477,8 +1099,65 @@ room's `field/pack` resource, the same test a warp makes, without a request.
 string and the battle outcome when there is one: `requested` (queued or
 loading), `battle`, `returning`, `done` (with `arrived`, `returned` or why the
 game finished it otherwise) or `refused` (with the reason; nothing changed).
-Only one request is in flight at a time across all mods. A request whose scene
-stops being ready before it runs is refused and discarded, never retried later.
+Only one request is in flight at a time across all mods. With `scene@2`, each
+mod retains its own last accepted result even if another mod starts a request;
+it is replaced by that mod's next accepted request or cleared at shutdown.
+Serialize requests within the same mod when each result matters: a new
+accepted request supersedes its previous one. An immediate refusal does not
+replace it. A request whose scene stops being ready before it runs is refused
+and discarded, never retried later.
+
+### Passing the time slot (`calendar.pass@2`) and the hold on time (`calendar.hold@1`)
+
+`p4.calendar.pass()` returns `true` when queued or `false, reason`. It ends the
+current time slot the way an activity does. The next slot is the one the game
+has staged (`datGetPendingFlag`; after every calendar step the game stages the
+next one itself); when nothing is staged it is the one `calendarStepTimeSlot`
+(`0x00120F70`) would stage (slot 5 rolls over to the next day, days without a
+calendar entry step by one, others step 0, 3, 5), and the request stages it
+through the game's own setters (`datSetPendingDateIndex/TimeSlot/Flag`, as the
+script command at `0x0025C560` does). Refusal reasons: the scene is not a
+ready fixed field (the warp gate and its reasons), `a camera lease is active`,
+`another scene request is in flight`, `the next time slot is tomorrow` (never
+across midnight), a hold (below; with `calendar.pass@2`) and, at the
+frame boundary, `the calendar changed before the time could pass` when the
+staged slot no longer matches the request, or the hold again, checked in
+the same boundary step that stages the slot, so no game script runs between
+the check and the pass. Once the
+scene resources are prepared it requests sequence 25, CALENDAR MAIN, as the
+script command at `0x00176320` does; `calendarStepTimeSlot` applies the slot and
+starts that period's scheduler procedure, which picks the next scene. The
+request shares the scene queue and `p4.scene.status()`. A `done` detail that
+starts with `passed` means sequence 25 ran and the date and slot read back
+equal the expected ones: `passed` when the game is back in a ready field, or
+`passed; an event followed`, `passed; a dungeon floor followed` or `passed; a
+battle followed` when the next scene is not a field. Other `done` details:
+`the calendar sequence did not start` (600 frames) or `did not finish` (5400
+frames), `the game did not return to a ready field` (5400 frames with no
+sequence) or the slot read back. Frames are counted only while the calendar
+runs or nothing is happening, so field events and messages after the pass are
+waited out. The call logs the slot it expects and records semantic use, like a
+warp.
+
+`p4.calendar.hold()` returns `nil`, or why the time is held. Retail has no
+single free-time gate; every activity that spends time checks its own
+conditions. The hold is what they share. First the story hold, the script
+flags on which the optional time-spending activities of the free fields refuse
+(Aiya, the shrine, the bus stop and the capsule machines of the shopping
+district, the Junes elevator, the library, the desk, sofa and bed at home,
+riverbank fishing; `BIT_CHK`, which is `datGetFlag`). Only scheduler procedures
+set and clear them. Reasons: `the 12/05 investigation holds the day` (flag
+`0x60F`, set by `sdl12_05_AM_A` and cleared by `sdl12_05_PM_D`; "You have to
+gather information") and `the last day holds the time` (flag `0x602`,
+`sdl03_20_PM_B` to `sdl03_21_AM_A`; only the farewells remain). Then the slot's
+owner: `the schedule still runs this time of day` while the `sdlScheduler`
+task that the calendar step starts (`cldSchedulerStart`, `0x00260450`) is
+still running the slot's `sdlMM_DD_<slot>` procedure. A procedure that ends
+without handing the player a scene makes that task request the calendar
+sequence itself (`cldSchedulerTaskUpdate`, `0x00260020`), so the slot is not
+the player's until the task is gone (it is freed two frames after its
+procedure ends). An activity's own availability (weather, weekday, prices,
+Social Link state) is not part of the hold.
 
 ### Encounter launcher
 
@@ -526,8 +1205,9 @@ Out-of-range values return false. `input(true)` gives the mod the pad: the game
 then receives a neutral packet after the mod's own input sample, and after
 `input(false)` or release the neutral packet continues until every button is
 up, so no held button reaches the game as a new press. The lease ends at
-`release()`, a field change, an event, a menu or the mod's shutdown;
-`active()` then returns false and why.
+`release()`, a field change, an event, a menu, a `give.skill` choice panel
+about to open (`docs/modding/systems/actions.md`; `acquire` is refused until
+it has) or the mod's shutdown; `active()` then returns false and why.
 
 ### HUD groups
 
@@ -545,12 +1225,437 @@ Hides are per mod and per group, require a field, floor or battle and are
 released at the next scene change, load or the mod's shutdown; a mod that
 keeps a HUD hidden reapplies it on `field_enter`/`battle_start`.
 
+### Practice speed (`pace@1`)
+
+`p4.pace.set(rate)` asks for 0.25, 0.5, 1, 2 or 4 times normal speed and
+returns `true` or `false` and a reason; `p4.pace.state()` returns the requested
+rate, the rate in force and, when they differ, why. One mod at a time owns the
+speed; `set(1)`, the mod's shutdown or recovery and a return to the title
+release it. It changes how fast wall time passes for the game's own scheduler
+clock (`src/platform/kernel_thread.c`, `include/p4pc/pace.h`): every VBLANK,
+alarm and timed wait keeps its spacing in game time, so each frame runs the
+same updates, random draws and counters as at normal speed and only the host
+waits less or more between frames. The new rate is taken at a VBLANK from the
+current clock, so time never jumps. A run that was never paced uses the host
+clock exactly as before.
+
+The requested rate runs only in gameplay: a ready field or floor, or a
+battle. Camp and Config menus, scene changes and movies run at 1x, and the
+requested rate returns at the next ready field or battle. Above 1x only every
+second or fourth frame is drawn and presented, so the display keeps its own
+rate. At any rate other than 1x the audio output is muted and the mixer
+renders each VBLANK period's samples from the kernel (as on a virtual clock)
+instead of the device's real-time callback, so ADX voices, streams and music
+sequences advance with game frames and their ends fall on the same frames as
+at 1x; at 1x the device plays again. Movies keep their own audio clock, which
+is why they run at 1x.
+
+Pacing changes wall time only, so it records no semantic use and never tags a
+save, but like other requests it is refused in synchronous UI callbacks and
+save snapshots. A virtual-clock, turbo or lockstep run (`P4PC_VIRTUAL_CLOCK`,
+`P4PC_TURBO`, the battle simulator) keeps its own time and refuses it.
+
+## Final-damage modifiers
+
+`p4.damage.on{kind, priority, fn}` (capability `stage.damage@1`) registers a
+modifier in the native final damage stage
+([tables.md "Final damage stage"](tables.md#final-damage-stage), the end of
+`datCalcSkillAmount` 0x00235520) and returns an enable/disable/remove
+subscription that counts toward the mod's 128 like a hook:
+
+```luau
+p4.damage.on({kind = "multiply", priority = 10, fn = function(hit)
+    if hit.target_side == "enemy" and hit.hit_kind == "weak" then
+        return 1.2
+    end
+    return nil
+end})
+```
+
+`kind` is `"multiply"` (fn returns a factor) or `"add"` (an addend); `priority`
+is an optional integer, default 0. fn receives one eligible hit as a readonly
+table and returns a number, or nil to leave the hit alone:
+
+| Field | Meaning |
+| --- | --- |
+| `skill` | skill ID |
+| `source_side`, `source_id` | `"party"` or `"enemy"`, and the attacker's DatUnit ID |
+| `target_side`, `target_id` | the unit taking the damage |
+| `source_status`, `target_status` | each unit's DatUnit ailment word for this hit, as the retail equation reads it: committed before this action, never including the ailments the action itself inflicts |
+| `origin_side`, `origin_id` | the unit the hit was aimed at; differs from the target only when `reflected` |
+| `hit_kind` | `"normal"`, `"critical"`, `"weak"` or `"other"` |
+| `element` | the resolved element leaf, or nil |
+| `reflected` | a repel delivered the hit back to its source |
+| `resolved` | true while the game resolves the hit; false for an estimate (AI target choice) |
+| `stock` | the retail equation's value before any modifier |
+| `origin` (`stage.damage@2`) | the command the game resolves: `"skill"`, `"item"` or `"attack"` (Attack and its weapon follow-ups); `"unknown"` only for an estimate outside the resolution of an action |
+| `source_persona`, `source_persona_level` (`stage.damage@2`) | a party attacker's active persona ID and that persona's level, for a skill or an unknown origin, so an estimate and the resolved hit agree; nil for an enemy, an item or an attack |
+
+The stage orders every mod's modifiers by priority, then multiply before add,
+then the mods' load order, then registration order, and converts the composed
+value once with the retail truncation and clamp. fn runs synchronously like a
+save snapshot: no native calls, no guest or settings mutation and no `p4.log`
+(record what you want to report in your own Lua state and log it from a later
+callback, such as `frame_start`), the ordinary callback budget. It must be a
+pure function of the hit (no RNG, the same answer for an estimate and the
+resolved hit). An identity value (factor 1, addend 0)
+is the same as nil; any other value records semantic use of the mod. An error,
+a non-number result or an exhausted budget never applies a value: the mod
+enters native recovery. Registration is a start-up declaration: `p4.damage.on`
+inside any callback is refused. A disabled modifier keeps its place and is not
+called; `remove` (refused while a hit is composed), VM teardown and session end
+unregister it. With no modifier registered the game's damage is unchanged.
+
+## Recovery, skill cost and chance modifiers
+
+`p4.recovery.on` (capability `stage.recovery@1`), `p4.cost.on` (`stage.cost@1`)
+and `p4.chance.on` (`stage.chance@1`) take the same
+`{kind, priority, fn}` specification as `p4.damage.on` and follow every rule
+above: start-up registration, snapshot-mode fn, the same order and identity
+rule, enable/disable/remove handles counted like hooks, native recovery on an
+error. Each registers in its own native stage ([tables.md "Final damage
+stage"](tables.md#final-damage-stage) and the sections after it), and none runs
+while it has no modifier.
+
+```luau
+p4.cost.on({kind = "multiply", priority = 20, fn = function(cost)
+    if cost.persona == JACK_FROST and cost.resource == "sp" then return 0.81 end
+    return nil
+end})
+```
+
+`p4.recovery.on` sees each formula HP heal (the Dia and Media lines) after
+Divine Grace and the variance. The result is truncated once and clamped to
+1..32550:
+
+| Field | Meaning |
+| --- | --- |
+| `skill`, `source_side`, `source_id`, `target_side`, `target_id` | as for damage |
+| `resolved`, `origin` | as for damage |
+| `stock` | the heal before any modifier |
+| `source_persona`, `source_persona_level` | as for damage |
+
+`p4.cost.on` sees every nonzero skill cost wherever the game computes it: the
+battle and Camp skill lists, availability, the deduction, AI and the Persona
+cost rows. The result is rounded half up once and clamped to 1..65535, so a
+nonzero cost stays nonzero:
+
+| Field | Meaning |
+| --- | --- |
+| `skill` | skill ID |
+| `side`, `unit` | the paying unit's side and DatUnit ID |
+| `resource` | `"hp"` or `"sp"`, the skill row's cost kind |
+| `stock` | the cost after Spell Master/Arms Master and the minimum of 1 |
+| `persona`, `persona_level` | the persona the cost is priced for: the unit's active persona, or the persona a Persona or Camp cost row shows, which may be a stocked one; nil for an enemy |
+
+`p4.chance.on` sees each rolled ailment or instant-KO attempt: one call per
+target, since the game rolls each target of an all-target skill separately.
+The result is truncated once, then the game's own clamp to 0..99 and its single
+random roll follow. Guard, immunity and null exits, guaranteed rates (100 or
+more) and the scripted unconditional KO never reach it:
+
+| Field | Meaning |
+| --- | --- |
+| `skill`, `source_side`, `source_id`, `target_side`, `target_id` | as for damage |
+| `component` | `"ailment"`, or `"instant_ko"` for the KO mask 0x80000 |
+| `statuses` | the attempted status mask |
+| `item` | an item action |
+| `stock` | the game's truncated chance before its clamp |
+| `afflictions` | ailments that landed on the target earlier this battle (capability `status.afflictions@1`) |
+| `source_persona`, `source_persona_level` | a party attacker's active persona and level; nil for an enemy or an item |
+
+Rage, fear, silence, confusion, poison, exhaustion and enervation count as
+afflictions; Dizzy and KO do not. SMT V-style decay, where each prior
+affliction in the fight makes the next one less likely:
+
+```luau
+p4.chance.on({kind = "multiply", fn = function(hit)
+    if hit.component ~= "ailment" or hit.target_side ~= "enemy" then return nil end
+    return math.max(0.1, 1 - 0.3 * hit.afflictions) -- 100% -> 70% -> 40% -> 10%
+end})
+```
+
+## Ailment wear-off
+
+> Requires capability `status.wearoff@1`.
+
+`p4.status.wearoff.on` takes the same `{kind, priority, fn}` specification and
+changes the chance that a unit shakes off an ailment on its own turn, for party
+members and enemies alike. Confusion, fear, rage and exhaustion wear off
+without a roll on a unit's third turn with them, enervation and silence on its
+sixth (Fast Heal halves that, Insta-Heal makes it one); each turn in between
+rolls. The result is truncated and clamped to 0..100 (0 never cures on that
+roll, 100 always does); the game's own random roll then follows as usual:
+
+| Field | Meaning |
+| --- | --- |
+| `side`, `unit` | the unit whose turn it is and its DatUnit ID |
+| `status` | `"confusion"`, `"fear"`, `"rage"`, `"exhaustion"`, `"enervation"` or `"silence"` |
+| `level`, `luck` | the unit's level and Luck |
+| `turns` | the unit's own turns with the ailment so far (rolls start at 2) |
+| `limit` | the turn that cures it without a roll |
+| `stock` | the game's chance in percent |
+| `afflictions` | ailments that landed on the unit this battle, this one included (capability `status.afflictions@1`) |
+
+```luau
+p4.status.wearoff.on({kind = "add", fn = function(roll)
+    return 15 * (roll.turns - 1) -- every unit shakes ailments off faster each turn
+end})
+```
+
+## Buff multipliers
+
+> Requires capability `buff@1`.
+
+`p4.buff.on` takes the same `{kind, priority, fn}` specification and changes
+the multiplier a buff rank, Charge or Concentrate gives one stat, for party
+members and enemies alike. The game asks for the attacker's attack or magic
+and the target's defense when it works out damage, and the attacker's
+accuracy and the target's evasion when it works out a hit. The result is
+clamped to 0..100:
+
+| Field | Meaning |
+| --- | --- |
+| `side`, `unit` | the unit and its DatUnit ID |
+| `stat` | `"attack"`, `"magic"`, `"defense"` (damage taken), `"accuracy"` or `"evasion"` |
+| `rank` | the buff rank: -1, 0 or 1 |
+| `charged` | this attack's Charge (attack) or Concentrate (magic) is up |
+| `stock` | the game's multiplier: the rank table, x2.5 Charge, Lead boost |
+
+```luau
+p4.buff.on({kind = "multiply", fn = function(query)
+    if query.charged then return 1.8 / 2.5 end -- Charge and Concentrate give x1.8
+    return nil
+end})
+```
+
+## Battle rewards
+
+> Requires capability `reward@1`.
+
+`p4.reward.on` takes the same `{kind, priority, fn}` specification and changes
+the EXP each recipient and the money the team earns from a won battle. The
+result is truncated and clamped to 0..999999; 0 pays nothing:
+
+| Field | Meaning |
+| --- | --- |
+| `reward` | `"exp"` or `"money"` |
+| `recipient` | for EXP: `"hero"`, `"party"` (a party member) or `"persona"` (one of the protagonist's Personas); nil for money |
+| `id` | the hero's 1, the party member's character ID or the Persona's ID; nil for money |
+| `level` | the recipient's level; nil for money |
+| `equipped` | for a Persona: true for the one the protagonist carries, false for a stock Persona earning through Growth |
+| `stock` | the game's award (EXP after the level-difference scale, Growth, Lead boost and EXP accessories; money after its flags) |
+
+Stock Personas without a Growth skill are asked with stock 0, so a mod can give
+them EXP. Money is asked every frame the results screen shows it and once more
+for the payment; answer the same every time.
+
+```luau
+p4.reward.on({kind = "multiply", fn = function(query)
+    if query.reward == "exp" and query.level >= 30 then return 0 end -- level cap 30
+    return nil
+end})
+```
+
+## Unit values
+
+> Requires capability `unit@1`.
+
+`p4.unit.on` takes the same `{kind, priority, fn}` specification and changes a
+unit's max HP and SP (an enemy's starting HP and SP with them) and the five
+stats battle formulas read, for party members and enemies alike. The result is
+truncated and clamped: max HP and SP up to 999 for the party and 65535 for an
+enemy, stats to 1..99:
+
+| Field | Meaning |
+| --- | --- |
+| `side`, `unit` | the unit and its DatUnit ID |
+| `stat` | `"max_hp"`, `"max_sp"`, `"strength"`, `"magic"`, `"endurance"`, `"agility"` or `"luck"` |
+| `level` | the unit's level |
+| `stock` | the game's value (after HP/SP skills, accessories and the party cap; a stat before Enervation halves it) |
+
+Max HP and SP are read across the game, outside battle too, so keep fn cheap.
+
+```luau
+p4.unit.on({kind = "multiply", fn = function(query)
+    if query.side == "enemy" and query.stat == "max_hp" then return 1.5 end
+    return nil
+end})
+```
+
+## Accuracy and critical hits
+
+> Requires capability `hit@1`.
+
+`p4.hit.on` takes the same `{kind, priority, fn}` specification and changes the
+chance that an attack hits and the chance that it lands a critical, for party
+members and enemies alike. The result is truncated and clamped to 0..100 (0
+never succeeds, 100 always does); the game's own random roll follows:
+
+| Field | Meaning |
+| --- | --- |
+| `roll` | `"accuracy"` (after the game's 50..99 clamp) or `"critical"` |
+| `skill`, `source_side`, `source_id`, `target_side`, `target_id` | as for damage |
+| `stock` | the game's chance in percent |
+
+Automatic hits and guaranteed criticals never ask.
+
+```luau
+p4.hit.on({kind = "add", fn = function(query)
+    if query.roll == "critical" and query.source_side == "party" then return 10 end -- +10% party criticals
+    return nil
+end})
+```
+
+[`tests/mod_fixtures/formula_stages`](../../tests/mod_fixtures/formula_stages/main.luau)
+is a complete small difficulty mod built only from these stages (unit, hit,
+buff, chance with afflictions, wear-off and reward), with the `requires=` list
+its `mod.ini` declares; `mod_api_check` type-checks it.
+
+## Passive grants
+
+> Requires capability `passive.grant@1`.
+
+`p4.passive` gives a passive skill to a party member, a Persona, an equipment
+item or an enemy kind without using a skill slot, and takes it back. The skill
+is an ID or a `p4.data` skill row and must be a passive of the loaded tables;
+a target is one of:
+
+| Target | Reaches |
+| --- | --- |
+| `{party = "yosuke"}` or `{party = 2}` | that member (1 protagonist .. 8 teddie), whatever Persona they have |
+| `{persona = row or ID}` | whoever has that Persona now; in the protagonist's stock, that Persona's own checks (Growth, the Camp skill list's duplicate choice) |
+| `{item = row or ID}` | whichever party member has the item equipped, in any slot |
+| `{enemy = row or ID}` | every enemy of that kind |
+
+The protagonist's own grants and his equipment's also reach his stocked
+Personas' checks. A grant counts wherever the game asks whether a unit has
+that passive, exactly as the skill in a slot would: damage, healing, hit,
+critical, ailment and affinity formulas, counters, Endure and Light/Dark
+survival, automatic buffs at battle start, regeneration, ailment recovery,
+victory recovery, max HP and SP, HP and SP cost halving, the enemy AI's avoidance
+of Counter, Growth, the field encounter check (0x205), and table effect rows and damage
+cover keyed to the skill. A unit that already has the skill, or whose skill two
+mods grant, has it once. The skill list itself is unchanged: skill menus,
+Analyze, the AI's command lists, fusion and learning see the eight slots only.
+Each check happens when the game makes it, so a grant made during a battle
+reaches the next check, and a battle-start check (automatic buffs) the next
+battle.
+
+`grant` and `revoke` are mutations (refused in snapshot callbacks such as
+stage modifiers) and return whether this mod's own grant changed; another mod's
+grant of the same skill stays. Once the catalog is loaded, `grant` takes only a
+Persona, item or enemy that is a row of it (`revoke` and `granted` take any
+in-range target, so a grant can always be taken back). `granted` asks whether
+any mod grants exactly that target the skill. `list` returns every held grant,
+ordered by target kind (party, persona, item, enemy), target, skill and mod load
+order, each with `kind` and numeric `id` beside its `target` and the holding
+mod's `p4.id` as `owner`: filter on `owner == p4.id` to see only this mod's.
+`clear` takes back every grant of this mod and none of another's.
+
+Every mod together holds at most 256 grants; `grant` of a new one beyond that
+raises "the grant table is full" and changes nothing, so a mod that grants in
+response to the player catches it with `pcall` and shows the refusal.
+
+Grants are not saved. They outlive a load and a New Game and end only when
+revoked, cleared, or with the mod's script. A grant that belongs to one save
+(a reward, a story trait) must therefore be dropped when another save is loaded
+or a New Game starts: do it in the `load` callback of `p4.save.register`, which
+runs for both (`origin` `"load"` or `"reset"`), and grant again from the loaded
+value. Grants that hold for every save (a Persona trait, an item's effect) can
+simply be made at start-up.
+
+```luau
+local counter = p4.data.skill("Counter")
+p4.passive.grant({persona = p4.data.persona("Izanagi")}, p4.data.skill("Arms Master")) -- every save
+p4.passive.grant({enemy = p4.data.enemy("Cowardly Maya")}, counter)
+
+local trait = false -- earned in this save
+p4.save.register({
+    schema = 1, max_bytes = 16,
+    snapshot = function() return trait end,
+    load = function(value, origin)
+        p4.passive.revoke({party = "kanji"}, counter) -- the previous save's
+        trait = value == true
+        if trait then p4.passive.grant({party = "kanji"}, counter) end
+    end,
+})
+```
+
+Navigator skills (the support Persona's escape, healing and analysis) are not
+passives and cannot be granted. Which native checks read grants, and the
+timing of each, is listed in [tables.md "Passive grants"](tables.md#passive-grants).
+The bundled Practice tools mod's P18 PASSIVE SKILLS
+([`mods/p4pc.practice`](../../mods/p4pc.practice/main.luau)) grants and takes
+back a party member's passives from its MODS page.
+
+## Session bank overlays (`tables.overlay@1`)
+
+`p4.tables` lets a mod give the current run its own copy of a loaded battle
+bank: the rows of a `BTL.CVM` file block, keyed by the file label and block of
+the game's own loader descriptor (`PERSONA1` is block 1 of
+`battle/PERSONA.TBL`). The table service owns the banks and their exact
+extents ([tables.md "Session bank overlays"](tables.md#session-bank-overlays)).
+
+```luau
+local stock = p4.tables.stock("PERSONA1")       -- the bytes as the game loaded them
+-- ... generate a run's rows from stock ...
+local ok, why = p4.tables.overlay({PERSONA1 = rows, UNIT2 = affinities})
+```
+
+`banks()` lists every bank (`key`, `file`, `block`, `bytes` once loaded,
+`overlayable`, and the `owner` mod of an overlay); `bank(key)` returns one.
+`stock(key)` returns a copy of the bank as loaded, never an overlay's bytes.
+`overlay(layer)` replaces this mod's whole layer, all or none: every buffer must
+have exactly its bank's loaded size, banks this mod overlaid before but left out
+get their stock bytes back, and on any refusal (`false, reason`) no byte
+changes. Only `PERSONA0`, `PERSONA1`, `UNIT0`, `UNIT1`, `UNIT2`, `ENCOUNT0`
+to `ENCOUNT4` and the static fusion charts `FUSION0` to `FUSION3` can be
+overlaid. The charts are the arcana result tables the game's pair, alternate
+pair, triangle and alternate triangle fusions read (cells (1,1) to (22,22) of
+each 24-byte-row chart, 526 bytes); every byte must be an arcana 1..22 or 0 for
+"no fusion". A chart overlay composes with `fusion` authorizers: an authorizer
+may still deny a fusion kind whose results the overlaid chart decides. With
+`tables.overlay@2`, `ITEMTBL`, the retail item table (1536 rows of 68 bytes, the layout
+`init/itemtbl.bin` loads), can be overlaid too, but only in each row's two
+unlock-gate words at `+0x3c` and `+0x40` (the material and count the shop lists
+and Daidara's unlocks test); every other byte must equal stock, and it exists
+only while the game uses the retail table (no item catalog is active). A bank
+overlaid by another mod is refused and named. Overlays are refused while a package table source owns the battle banks,
+during a battle, and from initialization, hooked functions, save snapshots and
+synchronous UI callbacks: call it from an event, a `frame_start` or the save
+`load` callback. `clear()` restores this mod's banks (refused the same way,
+including during a battle); `active()` names them.
+
+An overlay lasts for the run. Every load and every New Game reset ends it: the
+save commit restores every overlaid bank before any mod's `load` callback runs,
+so a mod re-applies its run's layer from `load` (its own save block). If the
+game re-copies or relocates an overlaid bank, the new bytes become its stock
+and the layer is applied again, or dropped (and logged) when the bank's size
+changed. VM teardown, which happens only at process shutdown, restores the
+mod's banks immediately. The live banks are what every
+game reader uses; an overlay records semantic use of the mod.
+
+### Derived table source files (`tables.source@1`)
+
+`p4.tables.source(producer, name)` returns a copy (a `buffer`) of a raw file a
+registered derived table producer recorded while composing the active table
+catalog ([tables.md "Derived table sources"](tables.md#derived-table-sources)),
+or nil when that producer is not selected, did not record that name, was
+refused, or the catalog is not active yet. It never returns live guest bytes.
+Copies are at most 4 MiB. It is a query: legal in every callback, with no
+semantic use. The package's own script parses the bytes as a bounded buffer
+codec; for example `p4pc.golden` reads `p4pc:golden`'s `init/cmpTable.bin`
+from the player's Golden install for its bike-ride skills.
 ## Semantic events
 
 `p4.events.on(name, callback)` returns an enable/disable/remove subscription.
 Payloads contain copied scalars; guest addresses do not retain native objects.
 Routes use typed native hooks and remain inactive without subscribers. A missing
 required native seam refuses activation rather than fabricating an event.
+For battle semantic events, a failed registration leaves no listener or event
+interest and does not consume the lifetime subscription limit; the error is
+propagated to the caller.
 The pinned Analysis checker resolves literal event-name overloads; branch on a
 union of names before registering so each callback receives its specific payload.
 
@@ -728,7 +1833,10 @@ paths, one container invocation per build or game. See the
 There is no claimed `P4PC_SCOPE=mods-no-load` route or acceptance from source alone.
 It builds entry guards and Luau together OFF/ON on **both i386 and x64**,
 with fixed zero initialization and both selectors forced off. The shared
-package/VFS plumbing remains in both builds. It runs the existing real
+package/VFS plumbing remains in both builds, as do the mask-tested authorizer
+and formation seams in overrides 001b1d70 and 002ecfc0, which take the retail
+path at mask 0. The port64 census baseline describes the guarded mirror, so only
+the compiled-in side is checked against it. It runs the existing real
 `logic64_init.py` checkpoint/walk cohort with private seed-card copies, not
 synthetic game state.
 

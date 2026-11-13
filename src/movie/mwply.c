@@ -541,6 +541,13 @@ int32_t func_0050d4d0(void *h) {
 
 void *p4pc_movie_audio_current(void) { return g_audio_ply && g_audio_ply->used && g_audio_ply->adx ? g_audio_ply : NULL; }
 
+/* Whether a movie is being prepared or played (practice speed holds 1x for it, include/p4pc/pace.h). */
+int p4pc_mwply_active(void) {
+    for (int i = 0; i < MAX_PLAYERS; i++)
+        if (g_ply[i].used && (g_ply[i].stat == STAT_PREP || g_ply[i].stat == STAT_PLAYING)) return 1;
+    return 0;
+}
+
 int32_t p4pc_movie_audio_format(void *h, int32_t *rate, int32_t *channels) {
     MwPly *p = ply_from(h);
     if (!p || !p->adx || p4adx_sample_rate(p->adx) == 0) return 0;

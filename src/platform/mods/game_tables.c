@@ -16,6 +16,8 @@ typedef struct Affinity {
 typedef struct ActionElement { P4ActionElementBinding binding; char owner[OWNER_SIZE]; } ActionElement;
 typedef struct AffinityAlias { P4AffinityProfileAlias alias; char owner[OWNER_SIZE]; } AffinityAlias;
 typedef struct AffinityEffect { P4AffinityEffectBinding effect; char owner[OWNER_SIZE]; } AffinityEffect;
+typedef struct DamageCover { P4DamageCoverBinding cover; char owner[OWNER_SIZE]; } DamageCover;
+typedef struct SideAilment { P4SideAilmentDef def; char owner[OWNER_SIZE]; } SideAilment;
 typedef struct EffectPair { uint32_t element, channel; } EffectPair;
 typedef struct DisplayOrder { uint32_t order, id; size_t index; } DisplayOrder;
 struct P4GameTables {
@@ -25,11 +27,15 @@ struct P4GameTables {
     ActionElement *actions;
     AffinityAlias *aliases;
     AffinityEffect *effects;
+    DamageCover *covers;
+    SideAilment *sides;
     size_t elements_count, channels_count, affinities_count;
     DisplayOrder *display_order;
     size_t elements_capacity, channels_capacity, affinities_capacity;
     size_t actions_count, aliases_count, actions_capacity, aliases_capacity;
     size_t effects_count, effects_capacity;
+    size_t covers_count, covers_capacity;
+    size_t sides_count, sides_capacity;
     EffectPair *effect_pairs;
     size_t effect_pairs_count;
     uint32_t revision;
@@ -41,7 +47,8 @@ int p4_game_elements_requested(const P4GameTables *tables)
 {
     if (!tables) return 0;
     if (tables->elements_count != P4_ELEMENT_RETAIL_COUNT || tables->channels_count != 3u ||
-        tables->affinities_count || tables->actions_count || tables->aliases_count || tables->effects_count) return 1;
+        tables->affinities_count || tables->actions_count || tables->aliases_count || tables->effects_count ||
+        tables->covers_count || tables->sides_count) return 1;
     for (size_t i = 0; i < tables->elements_count; ++i) if (tables->elements[i].owner[0]) return 1;
     return 0;
 }
@@ -111,6 +118,19 @@ int p4_game_tables_runtime_use_row(const P4GameTables *t, uint32_t domain, const
         const AffinityEffect *entry = row;
         ids[0] = entry->effect.source_kind; ids[1] = entry->effect.source_id;
         ids[2] = entry->effect.element_id; ids[3] = entry->effect.channel_id; owner = entry->owner;
+        break;
+    }
+    case P4_TABLE_SOURCE_COVER: {
+        if (!issued_row(row, t->covers, t->covers_count, sizeof *t->covers)) return P4_TABLE_INVALID;
+        const DamageCover *entry = row;
+        ids[0] = entry->cover.source_kind; ids[1] = entry->cover.source_id;
+        ids[2] = entry->cover.element_id; ids[3] = entry->cover.channel_id; owner = entry->owner;
+        break;
+    }
+    case P4_TABLE_SOURCE_SIDE_AILMENT: {
+        if (!issued_row(row, t->sides, t->sides_count, sizeof *t->sides)) return P4_TABLE_INVALID;
+        const SideAilment *entry = row;
+        ids[0] = entry->def.leaf; owner = entry->owner;
         break;
     }
     default: return P4_TABLE_INVALID;
@@ -245,6 +265,19 @@ static const AffinityEffect *effect_find(const P4GameTables *t,
         if (!effect_compare(&key, &t->effects[i])) return &t->effects[i];
     return NULL;
 }
+static int cover_compare(const void *a, const void *b)
+{
+    const P4DamageCoverBinding *x = &((const DamageCover *)a)->cover, *y = &((const DamageCover *)b)->cover;
+#define CMP(field) if (x->field != y->field) return (x->field > y->field) - (x->field < y->field)
+    CMP(source_kind); CMP(source_id); CMP(element_id); CMP(channel_id);
+#undef CMP
+    return 0;
+}
+static int side_compare(const void *a, const void *b)
+{
+    const uint32_t x = ((const SideAilment *)a)->def.leaf, y = ((const SideAilment *)b)->def.leaf;
+    return (x > y) - (x < y);
+}
 static const ActionElement *action_find(const P4GameTables *t, uint32_t kind, uint32_t id, uint32_t component)
 {
     if (!t || !t->actions_count) return NULL;
@@ -334,7 +367,7 @@ void p4_game_tables_destroy(P4GameTables *t)
 {
     if (!t) return;
     free(t->elements); free(t->channels); free(t->affinities); free(t->actions); free(t->aliases);
-    free(t->effects);
+    free(t->effects); free(t->covers); free(t->sides);
     free(t->effect_pairs);
     free(t->display_order); free(t);
 }
@@ -342,8 +375,8 @@ int p4_game_tables_element(P4GameTables *t, const char *owner, const P4ElementDe
 {
     if (!t || !d || !identifier(owner, OWNER_SIZE) || !strcmp(owner, "p4")) return P4_TABLE_INVALID;
     if (t->frozen) return P4_TABLE_FROZEN;
-    if (d->flags & ~15u || !key_valid(d->key) ||
-        !label_valid(d->display_name) || !label_valid(d->short_name) || !resource_ref_valid(&d->icon)) return P4_TABLE_INVALID;
+    if (d->flags & ~15u || !key_valid(d->key) || !label_valid(d->display_name) || !label_valid(d->short_name) ||
+        !resource_ref_valid(&d->icon) || !resource_ref_valid(&d->header_icon)) return P4_TABLE_INVALID;
     Element *existing = (Element *)element_find(t, d->id);
     if (existing) {
         if (strcmp(d->key, existing->desc.key) || existing->owner[0] || d->id >= P4_ELEMENT_RETAIL_COUNT) return P4_TABLE_CONFLICT;
@@ -495,6 +528,40 @@ int p4_game_tables_affinity_effect(P4GameTables *t, const char *owner, const P4A
     AffinityEffect *row = &t->effects[t->effects_count++]; row->effect = *effect; strcpy(row->owner, owner);
     return P4_TABLE_OK;
 }
+int p4_game_tables_damage_cover(P4GameTables *t, const char *owner, const P4DamageCoverBinding *cover)
+{
+    if (!t || !cover || !identifier(owner, OWNER_SIZE) || !strcmp(owner, "p4")) return P4_TABLE_INVALID;
+    if (t->frozen) return P4_TABLE_FROZEN;
+    if (cover->source_kind > P4_AFFINITY_EFFECT_EQUIPPED_ITEM || cover->channel_id != P4_CHANNEL_DAMAGE ||
+        !cover->percent || cover->percent > 99u || !cover->schema || !cover->revision ||
+        !key_valid(cover->key) || !owned_key(owner, cover->key) ||
+        !key_valid(cover->family) || !owned_key(owner, cover->family)) return P4_TABLE_INVALID;
+    for (size_t i = 0; i < t->covers_count; ++i) {
+        const DamageCover *row = &t->covers[i];
+        if (!strcmp(row->cover.key, cover->key)) return P4_TABLE_CONFLICT;
+        if (row->cover.source_kind == cover->source_kind && row->cover.source_id == cover->source_id &&
+            (strcmp(row->owner, owner) || row->cover.element_id == cover->element_id))
+            return P4_TABLE_CONFLICT;
+    }
+    int result = reserve((void **)&t->covers, &t->covers_capacity, t->covers_count + 1, sizeof *t->covers);
+    if (result) return result;
+    DamageCover *row = &t->covers[t->covers_count++]; row->cover = *cover; strcpy(row->owner, owner);
+    return P4_TABLE_OK;
+}
+int p4_game_tables_side_ailment(P4GameTables *t, const char *owner, const P4SideAilmentDef *def)
+{
+    if (!t || !def || !identifier(owner, OWNER_SIZE) || !strcmp(owner, "p4")) return P4_TABLE_INVALID;
+    if (t->frozen) return P4_TABLE_FROZEN;
+    if ((def->flags & ~P4_SIDE_FLAGS) || !def->cure_mask || def->crit_bonus > 100u || !def->schema ||
+        !def->revision || !key_valid(def->key) || !owned_key(owner, def->key)) return P4_TABLE_INVALID;
+    for (size_t i = 0; i < t->sides_count; ++i)
+        if (!strcmp(t->sides[i].def.key, def->key) || t->sides[i].def.leaf == def->leaf) return P4_TABLE_CONFLICT;
+    if (t->sides_count == P4_SIDE_AILMENT_LIMIT) return P4_TABLE_INVALID;
+    int result = reserve((void **)&t->sides, &t->sides_capacity, t->sides_count + 1, sizeof *t->sides);
+    if (result) return result;
+    SideAilment *row = &t->sides[t->sides_count++]; row->def = *def; strcpy(row->owner, owner);
+    return P4_TABLE_OK;
+}
 int p4_game_tables_freeze(P4GameTables *t, uint32_t revision)
 {
     if (!t || !revision) return P4_TABLE_INVALID;
@@ -530,6 +597,26 @@ int p4_game_tables_freeze(P4GameTables *t, uint32_t revision)
             (channel->desc.kind == P4_CHANNEL_KO && (effect->flags & (P4_AFF_REPEL | P4_AFF_DRAIN))))
             return P4_TABLE_INVALID;
     }
+    for (size_t i = 0; i < t->covers_count; ++i) {
+        const Element *element = element_find(t, t->covers[i].cover.element_id);
+        if (!element) return P4_TABLE_NOT_FOUND;
+        if (!(element->desc.flags & P4_ELEMENT_AFFINITY)) return P4_TABLE_INVALID;
+    }
+    /* A side ailment's leaf is its owner's own status leaf (affinity-bearing,
+     * neither offensive nor physical); its default comes from a damage leaf. */
+    for (size_t i = 0; i < t->sides_count; ++i) {
+        const SideAilment *side = &t->sides[i];
+        const Element *element = element_find(t, side->def.leaf);
+        if (!element) return P4_TABLE_NOT_FOUND;
+        if (side->def.leaf < P4_ELEMENT_RETAIL_COUNT || strcmp(element->owner, side->owner) ||
+            (element->desc.flags & (P4_ELEMENT_AFFINITY | P4_ELEMENT_OFFENSIVE | P4_ELEMENT_PHYSICAL)) !=
+                P4_ELEMENT_AFFINITY) return P4_TABLE_INVALID;
+        if (side->def.default_from == P4_SIDE_DEFAULT_NONE) continue;
+        const Element *from = element_find(t, side->def.default_from);
+        if (!from) return P4_TABLE_NOT_FOUND;
+        if ((from->desc.flags & (P4_ELEMENT_AFFINITY | P4_ELEMENT_OFFENSIVE)) !=
+            (P4_ELEMENT_AFFINITY | P4_ELEMENT_OFFENSIVE)) return P4_TABLE_INVALID;
+    }
     if (t->affinities_count) qsort(t->affinities, t->affinities_count, sizeof *t->affinities, affinity_compare);
     for (size_t i = 0; i < t->aliases_count; ++i)
         if (!profile_present(t, &t->aliases[i].alias)) return P4_TABLE_NOT_FOUND;
@@ -554,6 +641,8 @@ int p4_game_tables_freeze(P4GameTables *t, uint32_t revision)
     if (t->actions_count) qsort(t->actions, t->actions_count, sizeof *t->actions, action_compare);
     if (t->aliases_count) qsort(t->aliases, t->aliases_count, sizeof *t->aliases, alias_compare);
     if (t->effects_count) qsort(t->effects, t->effects_count, sizeof *t->effects, effect_compare);
+    if (t->covers_count) qsort(t->covers, t->covers_count, sizeof *t->covers, cover_compare);
+    if (t->sides_count) qsort(t->sides, t->sides_count, sizeof *t->sides, side_compare);
     t->effect_pairs = pairs; t->effect_pairs_count = pairs_count;
     t->display_order = order; t->revision = revision; t->frozen = 1; return P4_TABLE_OK;
 }
@@ -638,6 +727,38 @@ int p4_game_tables_has_affinity_effect_pair(const P4GameTables *t, uint32_t elem
     const EffectPair key = {element, channel};
     return bsearch(&key, t->effect_pairs, t->effect_pairs_count, sizeof *t->effect_pairs, effect_pair_compare) != NULL;
 }
+const P4DamageCoverBinding *p4_game_tables_find_damage_cover(const P4GameTables *t,
+    uint32_t kind, uint32_t id, uint32_t element, uint32_t channel)
+{
+    if (!t || !t->frozen || !t->covers_count) return NULL;
+    DamageCover key = {0};
+    key.cover.source_kind = kind; key.cover.source_id = id; key.cover.element_id = element; key.cover.channel_id = channel;
+    const DamageCover *row = bsearch(&key, t->covers, t->covers_count, sizeof *t->covers, cover_compare);
+    return row ? &row->cover : NULL;
+}
+size_t p4_game_tables_damage_cover_count(const P4GameTables *t) { return t ? t->covers_count : 0; }
+const P4DamageCoverBinding *p4_game_tables_damage_cover_at(const P4GameTables *t, size_t index)
+{ return t && t->frozen && index < t->covers_count ? &t->covers[index].cover : NULL; }
+const char *p4_game_tables_damage_cover_owner(const P4GameTables *t, size_t index)
+{ return t && t->frozen && index < t->covers_count ? t->covers[index].owner : NULL; }
+const char *p4_game_tables_damage_cover_row_owner(const P4GameTables *t, const P4DamageCoverBinding *row)
+{
+    return t && t->frozen && issued_row(row, t->covers, t->covers_count, sizeof *t->covers) ?
+        ((const DamageCover *)row)->owner : NULL;
+}
+const P4SideAilmentDef *p4_game_tables_find_side_ailment(const P4GameTables *t, uint32_t leaf)
+{
+    if (!t || !t->frozen || !t->sides_count) return NULL;
+    SideAilment key = {0};
+    key.def.leaf = leaf;
+    const SideAilment *row = bsearch(&key, t->sides, t->sides_count, sizeof *t->sides, side_compare);
+    return row ? &row->def : NULL;
+}
+size_t p4_game_tables_side_ailment_count(const P4GameTables *t) { return t ? t->sides_count : 0; }
+const P4SideAilmentDef *p4_game_tables_side_ailment_at(const P4GameTables *t, size_t index)
+{ return t && t->frozen && index < t->sides_count ? &t->sides[index].def : NULL; }
+const char *p4_game_tables_side_ailment_owner(const P4GameTables *t, size_t index)
+{ return t && t->frozen && index < t->sides_count ? t->sides[index].owner : NULL; }
 static int classify_action_element(const P4GameTables *t, const P4GameActionElement *declared,
     P4GameActionElement *resolved, int runtime)
 {

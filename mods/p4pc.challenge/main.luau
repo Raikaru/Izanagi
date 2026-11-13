@@ -3,9 +3,8 @@
 -- MODS > Challenge modes are armed at the next New Game and saved with the run;
 -- loading a save adopts that save's rules, never the current settings.
 --
--- Retail addresses are guest addresses from the generated hook catalog; the
--- table bases are the game's own gp globals, so every number shown or compared
--- comes from the player's disc at runtime.
+-- The remaining legacy guest-address hooks and reads are awaiting semantic
+-- providers; this package is not yet an API-first Challenge release.
 
 local GP = 0x007690F0
 local function gp(offset: number): number
@@ -13,7 +12,6 @@ local function gp(offset: number): number
 end
 local SKILL_TABLE = gp(0xb3b8) -- 0x28-byte skill rows
 local ENCOUNTER_TABLE = gp(0xb414) -- 0x18-byte encounter rows, flags word first
-local ENEMY_TABLE = gp(0xb3c4) -- 0x3C-byte enemy rows, level at +3
 local FIELD_SCRIPT = gp(0xb284) -- the field script whose procedure 15 is Game Over
 local HERO_EXP_TABLE = 0x005dd6e0 -- u32[99] hero EXP thresholds in the ELF
 
@@ -21,6 +19,16 @@ local A = {
     datPersonaPreviewLevelUp = 0x0010be60,
     datPersonaAddExp = 0x0010c980,
     datPersonaGetExpForLevel = 0x0010c750,
+    datCalcUnitClass = 0x00243e90,
+    datSetUnitHp = 0x001056e0,
+    datGetEquippedItemByUnit = 0x00106cd0,
+    datSetEquippedItemByUnit = 0x00105dc0,
+    datEntryGetPrimaryValue = 0x001068b0,
+    datEntryHasFlag = 0x00106c30,
+    datItemPrice = 0x00106a90,
+    datCalcIsDeadById = 0x00105610,
+    scrCommonLoadPersonaRecord = 0x0025d580,
+    scrGetParamInt = 0x0029cc00,
     datPersonaGetRecord = 0x0010a900,
     datPersonaRosterSlot = 0x0010ace0,
     datPersonaCountValidMembers = 0x0010b6f0,
@@ -28,7 +36,6 @@ local A = {
     datSetHeroExp = 0x00105990,
     datPersonaGetExpById = 0x00105210,
     datCalcSetLevel = 0x00231ef0,
-    datCalcSkillAmount = 0x00235520,
     FldAmbientFlagPtr = 0x001823c0,
     FldEvent_FindNearestVisibleActor = 0x0014c540,
     datUnitGetRecord = 0x00105510,
@@ -57,15 +64,16 @@ local EPOCHS = {
 local SAVES_PER_EPOCH = 3
 -- Solo combatants by playable battle ID. Companions join this list with their
 -- early-curve progression in a later update.
-local SOLO_IDS: {[string]: number} = {YU = 1}
-local SOLO_NAMES: {[number]: string} = {[1] = "YU"}
+local SOLO_IDS: {[string]: number} = {YU = 1, YOSUKE = 2, NAOTO = 7}
+local SOLO_NAMES: {[number]: string} = {[1] = "YU", [2] = "YOSUKE", [7] = "NAOTO"}
 
 local RULES = {"ironman", "boss_cap", "no_fusion", "solo", "no_battle_items", "no_field_recovery", "severe_damage",
-    "limited_saves", "mandatory_only"}
+    "limited_saves", "mandatory_only", "no_weapon_fusion"}
 local LABELS: {[string]: string} = {
     ironman = "IRONMAN - LOCK ON LOSS",
     boss_cap = "BOSS LEVEL CAP",
     no_fusion = "NO FUSION",
+    no_weapon_fusion = "NO WEAPON FUSION",
     solo = "SOLO MEMBER",
     no_battle_items = "NO ITEMS IN BATTLE",
     no_field_recovery = "NO FIELD RECOVERY",
@@ -75,8 +83,12 @@ local LABELS: {[string]: string} = {
 }
 
 type Rules = {[string]: boolean}
+-- A solo companion's early curve: join level j, join stats a, level-1 bases b,
+-- the join skills, and the skills already granted once.
+type Curve = {j: number, a: {number}, b: {number}, join: {number}, given: {number}}
+type BossLevels = {levels: {number}, source: string, sha256: string}
 type Run = {id: string, rules: Rules, epoch: number, saves: number, gen: number, custom: boolean, solo: number,
-    strict: boolean}
+    strict: boolean, curve: Curve?, bossLevels: BossLevels?}
 -- state: A active, D ended by a battle loss, U ended by an unclean exit during a
 -- STRICT battle. battle: "-" or the open STRICT battle "B<session>.<n>".
 type Ledger = {state: string, gen: number, recoveries: number, session: string, epoch: number, saves: number,
@@ -96,10 +108,11 @@ local campOpen = false
 local itemRefusalLogged = false
 local refusalsLogged: {[string]: boolean} = {}
 local severeLogged: {[string]: boolean} = {}
+local severeSeen: {[string]: string} = {} -- first resolved hit of each kind, reported at battle_end
 local encounterRefusals: {[string]: boolean} = {}
+local curveCheck: P4Subscription? = nil -- frame_start, enabled while a solo curve step waits
 local soloLineup: string? = nil -- the battle's own lineup, until reported
 local soloReported = false
-local severeAvailable = false -- the damage seam is in this build's hook catalog
 local session = 0 -- this launch's port session (p4.lifecycle), 0 when unavailable
 local battleCount = 0 -- STRICT battles opened in this session
 
@@ -164,19 +177,31 @@ local function ledgerPut(id: string, entry: Ledger)
     ledgerView = entry
 end
 
--- Disc-derived values -------------------------------------------------------
-
-local function enemyLevel(enemy: number): number
-    local base = p4.mem.read("u32", ENEMY_TABLE)
-    return p4.mem.read("u8", base + enemy * 0x3c + 3)
+-- Captured from the selected disc, separately from loaded or edited rows.
+-- Freeze all epochs and their file identity with the run, not on each read.
+local function originalBossLevels(): BossLevels
+    local levels = {}
+    local source, sha256 = "", ""
+    for _, epoch in EPOCHS do
+        local original = p4.data.original_enemy_level(epoch.enemy)
+        if original.level < 1 or original.level > 99 then
+            error("challenge: original boss level is outside 1..99")
+        end
+        if source ~= "" and (source ~= original.source or sha256 ~= original.sha256) then
+            error("challenge: original boss levels have inconsistent provenance")
+        end
+        source, sha256 = original.source, original.sha256
+        table.insert(levels, original.level)
+    end
+    return {levels = levels, source = source, sha256 = sha256}
 end
 
 local function currentCap(): number
     local current = run
     if not current then return 99 end
-    local epoch = EPOCHS[current.epoch]
-    if not epoch then return 99 end
-    return enemyLevel(epoch.enemy)
+    if not EPOCHS[current.epoch] then return 99 end
+    if not current.bossLevels then error("challenge: boss level provenance is missing") end
+    return current.bossLevels.levels[current.epoch]
 end
 
 local HEAL_KINDS = {[2] = true, [5] = true, [7] = true, [9] = true, [11] = true, [15] = true}
@@ -272,10 +297,6 @@ local function armedRules(): Rules
             rules.ironman = p4.settings.get("ironman") == true and p4.settings.get("ironman_confirm") == true
         elseif name == "solo" then
             rules.solo = SOLO_IDS[tostring(p4.settings.get("solo"))] ~= nil
-        elseif name == "severe_damage" and p4.settings.get(name) == true and not severeAvailable then
-            -- Never arm a rule this build cannot enforce.
-            log("CHALLENGE_RULE_UNAVAILABLE rule=severe_damage")
-            rules[name] = false
         else
             rules[name] = p4.settings.get(name) == true
         end
@@ -300,6 +321,219 @@ local function openSession(current: Run, ledger: Ledger)
     ledgerPut(current.id, ledger)
 end
 
+-- Solo companions: the early curve from level 1 -------------------------------
+-- A companion chosen at New Game fights from the first battle with their own
+-- Persona, rebuilt at level 1: each stat's level-1 base is its join value less
+-- the Persona's own fixed growth from level 2 to the join level J (at least 1;
+-- a stat clamped at 1 instead gains exactly the rest over levels 2..J,
+-- proportional to that stat's own growth, largest remainders first, lower
+-- levels first on ties). Native growth carries on after J. Skills follow the
+-- design's early learnset (levels 1, 4, 8, 12), then the down-tier
+-- predecessors of the Persona's own elemental lines at 20, 28, ... below J,
+-- weakest first, then at J the join skills not yet held. Each is granted once,
+-- into a free slot; a forgotten skill is not restored.
+local PARTY_GROWTH = gp(0xb3e4) -- per party Persona (from 0xC0) a 0x26E-byte row
+local GROWTH_ROW = 0x26e
+local GROWTH_LEARN = 0x04 -- 32 events {level u8, kind u8, skill u16}; kind 1 learns
+local GROWTH_STATS = 0x7a -- + level * 5: the five stat gains reaching that level
+
+-- Original P4 skill IDs (names from the disc's battle message table).
+local EARLY_SKILLS: {[number]: {[number]: number}} = {
+    [2] = {[1] = 14, [4] = 192, [8] = 220, [12] = 120}, -- Yosuke: Garu, Dia, Sukukaja, Bash
+    [3] = {[1] = 26, [4] = 150, [8] = 218, [12] = 29}, -- Chie: Bufu, Skewer, Tarukaja, Mabufu
+    [4] = {[1] = 1, [4] = 192, [8] = 200, [12] = 195}, -- Yukiko: Agi, Dia, Me Patra, Media
+    [6] = {[1] = 39, [4] = 120, [8] = 218, [12] = 42}, -- Kanji: Zio, Bash, Tarukaja, Mazio
+    [7] = {[1] = 123, [4] = 61, [8] = 72, [12] = 220}, -- Naoto: Sonic Punch, Hama, Mudo, Sukukaja
+    [8] = {[1] = 26, [4] = 192, [8] = 222, [12] = 29}, -- Teddie: Bufu, Dia, Rakukaja, Mabufu
+}
+-- Tiered elemental lines, weakest first.
+local LINES: {{number}} = {{1, 2, 3}, {4, 5, 6}, {14, 15, 16}, {17, 18, 19}, {26, 27, 28}, {29, 30, 31}, {39, 40, 41},
+    {42, 43, 44}, {51, 52, 53}, {61, 62}, {63, 64}, {72, 73}, {74, 75}}
+
+local function growthRow(persona: number): number
+    return p4.mem.read("u32", PARTY_GROWTH) + (persona - 0xc0) * GROWTH_ROW
+end
+local function growth(persona: number, level: number, stat: number): number
+    return p4.mem.read("u8", growthRow(persona) + GROWTH_STATS + level * 5 + stat)
+end
+
+-- Per stat, the gains for levels 2..J (the stat's own fixed growth, or for a
+-- stat clamped at 1 its exact redistribution).
+local function curveGains(curve: Curve, persona: number): {{number}}
+    local gains = {}
+    for stat = 0, 4 do
+        local own, total = {}, 0
+        for level = 2, curve.j do
+            own[level] = growth(persona, level, stat)
+            total += own[level]
+        end
+        local need = curve.a[stat + 1] - curve.b[stat + 1]
+        if need ~= total then
+            -- Clamped at 1: distribute exactly `need` over the same levels.
+            local shares, given = {}, 0
+            for level = 2, curve.j do
+                local exact = if total > 0 then need * own[level] / total else need / math.max(1, curve.j - 1)
+                shares[level] = math.floor(exact)
+                given += shares[level]
+                own[level] = exact - shares[level]
+            end
+            while given < need do
+                local best = 2
+                for level = 3, curve.j do
+                    if own[level] > own[best] then best = level end
+                end
+                shares[best] += 1
+                own[best] = -1
+                given += 1
+            end
+            own = shares
+        end
+        gains[stat + 1] = own
+    end
+    return gains
+end
+
+-- Skills by level: the early learnset, gap predecessors, then the join skills.
+local function curveSchedule(curve: Curve, member: number, persona: number): {{level: number, skill: number}}
+    local schedule = {}
+    local seen: {[number]: boolean} = {}
+    local function add(level: number, skill: number)
+        if skill ~= 0 and not seen[skill] then
+            seen[skill] = true
+            table.insert(schedule, {level = level, skill = skill})
+        end
+    end
+    local early = EARLY_SKILLS[member]
+    for _, level in {1, 4, 8, 12} do add(level, early[level]) end
+    -- The Persona's own lines: its join skills and its learn events.
+    local own: {[number]: boolean} = {}
+    for _, skill in curve.join do own[skill] = true end
+    local row = growthRow(persona)
+    for event = 0, 31 do
+        local kind = p4.mem.read("u8", row + GROWTH_LEARN + event * 4 + 1)
+        if kind == 0 then break end
+        if kind == 1 then own[p4.mem.read("u16", row + GROWTH_LEARN + event * 4 + 2)] = true end
+    end
+    local predecessors: {{tier: number, skill: number}} = {}
+    for _, line in LINES do
+        for tier = #line, 2, -1 do
+            if own[line[tier]] then
+                for lower = 1, tier - 1 do table.insert(predecessors, {tier = lower, skill = line[lower]}) end
+                break
+            end
+        end
+    end
+    table.sort(predecessors, function(x: {tier: number, skill: number}, y: {tier: number, skill: number}): boolean
+        return x.tier < y.tier or (x.tier == y.tier and x.skill < y.skill)
+    end)
+    local level = 20
+    for _, entry in predecessors do
+        if level >= curve.j then break end
+        if not seen[entry.skill] then
+            add(level, entry.skill)
+            level += 8
+        end
+    end
+    for _, skill in curve.join do add(curve.j, skill) end
+    return schedule
+end
+
+-- The record a level-1..J companion should hold: stats on the curve, and the
+-- scheduled skills reached so far that were never granted, into free slots.
+local function curveTarget(current: Run, record: P4PartyRecord): P4PartyRecord?
+    local curve = current.curve
+    if not curve then return nil end
+    local changed = false
+    local stats = table.clone(record.stats)
+    if record.level <= curve.j then
+        local gains = curveGains(curve, record.persona)
+        for stat = 1, 5 do
+            local expected = curve.b[stat]
+            for level = 2, record.level do expected += gains[stat][level] end
+            if stats[stat] ~= expected then
+                stats[stat] = expected
+                changed = true
+            end
+        end
+    end
+    local skills = table.clone(record.skills)
+    local held: {[number]: boolean} = {}
+    for _, skill in skills do held[skill] = true end
+    local granted: {[number]: boolean} = {}
+    for _, skill in curve.given do granted[skill] = true end
+    for _, entry in curveSchedule(curve, current.solo, record.persona) do
+        if entry.level <= record.level and not granted[entry.skill] then
+            if held[entry.skill] or #skills < 8 then
+                -- Granted once: a skill later forgotten is not restored.
+                granted[entry.skill] = true
+                table.insert(curve.given, entry.skill)
+            end
+            if not held[entry.skill] and #skills < 8 then
+                table.insert(skills, entry.skill)
+                held[entry.skill] = true
+                changed = true
+                log(string.format("SOLO_SKILL member=%s level=%d skill=%d", SOLO_NAMES[current.solo], record.level,
+                    entry.skill))
+            end
+        end
+    end
+    if not changed then return nil end
+    return {persona = record.persona, level = record.level, exp = record.exp, stats = stats, skills = skills}
+end
+
+-- The companion's weapon and armor are held to Yu's New Game starting tier:
+-- one above it gives way to the strongest priced item of the companion's own
+-- equip category (the Camp equip list's legality test) that does not exceed
+-- it, so a late companion's story join kit is not free at level 1.
+local function starterEquipment(member: number): {number}
+    local kit = {}
+    for slot = 0, 1 do
+        local current = p4.call(A.datGetEquippedItemByUnit, "hhh", member, slot) :: number
+        local reference = p4.call(A.datEntryGetPrimaryValue, "Hh",
+            p4.call(A.datGetEquippedItemByUnit, "hhh", 1, slot) :: number) :: number
+        local best = current
+        if (p4.call(A.datEntryGetPrimaryValue, "Hh", current) :: number) > reference then
+            local bestValue, lowest, lowestValue = -1, current, math.huge
+            for item = slot * 0x100 + 1, slot * 0x100 + 0xff do
+                if p4.call(A.datEntryHasFlag, "ihh", item, member) ~= 0 and
+                    (p4.call(A.datItemPrice, "Ih", item) :: number) > 0 then
+                    local value = p4.call(A.datEntryGetPrimaryValue, "Hh", item) :: number
+                    if value > 0 and value <= reference and value > bestValue then best, bestValue = item, value end
+                    if value > 0 and value < lowestValue then lowest, lowestValue = item, value end
+                end
+            end
+            if bestValue < 0 then best = lowest end
+            if best ~= current then p4.call(A.datSetEquippedItemByUnit, "vhhh", member, slot, best) end
+        end
+        table.insert(kit, best)
+    end
+    table.insert(kit, p4.call(A.datGetEquippedItemByUnit, "hhh", member, 2) :: number)
+    return kit
+end
+
+-- New Game: the chosen companion's record becomes level 1 on the curve.
+local function companionCurve(member: number): Curve?
+    local record = p4.party.record(member)
+    if not record then return nil end
+    local a, b = table.clone(record.stats), {}
+    for stat = 0, 4 do
+        local total = 0
+        for level = 2, record.level do total += growth(record.persona, level, stat) end
+        b[stat + 1] = math.max(1, a[stat + 1] - total)
+    end
+    local first = EARLY_SKILLS[member][1]
+    local curve: Curve = {j = record.level, a = a, b = b, join = table.clone(record.skills), given = {first}}
+    local ok, why = p4.party.set(member, {persona = record.persona, level = 1, exp = 0, stats = b, skills = {first}})
+    if not ok then error("solo early curve could not be set: " .. tostring(why)) end
+    local join = {}
+    for slot = 0, 2 do table.insert(join, p4.call(A.datGetEquippedItemByUnit, "hhh", member, slot) :: number) end
+    local kit = starterEquipment(member)
+    log(string.format("SOLO_CURVE member=%s persona=%d join_level=%d join_stats=%s base=%s skill=%d join_equipment=%s equipment=%s",
+        SOLO_NAMES[member], record.persona, record.level, table.concat(a :: {any}, ","),
+        table.concat(b :: {any}, ","), first, table.concat(join :: {any}, ","), table.concat(kit :: {any}, ",")))
+    return curve
+end
+
 local function startRun(custom: boolean)
     local rules = armedRules()
     if ruleCount(rules) == 0 then
@@ -308,22 +542,62 @@ local function startRun(custom: boolean)
         log("CHALLENGE_NEW_GAME armed=0")
         return
     end
+    local bossLevels = if rules.boss_cap or custom then originalBossLevels() else nil
     local epoch = 1
     if custom then
-        -- A continuation of an ordinary save starts at the first chapter whose
-        -- boss is above the hero's current level, so the cap never strands a
-        -- mid-game save below the chapter it is already in.
+        -- Provisional custom-run epoch inference still follows hero level.
         local level = p4.call(A.datCalcGetLevelById, "ii", 1) :: number
-        while EPOCHS[epoch] and enemyLevel(EPOCHS[epoch].enemy) <= level do epoch += 1 end
+        while EPOCHS[epoch] and (bossLevels :: BossLevels).levels[epoch] <= level do epoch += 1 end
     end
     local solo = if rules.solo then SOLO_IDS[tostring(p4.settings.get("solo"))] else 0
+    local curve: Curve? = nil
+    if solo > 1 then
+        if custom then
+            -- A companion's early curve starts at New Game, never from a save.
+            log("CHALLENGE_RULE_UNAVAILABLE rule=solo member=" .. SOLO_NAMES[solo] .. " reason=new_game_only")
+            rules.solo = false
+            solo = 0
+        else
+            curve = companionCurve(solo)
+        end
+    end
     local strict = armedStrict(rules)
     local current: Run = {id = nextRunId(), rules = rules, epoch = epoch, saves = 0, gen = 0, custom = custom, solo = solo,
-        strict = strict}
+        strict = strict, curve = curve, bossLevels = bossLevels}
     run = current
     openSession(current, {state = "A", gen = 0, recoveries = 0, session = "C", epoch = epoch, saves = 0, battle = "-"})
     log(string.format("CHALLENGE_ARMED run=%s rules=%s custom=%s epoch=%d solo=%d strict=%s", current.id, ruleList(rules),
         tostring(custom), epoch, solo, tostring(strict)))
+end
+
+local function decodeCurve(value: any): Curve?
+    if type(value) ~= "table" or type(value.a) ~= "table" or type(value.b) ~= "table" then return nil end
+    local function numbers(list: any): {number}
+        local out = {}
+        if type(list) == "table" then
+            for _, item in list do
+                if type(item) == "number" then table.insert(out, item) end
+            end
+        end
+        return out
+    end
+    return {j = tonumber(value.j) or 1, a = numbers(value.a), b = numbers(value.b), join = numbers(value.join),
+        given = numbers(value.given)}
+end
+
+local function decodeBossLevels(value: any): BossLevels?
+    if type(value) ~= "table" or type(value.levels) ~= "table" or type(value.source) ~= "string" or
+        value.source == "" or type(value.sha256) ~= "string" or
+        not string.match(value.sha256, "^[0-9a-f]+$") or #value.sha256 ~= 64 or #value.levels ~= #EPOCHS then
+        return nil
+    end
+    local levels = {}
+    for i = 1, #EPOCHS do
+        local level = value.levels[i]
+        if type(level) ~= "number" or level < 1 or level > 99 or level ~= math.floor(level) then return nil end
+        levels[i] = level
+    end
+    return {levels = levels, source = value.source, sha256 = value.sha256}
 end
 
 local function decodeRun(value: any): Run?
@@ -335,7 +609,8 @@ local function decodeRun(value: any): Run?
     return {id = value.id, rules = rules, epoch = tonumber(value.epoch) or 1, saves = tonumber(value.saves) or 0,
         gen = tonumber(value.gen) or 0, custom = value.custom == true,
         solo = if rules.solo and SOLO_NAMES[tonumber(value.solo) or 0] then tonumber(value.solo) :: number else 0,
-        strict = rules.ironman and value.strict == true}
+        strict = rules.ironman and value.strict == true, curve = decodeCurve(value.curve),
+        bossLevels = decodeBossLevels(value.bossLevels)}
 end
 
 local function adoptRun(value: any)
@@ -388,14 +663,15 @@ end
 
 p4.save.register({
     schema = 1,
-    max_bytes = 1024,
+    max_bytes = 2048,
     snapshot = function()
         local current = run
         if not current then return nil end
         -- The saved state includes this save: its generation and quota debit.
         local saves = current.saves + (if current.rules.limited_saves then 1 else 0)
         return {v = 1, id = current.id, rules = current.rules, epoch = current.epoch, saves = saves,
-            gen = current.gen + 1, custom = current.custom, solo = current.solo, strict = current.strict}
+            gen = current.gen + 1, custom = current.custom, solo = current.solo, strict = current.strict,
+            curve = current.curve, bossLevels = current.bossLevels}
     end,
     load = function(value, origin)
         if origin == "reset" then
@@ -425,6 +701,9 @@ p4.save.register({
     authorize_load = function(value: P4SaveValue): (boolean, ...string)
         local current = decodeRun(value)
         if not current then return true end
+        if current.rules.boss_cap and not current.bossLevels then
+            return false, "This provisional Challenge save lacks original boss-level provenance and cannot be resumed with the cap."
+        end
         local ledger = ledgerGet(current.id)
         if not ledger then
             return false, "Challenge run " .. current.id .. " has no ledger record on this device; its saves cannot be played."
@@ -497,6 +776,21 @@ local function gameOverHook(where: string)
 end
 p4.hook(A.scrStartProcedureIndex, "iipi", "before", gameOverHook("field"))
 p4.hook(A.scrStartProcedureChecked, "iiiii", "before", gameOverHook("script"))
+
+-- A battle retry (p4.battle.defeat, such as hard mode's BATTLE RETRY) would
+-- undo the loss that ends an Ironman run, so its "retry" authorizer refuses it
+-- before it is offered; the retry's owner shows the reason and the Game Over
+-- above follows. Without Ironman a retry is allowed: it writes no save, so
+-- LIMITED SAVES and the other ledgers are untouched.
+if p4.has("authorize.retry") then
+    p4.authorize.on("retry", function(context: P4RetryContext): (boolean, ...string)
+        local current = run
+        if current and current.rules.ironman then
+            return false, "IRONMAN: a lost battle ends this run"
+        end
+        return true
+    end)
+end
 
 -- STRICT IRONMAN: an open battle is durable before the battle runs ----------
 -- Its record names this session and battle; the port's crash handler records
@@ -579,6 +873,11 @@ p4.events.on("battle_start", function()
 end)
 
 p4.events.on("battle_end", function(event: P4BattleEndEvent)
+    for key, line in severeSeen do
+        severeLogged[key] = true
+        log(line)
+    end
+    severeSeen = {}
     local lineup = soloLineup
     if lineup and not soloReported then
         soloReported = true
@@ -587,9 +886,17 @@ p4.events.on("battle_end", function(event: P4BattleEndEvent)
     inBattle = false
     local current = run
     if not current then return end
+    if current.curve and curveCheck then (curveCheck :: P4Subscription):enable() end
     if event.outcome == 2 then
         pendingDefeat = true
         log("CHALLENGE_DEFEAT run=" .. current.id)
+        if current.solo > 1 and p4.call(A.datCalcIsDeadById, "Ih", current.solo) ~= 0 then
+            -- The chosen companion fell; benched Yu must not keep the run going.
+            -- A scripted loss (the first night's dream) leaves the fighter
+            -- standing and the story goes on as in retail.
+            p4.call(A.datSetUnitHp, "vhh", 1, 0)
+            log("SOLO_DEFEAT member=" .. SOLO_NAMES[current.solo])
+        end
         return
     end
     if event.outcome ~= 1 then
@@ -682,9 +989,17 @@ p4.hook(A.datPersonaAddExp, "vpi", "replace", capPersonaExp(2))
 -- themselves (not through datPersonaAddExp), so each award is clamped where
 -- btlXpPrepareAwards leaves it, before anything reads it. Its level-up previews
 -- were already computed from the clamped amounts above.
+local AWARD_FLAGS = 0x00 -- u32: 2 hero, 8 roster, 0x10 party level-up screens
+local AWARD_HERO_EXP = 0x04 -- s32
 local AWARD_ROSTER_EXP = 0x08 -- s32[12], one per roster slot
+local AWARD_ROSTER_PREVIEW = 0x38 -- 0x88-byte level-up previews; byte 0 is levels gained
+local AWARD_PARTY_PREVIEW = 0x6b4
 local AWARD_PARTY_IDS = 0x69a -- u16[4]
 local AWARD_PARTY_EXP = 0x6a4 -- s32[4]
+
+local function heroThreshold(level: number): number
+    return p4.mem.read("u32", HERO_EXP_TABLE + 4 * (math.min(level, 99) - 1))
+end
 
 local function clampAward(cell: number, persona: number)
     local requested = p4.mem.read("i32", cell)
@@ -704,11 +1019,40 @@ p4.hook(A.btlXpPrepareAwards, "vpp", "after", function(context)
     for slot = 0, roster - 1 do
         clampAward(awards + AWARD_ROSTER_EXP + slot * 4, p4.call(A.datPersonaRosterSlot, "ph", slot) :: number)
     end
+    local partyUp = false
     for slot = 0, 3 do
         local id = p4.mem.read("u16", awards + AWARD_PARTY_IDS + slot * 2)
         if id ~= 0 then
             clampAward(awards + AWARD_PARTY_EXP + slot * 4, p4.call(A.datPersonaGetRecord, "pH", id) :: number)
+            partyUp = partyUp or p4.mem.read("u8", awards + AWARD_PARTY_PREVIEW + slot * 0x88) > 0
         end
+    end
+    -- Yu's own award, so the results never show EXP the cap takes away.
+    local cap = currentCap()
+    local heroExp = p4.call(A.datPersonaGetExpById, "Ih", 1) :: number
+    local heroLevel = p4.call(A.datCalcGetLevelById, "ii", 1) :: number
+    local heroAward = p4.mem.read("i32", awards + AWARD_HERO_EXP)
+    if cap < 99 and heroAward > 0 then
+        local allowed = math.max(0, math.min(heroAward, heroThreshold(cap + 1) - 1 - heroExp))
+        if allowed ~= heroAward then
+            p4.mem.write("i32", awards + AWARD_HERO_EXP, allowed)
+            log(string.format("CAP_AWARD persona=hero cap=%d requested=%d allowed=%d", cap, heroAward, allowed))
+            heroAward = allowed
+        end
+    end
+    -- The level-up screens follow the clamped awards: their previews were made
+    -- from the clamped amounts, so a screen with no level left is not shown.
+    local rosterUp = false
+    for slot = 0, roster - 1 do
+        rosterUp = rosterUp or p4.mem.read("u8", awards + AWARD_ROSTER_PREVIEW + slot * 0x88) > 0
+    end
+    local heroUp = heroLevel < 99 and heroThreshold(heroLevel + 1) <= heroExp + heroAward
+    local flags = p4.mem.read("u32", awards + AWARD_FLAGS)
+    local kept = bit32.band(flags, bit32.bnot(bit32.bor(if heroUp then 0 else 2, if rosterUp then 0 else 8,
+        if partyUp then 0 else 0x10)))
+    if kept ~= flags then
+        p4.mem.write("u32", awards + AWARD_FLAGS, kept)
+        log(string.format("CAP_RESULT flags=0x%x shown=0x%x", flags, kept))
     end
 end)
 
@@ -721,9 +1065,22 @@ p4.authorize.on("fusion", function(context: P4FusionContext): (boolean, ...strin
     return true
 end)
 
-local function heroThreshold(level: number): number
-    return p4.mem.read("u32", HERO_EXP_TABLE + 4 * (math.min(level, 99) - 1))
-end
+-- Item-backed death prevention is separate from passive and social-link Endure.
+p4.authorize.on("battle_protection_item", function(_context: P4BattleProtectionItemContext): (boolean, ...string)
+    if active("no_battle_items") then
+        return false, "NO ITEMS IN BATTLE challenge rule"
+    end
+    return true
+end)
+
+-- Both the Velvet offer and the forge's safe-point commit ask this authorizer.
+-- Persona fusion is a separate operation and remains independently configurable.
+p4.authorize.on("weapon_fusion", function(_context: P4WeaponFusionContext): (boolean, ...string)
+    if active("no_weapon_fusion") then
+        return false, "NO WEAPON FUSION challenge rule"
+    end
+    return true
+end)
 
 p4.hook(A.datSetHeroExp, "vhI", "replace", function(context)
     if active("boss_cap") and context.args[1] == 1 then
@@ -761,9 +1118,11 @@ end)
 -- Solo member: the chosen character alone fights every battle ---------------
 -- Every battle's lineup, at the one place any encounter route creates its
 -- player-side units, is projected to the chosen character. Story party, field,
--- Social Links and recruitment are untouched; with Yu alone the retail rules
--- already make his knockout the loss and withhold All-Out Attacks (they need a
--- second fighter).
+-- Social Links and recruitment are untouched; with one fighter the retail
+-- rules withhold All-Out Attacks and follow-ups (they need a second one). A
+-- chosen companion takes Direct Commands, earns the battle EXP (Yu, benched,
+-- earns none), and their fall is the loss: Yu's record is knocked out before
+-- the field's own Game Over check reads it.
 p4.battle.formation(function(context: P4FormationContext): {number}?
     local member = soloId()
     local party = context.party
@@ -775,48 +1134,90 @@ p4.battle.formation(function(context: P4FormationContext): {number}?
     return {member}
 end)
 
--- Severe damage: our own asymmetric curve on each resolved HP damage hit ---
--- datCalcSkillAmount returns one hit's signed amount (negative is damage) for
--- its channel (1 HP, 2 SP). Only nonfixed HP damage between opposite sides is
--- scaled: fixed/percent/leave-1 kinds, healing, SP, absorb (positive), null,
--- miss and same-side hits keep the stock amount. Hit kind 2 is a critical and
--- 4 a weakness hit (datCalcHitResult); either adds x1.25 once. No RNG is drawn.
-local FIXED_KINDS = {[3] = true, [4] = true, [6] = true, [8] = true, [10] = true, [13] = true}
-local function enemyRecord(record: number): boolean
-    return bit32.band(p4.mem.read("u16", record), 4) ~= 0
-end
-local function severeDamage(context: P4HookContext)
-    local amount = context.next() :: number
-    context.result = amount
-    if not active("severe_damage") or amount >= 0 or context.args[8] ~= 1 or context.args[6] == 16 then return end
-    local skill = context.args[1] :: number
-    if skill >= 0x1b8 then return end
-    local kind = p4.mem.read("u8", p4.mem.read("u32", SKILL_TABLE) + skill * 0x28 + 0x11)
-    if FIXED_KINDS[kind] then return end
-    local fromEnemy = enemyRecord(context.args[2] :: number)
-    local toEnemy = enemyRecord(context.args[3] :: number)
-    if fromEnemy == toEnemy then return end
-    local numerator = 3
-    local denominator = if fromEnemy then 2 else 4
-    local hitKind = context.args[6] :: number
-    if hitKind == 2 or hitKind == 4 then
-        numerator *= 5
-        denominator *= 4
+p4.hook(A.datCalcUnitClass, "ip", "replace", function(context)
+    local member = soloId()
+    if member > 1 and p4.mem.read("u16", (context.args[1] :: number) + 2) == member then
+        context.result = 4 -- Direct Commands for the chosen fighter only
+        return
     end
-    local damage = -amount
-    local scaled = math.max(1, math.floor(damage * numerator / denominator))
-    context.result = -scaled
-    local key = (if fromEnemy then "enemy" else "party") .. (if hitKind == 2 or hitKind == 4 then "+" else "")
-    if not severeLogged[key] then
-        severeLogged[key] = true
-        log(string.format("SEVERE_DAMAGE from_enemy=%s kind=%d stock=%d scaled=%d", tostring(fromEnemy), hitKind, damage, scaled))
+    context.result = context.next()
+end)
+
+-- Yu and his own Personas did not fight: their prepared awards and level-up
+-- screens are withdrawn before anything reads them.
+p4.hook(A.btlXpPrepareAwards, "vpp", "after", function(context)
+    if soloId() <= 1 then return end
+    local awards = context.args[1] :: number
+    p4.mem.write("i32", awards + AWARD_HERO_EXP, 0)
+    for slot = 0, 11 do p4.mem.write("i32", awards + AWARD_ROSTER_EXP + slot * 4, 0) end
+    local flags = p4.mem.read("u32", awards + AWARD_FLAGS)
+    p4.mem.write("u32", awards + AWARD_FLAGS, bit32.band(flags, bit32.bnot(2 + 8)))
+end)
+
+-- The story reloads a companion's Persona from its template
+-- (scrCommonLoadPersonaRecord: datPersonaLoadRecord replays the template from
+-- its join level with the record's EXP on top, keeping skills), at a join or a
+-- Social Link evolution. The chosen companion takes the template's Persona
+-- (an evolution happens) but keeps the earned level, EXP and stats; the
+-- carried skills are the record's own.
+p4.hook(A.scrCommonLoadPersonaRecord, "i", "replace", function(context)
+    local member = soloId()
+    if member <= 1 or p4.call(A.scrGetParamInt, "ii", 0) ~= member then
+        context.result = context.next()
+        return
     end
+    local before = p4.party.record(member)
+    context.result = context.next()
+    local after = p4.party.record(member)
+    if not before or not after then return end
+    local ok, why = p4.party.set(member, {persona = after.persona, level = before.level, exp = before.exp,
+        stats = before.stats, skills = after.skills})
+    log(string.format("SOLO_RECORD_KEPT member=%s persona=%d->%d level=%d template_level=%d ok=%s why=%s",
+        SOLO_NAMES[member], before.persona, after.persona, before.level, after.level, tostring(ok), tostring(why)))
+end)
+
+-- After a battle the chosen companion's record is brought onto the curve at the
+-- next frame outside battle (stats up to the join level, scheduled skills).
+local function checkCurve(): boolean
+    local current = run
+    if not current or not current.curve then return true end
+    local record = p4.party.record(current.solo)
+    if not record then return true end
+    local target = curveTarget(current, record)
+    if not target then return true end
+    local ok = p4.party.set(current.solo, target)
+    if ok then
+        log(string.format("SOLO_CURVE_STEP member=%s level=%d stats=%s skills=%s", SOLO_NAMES[current.solo],
+            target.level, table.concat(target.stats :: {any}, ","), table.concat(target.skills :: {any}, ",")))
+    end
+    return ok
 end
-local severeSeam = p4.describe(A.datCalcSkillAmount)
-severeAvailable = severeSeam ~= nil and severeSeam.signature == "iHppHHHiB"
-if severeAvailable then
-    p4.hook(A.datCalcSkillAmount, "iHppHHHiB", "replace", severeDamage)
-end
+local check = p4.events.on("frame_start", function()
+    if checkCurve() and curveCheck then (curveCheck :: P4Subscription):disable() end
+end)
+check:disable()
+curveCheck = check
+
+-- Severe damage: our own asymmetric curve in the native final-damage stage ---
+-- A MULTIPLY modifier of the final-damage stage (0x00235520), which offers only
+-- eligible hits: the retail non-fixed HP damage equation, never fixed,
+-- percentage or scripted amounts, SP, misses, nulls, drains or heals. Enemy
+-- hits on the party x1.5, party hits on enemies x0.75; a critical or weakness
+-- hit x1.25 more. A repel is judged by who it was aimed at (origin), so it is
+-- scaled once. The stage composes and rounds; no RNG is drawn.
+p4.damage.on({kind = "multiply", fn = function(hit: P4DamageHit): number?
+    if not active("severe_damage") or hit.source_side == hit.origin_side then return nil end
+    local factor = if hit.source_side == "enemy" then 1.5 else 0.75
+    local boosted = hit.hit_kind == "critical" or hit.hit_kind == "weak"
+    if boosted then factor *= 1.25 end
+    local key = hit.source_side .. (if boosted then "+" else "")
+    if hit.resolved and not severeLogged[key] and not severeSeen[key] then
+        -- Snapshot frame: no logging here.
+        severeSeen[key] = string.format("SEVERE_DAMAGE from_enemy=%s kind=%s stock=%d factor=%g",
+            tostring(hit.source_side == "enemy"), hit.hit_kind, hit.stock, factor)
+    end
+    return factor
+end})
 
 -- Mandatory battles only: optional field encounters never start ------------
 -- The game marks an encounter escapable (flags bit 0) exactly when it is an

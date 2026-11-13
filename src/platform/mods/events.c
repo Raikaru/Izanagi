@@ -267,19 +267,47 @@ void p4_mod_events_clear(void)
     calendar_depth = 0;
 }
 static int (*published_notify)(void);
+static int (*party_apply)(void);
+static int (*forge_apply)(void);
+static int (*equipment_apply)(void);
 static void (*quit_finish)(void);
 void p4_mod_events_set_published(int (*notify)(void)) { published_notify = notify; }
 static int (*services_pump)(uint32_t frame);
 void p4_mod_events_set_services(int (*pump)(uint32_t frame)) { services_pump = pump; }
+void p4_mod_events_set_party(int (*apply)(void)) { party_apply = apply; }
+static int (*semantic_pump)(void);
+void p4_mod_events_set_semantic(int (*pump)(void)) { semantic_pump = pump; }
+static int (*present_pump)(uint32_t frame);
+void p4_mod_events_set_present(int (*pump)(uint32_t frame)) { present_pump = pump; }
+void p4_mod_events_set_forge(int (*apply)(void)) { forge_apply = apply; }
+void p4_mod_events_set_equipment(int (*apply)(void)) { equipment_apply = apply; }
 void p4_mod_event_frame(uint32_t frame)
 {
     /* The scheduler's frame boundary is the game-thread safe point for queued
-     * work: durable-save publication notices first, then an orderly quit. */
+     * work: party-record writes, a weapon fusion, an equipment exchange,
+     * durable-save publication notices, game service requests, then an orderly quit. */
+    if (p4_mod_safe_point & P4_MOD_SAFE_PARTY) {
+        if (!party_apply || !party_apply()) p4_mod_safe_point &= ~P4_MOD_SAFE_PARTY;
+    }
+    if (p4_mod_safe_point & P4_MOD_SAFE_FORGE) {
+        if (!forge_apply || !forge_apply()) p4_mod_safe_point &= ~P4_MOD_SAFE_FORGE;
+    }
+    if (p4_mod_safe_point & P4_MOD_SAFE_EQUIP) {
+        if (!equipment_apply || !equipment_apply()) p4_mod_safe_point &= ~P4_MOD_SAFE_EQUIP;
+    }
     if (p4_mod_safe_point & P4_MOD_SAFE_PUBLISHED) {
         if (!published_notify || !published_notify()) p4_mod_safe_point &= ~P4_MOD_SAFE_PUBLISHED;
     }
     if (p4_mod_safe_point & P4_MOD_SAFE_SERVICES) {
         if (!services_pump || !services_pump(frame)) p4_mod_safe_point &= ~P4_MOD_SAFE_SERVICES;
+    }
+    /* Semantic battle events (battle_semantic.h) committed since the last
+     * boundary, in commit order, after services and before frame_start. */
+    if (p4_mod_safe_point & P4_MOD_SAFE_SEMANTIC) {
+        if (!semantic_pump || !semantic_pump()) p4_mod_safe_point &= ~P4_MOD_SAFE_SEMANTIC;
+    }
+    if (p4_mod_safe_point & P4_MOD_SAFE_PRESENT) {
+        if (!present_pump || !present_pump(frame)) p4_mod_safe_point &= ~P4_MOD_SAFE_PRESENT;
     }
     if (p4_mod_safe_point & P4_MOD_SAFE_EXIT) {
         P4ModEvent quit = {NULL, 0, {{0}}};

@@ -28,6 +28,8 @@ public class P4Activity extends SDLActivity implements InputManager.InputDeviceL
 
     private static native void nativeSetEnv(String name, String value);
     private static native void nativeHardwareKeyboardChanged(boolean connected);
+    /** The touch pad's analog stick (PadOverlay): the thumb's offset in units of the stick's travel, y down; (0, 0) releases. */
+    static native void nativeTouchStick(float x, float y);
 
     private PadOverlay pad;
     private InputManager keyboardDevices;

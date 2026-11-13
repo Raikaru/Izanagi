@@ -13,6 +13,7 @@ fnptr-words: write config/retail_fnptr_words.txt from the retail executable.
 """
 
 import argparse
+import concurrent.futures
 import contextlib
 import io
 import difflib
@@ -347,6 +348,132 @@ def read_units(root):
     excluded.update((unit, inactive["reason"]) for unit in inactive["units"])
     units = [u for u in read_list(root / "config/units.txt") if u not in excluded]
     return units, excluded
+
+
+# ---------------------------------------------------------------- RenderWare clean layer (docs/rw_clean.md)
+
+# config/rw_clean.json names, per subsystem, the RenderWare units a clean subsystem replaces ("units", decomp paths),
+# the port transcriptions it retires ("port_sources", port paths) and its clean sources ("sources", port paths under
+# src/rwclean). `gen_port.py units --rw-clean <ids>` selects subsystems and records the selection in the build directory;
+# the default build selects none and is unchanged. A clean source's `// FUN_` markers make it the only owner of those
+# retail addresses: the mirror strips the definitions at those markers from every other compiled unit.
+RW_CLEAN_POLICY = ROOT / "config/rw_clean.json"
+RW_CLEAN_DIR = "src/rwclean"
+RW_CLEAN_STRIPPED = "stripped_units.txt"   # in the mirror's RW_CLEAN_DIR: units whose definitions a clean unit took over
+
+
+def read_rw_clean_policy():
+    policy = json.loads(RW_CLEAN_POLICY.read_text(encoding="utf-8"))
+    for sid, sub in policy["subsystems"].items():
+        for key in ("units", "port_sources", "sources"):
+            if not isinstance(sub.get(key), list):
+                die(f"{RW_CLEAN_POLICY}: subsystem {sid} has no {key} list")
+        for src in sub["sources"]:
+            if not src.startswith(RW_CLEAN_DIR + "/") or not src.endswith(".c"):
+                die(f"{RW_CLEAN_POLICY}: {sid}: clean source {src} is not a .c file under {RW_CLEAN_DIR}/")
+    return policy
+
+
+def rw_clean_plan(selected):
+    """The union of the selected subsystems' lists, in policy order."""
+    known = read_rw_clean_policy()["subsystems"]
+    unknown = [s for s in selected if s not in known]
+    if unknown:
+        die(f"--rw-clean: unknown subsystem(s) {', '.join(unknown)} (config/rw_clean.json has {', '.join(known)})")
+    plan = {"subsystems": [s for s in known if s in selected], "units": [], "port_sources": [], "sources": []}
+    for sid in plan["subsystems"]:
+        for key in ("units", "port_sources", "sources"):
+            plan[key] += known[sid][key]
+    return plan
+
+
+def rw_clean_selected(build):
+    """The plan `units` recorded for this build directory (no file: the default build, nothing selected)."""
+    path = Path(build) / "rw_clean.json"
+    return json.loads(path.read_text(encoding="utf-8")) if path.is_file() else rw_clean_plan([])
+
+
+def rw_clean_units(units, plan):
+    """The compiled unit list: the default units minus the replaced ones, plus the clean sources."""
+    missing = [u for u in plan["units"] if u not in units]
+    if missing:
+        die(f"config/rw_clean.json replaces units the build does not compile: {', '.join(missing)}")
+    return [u for u in units if u not in plan["units"]] + plan["sources"]
+
+
+def rw_clean_owned(plan):
+    """Retail address -> clean source for every `// FUN_` marker of the selected clean sources."""
+    owned = {}
+    for src in plan["sources"]:
+        for mk in MARKER_RE.finditer((ROOT / src).read_text(encoding="utf-8")):
+            addr = int(mk[1], 16)
+            if addr in owned:
+                die(f"FUN_{addr:08X} is marked in both {owned[addr]} and {src}")
+            owned[addr] = src
+    return owned
+
+
+def rw_clean_apply(stage, plan, compiled):
+    """Copy the clean sources and headers into the mirror and strip, from every other compiled unit, the
+    definition after each marker a clean source owns (an INCLUDE_ASM marker loses only its marker line); list the
+    units it changed in RW_CLEAN_STRIPPED. Runs after the reviewed mirror passes: those passes and their contracts see
+    the default tree."""
+    src_root = ROOT / RW_CLEAN_DIR
+    for f in sorted(src_root.rglob("*")):
+        if f.is_file() and f.suffix in (".c", ".h"):
+            dest = stage / RW_CLEAN_DIR / f.relative_to(src_root)
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            dest.write_bytes(f.read_bytes().replace(b"\r\n", b"\n"))
+    owned = rw_clean_owned(plan)
+    stripped = 0
+    touched = []
+    for u in compiled:
+        if u in plan["sources"]:
+            continue
+        path = stage / u
+        text = path.read_text(encoding="utf-8", errors="surrogateescape")
+        hits = [mk for mk in MARKER_RE.finditer(text) if int(mk[1], 16) in owned]
+        if not hits:
+            continue
+        touched.append(u)
+        for mk in reversed(hits):
+            start = text.rfind("\n", 0, mk.start()) + 1
+            end = line_end(text, mk.end())
+            name = marker_definition_name(text, mk.end())
+            if name is not None:
+                pattern = re.compile(r"^[ \t]*[A-Za-z_][\w \t*]*?\b" + re.escape(name) + r"\s*\(", re.M)
+                body = next(((m.start(), definition_end(text, m.start())) for m in pattern.finditer(text, end)
+                             if definition_end(text, m.start()) is not None), None)
+                if body is None:
+                    die(f"rw-clean: {u}: no definition of {name} after FUN_{mk[1].upper()}")
+                end = line_end(text, body[1])
+            text = text[:start] + text[end:]
+            stripped += 1
+        path.write_text(text, encoding="utf-8", errors="surrogateescape", newline="\n")
+    # The units this selection changed (the 64-bit census does not compare their rule counts while the switch is on; the
+    # baseline takes the switched counts when the subsystem becomes the default). Inside the mirror, so a cached mirror has it.
+    (stage / RW_CLEAN_DIR / RW_CLEAN_STRIPPED).write_text("".join(u + "\n" for u in sorted(touched)), encoding="utf-8", newline="\n")
+    return len(owned), stripped
+
+
+def rw_clean_cmake(plan):
+    """build/rw_clean.cmake: what CMake needs from the selection (the port transcriptions to leave out)."""
+    drop = ";".join(plan["port_sources"])
+    return (f"# Generated by tools/gen_port.py units (config/rw_clean.json). Never edit.\n"
+            f"set(P4_RW_CLEAN_SUBSYSTEMS \"{';'.join(plan['subsystems'])}\")\n"
+            f"set(P4_RW_CLEAN_PORT_DROP \"{drop}\")\n")
+
+
+def rw_clean_governed(plan):
+    """Every unit the switch governs, `<unit> active|inactive`: the census compares an active governed unit
+    only when its baseline has it, and ignores an inactive one (tools/port64/unit64.py --rw-clean-units)."""
+    policy = read_rw_clean_policy()["subsystems"]
+    rows = []
+    for sid, sub in policy.items():
+        on = sid in plan["subsystems"]
+        rows += [f"{u}\t{'inactive' if on else 'active'}" for u in sub["units"]]
+        rows += [f"{u}\t{'active' if on else 'inactive'}" for u in sub["sources"]]
+    return "".join(r + "\n" for r in rows)
 
 
 def read_inactive_movie(root=None):
@@ -1345,53 +1472,63 @@ def _strip_literals(text):
     return _LITERAL_RE.sub(lambda m: re.sub(r"[^\n]", " ", m.group(0)), text)
 
 
-def _typedef_classes(texts):
-    """typedef name -> its ABI-class source: an underlying type text, or '@agg' for a struct/union by value."""
+def _typedef_classes(texts, concurrent=False):
+    """typedef name -> its ABI-class source: an underlying type text, or '@agg' for a struct/union by value. The first
+    definition of a name, in text order, wins."""
     td = {}
-    for text in texts:
-        for m in re.finditer(r"^[ \t]*typedef\b", text, re.M):
-            i, depth = m.end(), 0
-            stmt_end = None
-            while i < len(text):
-                nxt = _skip_token(text, i)
-                if nxt is not None:
-                    i = nxt
-                    continue
-                if text[i] == "{":
-                    depth += 1
-                elif text[i] == "}":
-                    depth -= 1
-                elif text[i] == ";" and depth == 0:
-                    stmt_end = i
-                    break
-                i += 1
-            if stmt_end is None or stmt_end - m.end() > 6000:
-                continue
-            stmt = text[m.end():stmt_end]
-            if "{" in stmt:
-                head = stmt[:stmt.index("{")].split()
-                close = stmt.rindex("}")
-                kind = "@agg" if head and head[0] in ("struct", "union") else "int"
-                for decl in stmt[close + 1:].split(","):
-                    decl = decl.strip()
-                    nm = re.search(r"([A-Za-z_]\w*)\s*(?:\[.*)?$", decl)
-                    if nm:
-                        td.setdefault(nm.group(1), "void *" if "*" in decl else kind)
-                continue
-            if "(" in stmt:
-                nm = re.search(r"\(\s*\*+\s*([A-Za-z_]\w*)\s*\)", stmt)
-                if nm:
-                    td.setdefault(nm.group(1), "void *")
-                continue
-            nm = re.search(r"([A-Za-z_]\w*)\s*(\[[^\]]*\])?\s*$", stmt)
-            if nm and nm.start() > 0:
-                under = stmt[:nm.start()].strip()
-                if "[" in stmt:
-                    under += " *"
-                td.setdefault(nm.group(1), under)
-        for m in re.finditer(r"^[ \t]*#\s*define[ \t]+([A-Za-z_]\w*)[ \t]+((?:(?:unsigned|signed|const|long|short|char|int|float|double|void)[ \t]*)+)$", text, re.M):
-            td.setdefault(m.group(1), m.group(2))
+    texts = list(texts)
+    for pairs in (map_in_order(_typedef_pairs, [(text,) for text in texts]) if concurrent else map(_typedef_pairs, texts)):
+        for name, value in pairs:
+            td.setdefault(name, value)
     return td
+
+
+def _typedef_pairs(text):
+    """(typedef name, ABI-class source) of each typedef and type-like #define in `text`, in order."""
+    pairs = []
+    for m in re.finditer(r"^[ \t]*typedef\b", text, re.M):
+        i, depth = m.end(), 0
+        stmt_end = None
+        while i < len(text):
+            nxt = _skip_token(text, i)
+            if nxt is not None:
+                i = nxt
+                continue
+            if text[i] == "{":
+                depth += 1
+            elif text[i] == "}":
+                depth -= 1
+            elif text[i] == ";" and depth == 0:
+                stmt_end = i
+                break
+            i += 1
+        if stmt_end is None or stmt_end - m.end() > 6000:
+            continue
+        stmt = text[m.end():stmt_end]
+        if "{" in stmt:
+            head = stmt[:stmt.index("{")].split()
+            close = stmt.rindex("}")
+            kind = "@agg" if head and head[0] in ("struct", "union") else "int"
+            for decl in stmt[close + 1:].split(","):
+                decl = decl.strip()
+                nm = re.search(r"([A-Za-z_]\w*)\s*(?:\[.*)?$", decl)
+                if nm:
+                    pairs.append((nm.group(1), "void *" if "*" in decl else kind))
+            continue
+        if "(" in stmt:
+            nm = re.search(r"\(\s*\*+\s*([A-Za-z_]\w*)\s*\)", stmt)
+            if nm:
+                pairs.append((nm.group(1), "void *"))
+            continue
+        nm = re.search(r"([A-Za-z_]\w*)\s*(\[[^\]]*\])?\s*$", stmt)
+        if nm and nm.start() > 0:
+            under = stmt[:nm.start()].strip()
+            if "[" in stmt:
+                under += " *"
+            pairs.append((nm.group(1), under))
+    for m in re.finditer(r"^[ \t]*#\s*define[ \t]+([A-Za-z_]\w*)[ \t]+((?:(?:unsigned|signed|const|long|short|char|int|float|double|void)[ \t]*)+)$", text, re.M):
+        pairs.append((m.group(1), m.group(2)))
+    return pairs
 
 
 def _abi_class(text, td, depth=0):
@@ -1707,6 +1844,46 @@ def _scan_functions(stripped, td):
     return found
 
 
+# The per-text scans of the big passes run in forked workers, which inherit the pass's texts instead of receiving copies;
+# results come back in input order, so a pass sees exactly a serial run's facts. Without fork they run serially.
+_FORK_JOB = None
+
+
+def _fork_item(index):
+    fn, items = _FORK_JOB
+    return fn(*items[index])
+
+
+def map_in_order(fn, items):
+    """[fn(*item) for item in items], on every core where the platform forks (Linux, so every CI build)."""
+    global _FORK_JOB
+    workers = os.cpu_count() or 1
+    if len(items) < 64 or workers < 2 or sys.platform != "linux":
+        return [fn(*item) for item in items]
+    import multiprocessing
+    _FORK_JOB = (fn, items)
+    try:
+        with multiprocessing.get_context("fork").Pool(workers) as pool:
+            return pool.map(_fork_item, range(len(items)), chunksize=max(1, len(items) // (workers * 8)))
+    finally:
+        _FORK_JOB = None
+
+
+def _scan_text(text, td):
+    return _scan_functions(_strip_literals(text), td)
+
+
+def _text_arg_counts(text, names):
+    return _call_arg_counts(_strip_literals(text), names)
+
+
+def _text_called_arg_counts(text, candidates):
+    """_call_arg_counts of the candidates the text calls."""
+    stripped = _strip_literals(text)
+    return _call_arg_counts(stripped, candidates.intersection(re.findall(r"\b([A-Za-z_]\w*)\s*\(", stripped)))
+
+
+
 def _word(cls):
     return "w" if cls in ("i", "p") else cls
 
@@ -1883,15 +2060,15 @@ def prototype_unprototyped_declarations(mirror, root, report_path):
     port_paths = sorted([*(root / "include").rglob("*.h"), *(root / "include").rglob("*.inc")])
     port_headers = {p: p.read_text(encoding="utf-8", errors="surrogateescape") for p in port_paths}
     port_texts = [p.read_text(encoding="utf-8", errors="surrogateescape") for p in sorted((root / "src").rglob("*.c"))]
-    td = _typedef_classes(list(texts.values()))
+    td = _typedef_classes(texts.values(), concurrent=True)
 
     # 1. one ABI signature per declared name, from every definition and typed prototype in the tree
     sigs, conflicts = {}, set()
     records = {}
     sources = [(p, t) for p, t in texts.items()] + [(None, t) for t in port_texts] + list(port_headers.items())
     own_defs, def_shapes = {}, {}
-    for path, text in sources:
-        for name, is_def, ret, params, variadic in _scan_functions(_strip_literals(text), td):
+    for (path, _), found in zip(sources, map_in_order(_scan_text, [(text, td) for _, text in sources])):
+        for name, is_def, ret, params, variadic in found:
             if params is None and not is_def:
                 continue          # an unprototyped declaration says nothing about the parameters
             records.setdefault(name, []).append((ret, [] if params is None else params, variadic, is_def))
@@ -1939,10 +2116,10 @@ def prototype_unprototyped_declarations(mirror, root, report_path):
             if m:
                 decl_names.add(m.group("name"))
     wanted = {n for n in decl_names if n in sigs}
-    stripped = {p: _strip_literals(t) for p, t in texts.items() if p.suffix == ".c"}
     arity = {}
-    for text in stripped.values():
-        for n, c in _call_arg_counts(text, wanted).items():
+    c_texts = [t for p, t in texts.items() if p.suffix == ".c"]
+    for counts in map_in_order(_text_arg_counts, [(text, wanted) for text in c_texts]):
+        for n, c in counts.items():
             arity.setdefault(n, set()).update(c)
     skipped, ok = {}, {}
     for name in sorted(wanted):
@@ -1999,11 +2176,9 @@ def prototype_unprototyped_declarations(mirror, root, report_path):
     candidates = {n for n, s in sigs.items() if s is not None and s[1] is not None
                   and not any(c in ("@agg", "x", "?") for c in s[1]) and n not in conflicts and n not in macro_names}
     called_by = {}
-    stripped = {p: _strip_literals(t) for p, t in texts.items() if p.suffix == ".c"}
     all_arity = {}
-    for path, text in stripped.items():
-        used = candidates.intersection(re.findall(r"\b([A-Za-z_]\w*)\s*\(", text))
-        got = _call_arg_counts(text, used)
+    c_paths = [p for p in texts if p.suffix == ".c"]
+    for path, got in zip(c_paths, map_in_order(_text_called_arg_counts, [(texts[p], candidates) for p in c_paths])):
         if got:
             called_by[path] = got
             for n, c in got.items():
@@ -2840,11 +3015,21 @@ def cmd_units(a):
     for u in units:
         if not (decomp / u).is_file():
             die(f"unit {u} is not in the decomp checkout")
+    plan = rw_clean_plan([s for s in re.split(r"[,;\s]+", a.rw_clean or "") if s])
+    for src in plan["sources"] + plan["port_sources"]:
+        if not (ROOT / src).is_file():
+            die(f"config/rw_clean.json: {src} does not exist")
+    units = rw_clean_units(units, plan)
+    rw_clean_owned(plan)
     lines = unit_flags(decomp, build, units)
     write_if_changed(build / "units.txt", "\n".join(lines) + "\n")
     write_if_changed(build / "excluded.txt",
                      "".join(f"{u}\t{why}\n" for u, why in sorted(excluded.items())))
-    print(f"gen_port: units: {len(units)} units, {len(excluded)} excluded")
+    write_if_changed(build / "rw_clean.json", json.dumps(plan, indent=1) + "\n")
+    write_if_changed(build / "rw_clean.cmake", rw_clean_cmake(plan))
+    write_if_changed(build / "rw_clean_units.txt", rw_clean_governed(plan))
+    print(f"gen_port: units: {len(units)} units, {len(excluded)} excluded"
+          + (f"; RenderWare clean subsystems {', '.join(plan['subsystems'])}" if plan["subsystems"] else ""))
 
 
 # A decomp unit that defines a retail-addressed name (`static s32 iGpffffb9e0;`, `f32 fGpffff83bc = 8.1f;`,
@@ -3290,6 +3475,8 @@ class MirrorContracts:
         self.refresh = refresh
         self.actual = {}
         self.errors = []
+        # The stage tree changes only inside run(), so one stage's after-snapshot is the next stage's before-snapshot.
+        self.previous = None
         if not refresh and not self.path.is_file():
             die(f"{self.path}: missing mirror match contracts")
         self.expected = {} if refresh else json.loads(self.path.read_text(encoding="utf-8"))
@@ -3304,12 +3491,13 @@ class MirrorContracts:
     def run(self, fn, *args, stage_name=None, before_root=None):
         name = stage_name or fn.__name__
         with build_cache.timed("mirror.snapshot-before", stage=name):
-            before = self.snapshot(before_root)
+            before = self.previous if before_root is None and self.previous is not None else self.snapshot(before_root)
         with build_cache.timed("mirror.transform", stage=name):
             result = fn(*args)
         with build_cache.timed("mirror.snapshot-after", stage=name):
             after = self.snapshot()
-        edits = {}
+        self.previous = after
+        edits, misses = {}, []
         with build_cache.timed("mirror.contract-diff", stage=name):
             for unit in sorted(before.keys() | after.keys()):
                 old, new = before.get(unit, b""), after.get(unit, b"")
@@ -3318,13 +3506,19 @@ class MirrorContracts:
                         # Unedited headers still determine inherited types and pointer strides.
                         edits[unit] = {"input_sha256": hashlib.sha256(old).hexdigest(), "hunks": []}
                     continue
-                data = build_cache.run_bytes("mirror.contract-unit", lambda: {
-                    "stage": name, "unit": unit,
-                    "before": hashlib.sha256(old).hexdigest(),
-                    "after": hashlib.sha256(new).hexdigest(),
-                    "versions": build_cache.versions(__file__)},
-                    lambda: json.dumps(self._edit_facts(old, new), sort_keys=True).encode("ascii"))
-                edits[unit] = json.loads(data)
+                inputs = {"stage": name, "unit": unit,
+                          "before": hashlib.sha256(old).hexdigest(),
+                          "after": hashlib.sha256(new).hexdigest(),
+                          "versions": build_cache.versions(__file__)}
+                data = build_cache.lookup("mirror.contract-unit", inputs)
+                if data is None:
+                    misses.append((unit, inputs, old, new))
+                else:
+                    edits[unit] = json.loads(data)
+            # A changed pass, pin or gen_port.py misses every unit the stage edits: diff those concurrently (the line diff is
+            # quadratic in big units), then publish each fact through the cache.
+            for (unit, inputs, _, _), facts in zip(misses, edit_facts_concurrently([(old, new) for _, _, old, new in misses])):
+                edits[unit] = json.loads(build_cache.run_bytes("mirror.contract-unit", inputs, lambda: facts))
         self.record(name, edits)
         return result
 
@@ -3362,6 +3556,19 @@ class MirrorContracts:
             die(f"{len(self.errors)} mirror stages changed their reviewed matches; mirror not published")
 
 
+def _edit_facts_bytes(pair):
+    return json.dumps(MirrorContracts._edit_facts(*pair), sort_keys=True).encode("ascii")
+
+
+def edit_facts_concurrently(pairs):
+    """The contract facts of (before, after) pairs, in order; a process per core once there are enough pairs to pay for them."""
+    if len(pairs) < 8:
+        return [_edit_facts_bytes(pair) for pair in pairs]
+    # (61: the most worker processes a Windows ProcessPoolExecutor accepts)
+    with concurrent.futures.ProcessPoolExecutor(max_workers=min(os.cpu_count() or 1, 61)) as pool:
+        return list(pool.map(_edit_facts_bytes, pairs))
+
+
 def mirror_cache_inputs(decomp, build, mod_hooks):
     """Conservative file inputs actually consumed by the mirror passes."""
     decomp_paths = [p for tree in ("src", "include", "config")
@@ -3369,11 +3576,12 @@ def mirror_cache_inputs(decomp, build, mod_hooks):
     port_paths = [p for tree in ("config", "overrides")
                   for p in (ROOT / tree).rglob("*") if p.is_file()]
     port_paths += list((ROOT / "src").rglob("*.c")) + list((ROOT / "include").rglob("*.h"))
+    port_paths += list((ROOT / RW_CLEAN_DIR).rglob("*.h"))
     # Prototype aliases also read ROOT/decomp when --decomp names another tree.
     if (ROOT / "decomp").resolve() != decomp.resolve():
         port_paths += list((ROOT / "decomp/config").glob("*"))
     return {"decomp": str(decomp.resolve()), "build": str(build.resolve()),
-            "mod_hooks": mod_hooks,
+            "mod_hooks": mod_hooks, "rw_clean": rw_clean_selected(build),
             "decomp_files": build_cache.input_files(decomp_paths, root=decomp),
             "port_files": build_cache.input_files(port_paths, root=ROOT),
             "versions": build_cache.versions(__file__, str(ROOT / "tools/mod_codegen.py")),
@@ -3551,8 +3759,15 @@ def generate_mirror(a):
     print(f"gen_port: mirror: removed inactive movie decoder: {inactive_units} units, "
           f"{inactive_functions} mixed-unit functions, {inactive_registrations} registrations")
     contracts.finish()
+    plan = rw_clean_selected(build)
+    compiled = rw_clean_units(units, plan)
+    if plan["subsystems"]:
+        owned_addrs, stripped = rw_clean_apply(stage, plan, compiled)
+        print(f"gen_port: mirror: RenderWare clean subsystems {', '.join(plan['subsystems'])}: {len(plan['sources'])} clean units "
+              f"own {owned_addrs} retail addresses; stripped {stripped} definitions at them from other units; "
+              f"{len(plan['units'])} replaced units not compiled")
     import mod_codegen
-    hooks = mod_codegen.instrument(stage, units, build, sys.modules[__name__], a.mod_hooks)
+    hooks = mod_codegen.instrument(stage, compiled, build, sys.modules[__name__], a.mod_hooks)
     print(f"gen_port: mirror: emitted {hooks} typed mod entry guards after the reviewed mirror passes")
     publish_mirror(stage, build / "decomp")
     shutil.rmtree(stage)
@@ -3592,10 +3807,23 @@ def target_name(raw):
     return raw[1:] if Tools.us and raw.startswith("_") else raw
 
 
+def object_chunks(objs, count=400, characters=24000):
+    """The object paths as groups of at most `count` paths and `characters` characters, for one nm/objdump command
+    each: a Windows command line holds 32,767 characters, which 400 build-tree paths exceed."""
+    chunk, used = [], 0
+    for obj in map(str, objs):
+        if chunk and (len(chunk) >= count or used + len(obj) + 1 > characters):
+            yield chunk
+            chunk, used = [], 0
+        chunk.append(obj)
+        used += len(obj) + 1
+    if chunk:
+        yield chunk
+
+
 def nm_symbols(objs):
     defined, undefined, functions = set(), set(), set()
-    for chunk_start in range(0, len(objs), 400):
-        chunk = [str(o) for o in objs[chunk_start:chunk_start + 400]]
+    for chunk in object_chunks(objs):
         out = subprocess.run([Tools.nm, "-P", "-g", *chunk], capture_output=True, text=True, check=True).stdout
         for line in out.splitlines():
             parts = line.split()
@@ -3647,8 +3875,7 @@ def reloc_kinds(objs, names):
     """name -> set of relocation types that reference it, from `objdump -r` (`--macho -r` for Mach-O)."""
     kinds = {}
     types = MACHO_RELOC_TYPES["arm64" if Tools.arm64 else "x86_64"]
-    for chunk_start in range(0, len(objs), 400):
-        chunk = [str(o) for o in objs[chunk_start:chunk_start + 400]]
+    for chunk in object_chunks(objs):
         out = subprocess.run([Tools.objdump, *(["--macho"] if Tools.macho else []), "-r", *chunk],
                              capture_output=True, text=True, check=True).stdout
         for line in out.splitlines():
@@ -4289,6 +4516,8 @@ def main():
     c = sub.add_parser("units")
     c.add_argument("--decomp", required=True)
     c.add_argument("--build", required=True)
+    c.add_argument("--rw-clean", default="",
+                   help="RenderWare clean subsystems to compile instead of the units they replace (config/rw_clean.json; CMake P4_RW_CLEAN)")
     c.set_defaults(fn=cmd_units)
 
     m = sub.add_parser("mirror")

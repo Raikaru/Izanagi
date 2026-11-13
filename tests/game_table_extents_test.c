@@ -8,6 +8,17 @@
 #include <stdint.h>
 #include <stdio.h>
 
+static unsigned observed_count;
+static uint32_t observed_slot, observed_base, observed_bytes;
+static void observe(void *user, uint32_t slot, uint32_t base, uint32_t bytes)
+{
+    assert(user == &observed_count);
+    ++observed_count;
+    observed_slot = slot;
+    observed_base = base;
+    observed_bytes = bytes;
+}
+
 int main(void)
 {
     if (p4t_guest_map(0x00764000u, 0x2000) != 0) return 77;
@@ -52,6 +63,17 @@ int main(void)
     for (unsigned i = 0; i < 160; i++)
         p4_game_table_extent_note(0x00764000u + i * 4, base, 24);
     assert(!p4_game_table_extent_rows(slot, 24, &actual_base, &rows));
-    puts("game_table_extents: original extents, same-step publication and fail-closed readers PASS");
+    /* One observer sees each note after its entry is updated (publication goes
+     * through note); clearing it, or never registering one, changes nothing. */
+    observed_count = 0;
+    p4_game_table_extent_observe(observe, &observed_count);
+    p4_game_table_slot_publish(slot, base, 72);
+    assert(observed_count == 1 && observed_slot == slot && observed_base == base && observed_bytes == 72);
+    p4_game_table_extent_note(slot, base + 32, 24);
+    assert(observed_count == 2 && observed_base == base + 32 && observed_bytes == 24);
+    p4_game_table_extent_observe(NULL, &observed_count);
+    p4_game_table_extent_note(slot, base, 48);
+    assert(observed_count == 2);
+    puts("game_table_extents: original extents, same-step publication, observer and fail-closed readers PASS");
     return 0;
 }

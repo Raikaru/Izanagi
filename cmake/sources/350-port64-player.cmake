@@ -63,7 +63,8 @@ if(P4_PORT64_LINK AND P4_PORT64_OBJS)
       set_target_properties(${tgt}64 PROPERTIES C_COMPILER_LAUNCHER "${launcher}")
     endif()
   endforeach()
-  add_dependencies(p4port64 p4decomp64)
+  # The port sources need no mirror output (their i386 objects compile without it), so p4port64 and p4portee64 compile beside the mirror64,
+  # and this audit runs beside the mirror64's own (crt-mirror64): the tables and the executables wait for both.
   p4_crt_guard(native64
     "${P4_PORT64_OBJS};$<FILTER:$<TARGET_OBJECTS:p4port64>,EXCLUDE,/(src/platform|third_party)/>;$<FILTER:$<TARGET_OBJECTS:p4portee64>,EXCLUDE,/(src/platform|third_party)/>"
     "$<TARGET_OBJECTS:p4port64>;$<TARGET_OBJECTS:p4portee64>" ${P4_HOSTLIB_ARGS64} ${P4_MOD_CRT_PROJECT64})

@@ -7,9 +7,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-static const char *const names[P4_MOD_AUTH_COUNT] = {"fusion", "encounter"};
+static const char *const names[P4_MOD_AUTH_COUNT] = {"fusion", "encounter", "battle_protection_item", "weapon_fusion",
+    "retry"};
 _Static_assert(P4_MOD_AUTH_FUSION_BIT == 1u << P4_MOD_AUTH_FUSION &&
-    P4_MOD_AUTH_ENCOUNTER_BIT == 1u << P4_MOD_AUTH_ENCOUNTER, "authorizer seam bits");
+    P4_MOD_AUTH_ENCOUNTER_BIT == 1u << P4_MOD_AUTH_ENCOUNTER &&
+    P4_MOD_AUTH_BATTLE_PROTECTION_ITEM_BIT == 1u << P4_MOD_AUTH_BATTLE_PROTECTION_ITEM &&
+    P4_MOD_AUTH_WEAPON_FUSION_BIT == 1u << P4_MOD_AUTH_WEAPON_FUSION &&
+    P4_MOD_AUTH_RETRY_BIT == 1u << P4_MOD_AUTH_RETRY, "authorizer seam bits");
 struct P4ModAuthorizer {
     size_t owner;
     int operation, enabled, removed;
@@ -131,6 +135,19 @@ int p4_mod_authorize_fusion(int kind, int materials)
     P4ModEvent context = {"fusion", 2, {{"kind", kind}, {"materials", materials}}};
     return p4_mod_authorize(P4_MOD_AUTH_FUSION, &context, NULL, 0);
 }
+int p4_mod_authorize_battle_protection_item(int character, int item, int element)
+{
+    P4ModEvent context = {"battle_protection_item", 3, {{"character", character}, {"item", item}, {"element", element}}};
+    return p4_mod_authorize(P4_MOD_AUTH_BATTLE_PROTECTION_ITEM, &context, NULL, 0);
+}
+
+int p4_mod_authorize_weapon_fusion(int stage, int character, int vessel, int persona, int signature,
+    char *reason, size_t capacity)
+{
+    P4ModEvent context = {"weapon_fusion", 5, {{"stage", stage}, {"character", character},
+        {"vessel", vessel}, {"persona", persona}, {"signature", signature != 0}}};
+    return p4_mod_authorize(P4_MOD_AUTH_WEAPON_FUSION, &context, reason, capacity);
+}
 
 /* Battle formation projector: one owner at a time, never last-writer-wins. */
 struct P4ModFormation {
@@ -197,4 +214,8 @@ uint32_t p4_mod_formation_project(uint32_t packed, uint32_t count)
     for (int i = 0; i < n; ++i) result |= (uint32_t)out[i] << (i * 4);
     fprintf(stderr, "p4pc: mods: battle lineup projected by owner %zu: %u -> %d members\n", f->owner, count, n);
     return result;
+}
+void p4_mod_formation_leader(uint32_t unitId)
+{
+    fprintf(stderr, "p4pc: mods: battle leader role given to unit %u (projected lineup without Yu)\n", unitId);
 }

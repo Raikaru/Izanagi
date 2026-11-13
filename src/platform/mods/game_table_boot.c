@@ -1,4 +1,5 @@
 #include "game_table_inputs_internal.h"
+#include "game_table_derived_internal.h"
 #include "p4pc/game_table_boot.h"
 #include "p4pc/game_table_extents.h"
 #include "p4pc/game_table_xml.h"
@@ -6,6 +7,7 @@
 #include "p4pc/game_table_manifest.h"
 #include "p4pc/game_items_save.h"
 #include "p4pc/game_personas_save.h"
+#include "p4pc/game_skills_save.h"
 #include "p4pc/game_table_admission.h"
 #include "p4pc/packages.h"
 #include "p4pc/package_memory.h"
@@ -13,6 +15,8 @@
 #include "p4pc/platform.h"
 #include "p4pc/guest.h"
 #include "p4pc/game_elements.h"
+#include "p4pc/game_damage_cover.h"
+#include "p4pc/game_side_ailment.h"
 #include "p4pc/mod_setting_gate.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,7 +35,7 @@ static struct TableSourceBoot {
     DefinitionSource *definitions;
     P4GameItemsSave *item_save;
     size_t count, capacity;
-    int sealed, exposed, native_items, native_skills, native_enemies, native_personas, admission_staged;
+    int sealed, exposed, native_items, native_skills, native_enemies, native_personas, native_derived, admission_staged;
     int identity_valid;
     uint8_t identity[32];
 } boot;
@@ -85,11 +89,14 @@ static int destroy(void)
     boot.item_save = NULL;
     result = p4_game_personas_save_unregister();
     if (result) return result;
+    result = p4_game_skills_save_unregister();
+    if (result) return result;
     result = p4_game_tables_builder_destroy(&boot.builder);
     if (result) return result;
     for (size_t i = 0; i < boot.count; ++i) p4_package_file_plan_release(boot.definitions[i].plan);
     free(boot.definitions);
     if (boot.capacity) p4_packages_memory_release(boot.capacity * sizeof *boot.definitions);
+    p4_game_tables_derived_reset();
     memset(&boot, 0, sizeof boot);
     return P4_TABLE_OK;
 }
@@ -145,6 +152,40 @@ static int definition(const P4PackageProvider *provider, const P4PackageField *f
     int closed = p4_package_file_close(input);
     if (result) return refuse(provider, *error ? error : "Table source decode/registration failed");
     if (closed) return refuse(provider, "Table source changed or could not close after CPU validation");
+    if (p4_package_provider_claim(provider, P4_PACKAGE_CLAIM_TABLES | P4_PACKAGE_CLAIM_SEMANTIC)) return -1;
+    return 0;
+}
+/* [table-derived KEY]: a registered producer composes retail-layout rows into
+ * the declared inputs at seal; those inputs are prepared like any other. */
+static int derived_definition(const P4PackageProvider *provider, const P4PackageField *fields, size_t count)
+{
+    char error[192];
+    uint32_t inputs = 0;
+    if (p4_game_tables_derived_select(provider, fields, count, &inputs, error, sizeof error))
+        return refuse(provider, error);
+    P4GameTablesDefinitionBuilder *builder = p4_game_tables_boot_builder();
+    if (!builder) return refuse(provider, "Table-derived builder allocation failed");
+    for (unsigned kind = 0; kind < P4_TABLE_INPUT_COUNT; ++kind)
+        if ((inputs & (1u << kind)) && p4_game_tables_builder_request_input(builder, (P4GameTableInputKind)kind))
+            return refuse(provider, "Table-derived input request failed");
+    if (p4_package_provider_claim(provider, P4_PACKAGE_CLAIM_TABLES | P4_PACKAGE_CLAIM_SEMANTIC)) return -1;
+    return 0;
+}
+/* [table-delta KEY]: named-field deltas the derived compose stage applies
+ * after every producer; the inputs they patch are prepared like any other. */
+static int delta_definition(const P4PackageProvider *provider, const P4PackageField *fields, size_t count)
+{
+    char error[240];
+    uint32_t inputs = 0;
+    if (p4_game_tables_delta_definition(provider, fields, count, &inputs, error, sizeof error)) {
+        fprintf(stderr, "p4pc: table-delta refused: %s\n", error);
+        return refuse(provider, error);
+    }
+    P4GameTablesDefinitionBuilder *builder = p4_game_tables_boot_builder();
+    if (!builder) return refuse(provider, "Table-delta builder allocation failed");
+    for (unsigned kind = 0; kind < P4_TABLE_INPUT_COUNT; ++kind)
+        if ((inputs & (1u << kind)) && p4_game_tables_builder_request_input(builder, (P4GameTableInputKind)kind))
+            return refuse(provider, "Table-delta input request failed");
     if (p4_package_provider_claim(provider, P4_PACKAGE_CLAIM_TABLES | P4_PACKAGE_CLAIM_SEMANTIC)) return -1;
     return 0;
 }
@@ -204,6 +245,8 @@ static void seal_identity(void)
         identity_word(&digest, input->fingerprint.size);
         identity_text(&digest, input->fingerprint.hex);
     }
+    if (p4_game_tables_derived_count() || p4_game_tables_derived_delta_count() || p4_game_tables_derived_layer_count())
+        p4_game_tables_derived_identity(&digest);
     identity_end(&digest, boot.identity);
     boot.identity_valid = 1;
 }
@@ -233,11 +276,15 @@ static int prepare(void *unused)
             size_t last = first + 1;
             while (last < count && !strcmp(fields[first].section, fields[last].section) &&
                 !strcmp(fields[first].argument, fields[last].argument)) ++last;
-            if (!strcmp(fields[first].section, "table-source")) {
+            const char *section = fields[first].section;
+            int (*handler)(const P4PackageProvider *, const P4PackageField *, size_t) =
+                !strcmp(section, "table-source") ? definition : !strcmp(section, "table-derived") ? derived_definition :
+                !strcmp(section, "table-delta") ? delta_definition : NULL;
+            if (handler) {
                 char reason[192];
                 const int gate = p4_mod_setting_section_gate(provider, fields + first, last - first, reason, sizeof reason);
                 if (gate < 0) return refuse(provider, reason);
-                if (gate && definition(provider, fields + first, last - first)) return -1;
+                if (gate && handler(provider, fields + first, last - first)) return -1;
             }
             first = last;
         }
@@ -311,24 +358,54 @@ static int finalize_prepare(void *unused)
                 result = p4_game_tables_battle_complete_require("persona", "table-source");
         }
     }
+    /* A relocated derived span moves its slot after the battle tables load;
+     * renamed items (a producer's or a p4.data layer's) publish their names. */
+    if (!result && (p4_game_tables_derived_count() || p4_game_tables_derived_item_name_count())) {
+        result = p4_game_tables_derived_boot_stage(&boot.builder.allocator);
+        if (!result) boot.native_derived = 1;
+    }
     if (!result && boot.builder.items)
         result = p4_game_tables_items_save_register(boot.builder.items, boot.builder.sources, &boot.item_save);
     if (!result && boot.builder.personas)
         result = p4_game_personas_save_register(boot.builder.personas, boot.builder.sources);
+    if (!result && boot.builder.skills)
+        result = p4_game_skills_save_register(boot.builder.skills, boot.builder.sources);
     if (result) fprintf(stderr, "p4pc: pre-raw table hook staging refused: %s\n", p4_game_tables_error(result));
     return result ? -1 : 0;
 }
-static void publish(void *unused) { (void)unused; boot.exposed = 1; }
+static void publish(void *unused)
+{
+    (void)unused;
+    boot.exposed = 1;
+    p4_game_tables_derived_expose();
+}
 static void rollback(void *unused)
 {
     (void)unused;
     if (boot.exposed) abort(); /* This callback is strictly PRE-exposure. */
+    p4_game_damage_cover_session_end(); /* A staged plan never outlives its tables. */
+    p4_game_side_ailment_session_end();
     int result = boot.native_skills ? p4_game_skills_boot_unstage(boot.builder.skills) : P4_TABLE_OK;
     if (!result && boot.native_items) result = p4_game_tables_items_boot_unstage(boot.builder.items);
     if (!result && boot.native_enemies) result = p4_game_enemies_boot_unstage(boot.builder.enemies);
     if (!result && boot.native_personas) result = p4_game_personas_boot_unstage(boot.builder.personas);
+    if (!result && boot.native_derived) result = p4_game_tables_derived_boot_unstage();
     if (result) p4_package_boot_runtime_failed("Early table-source rollback could not release its exact unused raw hooks.");
     if (destroy()) p4_package_boot_runtime_failed("Table-source rollback could not unregister its actual native provenance provider.");
+}
+/* A cover owner's load position: the earliest package whose table source
+ * key carries that owner (owners without one sort last). */
+static uint32_t owner_load_order(const char *owner)
+{
+    size_t best = SIZE_MAX;
+    const size_t length = strlen(owner);
+    for (size_t i = 0; i < boot.count; ++i) {
+        const char *key = boot.definitions[i].key, *colon = strchr(key, ':');
+        if (!colon || (size_t)(colon - key) != length || strncmp(key, owner, length)) continue;
+        const P4PackageInfo *info = p4_package_provider_info(boot.definitions[i].provider);
+        if (info && info->ordinal < best) best = info->ordinal;
+    }
+    return best > UINT32_MAX ? UINT32_MAX : (uint32_t)best;
 }
 static int runtime_prepare(void *unused)
 {
@@ -340,12 +417,26 @@ static int runtime_prepare(void *unused)
     if (!result) result = p4_game_table_sources_boot_stage(boot.builder.sources);
     if (!result && p4_game_elements_requested(boot.builder.tables))
         result = p4_game_elements_boot_stage(boot.builder.tables, boot.builder.skills, boot.builder.items);
+    if (!result && p4_game_tables_damage_cover_count(boot.builder.tables))
+        result = p4_game_damage_cover_prepare(boot.builder.tables, owner_load_order);
+    if (!result && p4_game_tables_side_ailment_count(boot.builder.tables))
+        result = p4_game_side_ailment_prepare(boot.builder.tables);
     if (result) return p4_package_boot_fail(NULL, p4_game_tables_error(result));
     boot.runtime_product = boot.cpu_product;
     return p4_package_boot_provide(&boot.runtime_product);
 }
+/* The sealed catalog's cover modifiers join the final-damage stage, and its
+ * side ailments become the battle service's definitions. */
+static void runtime_publish(void *unused)
+{
+    (void)unused;
+    p4_game_damage_cover_publish();
+    p4_game_side_ailment_publish();
+}
 int p4_game_tables_boot_session_end(void)
 {
+    p4_game_damage_cover_session_end();
+    p4_game_side_ailment_session_end();
     if (boot.builder.sources) {
         int result = p4_game_table_sources_session_end();
         if (result) return result;
@@ -354,11 +445,12 @@ int p4_game_tables_boot_session_end(void)
     if (!result) { action_preparer = NULL; action_context = NULL; }
     return result;
 }
-static const char *const sections[] = {"table-source", NULL};
-/* A table-source's `when` reads this admission's settings snapshot. */
+static const char *const sections[] = {"table-source", "table-derived", "table-delta", NULL};
+/* A table-source's, table-derived's or table-delta's `when` reads this admission's settings snapshot. */
 static const char *const dependencies[] = {P4_MOD_SETTINGS_HANDLER, NULL};
 const P4PackageHandler p4_game_tables_sources_boot_provider = {
     .name = P4_GAME_TABLES_BOOT_PROVIDER, .sections = sections,
     .prepare = prepare, .finalize_prepare = finalize_prepare, .publish = publish, .rollback = rollback,
-    .boot_phase = P4_PACKAGE_BOOT_TABLES, .dependencies = dependencies, .runtime_prepare = runtime_prepare
+    .boot_phase = P4_PACKAGE_BOOT_TABLES, .dependencies = dependencies, .runtime_prepare = runtime_prepare,
+    .runtime_publish = runtime_publish
 };

@@ -103,6 +103,7 @@ static void movie_tick(double seconds)
         if (M.voice == NULL) {
             return;
         }
+        p4snd_voice_set_category(M.voice, P4SND_CAT_MOVIE);
         M.channels = ch;
         M.last_consumed = 0;
         p4snd_voice_set_rate(M.voice, rate);

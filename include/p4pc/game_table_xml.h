@@ -24,4 +24,15 @@ struct P4PackageFile;
  * file handle; caller closes/revalidates it and discards candidate on failure. */
 int p4_game_tables_source_xml_file(const P4GameTableXmlTarget *target,
     struct P4PackageFile *file, char *error, size_t error_capacity);
+#ifdef P4_TABLE_XML_CHECK
+/* game_table_xml.c built for p4mod check (P4_TABLE_XML_CHECK): the same lexical,
+ * root, nesting, size, record-field and attribute checks as above with no
+ * builder, so nothing is registered and registration rules (ID claims, key
+ * uniqueness, family state, source binding) are not applied. visit sees each
+ * accepted record's name and attribute names. 0, or an error naming the line. */
+typedef void (*P4GameTableXmlVisit)(void *user, const char *record, const char *const *attributes, size_t count,
+    unsigned long line);
+int p4_game_tables_source_xml_check(const char *owner, uint32_t revision, const uint8_t *bytes, size_t size,
+    P4GameTableXmlVisit visit, void *user, char *error, size_t error_capacity);
+#endif
 #endif

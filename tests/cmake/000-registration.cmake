@@ -53,6 +53,19 @@ function(add_test)
   endif()
 endfunction()
 
+# p4_target_command(<var> <target>): the argv that runs a built program from a test harness (a Python or shell
+# script given the program on its command line): the target's CROSSCOMPILING_EMULATOR (wine for the Windows
+# builds) followed by $<TARGET_FILE:target>. A harness runs that argv as given and never execs the .exe itself:
+# a direct exec only works on a machine whose kernel has a binfmt handler for Windows programs (Fedora's
+# wine-systemd installs one), so the result would depend on the machine that runs the test.
+function(p4_target_command var target)
+  get_target_property(runner ${target} CROSSCOMPILING_EMULATOR)
+  if(NOT runner)
+    set(runner)
+  endif()
+  set(${var} ${runner} "$<TARGET_FILE:${target}>" PARENT_SCOPE)
+endfunction()
+
 # Host tests. The compile and link flags of the target (Linux i386 or 32-bit Windows) come from the
 # root CMakeLists.txt (add_compile_options / add_link_options), so the targets below do not repeat
 # them. Tests that map memory at PS2 addresses call p4_ps2_exe(): on Windows that links the exe's

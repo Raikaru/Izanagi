@@ -26,8 +26,11 @@
 #include "p4pc/gmem.h"
 #include "p4pc/platform.h"
 #include "p4pc/vblank_hook.h"
+#include "p4pc/pace.h"
 #include "config/p4cfg.h"
 #include "pad/pad_sdl.h"
+#include "p4pc/game_skills_native.h"
+#include "p4pc/game_passive_grant.h"
 #include "sound/p4snd.h"
 
 /* TIMER0 callback that kwlnInitIop registers (overrides/00100310.c). */
@@ -92,6 +95,8 @@ void p4pc_platform_init(void) {
     p4snd_set_user_volume((float)p4cfg_float("audio.volume", 100.0) / 100.0f);
     /* On a virtual clock the SPU2's playing time is the kernel's VBLANK periods (kernel_thread.c). */
     p4pc_vblank_period_hook = p4snd_virtual_tick;
+    /* Paced practice play (p4pc_pace_request): audio follows the VBLANK periods, muted. */
+    p4pc_pace_audio_hook = p4snd_set_frame_driven;
     if (p4pc_intc_add_handler(INTC_TIMER0, kwlnHandleTimerInterrupt, 0) != INTC_TIMER0) {
         fprintf(stderr, "p4pc: AddIntcHandler(TIMER0) refused\n");
         exit(2);
@@ -120,6 +125,8 @@ void p4pc_platform_init(void) {
      * sync that this function replaces. */
     func_0042eae0(0);
     p4pc_pad_autopress_set_clock(p4pc_flip_count);
+    p4pc_pad_set_skill_active(p4_game_skill_active);
+    p4pc_pad_set_passive_granted(p4_game_passive_enemy_has);
     /* Pad start-up: retail kwlnInitIop calls sdkPadInit after the module loads (scePadInit and the
      * port opens through src/platform/pad/ps2_pad.c). Without it sdkPadUpdateAll never saw a button. */
     sdkPadInit();

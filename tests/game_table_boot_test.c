@@ -1,8 +1,12 @@
+#include "game_table_derived_internal.h"
 #include "p4pc/game_table_boot.h"
 #include "p4pc/game_table_extents.h"
 #include "p4pc/game_tables_native.h"
 #include "p4pc/game_elements.h"
+#include "p4pc/game_damage_cover.h"
+#include "p4pc/game_side_ailment.h"
 #include "p4pc/game_personas_save.h"
+#include "p4pc/game_skills_save.h"
 #include "p4pc/packages.h"
 #include "package_boot_internal.h"
 #include "p4pc/package_memory.h"
@@ -75,8 +79,25 @@ int p4_game_personas_boot_unstage(P4GamePersonas *personas)
 int p4_game_personas_save_register(const P4GamePersonas *personas, const P4GameTableSources *sources)
 { (void)personas; (void)sources; fputs("Unrequested persona save block\n", stderr); abort(); }
 int p4_game_personas_save_unregister(void) { return P4_TABLE_OK; } /* Nothing registered here. */
+int p4_game_skills_save_register(const P4GameSkills *skills, const P4GameTableSources *sources)
+{ (void)skills; (void)sources; fputs("Skill save block registered after the native skill stage refused\n", stderr); abort(); }
+int p4_game_skills_save_unregister(void) { return P4_TABLE_OK; } /* Nothing registered here. */
+int p4_game_tables_derived_boot_stage(const P4GameTableAllocator *allocator)
+{ (void)allocator; fputs("Unselected derived relocation stage\n", stderr); abort(); }
+int p4_game_tables_derived_boot_unstage(void)
+{ fputs("Unowned derived relocation rollback\n", stderr); abort(); }
 int p4_game_elements_boot_stage(const P4GameTables *tables, const P4GameSkills *skills, const P4GameItems *items)
 { (void)tables; (void)skills; (void)items; fputs("Element stage continued after required family refusal\n", stderr); abort(); }
+/* No fixture source declares damage cover; publication finds no plan. */
+int p4_game_damage_cover_prepare(const P4GameTables *tables, P4DamageCoverLoadOrderFn load_order)
+{ (void)tables; (void)load_order; fputs("Unrequested damage cover plan\n", stderr); abort(); }
+void p4_game_damage_cover_publish(void) { }
+void p4_game_damage_cover_session_end(void) { }
+/* Nor side ailments. */
+int p4_game_side_ailment_prepare(const P4GameTables *tables)
+{ (void)tables; fputs("Unrequested side-ailment plan\n", stderr); abort(); }
+void p4_game_side_ailment_publish(void) { }
+void p4_game_side_ailment_session_end(void) { }
 static void observed(const P4PackageFileOrigin *origin, const void *bytes, size_t size, uint64_t offset, void *user)
 {
     assert(!user && origin && origin->package && bytes && size && offset == bytes_read);
@@ -190,10 +211,17 @@ int main(int argc, char **argv)
     expected_item_only = !strcmp(mode, "item-only");
     expected_skill_only = !strcmp(mode, "skill-only");
     /* gated-on/off: a table-source `when` toggle admitted on or off; gated-live
-     * names an apply=live toggle, which a sealed boot section must refuse. */
-    expected_active = !strcmp(mode, "good") || !strcmp(mode, "gated-on") || expected_families || expected_category ||
-        expected_item_only || expected_skill_only;
-    int success = expected_active || !strcmp(mode, "empty") || !strcmp(mode, "gated-off");
+     * names an apply=live toggle, which a sealed boot section must refuse.
+     * companion-on/off: a `companion` gate whose declared companion is enabled
+     * or absent; companion-undeclared names one the manifest never declares.
+     * companion-setting-on/off: the enabled companion's restart toggle holds the
+     * section's `companion-setting` value or not; -invalid names an undeclared key;
+     * -malformed has no value and is refused with its companion absent. */
+    expected_active = !strcmp(mode, "good") || !strcmp(mode, "gated-on") || !strcmp(mode, "companion-on") ||
+        !strcmp(mode, "companion-setting-on") || expected_families || expected_category || expected_item_only ||
+        expected_skill_only;
+    int success = expected_active || !strcmp(mode, "empty") || !strcmp(mode, "gated-off") || !strcmp(mode, "companion-off") ||
+        !strcmp(mode, "companion-setting-off");
     if (expected_category) assert(!p4_game_tables_boot_action_preparer_register(prepare_action, &action_slot));
     static const P4PackageClient client = {.diagnostic_name = "table source fixture", .manifest_name = "mod.ini",
         .section = "[mod]", .kind = P4_PACKAGE_MOD};
@@ -205,7 +233,10 @@ int main(int argc, char **argv)
     assert(!p4_package_handler_register(&p4_mod_settings_boot_provider)); /* table-source `when` */
     assert(!p4_package_reads_observe(observed, NULL));
     P4PackageRegistry *registry = NULL;
-    if (strcmp(mode, "empty")) assert(!p4_package_registry_load(&registry, &client, argv[2], "source.owner"));
+    if (strcmp(mode, "empty"))
+        assert(!p4_package_registry_load(&registry, &client, argv[2],
+            !strcmp(mode, "companion-on") || (!strncmp(mode, "companion-setting-", 18) &&
+            strcmp(mode, "companion-setting-malformed")) ? "source.companion,source.owner" : "source.owner"));
     int result = p4_package_registry_publish();
     if (!success) {
         assert(result && !prepares && !publishes && !runtime_prepares && !p4_game_table_sources_active());

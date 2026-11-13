@@ -359,9 +359,13 @@ void p4_lua_ui_initialize(lua_State *L)
     lua_setreadonly(L, -1, 1);
     lua_setuserdatametatable(L, P4_LUA_TAG_UI_PAGE);
     lua_setuserdatadtor(L, P4_LUA_TAG_UI_PAGE, page_destroyed);
+    p4_lua_overlay_initialize(L);
+    p4_lua_rows_initialize(L);
     static const luaL_Reg methods[] = {
         {"page", new_page}, {"detail", new_detail}, {"back", go_back},
-        {"close", close_page}, {"active", active_page}, {"status", set_status}, {NULL, NULL}
+        {"close", close_page}, {"active", active_page}, {"status", set_status},
+        {"sprite", p4_lua_ui_sprite}, {"overlay", p4_lua_ui_overlay},
+        {"native_row", p4_lua_ui_native_row}, {NULL, NULL}
     };
     p4_lua_library(L, methods);
     lua_setfield(L, -2, "ui");
@@ -370,6 +374,8 @@ void p4_lua_ui_close(P4LuaMod *mod)
 {
     mod->ui_closing = 1;
     p4_mod_status_set((uint32_t)mod->owner, P4_MOD_STATUS_CAMP, NULL, 0);
+    p4_lua_rows_close(mod); /* before its page and sprites go */
+    p4_lua_overlay_close(mod);
     p4_mod_hud_status_changed();
     if (mod->ui_pages) {
         for (P4LuaUIPage **slot = &unlisted_pages; *slot;)

@@ -2,6 +2,7 @@
 #include "p4pc/mod_settings.h"
 #include "p4pc/settings.h"
 #include "p4pc/os.h"
+#include "p4pc/settings_native.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -53,6 +54,10 @@ int main(void)
     CHECK(p4_mod_settings_detach_page(&ownerB, page.key) == -1);
     CHECK(p4_mod_settings_detach_page(&ownerA, page.key) == 0);
     CHECK(p4_settings_page_register(&page) == -1); /* unlink is NOT unregister */
+    /* Hosting validates before any guest task access, and never opens a view. */
+    CHECK(p4_settings_native_host(0, page.key) == -1);
+    CHECK(p4_settings_native_host(0x00100000u, "service/not-registered") == -1);
+    CHECK(p4_settings_native_active() == 0 && p4_settings_page_active() == NULL);
     CHECK(p4_settings_page_unregister(page.key) == 0);
 
     page.key = "lua/witness/one";

@@ -325,6 +325,10 @@ static int play_one(const char *adxPath, const char *wavPath)
         int i;
 
         func_004c0e50(P4_G2H(P4_G32(0x00725294)));
+        /* ADXM_ExecVint counts a server pass every second VBLANK; the renderer's IOP clock runs on it */
+        if ((ticks & 1) == 0) {
+            *(uint32_t *)P4_G2H(0x007188b8u) += 1;
+        }
         ADXT_ExecServer();
         stat = ADXT_GetStat(adxt);
         if (startFrame < 0 && stat == ADXT_STAT_PLAYING) {
@@ -353,12 +357,12 @@ static int play_one(const char *adxPath, const char *wavPath)
     }
 
     /* duration: from the first frame the voice played to the end state. The end state comes after
-     * the last sample by the renderer's report latency, as on the PS2 (docs/audio.md, "End of a
-     * voice"): 2.75 server passes (one per 1/60 s tick here) and up to one 256-sample block. */
+     * the last sample by the renderer's report, as on the PS2 (docs/audio.md, "End of a voice"): up
+     * to 7.25 IOP blocks of 10.67 ms, one server pass and one block. */
     {
         double played = (double)(endFrame - startFrame) / P4SND_RATE;
         double want = (double)total / rate;
-        double report = 2.75 / 60.0 + 256.0 / rate;
+        double report = 0.125;
 
         fprintf(stderr, "ahx_wav_test: played %.3f s, header %.3f s\n", played, want);
         if (played - want < -0.1 || played - want > 0.1 + report) {

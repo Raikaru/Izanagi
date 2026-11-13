@@ -30,7 +30,7 @@ int p4_game_tables_prepare(const char *table_key, const char *source_key,
     uint32_t original_rows, const uint8_t *retail_bytes, size_t size);
 int p4_game_tables_prepare_clear(void);
 /* Shared actual0010d480 completion order: item, skill, persona, enemy, table-source,
- * element, element-ai, element-knowledge, element-ui. Expanded native activation
+ * table-derived, element, element-route, element-ai, element-knowledge, element-ui. Expanded native activation
  * requires actual source/AI-carrier/knowledge/UI participants, not claim bits.
  * Register only expanding participants. Prepare validates/freezes without
  * publishing RAM/count/active state; commit only publishes prevalidated state
@@ -68,12 +68,15 @@ typedef enum P4KoAffinity { P4_KO_NORMAL = 0, P4_KO_VULNERABLE = 1, P4_KO_RESIST
  * encodings retain their separate limits; registration is not a native-route
  * capability or permission to narrow an ID into such a field.
  * Icons are stable owner/key/revision references, never process tokens. Real
- * resource preparation resolves them; UI products own validated token pins. */
+ * resource preparation resolves them; UI products own validated token pins.
+ * icon is the leaf's skill art; header_icon (optional, empty owner = none) is
+ * its affinity-column header art, which falls back to icon when absent. */
 typedef struct P4ElementDesc {
     uint32_t id, flags, family, order, revision;
     char key[P4_TABLE_KEY_SIZE];
     char display_name[P4_TABLE_NAME_SIZE], short_name[P4_TABLE_NAME_SIZE];
     P4ResourceRef icon;
+    P4ResourceRef header_icon;
 } P4ElementDesc;
 typedef struct P4AffinityChannelDesc {
     uint32_t id, kind, revision;
@@ -124,6 +127,39 @@ typedef struct P4AffinityEffectBinding {
     uint32_t source_kind, source_id, element_id, channel_id, flags, schema, revision;
     char key[P4_TABLE_KEY_SIZE];
 } P4AffinityEffectBinding;
+/* One-leaf final-damage cover (docs/modding/tables.md "Damage cover"): a
+ * source a unit carries lowers the HP damage one leaf delivers to it by
+ * percent (1..99), composed once in the final-damage stage. It is not an
+ * affinity: weakness, Down, the hit kind and every affinity query stay as
+ * they were. Sources match exactly as the added affinity effects do (the
+ * unit's skill list, a party member's three equipped items and the
+ * accessory's granted skill). The channel is the standard damage channel;
+ * family is a key of the owner, and within a family only the highest cover
+ * of a leaf applies. A source covers a leaf once, and one owner claims a
+ * source's cover set. */
+typedef struct P4DamageCoverBinding {
+    uint32_t source_kind, source_id, element_id, channel_id, percent, schema, revision;
+    char family[P4_TABLE_KEY_SIZE];
+    char key[P4_TABLE_KEY_SIZE];
+} P4DamageCoverBinding;
+/* A side ailment (docs/modding/tables.md "Side ailments"): a status leaf above
+ * the retail leaves, declared by the same owner with the AFFINITY flag, whose
+ * state the side-ailment service (game_side_ailment.h) holds per battle unit
+ * outside DatUnit.bad. flags are P4_SIDE_*. A retail mode-2 cure clears it when
+ * its mask covers cure_mask (nonzero). default_from is the damage leaf whose
+ * effective affinity gives the unit's susceptibility when no status-channel
+ * row exists (P4_SIDE_DEFAULT_NONE: none). crit_bonus is a percent (0..100)
+ * added to the critical chance against an ailing unit. One row per leaf. */
+#define P4_SIDE_LOSE_TURN 1u   /* loses its next own turn, recovers at that turn's end */
+#define P4_SIDE_SINGLE_SLOT 2u /* excludes and is excluded by retail ailments, Dizzy included */
+#define P4_SIDE_SMTV_DECAY 4u  /* each prior landing this battle lowers the next chance */
+#define P4_SIDE_FLAGS 7u
+#define P4_SIDE_DEFAULT_NONE UINT32_MAX
+#define P4_SIDE_AILMENT_LIMIT 16u
+typedef struct P4SideAilmentDef {
+    uint32_t leaf, flags, cure_mask, default_from, crit_bonus, schema, revision;
+    char key[P4_TABLE_KEY_SIZE];
+} P4SideAilmentDef;
 
 typedef struct P4GameTables P4GameTables;
 /* Actual runtime consumption transport, declared before seal. Root binds this
@@ -165,6 +201,8 @@ int p4_game_tables_affinity_resolve_retail(P4GameTables *tables,
 int p4_game_tables_action_element(P4GameTables *tables, const char *owner, const P4ActionElementBinding *binding);
 int p4_game_tables_affinity_alias(P4GameTables *tables, const char *owner, const P4AffinityProfileAlias *alias);
 int p4_game_tables_affinity_effect(P4GameTables *tables, const char *owner, const P4AffinityEffectBinding *effect);
+int p4_game_tables_damage_cover(P4GameTables *tables, const char *owner, const P4DamageCoverBinding *cover);
+int p4_game_tables_side_ailment(P4GameTables *tables, const char *owner, const P4SideAilmentDef *def);
 /* Resolve one explicitly selected source domain against a frozen registry.
  * declared is the actual metadata result, including an explicit validity tag,
  * not an invented fallback. An owned binding takes precedence. Classification
@@ -222,6 +260,17 @@ const P4AffinityEffectBinding *p4_game_tables_affinity_effect_at(const P4GameTab
 const char *p4_game_tables_affinity_effect_owner(const P4GameTables *tables, size_t index);
 /* Compiled pair index: an absent pair skips native skill/equipment work. */
 int p4_game_tables_has_affinity_effect_pair(const P4GameTables *tables, uint32_t element_id, uint32_t channel_id);
+const P4DamageCoverBinding *p4_game_tables_find_damage_cover(const P4GameTables *tables,
+    uint32_t source_kind, uint32_t source_id, uint32_t element_id, uint32_t channel_id);
+size_t p4_game_tables_damage_cover_count(const P4GameTables *tables);
+const P4DamageCoverBinding *p4_game_tables_damage_cover_at(const P4GameTables *tables, size_t index);
+const char *p4_game_tables_damage_cover_owner(const P4GameTables *tables, size_t index);
+/* The owner of a row this snapshot issued (find/at), else NULL. */
+const char *p4_game_tables_damage_cover_row_owner(const P4GameTables *tables, const P4DamageCoverBinding *row);
+const P4SideAilmentDef *p4_game_tables_find_side_ailment(const P4GameTables *tables, uint32_t element_id);
+size_t p4_game_tables_side_ailment_count(const P4GameTables *tables);
+const P4SideAilmentDef *p4_game_tables_side_ailment_at(const P4GameTables *tables, size_t index);
+const char *p4_game_tables_side_ailment_owner(const P4GameTables *tables, size_t index);
 const char *p4_game_tables_error(int result);
 /* Exact retail packed-u16 decode, including unflagged zero. */
 uint32_t p4_affinity_decode(uint16_t packed);

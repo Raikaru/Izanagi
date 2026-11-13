@@ -18,8 +18,12 @@
  * (collision 900's voice: 5 updates, 8 VBLANKs, 4 passes). Any other
  * stream server read completes normally and is only recorded. Unmatched or unowned reads fail
  * the run. Host bytes are still copied at submission: retail consumers read a destination only
- * after observing completion (H_Cdvd_UpdateRequests state 3). port-disc-holds.tsv records every
- * held and stream read. */
+ * after observing completion (H_Cdvd_UpdateRequests state 3). With P4PC_LOCKSTEP_DISC_ONLINE
+ * (include/p4pc/lockstep_online.h) game reads come live from retail instead of from the table:
+ * the port's n-th game read after the anchor is retail's n-th, and each status poll of it
+ * (p4pc_lockstep_disc_poll) is answered by retail's poll in the same update, releasing the read
+ * exactly where retail's poll saw it complete. port-disc-holds.tsv records every held and
+ * stream read. */
 #include <ctype.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -30,6 +34,7 @@
 #include "p4pc/lockstep_disc.h"
 #include "p4pc/frame_alarm_seam.h"
 #include "p4pc/lockstep_format.h"
+#include "p4pc/lockstep_online.h"
 #include "p4pc/platform.h"
 #include "p4pc/vfs_origin.h"
 #include "files/adxf_host.h"
@@ -40,6 +45,7 @@
 #define DISC_RECHECK_US (1000000u / 60u)
 #define DISC_VBLANK_NS (1000000000ull / 60u) /* the kernel's VBLANK period (kernel_thread.c KT_VSYNC_NS) */
 #define HCDVD_REQUESTS 0x008D1B84u
+#define ADXF_PARTITION_HANDLE 0x00716720u /* the archive the partition loader is reading */
 
 /* Held by ADXSTM_ExecServer's test-and-set for its whole pass (src/cri/re4/adx_stmc.c). */
 extern int32_t adxstmf_execsvr_flg;
@@ -62,13 +68,16 @@ typedef struct {
     uint32_t request, target;
     uint64_t due_ns; /* a stream hold: released once the scheduler reaches it, not by frame */
     size_t row;
+    int online;            /* released only by p4pc_lockstep_disc_poll, when retail's poll saw it complete */
+    uint32_t online_index; /* retail's game read index */
 } DiscHold;
 
 static DiscRow *sRows;
 static size_t sRowCount;
 static uint32_t sRetailAnchor, sHorizon, sAnchor;
 static FILE *sReceipt;
-static int sConfigured;
+static int sConfigured, sOnline;
+static uint32_t sOnlineReads;
 static DiscHold sHolds[DISC_HOLDS];
 static struct {
     int valid, family;
@@ -151,8 +160,11 @@ static uint32_t guest_word(uint32_t address) {
 
 /* Classification is by ownership, never by file type. A handle held by an H_Cdvd request node
  * (decomp/src/Kernel/sdkCdvd.c: list head 0x008D1B84, next +0x4, adxf +0x154) is a game-level
- * request. A read issued while the ADXSTM server pass holds its test-and-set flag belongs to
- * the ADX stream server (BGM .ADX, voice .AFS). Anything else refuses the run. */
+ * request, and so is the archive handle the ADXF partition loader is reading a table of contents
+ * through (func_004c7b80/adxf_GetPtStat, src/platform/files/adxf_partition.c: retail word
+ * 0x00716720), such as an event's voice .AFS. A read issued while the ADXSTM server pass holds
+ * its test-and-set flag belongs to the ADX stream server (BGM .ADX, voice .AFS members).
+ * Anything else refuses the run. */
 static int hcdvd_request(uint32_t handle) {
     uint32_t node = guest_word(HCDVD_REQUESTS);
     for (unsigned count = 0; node; count++) {
@@ -161,6 +173,10 @@ static int hcdvd_request(uint32_t handle) {
         node = guest_word(node + 0x4u);
     }
     return 0;
+}
+
+static int partition_request(uint32_t handle) {
+    return guest_word(ADXF_PARTITION_HANDLE) == handle;
 }
 
 static void release(DiscHold *hold, int from_alarm) {
@@ -175,6 +191,7 @@ static void release(DiscHold *hold, int from_alarm) {
  * after its request: the stream server polls on VBLANKs, and retail's update counter steps between
  * its request and its completing poll once more than its passes do as often as not. */
 static int hold_due(const DiscHold *hold) {
+    if (hold->online) return 0;
     if (hold->due_ns != 0) return p4pc_scheduler_time_ns() >= hold->due_ns;
     return (int32_t)(game_frame() - hold->target) >= 0;
 }
@@ -197,7 +214,27 @@ static int32_t seam_set(uint32_t (*handler)(int32_t, void *), void *arg) {
     const int32_t relative = (int32_t)(frame - sAnchor);
     uint32_t offset, sectors;
     size_t index, slot;
-    if (!sRead.valid) disc_fail("a disc completion has no preceding VFS read");
+    if (!sRead.valid) {
+        /* No bytes were read: a zero-sector read (or one at the end of its window). The ADX stream
+         * server issues these (retail's ADXSTM does too, through rofs_read); it is not held, so it
+         * is receipted with no sectors. Any other unobserved read refuses the run. */
+        const P4AdxfHandle *file = arg;
+        P4VfsOrigin origin;
+        char name[DISC_NAME] = "-";
+        if (file != NULL && !vfs_origin(file->fd, &origin) && origin.key) base_name(origin.key, name);
+        if (file != NULL && adxstmf_execsvr_flg && file->pos >= 0 && file->pos % DISC_SECTOR == 0) {
+            stream_receipt(name, (uint32_t)(file->pos / DISC_SECTOR), 0, frame);
+            return p4pc_set_frame_boundary_alarm(handler, arg);
+        }
+        if (file == NULL)
+            snprintf(why, sizeof why, "a raw sector read at port frame %u (anchor+%d) has no preceding VFS read",
+                     frame, relative);
+        else
+            snprintf(why, sizeof why, "a file read of %s at port frame %u (anchor+%d) has no preceding VFS read "
+                     "(handle position %lld of %lld bytes) and is not the ADX stream server's", name, frame,
+                     relative, (long long)file->pos, (long long)file->size);
+        disc_fail(why);
+    }
     if (sRead.family == DISC_CDVD) {
         if (arg != NULL) disc_fail("a raw sector read completes through a file handle");
         offset = (uint32_t)(sRead.first / DISC_SECTOR);
@@ -223,10 +260,10 @@ static int32_t seam_set(uint32_t (*handler)(int32_t, void *), void *arg) {
         sectors = (uint32_t)((file->pos - before) / DISC_SECTOR);
     }
     sRead.valid = 0;
-    if (sRead.family != DISC_FILE || !hcdvd_request(P4_H2G(arg))) {
+    if (sRead.family != DISC_FILE || !(hcdvd_request(P4_H2G(arg)) || partition_request(P4_H2G(arg)))) {
         if (!adxstmf_execsvr_flg) {
             snprintf(why, sizeof why, "%s read %s offset %u sectors %u at port frame %u (anchor+%d) has neither "
-                     "an H_Cdvd request node nor the ADX stream server as owner",
+                     "an H_Cdvd request node, the ADXF partition loader nor the ADX stream server as owner",
                      sRead.family == DISC_CDVD ? "raw sector" : "file", sRead.name[0] ? sRead.name : "-",
                      offset, sectors, frame, relative);
             disc_fail(why);
@@ -246,6 +283,30 @@ static int32_t seam_set(uint32_t (*handler)(int32_t, void *), void *arg) {
             stream_receipt(sRead.name, offset, sectors, frame);
             return p4pc_set_frame_boundary_alarm(handler, arg);
         }
+    } else if (sOnline) {
+        char name[P4ON_NAME];
+        uint32_t retail_offset, retail_sectors;
+        int32_t request;
+        DiscRow *grown;
+        p4pc_online_read(sOnlineReads, name, &retail_offset, &retail_sectors, &request);
+        if (strcmp(name, sRead.name) || retail_offset != offset || retail_sectors != sectors || request != relative) {
+            snprintf(why, sizeof why, "game read %s offset %u sectors %u at port frame %u (anchor+%d) is retail's "
+                     "game read %u, %s offset %u sectors %u at anchor+%d", sRead.name, offset, sectors, frame,
+                     relative, sOnlineReads, name, retail_offset, retail_sectors, request);
+            disc_fail(why);
+        }
+        grown = realloc(sRows, (sRowCount + 1) * sizeof *sRows);
+        if (!grown) disc_fail("allocating the rows");
+        sRows = grown;
+        memset(&sRows[sRowCount], 0, sizeof *sRows);
+        sRows[sRowCount].game = 1;
+        strcpy(sRows[sRowCount].name, name);
+        sRows[sRowCount].offset = offset;
+        sRows[sRowCount].sectors = sectors;
+        sRows[sRowCount].request = request;
+        sRows[sRowCount].complete = -1;
+        sRows[sRowCount].vblanks = -1;
+        index = sRowCount++;
     } else {
         for (index = 0; index < sRowCount; index++) {
             const DiscRow *row = &sRows[index];
@@ -260,7 +321,7 @@ static int32_t seam_set(uint32_t (*handler)(int32_t, void *), void *arg) {
                  relative, (int32_t)(sHorizon - sRetailAnchor));
         disc_fail(why);
     }
-    if (sRows[index].request != relative || sRows[index].complete < 0) {
+    if (sRows[index].request != relative || (sRows[index].complete < 0 && !(sOnline && sRows[index].game))) {
         snprintf(why, sizeof why, "read %s offset %u sectors %u at port frame %u (anchor+%d) matches retail "
                  "row %llu at anchor+%d with completion %d", sRead.name[0] ? sRead.name : "-", offset,
                  sectors, frame, relative, (unsigned long long)index, sRows[index].request,
@@ -271,7 +332,11 @@ static int32_t seam_set(uint32_t (*handler)(int32_t, void *), void *arg) {
     }
     if (slot == DISC_HOLDS) disc_fail("more than 32 disc reads held at once");
     sRows[index].used = 1;
-    sHolds[slot] = (DiscHold){1, 0, 0, handler, arg, frame, sAnchor + (uint32_t)sRows[index].complete, 0, index};
+    sHolds[slot] = (DiscHold){1, 0, 0, handler, arg, frame, sAnchor + (uint32_t)sRows[index].complete, 0, index, 0, 0};
+    if (sOnline && sRows[index].game) {
+        sHolds[slot].online = 1;
+        sHolds[slot].online_index = sOnlineReads++;
+    }
     /* Due half a VBLANK early, so the stream server's poll at retail's VBLANK sees it complete. */
     if (sRows[index].stream)
         sHolds[slot].due_ns = p4pc_scheduler_time_ns() + (uint64_t)sRows[index].vblanks * DISC_VBLANK_NS -
@@ -300,11 +365,40 @@ static void seam_poll(void) {
 
 static const P4FrameAlarmSeam sSeam = {seam_set, seam_cancel, seam_poll};
 
+void p4pc_lockstep_disc_poll(const void *handle) {
+    char why[384];
+    if (!sOnline || p4pc_frame_alarm_seam != &sSeam) return;
+    for (size_t slot = 0; slot < DISC_HOLDS; slot++) {
+        DiscHold *hold = &sHolds[slot];
+        int32_t update;
+        int complete;
+        if (!hold->used || !hold->online || hold->arg != handle) continue;
+        const uint32_t frame = game_frame();
+        const int32_t relative = (int32_t)(frame - sAnchor);
+        p4pc_online_read_poll(hold->online_index, &update, &complete);
+        if (update != relative) {
+            snprintf(why, sizeof why, "game read %s offset %u sectors %u polled at port frame %u (anchor+%d), where "
+                     "retail's poll of it is at anchor+%d", sRows[hold->row].name, sRows[hold->row].offset,
+                     sRows[hold->row].sectors, frame, relative, update);
+            disc_fail(why);
+        }
+        if (complete) {
+            sRows[hold->row].complete = relative;
+            release(hold, 0);
+        }
+        return;
+    }
+}
+
 int p4pc_lockstep_disc_open(const char *directory) {
     const char *source = getenv("P4PC_LOCKSTEP_DISC_REPLAY");
     char line[512], path[1200];
     FILE *table;
-    if (!source || !*source) return 0;
+    sOnline = p4pc_online_configured();
+    if (!source || !*source) {
+        if (!sOnline) return 0;
+        goto receipt; /* online without a table: stream reads are not held */
+    }
     table = fopen(source, "r");
     if (!table) disc_fail("cannot open P4PC_LOCKSTEP_DISC_REPLAY");
     if (!fgets(line, sizeof line, table) ||
@@ -330,6 +424,7 @@ int p4pc_lockstep_disc_open(const char *directory) {
         sRows[sRowCount++] = row;
     }
     if (ferror(table) || fclose(table)) disc_fail("reading the table");
+receipt:
     snprintf(path, sizeof path, "%s/port-disc-holds.tsv", directory);
     sReceipt = fopen(path, "w");
     if (!sReceipt ||

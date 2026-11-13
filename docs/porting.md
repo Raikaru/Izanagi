@@ -89,7 +89,8 @@ The input fingerprint includes caller signatures and declarations: a parameter r
 silently leave stale names in an otherwise unchanged call repair. Losing a site, acquiring
 a site, or targeting different text fails the build before the staged mirror is published.
 These are expectations, not a cache: builds and nightly jobs never
-regenerate them. Address claims must still have a decomp marker/function symbol, unbound
+regenerate them. (Each unit's computed facts are cached by its before/after bytes and `tools/gen_port.py`; a changed pass, pin
+or generator misses every unit it edits, and those line diffs run on every core, results taken in unit order.) Address claims must still have a decomp marker/function symbol, unbound
 natives must still bind the specified address, named natives must be compiled functions, and every
 `libc_rename.h` target must be a compiled function, not a same-named data object or a trap. Object-like
 alias directives are parsed explicitly: duplicate names and nonsimple targets fail,
@@ -215,6 +216,42 @@ MAD/state-word/RNG/walk-digest comparisons, ovdiff, golden replay, and the full 
 Measure state words from the actual registered gate commands with a read-only debugger
 snapshot at their normal exit, preserving their input, card and capture environments.
 A standalone launch with different observer/startup flags is not a gate-equivalent control.
+
+The Challenge/Fusion integration combines the three Challenge leader overrides
+(`001e6d20`, `001e1530`, `001e1800`) with the newer AI metadata-decode mirror
+fixes and the inherited weapon-icon changes. The original Challenge contract
+inputs below are historical, not the combined-source expectations. Their
+complete files remain available at
+`2a4420dfaee9bfef76b34602272c693cfa0d04d7:config/mirror_contracts.json` and
+`8c626d726726925bd37d61eee110796722dd22c2:config/mirror_contracts.json`;
+`a9851d7c981b0221064f99c3ddb1ed58d93f6379` preserves the intermediate HP-only
+contract.
+
+| Pass | Retained newer input | HP-only input | HP plus ailment input |
+| --- | --- | --- | --- |
+| `align_narrow_returns` | `c81098fa294bc1814f536a9ae6117a6d0c3cf098c191a760fc09c2c5bfa1fc64` | `b340decb747cec8f1dca13f2dcab10d999ecaf37d22b2420af9f1a0c186ecebf` | `83c4aee78aff53d1356e2fda07881d6455df1a1504e1fb1b497f63891b56422e` |
+| `prototype_unprototyped_declarations` | `b7c1de1d115d11dc0de709c29ba28a8b9c1d4ec64a1e92ab9629ca160011c298` | `0acca30638bb0011245375be6abc377a410bbfdc5e0b0b5bd272420b4062d48d` | `37d3eaf7d37cae47ba3ea62c5ee503b7946e4e43a8dd5332513429b0644ee1f3` |
+| `widen_narrow_returns` | `c5e9d84b47d473fb3fee029105caeec6a9b715741db5b9a0cb2e20749fc0899d` | `fa195e252f2ca3bb970daa36d4577ecb0065030b436381a14d54106c3cbb251c` | `e52f4f7d219e8ec6933b3ab13478187c704e05485bfb3266ec9255dd85218bcd` |
+
+The combined candidate retains `833d5108`'s ten icon-related contract entries
+and `10f58d46`'s four `btlAICommand.c` input-hash updates. The icon entries
+cover `y_fclShopDraw.c`, `code1_0012.c` and
+`unplaced_inferred_00111bc0.c`: three `apply_mirror_fixes` records change
+hunks, while the other seven retain their hunks and change input hashes.
+The four AI records retain their hunks and change only inputs. These are
+distinct pass/unit records; the Challenge merge did not replace the icon
+records. Prior pinned-decomp mirror runs were reported successful for the
+icon and combined candidates, but an independent exact-tip contract review
+remains pending; this integration did not regenerate or validate them.
+
+For that review, use the pinned decomp
+`18016afe60c6c73bdc5d0c72177a29c6f25878c6` and a unique scratch build:
+`python tools/gen_port.py mirror --decomp <decomp> --build <scratch> --mod-hooks --refresh-contracts`.
+Compare every affected input and hunk to the actual transformed source and
+the preserved contracts before accepting any generated change; then run the
+mirror without refresh. The focused AI and Fusion/Challenge regressions, all
+required target censuses, final-tip milestone scopes and real-game hardware
+witnesses remain separate checks. No qualification is implied here.
 
 The post-pin argument audit starts with the actual preprocessed compilation units:
 `python tools/audit_prototypes.py --gen build/gen --classes --abi build/gen/obj64/abi.json --json build/call-classes.json`.

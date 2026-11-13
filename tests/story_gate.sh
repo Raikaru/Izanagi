@@ -54,13 +54,7 @@ env $saveenv SDL_VIDEODRIVER="${SDL_VIDEODRIVER:-offscreen}" SDL_AUDIODRIVER=dum
     P4PC_BATTLE_FIRST="$first" P4PC_BATTLE_DRIVER="$driver" P4PC_BATTLE_SKIP="$skip" \
     P4PC_NEWGAME_GATE="$gate,$want" timeout -s KILL 1700 "$prog" "$P4PC_ELF" > "$work/boot.log" 2>&1
 rc=$?
-if [ -n "${P4PC_GATE_BOOT_LOG:-}" ] && ! cp "$work/boot.log" "$P4PC_GATE_BOOT_LOG"; then
-    echo "story_gate: cannot retain log at $P4PC_GATE_BOOT_LOG"
-    rc=1
-fi
-if [ -n "${P4PC_SCENE_ARTIFACTS:-}" ]; then
-    cp "$work/boot.log" "$P4PC_SCENE_ARTIFACTS/boot.log" || exit 1
-fi
+gate_artifacts_boot_log p4pc_story
 if [ $make = 1 ] && [ $rc -eq 0 ]; then
     out=${P4PC_SAVE_OUT:-$(dirname "$P4PC_ELF")/saves/story0415}
     if mkdir -p "$out" && cp -r "$work/card/mc0/." "$out/"; then

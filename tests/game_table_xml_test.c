@@ -38,13 +38,21 @@ static void valid(void)
     int length = snprintf(bytes, sizeof bytes,
         "<p4-tables schema=\"1\">"
         "<element id=\"19\" flags=\"7\" family=\"0\" order=\"0\" key=\"xml:leaf\" display-name=\"Slash &amp; other\" short-name=\"Slash\" "
-        "icon-owner=\"art\" icon-key=\"art:slash\" icon-revision=\"15\"/>"
+        "icon-owner=\"art\" icon-key=\"art:slash\" icon-revision=\"15\" "
+        "header-icon-owner=\"art\" header-icon-key=\"art:slash-header\" header-icon-revision=\"16\"/>"
         "<channel id=\"19\" kind=\"0\" key=\"xml:channel\" display-name=\"Custom damage\"/>"
         "<affinity kind=\"1\" entity=\"1\" profile=\"0x80000000\" element=\"19\" channel=\"19\" value=\"100\" scalar=\"100\"/>"
         "<action source-kind=\"%u\" source-id=\"120\" component=\"0\" element=\"19\" channel=\"19\" key=\"xml:action\"/>"
         "<alias kind=\"1\" entity=\"1\" native-profile=\"5\" profile=\"2147483648\" knowledge=\"4294967295\" key=\"xml:alias\"/>"
         "<effect source-kind=\"%u\" source-id=\"440\" element=\"19\" channel=\"19\" flags=\"0x10000000\" key=\"xml:effect\"/>"
-        "</p4-tables>", (unsigned)P4_ACTION_ELEMENT_SKILL, (unsigned)P4_AFFINITY_EFFECT_SKILL);
+        "<damage-cover source-kind=\"%u\" source-id=\"12\" element=\"19\" channel=\"0\" percent=\"25\" "
+        "family=\"xml:lining\" key=\"xml:cover\"/>"
+        "<element id=\"22\" flags=\"12\" family=\"22\" order=\"22\" key=\"xml:freeze\" display-name=\"Freeze\" short-name=\"Frz\"/>"
+        "<element id=\"23\" flags=\"12\" family=\"23\" order=\"23\" key=\"xml:shock\" display-name=\"Shock\" short-name=\"Shk\"/>"
+        "<status-ailment element=\"22\" flags=\"7\" cure-mask=\"0x16\" default-from=\"2\" crit-bonus=\"100\" key=\"xml:freeze-ailment\"/>"
+        "<status-ailment element=\"23\" flags=\"1\" cure-mask=\"0xFF\" key=\"xml:shock-ailment\"/>"
+        "</p4-tables>", (unsigned)P4_ACTION_ELEMENT_SKILL, (unsigned)P4_AFFINITY_EFFECT_SKILL,
+        (unsigned)P4_AFFINITY_EFFECT_EQUIPPED_ITEM);
     assert(length > 0 && (size_t)length < sizeof bytes);
     P4GameTablesDefinitionBuilder builder;
     P4GameTableXmlTarget target = candidate(&builder);
@@ -55,18 +63,35 @@ static void valid(void)
     const P4ElementDesc *leaf = p4_game_tables_find_element(tables, 19);
     assert(leaf && leaf->revision == 37 && !strcmp(leaf->display_name, "Slash & other"));
     assert(!strcmp(leaf->icon.owner, "art") && !strcmp(leaf->icon.key, "art:slash") && leaf->icon.revision == 15);
+    assert(!strcmp(leaf->header_icon.owner, "art") && !strcmp(leaf->header_icon.key, "art:slash-header") &&
+        leaf->header_icon.revision == 16);
     const P4AffinityProfileAlias *alias = p4_game_tables_affinity_alias_at(tables, 0);
     assert(alias && alias->profile_id == 0x80000000u && alias->knowledge_id == UINT32_MAX);
+    const P4DamageCoverBinding *cover = p4_game_tables_find_damage_cover(tables, P4_AFFINITY_EFFECT_EQUIPPED_ITEM, 12, 19, 0);
+    assert(cover && cover->percent == 25 && !strcmp(cover->family, "xml:lining") && cover->revision == 37);
+    const P4SideAilmentDef *freeze = p4_game_tables_find_side_ailment(tables, 22);
+    const P4SideAilmentDef *shock = p4_game_tables_find_side_ailment(tables, 23);
+    assert(freeze && freeze->flags == P4_SIDE_FLAGS && freeze->cure_mask == 0x16 && freeze->default_from == 2 &&
+        freeze->crit_bonus == 100 && freeze->revision == 37 && !strcmp(freeze->key, "xml:freeze-ailment"));
+    assert(shock && shock->flags == P4_SIDE_LOSE_TURN && shock->cure_mask == 0xFF &&
+        shock->default_from == P4_SIDE_DEFAULT_NONE && !shock->crit_bonus); /* Both optional. */
     assert(p4_game_table_sources_freeze(sources) == P4_TABLE_OK);
     assert(p4_game_table_sources_require_owner(tables, NULL, "xml", sources) == P4_TABLE_OK);
     const P4TableSourceOrigin *origin = p4_game_table_sources_origin_at(sources, tables, "xml", 0);
     assert(origin && !strcmp(origin->source_key, "fixture:xml-data") && origin->schema == 1 && origin->revision == 37);
-    P4TableSourceCursor cursor = {0}; P4TableSourceEntry entry; unsigned count = 0;
+    P4TableSourceCursor cursor = {0}; P4TableSourceEntry entry; unsigned count = 0, covers = 0, sides = 0;
     while (p4_game_table_sources_next(P4_TABLE_SOURCE_REGISTRY, tables, &cursor, &entry) == P4_TABLE_OK) {
         ++count; assert(!strcmp(entry.owner, "xml") && entry.schema == 1);
         assert(entry.revision == (entry.domain == P4_TABLE_SOURCE_AFFINITY ? 91u : 37u));
+        if (entry.domain == P4_TABLE_SOURCE_COVER) {
+            ++covers; assert(!strcmp(entry.key, "xml:cover") && entry.ids[0] == P4_AFFINITY_EFFECT_EQUIPPED_ITEM &&
+                entry.ids[1] == 12 && entry.ids[2] == 19 && entry.ids[3] == 0);
+        }
+        if (entry.domain == P4_TABLE_SOURCE_SIDE_AILMENT) {
+            ++sides; assert(entry.ids[0] == 22 + (sides - 1) && !entry.ids[1]);
+        }
     }
-    assert(count == 6);
+    assert(count == 11 && covers == 1 && sides == 2);
     destroy(&builder);
 }
 static void families(void)
@@ -81,7 +106,7 @@ static void families(void)
     int length = snprintf(bytes, sizeof bytes,
         "<p4-tables schema=\"1\">"
         "<skill id=\"1024\" active=\"1\" element=\"4294967295\" element-aux=\"255\" inheritance-group=\"18\" inheritance-rate=\"-128\" "
-        "key=\"xml:skill\" metadata=\"%s\" presentation=\"%s\"/>"
+        "key=\"xml:skill\" metadata=\"%s\" presentation=\"%s\" effect-source=\"1\"/>"
         "<item id=\"1536\" key=\"xml:item\" metadata=\"%s\" icon-owner=\"art\" icon-key=\"art:item\" icon-revision=\"15\" "
         "require0-id=\"7\" require0-quantity=\"2\"/>"
         "<category id=\"6\" key=\"xml:cards\" filter-a=\"64\" filter-b=\"128\" stock-policy=\"1\" "
@@ -211,6 +236,44 @@ static void retail_rows(void)
     assert(row && row->value == (P4_AFF_RESIST | 50) && row->scalar == 50);
     destroy(&builder);
 }
+#define SKILL_ZERO_ROW "00000000000000000000000000000000000000000000000000000000000000000000000000000000"
+#define SKILL_HEAD "<p4-tables schema=\"1\"><skill id=\"1024\" active=\"1\" element=\"2\" element-aux=\"0\" " \
+    "inheritance-group=\"0\" inheritance-rate=\"0\" key=\"xml:dive\" "
+/* A derived skill names a retail anchor, the fields it overrides and its
+ * delivery; the anchor's row is copied at seal (game_skills_test). Each
+ * override reaches its own range check, and the delivery its passive check. */
+static void derived_skills(void)
+{
+    static const char *const accepted[] = {
+        SKILL_HEAD "derive=\"0x7a\" power=\"9999\" cost=\"999\" accuracy=\"100\" critical=\"0\" delivery=\"physical\" "
+            "effect-source=\"0xa9\"/></p4-tables>",
+        SKILL_HEAD "derive=\"0x7a\" delivery=\"magic\"/></p4-tables>",
+    };
+    static const char *const refused[] = {
+        SKILL_HEAD "derive=\"0x7a\" power=\"10000\"/></p4-tables>",
+        SKILL_HEAD "derive=\"0x7a\" cost=\"1000\"/></p4-tables>",
+        SKILL_HEAD "derive=\"0x7a\" accuracy=\"0\"/></p4-tables>",
+        SKILL_HEAD "derive=\"0x7a\" critical=\"101\"/></p4-tables>",
+        ("<p4-tables schema=\"1\"><skill id=\"1024\" active=\"0\" element=\"2\" element-aux=\"0\" inheritance-group=\"0\" "
+         "inheritance-rate=\"0\" key=\"xml:dive\" metadata=\"" SKILL_ZERO_ROW "\" presentation=\"00000000\" "
+         "delivery=\"physical\"/></p4-tables>"),
+    };
+    for (size_t i = 0; i < sizeof accepted / sizeof *accepted; ++i) {
+        P4GameTablesDefinitionBuilder builder;
+        P4GameTableXmlTarget target = candidate(&builder); char error[200];
+        assert(p4_game_tables_source_xml(&target, (const uint8_t *)accepted[i], strlen(accepted[i]), error,
+            sizeof error) == P4_TABLE_OK && !*error);
+        assert(p4_game_skills_count(builder.skills) == 1);
+        destroy(&builder);
+    }
+    for (size_t i = 0; i < sizeof refused / sizeof *refused; ++i) {
+        P4GameTablesDefinitionBuilder builder;
+        P4GameTableXmlTarget target = candidate(&builder); char error[200];
+        assert(p4_game_tables_source_xml(&target, (const uint8_t *)refused[i], strlen(refused[i]), error,
+            sizeof error) != P4_TABLE_OK && *error);
+        destroy(&builder);
+    }
+}
 static void invalid(void)
 {
     const char *cases[] = {
@@ -220,6 +283,9 @@ static void invalid(void)
         "<p4-tables schema=\"1\"><unknown/></p4-tables>",
         "<p4-tables schema=\"1\"><element><nested/></element></p4-tables>",
         "<p4-tables schema=\"1\"><channel id=\"-1\" kind=\"0\" key=\"xml:c\" display-name=\"C\"/></p4-tables>",
+        /* A header icon is all-or-none, like the skill icon. */
+        ("<p4-tables schema=\"1\"><element id=\"19\" flags=\"7\" family=\"0\" order=\"0\" key=\"xml:h\" display-name=\"H\" "
+         "short-name=\"H\" header-icon-owner=\"art\" header-icon-key=\"art:h\"/></p4-tables>"),
         "<p4-tables schema=\"1\"><channel id=\"4294967296\" kind=\"0\" key=\"xml:c\" display-name=\"C\"/></p4-tables>",
         "<p4-tables schema=\"1\"><channel id=\"19\" kind=\"0\" key=\"xml:c\" display-name=\"C\" unknown=\"1\"/></p4-tables>",
         "<p4-tables schema=\"1\"><channel id=\"19\" id=\"20\" kind=\"0\" key=\"xml:c\" display-name=\"C\"/></p4-tables>",
@@ -240,7 +306,33 @@ static void invalid(void)
          "retail-element=\"0\" value=\"100\" scalar=\"100\"/></p4-tables>"),
         ("<p4-tables schema=\"1\"><affinity kind=\"1\" entity=\"1\" profile=\"1\" element=\"6\" channel=\"0\" retail-row=\"1\" "
          "retail-element=\"0\" scalar=\"100\"/></p4-tables>"),
-        "<p4-tables schema=\"1\"><affinity kind=\"1\" entity=\"1\" profile=\"1\" element=\"6\" channel=\"0\" retail-row=\"1\" retail-element=\"16\"/></p4-tables>"
+        "<p4-tables schema=\"1\"><affinity kind=\"1\" entity=\"1\" profile=\"1\" element=\"6\" channel=\"0\" retail-row=\"1\" retail-element=\"16\"/></p4-tables>",
+        /* Damage cover: every field, nothing else, a percent of 1..99 and the owner's family. */
+        "<p4-tables schema=\"1\"><damage-cover source-kind=\"1\" source-id=\"12\" element=\"6\" channel=\"0\" percent=\"25\" key=\"xml:c\"/></p4-tables>",
+        ("<p4-tables schema=\"1\"><damage-cover source-kind=\"1\" source-id=\"12\" element=\"6\" channel=\"0\" percent=\"25\" "
+         "family=\"xml:f\" key=\"xml:c\" extra=\"1\"/></p4-tables>"),
+        ("<p4-tables schema=\"1\"><damage-cover source-kind=\"1\" source-id=\"12\" element=\"6\" channel=\"0\" percent=\"100\" "
+         "family=\"xml:f\" key=\"xml:c\"/></p4-tables>"),
+        ("<p4-tables schema=\"1\"><damage-cover source-kind=\"1\" source-id=\"12\" element=\"6\" channel=\"0\" percent=\"25\" "
+         "family=\"other:f\" key=\"xml:c\"/></p4-tables>"),
+        /* Status ailment: element, flags, cure-mask and key; default-from and crit-bonus are optional. */
+        "<p4-tables schema=\"1\"><status-ailment element=\"22\" flags=\"1\" key=\"xml:s\"/></p4-tables>",
+        "<p4-tables schema=\"1\"><status-ailment element=\"22\" flags=\"1\" cure-mask=\"0x16\" crit-bonus=\"\" key=\"xml:s\"/></p4-tables>",
+        "<p4-tables schema=\"1\"><status-ailment element=\"22\" flags=\"1\" cure-mask=\"0x16\" crit-bonus=\"101\" key=\"xml:s\"/></p4-tables>",
+        "<p4-tables schema=\"1\"><status-ailment element=\"22\" flags=\"1\" cure-mask=\"0x16\" key=\"xml:s\" extra=\"1\"/></p4-tables>",
+        /* A skill's effect source is a retail active skill (1..439), never 0 or a passive. */
+        ("<p4-tables schema=\"1\"><skill id=\"1024\" active=\"1\" element=\"2\" element-aux=\"255\" inheritance-group=\"18\" "
+         "inheritance-rate=\"0\" key=\"xml:s\" metadata=\"" SKILL_ZERO_ROW "\" presentation=\"00000000\" effect-source=\"0\"/></p4-tables>"),
+        ("<p4-tables schema=\"1\"><skill id=\"1024\" active=\"1\" element=\"2\" element-aux=\"255\" inheritance-group=\"18\" "
+         "inheritance-rate=\"0\" key=\"xml:s\" metadata=\"" SKILL_ZERO_ROW "\" presentation=\"00000000\" effect-source=\"440\"/></p4-tables>"),
+        /* Derived skills: a retail active anchor, no rows of their own, overrides in range, a known delivery. */
+        SKILL_HEAD "derive=\"0x7a\" metadata=\"" SKILL_ZERO_ROW "\"/></p4-tables>",
+        SKILL_HEAD "derive=\"440\"/></p4-tables>",
+        SKILL_HEAD "derive=\"0\"/></p4-tables>",
+        SKILL_HEAD "derive=\"0x7a\" power=\"0\"/></p4-tables>",
+        SKILL_HEAD "derive=\"0x7a\" accuracy=\"101\"/></p4-tables>",
+        SKILL_HEAD "derive=\"0x7a\" delivery=\"ranged\"/></p4-tables>",
+        SKILL_HEAD "metadata=\"" SKILL_ZERO_ROW "\" presentation=\"00000000\" power=\"80\"/></p4-tables>"
     };
     for (size_t i = 0; i < sizeof cases / sizeof *cases; ++i) {
         P4GameTablesDefinitionBuilder builder;
@@ -257,9 +349,84 @@ static void invalid(void)
     assert(p4_game_tables_source_xml(&target, nul, P4_GAME_TABLE_SOURCE_XML_MAX + 1u, error, sizeof error) == P4_TABLE_INVALID);
     destroy(&builder);
 }
+/* Derived items: derive instead of metadata, named overrides in their field
+ * widths, and the ITEM and MODEL inputs requested. */
+static int item_xml(P4GameTablesDefinitionBuilder *builder, const char *attributes, char *error, size_t error_size)
+{
+    char bytes[1024];
+    P4GameTableXmlTarget target = candidate(builder);
+    int length = snprintf(bytes, sizeof bytes, "<p4-tables schema=\"1\"><item id=\"1600\" key=\"xml:forged\" %s "
+        "icon-owner=\"art\" icon-key=\"art:item\" icon-revision=\"15\"/></p4-tables>", attributes);
+    assert(length > 0 && (size_t)length < sizeof bytes);
+    return p4_game_tables_source_xml(&target, (const uint8_t *)bytes, (size_t)length, error, error_size);
+}
+static int anchor_icon_xml(P4GameTablesDefinitionBuilder *builder, const char *attributes, char *error, size_t error_size)
+{
+    char bytes[1024];
+    P4GameTableXmlTarget target = candidate(builder);
+    int length = snprintf(bytes, sizeof bytes, "<p4-tables schema=\"1\"><item id=\"1600\" key=\"xml:forged\" %s/></p4-tables>", attributes);
+    assert(length > 0 && (size_t)length < sizeof bytes);
+    return p4_game_tables_source_xml(&target, (const uint8_t *)bytes, (size_t)length, error, error_size);
+}
+static void derived_items(void)
+{
+    char error[200];
+    P4GameTablesDefinitionBuilder builder;
+    assert(!item_xml(&builder, "derive=\"0x004\" value=\"0x24\" element=\"2\" price=\"1200\" property=\"255\" "
+        "stat-bonus=\"-1,2,0,0,5\" available=\"-1,3\" moon-gates=\"0,0x10\" category-mask=\"0x20\" "
+        "primary-value=\"65535\" secondary-value=\"0\" granted-skill=\"4294967295\" accessory-percent=\"10\" right-model=\"9\"",
+        error, sizeof error) && !*error);
+    const uint32_t inputs = (1u << P4_TABLE_INPUT_ITEM) | (1u << P4_TABLE_INPUT_MODEL);
+    assert(p4_game_tables_items_count(builder.items) == 1 && (builder.input_mask & inputs) == inputs);
+    destroy(&builder);
+    assert(!item_xml(&builder, "derive=\"0x204\"", error, sizeof error) && !*error);
+    assert((builder.input_mask & inputs) == inputs); /* Its anchor may be a weapon. */
+    destroy(&builder);
+    error[0] = 0;
+    assert(!anchor_icon_xml(&builder, "derive=\"4\" icon-source=\"anchor\"", error, sizeof error) && !*error);
+    assert((builder.input_mask & inputs) == inputs);
+    destroy(&builder);
+    static const char *const refused_icon[] = {
+        "derive=\"4\"", /* Missing both sources. */
+        "derive=\"4\" icon-source=\"retail\"",
+        "derive=\"4\" icon-source=\"anchor\" icon-owner=\"art\" icon-key=\"art:item\" icon-revision=\"15\"",
+        "derive=\"4\" icon-source=\"anchor\" icon-owner=\"art\"",
+        "icon-source=\"anchor\"",
+    };
+    for (size_t i = 0; i < sizeof refused_icon / sizeof refused_icon[0]; ++i) {
+        error[0] = 0;
+        assert(anchor_icon_xml(&builder, refused_icon[i], error, sizeof error) != P4_TABLE_OK && *error);
+        destroy(&builder);
+    }
+    static const char *const refused[] = {
+        "derive=\"4\" metadata=\"00\"",            /* derive replaces metadata */
+        "derive=\"1536\"",                         /* a retail anchor only */
+        "derive=\"4\" stat-bonus=\"1,2,3,4\"",     /* all five bonuses */
+        "derive=\"4\" stat-bonus=\"1,2,3,4,5,6\"",
+        "derive=\"4\" stat-bonus=\"32768,0,0,0,0\"",
+        "derive=\"4\" property=\"256\"",
+        "derive=\"4\" price=\"-1\"",
+        "derive=\"4\" available=\"128,1\"",
+        "derive=\"4\" moon-gates=\"1\"",
+        "derive=\"4\" element=\"\"",
+        "derive=\"4\" color=\"1\"",
+    };
+    for (size_t i = 0; i < sizeof refused / sizeof refused[0]; ++i) {
+        error[0] = 0;
+        assert(item_xml(&builder, refused[i], error, sizeof error) != P4_TABLE_OK && *error);
+        destroy(&builder);
+    }
+    /* Overrides belong to derived rows. */
+    P4ItemRow row = {.kind = 1};
+    char row_hex[137], attributes[200];
+    hex(row_hex, &row, sizeof row);
+    snprintf(attributes, sizeof attributes, "metadata=\"%s\" price=\"1\"", row_hex);
+    assert(item_xml(&builder, attributes, error, sizeof error) != P4_TABLE_OK && *error);
+    destroy(&builder);
+}
 int main(void)
 {
-    valid(); families(); enemies(); personas(); retail_rows(); invalid();
+    valid(); families(); enemies(); personas(); retail_rows(); derived_skills(); invalid(); derived_items();
     assert(!p4_packages_memory_usage().resident && !p4_packages_memory_usage().reserved);
     puts("game_table_xml: strict bounded semantic decode, exact native origins, uint32 identities and unpublished-candidate refusal passed; no runtime admission claim");
     return 0;

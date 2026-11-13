@@ -16,7 +16,11 @@ enum {
     P4_LUA_TAG_FUNCTION,
     P4_LUA_TAG_UI_PAGE,
     P4_LUA_TAG_AUTHORIZER,
-    P4_LUA_TAG_CAMERA
+    P4_LUA_TAG_CAMERA,
+    P4_LUA_TAG_STAGE,
+    P4_LUA_TAG_UI_SPRITE,
+    P4_LUA_TAG_UI_OVERLAY,
+    P4_LUA_TAG_UI_NATIVE_ROW
 };
 typedef struct P4LuaContext P4LuaContext;
 enum { P4_LUA_STARTUP = 1, P4_LUA_SYNCHRONOUS = 2, P4_LUA_SEMANTIC = 4, P4_LUA_SNAPSHOT = 8 };
@@ -82,8 +86,18 @@ int p4_lua_protected(P4LuaMod *mod, lua_State *state, int arguments, int results
 int p4_lua_invoke(P4LuaMod *mod, lua_CFunction function, void *data, int results, int flags);
 /* Snapshot callbacks are pure: no guest/native mutation or game dispatch. */
 void p4_lua_require_mutation(lua_State *state);
+/* The hook invocation the current frame runs (lua_hooks.c), NULL outside one;
+ * *table receives its context table reference. */
+struct P4ModCall;
+const struct P4ModCall *p4_lua_hook_call(lua_State *state, int *table);
 void p4_lua_save_library(lua_State *state);
 void p4_lua_save_destroy(P4LuaMod *mod);
+/* C-owned copies under the p4.save value rules (nil/boolean/number/string and
+ * acyclic tables without metatables). copy returns NULL with a bounded reason;
+ * push may raise a Lua allocation error and makes every table read-only when asked. */
+void *p4_lua_value_copy(lua_State *state, int index, size_t maximum, const char *what, char *error, size_t capacity);
+void p4_lua_value_push(lua_State *state, const void *value, int readonly);
+void p4_lua_value_free(void *value);
 /* Restore the caller's game FP environment around an original/native call.
  * Native work does not consume Luau safepoint budget. */
 void p4_lua_native_enter(lua_State *state, fenv_t *script_environment);
@@ -103,4 +117,9 @@ void p4_lua_input(lua_State *state);
 void p4_lua_files(lua_State *state);
 void p4_lua_settings(lua_State *state);
 void p4_lua_lifecycle(lua_State *state);
+void p4_lua_mods(lua_State *state);
+void p4_lua_contract(lua_State *state);
+/* Forgets the contracts a mod published; VM teardown only. */
+void p4_lua_contract_destroy(P4LuaMod *mod);
+void p4_lua_artifacts(lua_State *state);
 #endif

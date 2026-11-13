@@ -1,5 +1,5 @@
 #!/bin/sh
-# Real game Config: a refused shortcut expires; touch opens the native task;
+# Real game Config: a refused shortcut expires; the F1 shortcut opens the native task;
 # native pad/list input changes resolution and starts press-to-bind; Esc closes.
 # An optional absolute second argument retains native Config PNGs, INI and log for visual qualification.
 . "$(dirname "$0")/input_guard.sh"
@@ -34,7 +34,7 @@ key = value
 INI
 # The fresh room starts with its real Help event. A shortcut must not dismiss
 # that event, nor replay after Cross closes it.
-script='settings-open,wait60,settings-check:closed,cross,wait90,settings-check:closed,settings-block:1,settings-open,wait60,settings-check:closed,settings-block:0,wait60,settings-check:closed,settings-touch:10:10,wait20,shot:settings_corner,settings-touch:600:24,wait240,settings-check:open,settings-check:platform,shot:settings_native'
+script='settings-open,wait60,settings-check:closed,cross,wait90,settings-check:closed,settings-block:1,settings-open,wait60,settings-check:closed,settings-block:0,wait60,settings-check:closed,settings-open,wait240,settings-check:open,settings-check:platform,shot:settings_native'
 script="$script,settings-check:save-count:1,settings-check:draw-skipped,settings-row:Resolution,up,settings-touch-row:Resolution,wait30,settings-check:scale1,settings-touch-row:Resolution,wait30,settings-check:scale2,shot:settings_resolution"
 script="$script,settings-row:Controls,shot:settings_pcrows,cross,wait90,settings-row:Key cross (1)"
 script="$script,cross,settings-key:K,wait30,settings-check:binding,shot:settings_controls,settings-row:Key circle (1),cross,settings-key:K,wait30,shot:settings_conflict,settings-key:Escape,settings-check:binding,settings-check:open,settings-key:Escape,wait90"
@@ -45,7 +45,6 @@ script="$script,right,wait20,settings-check:movie-zoom,shot:settings_movie_zoom"
 script="$script,right,wait20,settings-check:movie-stretch,shot:settings_movie_stretch"
 script="$script,settings-key:Escape,wait90,settings-check:closed,settings-check:movie-persisted,shot:settings_closed"
 script="$script,settings-check:persisted,totitle,settings-title-ready,settings-open,wait240,settings-check:title,shot:settings_title,settings-key:Escape,wait90,settings-check:closed"
-script="$script,settings-touch:10:10,wait20,shot:settings_title_corner,settings-touch:600:24,wait240,settings-check:title,shot:settings_title_touch,settings-key:Escape,wait90,settings-check:closed"
 env SDL_VIDEODRIVER="${SDL_VIDEODRIVER:-offscreen}" SDL_AUDIODRIVER=dummy \
   P4PC_HIDDEN_WINDOW=1 P4PC_INPUT=script P4PC_CONFIG=settings.ini P4PC_SAVE_DIR="$wwork/card" \
   P4PC_SETTINGS_TEST=1 P4PC_START_MENU=7:2 P4PC_MENU_EXIT=1 \

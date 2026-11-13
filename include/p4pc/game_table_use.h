@@ -7,7 +7,8 @@ typedef enum P4TableSourceDomain {
     P4_TABLE_SOURCE_ALIAS = 5, P4_TABLE_SOURCE_EFFECT = 6,
     P4_TABLE_SOURCE_SKILL = 7, P4_TABLE_SOURCE_ITEM = 8,
     P4_TABLE_SOURCE_CATEGORY = 9, P4_TABLE_SOURCE_STRING = 10,
-    P4_TABLE_SOURCE_ENEMY = 11, P4_TABLE_SOURCE_PERSONA = 12
+    P4_TABLE_SOURCE_ENEMY = 11, P4_TABLE_SOURCE_PERSONA = 12,
+    P4_TABLE_SOURCE_COVER = 13, P4_TABLE_SOURCE_SIDE_AILMENT = 14
 } P4TableSourceDomain;
 /* Native actual semantic consumption ONLY, never registration/CPU preparation,
  * sealing, byte verification or binding. Identity is the exact sealed source

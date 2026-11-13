@@ -166,15 +166,87 @@ static int history_warning_cases(const char *root,const P4ModSaveImage *saved)
     p4_mod_save_load_abort(load);p4_mod_save_capture_free(capture);
     return 0;
 }
+/* A required block whose owner was refused at admission names that reason. */
+static int quarantine(const char *id,const char *reason,void *user){(void)id;(void)reason;(void)user;return 0;}
+static int refused_owner_cases(const char *root,const P4ModSaveImage *saved)
+{
+    char error[1024]={0};
+    Fixture f={.active=5,.owner="save.needs"};P4ModSaveProvider p=provider(&f);
+    P4ModSaveRegistration *registration=NULL;
+    CHECK(!p4_mod_save_register(&p,&registration));
+    P4ModSaveCapture *capture=NULL;
+    CHECK(!p4_mod_save_capture_image(saved,&capture,error,sizeof error)&&capture);
+    CHECK(!p4_mod_save_unregister(registration));
+    CHECK(!p4_mods_set_refusal_handler(quarantine,NULL));
+    CHECK(!p4_mods_stage(root,"save.needs")&&!p4_package_registry_publish()&&p4_packages_count()==0);
+    P4ModSaveLoad *load=NULL;
+    CHECK(p4_mod_save_stage_image(saved,copy_sidecar(capture),capture->sidecar_size,&load,error,sizeof error)<0&&!load);
+    CHECK(strstr(error,"Missing required save provider save.needs:state; save.needs was refused at startup: "
+                       "Needs a ghost needs save.ghost 1.0+, which is not enabled"));
+    p4_package_registry_retire();
+    p4_mod_save_capture_free(capture);
+    return 0;
+}
+/* Two starts, since packages stage once per process. A required core block
+ * sorts first and needs a package; the next start refuses that package. Its
+ * admission reason must win over the core provider missing as a result. */
+static int requirement_capture(const char *root,const P4ModSaveImage *saved,const char *path)
+{
+    char error[1024]={0};
+    CHECK(!p4_mods_stage(root,"save.ghost,save.needs")&&!p4_package_registry_publish()&&p4_packages_count()==2);
+    Fixture core={.active=7,.owner="aaa.core"};
+    for(size_t i=0;i<p4_packages_count();i++)
+        if(!strcmp(p4_package_provider_info(p4_packages_provider(i))->id,"save.needs"))core.dependency=p4_packages_provider(i);
+    CHECK(core.dependency);
+    P4ModSaveProvider p=provider(&core);P4ModSaveRegistration *registration=NULL;
+    CHECK(!p4_mod_save_register(&p,&registration));
+    P4ModSaveCapture *capture=NULL;
+    CHECK(!p4_mod_save_capture_image(saved,&capture,error,sizeof error)&&capture);
+    FILE *out=fopen(path,"wb");
+    CHECK(out&&fwrite(capture->sidecar,1,capture->sidecar_size,out)==capture->sidecar_size);
+    CHECK(!fclose(out));
+    CHECK(!p4_mod_save_unregister(registration));
+    p4_package_registry_retire();
+    p4_mod_save_capture_free(capture);
+    return 0;
+}
+static int requirement_load(const char *root,const P4ModSaveImage *saved,const char *path)
+{
+    char error[1024]={0};
+    FILE *in=fopen(path,"rb");CHECK(in);
+    unsigned char *sidecar=malloc(65536);
+    size_t size=sidecar?fread(sidecar,1,65536,in):0;
+    fclose(in);
+    CHECK(sidecar&&size>0&&size<65536);
+    CHECK(!p4_mods_set_refusal_handler(quarantine,NULL));
+    CHECK(!p4_mods_stage(root,"save.needs")&&!p4_package_registry_publish()&&p4_packages_count()==0);
+    P4ModSaveLoad *load=NULL;
+    CHECK(p4_mod_save_stage_image(saved,sidecar,size,&load,error,sizeof error)<0&&!load);
+    CHECK(strstr(error,"Save requires mod save.needs version 1.0; save.needs was refused at startup: "
+                       "Needs a ghost needs save.ghost 1.0+, which is not enabled")&&!strstr(error,"aaa.core"));
+    p4_package_registry_retire();
+    return 0;
+}
 int main(int argc,char **argv)
 {
-    if(argc!=2&&argc!=3)return 2;
+    if(argc<2||argc>4)return 2;
     CHECK(!hash_cases());
     unsigned char image[4100]={0},original[sizeof image];
     word(image+56,0x2000);word(image+60,1);word(image+65,UINT32_MAX);memcpy(original,image,sizeof image);
     char error[1024]={0};P4ModSaveImage saved={.data=image,.size=sizeof image,.slot="fixture"};
     CHECK(!p4save_image_validate(image,sizeof image,error,sizeof error));
+    if(argc==4){
+        if(!strcmp(argv[2],"requirement-capture"))CHECK(!requirement_capture(argv[1],&saved,argv[3]));
+        else{CHECK(!strcmp(argv[2],"requirement-load"));CHECK(!requirement_load(argv[1],&saved,argv[3]));}
+        printf("native sidecar %s: synthetic fixture complete\n",argv[2]);
+        return 0;
+    }
     if(argc==3){
+        if(!strcmp(argv[2],"refused")){
+            CHECK(!refused_owner_cases(argv[1],&saved));
+            puts("native sidecar refused owner: synthetic fixture complete");
+            return 0;
+        }
         CHECK(!strcmp(argv[2],"history"));
         CHECK(!history_warning_cases(argv[1],&saved));
         CHECK(!p4_packages_memory_usage().resident&&!p4_packages_memory_usage().reserved);
@@ -259,7 +331,8 @@ int main(int argc,char **argv)
     CHECK(!p4_mod_save_stage_image(&saved,copy_sidecar(dependent),dependent->sidecar_size,&load,error,sizeof error));
     CHECK(!p4_mod_save_load_warning(load));p4_mod_save_load_abort(load);load=NULL;
     p4_package_registry_retire();f.dependency=NULL;
-    CHECK(p4_mod_save_stage_image(&saved,copy_sidecar(dependent),dependent->sidecar_size,&load,error,sizeof error)<0&&!load&&strstr(error,"requires package"));
+    CHECK(p4_mod_save_stage_image(&saved,copy_sidecar(dependent),dependent->sidecar_size,&load,error,sizeof error)<0&&!load&&
+          strstr(error,"Save requires mod save.dep version 1.2.3, which is not enabled at that version"));
     CHECK(!p4_mod_save_reset_session(error,sizeof error));
     CHECK(f.active==0&&f.new_game==1);
     /* Resetting game state cannot declassify an already witnessed native run. */

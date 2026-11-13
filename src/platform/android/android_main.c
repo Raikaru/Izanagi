@@ -24,6 +24,7 @@
 #include "p4pc/guest.h"
 #include "p4pc/os.h"
 #include "p4pc/settings.h"
+#include "../pad/pad_sdl.h"
 
 int p4pc_main(int argc, char **argv);
 int p4pc_viewer_main(int argc, char **argv); /* src/viewer/p4pc_viewer.c, built into libmain for the scene gates */
@@ -45,6 +46,13 @@ JNIEXPORT void JNICALL Java_org_p4pc_game_P4Activity_nativeHardwareKeyboardChang
     (void)env;
     (void)cls;
     p4_settings_android_keyboard_presence(connected != JNI_FALSE);
+}
+/* The touch pad's analog stick: PadOverlay's thumb offset, read by pad_sdl.c on the game thread. */
+JNIEXPORT void JNICALL Java_org_p4pc_game_P4Activity_nativeTouchStick(JNIEnv *env, jclass cls, jfloat x, jfloat y)
+{
+    (void)env;
+    (void)cls;
+    p4pc_pad_touch_stick(x, y);
 }
 void p4_settings_android_keyboard_watch(int enabled)
 {

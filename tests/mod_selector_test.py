@@ -23,6 +23,23 @@ with tempfile.TemporaryDirectory(prefix="p4-mod-selector-") as temp:
         (folder / "mod.ini").write_text(
             "[mod]\nid=mod.duplicate\nname=duplicate\nversion=1\napi=1.0\npriority=0\norder=0\n",
             encoding="utf-8")
+    # Requirements: a dependent needing base 1.0+ with SPLIT on, and one whose requirement is absent.
+    for folder_name, text in (
+            ("base", "[mod]\nid=mod.base\nname=Base\nversion=1.2\napi=1.6\npriority=0\norder=0\n"
+                     "[setting split]\nkind=toggle\nlabel=SPLIT\napply=restart\n"),
+            ("dependent", "[mod]\nid=mod.dep\nname=Dependent\nversion=1\napi=1.6\npriority=-9\norder=0\n"
+                          "[require mod.base]\nversion=1.0\nsetting.split=on\n"),
+            ("orphan", "[mod]\nid=mod.orphan\nname=Orphan\nversion=1\napi=1.6\npriority=0\norder=0\n"
+                       "[require mod.ghost]\nversion=1.0\n"),
+            # Companions: a user of comp 2.0+, and an older user wanting 3.0+.
+            ("comp", "[mod]\nid=mod.comp\nname=Comp\nversion=2.0\napi=1.0\npriority=0\norder=0\n"),
+            ("user", "[mod]\nid=mod.user\nname=User\nversion=1\napi=1.6\npriority=-9\norder=0\n"
+                     "[companion mod.comp]\nversion=2.0\n"),
+            ("olduser", "[mod]\nid=mod.olduser\nname=Olduser\nversion=1\napi=1.6\npriority=0\norder=0\n"
+                        "[companion mod.comp]\nversion=3.0\n")):
+        folder = mods / folder_name
+        folder.mkdir(parents=True)
+        (folder / "mod.ini").write_text(text, encoding="utf-8")
     packs = root / "packs"
     for folder_name, pack_id in (("single", "pack.single"),
                                  ("duplicate-one", "pack.duplicate"),
@@ -41,7 +58,9 @@ with tempfile.TemporaryDirectory(prefix="p4-mod-selector-") as temp:
         raise SystemExit(result.stdout + result.stderr)
     settings = configparser.ConfigParser()
     settings.read(config, encoding="utf-8")
-    assert settings["mods"]["enabled"] == "mod.low,mod.high"
-    assert settings["mods"]["load_order"] == "mod.low,mod.high"
+    assert settings["mods"]["enabled"] == "mod.low,mod.high,mod.base"
+    assert settings["mods"]["load_order"] == "mod.low,mod.high,mod.base"
+    split = (root / "mod-settings" / "mod.base.ini").read_text(encoding="ascii")
+    assert "split = off" in split, split
     assert settings["packs"]["enabled"] == "pack.single"
     print(result.stdout, end="")

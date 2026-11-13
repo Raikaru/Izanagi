@@ -1,6 +1,9 @@
-# Builds, tests and packages the port: Linux and Windows in the p4pc-ci image (ci/Dockerfile), macOS on GitHub's Macs (ci/macos/). No game
-# data is used or available here: the build reads config/retail_fnptr_words.txt, and the tests that need the disc skip.
+# Builds, tests and packages the port: Linux and Windows in the p4pc-ci image (ci/Dockerfile), macOS on GitHub's Macs (ci/macos/),
+# Android in the p4pc-android image (ci/android/). No game data is used or available here: the build reads
+# config/retail_fnptr_words.txt, and the tests that need the disc skip.
 # A pushed tag v* also attaches the Windows x64 zip, the Linux x86_64 AppImage and the macOS arm64 and x86_64 zips to its GitHub release.
+# The Android job builds the unsigned arm64-v8a release APK on every push and uploads it as a workflow artifact, so Android breakage
+# shows up publicly; the signed APK (not the AAB) is attached to releases by hand from the local signer.
 name: build
 
 on:
@@ -205,6 +208,55 @@ jobs:
         with:
           name: p4pc-macos-${{ matrix.arch }}
           path: dist/*
+          if-no-files-found: error
+
+  # Android (docs/android.md): the unsigned arm64-v8a release APK in the p4pc-android image (ci/android/) with
+  # tools/android_ci_run.sh and P4PC_ANDROID_BUILD=release, on every push and pull request. No signing in CI and no
+  # secrets: the release build type has no signingConfig, so Gradle emits the unsigned APK/AAB. The signed APK/AAB
+  # are built on the packaging PC (tools/package_android.py) and attached to releases by hand, so this artifact is
+  # named without the p4pc- prefix the release job collects.
+  android:
+    name: Android arm64-v8a (build release APK)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    steps:
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          df -h /
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+      - uses: docker/setup-buildx-action@v3
+      - name: Android CI image (from the GitHub Actions cache)
+        uses: docker/build-push-action@v6
+        with:
+          context: ci/android
+          tags: p4pc-android
+          load: true
+          cache-from: type=gha,scope=p4pc-android
+          cache-to: type=gha,scope=p4pc-android,mode=max
+      - uses: actions/cache@v4
+        with:
+          path: .ccache
+          key: ccache-android-arm64-v8a-${{ github.sha }}
+          restore-keys: ccache-android-arm64-v8a-
+      - name: Build the unsigned release APK
+        run: |
+          mkdir -p dist android-cache
+          docker run --rm -v "$PWD:/lane/src" -v "$PWD/dist:/lane/out" -v "$PWD/android-cache:/android-cache" -v "$PWD/.ccache:/ccache" -w /lane/src p4pc-android sh -euc '
+            git config --global --add safe.directory "*"
+            export P4PC_ANDROID_ABI=arm64-v8a P4PC_ANDROID_BUILD=release
+            export P4PC_ANDROID_VERSION_NAME="$(git describe --tags --always --long)"
+            export P4PC_ANDROID_VERSION_CODE="$(git rev-list --count HEAD)"
+            sh /lane/src/tools/android_ci_run.sh /lane/build
+          '
+          ls -l dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-arm64-v8a-unsigned
+          path: dist/p4pc-arm64-v8a-release.apk
           if-no-files-found: error
 
   release:

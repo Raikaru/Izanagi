@@ -24,7 +24,7 @@ enum P4SettingsNativeKind {
     P4_SETTINGS_NATIVE_EMPTY
 };
 enum { P4_SETTINGS_NATIVE_ROOT, P4_SETTINGS_NATIVE_CONTROL_LIST };
-enum { P4_SETTINGS_NATIVE_SHORTCUT = 1 };
+enum { P4_SETTINGS_NATIVE_SHORTCUT = 1, P4_SETTINGS_NATIVE_HOSTED = 2, P4_SETTINGS_NATIVE_HOSTED_TOP = 4 };
 enum { P4_SETTINGS_NATIVE_ROW_DISABLED = 1 };
 enum { P4_SETTINGS_NATIVE_BACK = -1, P4_SETTINGS_NATIVE_RESTORE = -2 };
 enum { P4_SETTINGS_NATIVE_SWITCH = 1, P4_SETTINGS_NATIVE_CLOSE = 2 };
@@ -63,6 +63,16 @@ void p4_settings_native_frame_end(void);
 int p4_settings_native_active(void);
 void p4_settings_native_begin(uint32_t work, int mode);
 void p4_settings_native_end(uint32_t work);
+/* A game parent other than System/title, running outside Camp/title with nLine
+ * off, hosts one registered page flow in its own real cmpConfigCreate(task, 1)
+ * child. Call with the returned task handle before that child's first update;
+ * Camp mode 0 is refused (its close waits on Camp's nLine forever). The page is
+ * the top view: Back, Esc, touch Back or page_back/close there close Config,
+ * never revealing the Config root, Controls or CONFIRM; retail flags are not
+ * synchronized. The parent reads no pad edges until cmpConfigIsStepDone, then
+ * destroys the child; cmpConfigDestroy closes the page stack first and turns
+ * the title-mode nLine off again. 0/-1. */
+int p4_settings_native_host(uint32_t config_task, const char *key);
 /* Returns a guest address, or zero for the retail-only qualification path.
  * refresh formats the seven visible rows using the settings model. */
 uint32_t p4_settings_native_state(uint32_t work, int refresh);
@@ -88,8 +98,6 @@ void p4_settings_native_touch(float x, float y);
 void p4_settings_native_hover(float x, float y);
 void p4_settings_native_touch_scroll(int direction);
 void p4_settings_native_back(void);
-/* Queues the game's own rounded HUD frame and font; does nothing without touch. */
-void p4_settings_native_corner(void);
 
 /* Model-only actions shared by native Config and the SDL press-to-bind fence. */
 void p4_settings_model_reset(void);

@@ -6,6 +6,7 @@ list(APPEND _p4_table_boot_sources game_table_boot_test.c
   "${CMAKE_SOURCE_DIR}/src/platform/mods/game_table_admission.c"
   "${CMAKE_SOURCE_DIR}/src/platform/mods/game_table_manifest.c"
   "${CMAKE_SOURCE_DIR}/src/platform/mods/game_table_boot.c"
+  "${CMAKE_SOURCE_DIR}/src/platform/mods/game_table_delta.c"
   "${CMAKE_SOURCE_DIR}/src/platform/mods/mod_setting_store.c"
   "${CMAKE_SOURCE_DIR}/src/platform/mods/mod_setting_gate.c")
 # Early CPU seal must not allocate or free guest memory in this fixture.

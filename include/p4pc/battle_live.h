@@ -14,7 +14,6 @@ int p4_battle_live_decode(const uint8_t *bytes, size_t length, P4BattleLiveEntry
 int p4_battle_live_start(const char *entry, const char *result, const char *trace);
 void p4_battle_live_before_update(void);
 void p4_battle_live_before_present(void);
-void p4_battle_live_after_present(void);
 void p4_battle_live_command_ready(uint32_t action);
 void p4_battle_live_after_update(int completed);
 /* 0 when inactive or an observation prefix was recorded; nonzero on error. */

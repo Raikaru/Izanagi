@@ -11,11 +11,13 @@ struct P4GameItemsUi {
 void p4_game_tables_items_ui_destroy(P4GameItemsUi *ui)
 {
     if (!ui) return;
-    for (size_t i = 0; i < ui->pinned; ++i) p4_resources_release(ui->images[i].token);
+    for (size_t i = 0; i < ui->pinned; ++i)
+        if (ui->images[i].token) p4_resources_release(ui->images[i].token);
     free(ui);
 }
 static int resolve(P4GameItemsUi *ui, const P4Resources *resources, uint32_t id, const P4ResourceRef *ref)
 {
+    if (!resources || !p4_resources_revision(resources)) return P4_TABLE_NOT_READY;
     const P4ResourceImage *image = p4_resources_find(resources, ref->key);
     if (!image) return P4_TABLE_NOT_FOUND;
     if (strcmp(image->owner, ref->owner) || image->revision != ref->revision) return P4_TABLE_CONFLICT;
@@ -28,7 +30,6 @@ int p4_game_tables_items_ui_prepare(const P4GameItems *items, const P4Resources 
     if (!items || !out || *out || !p4_game_tables_items_semantic_revision(items)) return P4_TABLE_INVALID;
     size_t count = p4_game_tables_items_count(items), categories = p4_game_tables_items_category_count(items);
     if (!count && !categories) return P4_TABLE_OK;
-    if (!resources || !p4_resources_revision(resources)) return P4_TABLE_NOT_READY;
     if (count > SIZE_MAX - categories || count + categories > (SIZE_MAX - sizeof(P4GameItemsUi)) / sizeof(ItemImage))
         return P4_TABLE_NOMEM;
     P4GameItemsUi *ui = malloc(sizeof *ui + (count + categories) * sizeof *ui->images);
@@ -37,7 +38,8 @@ int p4_game_tables_items_ui_prepare(const P4GameItems *items, const P4Resources 
     int result = P4_TABLE_OK;
     for (size_t i = 0; !result && i < count; ++i) {
         const P4GameItemView *row = p4_game_tables_items_at(items, i);
-        result = resolve(ui, resources, row->id, &row->icon);
+        if (row->icon_anchor_plus_one) ui->images[ui->pinned++] = (ItemImage){row->id, 0};
+        else result = resolve(ui, resources, row->id, &row->icon);
     }
     for (size_t i = 0; !result && i < categories; ++i) {
         const P4GameItemCategoryView *row = p4_game_tables_items_category_at(items, i);

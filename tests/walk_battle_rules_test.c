@@ -326,7 +326,12 @@ static void skill_keys(void)
     CHECK(p4walk_battle_rule_parse("dead@4=circle,down,cross,skill:0xC5,cross,cross", &rule));
     CHECK(rule.key_count == 6 && rule.keys[3] == (P4WALK_KEY_SKILL | 0xC5u) && rule.keys[4] == 1u << P4W_CROSS);
     CHECK(!p4walk_battle_rule_parse("dead=skill:0", &rule) && !p4walk_battle_rule_parse("dead=skill:0x1B8", &rule) &&
+          !p4walk_battle_rule_parse("dead=skill:0x23F", &rule) && !p4walk_battle_rule_parse("dead=skill:0x1000", &rule) &&
           !p4walk_battle_rule_parse("dead=skill:abc", &rule) && !p4walk_battle_rule_parse("dead=skill:", &rule));
+    /* An added skill (576..4095) is a listed active skill too. */
+    CHECK(p4walk_battle_rule_parse("dead=circle,down,cross,skill:576,cross", &rule) &&
+          rule.keys[3] == (P4WALK_KEY_SKILL | 576u));
+    CHECK(p4walk_battle_rule_parse("dead=skill:0xFFF", &rule) && rule.keys[0] == (P4WALK_KEY_SKILL | 0xFFFu));
     CHECK(p4walk_battle_rule_parse("dead@1=circle,down,down,down,cross,item:0x30F,cross,cross", &rule));
     CHECK(rule.key_count == 8 && rule.keys[5] == (P4WALK_KEY_ITEM | 0x30Fu));
     CHECK(!p4walk_battle_rule_parse("dead=item:0x300", &rule) && !p4walk_battle_rule_parse("dead=item:0x400", &rule) &&

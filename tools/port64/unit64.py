@@ -138,20 +138,49 @@ def rewrite_outputs(path, flags, work, root, syms, oracle_flags, clang, abi, dep
     finally:
         if oracle_depfile and os.path.exists(oracle_depfile):
             os.remove(oracle_depfile)
+    # The rewriter reads the symbol and ABI tables only by name (get(), and whether the ABI table is empty), and every name it asks
+    # for is spelled in the preprocessed text: the key holds those names' rows, not the whole tables, so a change to another unit's
+    # symbol or ABI leaves this unit's entry valid. A computed rewrite that asks for any other name, or reads a table another way,
+    # fails instead of publishing an entry its key does not cover.
+    with open(ipath, encoding="latin-1") as source:
+        spelled = set(IDENTIFIER_RE.findall(source.read()))
+    sym_rows = {name: syms[name] for name in spelled.intersection(syms)}
+    abi_rows = {name: abi[name] for name in spelled.intersection(abi)} if abi else None
     parsed = []
     def produce():
-        rw, _, text = gr.rewrite_preprocessed(ipath, flags, root, syms, path, oracle_flags,
-                                              clang, abi, layouts)
+        sym_reads, abi_reads = NameReads(syms), NameReads(abi or {})
+        rw, _, text = gr.rewrite_preprocessed(ipath, flags, root, sym_reads, path, oracle_flags,
+                                              clang, abi_reads if abi else abi, layouts)
+        unkeyed = sorted((sym_reads.names | abi_reads.names) - spelled)
+        if unkeyed:
+            sys.exit(f"unit64: rewriting {path} read table rows its cache key omits: {', '.join(unkeyed[:8])}")
         value = artifacts(rw, text)
         parsed.append(value)
         return json.dumps(value, ensure_ascii=False, sort_keys=True).encode("utf-8")
     data = build_cache.run_bytes("rewrite", {
         "preprocessed": build_cache.file_digest(ipath), "input_path": os.path.abspath(ipath),
         "flags": flags, "root": os.path.abspath(root), "oracle_flags": oracle_flags,
-        "layouts": layouts, "symbols": syms, "abi": abi,
+        "layouts": layouts, "symbol_rows": sym_rows, "abi_rows": abi_rows,
         "compiler": build_cache.compiler_identity(clang),
         "versions": build_cache.versions(__file__, gr.__file__)}, produce)
     return ipath, parsed[0] if parsed else json.loads(data)
+
+
+IDENTIFIER_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
+
+
+class NameReads:
+    """A symbol or ABI table the rewriter may read only with get() (and test for emptiness); records every name asked for."""
+
+    def __init__(self, table):
+        self.table, self.names = table, set()
+
+    def __bool__(self):
+        return bool(self.table)
+
+    def get(self, name, default=None):
+        self.names.add(name)
+        return self.table.get(name, default)
 
 
 def cmd_build(a):
@@ -331,16 +360,38 @@ def cmd_report(a):
                              f"dump, so a few counts depend on the major: build with a supported compiler, or review and add this one with\n"
                              f"  python tools/port64/unit64.py report --dir <build>/gen/obj64/units --census-refresh {path} --clang {a.clang}")
                 base.update(patch["units"])
+            # Units the RenderWare clean switch governs (gen/rw_clean_units.txt, docs/rw_clean.md): an inactive one is not part of
+            # this build, and an active one is compared once its baseline row exists (a subsystem's rows are added when it becomes the default).
+            governed = {}
+            if getattr(a, "rw_clean_units", None):
+                for ln in open(a.rw_clean_units):
+                    if ln.strip():
+                        unit, state = ln.split()
+                        governed[unit] = state
+            # Units whose definitions a selected clean subsystem took over (the mirror lists them; absent with the switch off):
+            # their counts follow the switch until the subsystem becomes the default and the baseline takes them.
+            switched = set()
+            stripped_list = getattr(a, "rw_clean_stripped", None)
+            if stripped_list and os.path.isfile(stripped_list):
+                switched = {ln.strip() for ln in open(stripped_list) if ln.strip()}
             drift = []
             for u in sorted(set(base) | set(now)):
+                if governed.get(u) == "inactive" and u not in now:
+                    continue
                 if u not in now:
                     drift.append(f"{u}: unit missing from this build (baseline has it)")
                 elif u not in base:
+                    if governed.get(u) == "active":
+                        print(f"  {u}: RenderWare clean unit without a baseline row, not compared")
+                        continue
                     drift.append(f"{u}: unit not in the baseline")
                 else:
-                    for k in sorted(set(base[u]) | set(now[u])):
-                        if base[u].get(k, 0) != now[u].get(k, 0):
-                            drift.append(f"{u}: rule {k}: baseline {base[u].get(k, 0)}, now {now[u].get(k, 0)}")
+                    diff = [f"{u}: rule {k}: baseline {base[u].get(k, 0)}, now {now[u].get(k, 0)}"
+                            for k in sorted(set(base[u]) | set(now[u])) if base[u].get(k, 0) != now[u].get(k, 0)]
+                    if diff and u in switched:
+                        print(f"  {u}: changed by the RenderWare clean switch ({len(diff)} rule counts), not compared")
+                        continue
+                    drift += diff
             if drift:
                 print(f"{len(drift)} rewriter rule counts differ from {path}:")
                 for d in drift[:60]:
@@ -393,6 +444,8 @@ def main():
     s.add_argument("--census-refresh", help="write the baseline from the build's counts (review the diff)")
     s.add_argument("--clang", default="clang", help="the build's compiler: the census baseline of that clang major is the one checked")
     s.add_argument("--active-units", help="file listing the units of the current build, one per line: only these are compared (a stale .census of a dropped unit is ignored)")
+    s.add_argument("--rw-clean-units", help="gen/rw_clean_units.txt: `<unit> active|inactive` for the units the RenderWare clean switch governs (docs/rw_clean.md)")
+    s.add_argument("--rw-clean-stripped", help="the mirror's src/rwclean/stripped_units.txt: units a selected clean subsystem changed (absent when none is selected)")
     a = ap.parse_args()
     {"abi": cmd_abi, "merge": cmd_merge, "build": cmd_build, "report": cmd_report}[a.cmd](a)
 

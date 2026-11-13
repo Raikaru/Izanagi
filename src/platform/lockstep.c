@@ -41,6 +41,7 @@ static uint32_t sAnchor;
 static int sAnchorSet;
 static int sAligned;
 static int sReplayAligned;
+static int sFlushPads;
 static char sCompletePath[1100];
 static P4LockstepDrawBuffer sDraw;
 
@@ -100,6 +101,9 @@ static void pad(uint8_t *packet, size_t size) {
     p4ls_put(record+4,word(NULL,P4LS_GAME_FRAME));
     memcpy(record+8,packet,32);
     record_bytes(record);
+    /* An online disc replay waits inside the update for retail's polls: retail must have this
+     * update's pad reads before the frame is presented. */
+    if (sFlushPads && sRecord && fflush(sRecord)) fail("writing input log");
     if (sAligned) p4pc_align_pad_read();
 }
 static FILE *open_file(const char *path, const char *mode) {
@@ -129,6 +133,7 @@ void p4pc_lockstep_init(void) {
         sAligned=aligned && !strcmp(aligned,"1");
     }
     if (sAligned && sLive) fail("state-aligned barriers are offline-only; live recording remains nonblocking");
+    sFlushPads=sAligned && getenv("P4PC_LOCKSTEP_DISC_ONLINE") && *getenv("P4PC_LOCKSTEP_DISC_ONLINE");
     if (sScenarioReplay && (!replay || !sDir || sLive || sAligned))
         fail("scenario replay requires a strict offline replay and diagnostic directory");
     sMarks=getenv("P4PC_LOCKSTEP_MARKS");

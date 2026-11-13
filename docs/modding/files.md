@@ -1,4 +1,4 @@
-# File and data mods (API 1.4; accepts 1.0, 1.1, 1.2 and 1.3 metadata)
+# File and data mods (API 1.6; accepts 1.0 to 1.5 metadata)
 
 Mods are opt-in. Installing a directory changes nothing until its id appears in the
 player's `p4pc.ini`:
@@ -18,6 +18,22 @@ Other values are errors. Ordinary scripted/capture/headless runs with enabled
 mods refuse startup unless the kill switch is set. The explicit, isolated
 mod-test boundary below is the only exception; it does not enable installed mods.
 Synthetic unit fixtures stage their own bounded inputs without player settings.
+
+Mods made for this port ship read-only in the game program's own `mods/`
+directory (`SDL_GetBasePath()`: beside the Windows exe, `usr/bin/mods` in the
+Linux AppImage, `Contents/Resources/mods` in the macOS app; the Android package
+ships none). The MODS catalog lists them beside the player's installations and
+the enabled list finds them, but installation never enables one and nothing
+writes `p4pc.ini` for them. A valid player installation with the same id hides
+the shipped copy, both in the catalog and at startup, and is reported: the
+MODS entry says "player copy shadows bundled <id> <version>" and stderr gets
+one line. Two copies within one root still refuse as duplicates. Nothing is
+ever written into the shipped root (settings go to `mod-settings/` beside
+`p4pc.ini`; saves, captures and caches to the user's directories), so a
+read-only Program Files folder or app bundle works. `P4PC_BUNDLED_MOD_DIR`
+replaces the shipped root (empty: none; every CTest sets it empty unless the
+fixture names one). Repository sources live in `mods/<id>/`; the packagers
+copy every one of them.
 
 Standalone engine packs use `[packs] enabled` independently of the mod selector.
 Their default root is `packs/` beside `p4pc.ini`; `packs.directory` changes it
@@ -85,7 +101,12 @@ priority = 0
 order = 0
 ```
 
-All six keys are required, each exactly once, in one `[mod]` section. Unknown
+All six keys shown are required, each exactly once, in one `[mod]` section.
+An optional `requires` key lists comma-separated capability keys and revisions,
+for example `requires = events.battle_end@1, ui.status@1`. An omitted revision
+means `@1`. A malformed list refuses the manifest; an unavailable key or older
+revision refuses the mod before its files or code are exposed. See the
+[capability reference](capabilities.md) for syntax and diagnostics. Unknown
 metadata keys are refused. API1.1 extension sections require a registered native
 handler; unknown/unavailable sections are diagnosed, never ignored.
 Whole-line `#`/`;` comments and surrounding whitespace are allowed. `id` is 1–63 lowercase ASCII letters,
@@ -145,13 +166,15 @@ shared `p4pc.ini` is never written. A missing or invalid stored value reads as
 the declared default. With no settings file (`P4PC_CONFIG=none`) values stay at
 their defaults and writes are refused. Native consumers read the admitted value
 with `p4_mod_setting_boot()` (`include/p4pc/mod_setting_store.h`); scripts use
-[`p4.settings`](lua.md#persisted-settings).
+[`p4.settings`](lua.md#persisted-settings). A mod's own files (spoiler logs,
+caches) live beside them in `mod-artifacts/<mod id>/`, written only through
+[`p4.artifacts`](lua.md#artifacts-artifacts1) (`artifacts@1`).
 
 A boot section can follow one of the mod's own toggles: `when = <key>` in a
-`[table-source]`, `[resource-image]` or `[element-ui]` section makes it take
-part in this start only while that toggle's admitted value is `on`; off, the
-handler treats the section as absent (an `[element-ui]` gate covers its
-`[element-column]` sections). Such sections are sealed for the whole session,
+`[table-source]`, `[table-derived]`, `[table-delta]`, `[resource-image]`, `[element-ui]`, `[element-header]` or
+`[element-prompt]` section makes it take part in this start only while that
+toggle's admitted value is `on`; off, the handler treats the section as absent
+(an `[element-ui]` gate covers its `[element-column]` sections). Such sections are sealed for the whole session,
 so `when` must name a declared `toggle` with `apply = restart`; an undeclared
 key, a choice setting, a live toggle or a repeated `when` refuses the mod at
 admission. The value comes from the same admission snapshot as
@@ -172,6 +195,116 @@ format = p4-tables-xml
 schema = 1
 revision = 1
 ```
+
+Such a section can also follow a companion (capability
+`manifest.companion-setting@1`): `companion = <mod id>` names one of the mod's
+own [`[companion]`](#companions-api-16) declarations, and the section takes
+part only while that companion is in the admission. It ANDs with `when`:
+`when` is evaluated first, then `companion`, and a section with both needs the
+toggle on and the companion admitted. A repeated or empty `companion`, or one
+naming a mod that the manifest does not declare as a companion, refuses the mod
+at admission (`companion = X is not a declared [companion]`). An absent
+companion is not an error; the section is simply absent:
+
+```ini
+[companion p4pc.physsplit]
+version = 1.2
+
+[table-source p4pc.fusion-arts:split-weapons]
+companion = p4pc.physsplit
+companion-setting = split=on
+file = data/split-weapons.xml
+format = p4-tables-xml
+schema = 1
+revision = 1
+```
+
+`companion-setting = <key>=<value>` additionally requires one of the
+companion's settings, like a `[require]` section's `setting.<key>`: the key
+must be a setting the companion declares with `apply = restart` and the value
+one of its declared values (`on`/`off` for a toggle). It is read from the same
+admission snapshot as `when`, so it holds for the whole start, and only once
+the companion is admitted; a section with it but no `companion`, a second one,
+or an undeclared key or value refuses the mod at admission. The example above
+supplies Physical Split leaf rows only while Physical Split is admitted with
+its toggle on.
+
+## Requirements (API 1.6)
+
+Capability `manifest.require@1` ([capabilities](capabilities.md)).
+
+A package that only works on top of another declares it, one section per
+required package of the same kind (mods require mods, packs require packs):
+
+```ini
+[require p4pc.physsplit]
+version = 1.0
+setting.split = on
+```
+
+`version = <major>.<minor>` is mandatory: the required package's own `version`
+must have the same major and at least that minor. Comparison needs a numeric
+version (`1`, `1.0` or `1.0.3`, optionally followed by a `-` or `+` suffix);
+anything else is refused as not comparable. Each `setting.<key> = <value>` row
+names a declared [setting](#settings-api-12) of the required mod and one of its
+choices (`on`/`off` for toggles). At most 16 requirements per package and 8
+setting rows per requirement; unknown fields, a missing version, a bad id, a
+package requiring itself or an api below 1.6 refuse the package.
+
+Admission treats requirements as metadata, before any mod code runs. Every
+requirement must be enabled and admitted, satisfy the version and hold each
+named setting at admission; otherwise the dependent is refused as a whole, with
+the reason on stderr and in MODS, for example `Hard mode needs Physical Split
+with PHYSICAL SPLIT on`. Refusals cascade: a mod whose requirement was refused
+for any reason is refused too, and its message quotes that reason. Requirements
+always load before their dependents. The selector's (or manifest) order is kept
+otherwise, each kind keeps its own catalog slots, and the members of a
+requirement cycle are refused. `p4_package_refusal()` keeps this process's
+admission reason per id, so a later refusal can say why. Loading a save checks
+the packages the save requires before its missing blocks: a required package
+refused at startup is named with that reason (`Save requires mod p4pc.hardmode
+version 1.0; p4pc.hardmode was refused at startup: Hard mode needs
+p4pc.physsplit 1.0+, which is not enabled`), then a required package that is
+not enabled at that version, and only then a missing required save block.
+
+The MODS hub follows the same rules. Enabling a dependent first writes the
+settings it requires, then enables every missing requirement in front of it in
+one `p4pc.ini` batch; a requirement that is not installed (or installed twice),
+too old, missing a named setting, part of a cycle, or wanted with another value by
+an enabled mod refuses the change with that message. While a dependent is
+enabled, the requirement's ENABLED row reads `REQUIRED BY <NAME>` and its
+required setting rows are locked, and a load-order move that would put a
+requirement after its dependent is refused. Disabling the dependent only
+unlocks; the requirement stays enabled. At run time `p4.settings.set` on a
+required key returns `false, "locked: required by <name>"`, and
+[`p4.mods.required`](lua.md#persisted-settings) reports the admitted version and
+values. Native code uses `p4_package_requirements()`,
+`p4_package_version_satisfies()` and `p4_packages_requirer()` from
+`include/p4pc/packages.h`.
+
+### Companions (API 1.6)
+
+Capability `manifest.companion@1`.
+
+A package that works better beside another, but also without it, names it as a
+companion instead:
+
+```ini
+[companion p4pc.hardmode]
+version = 1.0
+```
+
+A companion section has only the mandatory `version`; setting rows, and naming
+the same id as both a requirement and a companion, are refused. If the companion
+is enabled and admitted it loads first and must satisfy the version, otherwise
+the declaring package is refused (`Fusion arts needs companion Hard mode 1.0+
+(enabled: 0.9)`). An absent, disabled or refused companion is fine: nothing is
+enabled, locked or refused for it. A cycle through companions refuses its
+members like any requirement cycle. The hub never enables or locks a companion,
+but puts a newly enabled one in front of the mod that names it, refuses a
+load-order move that would put it after that mod, and refuses enabling either
+side when the installed versions do not fit. Scripts read what a companion or
+requirement publishes with [`p4.contract.read`](lua.md#published-contracts).
 
 ## Shared native registry and Config discovery
 
@@ -452,6 +585,57 @@ validated bytes. Direct provider-plan sources use
 end the resource session only after independently draining game tasks, queues
 and UI pins; a still-pinned generation refuses retirement.
 
+### Authored model resources
+
+Native packages may replace a disc model's look with a glTF 2.0 model:
+
+```ini
+[resource-model example.model:sword]
+file=models/test_sword.glb
+format=gltf
+schema=1
+revision=1
+replaces=DATA/MODEL/WEAPON/WP004.RMD
+```
+
+Declare `requires = manifest.resource-model@1` in `[mod]` for a static
+model, `manifest.resource-model@2` for skinned meshes, or
+`manifest.resource-model@3` for slot animations. This lets older builds
+refuse an unsupported model capability before loading the mod.
+`schema=1` takes static meshes. `schema=2` also takes skinned meshes; a mesh
+that is skinned under `schema=1` is refused. `schema=3` also replaces the
+replaced model's slot animations with the glTF's `L<layer>S<slot>` animations;
+under `schema=1` and `2` those animations are cooked but not applied, and the
+start log says so. `owner:key` and `revision` follow the image rules above.
+
+- `file` names a contained, indexed `.glb`, or a `.gltf` whose buffers and PNG
+  images are contained files beside it (relative URIs, no `..`).
+- `replaces` is the disc key of an `.RMD`, or `<pack>.PAC#<member>.RMD` for a
+  model inside a pack, such as
+  `DATA/MODEL/PACK/BC001.PAC#bc001.RMD`. It must exist on the disc (or in
+  the developer tree `P4PC_OVERRIDE_DIR`).
+- A `when` gate follows the other sections: a restart toggle only.
+
+Early CPU preparation cooks the glTF, or loads a cached cook (see
+[models.md](models.md#runtime-gltf-models)). It checks it against the
+replaced model's budget. A refusal names the glTF object and the exceeded
+bound, for example `texture blade is 512x512; at most 256 for a weapon`, and
+refuses its provider before raw files publish. The runtime phase freezes the
+override table that the model loader consults.
+
+Conflicts:
+
+- When two packages declare the same key, or replace the same model, the
+  later selected package wins and the override is reported.
+- When one package's `files/` raw-replaces the RMD or PAC that another
+  package's `[resource-model]` targets, the model section wins for the
+  model's geometry, materials and textures. It is the more specific
+  declaration. The game still reads the winning file's other chunks: its
+  animation slots, attach table and effects. Both providers are reported.
+
+With no section declared, the table is empty, and every model takes the
+retail loader path with nothing more than one flag read.
+
 ## Existing Mod Compendium packages
 
 An existing Persona 4 PS2 data package can stay in its original directory. The
@@ -567,4 +751,5 @@ identity/ranks, canonical aliases, failed-mount rollback, retained backing
 extents, exact observed buffers/offsets and exclusive observer ownership.
 
 Luau hooks, UI registration, save provenance and table expansion are separate
-phases; this page does not claim those interfaces exist yet.
+services, not future promises: see [Luau](lua.md) and [table sources](tables.md)
+for their current contracts and limits.

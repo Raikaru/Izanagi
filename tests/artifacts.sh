@@ -21,6 +21,7 @@ gate_artifacts_begin() {
         gate_local_register "$work" || return 1
     fi
     gate_artifact_done=0
+    gate_artifact_copy_failed=0
     if [ "${2:-game}" = viewer ]; then
         export P4PC_DUMP_RAM="$work/state.bin"
     else
@@ -32,12 +33,34 @@ gate_artifacts_begin() {
     fi
     trap 'gate_artifacts_cleanup "$?"' EXIT
 }
+# Retain successful story/save logs separately from the scratch tree. Each invocation
+# gets its own directory, even when CTest runs in parallel or retries a test.
+gate_artifacts_boot_log() {
+    if [ -n "${P4PC_GATE_BOOT_LOG:-}" ] && ! cp "$work/boot.log" "$P4PC_GATE_BOOT_LOG"; then
+        echo "gate artifacts: warning: cannot retain log at $P4PC_GATE_BOOT_LOG" >&2
+        gate_artifact_copy_failed=1
+    fi
+    if [ -n "${P4PC_SCENE_ARTIFACTS:-}" ]; then
+        gate_log_dir=$(mktemp -d "$P4PC_SCENE_ARTIFACTS/${1}.log.XXXXXX") &&
+            cp "$work/boot.log" "$gate_log_dir/boot.log" ||
+            {
+                echo "gate artifacts: warning: cannot retain log under $P4PC_SCENE_ARTIFACTS" >&2
+                gate_artifact_copy_failed=1
+            }
+    fi
+    # Nested scene gates must retain their parent tree if this copy failed.
+    if [ "$gate_artifact_copy_failed" = 1 ] && [ -n "${P4PC_GATE_ARTIFACT_FAILURE_FILE:-}" ]; then
+        : > "$P4PC_GATE_ARTIFACT_FAILURE_FILE" ||
+            echo "gate artifacts: warning: cannot signal parent to retain $work" >&2
+    fi
+}
 gate_artifacts_cleanup() {
     gate_artifact_status=${1:-$?}
     if [ "${gate_artifact_done:-1}" = 0 ]; then
         gate_artifact_done=1
-        if [ "$gate_artifact_status" -ne 0 ] && [ "$gate_artifact_status" -ne 77 ]; then
-            echo "gate artifacts: failure evidence retained in $work"
+        if { [ "$gate_artifact_status" -ne 0 ] && [ "$gate_artifact_status" -ne 77 ]; } ||
+           [ "${gate_artifact_copy_failed:-0}" = 1 ]; then
+            echo "gate artifacts: evidence retained in $work"
         else
             rm -rf "$work"
         fi

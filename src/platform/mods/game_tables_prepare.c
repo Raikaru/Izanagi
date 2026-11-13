@@ -49,7 +49,7 @@ typedef struct CompleteParticipant {
     unsigned required;
 } CompleteParticipant;
 static const char *const participant_keys[] = {
-    "item", "skill", "persona", "enemy", "table-source", "element", "element-route",
+    "item", "skill", "persona", "enemy", "table-source", "table-derived", "element", "element-route",
     "element-ai", "element-knowledge", "element-ui"
 };
 enum { COMPLETE_COUNT = sizeof participant_keys / sizeof participant_keys[0] };

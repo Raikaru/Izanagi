@@ -16,6 +16,15 @@ typedef enum P4AffinityKind { P4_ENTITY_PERSONA = 0, P4_ENTITY_ENEMY = 1 } P4Aff
 #define P4_ELEMENT_OFFENSIVE 2u
 #define P4_ELEMENT_AFFINITY 4u
 #define P4_ELEMENT_VISIBLE 8u
+/* A resolved action's delivery (hardmode-design 8.1) rides in its element's
+ * flags, so the 44-byte frame and the AI candidate guest layouts stay as they
+ * are. Neither bit set: the delivery follows the element (P4_ELEMENT_PHYSICAL).
+ * An authored <skill delivery> sets one; registry element flags never do. */
+#define P4_ELEMENT_DELIVERY_PHYSICAL 0x100u
+#define P4_ELEMENT_DELIVERY_MAGIC 0x200u
+#define P4_DELIVERY_DEFAULT 0u
+#define P4_DELIVERY_PHYSICAL 1u
+#define P4_DELIVERY_MAGIC 2u
 #define P4_AFF_NULL 0x01000000u
 #define P4_AFF_REPEL 0x02000000u
 #define P4_AFF_DRAIN 0x04000000u
@@ -59,6 +68,17 @@ typedef struct P4GameAffinityQuery {
 static inline int p4_game_action_element_is_physical(const P4GameActionElement *element)
 {
     return element->valid && (element->flags & P4_ELEMENT_PHYSICAL) != 0;
+}
+/* Physical delivery: the crit roll, the counter roll and the physical-only
+ * damage term. Affinity, shields, Boost/Amp and evasion passives keep asking
+ * the element. Reflected and countered hits carry their frame, so they keep
+ * the original delivery. */
+static inline int p4_game_action_frame_physical(const P4GameActionFrame *frame)
+{
+    const uint32_t flags = frame->element.flags;
+    if (flags & P4_ELEMENT_DELIVERY_PHYSICAL) return frame->element.valid;
+    if (flags & P4_ELEMENT_DELIVERY_MAGIC) return 0;
+    return p4_game_action_element_is_physical(&frame->element);
 }
 static inline int p4_game_action_element_is_offensive(const P4GameActionElement *element)
 {

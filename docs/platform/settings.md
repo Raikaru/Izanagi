@@ -28,6 +28,9 @@ The generated desktop player template selects a 1280x960 window, `fit=4:3` and
 mapping. Other player keys are:
 
 - `[game] iso`: validated disc path; `P4PC_ISO` overrides it. See [startup](playing.md).
+- `[golden] install`: the player's own Persona 4 Golden (Steam) folder for the
+  Golden mechanics mod; `P4PC_GOLDEN` overrides it. When neither is set, the
+  standard Steam libraries are searched. See [Golden mechanics](../modding/golden.md).
 - `audio.volume` / `P4PC_VOLUME`: 0..100, default 100, applied to the device stream via
   `p4snd_set_user_volume`. Offline test renders do not observe device volume.
 - `input.deadzone` / `P4PC_STICK_DEADZONE`: 0..50 percent, default 0.
@@ -120,9 +123,11 @@ Esc or F1 requests Config; a gamepad can hold Select + Start for 0.6 seconds.
 In the field this follows the real Camp → System → Config task path and respects
 the game's own event, battle and flag-0x37 gates. A refused request is discarded,
 not forced or replayed later. Before the menu system is ready there is no fallback
-overlay. The `CONFIG` corner button is visible on Android/iOS and after desktop
-touch input, never on a keyboard/pad-only desktop. Tap a row to select it and tap
-again to activate/change it; native arrows and optional vertical swipes scroll the list.
+overlay. On Android the touch pad's labelled **CONFIG** pill (right side bar, below
+R2) sends F1; it is part of the Java pad overlay ([Android](../android.md)), not
+drawn into the game image, so it never covers the retail HUD. Tap a row to select
+it and tap again to activate/change it; native arrows and optional vertical swipes
+scroll the list.
 Touch Back or Esc leaves a sub-list; from a shortcut-opened field root it resumes
 the field. Ordinary game menu navigation keeps its stock Cross/Circle/Triangle
 behavior (default keyboard Z/X/C, plus arrows); there are no host-only tabs.
@@ -288,6 +293,29 @@ references and drains callbacks, so userdata may be released on return. A stock
 fade may still draw native-owned snapshots; it cannot dereference that userdata.
 All API/provider calls are game-thread only.
 
+**Hosted flows.** A game menu other than System or the title can present one
+registered page flow with the same native Config task, not a second renderer.
+Its override creates the real child with `cmpConfigCreate(task, 1)`, then calls
+`p4_settings_native_host(handle, key)` (`p4pc/settings_native.h`) before the
+child's first update. Title mode 1 is required: it draws Config's own opaque
+backdrop and drives its own nLine transitions. Camp mode 0 is refused, because
+outside Camp its close waits on an inactive nLine forever (observed in the
+Velvet Room). The page is the top view: Back, Esc, touch Back, `page_back()` or
+`page_close()` there close Config, and unregistering it does too. The Config
+root, Controls and CONFIRM are never shown and the retail flags are not
+synchronized. LINKs inside the flow behave normally. The parent reads no pad
+edges until `cmpConfigIsStepDone`, then destroys the child; `cmpConfigDestroy`
+closes the page stack, children first, then turns nLine off as
+`cmpMainTaskDestroy` does, so the parent must not itself own nLine (Camp and the
+title use the ordinary routes). A host request is refused while Config is open
+or another request is pending, and in retail-only qualification. The parent
+hides and restores its own header/footer sprites; Config does not know them.
+`settings_host_velvet` runs this from the Velvet Room fusion menu's three-row
+root (`tests/settings_host_velvet_gate.sh`, the level-99 Apollo save,
+mod-witness lane): mode 0 refused, then list, detail, back and close, nLine off
+again, a capture of the returned root compared with the root before hosting, and
+ordinary root input.
+
 The page change's mirror-census review is scoped to two Config units at decomp
 pin `363eab8a`: `cmpConfig.c` changes its draw hunk count from 26 to 29 for native
 page titles, read-only/disabled rows, value pills, measured help and the stock
@@ -382,9 +410,9 @@ directory attribute query; a delta-only import check cannot catch a counter
 that always returns zero.
 Whitespace-separated `;`/`#` inline comments are not part of cached values:
 the parser and atomic writer share this rule, while preserving their file bytes.
-Captures include the touch corner, native root, resolution, Controls, conflict and closed
+Captures include the native root, resolution, Controls, conflict and closed
 field. It requires the user's ISO/ELF and scripted input with dummy audio;
-ordinary gates never opt into settings input or the mobile touch corner.
+ordinary gates never opt into settings input.
 The gate uses `P4PC_TURBO=2`: game/menu updates and live GL changes still run,
 but only the normal 30-flip warmup before each inspected PNG is rasterized.
 Capture scheduling respects `P4PC_MENU_STEP` and re-arms when a row/title retry

@@ -120,6 +120,14 @@ int p4_game_elements_native_profile_affinity(void *unit, uint32_t leaf,
     (void)leaf; (void)channel; (void)component;
     assert(unit == target); ++effective_calls; *word = P4_AFF_REPEL | 100u; return 0;
 }
+/* Passive grants (game_passive_grant_native.h): the fixture's one granted
+ * skill on the target; the predicate asks only while something is granted. */
+uint32_t p4_game_passive_live;
+static uint32_t granted_skill, grant_queries;
+int p4_game_passive_native_unit(const void *unit, uint32_t skill)
+{
+    assert(unit == target); ++grant_queries; return skill == granted_skill;
+}
 #include "../src/platform/mods/game_elements_ai_predicate.inc"
 int p4_game_elements_ai_native_test(void *unit, const P4GameActionFrame *frame,
     uint32_t genus, uint32_t policy, uint32_t *value, P4GameAffinityQuery *query)
@@ -269,6 +277,29 @@ static void native_gates_precede_real_rows(void)
     authored[0].element.family = 5;
     candidate.frame = authored[0];
     assert(!p4_knowledge_ai_normal(target, 1, &candidate) && effective_calls == 2);
+    /* A granted Counter, Counterstrike or High Counter keeps physical commands
+     * off a party or an enemy target exactly as one in its slots or row does;
+     * an unrelated grant changes nothing and nothing granted asks nothing. */
+    authored[0] = authored[1];
+    authored[0].element.flags |= P4_ELEMENT_PHYSICAL;
+    authored[0].element.family = 0;
+    candidate.frame = authored[0]; target->buffs[17] = 0;
+    grant_queries = 0;
+    const uint32_t before = effective_calls;
+    (void)p4_knowledge_ai_normal(target, 0, &candidate);
+    assert(effective_calls == before + 1 && !grant_queries);
+    p4_game_passive_live = 1;
+    for (uint32_t counter = 0x1f6; counter <= 0x1f8; ++counter)
+        for (uint32_t genus = 0; genus < 2; ++genus) {
+            granted_skill = counter;
+            const uint32_t calls = effective_calls;
+            assert(!p4_knowledge_ai_normal(target, genus, &candidate) && effective_calls == calls);
+        }
+    granted_skill = 0x1b8; grant_queries = 0;
+    const uint32_t unrelated = effective_calls;
+    (void)p4_knowledge_ai_normal(target, 1, &candidate);
+    assert(grant_queries == 3 && effective_calls == unrelated + 1);
+    p4_game_passive_live = 0; granted_skill = 0;
 }
 static void ranking_ties_and_cost_fallback(void)
 {
@@ -297,6 +328,19 @@ static void physical_family_skill_scan(void)
     usable = 0;
     assert(!p4_knowledge_ai_has_skill(&action, source, 0));
     assert(!p4_knowledge_ai_has_skill(&action, source, -1));
+}
+static void typed_selector_ignores_delivery(void)
+{
+    /* A typed element argument names an element, never a delivery: an authored
+     * delivery skill's frame still answers it, and any other flag still refuses. */
+    reset();
+    P4GameActionElement typed = authored[3].element;
+    authored[3].element.flags |= P4_ELEMENT_DELIVERY_PHYSICAL;
+    assert(p4_knowledge_ai_collect(NULL, &action, (uint8_t *)target, source, target, 1, 7, 0, 0, 1, &typed) == 3);
+    authored[3].element.flags ^= P4_ELEMENT_DELIVERY_PHYSICAL | P4_ELEMENT_DELIVERY_MAGIC;
+    assert(p4_knowledge_ai_collect(NULL, &action, (uint8_t *)target, source, target, 1, 7, 0, 0, 1, &typed) == 3);
+    typed.flags ^= P4_ELEMENT_AFFINITY;
+    assert(p4_knowledge_ai_collect(NULL, &action, (uint8_t *)target, source, target, 1, 7, 0, 0, 1, &typed) == -1);
 }
 static void exact_selected_frame_and_permission(void)
 {
@@ -406,6 +450,7 @@ int main(void)
     native_gates_precede_real_rows();
     ranking_ties_and_cost_fallback();
     physical_family_skill_scan();
+    typed_selector_ignores_delivery();
     exact_selected_frame_and_permission();
     own_null_uses_base_not_normal_wrapper();
     side_barriers_precede_unknown_shortcuts();

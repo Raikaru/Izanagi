@@ -229,6 +229,29 @@ void p4_settings_pump(void)
 
 extern int p4_battle_sim_renderless;
 
+#ifdef _WIN32
+/* Set position and taskbar style before the HWND is created: moving or hiding
+ * an already-created window can flash on the user's desktop. */
+static SDL_Window *createHiddenWindow(int width, int height, SDL_WindowFlags flags)
+{
+    SDL_PropertiesID props = SDL_CreateProperties();
+    SDL_Window *window = NULL;
+
+    if (!props) return NULL;
+    if (SDL_SetStringProperty(props, SDL_PROP_WINDOW_CREATE_TITLE_STRING, "Persona 4 PC") &&
+        SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, width) &&
+        SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, height) &&
+        SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_X_NUMBER, -32000) &&
+        SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_Y_NUMBER, -32000) &&
+        SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_FLAGS_NUMBER,
+                              flags | SDL_WINDOW_HIDDEN | SDL_WINDOW_UTILITY | SDL_WINDOW_NOT_FOCUSABLE)) {
+        window = SDL_CreateWindowWithProperties(props);
+    }
+    SDL_DestroyProperties(props);
+    return window;
+}
+#endif
+
 int p4pc_pad_sdl_init(void)
 {
     const char *hidden;
@@ -287,7 +310,15 @@ int p4pc_pad_sdl_init(void)
         if (video->fullscreen) {
             flags |= SDL_WINDOW_FULLSCREEN;
         }
+#ifdef _WIN32
+        if (hidden != NULL && hidden[0] == '1') {
+            sWindow = createHiddenWindow(video->width, video->height, flags);
+        } else {
+            sWindow = p4gl_api_create_window("Persona 4 PC", video->width, video->height, flags);
+        }
+#else
         sWindow = p4gl_api_create_window("Persona 4 PC", video->width, video->height, flags);
+#endif
         if (sWindow != NULL && video->fullscreen && !(hidden != NULL && hidden[0] == '1')) {
             SDL_HideCursor();
         }
@@ -422,6 +453,52 @@ void p4pc_pad_stick(int x, int y, int dead, uint8_t *ox, uint8_t *oy)
     }
 }
 
+/* A deliberate left-stick deflection also presses the digital direction the
+ * native Config list reads; smaller movement stays analog only. */
+static void bridgeDirections(P4PadSnapshot *out, int ax, int ay)
+{
+    int threshold = sStickDead > 16000 ? sStickDead : 16000;
+    if (ax < -threshold) setBit(out, P4PC_PAD_LEFT);
+    else if (ax > threshold) setBit(out, P4PC_PAD_RIGHT);
+    if (ay < -threshold) setBit(out, P4PC_PAD_UP);
+    else if (ay > threshold) setBit(out, P4PC_PAD_DOWN);
+}
+
+/* The Android touch pad's analog stick (PadOverlay, through JNI on the UI
+ * thread; the game reads it on its own). It is a left stick like a gamepad's:
+ * SDL axis units, Y positive down. */
+#define P4PC_TOUCH_STICK_DEAD 0.15f /* fraction of the stick's travel, then rescaled */
+static SDL_AtomicInt sTouchStickX, sTouchStickY;
+
+void p4pc_pad_touch_stick(float x, float y)
+{
+    float length = hypotf(x, y);
+    int ax = 0, ay = 0;
+    if (isfinite(length) && length > P4PC_TOUCH_STICK_DEAD) {
+        float clamped = length > 1.0f ? 1.0f : length;
+        float scale = (clamped - P4PC_TOUCH_STICK_DEAD) / (1.0f - P4PC_TOUCH_STICK_DEAD) / length;
+        ax = (int)(x * scale * 32767.0f);
+        ay = (int)(y * scale * 32767.0f);
+    }
+    SDL_SetAtomicInt(&sTouchStickX, ax);
+    SDL_SetAtomicInt(&sTouchStickY, ay);
+}
+
+int p4pc_pad_touch_stick_apply(P4PadSnapshot *out, int dead, int menu)
+{
+    int ax = SDL_GetAtomicInt(&sTouchStickX), ay = SDL_GetAtomicInt(&sTouchStickY);
+    uint8_t x, y;
+    if (!ax && !ay) return 0;
+    /* A deflected gamepad stick keeps the axes it already has. */
+    if ((out->lx != 0x80 && out->lx != 0x7F) || (out->ly != 0x80 && out->ly != 0x7F)) return 0;
+    p4pc_pad_stick(ax, ay, dead, &x, &y);
+    if (x == 0x7F && y == 0x7F) return 0;
+    out->lx = x;
+    out->ly = y;
+    if (menu) bridgeDirections(out, ax, ay);
+    return 1;
+}
+
 static void readGamepad(P4PadSnapshot *out)
 {
     Sint16 lt, rt;
@@ -454,13 +531,8 @@ static void readGamepad(P4PadSnapshot *out)
     if (sSettingsMenuActive && sSettingsMenuActive()) {
         /* Config's stock list consumes digital directions; preserve the real
          * analog axes, and bridge only a deliberate left-stick movement. */
-        int ax = SDL_GetGamepadAxis(sGamepad, SDL_GAMEPAD_AXIS_LEFTX);
-        int ay = SDL_GetGamepadAxis(sGamepad, SDL_GAMEPAD_AXIS_LEFTY);
-        int threshold = sStickDead > 16000 ? sStickDead : 16000;
-        if (ax < -threshold) setBit(out, P4PC_PAD_LEFT);
-        else if (ax > threshold) setBit(out, P4PC_PAD_RIGHT);
-        if (ay < -threshold) setBit(out, P4PC_PAD_UP);
-        else if (ay > threshold) setBit(out, P4PC_PAD_DOWN);
+        bridgeDirections(out, SDL_GetGamepadAxis(sGamepad, SDL_GAMEPAD_AXIS_LEFTX),
+            SDL_GetGamepadAxis(sGamepad, SDL_GAMEPAD_AXIS_LEFTY));
     }
     p4pc_pad_stick(SDL_GetGamepadAxis(sGamepad, SDL_GAMEPAD_AXIS_RIGHTX), SDL_GetGamepadAxis(sGamepad, SDL_GAMEPAD_AXIS_RIGHTY), sStickDead, &x, &y);
     out->rx = x;
@@ -835,6 +907,29 @@ static int walkBattleTurn(void *user, unsigned n, char *line, size_t size)
     return sBattleTurn != NULL ? sBattleTurn(n, line, size) : 0;
 }
 
+/* The port's active-skill predicate for the walk driver's list model (set at kernel init); NULL keeps the retail split. */
+static int (*sSkillActive)(uint32_t id);
+void p4pc_pad_set_skill_active(int (*active)(uint32_t id))
+{
+    sSkillActive = active;
+}
+static int walkSkillActive(void *user, unsigned id)
+{
+    (void)user;
+    return sSkillActive(id);
+}
+/* The port's passive grant query for an enemy kind (set at kernel init); NULL: nothing granted. */
+static int (*sPassiveGranted)(uint32_t enemy, uint32_t skill);
+void p4pc_pad_set_passive_granted(int (*granted)(uint32_t enemy, uint32_t skill))
+{
+    sPassiveGranted = granted;
+}
+static int walkPassiveGranted(void *user, unsigned enemy, unsigned skill)
+{
+    (void)user;
+    return sPassiveGranted(enemy, skill);
+}
+
 /* P4PC_WALK_LOG_EVERY=<flips>: how often P4PC_WALK_LOG prints (default 30). */
 static unsigned walkLogEvery(void)
 {
@@ -1016,7 +1111,9 @@ static void walkScriptRead(P4PadSnapshot *out)
         uint32_t frame = sFrameClock();
 
         if (frame != sWalkFrame) {
-            const P4WalkHost host = { walkRead32, walkLog, NULL, sNavBlocked, sNavGround, walkBattleTurn };
+            const P4WalkHost host = { walkRead32, walkLog, NULL, sNavBlocked, sNavGround, walkBattleTurn,
+                                      sSkillActive != NULL ? walkSkillActive : NULL,
+                                      sPassiveGranted != NULL ? walkPassiveGranted : NULL };
 
             sWalkFrame = frame;
             /* flips by default (the scene gates' schedules are calibrated in flips: under P4PC_TURBO=2 a flip runs two game frames); P4PC_WALK_GAME=1 counts the
@@ -1195,6 +1292,7 @@ void p4pc_pad_sdl_read(P4PadSnapshot *out)
         p4pc_pad_keys_to_snapshot(keys, numkeys, out);
     }
     if (sInputMode != 1) readGamepad(out);
+    if (sInputMode == 0) p4pc_pad_touch_stick_apply(out, sStickDead, sSettingsMenuActive && sSettingsMenuActive());
 
     /* Keyboard left stick: the D-pad, used only when the gamepad stick is idle. */
     if (out->lx == 0x80 || out->lx == 0x7F) {

@@ -1,8 +1,10 @@
 #include "p4pc/mod_resources_boot.h"
+#include "p4pc/battle_sim.h"
 #include "p4pc/content_source.h"
 #include "p4pc/mod_setting_gate.h"
 #include "file_index.h"
 #include "package_memory_internal.h"
+#include "mod_resources_native.h"
 #include "resource_png.h"
 #include <limits.h>
 #include <stdio.h>
@@ -143,17 +145,21 @@ static int prepare_image(const P4PackageProvider *provider, const P4PackageField
     ImageInput image = {0};
     if (!info || !p4_package_provider_selected(provider) || !qualified(key, image.owner))
         return refuse(provider, key, NULL, "expected a bounded lowercase owner:key");
-    size_t gates = 0;
+    size_t whens = 0, companions = 0, settings = 0;
     for (size_t i = 0; i < count; ++i) {
         if (!strcmp(fields[i].key, "file")) file = fields[i].value;
         else if (!strcmp(fields[i].key, "format")) format = fields[i].value;
         else if (!strcmp(fields[i].key, "schema")) schema = fields[i].value;
         else if (!strcmp(fields[i].key, "revision")) revision = fields[i].value;
-        else if (!strcmp(fields[i].key, P4_MOD_SETTING_GATE_FIELD)) ++gates; /* evaluated by prepare() */
+        else if (!strcmp(fields[i].key, P4_MOD_SETTING_GATE_FIELD)) ++whens; /* evaluated by prepare() */
+        else if (!strcmp(fields[i].key, P4_MOD_COMPANION_GATE_FIELD)) ++companions; /* evaluated by prepare() */
+        else if (!strcmp(fields[i].key, P4_MOD_COMPANION_SETTING_FIELD)) ++settings; /* evaluated by prepare() */
         else return refuse(provider, key, file, "unknown declaration field");
     }
     uint32_t schema_number;
-    if (gates > 1 || count - gates != 4 || !file || !*file || !format || strcmp(format, "png") ||
+    if (whens > 1 || companions > 1 || settings > 1 || count - whens - companions - settings != 4 || !file || !*file ||
+        !format ||
+        strcmp(format, "png") ||
         !decimal(schema, &schema_number) || schema_number != 1 || !decimal(revision, &image.revision))
         return refuse(provider, key, file, "requires file, format=png, schema=1 and nonzero revision");
     const char *actual = actual_file(provider, file);
@@ -164,7 +170,8 @@ static int prepare_image(const P4PackageProvider *provider, const P4PackageField
         return refuse(provider, key, file, "cannot open the selected contained source");
     char error[192] = {0};
     int failed = p4_package_file_plan_acquire(stream, &image.plan) ||
-                 p4_resource_png_decode(stream, &image.image, error, sizeof error);
+        (p4_battle_sim_renderless ? p4_resource_png_probe(stream, &image.image, error, sizeof error) :
+                                   p4_resource_png_decode(stream, &image.image, error, sizeof error));
     if (p4_package_file_close(stream)) failed = 1;
     if (!failed) {
         /* Check the same issued object's revision after decoding, before any
@@ -261,14 +268,22 @@ static int runtime_prepare(void *unused)
         uint32_t token;
         if (!p4_package_provider_selected(image->provider))
             return p4_package_boot_fail(NULL, "Selected image provider is no longer active");
-        if (p4_resources_image(runtime_resources, image->owner, image->key, &image->source,
+        int result = p4_battle_sim_renderless ?
+            p4_resources_image_metadata(runtime_resources, image->owner, image->key, &image->source,
+                image->image.width, image->image.height, image->revision, &token) :
+            p4_resources_image(runtime_resources, image->owner, image->key, &image->source,
                 image->image.rgba, image->image.size, image->image.width, image->image.height,
-                image->revision, &token) != P4_RESOURCE_OK)
+                image->revision, &token);
+        if (result != P4_RESOURCE_OK)
             return p4_package_boot_fail(image->provider, "Cannot materialize the selected authored image");
     }
     if (p4_resources_freeze(runtime_resources, next_revision++) != P4_RESOURCE_OK)
         return p4_package_boot_fail(NULL, "Cannot freeze resource generation");
     return p4_package_boot_provide(runtime_resources);
+}
+const P4Resources *p4_resources_images_runtime(void)
+{
+    return runtime_resources && p4_resources_revision(runtime_resources) ? runtime_resources : NULL;
 }
 int p4_resources_images_session_end(void)
 {

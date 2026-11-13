@@ -81,6 +81,15 @@ static int scene_state(lua_State *L)
     return 1;
 }
 
+static int scene_player_position(lua_State *L)
+{
+    float x, z;
+    if (!p4_mod_scene_player_position(&x, &z)) { lua_pushnil(L); return 1; }
+    lua_pushnumber(L, x);
+    lua_pushnumber(L, z);
+    return 2;
+}
+
 static int scene_available(lua_State *L)
 {
     uint32_t field = (uint32_t)p4_lua_integer(L, 1, 0, 999), room = (uint32_t)p4_lua_integer(L, 2, 0, 999);
@@ -111,6 +120,26 @@ static int scene_status(lua_State *L)
     lua_pushstring(L, detail);
     if (outcome >= 0) lua_pushinteger(L, outcome); else lua_pushnil(L);
     return 3;
+}
+
+/* ---- p4.calendar (calendar.pass@2, calendar.hold@1) */
+
+/* Same queue and status as p4.scene: p4.scene.status() reports the pass. */
+static int calendar_pass(lua_State *L)
+{
+    P4LuaMod *mod = mutation(L, "p4.calendar.pass");
+    const char *reason = NULL;
+    if (p4_mod_calendar_pass(mod->owner, &reason)) return refused(L, reason);
+    lua_pushboolean(L, 1);
+    return 1;
+}
+
+/* nil, or why the time is held (pass refuses for the same reason). */
+static int calendar_hold(lua_State *L)
+{
+    const char *held = p4_mod_calendar_hold();
+    if (held) lua_pushstring(L, held); else lua_pushnil(L);
+    return 1;
 }
 
 /* ---- p4.encounter */
@@ -249,6 +278,35 @@ static int camera_owner(lua_State *L)
 
 static const char *const hud_groups[] = {"field_banner", "field_map", "calendar", "party", "battle_commands"};
 
+/* p4.pace changes only wall time: refused where mutations are, but it records
+ * no semantic use, so it never tags a save. */
+static int pace_set(lua_State *L)
+{
+    p4_lua_require_mutation(L);
+    if (p4_lua_frame(L)->no_native_calls)
+        luaL_error(L, "p4.pace.set is not allowed in a synchronous UI callback; stage it and run it from an event");
+    const double rate = luaL_checknumber(L, 1);
+    const unsigned quarters = rate == 0.25 ? 1u : rate == 0.5 ? 2u : rate == 1.0 ? 4u : rate == 2.0 ? 8u :
+        rate == 4.0 ? 16u : 0u;
+    if (!quarters) luaL_argerror(L, 1, "the rate must be 0.25, 0.5, 1, 2 or 4");
+    const char *reason = NULL;
+    P4LuaMod *mod = p4_luau_user(L);
+    if (p4_mod_pace_set(mod->owner, quarters, &reason)) return refused(L, reason);
+    lua_pushboolean(L, 1);
+    return 1;
+}
+
+static int pace_state(lua_State *L)
+{
+    unsigned requested = 4, effective = 4;
+    const char *held = NULL;
+    p4_mod_pace_state(&requested, &effective, &held);
+    lua_pushnumber(L, requested / 4.0);
+    lua_pushnumber(L, effective / 4.0);
+    if (held) lua_pushstring(L, held); else lua_pushnil(L);
+    return 3;
+}
+
 static int hud_list(lua_State *L)
 {
     int count = (int)(sizeof hud_groups / sizeof hud_groups[0]);
@@ -301,7 +359,8 @@ void p4_lua_services_initialize(lua_State *L)
     p4_lua_library(L, clock);
     lua_setfield(L, -2, "clock");
     static const luaL_Reg scene[] = {
-        {"state", scene_state}, {"available", scene_available}, {"warp", scene_warp}, {"status", scene_status}, {NULL, NULL}
+        {"state", scene_state}, {"player_position", scene_player_position}, {"available", scene_available},
+        {"warp", scene_warp}, {"status", scene_status}, {NULL, NULL}
     };
     p4_lua_library(L, scene);
     lua_setfield(L, -2, "scene");
@@ -316,6 +375,12 @@ void p4_lua_services_initialize(lua_State *L)
     static const luaL_Reg hud[] = {{"groups", hud_list}, {"hide", hud_hide}, {"hidden", hud_hidden}, {NULL, NULL}};
     p4_lua_library(L, hud);
     lua_setfield(L, -2, "hud");
+    static const luaL_Reg calendar[] = {{"pass", calendar_pass}, {"hold", calendar_hold}, {NULL, NULL}};
+    p4_lua_library(L, calendar);
+    lua_setfield(L, -2, "calendar");
+    static const luaL_Reg pace[] = {{"set", pace_set}, {"state", pace_state}, {NULL, NULL}};
+    p4_lua_library(L, pace);
+    lua_setfield(L, -2, "pace");
 }
 
 void p4_lua_services_close(P4LuaMod *mod)

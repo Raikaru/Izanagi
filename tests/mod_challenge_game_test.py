@@ -67,8 +67,30 @@ p4.events.on("battle_end", function(event)
     local yu = p4.call(0x00104c70, "ii", 1) :: number
     local yosuke = p4.call(0x00109400, "BH", 2) :: number
     local chie = p4.call(0x00109400, "BH", 3) :: number
-    p4.log(string.format("TEST_LEVELS outcome=%d yu=%d yosuke=%d chie=%d", event.outcome, yu, yosuke, chie))
+    local record = p4.mem.read("u32", event.battle + 0xc68)
+    local encounter = if record ~= 0 then p4.mem.read("u16", record + 8) else 0
+    p4.log(string.format("TEST_LEVELS outcome=%d yu=%d yosuke=%d chie=%d encounter=%d", event.outcome, yu, yosuke,
+        chie, encounter))
 end)
+-- Each field entry: Yosuke's Persona level (his join on 04/15 must keep it).
+p4.events.on("field_enter", function()
+    p4.log("TEST_CASTLE_CATALOG_LEVEL " .. tostring(p4.data.enemy(258).level))
+    local record = p4.call(0x0010a900, "pH", 2) :: number
+    local skills = {}
+    for slot = 0, 7 do
+        local skill = p4.mem.read("u16", record + 0xc + slot * 2)
+        if skill ~= 0 then table.insert(skills, tostring(skill)) end
+    end
+    p4.log("TEST_FIELD yosuke=" .. tostring(p4.call(0x00109400, "BH", 2)) .. " skills=" .. table.concat(skills, ","))
+end)
+-- Game Over: the field script's procedure 15 (field or script battle).
+for _, address in {0x0029da90, 0x0029db50} do
+    p4.hook(address, if address == 0x0029da90 then "iipi" else "iiiii", "before", function(context)
+        if context.args[1] == 15 and context.args[2] == p4.mem.read("u32", 0x007690f0 + 0xb284 - 0x10000) then
+            p4.log("TEST_GAME_OVER")
+        end
+    end)
+end
 p4.log("TEST_OBSERVE_READY")
 """,
     # Multiplies each recipient's base battle EXP, so the cap clamps real awards.
@@ -80,7 +102,85 @@ p4.hook(0x0021de90, "iip", "replace", function(context)
 end)
 p4.log("TEST_BOOST_READY")
 """,
-    # Leaves Yu, Yosuke and Chie at 1 HP when a battle starts.
+    # Exercises p4.party (API 1.8) on Yosuke's record: refused writes change
+    # nothing, an accepted one lands at the next frame safe point, and a
+    # battle refuses it.
+    "test.challenge.party": """--!strict
+local done = false
+local expected: P4PartyRecord? = nil
+local function show(tag: string, r: P4PartyRecord?)
+    if not r then p4.log(tag .. " none") return end
+    local hp = p4.call(0x00104ce0, "Ih", 2) :: number
+    local max = p4.call(0x00104dc0, "Hh", 2) :: number
+    p4.log(string.format("%s persona=%d level=%d exp=%d stats=%s skills=%s hp=%d max=%d", tag, r.persona, r.level,
+        r.exp, table.concat(r.stats :: {any}, ","), table.concat(r.skills :: {any}, ","), hp, max))
+end
+p4.events.on("field_enter", function()
+    if done then return end
+    done = true
+    local r = p4.party.record(2)
+    show("TEST_PARTY_READ", r)
+    if not r then return end
+    local ok, why = p4.party.set(2, {persona = r.persona, level = 1, exp = 999999, stats = r.stats, skills = r.skills})
+    p4.log("TEST_PARTY_BAD_EXP ok=" .. tostring(ok) .. " why=" .. tostring(why))
+    ok, why = p4.party.set(2, {persona = r.persona + 1, level = r.level, exp = r.exp, stats = r.stats, skills = r.skills})
+    p4.log("TEST_PARTY_BAD_PERSONA ok=" .. tostring(ok) .. " why=" .. tostring(why))
+    ok, why = p4.party.set(2, {persona = r.persona, level = r.level, exp = r.exp, stats = r.stats,
+        skills = {r.skills[1], r.skills[1]}})
+    p4.log("TEST_PARTY_BAD_SKILLS ok=" .. tostring(ok) .. " why=" .. tostring(why))
+    show("TEST_PARTY_UNCHANGED", p4.party.record(2))
+    expected = {persona = r.persona, level = 1, exp = 0, stats = {2, 2, 2, 2, 2}, skills = {r.skills[1]}}
+    ok, why = p4.party.set(2, expected :: P4PartyRecord)
+    p4.log("TEST_PARTY_SET ok=" .. tostring(ok) .. " why=" .. tostring(why))
+    show("TEST_PARTY_SAME_FRAME", p4.party.record(2))
+end)
+p4.events.on("frame_start", function()
+    if expected then
+        expected = nil
+        show("TEST_PARTY_APPLIED", p4.party.record(2))
+    end
+end)
+p4.events.on("battle_start", function()
+    local r = p4.party.record(2)
+    if not r then return end
+    local ok, why = p4.party.set(2, {persona = r.persona, level = r.level, exp = r.exp, stats = r.stats, skills = r.skills})
+    p4.log("TEST_PARTY_IN_BATTLE ok=" .. tostring(ok) .. " why=" .. tostring(why))
+end)
+p4.log("TEST_PARTY_READY")
+""",
+    # Opens the Velvet Room's roster pair fusion (flag 0x1305, normally a late
+    # unlock): at the root's first row dispatch (mode 0, state 0x1C, where the
+    # selected row's own mode/state are copied in) it takes the roster row's
+    # transition instead (mode 8, state 0x75), then reports whether the mode ran.
+    "test.challenge.roster": """--!strict
+local chosen, entered = false, false
+local last, reported = -1, 0
+p4.events.on("field_enter", function()
+    p4.call(0x00106390, "vii", 0x1305, 1)
+end)
+p4.hook(0x002e7ac0, "ip", "before", function(context)
+    local work = p4.mem.read("u32", (context.args[1] :: number) + 0x38)
+    local now = p4.mem.read("u8", work) * 256 + p4.mem.read("u8", work + 1)
+    if now ~= last and reported < 40 then
+        last, reported = now, reported + 1
+        p4.log(string.format("TEST_ROSTER_STATE mode=%d state=0x%x", now // 256, now % 256))
+    end
+    if not chosen and now == 0x1c then
+        chosen = true
+        p4.mem.write("u8", work, 8)
+        p4.mem.write("u8", work + 1, 0x75)
+        p4.log("TEST_ROSTER_ROW_CHOSEN")
+    end
+end)
+p4.hook(0x00304580, "vp", "before", function()
+    if not entered then
+        entered = true
+        p4.log("TEST_ROSTER_FUSION_ENTERED")
+    end
+end)
+p4.log("TEST_ROSTER_READY")
+""",
+    # Knocks Yu out when a battle starts.
     "test.challenge.frail": """--!strict
 -- Yu enters the battle already knocked out (his record's HP is 0), so the
 -- battle's own defeat check ends it as a loss; Yosuke and Chie stay at 1 HP.
@@ -98,8 +198,11 @@ def write_fixtures(root):
     for name, source in FIXTURES.items():
         package = root / name
         package.mkdir(parents=True)
+        requirement = "requires = data.catalog@1\n" if name == "test.challenge.observe" else ""
         (package / "mod.ini").write_text(
-            f"[mod]\nid = {name}\nname = Challenge witness fixture\nversion = 1.0.0\napi = 1.3\npriority = 0\norder = 0\n",
+            f"[mod]\nid = {name}\nname = Challenge witness fixture\nversion = 1.0.0\napi = 1.3\n"
+            f"{requirement}"
+            "priority = 0\norder = 0\n",
             encoding="ascii")
         (package / "main.luau").write_text(source, encoding="utf-8")
     shutil.copytree(ROOT / "mods" / PACKAGE, root / PACKAGE)
@@ -146,6 +249,7 @@ class Scenario:
         load never reaches a walk's end), by SIGKILL or `stop_signal`."""
         env = dict(self.common, P4PC_CONFIG=str(self.config), P4PC_SAVE_DIR=str(self.card.parent),
                    P4PC_SCENE_ARTIFACTS=str(self.dir), **extra)
+        env = {key: value for key, value in env.items() if value is not None}  # None removes a common key
         log = self.dir / (label + ".log")
         stopped = False
         with log.open("wb") as output:
@@ -212,7 +316,9 @@ def training(s):
     need(text, r"FIELD_RECOVERY_REFUSED item=\d+ effect=\d+", "Camp item refusal")
     need(text, r"FIELD_RECOVERY_REFUSED skill=\d+", "Camp skill refusal")
     need(text, r"BATTLE_ITEMS_REFUSED", "battle Item command refusal")
+    need(text, r"TEST_CASTLE_CATALOG_LEVEL 15", "castle boss level from the semantic catalog")
     need(text, r"CAP_AWARD persona=\d+ cap=15 requested=\d+ allowed=\d+", "prepared battle awards clamped")
+    need(text, r"CAP_RESULT flags=0x[0-9a-f]+ shown=0x[0-9a-f]+", "level-up screens the cap took away are not shown")
     caps = re.findall(r"CAP_(?:PERSONA|HERO|HERO_LEVEL|AWARD persona=\d+) cap=(\d+) requested=(\d+) allowed=(\d+)", text)
     assert caps and all(cap == "15" and int(allowed) < int(requested) for cap, requested, allowed in caps), caps
     levels = [tuple(int(v) for v in m) for m in re.findall(r"TEST_LEVELS outcome=1 yu=(\d+) yosuke=(\d+) chie=(\d+)", text)]
@@ -251,6 +357,25 @@ def locked(s):
 
 
 STRICT_RULES = ("ironman", "ironman_confirm", "strict_ironman", "strict_confirm", "custom_on_load")
+
+
+def party(s):
+    text = s.walk("party", "save0420_5f_to_training.walk", "999999,20:1,4/20", timeout=2400,
+                  stop_on=r"TEST_PARTY_IN_BATTLE", grace=2)
+    read = need(text, r"TEST_PARTY_READ persona=(\d+) level=(\d+) exp=(\d+) stats=(\S+) skills=(\S+) hp=\d+", "Yosuke's record")
+    for label in ("BAD_EXP", "BAD_PERSONA", "BAD_SKILLS"):
+        need(text, r"TEST_PARTY_%s ok=false why=\S" % label, "refused " + label)
+    unchanged = need(text, r"TEST_PARTY_UNCHANGED persona=(\d+) level=(\d+) exp=(\d+) stats=(\S+) skills=(\S+) hp=\d+",
+                     "record after refusals")
+    assert unchanged.groups() == read.groups(), "a refused write changed the record"
+    need(text, r"TEST_PARTY_SET ok=true why=nil", "accepted write")
+    same = need(text, r"TEST_PARTY_SAME_FRAME persona=\d+ level=(\d+)", "same-frame read")
+    assert same[1] == read[2], "the write applied before the frame safe point"
+    need(text, r"p4pc: mods: party record 2 set by owner \d+: level 1", "native safe-point apply")
+    applied = need(text, r"TEST_PARTY_APPLIED persona=\d+ level=1 exp=0 stats=2,2,2,2,2 skills=\d+ hp=(\d+) max=(\d+)",
+                   "the applied record")
+    assert int(applied[1]) <= int(applied[2]), "HP above the new maximum"
+    need(text, r"TEST_PARTY_IN_BATTLE ok=false why=Party records cannot change during a battle", "battle refusal")
 
 
 def strict_training(s):
@@ -320,6 +445,85 @@ def fusion(s):
     assert all((s.dir / ("fusion_%d.png" % f)).is_file() for f in shots), "Velvet Room captures missing"
 
 
+def roster(s, gated):
+    shots = (2200,)
+    text = s.run("roster", {"P4PC_WALK_SCRIPT": str(WALKS / "challenge_velvet_roster.walk"),
+                            "P4PC_NEWGAME_GATE": "999999,20:1,4/22",
+                            "P4PC_CAPTURE_FRAMES": ",".join(str(f) for f in shots),
+                            "P4PC_CAPTURE_PNG": str(s.dir / "roster_%d.png")}, 1800,
+                 stop_on=r"TEST_ROSTER_FUSION_ENTERED|fusion refused by owner", grace=5)
+    need(text, r"TEST_ROSTER_ROW_CHOSEN", "the roster pair fusion row taken from the idle root menu")
+    if gated:
+        need(text, r"CHALLENGE_ARMED run=R1 rules=no_fusion custom=true", "CUSTOM no-fusion run")
+        need(text, r"p4pc: mods: fusion refused by owner \d+: NO FUSION challenge rule", "roster fusion refused")
+        assert "TEST_ROSTER_FUSION_ENTERED" not in text, "the denied roster fusion mode was entered"
+    else:
+        # Control: without the rule the same input reaches roster pair fusion.
+        need(text, r"TEST_ROSTER_FUSION_ENTERED", "the row is roster pair fusion")
+    assert all((s.dir / ("roster_%d.png" % f)).is_file() for f in shots), "Velvet Room captures missing"
+
+
+# New Game through 04/15 (the story gate's route and battle driver): the first
+# night's dream battle, the Persona awakening fights and Shadow Yosuke, to the
+# Dojima living room on 04/15.
+NEWGAME = {"P4PC_AUTOPRESS_LOAD": None, "P4PC_AUTOPRESS_NEWGAME": "1560",
+           "P4PC_AUTOPRESS": "cross@2300:2/150*20,start@6500:2/300*14",
+           # Circle puts the command wheel on Attack (it otherwise keeps each
+           # character's last command, across fights too), then Skill, the
+           # first skill, its target; when the skill cannot be paid, Circle
+           # twice backs out to Attack and attacks.
+           "P4PC_BATTLE_FIRST": "circle,down,cross,cross,cross,circle,circle,cross,cross",
+           "P4PC_BATTLE_DRIVER": "circle,down,cross,cross,cross,circle,circle,cross,cross",
+           "P4PC_BATTLE_SKIP": "140", "P4PC_WALK_SCRIPT": str(WALKS / "newgame_to_0413.walk"),
+           "P4PC_NEWGAME_GATE": "220000,7:2,4/15", "P4PC_FACING_GATE": "1", "P4PC_BATTLE_LOG": "1"}
+
+
+def solo_companion(s, member, name, plan=None, must_win=True):
+    """The chosen companion fights every battle of a New Game alone, from level 1."""
+    shots = (100000, 125000, 140000, 160000, 190000)
+    env = dict(NEWGAME, P4PC_CAPTURE_FRAMES=",".join(str(f) for f in shots),
+               P4PC_CAPTURE_PNG=str(s.dir / "newgame_%d.png"))
+    if plan:
+        env.update(P4PC_BATTLE_FIRST=plan, P4PC_BATTLE_DRIVER=plan)
+    text = s.run("newgame", env, 4800,
+                 stop_on=r"new-game gate (PASS|FAIL)|TEST_GAME_OVER", grace=3)
+    need(text, r"CHALLENGE_ARMED run=R1 rules=solo custom=false epoch=1 solo=%d" % member, "New Game solo arming")
+    curve = need(text, r"SOLO_CURVE member=%s persona=\d+ join_level=(\d+) join_stats=(\S+) base=\S+ skill=\d+ "
+                       r"join_equipment=(\d+),(\d+),\d+ equipment=(\d+),(\d+),\d+" % name, "level-1 early curve")
+    need(text, r"p4pc: mods: party record %d set by owner \d+: level 1" % member, "record set to level 1")
+    projected = re.findall(r"p4pc: mods: battle lineup projected by owner \d+: (\d) -> 1 members", text)
+    battles = re.findall(r"TEST_LEVELS outcome=(\d+) yu=\d+ yosuke=\d+ chie=\d+ encounter=(\d+)", text)
+    assert projected and len(projected) == len(battles), f"every battle fought alone: {projected} {battles}"
+    leaders = re.findall(r"p4pc: mods: battle leader role given to unit (\d+)", text)
+    assert leaders and set(leaders) == {str(member)} and len(leaders) == len(battles), \
+        f"the fighter takes Yu's leader role in every battle: {leaders}"
+    # The dream battle (encounter 532) ends as a scripted loss in retail too.
+    assert battles[0][1] == "532", battles
+    assert not must_win or any(outcome == "1" for outcome, _ in battles), f"no battle won: {battles}"
+    join_level, join_stats = curve.group(1), curve.group(2)
+    if member == 2 and "new-game gate PASS" in text:
+        # Yosuke joins the story party on 04/15: the field after it still
+        # shows the level he earned, not the template's join level.
+        earned = re.findall(r"TEST_LEVELS outcome=\d+ yu=\d+ yosuke=(\d+)", text)[-1]
+        skills = re.findall(r"SOLO_CURVE_STEP member=YOSUKE level=\d+ stats=\S+ skills=(\S+)", text)[-1]
+        assert re.findall(r"TEST_FIELD yosuke=(\d+) skills=(\S*)", text)[-1] == (earned, skills), \
+            "the join reset Yosuke's record"
+    # On the curve the join level brings exactly the story's join stats.
+    for level, stats in re.findall(r"SOLO_CURVE_STEP member=%s level=(\d+) stats=(\S+)" % name, text):
+        if level == join_level:
+            assert stats == join_stats, f"level {level} stats {stats}, join stats {join_stats}"
+    print(f"mod_challenge_game: {name} battles (outcome, encounter): {battles}; join kit "
+          f"{curve.group(3)},{curve.group(4)} -> starter {curve.group(5)},{curve.group(6)}")
+    if "SOLO_DEFEAT" in text:
+        # The chosen fighter's real fall ends the run although Yu, benched,
+        # stands: his record is knocked out and the field's Game Over runs.
+        need(text, r"SOLO_DEFEAT member=%s" % name, "the fighter's fall")
+        need(text, r"TEST_GAME_OVER", "the Game Over procedure after the fighter's fall")
+    else:
+        need(text, r"new-game gate PASS", "the story reached the Dojima living room on 04/15")
+    return battles
+
+
 def solo(s):
     text = s.walk("solo", "save0420_5f_to_training.walk", "38000,20:1,4/20", timeout=2400,
                   stop_on=r"walk script (done|failed)|CHALLENGE_DEFEAT", grace=10)
@@ -332,8 +536,9 @@ def solo(s):
 
 
 def severe(s):
-    text = s.walk("severe", "save0420_5f_to_training.walk", "38000,20:1,4/20", timeout=2400,
-                  stop_on=r"walk script (done|failed)|CHALLENGE_DEFEAT|CHALLENGE_NEW_GAME armed=0", grace=10)
+    text = s.run("severe", {"P4PC_WALK_SCRIPT": str(WALKS / "save0420_5f_to_training.walk"),
+                            "P4PC_NEWGAME_GATE": "38000,20:1,4/20", "P4PC_DAMAGE_TRACE": "1"}, 2400,
+                 stop_on=r"walk script (done|failed)|CHALLENGE_DEFEAT|CHALLENGE_NEW_GAME armed=0", grace=10)
     if "CHALLENGE_RULE_UNAVAILABLE rule=severe_damage" in text:
         # A build without the damage stage never arms the rule it cannot enforce.
         need(text, r"CHALLENGE_NEW_GAME armed=0", "no run armed without its only rule")
@@ -341,13 +546,16 @@ def severe(s):
         print("mod_challenge_game: severe_damage unavailable in this build; refused to arm")
         return
     need(text, r"CHALLENGE_ARMED run=R1 rules=severe_damage custom=true", "CUSTOM severe-damage run")
-    hits = re.findall(r"SEVERE_DAMAGE from_enemy=(true|false) kind=(\d+) stock=(\d+) scaled=(\d+)", text)
+    hits = re.findall(r"SEVERE_DAMAGE from_enemy=(true|false) kind=(\w+) stock=(\d+) factor=([\d.]+)", text)
     assert {enemy for enemy, *_ in hits} == {"true", "false"}, f"both directions must be observed: {hits}"
-    for enemy, kind, stock, scaled in hits:
-        numerator, denominator = (3, 2) if enemy == "true" else (3, 4)
-        if kind in ("2", "4"):
-            numerator, denominator = numerator * 5, denominator * 4
-        assert int(scaled) == max(1, int(stock) * numerator // denominator), (enemy, kind, stock, scaled)
+    for enemy, kind, stock, factor in hits:
+        expected = 1.5 if enemy == "true" else 0.75
+        if kind in ("critical", "weak"):
+            expected *= 1.25
+        assert abs(float(factor) - expected) < 1e-9, (enemy, kind, stock, factor)
+    # The native stage composed each modifier exactly once and rounded the result.
+    steps = re.findall(r"damage stage:   \S+ priority -?\d+ load \d+ multiply ([\d.e+-]+): ([\d.e+-]+) -> ([\d.e+-]+)", text)
+    assert steps and all(abs(float(before) * float(f) - float(after)) < 1e-6 for f, before, after in steps), steps[:4]
 
 
 def mandatory(s):
@@ -361,6 +569,16 @@ def mandatory(s):
     refusals = re.findall(r"ENCOUNTER_REFUSED encounter=(\d+) via=(attack|contact)", text)
     assert refusals, "no ordinary Shadow was refused"
     assert "TEST_BATTLE_START" not in text, "an optional battle started"
+
+
+def mandatory_boss(s):
+    # Shadow Yukiko (encounter 0x202), a story boss: Mandatory Only lets it start.
+    text = s.walk("boss", "save0426trained5_to_yukiko_rescue.walk", "999999,6:6,4/27", timeout=2400,
+                  stop_on=r"TEST_LEVELS outcome=\d+ yu=\d+ yosuke=\d+ chie=\d+ encounter=514", grace=3)
+    need(text, r"CHALLENGE_ARMED run=R1 rules=mandatory_only custom=true", "CUSTOM mandatory-only run")
+    need(text, r"TEST_BATTLE_START", "the boss battle started")
+    need(text, r"TEST_LEVELS outcome=\d+ yu=\d+ yosuke=\d+ chie=\d+ encounter=514", "the boss battle resolved")
+    assert "ENCOUNTER_REFUSED" not in text, "a mandatory battle was refused"
 
 
 def quota(s):
@@ -384,7 +602,8 @@ def quota(s):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path, required=True)
-    parser.add_argument("--scenario", action="append", choices=("camp", "training", "loss", "strict", "fusion", "solo", "severe", "mandatory", "quota"))
+    parser.add_argument("--scenario", action="append", choices=("camp", "training", "loss", "strict", "fusion", "roster", "solo", "yosuke", "naoto", "severe", "mandatory",
+                                                            "boss", "quota", "party"))
     parser.add_argument("--driver", nargs=argparse.REMAINDER, required=True)
     args = parser.parse_args()
     if not args.driver:
@@ -396,11 +615,12 @@ def main():
     elf = Path(os.environ.get("P4PC_ELF", "")).resolve()
     iso = Path(os.environ.get("P4PC_ISO", ""))
     seeds = Path(os.environ.get("P4PC_CHALLENGE_SEEDS", str(elf.parent / "saves")))
-    needed = ("story0420_5f", "story0422personas", "story0422")
+    needed = ("story0420_5f", "story0422personas", "story0422", "story0426trained5")
     if not elf.is_file() or not iso.is_file() or any(not (seeds / s / SLOT).is_dir() for s in needed):
         print("mod_challenge: retail ELF/ISO or private story seeds unavailable", file=sys.stderr)
         return 77
-    selected = args.scenario or ["camp", "training", "loss", "strict", "fusion", "solo", "severe", "mandatory", "quota"]
+    selected = args.scenario or ["camp", "training", "loss", "strict", "fusion", "roster", "solo", "yosuke", "naoto", "severe",
+                                 "mandatory", "boss", "quota", "party"]
     args.out.mkdir(parents=True, exist_ok=True)
     work = Path(tempfile.mkdtemp(prefix="mod-challenge-", dir=args.out)).resolve()
     mod_witness.begin(work)
@@ -425,6 +645,8 @@ def main():
             s = Scenario(work, name, rules, fixtures, common, args.driver, elf)
             if seed:
                 s.seed(seeds / seed)
+            else:
+                s.card.mkdir(parents=True)  # New Game: an empty card
             return s
 
         if "camp" in selected:
@@ -446,16 +668,30 @@ def main():
             fusion(scenario("fusion", ("no_fusion", "custom_on_load"), ("test.challenge.observe",), "story0422personas"))
         if "severe" in selected:
             severe(scenario("severe", ("severe_damage", "custom_on_load"), ("test.challenge.observe",), "story0420_5f"))
+        if "party" in selected:
+            party(scenario("party", ("custom_on_load",), ("test.challenge.party",), "story0420_5f"))
         if "strict" in selected:
             s = scenario("strict", STRICT_RULES, ("test.challenge.observe",), "story0420_5f")
             strict_training(s)
             strict_kill(s)
             strict_crash(s)
+        if "roster" in selected:
+            roster(scenario("roster-control", ("custom_on_load",), ("test.challenge.roster",), "story0422personas"), False)
+            roster(scenario("roster", ("no_fusion", "custom_on_load"), ("test.challenge.roster",), "story0422personas"), True)
+        if "yosuke" in selected:
+            solo_companion(scenario("yosuke", ("solo=YOSUKE",), ("test.challenge.observe",)), 2, "YOSUKE")
+        if "naoto" in selected:
+            # Level 1 in Yu's starting-tier gun: the driver's shots do not win the
+            # 04/15 fight, so her witness is the fall that ends the run.
+            solo_companion(scenario("naoto", ("solo=NAOTO",), ("test.challenge.observe",)), 7, "NAOTO",
+                           "circle,cross,cross", must_win=False)
         if "solo" in selected:
             solo(scenario("solo", ("solo=YU", "custom_on_load"), ("test.challenge.observe",), "story0420_5f"))
         if "mandatory" in selected:
             mandatory(scenario("mandatory", ("mandatory_only", "custom_on_load"), ("test.challenge.observe",),
                                "story0420_5f"))
+        if "boss" in selected:
+            mandatory_boss(scenario("boss", ("mandatory_only", "custom_on_load"), ("test.challenge.observe",), "story0426trained5"))
         if "quota" in selected:
             quota(scenario("quota", ("limited_saves", "custom_on_load"), ("test.challenge.observe",), "story0422"))
         outcome = "pass"

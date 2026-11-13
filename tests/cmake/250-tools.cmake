@@ -15,7 +15,23 @@ add_test(NAME event_scene_capture COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE
 add_test(NAME package_runtime_provenance COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/package_runtime_provenance_test.py")
 # PC-side shell code calls only tools that Git for Windows ships (no grep, flock, pgrep ...).
 add_test(NAME windows_tool_lint COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/windows_tool_lint_test.py")
+# Inspect the actual Windows executables without launching them: a console
+# subsystem can create a visible Windows Terminal even when SDL is hidden.
+if(P4_WIN32)
+  _add_test(NAME windows_game_subsystem COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/windows_game_subsystem_test.py"
+    $<TARGET_FILE:p4pc> $<TARGET_FILE:p4pc_viewer>)
+  # exe-data: the test reads the PE headers of its .exe arguments and never runs them (tools/windows_test_lint.py).
+  set_tests_properties(windows_game_subsystem PROPERTIES LABELS "tools;exe-data" TIMEOUT 60)
+endif()
+if(TARGET p4pc64w)
+  _add_test(NAME windows_game_subsystem64w COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/windows_game_subsystem_test.py"
+    $<TARGET_FILE:p4pc64w> $<TARGET_FILE:p4pc_viewer64w>)
+  set_tests_properties(windows_game_subsystem64w PROPERTIES LABELS "tools;port64win;exe-data" TIMEOUT 60)
+endif()
 set_tests_properties(windows_tool_lint PROPERTIES LABELS "tools;port64" TIMEOUT 60)
+# The Windows GL host tests' Wine commands as native ones (tools/wingl.py: land.yml's wingl job and the PC's local_gates.py --gl).
+add_test(NAME wingl COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/wingl_test.py")
+set_tests_properties(wingl PROPERTIES LABELS "tools;port64" TIMEOUT 60)
 if(CMAKE_CXX_COMPILER_LOADED AND CMAKE_SYSTEM_NAME STREQUAL "Linux" AND NOT CMAKE_CROSSCOMPILING)
   set(P4_ADAPTER_GRAPH_COFF_ARGS)
   if(TARGET p4pc64w)
@@ -61,6 +77,35 @@ add_test(NAME asm_worklist COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/a
 set_tests_properties(asm_worklist PROPERTIES LABELS port64)
 add_test(NAME mipsdiff_sigs COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/mipsdiff_sigs_test.py")
 set_tests_properties(mipsdiff_sigs PROPERTIES LABELS port64)
+add_test(NAME models_export COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/models_export_test.py")
+set_tests_properties(models_export PROPERTIES LABELS port64)
+# The runtime glTF model cooker (src/platform/models) behind [resource-model]: models_roundtrip cooks synthetic
+# models and, with the disc (P4PC_ISO), exported retail weapons and props through this driver and compares
+# the cooked model with the RMD it came from; it also checks the refusals and the content-hash cache.
+add_executable(model_cook_cli model_cook_cli.c "${CMAKE_SOURCE_DIR}/src/platform/models/p4model_cook.c"
+  "${CMAKE_SOURCE_DIR}/src/platform/models/p4model_cache.c" "${CMAKE_SOURCE_DIR}/src/platform/models/p4model_stream.c"
+  "${CMAKE_SOURCE_DIR}/src/platform/content_digest.c"
+  "${CMAKE_SOURCE_DIR}/third_party/lodepng/lodepng.c" "${P4_OS_SRC}")
+target_include_directories(model_cook_cli PRIVATE "${CMAKE_SOURCE_DIR}/include")
+target_compile_definitions(model_cook_cli PRIVATE ${P4_PORT_DEFINES} LODEPNG_NO_COMPILE_DISK LODEPNG_NO_COMPILE_ENCODER
+  LODEPNG_NO_COMPILE_ANCILLARY_CHUNKS LODEPNG_NO_COMPILE_ALLOCATORS)
+target_link_libraries(model_cook_cli m)
+# The port64 scope builds p4_x64, not the default all target. Use its
+# architecture-specific cooker and include it in that aggregate.
+set(_p4_model_target model_cook_cli)
+if(P4_PORT64_LINK AND P4_PORT64_OBJS)
+  p4_host64_exe(model_cook_cli 64)
+  set(_p4_model_target model_cook_cli64)
+endif()
+get_target_property(_p4_model_runner ${_p4_model_target} CROSSCOMPILING_EMULATOR)
+if(NOT _p4_model_runner)
+  unset(_p4_model_runner)
+endif()
+add_test(NAME models_roundtrip COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/models_roundtrip_test.py"
+  --runner ${_p4_model_runner} "$<TARGET_FILE:${_p4_model_target}>" --)
+unset(_p4_model_runner)
+unset(_p4_model_target)
+set_tests_properties(models_roundtrip PROPERTIES LABELS port64)
 
 get_property(P4_PLAIN_TESTS GLOBAL PROPERTY P4_PLAIN_TESTS)
 foreach(t IN LISTS P4_PLAIN_TESTS)

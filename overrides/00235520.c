@@ -1,13 +1,20 @@
 /* 00235520: one canonical original amount equation for both native ABIs.
  * Owning frame/query are caller-local; unchanged mode never creates a frame.
- * An eligible HP hit then passes through the final-damage stage, which never
- * runs while no modifier is registered. */
+ * An eligible HP hit then passes through the final-damage stage, and an
+ * eligible formula heal through the recovery stage; neither runs while no
+ * modifier is registered. */
 #include "p4pc/game_elements_calc_native.h"
 #include "p4pc/game_skills_native.h"
 #include "p4pc/game_enemies_native.h"
 #include "p4pc/game_damage_stage_native.h"
+#include "p4pc/game_recovery_stage_native.h"
 /* Later0023df70 is also called by the following status routine in this unit. */
 extern s32 datCalcUsesWeaponProperties(s32 skillId);
+/* The stages report a party source's active persona: datPersonaGetRecordId
+ * 0x00109360 and datPersonaGetLevelByPcId 0x00109400, called only while a
+ * stage has a modifier. */
+extern u16 datPersonaGetRecordId(u16 partyId);
+extern u8 datPersonaGetLevelByPcId(u16 pcId);
 static s32 p4_calc_amount(u32 skillId, u8 *source, u8 *target, u16 hitCount, u16 outcome, u16 hitKind, s32 options, u8 channel, const P4GameActionFrame *p4_frame, const P4GameAffinityQuery *p4_query, P4GameActionFrame *p4_storage);
 s32 datCalcSkillAmount(skillId, source, target, hitCount, outcome, hitKind, options, channel)
 u16 skillId;
@@ -246,7 +253,8 @@ static s32 p4_calc_amount(u32 skillId, u8 *source, u8 *target, u16 hitCount,
              * Existing physical and Fire..Wind effects retain their one body. */
             rawElement = !resolved->valid ? -1 : physical ? 0 :
                 resolved->family >= 1u && resolved->family <= 4u ? (s32)resolved->family : 5;
-            elementMask = physical ? 2 : 0;
+            /* The physical-only damage term follows the delivery (8.1). */
+            elementMask = p4_game_action_frame_physical(p4_frame) ? 2 : 0;
         } else {
             rawElement = (s16)datCalcSkillElement((DatUnit *)source, skillId);
             elementMask = datCalcElementBit(rawElement);
@@ -558,9 +566,23 @@ static s32 p4_calc_amount(u32 skillId, u8 *source, u8 *target, u16 hitCount,
     if (damage > 0 && fixed == 0 && !(options & 1) && hitKind != 16 && channel == 1 &&
         p4_game_damage_native_active()) {
         const u32 leafValid = p4_frame ? p4_frame->element.valid != 0u : rawElement >= 0;
-        damage = p4_game_damage_native_amount(skillId, (*(u16 *)source & 4) != 0, sourceRecord->id, sourceRecord->bad,
+        const u32 sourceEnemy = (*(u16 *)source & 4) != 0;
+        damage = p4_game_damage_native_amount(skillId, sourceEnemy, sourceRecord->id, sourceRecord->bad,
             (*(u16 *)target & 4) != 0, ((DatUnit *)target)->id, targetStatus, hitKind, leafValid,
-            !leafValid ? 0u : p4_frame ? p4_frame->element.element_id : (u32)rawElement, damage);
+            !leafValid ? 0u : p4_frame ? p4_frame->element.element_id : (u32)rawElement, damage,
+            sourceEnemy ? 0u : (u32)datPersonaGetRecordId(sourceRecord->id),
+            sourceEnemy ? 0u : (u32)datPersonaGetLevelByPcId(sourceRecord->id));
+    }
+    /* Recovery stage: the formula HP heal (effect kind 2, after Divine Grace
+     * and the 95..105% variance) that this outcome delivers; not drains,
+     * fixed, percentage or full heals, items or SP. */
+    if (effect == 2 && healing > 0 && damage == 0 && fixed == 0 && !(options & 1) && channel == 1 &&
+        p4_game_recovery_native_active()) {
+        const u32 sourceEnemy = (*(u16 *)source & 4) != 0;
+        healing = p4_game_recovery_native_amount(skillId, sourceEnemy, sourceRecord->id,
+            (*(u16 *)target & 4) != 0, ((DatUnit *)target)->id, healing,
+            sourceEnemy ? 0u : (u32)datPersonaGetRecordId(sourceRecord->id),
+            sourceEnemy ? 0u : (u32)datPersonaGetLevelByPcId(sourceRecord->id));
     }
     if (damage > 0) {
         healing = -damage;

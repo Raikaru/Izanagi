@@ -121,12 +121,20 @@ driver's inbox-sentinel assertion. The driver now normalizes PTY line endings;
 its device-free regression exercises that correction. The release app was not
 installed, stopped or changed.
 
-**Touch pad** (`PadOverlay`): d-pad, four face buttons, L1/R1/L2/R2, Start and Select, drawn over the surface. Each button injects the Android key that the
-existing keyboard binding of that PS2 button uses (`pad_sdl.c` `kKeys`: arrows, Z X C V, Enter, Backspace, Q E, 1 3) through SDL's key entry points, so
-the native side has no touch code. **Controllers** (Bluetooth or USB) arrive through SDL's gamepad support, which `pad_sdl.c` already reads; the overlay hides
-while one is connected.
+**Touch pad** (`PadOverlay`): d-pad, a floating analog stick, four face buttons, L1/R1/L2/R2, Start, Select and CONFIG, drawn over the surface. Every pill carries its label
+(`L1 L2 R1 R2 SELECT START CONFIG`). The d-pad, face buttons, shoulders, Start and Select inject the Android key that the existing keyboard binding of that PS2 button uses
+(`pad_sdl.c` `kKeys`: arrows, Z X C V, Enter, Backspace, Q E, 1 3) through SDL's key entry points. **CONFIG** injects F1, the keyboard's shortcut to the native Config
+screen (`p4settings.c`; Select alone is the game's Select and opens nothing; the gamepad's Select + Start hold has no touch equivalent); pressed again while Config is
+open it leaves it. The **stick** is analog: its thumb offset from where the finger touched (travel 1.8 pad units, `u`) goes through JNI (`P4Activity.nativeTouchStick`,
+`android_main.c`) to `p4pc_pad_touch_stick`, which `pad_sdl.c` merges into the game's left stick like a gamepad's axis: its own 15 percent dead zone is rescaled away,
+then `input.deadzone` and the PCSX2 byte quantization apply, a deflected real gamepad stick keeps its own axes (the touch stick outranks the d-pad's synthesized stick), and in Config a deliberate deflection also
+presses the direction the list reads. The D-pad stays for menus (they read digital directions). **Controllers** (Bluetooth or USB) arrive through SDL's gamepad support,
+which `pad_sdl.c` already reads; the overlay hides while one is connected.
 
-On wide landscape displays (including the S20+'s 2400 x 1080 mode), the d-pad, face buttons, shoulders and Start/Select fit inside the black side bars of the 4:3 picture. Their scale follows the available bar width, not the full display width; narrower displays keep the overlaid layout.
+On wide landscape displays (20:9 phones such as the S20+, 2400 x 1080 or 3200 x 1440) the whole pad fits inside the black side bars of the 4:3 picture. The bar is 6.4 `u`
+wide and the left bar stacks, top to bottom, L1, L2, the stick zone (the thumb's first contact inside it is the stick's centre), the d-pad and Select, in 14.4 `u` of height;
+the right bar holds R1, R2, CONFIG, the face buttons and Start. Their scale follows the bar width and the display height, not the full display width. Narrower
+displays keep the overlaid layout, where there is room for one left control only: a pill under L2 switches the d-pad for the stick (remembered in the app's preferences).
 
 **Display.** SDL's EGL gives an ES 3.0 context (`p4gl_api.h`). The game draws into a 640 x 448 offscreen target and blits it to the window with the 4:3 picture
 fitted and black bars (`P4PC_PRESENT=blit` and `P4PC_PRESENT_FIT=4:3` are Android defaults

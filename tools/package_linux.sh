@@ -1,6 +1,7 @@
 #!/bin/sh
 # Packages the x86_64 player build as a standard AppImage, with replaceable SDL3
-# and LGPL-only FFmpeg libraries, their complete sources, licences and notices.
+# and LGPL-only FFmpeg libraries, their complete sources, licences and notices, and
+# p4mod, the modder's CLI (`p4pc-linux64-<version>.AppImage p4mod --help`, docs/modding/p4mod.md).
 #
 #   sh tools/package_linux.sh [--work DIR] [--out DIR] [--jobs N] [--version NAME]
 #
@@ -45,7 +46,7 @@ sh "$root/ci/win32/build_deps.sh" "$deps" /usr "$triple"
 cmake -S "$root" -B "$build" -G Ninja -DCMAKE_C_COMPILER="$lin_cc" $launcher -DP4_DECOMP="$root/decomp" \
   -DP4_PORT64=ON -DP4_PORT64_LINK=ON -DP4_PORT64_OPT=O2 -DP4_PORT64_JOBS="$jobs" -DP4_LINUX64_PREFIX="$deps" -DP4_FFMPEG_INC="$deps/include" \
   -UP4_SDL3_LIB64 -UP4_AVCODEC_LIB64 -UP4_AVUTIL_LIB64 -UP4_SWSCALE_LIB64 -DP4_CENSUS_CHECK=ON
-cmake --build "$build" --target p4pc64 -j "$jobs"
+cmake --build "$build" --target p4pc64 p4mod64 -j "$jobs"
 
 # 2. The program and the libraries it ships with, the licence check against exactly those libraries, and what it takes from the system.
 rm -rf "$pkg"; mkdir -p "$pkg/bin" "$pkg/lib"
@@ -66,6 +67,12 @@ dl=${P4PC_DL_CACHE:-$work/dl-cache}
 cp "$dl"/ffmpeg-*.tar.xz "$dl"/SDL3-*.tar.gz "$stage/downloads/"
 mkdir -p "$stage/$name/examples/mods"
 cp -R "$root/examples/mods/p4pc.example" "$stage/$name/examples/mods/"
+# Bundled mods beside usr/bin/p4pc (SDL_GetBasePath()/mods), disabled until chosen in MODS.
+mkdir -p "$stage/$name/usr/bin"
+! git -C "$root" cat-file -e HEAD:mods 2>/dev/null || git -C "$root" archive HEAD mods | tar -xf - -C "$stage/$name/usr/bin"
+# p4mod beside the game, with the definitions and capability index it reads from its own folder.
+cp "$build/tools/luau/p4mod64/p4mod64" "$stage/$name/usr/bin/p4mod"
+cp "$build/tools/luau/p4mod64/p4.d.luau" "$build/tools/luau/p4mod64/p4mod-capabilities.txt" "$stage/$name/usr/bin/"
 ffver=$(sed -n 's/^FFMPEG_VER=//p' "$root/ci/win32/build_deps.sh")
 ffsha=$(sed -n 's/^FFMPEG_SHA=//p' "$root/ci/win32/build_deps.sh")
 sdlver=$(sed -n 's/^SDL_VER=//p' "$root/ci/win32/build_deps.sh")
@@ -75,9 +82,10 @@ sub < "$root/packaging/NOTICES_linux.txt" > "$stage/$name/THIRD_PARTY_NOTICES.tx
 cp "$root/LICENSE" "$stage/$name/licenses/p4pc-MIT.txt"
 cp "$root/NOTICE" "$stage/$name/licenses/NOTICE.txt"
 cp "$root"/third_party/licenses/FFmpeg-LGPL-2.1.txt "$root"/third_party/licenses/SDL3-zlib.txt "$root"/third_party/licenses/LodePNG-zlib.txt \
+  "$root"/third_party/licenses/cgltf-MIT.txt \
   "$root"/third_party/licenses/Luau-MIT.txt "$root"/third_party/licenses/Lua-MIT.txt "$root"/third_party/licenses/yxml-MIT.txt \
   "$root"/third_party/licenses/GCC-GPL-3.0.txt "$root"/third_party/licenses/GCC-runtime-exception.txt \
-  "$root"/third_party/licenses/fdlibm-Sun.txt "$root"/third_party/licenses/recvx-decomp-MIT.txt \
+  "$root"/third_party/licenses/fdlibm-Sun.txt "$root"/third_party/licenses/newlib-BSD.txt "$root"/third_party/licenses/recvx-decomp-MIT.txt \
   "$root"/third_party/licenses/sky2hook-permission.txt "$stage/$name/licenses/"
 cp "$root/third_party/miniz/LICENSE" "$stage/$name/licenses/miniz-MIT.txt"
 tar -C "$root" -czf "$stage/$name/usr/share/p4pc/source/luau-source.tar.gz" third_party/luau third_party/luau_patches
@@ -88,7 +96,9 @@ cat > "$stage/$name/AppRun" <<'LAUNCH'
 #!/bin/sh
 # Keep the player's XDG paths; never write settings or saves inside the AppDir.
 d=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-LD_LIBRARY_PATH="$d/usr/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" exec "$d/usr/bin/p4pc" "$@"
+export LD_LIBRARY_PATH="$d/usr/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+if [ "${1:-}" = p4mod ]; then shift; exec "$d/usr/bin/p4mod" "$@"; fi
+exec "$d/usr/bin/p4pc" "$@"
 LAUNCH
 {
   printf '%s, commit %s\nbuilt %s (%s Linux)\n' "$version" "$sha" "$(date -u +%Y-%m-%dT%H:%MZ)" "$arch"

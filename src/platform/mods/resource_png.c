@@ -83,8 +83,8 @@ static int all_chunk_crcs(const uint8_t *bytes, size_t size)
     }
     return offset == size;
 }
-int p4_resource_png_decode(P4PackageFile *file, P4ResourcePng *out,
-                           char *error, size_t error_size)
+int p4_resource_png_probe(P4PackageFile *file, P4ResourcePng *out,
+                          char *error, size_t error_size)
 {
     if (error && error_size) *error = 0;
     if (!file || !out) return fail(error, error_size, "invalid image input");
@@ -99,6 +99,19 @@ int p4_resource_png_decode(P4PackageFile *file, P4ResourcePng *out,
     uint64_t decoded_size = (uint64_t)info.width * info.height * 4u;
     if (!decoded_size || decoded_size > SIZE_MAX || decoded_size > RESOURCE_CPU_LIMIT)
         return fail(error, error_size, "decoded image exceeds the resource CPU budget");
+    *out = (P4ResourcePng){NULL, info.width, info.height, (size_t)decoded_size};
+    return 0;
+}
+int p4_resource_png_decode(P4PackageFile *file, P4ResourcePng *out,
+                           char *error, size_t error_size)
+{
+    if (!out) {
+        if (error && error_size) *error = 0;
+        return fail(error, error_size, "invalid image input");
+    }
+    P4ResourcePng metadata;
+    if (p4_resource_png_probe(file, &metadata, error, error_size)) return -1;
+    uint64_t length = p4_package_file_size(file);
     uint8_t *encoded = lodepng_malloc((size_t)length);
     if (!encoded) return fail(error, error_size, "resource CPU budget exhausted reading PNG");
     if (p4_package_file_read_at(file, 0, encoded, (size_t)length)) {
@@ -117,11 +130,11 @@ int p4_resource_png_decode(P4PackageFile *file, P4ResourcePng *out,
     unsigned code = lodepng_decode(&rgba, &width, &height, &state, encoded, (size_t)length);
     lodepng_state_cleanup(&state);
     lodepng_free(encoded);
-    if (code || width != info.width || height != info.height || !rgba) {
+    if (code || width != metadata.width || height != metadata.height || !rgba) {
         lodepng_free(rgba);
         return fail(error, error_size, "invalid, corrupt or over-budget PNG payload");
     }
-    P4ResourcePng result = {rgba, width, height, (size_t)decoded_size};
+    P4ResourcePng result = {rgba, width, height, metadata.size};
     *out = result;
     return 0;
 }

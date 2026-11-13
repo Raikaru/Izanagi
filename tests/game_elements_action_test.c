@@ -142,9 +142,10 @@ int main(void)
     text(names, P4_TEXT_ITEM, 1536, P4_TEXT_NAME); text(descriptions, P4_TEXT_ITEM, 1536, P4_TEXT_DESCRIPTION);
     for (uint32_t id = 576; id < 581; ++id) {
         P4GameSkillDesc row = {.id = id, .active = id != 578, .element_id = id == 577 ? 65535u : id == 580 ? 16u : 6u,
-            .schema = 1, .revision = 1, .inheritance_group = id == 577 || id == 580 ? 0 : 6};
+            .schema = 1, .revision = 1, .inheritance_group = id == 577 || id == 580 ? 0 : 6,
+            .delivery = id == 576 ? P4_DELIVERY_PHYSICAL : id == 579 ? P4_DELIVERY_MAGIC : P4_DELIVERY_DEFAULT};
         snprintf(row.key, sizeof row.key, "test:action-%u", (unsigned)id);
-        row.metadata[2] = 2;
+        row.metadata[2] = id == 576 ? 1 : 2; /* A delivery names its row's own damage class. */
         if (id == 576 || id == 577) row.metadata[0x11] = 1; /* HP damage, independent of leaf. */
         if (id == 577 || id == 579 || id == 580) row.metadata[0x1e] = 8; /* Mixed rider or pure KO. */
         assert(p4_game_skills_register(skills, "test", &row) == P4_TABLE_OK);
@@ -218,10 +219,25 @@ int main(void)
     assert(p4_game_elements_resolve_action(tables, skills, items, NULL, 13, P4_ACTION_COMPONENT_DAMAGE, 0, &result) == P4_TABLE_INVALID);
     assert(p4_game_elements_resolve_primary_action(tables, skills, items, NULL, 576, &result) == P4_TABLE_OK);
     assert(result.element_id == 6 && result.component == P4_ACTION_COMPONENT_DAMAGE && result.channel_id == P4_CHANNEL_DAMAGE);
+    {
+        /* An authored physical delivery marks the damage frame only; the
+         * element (and its affinity) stays leaf 6. */
+        P4GameActionFrame delivered = {.element = result};
+        assert(result.flags & P4_ELEMENT_DELIVERY_PHYSICAL && !p4_game_action_element_is_physical(&result) &&
+            p4_game_action_frame_physical(&delivered));
+        delivered.element.flags &= ~P4_ELEMENT_DELIVERY_PHYSICAL;
+        assert(!p4_game_action_frame_physical(&delivered));
+        delivered.element.flags |= P4_ELEMENT_PHYSICAL | P4_ELEMENT_DELIVERY_MAGIC;
+        assert(!p4_game_action_frame_physical(&delivered));
+        delivered.element.flags &= ~P4_ELEMENT_DELIVERY_MAGIC;
+        assert(p4_game_action_frame_physical(&delivered));
+    }
     assert(p4_game_elements_resolve_primary_action(tables, skills, items, NULL, 577, &result) == P4_TABLE_OK);
     assert(result.element_id == 65535u && result.component == P4_ACTION_COMPONENT_DAMAGE && result.channel_id == P4_CHANNEL_DAMAGE);
     assert(p4_game_elements_resolve_primary_action(tables, skills, items, NULL, 579, &result) == P4_TABLE_OK);
     assert(result.element_id == 6 && result.component == P4_ACTION_COMPONENT_INSTANT_KO && result.channel_id == P4_CHANNEL_INSTANT_KO);
+    /* A delivery marks the damage component only, never a KO or status payload. */
+    assert(!(result.flags & (P4_ELEMENT_DELIVERY_PHYSICAL | P4_ELEMENT_DELIVERY_MAGIC)));
     assert(p4_game_elements_resolve_primary_action(tables, skills, items, NULL, 11, &result) == P4_TABLE_OK);
     assert(result.element_id == 6 && result.channel_id == P4_CHANNEL_INSTANT_KO);
     assert(p4_game_elements_resolve_primary_action(tables, skills, items, NULL, 578, &result) == P4_TABLE_INVALID);

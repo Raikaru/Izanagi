@@ -1,0 +1,377 @@
+# p4pc.hardmode tuning. Every number here is our own design value, not data
+# copied from the game: each multiplier scales the value the game itself
+# computes for that enemy, so the player's disc stays the source of every base
+# stat, reward and skill. Change these numbers to retune; bump `revision` when
+# you do, so a save records which tuning its run started with.
+#
+# Syntax: `# comment`, `[section]`, `key = value`. Numbers are decimal, or
+# hexadecimal with 0x. Unknown sections or keys, missing keys and values
+# outside their limits stop the mod with an error rather than being ignored.
+
+revision = 8
+
+# An encounter is a boss encounter when its formation flags (the first word of
+# its 0x18-byte ENCOUNT.TBL row) share a bit with this mask. In the retail
+# table, 0x2 is set on every boss-type formation (the story bosses, the
+# dungeon floor bosses such as Avenger Knight, the Reaper, the optional bosses
+# and one tutorial battle) and on no ordinary formation. Units summoned during
+# the battle inherit the encounter's class.
+[classes]
+boss_flags = 0x0002
+
+# Per difficulty and class: sp, st, ma, en, ag, lu scale the enemy's maximum SP
+# and its five stats (St, Ma, En, Ag, Lu); a boss's hp its maximum HP (its
+# starting HP/SP follow). exp and yen scale its battle rewards. damage scales
+# the HP damage of every hit the enemy deals. An ordinary enemy's hp, damage
+# and exp come from the story epoch below instead (there is no ordinary.exp
+# key). Results are rounded to the nearest whole number and kept inside the
+# game's own limits: stats 1..99, HP/SP 1..65535, rewards 0..65535. Limits:
+# 0.25..4.0 for each multiplier.
+#
+# No difficulty makes any enemy weaker than the original game, except the
+# Charming Prince (below), whose redesigned role trades HP for repeated heals,
+# and Golden's Shadow Yukiko, whose Golden HP assumed the Ice weakness a
+# hard-mode run removes ([enemy 258]).
+# Ordinary enemies follow the skill rebalance's family 1 (F1-c HP and F1-d
+# damage per epoch, the same on Hard and Harder until the healing and recovery
+# families land). Ordinary EXP has no key of its own: on both tiers it is the
+# epoch's HP factor (below), so a tougher ordinary fight pays in proportion.
+# Ordinary yen is 1.00 on both tiers: Harder's ordinary fights pay what Hard's
+# do until they differ. Bosses gain 10% (Hard) or 20% (Harder) HP and 5% or
+# 10% St/Ma; the principal bosses and floor bosses have their own rows below.
+# Only Hard can be chosen for a new run; Harder stays for runs saved on it.
+[hard]
+ordinary.sp = 1.00
+ordinary.st = 1.00
+ordinary.ma = 1.00
+ordinary.en = 1.00
+ordinary.ag = 1.00
+ordinary.lu = 1.00
+ordinary.yen = 1.00
+boss.hp = 1.10
+boss.sp = 1.10
+boss.st = 1.05
+boss.ma = 1.05
+boss.en = 1.00
+boss.ag = 1.00
+boss.lu = 1.00
+boss.exp = 1.00
+boss.yen = 1.00
+boss.damage = 1.00
+
+[harder]
+ordinary.sp = 1.15
+ordinary.st = 1.00
+ordinary.ma = 1.00
+ordinary.en = 1.00
+ordinary.ag = 1.05
+ordinary.lu = 1.00
+ordinary.yen = 1.00
+boss.hp = 1.20
+boss.sp = 1.15
+boss.st = 1.10
+boss.ma = 1.10
+boss.en = 1.00
+boss.ag = 1.05
+boss.lu = 1.00
+boss.exp = 1.00
+boss.yen = 1.00
+boss.damage = 1.00
+
+# Story epochs (design 5): a run is in the epoch of the first story dungeon
+# whose principal boss it has not beaten. A New Game starts in epoch 1 (the
+# tutorials belong to the castle); victory over `encounter` moves the run to the
+# next epoch, and visiting another dungeon does not change it. A save adopted
+# mid-game starts in the first epoch whose principal boss (`enemy`, its level
+# from the disc) is above the protagonist's level. Past the last epoch the
+# last one's values stay. hp scales an ordinary enemy's maximum HP and its
+# battle EXP, damage every hit it deals (skill rebalance F1-c, and F1-d halfway
+# to SMT V parity; approved 2026-11-05). Limits: 0.25..4.0.
+[epoch 1]
+# Yukiko's Castle, until Shadow Yukiko.
+encounter = 0x202
+enemy = 258
+hard.hp = 1.20
+hard.damage = 1.57
+harder.hp = 1.20
+harder.damage = 1.57
+
+[epoch 2]
+# Steamy Bathhouse, until Shadow Kanji.
+encounter = 0x203
+enemy = 259
+hard.hp = 1.20
+hard.damage = 1.78
+harder.hp = 1.20
+harder.damage = 1.78
+
+[epoch 3]
+# Marukyu Striptease, until Shadow Teddie.
+encounter = 0x205
+enemy = 260
+hard.hp = 1.30
+hard.damage = 1.65
+harder.hp = 1.30
+harder.damage = 1.65
+
+[epoch 4]
+# Void Quest, until Shadow Mitsuo.
+encounter = 0x206
+enemy = 262
+hard.hp = 1.20
+hard.damage = 1.75
+harder.hp = 1.20
+harder.damage = 1.75
+
+[epoch 5]
+# Secret Laboratory, until Shadow Naoto.
+encounter = 0x207
+enemy = 263
+hard.hp = 1.20
+hard.damage = 1.65
+harder.hp = 1.20
+harder.damage = 1.65
+
+[epoch 6]
+# Heaven, until Kunino-sagiri.
+encounter = 0x208
+enemy = 264
+hard.hp = 1.10
+hard.damage = 1.62
+harder.hp = 1.10
+harder.damage = 1.62
+
+[epoch 7]
+# Magatsu Inaba, until Ameno-sagiri.
+encounter = 0x20a
+enemy = 266
+hard.hp = 1.25
+hard.damage = 1.83
+harder.hp = 1.25
+harder.damage = 1.83
+
+[epoch 8]
+# Yomotsu Hirasaka, until Izanami-no-Okami.
+encounter = 0x215
+enemy = 270
+hard.hp = 1.00
+hard.damage = 1.78
+harder.hp = 1.00
+harder.damage = 1.78
+
+# Enemy support discipline, for enemies driven by the game's own AI tables, in
+# ordinary encounters only (boss encounters are never changed). The game's own
+# choices, and their random draws, always happen first; this only exchanges
+# them, at two levels:
+# - the table group the enemy's conditions chose: a group whose only moves are
+#   HP recovery, while every living ally is above skip_heal_above of its maximum
+#   HP, becomes the first group without a heal; a group without a heal, while a
+#   living ally is below rescue_below, becomes the first group with one;
+# - the move picked inside a group that mixes heals with other moves: a heal
+#   above skip_heal_above becomes the group's highest-weight other move, and
+#   another move below rescue_below becomes its highest-weight heal.
+# Limits: 0..1, rescue_below below skip_heal_above; rescue_below 0 turns the
+# rescue off. It is off: in the battle simulator (2026-11-03, two Magical Magus,
+# 20 paired seeds) the rescue let the party win 10 fights against the original
+# game's 5, while skip_heal alone allowed 4.
+[ai]
+skip_heal_above = 0.60
+rescue_below = 0.00
+
+# Technical: a normal hit (not a weakness or a critical, whose own bonus
+# stands) of the element paired here with an ailment the target already has
+# deals `party` times the damage when the attacker is on the party side and
+# `enemy` times when it is on the enemy side. No extra Down or turn. The stance
+# panel calls TECHNICAL. Ailments: panic, fear, rage, silence; elements: fire,
+# ice, electric, wind. Each element pairs with at most one ailment. Limits:
+# 1..2 for each factor.
+[technical]
+party = 1.50
+enemy = 1.25
+panic = wind
+fear = ice
+rage = fire
+silence = electric
+
+# Boss tactics and redesigns (design 4). Counted in base turns: a One More
+# action never advances a rotation.
+#
+# Avenger Knight: every `knight.cycle`-th base turn he visibly charges (Power
+# Charge), and his next base turn is Gale Slash on the whole party.
+#
+# Shadow Yukiko (4.A), steered through her own script: above `yukiko.prince_at`
+# of her HP her base turns repeat Agi on a random member, Double Fangs, Mind
+# Charge (the warning), Burn to Ashes, Matarunda (the recovery). At or below it
+# she summons the Charming Prince once, at her next base turn (his Ice weakness
+# is then known to Analyze), and repeats one ordinary pick, Mind Charge, Burn to
+# Ashes, Matarunda; at or below `yukiko.final_at` she alternates Agi and Double
+# Fangs again between the warned bursts, with no further summon. No resummon.
+# A One More after a burst is Matarunda. The Prince's own Diarama comes at most
+# once per `yukiko.prince_heal_turns` of his base turns.
+#
+# Shadow Kanji (4.B), steered through his and his supports' scripts: above
+# `kanji.formation_at` with both supports up, his base turns repeat Fatal End
+# on a random member, Power Charge (the warning), Swift Strike, his attack (the
+# recovery). At or below it, or once a support falls, he changes formation once
+# (Tetrakarn on himself) and repeats Fanatical Spark, Power Charge, Swift
+# Strike, attack; at or below `kanji.final_at` his electric and Fatal End
+# pressure alternate, and his first Power Charge there primes the finisher: a
+# charged Fatal End on one member instead of Swift Strike, told apart by its
+# own stance-panel cue ("Kanji sizes up one of you!"). A One More after a
+# burst is his attack. Nice Guy heals (Diarama) only an ally below
+# `kanji.heal_below`, at most once per `kanji.heal_turns` of his base turns,
+# else covers (White Wall, Heat Riser, Dekunda, Tarukaja); Tough Guy dispels
+# the party's buffs (Dekaja), else attacks, Kill Rush and Rampage in turn (no
+# Rampage right after Kanji hit everyone).
+#
+# The factors set each burst's final damage (after the charge, guard and the
+# game's own variance), so Guard on the warning roughly halves it:
+# knight_sweep, yukiko_burst (Burn to Ashes), kanji_strike (Swift Strike),
+# kanji_spark (Fanatical Spark), kanji_finisher (the finisher's Fatal End).
+# Limits: cycle 2..8, factors 0.25..2.0, HP fractions 0.05..0.95 (final_at at
+# most the earlier threshold), heal turns 1..8.
+# Knight calibration (2026-11-04, attentive policy that guards on a visible
+# charge, typical-player entries, 80 seeds; all figures wins of 80):
+# retail 74 / Hard 52 / Harder 33.
+# Yukiko redesign calibration (2026-11-06, technical policy, retail rows, 80
+# seeds, Hard): retail 61; Prince 0.50 / burst 0.65 won 73, 0.75 / 0.70 won 67,
+# 1.00 / 0.70 won 59 (31 rounds), 0.75 / 0.80 won 58 (19.5 rounds; retail 17).
+[bosses]
+knight.cycle = 3
+hard.knight_sweep = 0.50
+harder.knight_sweep = 0.50
+hard.yukiko_burst = 0.80
+harder.yukiko_burst = 0.85
+yukiko.prince_at = 0.65
+yukiko.final_at = 0.30
+yukiko.prince_heal_turns = 3
+hard.kanji_strike = 1.00
+harder.kanji_strike = 1.00
+hard.kanji_spark = 0.75
+harder.kanji_spark = 0.75
+hard.kanji_finisher = 0.75
+harder.kanji_finisher = 0.75
+kanji.formation_at = 0.60
+kanji.final_at = 0.25
+kanji.heal_below = 0.40
+kanji.heal_turns = 4
+
+# Boss Technical windows (design 4.D), with the restart setting BOSS PLAY and
+# data/windows.xml (whose status rows must name the same enemies and ailments).
+# Each `enemy.<ID>` boss can suffer that one ailment (panic 0x10, fear 0x04,
+# rage 0x02, silence 0x08) with one designed landing chance: the game's own
+# roll is scaled to `chance` (a fraction), so the skill's own rate no longer
+# matters. A landed ailment holds through the boss's next turn and is cured at
+# the one after ("<boss> recovers!" on the stance panel): a window costs the
+# boss exactly one turn. It opens at most once per phase (the Knight is one
+# phase: one window per fight); for the rest of the phase, and on the guarded
+# turns below, a roll on the boss fails and the panel says "<boss> shrugs it
+# off!". There is no wear-off roll, immune-turn counter or cap.
+# Outside a hard-mode run with Technical damage the boss stays immune.
+# On a hard-mode run a window boss also has no elemental weakness on any
+# element, on the retail or the Golden row (p4.data.session.edit at its first
+# battle; Off and non-hard runs keep the original rows): a weakness gives Down
+# and One More with no cap or guard and would make the window irrelevant. The
+# Charming Prince (269) is no window boss and keeps his Ice weakness.
+# Limits: chance 0.01..0.95.
+[windows]
+chance = 0.30
+# Avenger Knight: Panic (Wind Technical).
+enemy.310 = 0x10
+# Shadow Yukiko: Fear (Ice Technical) until Freeze exists.
+enemy.258 = 0x04
+# Shadow Kanji: Rage (Fire Technical).
+enemy.259 = 0x02
+
+# Lock guards: a window boss shrugs its ailment off from a turn that uses one
+# of these skills until its next turn (`skill.<ID> = 1`): Power Charge 0xE3 and
+# Mind Charge 0xE4 until the charged hit resolves, Burn to Ashes 0x162 and the
+# Summon skills 0x111, 0x164 and 0x165 on the scripted turns, White Wall 0xF1
+# on the Prince. `band.<enemy ID> = N` also guards the first turn of each of N
+# equal HP bands (Shadow Kanji's flag-guarded script turns at 100/75/50/25%).
+[guards]
+skill.0xe3 = 1
+skill.0xe4 = 1
+skill.0x162 = 1
+skill.0x111 = 1
+skill.0x164 = 1
+skill.0x165 = 1
+skill.0xf1 = 1
+band.259 = 4
+
+# Per-enemy overrides replace a class or epoch value for one enemy ID and one
+# difficulty (`<mode>.<field>`, fields as above plus damage). `golden.` before
+# the key applies it instead while p4pc.golden's ENEMIES group gives the enemy
+# Golden's row; a retail-fit value never applies to a Golden row. The retail
+# rows are hard mode's qualified baseline; every `golden.` value is
+# experimental (v1 preview, 2026-11-10).
+
+# Avenger Knight, retail row. Physical Split keeps retail Phys (resist) on all
+# three leaves. On Hard with the fixed attentive bot, PARTY KIT and Split on,
+# Golden off, typical-player L12 entry and seeds 0..399, HP x1.50 / St x1.00
+# won 213/400 (53.2%, Wilson 48.4-58.1%; median 13 items). The approved K4b
+# gear-off reference won 226/400 (56.5%, Wilson 51.6-61.3%). The previous
+# gear-on fit used a stale item reader and is not valid tuning evidence.
+# Harder (no longer chosen for new runs) uses its boss class (x1.20 / x1.10),
+# unscreened. Golden row (2026-11-06; technical policy, 80 seeds): the golden
+# keys won Hard 42/80 and Harder 30/80 (targets 52/80 and 33/80, read as 52% /
+# 33% at the time: a unit slip). They predate the removal of his Golden Fire
+# weakness on a hard-mode run and are unscreened since: experimental.
+[enemy 310]
+hard.hp = 1.50
+hard.st = 1.00
+golden.hard.hp = 1.45
+golden.hard.st = 2.40
+golden.harder.hp = 1.50
+golden.harder.st = 2.75
+
+# Shadow Yukiko: a hard-mode run removes Golden's Ice weakness (the window-boss
+# rule under [windows]), and Golden's 2,500 HP (retail 1,050) assumed it. These
+# keys give her Golden row the retail row's HP on each tier: 1,050 x 1.10 /
+# 2,500 = 0.46 on Hard, 1,050 x 1.20 / 2,500 = 0.50 on Harder. Experimental:
+# no Golden-on screen of this cell has run (no Golden install on the screen
+# host, 2026-11-10).
+[enemy 258]
+golden.hard.hp = 0.46
+golden.harder.hp = 0.50
+
+# Charming Prince, Shadow Yukiko's summon (design 4.A): he now heals her once
+# every few of his turns instead of once a fight, and the design budgets him
+# as removable in a few targeted actions, Ice his openly shown weakness. Fit
+# on the retail row (850 HP) with Yukiko's burst above. Golden row (2026-11-06;
+# technical policy, Golden and Physical Split on, 80 seeds): Shadow Yukiko won
+# Hard 35/80 and Harder 12/80 with the class values, 70/80 and 61/80 with golden
+# hp 0.45 / 0.55, and 57/80 and 38/80 with the keys below (targets 58/80 and
+# 42/80, her Golden-off rates).
+[enemy 269]
+hard.hp = 0.75
+harder.hp = 0.85
+golden.hard.hp = 0.75
+golden.harder.hp = 0.80
+
+# Shadow Kanji's Nice Guy and Tough Guy: Golden-on candidate E. The same
+# technical cohort won 44/80 Hard and 23/73 resolved Harder (7 censored);
+# solo Oni won at L36 and L40. See docs/platform/battle_sim.md for limits.
+[enemy 272]
+golden.hard.hp = 1.70
+golden.harder.hp = 1.90
+
+[enemy 273]
+golden.hard.hp = 1.70
+golden.harder.hp = 1.90
+
+# Unscripted Castle/Bathhouse floor bosses (skill rebalance F10-D2): x1.25 to
+# every hit they deal. The principal bosses have their own tuning.
+[enemy 304]
+# Contrarian King.
+hard.damage = 1.25
+harder.damage = 1.25
+golden.hard.damage = 1.25
+golden.harder.damage = 1.25
+
+[enemy 311]
+# Daring Gigas.
+hard.damage = 1.25
+harder.damage = 1.25
+golden.hard.damage = 1.25
+golden.harder.damage = 1.25

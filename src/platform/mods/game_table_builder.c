@@ -1,8 +1,23 @@
+#include "game_table_derived_internal.h"
 #include "p4pc/game_table_builder.h"
+#include "p4pc/game_items_native.h"
+#include "p4pc/game_skills_native.h"
 #include <string.h>
 
 static int writable(const P4GameTablesDefinitionBuilder *b)
 { return b && b->tables && b->sources && b->registry_revision && !b->sealing && !b->sealed; }
+/* An ID a relocated derived block may name: retail, or one this sealed
+ * snapshot declares. */
+static int known_reference(const void *context, P4TableDerivedDomain domain, uint32_t id)
+{
+    const P4GameTablesDefinitionBuilder *b = context;
+    switch (domain) {
+    case P4_TABLE_DERIVED_SKILL: return id < P4_SKILL_RETAIL_COUNT || p4_game_skills_find(b->skills, id);
+    case P4_TABLE_DERIVED_ENEMY: return id < P4_ENEMY_RETAIL_ROWS || p4_game_enemies_find(b->enemies, id);
+    case P4_TABLE_DERIVED_ITEM: return id < P4_ITEM_RETAIL_COUNT || p4_game_tables_items_find(b->items, id);
+    }
+    return 0;
+}
 static int registry_use(const P4GameTables *view, uint32_t domain, const uint32_t ids[5], void *context)
 {
     const P4GameTablesDefinitionBuilder *b = context;
@@ -173,6 +188,9 @@ int p4_game_tables_builder_seal(P4GameTablesDefinitionBuilder *b,
         b->inputs[b->input_count++] = input;
         if (p4_game_table_input_seal(input)) return P4_TABLE_INVALID;
     }
+    /* Derived producers read the selected inputs, then their rows replace the
+     * originals in place before any family reads a span. */
+    if (p4_game_tables_derived_compose(b->inputs, b->input_count, failed_provider)) return P4_TABLE_INVALID;
     int result = b->names ? p4_game_tables_text_seal(b->names, b->registry_revision) : P4_TABLE_OK;
     if (!result && b->descriptions) result = p4_game_tables_text_seal(b->descriptions, b->registry_revision);
     if (!result && p4_game_tables_affinity_retail_pending(b->tables)) {
@@ -220,6 +238,7 @@ int p4_game_tables_builder_seal(P4GameTablesDefinitionBuilder *b,
             p4_game_table_input_span(persona, 5), p4_game_table_input_span(msg, 3),
             p4_game_table_input_span(unit, 2), b->names, b->registry_revision);
     }
+    if (!result) result = p4_game_tables_derived_check_references(known_reference, b, failed_provider);
     if (!result) result = p4_game_table_sources_seal(b->sources);
     if (!result && p4_game_table_native_uses_prepare(b->inputs, b->input_count, b->sources, &b->native_uses))
         result = P4_TABLE_NOT_READY;

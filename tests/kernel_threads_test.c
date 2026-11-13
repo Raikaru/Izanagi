@@ -14,6 +14,7 @@
 /* Wrappers under test. */
 int32_t func_004215e0(void *param);
 int32_t func_00421600(int32_t id, uint32_t arg);
+void func_00421620(void);
 int32_t func_004216b0(int32_t id);
 int32_t func_00421670(int32_t id, int32_t prio);
 int32_t func_00421690(int32_t prio);
@@ -619,6 +620,41 @@ static void test_context_incarnations(void) {
     CHECK(func_00421670(1, old_priority) == 50);
 }
 
+static uint32_t small_stack_local;
+static void small_stack_worker(void *unused) {
+    (void)unused;
+    volatile uint32_t local = 0;
+    small_stack_local = P4_H2G(&local);
+    func_00421620();
+}
+
+static void test_small_stack_relocation(void) {
+    void *stack = p4_guest_stack_alloc(4096);
+    CHECK(stack != NULL);
+    if (!stack) return;
+    const uint32_t address = P4_H2G(stack);
+    TestThreadParam p = {0}, info = {0};
+    p.function = P4_FN_H2G(small_stack_worker);
+    p.stack = address;
+    p.stackSize = 4096;
+    p.initialPriority = 40;
+    int32_t old_priority = func_00421670(1, 50);
+    int32_t child = func_004215e0(&p);
+    CHECK(child > 1);
+    if (child > 1) {
+        CHECK(func_004216e0(child, &info) == 0);
+        CHECK(info.stack == address && info.stackSize == 4096);
+        small_stack_local = 0;
+        CHECK(func_00421600(child, 0) == child);
+        CHECK(small_stack_local != 0 &&
+              (small_stack_local < address || small_stack_local >= address + 4096));
+        /* Reusing the exited slot releases its owned coroutine stack. */
+        CHECK(spawn(p_noop, 40) == child);
+    }
+    CHECK(func_00421670(1, old_priority) == 50);
+    p4_guest_stack_free(stack);
+}
+
 static void test_stack_admission(void) {
     /* Reserve without running: neither declared nor enlarged native stacks
      * may become writable just because a coroutine is still dormant. */
@@ -665,6 +701,7 @@ int main(void) {
     test_hardware_sync_wait();
     test_vsync();
     test_frame_alarm();
+    test_small_stack_relocation();
     test_stack_admission();
     test_context_incarnations();
     if (failures) {

@@ -1,0 +1,19 @@
+# From playthrough0520andra_registered (TV world entrance, 05/20): walk to the Velvet Room door the
+# way collection0520_to_andras_support.walk does and stop facing it. The QoL PLAN SUMMONS witness
+# (tests/mod_qol_game_test.py) queues a summon in Config here, then enters; the summon happens at
+# the Velvet Room's menu.
+timeout:6000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+timeout:30000
+waitcontrol:on
+wait:60
+walk:400,500,50
+face:90
+wait:20
+log

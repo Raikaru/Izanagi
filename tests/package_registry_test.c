@@ -139,6 +139,50 @@ static int settings_kinds(P4PackageClient *mod_client, P4PackageClient *pack_cli
     printf("setting kinds: %s\n", failures ? "FAIL" : "PASS");
     return failures ? 1 : 0;
 }
+/* Requirements: version comparison, then the admitted catalog order and every
+ * refusal (printed by settings_refusal) for the selection in the environment. */
+static int requirements_witness(P4PackageClient *mod_client, P4PackageClient *pack_client, const char *mod_root,
+                                const char *pack_root)
+{
+    CHECK(p4_package_version_satisfies("1.0", 1, 0) == 1 && p4_package_version_satisfies("1.2.3-rc1", 1, 2) == 1);
+    CHECK(p4_package_version_satisfies("2", 2, 0) == 1 && p4_package_version_satisfies("1.10+build", 1, 9) == 1);
+    CHECK(p4_package_version_satisfies("1.1", 1, 2) == 0 && p4_package_version_satisfies("2.0", 1, 0) == 0);
+    CHECK(p4_package_version_satisfies("beta", 1, 0) == -1 && p4_package_version_satisfies("1.0.0.0", 1, 0) == -1);
+    CHECK(p4_package_version_satisfies("1.", 1, 0) == -1 && p4_package_version_satisfies("1.0 final", 1, 0) == -1);
+    P4PackageRegistry *mods = NULL, *packs = NULL;
+    char settings[1200];
+    snprintf(settings, sizeof settings, "%s/../settings", mod_root);
+    mod_client->refuse = pack_client->refuse = settings_refusal;
+    mod_client->user = pack_client->user = &refusals;
+    CHECK(p4_mod_setting_store_root(settings) == 0);
+    CHECK(p4_package_handler_register(&p4_mod_settings_boot_provider) == 0);
+    const char *enabled = getenv("P4PC_TEST_MODS"), *packs_enabled = getenv("P4PC_TEST_PACKS");
+    const char *order = getenv("P4PC_TEST_ORDER"), *refused = getenv("P4PC_TEST_REFUSED");
+    CHECK(p4_package_registry_load(&mods, mod_client, mod_root, enabled) == 0);
+    if (packs_enabled && packs_enabled[0])
+        CHECK(p4_package_registry_load(&packs, pack_client, pack_root, packs_enabled) == 0);
+    if (order && order[0]) CHECK(p4_package_registry_set_order(mods, order) == 0);
+    CHECK(p4_package_registry_publish() == 0);
+    printf("admitted=");
+    for (size_t i = 0; i < p4_packages_count(); ++i) {
+        const P4PackageInfo *info = p4_packages_info(i);
+        CHECK(info->ordinal == i);
+        printf("%s%s", i ? "," : "", info->id);
+    }
+    printf("\n");
+    /* Every admitted package's answer for each named companion id, -1 when undeclared. */
+    const char *companion = getenv("P4PC_TEST_COMPANION");
+    for (size_t i = 0; companion && companion[0] && i < p4_packages_count(); ++i)
+        printf("companion %s of %s=%d\n", companion, p4_packages_info(i)->id,
+               p4_packages_companion_admitted(p4_packages_provider(i), companion));
+    if (refused && refused[0]) {
+        const char *why = p4_package_refusal(P4_PACKAGE_MOD, refused);
+        printf("refusal %s=%s\n", refused, why ? why : "(none)");
+    }
+    p4_package_registry_retire();
+    printf("requirements: %s\n", failures ? "FAIL" : "PASS");
+    return failures ? 1 : 0;
+}
 static int admission_refusal(const char *id, const char *reason, void *user)
 {
     CHECK(user == &refusals && !strcmp(id, "mod.high") && reason && reason[0]);
@@ -342,6 +386,28 @@ int main(int argc, char **argv)
         printf("persisted selector order: %s\n", failures ? "FAIL" : "PASS");
         return failures ? 1 : 0;
     }
+    if (!strcmp(mode, "bundled")) {
+        /* argv[3] is the bundled root: mod.high also there loses to the player's copy. */
+        CHECK(p4_package_registry_load_bundled(&mods, &mod_client, argv[2], argv[3], "mod.high,mod.shipped") == 0);
+        CHECK(p4_package_registry_count(mods) == 2);
+        for (size_t i = 0; i < p4_package_registry_count(mods); ++i) {
+            const P4PackageInfo *info = p4_package_registry_info(mods, i);
+            const char *root = !strcmp(info->id, "mod.high") ? argv[2] : argv[3];
+            CHECK(!strcmp(info->id, "mod.high") || !strcmp(info->id, "mod.shipped"));
+            CHECK(!strncmp(info->directory, root, strlen(root)));
+        }
+        p4_package_registry_retire();
+        printf("bundled root: %s\n", failures ? "FAIL" : "PASS");
+        return failures ? 1 : 0;
+    }
+    if (!strcmp(mode, "bundled-only")) {
+        /* No player root at all: the shipped root alone still stages. */
+        CHECK(p4_package_registry_load_bundled(&mods, &mod_client, "absent-not-scanned", argv[3], "mod.shipped") == 0);
+        CHECK(p4_package_registry_count(mods) == 1);
+        p4_package_registry_retire();
+        printf("bundled root only: %s\n", failures ? "FAIL" : "PASS");
+        return failures ? 1 : 0;
+    }
     if (!strcmp(mode, "witness-mode")) {
         p4_mod_fidelity_check_start();
         CHECK(p4_mod_witness_enabled() == 1);
@@ -389,6 +455,7 @@ int main(int argc, char **argv)
     }
     p4_mod_fidelity_check_start();
     if (!strcmp(mode, "settings-kinds")) return settings_kinds(&mod_client, &pack_client, argv[2], argv[3]);
+    if (!strcmp(mode, "requirements")) return requirements_witness(&mod_client, &pack_client, argv[2], argv[3]);
     if (!strcmp(mode, "guard-mod") || !strcmp(mode, "guard-pack")) {
         if (!strcmp(mode, "guard-mod"))
             CHECK(p4_package_registry_load(&mods, &mod_client, argv[2], "mod.high") == 0);

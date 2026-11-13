@@ -10,18 +10,23 @@
  * as with the SPU2 ring:
  *   - GetNumData: samples pushed and not yet played, as PS2RNA reports them. PS2RNA's figure is
  *     its IOP buffer as the EE last heard of it: (0x4000 bytes - the free space the IOP returned)
- *     / 2 (PS2RNA_GetNumData, retail 0x004ecb40), at most 0x2000 samples. The IOP side's code is
- *     not in the decomp, so the report is modelled from retail's measured voices (collision 900,
- *     24 kHz, 800.8 samples played per 30 Hz server pass): the EE hears of consumption in whole
- *     256-sample blocks, as of 2.75 passes (5.5 VBLANKs) before the pass. That is the only lag in
- *     (2.68, 2.78] passes that gives all of retail's observations: no consumption seen in the
- *     third pass after key-on and 768 samples in the fourth (anchor+251, +252), and PLAYEND 50
- *     passes after key-on for 37222 samples, 68 for 51968 and 86 for 66482. Here the mixer plays
- *     at once; each server pass records the voice's consumed count (AXRNA_REPORT_PASSES deep)
- *     and GetNumData subtracts the count 2.75 passes back, interpolated, in 256-sample blocks
- *     from the voice's start. So ADXT's start test (`ndata >= min(maxdecsmpl * 2, 0x4000)` or
- *     `nroom <= blksmpl`), PLAYEND_WAIT -> PLAYEND (joint data + `ndata` - flush_nsmpl <= 0) and
- *     ADXT_GetTime see what retail's EE sees.
+ *     / 2 (PS2RNA_GetNumData, retail 0x004ecb40), at most 0x2000 samples. The IOP returns played
+ *     chunks through SJX/DTX once per server pass. Its side is not in the decomp, so the report is
+ *     modelled from retail's measured streams (collision 900: 87 voices and 3139 per-pass reports,
+ *     all reproduced but one sampling artefact). The IOP consumes a stream in blocks of 512 SPU2
+ *     output samples (93.75 per second; 256 samples of a 24 kHz stream) on a clock that runs from
+ *     boot. Retail's block ends fall at tick time t(c) = (2c + 203) * 93.75 / 59.94 - 0.93675
+ *     integer, where c is ADXT's server-pass count adxt_vsync_cnt (0x007188b8). It counts every
+ *     second VBLANK from boot (vsync = 2c + 203 throughout the run), and PCSX2's VBLANK rate is
+ *     59.94 Hz. A stream keyed on in the pass with count c is first heard consumed at the
+ *     first block end after t(c) + 6.2525. So the report's start lands 6 or 7 blocks after
+ *     key-on, by phase, and a voice of a given length can end a pass apart: collision 900's
+ *     cue 0x116 (39989 samples) ended 53 passes after key-on at count 8811 and 54 at count 13600.
+ *     Here the mixer plays at once. Each pass reports whole blocks counted from that start, never
+ *     more than was pushed. So ADXT's start test
+ *     (`ndata >= min(maxdecsmpl * 2, 0x4000)` or `nroom <= blksmpl`), PLAYEND_WAIT -> PLAYEND
+ *     (joint data + `ndata` - flush_nsmpl <= 0) and ADXT_GetTime see what retail's EE sees, given
+ *     the same pass count (lockstep transplants it at the anchor).
  *   - GetNumRoom: AXRNA_IOP_FRAMES (0x2000) minus GetNumData; the server never transfers more.
  *     The mixer ring (AXRNA_RING_FRAMES) is larger, to also hold the samples played but not yet
  *     reported.
@@ -35,6 +40,7 @@
  * decoded samples; a consumed chunk goes back to line 0 (free).
  *
  * Units: volume is 1/10 dB (0 = full), pan -15..15 per channel (ADXT_SetOutPan). */
+#include <math.h>
 #include <stdint.h>
 #include <string.h>
 
@@ -45,8 +51,11 @@
 #define AXRNA_MAX_OBJ 16
 #define AXRNA_RING_FRAMES 0x4000
 #define AXRNA_IOP_FRAMES 0x2000   /* PS2RNA's IOP buffer: 0x4000 bytes of 16-bit samples per channel */
-#define AXRNA_REPORT_PASSES 3     /* server passes of consumed counts kept: the report is 2.75 back */
-#define AXRNA_REPORT_BLOCK 256    /* the IOP reports consumption in 256-sample blocks */
+#define ADXT_VSYNC_CNT 0x007188b8u /* adxt_vsync_cnt: ADXM_ExecVint counts each server pass */
+#define AXRNA_TICKS_PER_VBLANK (93.75 / 59.94) /* IOP blocks (512 SPU2 output samples) per PCSX2 VBLANK */
+#define AXRNA_TICK_PHASE 0.93675  /* where retail's block ends fall (measured) */
+#define AXRNA_START_TICKS 6.2525  /* key-on to the first block end heard (measured) */
+#define AXRNA_PASS_JUMP 64        /* more passes than this between reports is a clock change, not a lag */
 #define SJ_CK_FREE 0
 #define SJ_CK_DATA 1
 
@@ -68,9 +77,10 @@ typedef struct AXRNA_OBJ {
     int32_t pan[P4SND_MAX_CH];
     int32_t play_sw;
     int32_t trans_sw;
-    uint32_t seen[AXRNA_REPORT_PASSES]; /* the voice's consumed count at the start of the last server passes */
-    int32_t seen_at;                    /* the oldest entry, three passes back */
-    uint32_t origin;                    /* the consumed count where the IOP buffer started (report blocks) */
+    uint32_t heard;       /* consumption the EE has heard of, in the mixer's write count */
+    uint32_t heard_start; /* heard when the current play run started */
+    int64_t start_tick;   /* the last block end before the run's first counted one */
+    uint32_t last_cnt;    /* the pass count of the last report */
 } AXRNA_OBJ;
 
 static AXRNA_OBJ *axrna_objs;
@@ -95,35 +105,62 @@ static void axrna_err(const char *msg)
     }
 }
 
-/* What the EE has heard consumed: the count 2.75 passes back (a quarter of the way from the oldest
- * entry to the next), in whole report blocks from the origin. */
-static uint32_t axrna_reported(const AXRNA_OBJ *rna)
+/* The IOP's block clock at server-pass count `cnt` (see the header). */
+static double axrna_tick_time(uint32_t cnt)
 {
-    uint32_t oldest = rna->seen[rna->seen_at];
-    uint32_t next = rna->seen[(rna->seen_at + 1) % AXRNA_REPORT_PASSES];
-    uint32_t heard = oldest + (next - oldest) / 4;
-
-    return rna->origin + ((heard - rna->origin) & ~(uint32_t)(AXRNA_REPORT_BLOCK - 1));
+    return (2.0 * cnt + 203.0) * AXRNA_TICKS_PER_VBLANK - AXRNA_TICK_PHASE;
 }
 
-/* Samples PS2RNA would report buffered: pushed (the mixer's write count) minus reported consumed. */
+static uint32_t axrna_pass_count(void)
+{
+    return *(const uint32_t *)P4_G2H(ADXT_VSYNC_CNT);
+}
+
+/* Samples pushed into the voice so far: the mixer's write count. */
+static uint32_t axrna_written(const AXRNA_OBJ *rna)
+{
+    return p4snd_stream_consumed(rna->voice) + p4snd_stream_data(rna->voice);
+}
+
+/* Samples PS2RNA would report buffered: pushed minus heard consumed. */
 static int32_t axrna_data(const AXRNA_OBJ *rna)
 {
-    uint32_t written = p4snd_stream_consumed(rna->voice) + p4snd_stream_data(rna->voice);
-
-    return (int32_t)(written - axrna_reported(rna));
+    return (int32_t)(axrna_written(rna) - rna->heard);
 }
 
 /* A new or stopped voice: the IOP buffer starts empty where the ring is. */
 static void axrna_sync(AXRNA_OBJ *rna)
 {
-    int i;
+    rna->heard = axrna_written(rna);
+    rna->heard_start = rna->heard;
+}
 
-    rna->origin = p4snd_stream_consumed(rna->voice);
-    for (i = 0; i < AXRNA_REPORT_PASSES; i++) {
-        rna->seen[i] = rna->origin;
+/* Play starts (key-on or resume) in the pass with count `cnt`: blocks are heard from the first
+ * block end after t(cnt) + AXRNA_START_TICKS. */
+static void axrna_start_run(AXRNA_OBJ *rna, uint32_t cnt)
+{
+    rna->heard_start = rna->heard;
+    rna->start_tick = (int64_t)floor(axrna_tick_time(cnt) + AXRNA_START_TICKS);
+}
+
+/* The pass's report: whole blocks since the run's start, at the stream's rate (512 SPU2 output
+ * samples per block), never more than was pushed. */
+static void axrna_report(AXRNA_OBJ *rna, uint32_t cnt)
+{
+    int64_t blocks = (int64_t)floor(axrna_tick_time(cnt)) - rna->start_tick;
+    uint32_t written = axrna_written(rna);
+    uint32_t heard;
+
+    if (!rna->play_sw || blocks <= 0) {
+        return;
     }
-    rna->seen_at = 0;
+    heard = rna->heard_start + (uint32_t)((uint64_t)blocks * (uint32_t)rna->sfreq * 512u / 48000u);
+    if ((int32_t)(heard - written) > 0) {
+        heard = written;
+    }
+    if ((int32_t)(heard - rna->heard) > 0) {
+        rna->heard = heard;
+    }
 }
 
 static void axrna_apply_gains(AXRNA_OBJ *rna)
@@ -228,6 +265,32 @@ AXRNA_OBJ *AXRNA_Create(uint32_t arg0, uint32_t arg1)
     return rna;
 }
 
+int p4snd_adxt_set_category(uint32_t adxt, int category)
+{
+    const uint32_t size = (uint32_t)sizeof(AXRNA_OBJ);
+    uint32_t base;
+    uint32_t addr;
+    AXRNA_OBJ *rna;
+
+    /* ADXT keeps its renderer at +0x0c (decomp adx_tlk.c, adxt->rna). The caller has checked
+     * that word is readable guest memory; only a word naming one of this file's live renderer
+     * objects is followed, anything else is refused. */
+    if (axrna_objs == NULL || adxt == 0 || (adxt & 3u)) {
+        return -1;
+    }
+    base = P4_H2G(axrna_objs);
+    addr = P4_G32(adxt + 0x0cu);
+    if (addr < base || addr - base >= size * AXRNA_MAX_OBJ || (addr - base) % size) {
+        return -1;
+    }
+    rna = &axrna_objs[(addr - base) / size];
+    if (!rna->used || rna->voice == NULL) {
+        return -1;
+    }
+    p4snd_voice_set_category(rna->voice, category);
+    return 0;
+}
+
 void AXRNA_Destroy(AXRNA_OBJ *rna)
 {
     if (rna != NULL && rna->used) {
@@ -284,17 +347,27 @@ void AXRNA_ExecServer(void)
 {
     int32_t i;
     AXRNA_OBJ *tab = axrna_table();
+    uint32_t cnt = axrna_pass_count();
 
     /* Each pass first takes the IOP's report, then fills the buffer up to it: retail's EE reports
      * the buffer full (0x2000 samples) after a pass once the joints keep up. */
     for (i = 0; i < AXRNA_MAX_OBJ; i++) {
         AXRNA_OBJ *rna = &tab[i];
+        int32_t step;
 
         if (!rna->used) {
             continue;
         }
-        rna->seen[rna->seen_at] = p4snd_stream_consumed(rna->voice);
-        rna->seen_at = (rna->seen_at + 1) % AXRNA_REPORT_PASSES;
+        /* A pass count that jumps (lockstep sets it to retail's at the anchor) moves the block
+         * clock: a running stream keeps what it was heard to have played and counts on from
+         * the new time. */
+        step = (int32_t)(cnt - rna->last_cnt);
+        if (rna->play_sw && (step < 0 || step > AXRNA_PASS_JUMP)) {
+            rna->heard_start = rna->heard;
+            rna->start_tick = (int64_t)floor(axrna_tick_time(cnt));
+        }
+        rna->last_cnt = cnt;
+        axrna_report(rna, cnt);
         if (rna->trans_sw) {
             axrna_transfer(rna);
         }
@@ -315,13 +388,10 @@ void AXRNA_DiscardData(AXRNA_OBJ *rna, int32_t nsmpl)
 {
     if (nsmpl > 0) {
         uint32_t n = p4snd_stream_discard(rna->voice, (uint32_t)nsmpl);
-        int i;
 
-        /* The discarded samples leave the report at once, as if consumed before every count kept. */
-        for (i = 0; i < AXRNA_REPORT_PASSES; i++) {
-            rna->seen[i] += n;
-        }
-        rna->origin += n;
+        /* The discarded samples leave the report at once. */
+        rna->heard += n;
+        rna->heard_start += n;
     }
 }
 
@@ -372,11 +442,16 @@ int32_t AXRNA_GetNumData(AXRNA_OBJ *rna)
 
 void AXRNA_SetPlaySw(AXRNA_OBJ *rna, int32_t sw)
 {
+    int32_t was = rna->play_sw;
+
     rna->play_sw = sw != 0;
     p4snd_voice_play(rna->voice, rna->play_sw);
     if (!rna->play_sw && !rna->trans_sw) {
         p4snd_stream_flush(rna->voice);
         axrna_sync(rna);
+    } else if (rna->play_sw && !was) {
+        rna->last_cnt = axrna_pass_count();
+        axrna_start_run(rna, rna->last_cnt);
     }
 }
 

@@ -4,6 +4,7 @@ list(REMOVE_ITEM _p4_admission_sources mod_files_test.c "${CMAKE_SOURCE_DIR}/src
 add_executable(game_table_admission_test game_table_admission_test.c vfs_source_iso.c
   "${CMAKE_SOURCE_DIR}/src/platform/mods/game_table_inputs.c"
   "${CMAKE_SOURCE_DIR}/src/platform/mods/game_table_admission.c"
+  "${CMAKE_SOURCE_DIR}/src/platform/mods/game_table_derived.c"
   "${CMAKE_SOURCE_DIR}/src/platform/mods/game_tables_prepare.c"
   "${CMAKE_SOURCE_DIR}/src/platform/content_digest.c" ${_p4_admission_sources})
 target_include_directories(game_table_admission_test PRIVATE "${CMAKE_SOURCE_DIR}/src/platform/files"

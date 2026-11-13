@@ -146,6 +146,9 @@ compiler/object formats rather than a separate permissive implementation.
 Executable PRE_LINK checks also include generated tables and native entry objects.
 The tables generation/link dependencies require the relevant profile guard.
 Generation-only census runs have no objects and are not an object/link audit.
+The guard's nm, objdump and adapter AST dumps run on every core, one object per task; it reads their results in
+object order, so a report (and the first error) is the same as a serial run's. The 64-bit mirror's and the native
+profile's guards run side by side: neither waits for the other, and the tables wait for both.
 
 The guard rejects an unknown external, a host CRT rename bypass, an unavailable
 retail implementation at final-profile closure, a generated trap masquerading

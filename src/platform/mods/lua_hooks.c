@@ -21,6 +21,21 @@ typedef struct HookInvocation {
     P4LuaContext *context;
 } HookInvocation;
 
+/* The hook invocation this frame is running on this thread, or NULL outside
+ * one and once it has returned. Bindings that act only inside one particular
+ * hook check its function, phase and arguments here instead of trusting
+ * values a script passes in; *table is the context table whose `args` the
+ * invocation copies back after a before-hook. */
+const P4ModCall *p4_lua_hook_call(lua_State *L, int *table)
+{
+    P4LuaContext *context = p4_lua_frame(L)->context;
+    if (context == NULL || context->key != p4pc_thread_context_key() || context->call == NULL ||
+        context->table == LUA_NOREF)
+        return NULL;
+    if (table != NULL) *table = context->table;
+    return context->call;
+}
+
 static void push_value(lua_State *L, char kind, const P4ModValue *value)
 {
     switch (kind) {

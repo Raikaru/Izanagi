@@ -5,8 +5,9 @@
  * other playable characters; the encounter's own party array is never
  * rewritten, so its retail owner still releases it. A character the setup did
  * not create gets one wrapper from datUnitCreatePc, kept for the process and
- * reused by every later projection. With no projector the one mask test
- * leaves the retail loop over the encounter's party array. */
+ * reused by every later projection. A lineup without Yu gives his leader role
+ * (the first selected action) to its first fighter. With no projector the one
+ * mask test leaves the retail loop over the encounter's party array. */
 static u32 btlMainProjectParty(s32 *party, u32 count);
 void btlMainUnitCreateInit(void) {
     extern s32 iGpffffb414;
@@ -48,6 +49,8 @@ void btlMainUnitCreateInit(void) {
     if ((((BtlBattleState *)D_0076449C)->flags & 0x20000000) == 0) {
         s32 party[4];
         u32 count;
+        u8 *firstAction = NULL;
+        u16 firstId = 0;
 
         for (count = 0; count < 4; count++) {
             party[count] = *(s32 *)&((BtlBattleState *)((u32)D_0076449C + count * 4))->encounter.partyUnits[0];
@@ -63,6 +66,10 @@ void btlMainUnitCreateInit(void) {
             dataOrModel = *(u8* *)&((DatUnitPc *)recordOrModel)->base.unit;
             id = ((DatUnit *)dataOrModel)->id;
             actionOrPacket = btlActionCreateWork(0, id, (u16 *)dataOrModel);
+            if (i == 0) {
+                firstAction = actionOrPacket;
+                firstId = id;
+            }
             unit = *(u8* *)&((BtlAction *)actionOrPacket)->unit;
             datCalcClearBadStatus(*(s32 *)&((BtlUnit *)unit)->datUnit, 0xFFF7FFFF);
             ((DatUnit *)MEMBER(u8 *, unit, BtlUnit, datUnit))->flags &= 0xFFDF;
@@ -98,6 +105,15 @@ void btlMainUnitCreateInit(void) {
             i++;
         }
         ((BtlBattleState *)D_0076449C)->unkC64 = (u8)i;
+        /* btlActionCreateWork makes Yu's action the leader (state 5, the battle's
+         * first selected action). A projected lineup without Yu gives that role
+         * to its first fighter; with Yu in the lineup nothing changes. */
+        if (p4_mod_formation_mask != 0 && ((BtlBattleState *)D_0076449C)->selectedAction == NULL &&
+            firstAction != NULL) {
+            *(s16 *)&((BtlAction *)firstAction)->state = 5;
+            ((BtlBattleState *)D_0076449C)->selectedAction = firstAction;
+            p4_mod_formation_leader(firstId);
+        }
     }
     list = *(u8* *)&((DatUnitEc *)*(u8* *)&((BtlBattleState *)D_0076449C)->encounterRecord)->base.unit;
     unitIndex = 0;

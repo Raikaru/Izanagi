@@ -1,4 +1,5 @@
 #include "mod_resources_native.h"
+#include "p4pc/battle_sim.h"
 #include "p4pc/gmem.h"
 #include "p4pc/image.h"
 #include "p4gl.h"
@@ -8,7 +9,8 @@ extern int32_t func_003f5070(int32_t state, uint32_t value);
 extern int32_t func_0040c0f0(int32_t primitive, uint8_t *vertices, int32_t count);
 static int ready(void)
 {
-    return p4pc_image_loaded() && p4gl_context_is_current() && P4_G32(0x00887404u) == 3u;
+    /* The no-device battle backend counts: authored rasters keep their guest shadows and its sinks take the upload and draw. */
+    return p4pc_image_loaded() && p4gl_device_ready() && P4_G32(0x00887404u) == 3u;
 }
 
 extern int32_t RwRasterDestroy(void *);
@@ -44,11 +46,12 @@ int p4_resources_draw(uint32_t token, float x, float y, float depth, uint32_t rg
 {
     if (!isfinite(x) || !isfinite(y) || !isfinite(depth) || !isfinite(scale_x) ||
         !isfinite(scale_y) || scale_x < 0 || scale_y < 0) return P4_RESOURCE_INVALID;
-    if (!ready()) return P4_RESOURCE_NOT_READY;
+    if (!p4_battle_sim_renderless && !ready()) return P4_RESOURCE_NOT_READY;
     const P4ResourceImage *image = p4_resources_query(token);
     if (!image) return P4_RESOURCE_NOT_FOUND;
     const float width = (float)image->width * scale_x, height = (float)image->height * scale_y;
     if (!isfinite(x + width) || !isfinite(y + height)) return P4_RESOURCE_INVALID;
+    if (p4_battle_sim_renderless) return P4_RESOURCE_OK;
     if (scale_x == 0 || scale_y == 0) return P4_RESOURCE_OK;
     P4Sky2Vertex vertices[4] = {{0}};
     const float u = (float)image->width / (float)image->texture_width;

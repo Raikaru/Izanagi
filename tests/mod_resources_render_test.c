@@ -1,4 +1,6 @@
-/* Real guest RW raster + GL upload, using only authored test pixels. */
+/* Real guest RW raster + GL upload, using only authored test pixels; `no-device` repeats it on the battle simulator's
+ * no-device backend. */
+#include "p4pc/battle_sim.h"
 #include "p4pc/mod_resources.h"
 #include "p4pc/content_source.h"
 #include "p4pc/image.h"
@@ -82,9 +84,36 @@ static void check_texture(const P4ResourceImage *image, const uint8_t *expected)
     p4gl_glBindFramebuffer(GL_FRAMEBUFFER, 0); p4gl_glDeleteFramebuffers(1, &fbo);
 }
 
+/* `no-device`: the battle simulator's no-device backend instead of a GL context. The authored raster and its guest shadow are
+ * the same; the upload and draws go to the backend's sinks, so pixels are checked in the shadow only. */
+static int no_device_main(P4Resources *resources, const P4ContentSource *source, const uint8_t *pixels, size_t size,
+                          const uint8_t *padded, size_t padded_size)
+{
+    uint32_t token = 99;
+    p4_battle_sim_renderless = 1;
+    kwlnInitEngine();
+    assert(!p4gl_context_is_current() && p4gl_device_ready());
+    assert(p4_resources_image(resources, "test.resources", "test.resources:icon", source,
+        pixels, size, 13, 11, 1, &token) == P4_RESOURCE_OK);
+    assert(p4_resources_freeze(resources, 1) == P4_RESOURCE_OK);
+    const P4ResourceImage *image = p4_resources_query(token); assert(image && image->raster && image->pixels);
+    assert(image->width == 13 && image->height == 11 && image->stride == 16 * 4);
+    assert(image->texture_width == 16 && image->texture_height == 16);
+    assert(!memcmp(P4_G2H(image->pixels), padded, padded_size));
+    P4_GDATA(float, 0x008872F8u) = 65535.0f;
+    assert(p4_resources_draw(token, 16, 32, 69, 0xffffffffu, 1.0f, 1.0f) == P4_RESOURCE_OK);
+    assert(!memcmp(P4_G2H(image->pixels), padded, padded_size));
+    p4_resources_retire(resources);
+    assert(!p4_resources_query(token));
+    p4gl_context_close();
+    assert(!p4gl_device_ready());
+    puts("mod_resources_render: no-device backend kept the authored guest raster, shadow and native draw; closed device refuses");
+    return 0;
+}
+
 static int test_main(int argc, char **argv)
 {
-    (void)argc; (void)argv;
+    const int no_device = argc > 1 && !strcmp(argv[1], "no-device");
     const char *elf = getenv("P4PC_ELF");
     if (!elf || !elf[0]) { fprintf(stderr, "mod_resources_render: P4PC_ELF unset\n"); return 77; }
     p4_os_headless_env();
@@ -94,6 +123,7 @@ static int test_main(int argc, char **argv)
     p4_os_setenv("P4PC_ASPECT", "4:3", 1);
     p4_os_setenv("P4PC_TRAP_CONTINUE", "0", 1);
     p4_os_setenv("P4PC_TEST_CONTEXT_LOSS", "1", 1);
+    if (no_device) p4_os_setenv("P4PC_RESOLUTION", "640x448", 1); /* the no-device backend's only size */
     p4pc_trap_configure();
     uint8_t pixels[13 * 11 * 4], padded[16 * 16 * 4] = {0};
     for (unsigned y = 0; y < 11; ++y) for (unsigned x = 0; x < 13; ++x) {
@@ -106,17 +136,18 @@ static int test_main(int argc, char **argv)
     strcpy(source.provider, "test.resources"); strcpy(source.key, "authored/test-pattern.rgba");
     P4Resources *resources = p4_resources_create(2 * sizeof padded); assert(resources);
     uint32_t token = 99;
-    assert(!p4pc_image_loaded() && !p4gl_context_is_current());
+    assert(!p4pc_image_loaded() && !p4gl_context_is_current() && !p4gl_device_ready());
     assert(p4_resources_image(resources, "test.resources", "test.resources:icon", &source,
         pixels, sizeof pixels, 13, 11, 1, &token) == P4_RESOURCE_NOT_READY);
     assert(token == 99 && !p4_resources_count(resources));
     p4pc_load_image(elf);
-    assert(p4pc_image_loaded() && !p4gl_context_is_current());
+    assert(p4pc_image_loaded() && !p4gl_context_is_current() && !p4gl_device_ready());
     assert(p4_resources_image(resources, "test.resources", "test.resources:icon", &source,
         pixels, sizeof pixels, 13, 11, 1, &token) == P4_RESOURCE_NOT_READY);
     assert(token == 99 && !p4_resources_count(resources));
     p4pc_apply_patches(); p4pc_kernel_pre_init();
     kwlnProbeHeapBudget();
+    if (no_device) return no_device_main(resources, &source, pixels, sizeof pixels, padded, sizeof padded);
     /* Reuse the actual game's RW/plugin/device/free-list owner. Do not invent
      * raster-module globals or substitute a host-only raster allocation. */
     kwlnInitEngine();
@@ -154,7 +185,7 @@ static int test_main(int argc, char **argv)
     assert(p4_resources_query(token) && p4_resources_pin(token) == P4_RESOURCE_RETIRED);
     assert(p4_resources_release(token) == P4_RESOURCE_OK && !p4_resources_query(token));
     p4gl_context_close();
-    assert(!p4gl_context_is_current());
+    assert(!p4gl_context_is_current() && !p4gl_device_ready());
     puts("mod_resources_render: real guest raster, NPOT RGBA/alpha, native draws/state ownership, context recovery and pinned retirement passed");
     return 0;
 }

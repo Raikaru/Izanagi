@@ -81,6 +81,10 @@ add_test(NAME systems_velvet_fusion COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/syst
 set_tests_properties(systems_velvet_fusion PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 1200)
 add_test(NAME systems_velvet_compendium COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/systems_gate.sh" $<TARGET_FILE:p4pc> compendium)
 set_tests_properties(systems_velvet_compendium PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 1200)
+# A registered native page flow hosted by the Velvet fusion task's own title-mode Config child (mod-witness lane).
+add_test(NAME settings_host_velvet COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/settings_host_velvet_gate.sh" $<TARGET_FILE:p4pc>
+  "${CMAKE_BINARY_DIR}/settings_host_velvet")
+set_tests_properties(settings_host_velvet PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 1500)
 add_test(NAME systems_club_floor_menu COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/systems_gate.sh" $<TARGET_FILE:p4pc> club)
 set_tests_properties(systems_club_floor_menu PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 1200)
 # Fixed generated-floor seeds preserve the regression references when asynchronous read ordering changes load duration.
@@ -127,23 +131,8 @@ set_tests_properties(rng_boot PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" 
 add_test(NAME rng_floor COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/rng_gate.sh" $<TARGET_FILE:p4pc> floor)
 set_tests_properties(rng_floor PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 1800)
 
-# Native port-frame goldens, not claims of a retail widescreen reference. The
-# 4:3 retail gates above keep their original names, bytes and capture phases.
-add_test(NAME widescreen_field_16_9 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/scene_mad.sh"
-  $<TARGET_FILE:p4pc_viewer> "${CMAKE_BINARY_DIR}/widescreen_field_16_9.png"
-  field:7:2 port-wide-field-16-9 0.1 P4PC_ASPECT=16:9 P4PC_DRAW_WINDOW=4 "P4PC_GATE_RENDERER=llvmpipe (LLVM 19.1.7, 256 bits)")
-set_tests_properties(widescreen_field_16_9 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes;widescreen" TIMEOUT 600)
-# Frame 0 is never presented; the state trigger owns the capture time.
-# Keep this argument nonempty because registration forwards arguments as a CMake list.
-add_test(NAME widescreen_battle_16_9 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/battle_mad.sh"
-  $<TARGET_FILE:p4pc> 532 port-wide-battle-16-9 0 0.1
-  "cross@360:2/150,start@500:2/300" P4PC_ASPECT=16:9 "P4PC_GATE_RENDERER=llvmpipe (LLVM 19.1.7, 256 bits)"
-  P4PC_VIRTUAL_CLOCK=1 P4PC_CAPTURE_STATE=battle-menu,40,1,4000)
-set_tests_properties(widescreen_battle_16_9 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes;widescreen" TIMEOUT 600)
-add_test(NAME widescreen_dialogue_16_9 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/event_scene_gate.sh"
-  $<TARGET_FILE:p4pc> velvet-windows-blurry 3630 0.1 story0415 save0415_to_river_scene.walk)
-set_tests_properties(widescreen_dialogue_16_9 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes;widescreen"
-  TIMEOUT 900 ENVIRONMENT "P4PC_ASPECT=16:9;P4PC_EVENT_REF=port-wide-dialogue-16-9;P4PC_GATE_RENDERER=llvmpipe (LLVM 19.1.7, 256 bits)")
+# Widescreen port-frame coverage runs on the NVIDIA 64-bit twins in
+# 220-port64-host.cmake; the llvmpipe-only i386/64-bit copies are retired.
 
 
 # Physical-resolution regression goldens. These references contain the exact
@@ -176,47 +165,4 @@ add_test(NAME scene_resolution_fog4k COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/bat
   532 p4-resolution-fog4k 1700 0.5 "cross@360:2/150,start@500:2/300"
   P4PC_RESOLUTION=3840x2160 P4PC_VIRTUAL_CLOCK=1)
 set_tests_properties(scene_resolution_fog4k PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 300 ENVIRONMENT "P4PC_FOG_SEAM=1")
-# Full-canvas policies have new immutable port frames, qualified independently
-# of the original 4:3 and widescreen field/battle/dialogue references.
-foreach(wideRatio IN ITEMS 16-9 21-9)
-  string(REPLACE "-" "_" wideName "${wideRatio}")
-  if(wideRatio STREQUAL "21-9")
-    set(wideMode auto)
-    set(wideWidth 1680)
-  else()
-    set(wideMode "16:9")
-    set(wideWidth 1280)
-  endif()
-  add_test(NAME widescreen_title_cover_${wideName} COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/scene_mad.sh"
-    $<TARGET_FILE:p4pc_viewer> "${CMAKE_BINARY_DIR}/widescreen_title_cover_${wideName}.png"
-    title port-wide-title-cover-${wideRatio}-llvmpipe19 0.1
-    P4PC_CONFIG=none P4PC_ASPECT=${wideMode} P4PC_WINDOW_W=${wideWidth} P4PC_WINDOW_H=720
-    P4PC_RESOLUTION=scale:1 P4PC_PRESENT=blit P4PC_TITLE_FRAME=400 P4PC_VIRTUAL_CLOCK=1 P4PC_CAPTURE_WINDOW=1
-    "P4PC_GATE_RENDERER=llvmpipe (LLVM 19.1.7, 256 bits)")
-  set_tests_properties(widescreen_title_cover_${wideName} PROPERTIES
-    SKIP_RETURN_CODE 77 LABELS "gl;scenes;widescreen" TIMEOUT 600 ENVIRONMENT "P4PC_TITLE_EDGES=1")
-  string(REPLACE "-" ":" wideAspect "${wideRatio}")
-  foreach(wideScene IN ITEMS allout shuffle)
-    set(wideVariant full)
-    # Recaptured once the sky VU0 vector multiplies moved the effect-RNG timeline (docs/renderer_port.md).
-    set(wideRef port-wide-shuffle-full-vu0-${wideRatio})
-    if(wideScene STREQUAL "allout")
-      set(wideVariant masked)
-      set(wideRef port-wide-allout-masked-${wideRatio})
-    endif()
-    add_test(NAME widescreen_${wideScene}_${wideVariant}_${wideName} COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/widescreen_saved_gate.sh"
-      $<TARGET_FILE:p4pc> ${wideScene} ${wideAspect} ${wideRef}-llvmpipe19)
-    set_tests_properties(widescreen_${wideScene}_${wideVariant}_${wideName} PROPERTIES
-      SKIP_RETURN_CODE 77 LABELS "gl;scenes;widescreen" TIMEOUT 900
-      ENVIRONMENT "P4PC_GATE_RENDERER=llvmpipe (LLVM 19.1.7, 256 bits)")
-  endforeach()
-  foreach(wideCutin IN ITEMS allout-intro cast-eyes)
-    string(REPLACE "-" "_" wideCutinName "${wideCutin}")
-    add_test(NAME widescreen_${wideCutinName}_${wideName} COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/widescreen_saved_gate.sh"
-      $<TARGET_FILE:p4pc> ${wideCutin} ${wideAspect} port-wide-${wideCutin}-${wideRatio}-llvmpipe19)
-    set_tests_properties(widescreen_${wideCutinName}_${wideName} PROPERTIES
-      SKIP_RETURN_CODE 77 LABELS "gl;scenes;widescreen" TIMEOUT 900
-      ENVIRONMENT "P4PC_GATE_RENDERER=llvmpipe (LLVM 19.1.7, 256 bits)")
-  endforeach()
-endforeach()
 

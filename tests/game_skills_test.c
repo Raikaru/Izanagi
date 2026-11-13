@@ -1,6 +1,7 @@
 /* Real Core/VFS original inputs, registry/text compiler and guest allocation.
  * Synthetic banks do not prove native learn/battle/description/save behavior. */
 #include "p4pc/game_skills.h"
+#include "p4pc/game_elements_native.h"
 #include "p4pc/game_table_inputs.h"
 #include "guest_test.h"
 #include <assert.h>
@@ -174,6 +175,62 @@ static int prepare(void *user)
         assert(!allocations);
         p4_game_skills_destroy(cpu);
     }
+    {
+        /* A derived row copies its anchor's SKILL1 row and EFFECT0 presentation
+         * at seal, then the fields it names; its delivery stays on the desc and
+         * must name the anchor's damage class (+0x02: 1 physical, 2 magic). */
+        const uint8_t *bank = p4_game_table_input_span_bytes(metadata);
+        uint32_t anchor = 1;
+        while (anchor < 440u && bank[anchor * 40u + 2u] != 1u && bank[anchor * 40u + 2u] != 2u) ++anchor;
+        const uint32_t delivery = anchor == 440u ? P4_DELIVERY_DEFAULT :
+            bank[anchor * 40u + 2u] == 1u ? P4_DELIVERY_PHYSICAL : P4_DELIVERY_MAGIC;
+        if (anchor == 440u) anchor = 11;
+        P4GameSkills *derived = p4_game_skills_create(NULL);
+        P4GameSkillDesc row = {.id = 581u, .active = 1, .element_id = 2u, .schema = 1, .revision = 1,
+            .key = "test:derived", .delivery = delivery, .derive = anchor,
+            .derive_fields = P4_SKILL_DERIVE_POWER | P4_SKILL_DERIVE_COST | P4_SKILL_DERIVE_ACCURACY |
+                P4_SKILL_DERIVE_CRITICAL,
+            .derive_power = 300, .derive_cost = 11, .derive_accuracy = 90, .derive_critical = 20};
+        assert(derived && !p4_game_skills_register(derived, "test", &row));
+        assert(!p4_game_skills_seal(derived, metadata, elements, presentation, original_names,
+            fixture.tables, fixture.names, fixture.descriptions, 7));
+        const P4GameSkillView *view = p4_game_skills_find(derived, 581u);
+        uint8_t want[40];
+        memcpy(want, bank + anchor * 40u, sizeof want);
+        want[0x12] = 300 & 0xff; want[0x13] = 300 >> 8; want[0x04] = 11; want[0x05] = 0;
+        want[0x0e] = 90; want[0x25] = 20;
+        assert(view && !memcmp(view->desc.metadata, want, sizeof want) &&
+            !memcmp(view->desc.presentation, p4_game_table_input_span_bytes(presentation) + anchor * 4u, 4) &&
+            view->desc.delivery == delivery);
+        p4_game_skills_destroy(derived);
+        if (delivery != P4_DELIVERY_DEFAULT) {
+            /* The other delivery than the anchor's class is refused at seal. */
+            P4GameSkills *mismatch = p4_game_skills_create(NULL);
+            P4GameSkillDesc other = row;
+            other.delivery = delivery == P4_DELIVERY_PHYSICAL ? P4_DELIVERY_MAGIC : P4_DELIVERY_PHYSICAL;
+            assert(mismatch && !p4_game_skills_register(mismatch, "test", &other));
+            assert(p4_game_skills_seal(mismatch, metadata, elements, presentation, original_names,
+                fixture.tables, fixture.names, fixture.descriptions, 7) == P4_TABLE_INVALID);
+            p4_game_skills_destroy(mismatch);
+        }
+        /* A passive or absent anchor, an out-of-range override, an unknown
+         * delivery, a passive's delivery and overrides without an anchor are refused. */
+        P4GameSkills *refused = p4_game_skills_create(NULL);
+        assert(refused);
+        row.derive = 440;
+        assert(p4_game_skills_register(refused, "test", &row) == P4_TABLE_INVALID);
+        row.derive = 11; row.derive_power = 0;
+        assert(p4_game_skills_register(refused, "test", &row) == P4_TABLE_INVALID);
+        row.derive_power = 300; row.delivery = 3;
+        assert(p4_game_skills_register(refused, "test", &row) == P4_TABLE_INVALID);
+        P4GameSkillDesc passive = {.id = 582u, .schema = 1, .revision = 1, .key = "test:passive",
+            .delivery = P4_DELIVERY_PHYSICAL};
+        assert(p4_game_skills_register(refused, "test", &passive) == P4_TABLE_INVALID);
+        row.delivery = P4_DELIVERY_DEFAULT; row.derive = 0;
+        assert(p4_game_skills_register(refused, "test", &row) == P4_TABLE_INVALID);
+        assert(!p4_game_skills_count(refused));
+        p4_game_skills_destroy(refused);
+    }
     fixture.prefix = p4_game_skills_create(NULL);
     assert(fixture.prefix && !p4_game_skills_seal(fixture.prefix, metadata, elements, presentation,
         original_names, NULL, NULL, NULL, 2));
@@ -249,6 +306,11 @@ int main(int argc, char **argv)
     invalid = row; invalid.inheritance_group = P4_SKILL_INHERITANCE_GROUP_COUNT;
     assert(p4_game_skills_register(skills, "test", &invalid) == P4_TABLE_INVALID);
     invalid.inheritance_group = UINT8_MAX;
+    assert(p4_game_skills_register(skills, "test", &invalid) == P4_TABLE_INVALID);
+    /* The effect source is a retail active skill: never a passive or added one. */
+    invalid = row; invalid.effect_source = P4_SKILL_RETAIL_ACTIVE_COUNT;
+    assert(p4_game_skills_register(skills, "test", &invalid) == P4_TABLE_INVALID);
+    invalid.effect_source = P4_SKILL_RETAIL_COUNT;
     assert(p4_game_skills_register(skills, "test", &invalid) == P4_TABLE_INVALID);
     assert(p4_game_skills_register(skills, "other", &row) == P4_TABLE_INVALID);
     /* Full-width leaves are admitted with a real allocator; activating them

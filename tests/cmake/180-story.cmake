@@ -396,6 +396,11 @@ set_tests_properties(collection_kanji_reunion_0606 PROPERTIES SKIP_RETURN_CODE 7
 add_test(NAME collection_school_0607 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 30000 6:6,6/7 playthrough0606postkanji night_sleep_to_school.walk)
 set_tests_properties(collection_school_0607 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
 
+# Pristine collection card2-slot09 (06/04 evening): the three legs above in one walk, then every day to June 15's
+# home save (card2-slot10's date), covering 06/08-06/14.
+add_test(NAME collection_june_0615 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 74000 7:2,6/15 playthrough0604home collection0604_to_home0615.walk)
+set_tests_properties(collection_june_0615 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 900 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
+
 # Independent June collection cards card2-slot10/-slot11/-slot12/-slot13: each sleeps
 # (or goes out) from its anchor and follows the automatic story, free nights and school
 # days to a native save: 06/20 (through the 06/17-06/18 camping trip), 06/21 (the next
@@ -459,6 +464,9 @@ set_tests_properties(collection_evening_0718 PROPERTIES SKIP_RETURN_CODE 77 LABE
 # Independent collection card3-slot03, July final-exam week through the home save.
 add_test(NAME collection_final_exams_0724 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 30000 7:2,7/24 playthrough0718exameve collection0718_to_exams0719.walk)
 set_tests_properties(collection_final_exams_0724 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
+# The same card past the exams: 07/25 and the 07/26 home save (card3-slot04's date).
+add_test(NAME collection_evening_0726 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 36000 7:2,7/26 playthrough0718exameve collection0718_to_home0726.walk)
+set_tests_properties(collection_evening_0726 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
 
 # Independent summer-break cards card3-slot04 (07/26 evening: 07/27 Junes, home, then the
 # automatic days to the 08/01 home save, the next card's date) and card3-slot05 (08/01
@@ -493,6 +501,9 @@ set_tests_properties(collection_summer_break_0814 PROPERTIES SKIP_RETURN_CODE 77
 # Independent card3-slot09 follows the summer-job/festival week to its home save.
 add_test(NAME collection_summer_festival_0822 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 40000 7:2,8/22 playthrough0814festival collection0814_to_festival0822.walk)
 set_tests_properties(collection_summer_festival_0822 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
+# The same card past the festival: the summer days to the 08/30 home save (card3-slot10's date).
+add_test(NAME collection_evening_0830 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 56000 7:2,8/30 playthrough0814festival collection0814_to_home0830.walk)
+set_tests_properties(collection_evening_0830 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 900 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
 
 # Independent collection card3-slot10: August 30 evening through 09/01 and the 09/02-09/06
 # school days to the 09/07 home save (the next card's date).
@@ -613,6 +624,9 @@ set_tests_properties(collection_adachi_1206 PROPERTIES SKIP_RETURN_CODE 77 LABEL
 # no Magatsu Inaba traversal claim.
 add_test(NAME collection_evening_1207 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 35000 7:2,12/7 playthrough1206evening collection1206_to_home1207.walk)
 set_tests_properties(collection_evening_1207 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
+# The same card past 12/07: every day to the 12/22 home save, the last day before card4-slot16's Magatsu Inaba.
+add_test(NAME collection_evening_1222 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 84000 7:2,12/22 playthrough1206evening collection1206_to_home1222.walk)
+set_tests_properties(collection_evening_1222 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 1200 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
 
 # Independent card4-slot16: final Magatsu field and first Adachi COMMAND, not victory.
 add_test(NAME collection_adachi_opening_1223 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/completed_walk_gate.sh" $<TARGET_FILE:p4pc> 30000 246:3,12/23 playthrough1223magatsu collection1223_magatsu_to_adachi.walk)
@@ -622,6 +636,10 @@ set_tests_properties(collection_adachi_opening_1223 PROPERTIES SKIP_RETURN_CODE 
 # items by native ID), the Ameno-sagiri reveal and its first COMMAND. Not Ameno-sagiri's defeat.
 add_test(NAME collection_adachi_victory_1223 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/completed_walk_gate.sh" $<TARGET_FILE:p4pc> 48000 246:2,12/23 playthrough1223magatsu collection1223_adachi_to_ameno.walk)
 set_tests_properties(collection_adachi_victory_1223 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600)
+# The same card: Ameno-sagiri's searched battleturn: tape after Adachi, the story home and the 12/24 home save
+# (card5-slot01's date). The tape is bound to retail-timed ADX voices.
+add_test(NAME collection_ameno_sagiri_victory_1223 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 94000 7:2,12/24 playthrough1223magatsu collection1223_adachi_to_ameno_victory1224.walk)
+set_tests_properties(collection_ameno_sagiri_victory_1223 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 1500 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
 
 # Independent post-Magatsu card5-slot01: Christmas through the farewell world map.
 add_test(NAME collection_departure_calendar_0320 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/completed_walk_gate.sh" $<TARGET_FILE:p4pc> 30000 1:1,3/20 playthrough1224evening collection1224_to_departure0320.walk)
@@ -651,6 +669,14 @@ set_tests_properties(collection_yomotsu_entrance_0320 PROPERTIES SKIP_RETURN_COD
 # Independent card5-slot06: Path 9 portal, first-phase Izanami COMMAND and one round of Attacks, not victory.
 add_test(NAME collection_izanami_opening_0320 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/completed_walk_gate.sh" $<TARGET_FILE:p4pc> 15000 247:2,3/20 playthrough0320yomotsu9f collection0320_yomotsu9f_to_izanami.walk)
 set_tests_properties(collection_izanami_opening_0320 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600)
+# The same card: Izanami's searched battleturn: tape to Thousand Curses' scripted defeat, Yu's revival and his
+# final battle won with Myriad Truths, to Yomotsu Hirasaka's exterior. The tape is bound to retail-timed ADX voices.
+add_test(NAME collection_izanami_victory_0320 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/completed_walk_gate.sh" $<TARGET_FILE:p4pc> 70000 30:1,3/20 playthrough0320yomotsu9f collection0320_yomotsu9f_to_izanami_victory.walk)
+set_tests_properties(collection_izanami_victory_0320 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 1200)
+# The same victory through the true ending: the epilogue, the staff roll and the new-cycle save over the card
+# (native Save OK; the cleared-game state has no field, calendar index 9).
+add_test(NAME collection_true_ending_0320 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_play_gate.sh" $<TARGET_FILE:p4pc> 100000 "-1:-1,4/10" playthrough0320yomotsu9f collection0320_yomotsu9f_to_true_ending.walk)
+set_tests_properties(collection_true_ending_0320 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 1500 ENVIRONMENT "P4PC_GATE_REQUIRE_SAVE=1")
 
 # Requested untouched CBS18506: native Margaret defeat, post-event Heaven10 control.
 add_test(NAME collection_margaret_0320 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/completed_walk_gate.sh" $<TARGET_FILE:p4pc> 15000 28:2,3/20 playthrough0320margaret18506 collection0320_cbs18506_margaret_victory.walk)

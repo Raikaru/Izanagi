@@ -568,7 +568,7 @@ int p4_os_rename(const char *from, const char *to) {
 }
 
 int p4_os_sync_file(FILE *stream) { return fflush(stream) || _commit(_fileno(stream)) ? -1 : 0; }
-int p4_os_replace_file(const char *from, const char *to) {
+static int replace_file(const char *from, const char *to, DWORD flags) {
     WCHAR wide_from[4096], wide_to[4096];
     if (!MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, from, -1, wide_from, sizeof wide_from / sizeof wide_from[0]) ||
         !MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, to, -1, wide_to, sizeof wide_to / sizeof wide_to[0])) {
@@ -577,7 +577,7 @@ int p4_os_replace_file(const char *from, const char *to) {
     }
     unsigned delay = 8;
     for (;;) {
-        if (MoveFileExW(wide_from, wide_to, MOVEFILE_REPLACE_EXISTING)) return 0;
+        if (MoveFileExW(wide_from, wide_to, flags)) return 0;
         DWORD error = GetLastError();
         if ((error != ERROR_ACCESS_DENIED && error != ERROR_SHARING_VIOLATION) || delay > 1024) {
             errno = error == ERROR_FILE_NOT_FOUND || error == ERROR_PATH_NOT_FOUND ? ENOENT :
@@ -587,6 +587,10 @@ int p4_os_replace_file(const char *from, const char *to) {
         Sleep(delay);
         delay *= 2;
     }
+}
+int p4_os_replace_file(const char *from, const char *to) { return replace_file(from, to, MOVEFILE_REPLACE_EXISTING); }
+int p4_os_replace_file_durable(const char *from, const char *to) {
+    return replace_file(from, to, MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH);
 }
 
 int p4_os_rmdir(const char *path) {

@@ -37,6 +37,7 @@ static struct ElementUiStage {
     int prepared;
 } staged;
 static const P4GameElementUi *active;
+static int analyze_page; /* Analyze ailment page selected (see below) */
 
 _Noreturn void p4_game_elements_ui_native_refuse(int32_t error)
 {
@@ -121,6 +122,7 @@ void p4_game_elements_ui_native_session_end(void)
     /* Core proved task/queue/graphics quiescence; it clears the shared
      * coordinator itself. This drops only our borrow and sample. */
     active = NULL;
+    analyze_page = 0;
     if (staged.sample) p4pc_heap_free(staged.sample);
     memset(&staged, 0, sizeof staged);
 }
@@ -177,12 +179,11 @@ static uint16_t column_scale(uint32_t count)
 {
     return count > 7u ? (uint16_t)((236u * 4096u) / (37u * (count - 1u))) : 0;
 }
-static int authored_icon(const P4GameElementUiPreparedColumn *column,
-    float x, float y, float depth, uint32_t rgba, float width, float height)
+/* The same horizontal factor as the native glyphs in that row: 1 for seven columns. */
+static float column_factor(uint32_t count)
 {
-    int result = p4_resources_draw(column->icon_token, x, y, depth, rgba,
-        width / (float)column->image_width, height / (float)column->image_height);
-    return result == P4_RESOURCE_OK ? P4_TABLE_OK : P4_TABLE_RENDER_ERROR;
+    const uint16_t scale = column_scale(count);
+    return scale ? (float)scale / 4096.0f : 1.0f;
 }
 
 int p4_game_elements_ui_native_skill_icon(void *unit, uint32_t skill, uint32_t *icon)
@@ -213,11 +214,29 @@ int p4_game_elements_ui_native_skill_icon(void *unit, uint32_t skill, uint32_t *
     return P4_ELEMENT_UI_ART_HANDLED;
 }
 int p4_game_elements_ui_native_draw_icon(uint32_t icon, float x, float y, float depth,
-    uint32_t rgba, float width, float height)
+    uint32_t rgba, float scale_x, float scale_y)
 {
     if (!active) return P4_TABLE_INVALID;
-    if (!icon || !width || !height || !(rgba >> 24)) return P4_TABLE_OK;
-    return p4_game_elements_ui_art_draw(active, icon - 1u, x, y, depth, rgba, width, height);
+    if (!icon || !scale_x || !scale_y || !(rgba >> 24)) return P4_TABLE_OK;
+    return p4_game_elements_ui_art_draw(active, icon - 1u, x, y, depth, rgba, scale_x, scale_y);
+}
+int p4_game_elements_ui_native_header_icon(uint32_t leaf, uint32_t *icon)
+{
+    if (!icon) return P4_TABLE_INVALID;
+    if (!active) return P4_TABLE_NOT_FOUND;
+    uint32_t art;
+    const int result = p4_game_elements_ui_header_art_find(active, leaf, &art);
+    if (!result) *icon = art + 1u;
+    return result;
+}
+int p4_game_elements_ui_native_prompt(uint32_t prompt, uint32_t *icon)
+{
+    if (!icon) return P4_TABLE_INVALID;
+    if (!active) return P4_TABLE_NOT_FOUND;
+    uint32_t art;
+    const int result = p4_game_elements_ui_prompt_find(active, prompt, &art);
+    if (!result) *icon = art + 1u;
+    return result;
 }
 
 int p4_game_elements_ui_native_persona_affinities(uint32_t persona, const uint32_t native_words[7],
@@ -247,8 +266,10 @@ int p4_game_elements_ui_native_persona_affinities(uint32_t persona, const uint32
             native_sprite(affinity_bank, column->native_affinity_sprite, point_x, y, depth,
                 opacity | 0x0081ffffu, scale_x, 0);
         else {
-            int result = authored_icon(column, point_x, y, depth, opacity | 0x0081ffffu, 26.0f, 20.0f);
-            if (result) return result;
+            /* The header art at its own size, fitted horizontally like the
+             * native glyphs of this row. */
+            if (p4_resources_draw(column->header_token, point_x, y, depth, opacity | 0x0081ffffu,
+                    column_factor(count), 1.0f) != P4_RESOURCE_OK) return P4_TABLE_RENDER_ERROR;
         }
         native_sprite(panel_bank, 0x43, point_x - 2.0f, y + 22.0f, depth, opacity | 0x002ce9ffu, scale_x, 0);
         native_sprite(affinity_bank, persona_affinity_sprite(values[i]), point_x, y + 24.0f, depth,
@@ -321,8 +342,10 @@ int p4_game_elements_ui_native_analyze_affinities(void *work, void *unit,
         glyph_horizontal = (uint32_t)horizontal;
         glyph_vertical = (uint32_t)vertical;
     }
-    const uint16_t compressed = column_scale(count);
-    btlUiSetScale(work, compressed ? saved_x * (float)compressed / 4096.0f : saved_x, saved_y);
+    /* Native sprites draw at their size times the canvas factor and scale
+     * (00201410); authored header art takes the same transform. */
+    const float row_scale_x = saved_x * column_factor(count);
+    btlUiSetScale(work, row_scale_x, saved_y);
     result = P4_TABLE_OK;
     for (uint32_t i = 0; !result && i < count; ++i) {
         const P4GameElementUiPreparedColumn *column = p4_game_elements_ui_column(active, i);
@@ -334,10 +357,9 @@ int p4_game_elements_ui_native_analyze_affinities(void *work, void *unit,
         else {
             float screen_x, screen_y;
             canvas_point(&canvas, point_x, header_y, &screen_x, &screen_y);
-            int drawn = p4_resources_draw(column->icon_token, screen_x, screen_y, depth,
+            int drawn = p4_resources_draw(column->header_token, screen_x, screen_y, depth,
                 opacity | (header_known ? 0x00004c24u : 0x00707070u),
-                canvas.factor_x * saved_x * 26.0f / (float)column->image_width,
-                canvas.factor_y * saved_y * 20.0f / (float)column->image_height);
+                canvas.factor_x * row_scale_x, canvas.factor_y * saved_y);
             if (drawn != P4_RESOURCE_OK) { result = P4_TABLE_RENDER_ERROR; break; }
         }
         /* 00218C60 cell for a known pair; 00219790's unknown cell otherwise. */
@@ -355,6 +377,133 @@ int p4_game_elements_ui_native_analyze_affinities(void *work, void *unit,
                     text_x, text_y, depth, 0x89ff1f00u | (opacity >> 24), 1, 0, 0, 0,
                     glyph_horizontal, glyph_vertical)) result = P4_TABLE_RENDER_ERROR;
         }
+    }
+    btlUiSetScale(work, saved_x, saved_y);
+    return result;
+}
+
+/* ---- Analyze ailment page (PortSeamlessUI; reviewed with PortTables and
+ * PortPhysSplit). Columns follow the hard-mode order (Panic, Fear, Rage,
+ * Silence, Poison, Exhaustion, Enervation, Freeze, Shock) over status leaves
+ * (datCalcStatusElement: 0x10 8, 0x4 10, 0x2 11, 0x8 15, 0x20 9, 0x40 13,
+ * 0x80 14; authored Freeze 24 and Shock 25). A leaf is a column only when the
+ * target has a pair for it (000681) and a package gives it header art
+ * (header-icon-* or [element-header]); nothing is shown for an unmodelled
+ * slot, and "?" only means not yet observed. */
+extern uint32_t datGetFlag(int32_t bit);
+extern void *datPersonaGetRecord(uint16_t id);
+extern int32_t datPersonaFindSkillSlot(uint8_t *persona, uint16_t skill);
+static const uint32_t ailment_leaves[] = {8u, 10u, 11u, 15u, 9u, 13u, 14u, 24u, 25u};
+enum { AILMENT_COLUMNS = (int)(sizeof ailment_leaves / sizeof ailment_leaves[0]) };
+typedef struct AilmentColumn {
+    uint32_t state, known, icon;
+} AilmentColumn;
+
+/* Presenter policy, not retail: once Rise navigates (flag 0x38) retail's
+ * Analyze command is Full Analysis (0x10B); the page reveals every ailment then
+ * if her Persona (party 5, 0x0010A900) holds 0x10B (0x0010CE10). */
+static int full_analysis(void)
+{
+    if (!datGetFlag(0x38)) return 0;
+    uint8_t *persona = datPersonaGetRecord(5u);
+    return persona && datPersonaFindSkillSlot(persona, 0x10Bu) != -1;
+}
+/* The page's columns for one target; a negative error refuses. */
+static int ailment_columns(void *unit, AilmentColumn *out)
+{
+    if (!active || !unit || !p4_game_elements_ui_count(active)) return 0;
+    const int full = full_analysis();
+    int count = 0;
+    for (int i = 0; i < AILMENT_COLUMNS; ++i) {
+        uint32_t state, observed, icon;
+        int result = p4_game_knowledge_native_ailment(unit, ailment_leaves[i], &state, &observed);
+        if (result == P4_TABLE_NOT_FOUND) continue;
+        if (!result) result = p4_game_elements_ui_native_header_icon(ailment_leaves[i], &icon);
+        if (result == P4_TABLE_NOT_FOUND) continue;
+        if (result) return result; /* table errors are negative */
+        out[count++] = (AilmentColumn){state, observed || full, icon};
+    }
+    return count;
+}
+void p4_game_elements_ui_native_analyze_reset(void) { analyze_page = 0; }
+int p4_game_elements_ui_native_analyze_flip(void *unit)
+{
+    AilmentColumn columns[AILMENT_COLUMNS];
+    const int count = ailment_columns(unit, columns);
+    if (count < 0) p4_game_elements_ui_native_refuse(count);
+    if (!count) return 0;
+    analyze_page = !analyze_page;
+    return 1;
+}
+int p4_game_elements_ui_native_analyze_page(void *unit)
+{
+    if (!analyze_page) return 0;
+    AilmentColumn columns[AILMENT_COLUMNS];
+    const int count = ailment_columns(unit, columns);
+    if (count < 0) p4_game_elements_ui_native_refuse(count);
+    return count > 0;
+}
+/* The page-flip prompt while the target has an ailment page: the declared
+ * analyze-ailments image on the affinity page, analyze-affinities on the
+ * ailment page, its top-left just right of the row's last header (canvas
+ * x + 266, the header's top) at the row's transform. No declaration, no prompt. */
+int p4_game_elements_ui_native_analyze_prompt(void *work, void *unit, float x, float header_y)
+{
+    AilmentColumn columns[AILMENT_COLUMNS];
+    if (!work || !unit) return P4_TABLE_INVALID;
+    const int count = ailment_columns(unit, columns);
+    if (count <= 0) return count;
+    uint32_t icon;
+    int result = p4_game_elements_ui_native_prompt(analyze_page ? P4_ELEMENT_UI_PROMPT_ANALYZE_AFFINITIES :
+        P4_ELEMENT_UI_PROMPT_ANALYZE_AILMENTS, &icon);
+    if (result == P4_TABLE_NOT_FOUND) return P4_TABLE_OK;
+    if (result) return result;
+    ElementUiCanvas canvas;
+    memcpy(&canvas, (const uint8_t *)work + 4u, sizeof canvas);
+    float depth, screen_x, screen_y;
+    memcpy(&depth, (const uint8_t *)work + 0x90u, sizeof depth);
+    const uint32_t opacity = (255u - ((const uint8_t *)work)[0x7cu]) << 24;
+    canvas_point(&canvas, x + 266.0f, header_y, &screen_x, &screen_y);
+    return p4_game_elements_ui_native_draw_icon(icon, screen_x, screen_y, depth, opacity | 0x00ffffffu,
+        canvas.factor_x * canvas.scale_x, canvas.factor_y * canvas.scale_y);
+}
+static uint32_t ailment_cell(uint32_t state)
+{
+    /* The native Analyze cells: Null, Str, Wk, or the plain normal cell. */
+    return state == P4_KNOWLEDGE_AILMENT_IMMUNE ? 0x38u : state == P4_KNOWLEDGE_AILMENT_RESIST ? 0x37u :
+        state == P4_KNOWLEDGE_AILMENT_WEAK ? 0x36u : 0x3au;
+}
+int p4_game_elements_ui_native_analyze_ailments(void *work, void *unit,
+    float x, float header_y, float cell_y, float unknown_y)
+{
+    AilmentColumn columns[AILMENT_COLUMNS];
+    if (!work || !unit) return P4_TABLE_INVALID;
+    const int count = ailment_columns(unit, columns);
+    if (count <= 0) return count < 0 ? count : P4_TABLE_INVALID;
+    ElementUiCanvas canvas;
+    memcpy(&canvas, (const uint8_t *)work + 4u, sizeof canvas);
+    const float saved_x = canvas.scale_x, saved_y = canvas.scale_y;
+    float depth;
+    memcpy(&depth, (const uint8_t *)work + 0x90u, sizeof depth);
+    const uint32_t opacity = (255u - ((const uint8_t *)work)[0x7cu]) << 24;
+    /* The affinity page's geometry for the same column count. */
+    const float row_scale_x = saved_x * column_factor((uint32_t)count);
+    btlUiSetScale(work, row_scale_x, saved_y);
+    int result = P4_TABLE_OK;
+    for (int i = 0; !result && i < count; ++i) {
+        const float point_x = x + column_x((uint32_t)i, (uint32_t)count);
+        const uint32_t known = columns[i].known;
+        float screen_x, screen_y;
+        canvas_point(&canvas, point_x, header_y, &screen_x, &screen_y);
+        result = p4_game_elements_ui_native_draw_icon(columns[i].icon, screen_x, screen_y, depth,
+            opacity | (known ? 0x00004c24u : 0x00707070u), canvas.factor_x * row_scale_x, canvas.factor_y * saved_y);
+        if (result) break;
+        btlUiDrawSpriteFaded(work, 14, 0x43, point_x - 2.0f, cell_y,
+            known ? 0x24 : 0x70, known ? 0x4c : 0x70, known ? 0 : 0x70, 255);
+        if (known)
+            btlUiDrawSpriteFaded(work, 13, (int32_t)ailment_cell(columns[i].state),
+                point_x, cell_y + 2.0f, 0x89, 255, 0x1f, 255);
+        else btlUiDrawSpriteFaded(work, 10, 0x4a, point_x, unknown_y, 0x89, 255, 0x1f, 255);
     }
     btlUiSetScale(work, saved_x, saved_y);
     return result;

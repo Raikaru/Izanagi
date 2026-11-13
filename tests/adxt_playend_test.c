@@ -9,17 +9,20 @@
  * The test drives the real kernel clock: per update it calls p4pc_wait_frame_boundary twice. Each
  * VBLANK renders that period's audio (P4PC_VIRTUAL_CLOCK=1, p4snd_virtual_tick from the kernel) and
  * runs the VBLANK chain: the game's field gate (FldShadow_InstallIntcHandler) and, behind it, a
- * handler standing in for kwlnEnableInterrupts that asks for one ADXT server pass. A synthetic
- * 24 kHz mono ADX of 37216 samples (no loop, 11 sectors like the voice) arrives in the handle's input
- * joint at update ARRIVE, as a disc read completing. Checks:
+ * handler standing in for kwlnEnableInterrupts: like ADXM_ExecVint it counts the pass
+ * (adxt_vsync_cnt, 0x007188b8) and asks for one ADXT server pass. A synthetic 24 kHz mono ADX of
+ * 39989 samples (no loop, 12 sectors like collision 900's cue 0x116) arrives in the handle's input
+ * joint at update ARRIVE, as a disc read completing. It plays twice, keyed on at the two pass
+ * counts retail keyed cue 0x116 on at in collision 900. Checks:
  *   - the handle comes from the retail create (func_004d3850 -> adxt_Create) with the battle voice's
  *     work size: file ring 39 sectors, reload threshold 33;
  *   - the field gate passes one VBLANK in two, and every VBLANK renders 48000 * 1001 / 60000 frames;
  *   - DECINFO -> PREP in the arrival pass, PLAYING three passes later (two passes of decoded data
- *     reach 2 * maxdecsmpl = 2432 samples), then PLAYEND_WAIT, then PLAYEND at update ARRIVE + 53,
- *     50 passes after key-on: the renderer reports what played 2.75 passes back in 256-sample
- *     blocks, as retail's PS2RNA does, so the 37216 samples (37376 in whole blocks) are heard in
- *     the 50th pass (collision 900's 37222-sample voice: key-on at anchor+248, PLAYEND at 298);
+ *     reach 2 * maxdecsmpl = 2432 samples), then PLAYEND_WAIT 43 passes after key-on and PLAYEND
+ *     when the renderer has reported every sample. The renderer reports the IOP's 256-sample
+ *     blocks at its clock's phase against the pass count. Keyed on at count 8811, retail
+ *     (anchor+754) ended 53 passes after key-on with flush_nsmpl 11691. Keyed on at count 13600
+ *     (anchor+5535), it was still in PLAYEND_WAIT 53 passes after key-on, and the model ends it at 54;
  *   - each PLAYEND_WAIT pass pads at most maxdecsmpl (1216) samples and flush_nsmpl (+0xa8)
  *     counts them;
  *   - the renderer is stopped and empty at PLAYEND.
@@ -42,11 +45,12 @@
 
 #define SKIP_RETURN 77
 #define RATE 24000
-#define NSMPL 37216                 /* 1163 blocks of 32 */
-#define FILE_BYTES (11 * 0x800)
+#define NSMPL 39989                 /* collision 900's cue 0x116 */
+#define FILE_BYTES (12 * 0x800)
 #define WORK_BYTES 0x1c1d8          /* ACSSND_Init's ADXT work for a two-channel voice at 24 kHz */
 #define ARRIVE 5
 #define UPDATES 80
+#define ADXT_VSYNC_CNT 0x007188b8u  /* adxt_vsync_cnt */
 
 typedef struct {
     uint32_t data;
@@ -93,10 +97,12 @@ static void check(const char *what, long got, long want)
     }
 }
 
-/* Stands in for kwlnEnableInterrupts (ADXM_ExecVint wakes the CRI server threads). */
+/* Stands in for kwlnEnableInterrupts -> ADXM_ExecVint: counts the pass (adxt_vsync_cnt) and wakes
+ * the CRI server. */
 static int32_t server_wake(int32_t cause)
 {
     (void)cause;
+    *(uint32_t *)P4_G2H(ADXT_VSYNC_CNT) += 1;
     wakeups++;
     return 0;
 }
@@ -113,7 +119,7 @@ static void put_be32(uint8_t *p, uint32_t v)
     put_be16(p + 2, v);
 }
 
-/* A plain 4-bit ADX (type 3, version 4, no loop): header, NSMPL / 32 frames, end frame (0x8001). */
+/* A plain 4-bit ADX (type 3, version 4, no loop): header, ceil(NSMPL / 32) frames, end frame (0x8001). */
 static void build_adx(uint8_t *f)
 {
     uint8_t *p;
@@ -132,7 +138,7 @@ static void build_adx(uint8_t *f)
     f[18] = 4;
     memcpy(f + 0x22, "(c)CRI", 6);
     p = f + 0x28;
-    for (b = 0; b < NSMPL / 32; b++, p += 18) {
+    for (b = 0; b < (NSMPL + 31) / 32; b++, p += 18) {
         put_be16(p, 0x0040);
         memset(p + 2, (b & 1) ? 0x71 : 0x17, 16);
     }
@@ -158,17 +164,92 @@ static void arrive(SjObj *sj, const uint8_t *file)
     check("input joint takes the whole file", done, FILE_BYTES);
 }
 
+/* Plays the file once on `adxt`, keyed on in the pass counted `keyon_count`; checks every update
+ * against retail's: PLAYEND_WAIT 43 passes after key-on, PLAYEND `end_after` passes after it, and
+ * (when nonzero) flush_nsmpl `flush` at PLAYEND. */
+static void play(uint8_t *adxt, const uint8_t *file, uint32_t keyon_count, int end_after, int32_t flush_want)
+{
+    uint8_t *jbuf = p4pc_heap_calloc(1, 0x6000 + 0x24);
+    SjObj *sj = SJRBF_Create(jbuf, 0x6000, 0x24);
+    int u, v, stat, prev = -1;
+    int prep = -1, playing = -1, wait = -1, end = -1;
+    int pads = 0;
+    char what[96];
+
+    ADXT_StartSj(adxt, sj);
+    ADXT_SetLnkSw(adxt, 0);
+    for (u = 0; u < UPDATES && end < 0; u++) {
+        int passes = 0;
+
+        if (u == ARRIVE) {
+            /* the passes at ARRIVE .. ARRIVE + 3 count up to keyon_count, PLAYING's pass */
+            *(uint32_t *)P4_G2H(ADXT_VSYNC_CNT) = keyon_count - 4;
+            arrive(sj, file);
+        }
+        for (v = 0; v < 2; v++) {
+            uint64_t before = p4snd_frames_rendered();
+            int woke = wakeups;
+
+            p4pc_wait_frame_boundary();
+            vblanks++;
+            if (p4snd_frames_rendered() - before != 800 && p4snd_frames_rendered() - before != 801) {
+                check("frames rendered by one VBLANK", (long)(p4snd_frames_rendered() - before), 801);
+            }
+            if (wakeups != woke) {
+                int32_t flush = *(int32_t *)(adxt + 0xa8);
+
+                ADXT_ExecServer();
+                passes++;
+                if (prev == 4) {
+                    int32_t pad = *(int32_t *)(adxt + 0xa8) - flush;
+
+                    if (pad < 0 || pad > 1216) {
+                        check("PLAYEND_WAIT pass pads 0..maxdecsmpl samples", pad, 1216);
+                    }
+                    pads++;
+                } else if (*(int32_t *)(adxt + 0xa8) != 0) {
+                    check("flush_nsmpl outside PLAYEND_WAIT", *(int32_t *)(adxt + 0xa8), 0);
+                }
+                prev = (int8_t)adxt[1];
+            }
+        }
+        check("server passes per update", passes, 1);
+        stat = (int8_t)adxt[1];
+        if (stat == 2 && prep < 0) {
+            prep = u;
+        } else if (stat == 3 && playing < 0) {
+            playing = u;
+        } else if (stat == 4 && wait < 0) {
+            wait = u;
+        } else if (stat == 5) {
+            end = u;
+        }
+    }
+    fprintf(stderr, "adxt_playend_test: key-on count %u: PREP %d PLAYING %d PLAYEND_WAIT %d PLAYEND %d (arrival %d), flush_nsmpl %d\n",
+            keyon_count, prep, playing, wait, end, ARRIVE, *(int32_t *)(adxt + 0xa8));
+    check("maxdecsmpl (+0x48)", *(int32_t *)(adxt + 0x48), 1216);
+    check("PREP update", prep, ARRIVE);
+    check("PLAYING update", playing, ARRIVE + 3);
+    check("pass count at PLAYING", (long)*(uint32_t *)P4_G2H(ADXT_VSYNC_CNT) - (end - playing), keyon_count);
+    check("PLAYEND_WAIT update", wait, ARRIVE + 3 + 43);
+    snprintf(what, sizeof what, "PLAYEND update, key-on at count %u", keyon_count);
+    check(what, end, ARRIVE + 3 + end_after);
+    if (pads == 0 || *(int32_t *)(adxt + 0xa8) <= 0) {
+        check("flush_nsmpl (+0xa8) counts the PLAYEND_WAIT padding", *(int32_t *)(adxt + 0xa8), 1216);
+    }
+    if (flush_want != 0) {
+        check("flush_nsmpl (+0xa8) at PLAYEND", *(int32_t *)(adxt + 0xa8), flush_want);
+    }
+    check("renderer empty at PLAYEND", ADXRNA_GetNumData(P4_G2H(*(uint32_t *)(adxt + 0x0c))), 0);
+}
+
 static int test_main(int argc, char **argv)
 {
     (void)argc;
     (void)argv;
     const char *iso = getenv("P4PC_ISO");
     const char *elf = getenv("P4PC_ELF");
-    uint8_t *adxt, *file, *jbuf;
-    SjObj *sj;
-    int u, v, stat, prev = -1;
-    int prep = -1, playing = -1, wait = -1, end = -1;
-    int pads = 0;
+    uint8_t *adxt, *file;
 
     if (iso == NULL || iso[0] == '\0' || elf == NULL || elf[0] == '\0') {
         fprintf(stderr, "adxt_playend_test: P4PC_ISO or P4PC_ELF unset, skipped\n");
@@ -207,70 +288,9 @@ static int test_main(int argc, char **argv)
 
     file = malloc(FILE_BYTES);
     build_adx(file);
-    jbuf = p4pc_heap_calloc(1, 0x6000 + 0x24);
-    sj = SJRBF_Create(jbuf, 0x6000, 0x24);
-    ADXT_StartSj(adxt, sj);
-    ADXT_SetLnkSw(adxt, 0);
-
-    for (u = 0; u < UPDATES && end < 0; u++) {
-        int passes = 0;
-
-        if (u == ARRIVE) {
-            arrive(sj, file);
-        }
-        for (v = 0; v < 2; v++) {
-            uint64_t before = p4snd_frames_rendered();
-            int woke = wakeups;
-
-            p4pc_wait_frame_boundary();
-            vblanks++;
-            if (p4snd_frames_rendered() - before != 800 && p4snd_frames_rendered() - before != 801) {
-                check("frames rendered by one VBLANK", (long)(p4snd_frames_rendered() - before), 801);
-            }
-            if (wakeups != woke) {
-                int32_t flush = *(int32_t *)(adxt + 0xa8);
-
-                ADXT_ExecServer();
-                passes++;
-                if (prev == 4) {
-                    int32_t pad = *(int32_t *)(adxt + 0xa8) - flush;
-
-                    if (pad <= 0 || pad > 1216) {
-                        check("PLAYEND_WAIT pass pads 1..maxdecsmpl samples", pad, 1216);
-                    }
-                    pads++;
-                } else if (*(int32_t *)(adxt + 0xa8) != 0) {
-                    check("flush_nsmpl outside PLAYEND_WAIT", *(int32_t *)(adxt + 0xa8), 0);
-                }
-                prev = (int8_t)adxt[1];
-            }
-        }
-        check("server passes per update", passes, 1);
-        stat = (int8_t)adxt[1];
-        if (stat == 2 && prep < 0) {
-            prep = u;
-        } else if (stat == 3 && playing < 0) {
-            playing = u;
-        } else if (stat == 4 && wait < 0) {
-            wait = u;
-        } else if (stat == 5) {
-            end = u;
-        }
-    }
-    fprintf(stderr, "adxt_playend_test: PREP %d PLAYING %d PLAYEND_WAIT %d PLAYEND %d (arrival %d), flush_nsmpl %d\n",
-            prep, playing, wait, end, ARRIVE, *(int32_t *)(adxt + 0xa8));
+    play(adxt, file, 8811, 53, 11691);  /* collision 900 anchor+754 */
+    play(adxt, file, 13600, 54, 0);     /* collision 900 anchor+5535 */
     check("field gate: wake-ups per VBLANK pair", wakeups * 2, vblanks);
-    check("maxdecsmpl (+0x48)", *(int32_t *)(adxt + 0x48), 1216);
-    check("PREP update", prep, ARRIVE);
-    check("PLAYING update", playing, ARRIVE + 3);
-    if (!(wait > playing && wait < ARRIVE + 53)) {
-        check("PLAYEND_WAIT update between PLAYING and PLAYEND", wait, ARRIVE + 40);
-    }
-    check("PLAYEND update", end, ARRIVE + 53);
-    if (pads == 0 || *(int32_t *)(adxt + 0xa8) <= 0) {
-        check("flush_nsmpl (+0xa8) counts the PLAYEND_WAIT padding", *(int32_t *)(adxt + 0xa8), 1216);
-    }
-    check("renderer empty at PLAYEND", ADXRNA_GetNumData(P4_G2H(*(uint32_t *)(adxt + 0x0c))), 0);
     free(file);
     if (failures == 0) {
         fprintf(stderr, "adxt_playend_test: ok\n");

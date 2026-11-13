@@ -24,6 +24,7 @@ enum { ENV_OFF = 0, ENV_ATTACK, ENV_DECAY, ENV_SUSTAIN, ENV_RELEASE };
 struct P4SndVoice {
     int kind;
     int playing;
+    int category; /* P4SndCategory: whose volume scales this voice */
     int nch;
     double rate; /* source frames per second */
     float target_l[P4SND_MAX_CH], target_r[P4SND_MAX_CH];
@@ -55,6 +56,10 @@ static struct {
     P4SndVoice voices[MAX_VOICES];
     float master;
     float user_gain; /* the player's volume (settings), applied to the device stream only */
+    float category_gain[P4SND_CAT_COUNT]; /* per-category volume; exactly 1 leaves every sample as is */
+    int meter;        /* P4PC_AUDIO_METER: log each category's level once a second */
+    double meter_energy[P4SND_CAT_COUNT];
+    uint64_t meter_frames;
     int offline;
     int virtual_clock; /* tick-driven; live lockstep may also have a playback-only device */
     unsigned long long virtual_frac; /* samples owed to the flips so far, in units of 1/60000 sample */
@@ -66,7 +71,7 @@ static struct {
     void (*tick_hooks[MAX_HOOKS])(double seconds);
     float scratch[RENDER_CHUNK * 2];
     float wet[CHUNK_FRAMES * 2]; /* the reverb's input for the chunk being mixed */
-} g = { .master = 1.0f, .user_gain = 1.0f };
+} g = { .master = 1.0f, .user_gain = 1.0f, .category_gain = {1.0f, 1.0f, 1.0f, 1.0f}, .meter = -1 };
 
 static void ensure_lock(void)
 {
@@ -116,6 +121,7 @@ static P4SndVoice *voice_alloc(int kind)
             v = &g.voices[i];
             memset(v, 0, sizeof(*v));
             v->kind = kind;
+            v->category = kind == KIND_SAMPLE ? P4SND_CAT_EFFECTS : P4SND_CAT_MUSIC;
             v->rate = P4SND_RATE;
             v->mix_dry_l = v->mix_dry_r = 1.0f;
             break;
@@ -353,6 +359,7 @@ int p4snd_sample_done(const P4SndVoice *v)
 
 static void mix_stream(P4SndVoice *v, float *out, int frames)
 {
+    const float volume = g.category_gain[v->category];
     uint32_t wr = atomic_load_explicit(&v->wr, memory_order_acquire);
     uint32_t rd = v->rd_local;
     double frac = v->frac;
@@ -388,8 +395,8 @@ static void mix_stream(P4SndVoice *v, float *out, int frames)
                 rd++;
             }
         }
-        out[i * 2] += fl;
-        out[i * 2 + 1] += fr;
+        out[i * 2] += fl * volume;
+        out[i * 2 + 1] += fr * volume;
         for (ch = 0; ch < v->nch; ch++) {
             l[ch] += dl[ch];
             r[ch] += dr[ch];
@@ -413,6 +420,7 @@ static void mix_sample(P4SndVoice *v, float *out, int frames)
 {
     const P4SndSample *s = v->smp;
     const double step = v->rate / (double)P4SND_RATE;
+    const float volume = g.category_gain[v->category];
     float l = v->cur_l[0];
     float r = v->cur_r[0];
     const float dl = (v->target_l[0] - l) / (float)frames;
@@ -473,7 +481,7 @@ static void mix_sample(P4SndVoice *v, float *out, int frames)
         }
         a = (float)s->pcm[v->spos];
         b = (float)s->pcm[next];
-        smp = (a + (b - a) * (float)v->frac) * (1.0f / 32768.0f) * v->env_level;
+        smp = (a + (b - a) * (float)v->frac) * (1.0f / 32768.0f) * v->env_level * volume;
         out[i * 2] += smp * l * v->mix_dry_l;
         out[i * 2 + 1] += smp * r * v->mix_dry_r;
         g.wet[i * 2] += smp * l * v->mix_wet_l;
@@ -500,6 +508,49 @@ static void mix_sample(P4SndVoice *v, float *out, int frames)
     v->cur_r[0] = v->target_r[0];
 }
 
+static void mix_voice(P4SndVoice *v, float *out, int frames)
+{
+    if (v->kind == KIND_STREAM) {
+        mix_stream(v, out, frames);
+    } else {
+        mix_sample(v, out, frames);
+    }
+}
+
+/* P4PC_AUDIO_METER=1 (tests): each voice mixes into a scratch chunk first so its
+ * category's energy can be summed; once a second of output the RMS level of each
+ * category is logged. Off, voices mix straight into the output as always. */
+static void mix_metered(P4SndVoice *v, float *out, int frames)
+{
+    float part[CHUNK_FRAMES * 2];
+    int i;
+
+    memset(part, 0, (size_t)frames * 2 * sizeof(float));
+    mix_voice(v, part, frames);
+    for (i = 0; i < frames * 2; i++) {
+        out[i] += part[i];
+        g.meter_energy[v->category] += (double)part[i] * (double)part[i];
+    }
+}
+
+static void meter_report(int frames)
+{
+    static const char *const names[P4SND_CAT_COUNT] = {"music", "effects", "voice", "movie"};
+    int c;
+
+    g.meter_frames += (uint64_t)frames;
+    if (g.meter_frames < P4SND_RATE) {
+        return;
+    }
+    fprintf(stderr, "p4snd: meter");
+    for (c = 0; c < P4SND_CAT_COUNT; c++) {
+        fprintf(stderr, " %s=%.4f", names[c], sqrt(g.meter_energy[c] / (double)(g.meter_frames * 2)));
+        g.meter_energy[c] = 0.0;
+    }
+    fprintf(stderr, "\n");
+    g.meter_frames = 0;
+}
+
 /* Mixes one chunk of at most CHUNK_FRAMES frames. */
 static void mix_chunk(float *out, int frames)
 {
@@ -510,17 +561,24 @@ static void mix_chunk(float *out, int frames)
     SDL_LockMutex(g.lock);
     trace_locked = p4pc_prof_span_stop(trace_start);
     memset(g.wet, 0, (size_t)frames * 2 * sizeof(float));
+    if (g.meter < 0) {
+        const char *meter = getenv("P4PC_AUDIO_METER");
+        g.meter = meter != NULL && meter[0] == '1';
+    }
     for (i = 0; i < MAX_VOICES; i++) {
         P4SndVoice *v = &g.voices[i];
 
         if (v->kind == KIND_FREE || !v->playing) {
             continue;
         }
-        if (v->kind == KIND_STREAM) {
-            mix_stream(v, out, frames);
+        if (g.meter) {
+            mix_metered(v, out, frames);
         } else {
-            mix_sample(v, out, frames);
+            mix_voice(v, out, frames);
         }
+    }
+    if (g.meter) {
+        meter_report(frames);
     }
     if (!g.virtual_clock || g.stream != NULL) {
         p4rev_process(g.wet, out, frames); /* only skip effects when virtual samples are discarded */
@@ -642,6 +700,34 @@ void p4snd_set_user_volume(float gain)
 }
 
 
+void p4snd_voice_set_category(P4SndVoice *v, int category)
+{
+    if (v == NULL || category < 0 || category >= P4SND_CAT_COUNT) {
+        return;
+    }
+    ensure_lock();
+    SDL_LockMutex(g.lock);
+    v->category = category;
+    SDL_UnlockMutex(g.lock);
+}
+
+int p4snd_set_category_gain(int category, float gain)
+{
+    if (category < 0 || category >= P4SND_CAT_COUNT || !(gain >= 0.0f && gain <= 1.0f)) {
+        return -1;
+    }
+    ensure_lock();
+    SDL_LockMutex(g.lock);
+    g.category_gain[category] = gain;
+    SDL_UnlockMutex(g.lock);
+    return 0;
+}
+
+float p4snd_category_gain(int category)
+{
+    return category >= 0 && category < P4SND_CAT_COUNT ? g.category_gain[category] : -1.0f;
+}
+
 uint64_t p4snd_frames_rendered(void)
 {
     return g.frames_rendered;
@@ -649,12 +735,29 @@ uint64_t p4snd_frames_rendered(void)
 
 /* ------------------------------------------------------------------ device */
 
+/* Paced practice play (p4snd_set_frame_driven): the device plays silence and the kernel renders
+ * each VBLANK period's audio through p4snd_virtual_tick, so voices and streams advance per game
+ * frame exactly as at 1x. */
+static _Atomic int frame_driven;
+static float paced_scratch[RENDER_CHUNK * 2];
+
 static void SDLCALL audio_cb(void *userdata, SDL_AudioStream *stream, int additional, int total)
 {
     int frames = additional / (int)(sizeof(float) * 2);
 
     (void)userdata;
     (void)total;
+    if (atomic_load(&frame_driven)) {
+        static const float silence[RENDER_CHUNK * 2];
+
+        while (frames > 0) {
+            int n = frames > RENDER_CHUNK ? RENDER_CHUNK : frames;
+
+            SDL_PutAudioStreamData(stream, silence, n * (int)(sizeof(float) * 2));
+            frames -= n;
+        }
+        return;
+    }
     while (frames > 0) {
         int n = frames > RENDER_CHUNK ? RENDER_CHUNK : frames;
 
@@ -672,7 +775,7 @@ static int SDLCALL pacer_main(void *arg)
 
     (void)arg;
     while (atomic_load(&g.pacer_run)) {
-        p4snd_render(buf, 480);
+        if (!atomic_load(&frame_driven)) p4snd_render(buf, 480);
         next += (uint64_t)480 * 1000000000ull / P4SND_RATE;
         {
             uint64_t now = SDL_GetTicksNS();
@@ -687,12 +790,14 @@ static int SDLCALL pacer_main(void *arg)
     return 0;
 }
 
-/* One VBLANK period's share of audio on a virtual-clock run: 48000 / (60000 / 1001) samples, the remainder carried. */
+/* One VBLANK period's share of audio on a virtual-clock run, or in paced play: 48000 / (60000 / 1001) samples, the remainder
+ * carried. Paced play discards it (the output is muted). */
 void p4snd_virtual_tick(void)
 {
     int frames;
+    const int paced = !g.virtual_clock && atomic_load(&frame_driven);
 
-    if (!g.virtual_clock) {
+    if (!g.virtual_clock && !paced) {
         return;
     }
     g.virtual_frac += (unsigned long long)P4SND_RATE * 1001ull;
@@ -701,11 +806,24 @@ void p4snd_virtual_tick(void)
     while (frames > 0) {
         const int n = frames > RENDER_CHUNK ? RENDER_CHUNK : frames;
 
-        p4snd_render(g.scratch, n);
-        if (g.stream != NULL)
+        p4snd_render(paced ? paced_scratch : g.scratch, n);
+        if (g.stream != NULL && !paced)
             SDL_PutAudioStreamData(g.stream, g.scratch, n * (int)(sizeof(float) * 2));
         frames -= n;
     }
+}
+
+void p4snd_set_frame_driven(int on)
+{
+    if (g.virtual_clock) {
+        return; /* a virtual-clock run is frame-driven already */
+    }
+    if (!on) {
+        g.virtual_frac = 0;
+    }
+    atomic_store(&frame_driven, on != 0);
+    fprintf(stderr, "p4snd: %s at %llu frames rendered\n", on ? "muted, rendering per VBLANK period" : "device plays in real time",
+            (unsigned long long)g.frames_rendered);
 }
 
 void p4snd_use_offline(void)

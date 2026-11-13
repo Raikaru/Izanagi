@@ -2,10 +2,15 @@
 
 One line per address: `<addr>  <owner>  <what it replaces>`. Claim an address here before writing `overrides/<addr>.c`. One owner per address.
 
+Port source files with no lane of their own name the owner to ask before changing them (one bullet per path; the address list follows):
+
+- `src/viewer/p4pc_viewer.c`: PortModelPipeline (acked by Main as lead; the viewer and its dev-only environment seams, including P4PC_VIEWER_MODEL and P4PC_VIEWER_DUMP)
+
 00100220  PortSkeleton  syscall 0x23 trap (kwlnExitThread)
 00100230  PortSkeleton  boot heap base (kwlnProbeHeapBudget)
 00100310  PortSkeleton  TIMER0 INTC callback, no-op (kwlnHandleTimerInterrupt)
 00100350  PortSkeleton  kwlnInitIop, IOP reset replaced by p4pc_platform_init
+00460a80  OverlayLifetime  native queue clear plus release of synthetic sprite packs retired behind the main ordering table
 0043ece8  PortSkeleton  malloc entry, native pointer bridge to literal retail EE newlib in src/platform/kernel_heap.c + ee_heap.c
 0043ed08  PortSkeleton  free entry, native pointer bridge to literal retail EE newlib in src/platform/kernel_heap.c + ee_heap.c
 0043ef80  PortSkeleton  _malloc_r (newlib), explicit guest reent and original chunk/bin/reuse implementation in src/platform/ee_heap.c
@@ -20,6 +25,7 @@ One line per address: `<addr>  <owner>  <what it replaces>`. Claim an address he
 001932f0  PortBattleSim  native script encounter request plus opt-in pre-fade and original-getter-result observation; preserve constructor and sequence order
 00193840  PortBattleSim  native packed-block copy; PortTables coordinates admission, the shared skill/enemy bank observer and the table-service extent note published with each GP store
 001a4800  PortBattleSim  unchanged native READY-to-execution owner plus opt-in copied committed-command observation; free Persona/Analyze remain distinct
+001a2b50  PortApiCore  native AI-to-READY transition plus the p4.battle.decide stage (battle_decide.c) once the command record is released; retail body when no decider is enabled
 001b15b0  PortBattleSim  unchanged native queue reorder/admission owner plus opt-in copied ordinary/followup actor admission
 001f3010  PortBattleSim  unchanged native target HP/SP/status/death commit plus opt-in requested-versus-effective resource observation, including zero-delta native clamps
 001f39d0  PortBattleSim  unchanged native action-cost/inventory owner plus opt-in copied actual cost commit; no second native cost calculation
@@ -1395,11 +1401,12 @@ One line per address: `<addr>  <owner>  <what it replaces>`. Claim an address he
 00512c70  PortDecompSync  raw SFD frame-phase search, actual pointer return and error path; src/cri/sfd_port.c
 00517ad0  PortDecompSync  raw per-handle/global error provider; preserve retail guest 745a5c rather than the i386 SDK's private host BSS; src/cri/sfd_port.c
 00517b40  PortDecompSync  raw first-error record and application callback, including the live second code argument; src/cri/sfd_port.c
-00189940  PortMods  FldPanel2dUpdate: native touch-only Config corner; preserve retail HUD writes and draws with keyboard or pad
-00124830  PortMods  titleSelectMenu: native title Config shortcut and touch-only native corner; retain unrequested title selection behavior
+00124830  PortMods  titleSelectMenu: native title Config shortcut; retain unrequested title selection behavior
 0012c510  PortMods  cmpMainTaskStep: route an accepted field settings request through the native Camp System transition
 0012d000  PortMods  cmpMainTaskCreate: associate an accepted field request with its actual child task; PortTables coordinates only the item-tail allocation size
 00170b50  PortMods  FldCampTriggerTest: accept settings shortcuts only through the original flag-0x37 and field event gates
+00172ba0  ApiPassiveGrant  FldEvent_PartyHasSkill: 0x205 also counts when granted to the protagonist, his current Persona or his equipment, and when granted to an active member or its equipment, as the member's accessory 0x270 (disc ITEMTBL row 0x270 grants 0x205) counts (mirror_fixes)
+00232730  ApiPassiveGrant  datCalcHasSkill and every datCalc.c learned/fixed-slot passive search: the static datCalcHasRequestedSkill and datCalcHasFixedSkill (overrides/static) end with the unit's passive grants
 0035d0a0  PortMods  cmpConfigDraw: registered PC rows, Controls and bounded native pages using retail bars, font, footer, value controls and scrollbar art
 0035dfb0  PortMods  cmpConfigDrawOnOff: project visible logical toggle values/timers onto the original ON/OFF widget without growing the retail work block
 0035e820  PortMods  cmpConfigDestroy: native Config sidecar cleanup
@@ -1421,8 +1428,8 @@ One line per address: `<addr>  <owner>  <what it replaces>`. Claim an address he
 00463930  PortContentPacks  tmxDecodeStream: unchanged decoded guest image plus opt-in native source-provenance publication
 00243840  PortTablesSkill  skill name bank expansion through owned RAW native text; retail bank unchanged
 00114cb0  PortPhysSplit  legacy skill-icon selector kept for retail art; full-width element art is intercepted at 001138c0/00205170; PortTablesSkill coordinates existing skill active/passive predicate facet
-00113520  PortTablesSkill  equipped skill cost rows; explicit active predicate in mirror_fixes
-00138490  PortTablesSkill  camp skill deduplication; explicit active predicate in mirror_fixes
+00113520  PortTablesSkill  equipped skill cost rows; explicit active predicate in mirror_fixes; PortSkillAffinity facet: each cost row brackets its datCalcSkillCostById call with the shown persona record for the skill cost stage
+00138490  PortTablesSkill  camp skill deduplication; explicit active predicate in mirror_fixes; ApiPassiveGrant facet: the static cmpSkillListContains (overrides/static) also counts a passive granted to the roster Persona or the protagonist
 0013ac30  PortPhysSplit  legacy Camp label selector kept for retail art; full-width element art is intercepted at 00138bf0; PortTablesSkill coordinates existing skill active predicate facet
 001daf40  PortTablesSkill  AI skill eligibility; explicit registered/active predicates in mirror_fixes
 001db160  TablesEnemyKnowledge  expanded native AI owned-element scan; PortTablesSkill coordinates existing skill active predicate facet
@@ -1440,12 +1447,12 @@ One line per address: `<addr>  <owner>  <what it replaces>`. Claim an address he
 001eb1d0  TablesEnemyKnowledge  script weighted-command/target root carries exact selected candidate instead of losing family permission into a scalar
 001e8bb0  TablesEnemyKnowledge  legacy script command-family collection retains owning source/target frame and query through returned command selection
 001e8cd0  TablesEnemyKnowledge  legacy script effective-skill collection retains owning source/target frame and query through returned command selection
-001de640  TablesEnemyKnowledge  action-code decoding binds or clears the actual lifetime-owned selected-frame carrier; preserve retail packed command/plan tags
+001de640  TablesEnemyKnowledge  action-code decoding binds or clears the actual lifetime-owned selected-frame carrier; script decodes pass through this hookable entry; one-shot authored substitution; preserve retail packed command/plan tags
 001da230  TablesEnemyKnowledge  legacy repel profile/family query facet; full typed candidate context for Phys0 and explicit canonical nonphysical profile query
 001da270  TablesEnemyKnowledge  legacy drain profile/family query facet; full typed candidate context for Phys0 and explicit canonical nonphysical profile query
 001da2b0  TablesEnemyKnowledge  legacy null profile/family query facet; full typed candidate context for Phys0 and explicit canonical nonphysical profile query
 001da2f0  TablesEnemyKnowledge  legacy weakness profile/family query facet; full typed candidate context for Phys0 and explicit canonical nonphysical profile query
-001db360  TablesEnemyKnowledge  expanded normal-affinity predicate preserves unknown-first and native temporary/physical gates over exact candidate frames
+001db360  TablesEnemyKnowledge  expanded normal-affinity predicate preserves unknown-first and native temporary/physical gates over exact candidate frames; ApiPassiveGrant facet: the Counter test (mirror_fixes and the predicate body) also sees a granted Counter, Counterstrike or High Counter
 001db9f0  TablesEnemyKnowledge  expanded nonnormal-affinity predicate preserves original observed-only policy over exact candidate frames
 001b0a60  TablesEnemyKnowledge  release explicit one-allocation AI carrier accounting after original unlink and before original base free; inactive lifecycle unchanged, verified001b0b78-001b0bc4
 001b0bf0  TablesEnemyKnowledge  full action-list teardown releases the same appended carrier before original base-owner free; no separate per-action allocation or tail-ownership probing
@@ -1535,7 +1542,8 @@ One line per address: `<addr>  <owner>  <what it replaces>`. Claim an address he
 001138c0  PortPhysSplit  shared descriptor skill icon: expanded-cohort element art; exact retail call kept on the retail route
 00138bf0  PortPhysSplit  Camp skill-list element art before the legacy label lookup; retail lookup, coordinates, alpha and scale kept
 00116820  PortPhysSplit  persona/compendium affinity row: explicit expanded-cohort columns (overrides/00116820.c); retail loop and status layout kept
-00219790  PortPhysSplit  Analyze affinity row only: explicit expanded-cohort columns with canonical profile affinity and knowledge; retail loop kept
+00219790  PortPhysSplit  Analyze affinity row only: explicit expanded-cohort columns with canonical profile affinity and knowledge; retail loop kept. PortSeamlessUI: ailment page via separate draw (p4_game_elements_ui_native_analyze_ailments) while Square's page is selected
+001a24b0  PortSeamlessUI  btlActionAnalyzeUpdate: Square flips the Analyze row to the target's ailment page (only with ailment columns); entry and target switch reset to the affinity page; mirror_fixes
 001efd50  PortTablesSkill  target skill classification; explicit active predicate in mirror_fixes
 00199d00  PortTables  native opening-motion presentation leaf from the owning frame; PortTablesSkill coordinates existing skill active predicate facet
 001a7720  PortTables  native skill-update presentation route: formation, target cue and hit-reaction motion use the frame leaf or its declared retail family
@@ -1545,23 +1553,29 @@ One line per address: `<addr>  <owner>  <what it replaces>`. Claim an address he
 002266b0  PortTablesSkill  battle skill voice classification; explicit active predicate in mirror_fixes
 0010f8c0  PortTablesSkill  skill target property byte; explicit active guard in mirror_fixes
 00232a40  PortTablesSkill  skill availability; explicit active predicate in mirror_fixes
-00238940  PortTables  native status/KO affinity route; PortTablesSkill coordinates existing skill registered predicate facet
+00238940  PortTables  native status/KO affinity route and the landed-ailment knowledge observe (TablesEnemyKnowledge3's store); PortTablesSkill coordinates existing skill registered predicate facet; PortSkillAffinity facet: the rolled chance passes the status/KO chance stage before the 0..99 clamp and RpRandom; PortApiData facet: the stage reports the target's afflictions this battle
+001f6930  PortApiData  native per-turn ailment recovery decision (btlSoundSelectCureableStatuses); each eligible roll's chance passes the ailment wear-off stage before datCalcRandomBelow(100)
+00233bc0  PortApiData  native per-stat buff multiplier (datCalcBuffMultiplier); attack, magic, evasion, defense and accuracy pass the buff stage after the rank table, Charge/Concentrate and Lead boost
+00232680  PortApiData  ailment landing (datCalcSetBadStatus); a landing rage, fear, silence, confusion, poison, exhaustion or enervation counts toward the unit's afflictions this battle while a chance or wear-off modifier is registered
+0021e050  PortApiData  results-screen battle money (btlXpBaseAward); the team's yen passes the reward stage as btlXpApplyAwards pays it
+0021e110  PortApiData  battle EXP awards (btlXpPrepareAwards); each recipient's EXP (hero, party member, the protagonist's Personas) passes the reward stage before the level-up preview; ApiPassiveGrant facet: an inactive Persona's Growth also counts when granted to it or the protagonist, once with its slots
+0021e9a0  PortApiData  battle award payment (btlXpApplyAwards); the team's yen passes the reward stage before datAddMoney; PortApiEvents facet reports the applied awards after money and items are given
 002397d0  PortTablesSkill  skill status result domain; explicit active predicate in mirror_fixes
 00239e40  PortTablesSkill  skill cure domain; explicit active predicate in mirror_fixes
 00239f50  PortTablesSkill  skill application domain; explicit active predicate in mirror_fixes
 0023a1e0  PortTablesSkill  skill effect domain; explicit active predicate in mirror_fixes
 0023a490  PortTablesSkill  skill outcome domain; explicit active predicate in mirror_fixes
 0023d8e0  PortTables  native effective element and actor substitution; PortTablesSkill coordinates existing skill active predicate facet
-0023d9b0  PortTablesSkill  skill cost domain; explicit active predicate in mirror_fixes; PortTables enemy-ID bank bound facet
+0023d9b0  PortTablesSkill  skill cost domain; explicit active predicate in mirror_fixes; PortTables enemy-ID bank bound facet; PortSkillAffinity facet: a nonzero cost passes the skill cost stage after the halving and minimum; ApiPassiveGrant facet: HP/SP cost halving (0x20B/0x20A) also sees the unit's passive grants (mirror_fixes)
 0023ddc0  PortTablesSkill  skill threshold domain; explicit registered predicate in mirror_fixes
 0023df70  PortTablesSkill  skill flags domain; explicit active predicate in mirror_fixes
-0023e6f0  PortTables  native effective element/hit route; PortTablesSkill coordinates existing skill active predicate facet
-002411a0  PortTables  native effective element/hit result route; PortTablesSkill coordinates existing skill active predicate facet
+0023e6f0  PortTables  native effective element/hit route; PortTablesSkill coordinates existing skill active predicate facet; PortApiData facet: a rolled hit's chance passes the hit stage after the 50..99 clamp
+002411a0  PortTables  native effective element/hit result route; PortTablesSkill coordinates existing skill active predicate facet; PortApiData facet: the critical chance passes the hit stage after its 0..100 clamp
 00241bc0  PortTables  native effective element/applicability route; PortTablesSkill coordinates existing skill active predicate facet
 00241de0  PortTables  native effective element/mode route; PortTablesSkill coordinates existing skill active predicate facet
 00241f00  PortTablesSkill  support skill hit domain; explicit active predicate in mirror_fixes
-00242360  PortTablesSkill  skill chance domain; explicit active predicate in mirror_fixes; PortTables enemy-ID bank bound facet
-00242990  PortTables  native Light/Dark skill substitution family route and enemy-ID bank bounds; PortTablesSkill coordinates existing skill active predicate facet
+00242360  PortTablesSkill  skill chance domain; explicit active predicate in mirror_fixes; PortTables enemy-ID bank bound facet; ApiPassiveGrant facet: the ailment boost (0x21C) also sees the source's passive grants (mirror_fixes)
+00242990  PortTables  native Light/Dark skill substitution family route and enemy-ID bank bounds; PortTablesSkill coordinates existing skill active predicate facet; ApiPassiveGrant facet: each of the eight passive searches ends with the unit's passive grants
 00243650  PortTablesSkill  skill value domain; explicit active predicate in mirror_fixes; PortTables enemy-ID bank bound facet
 00243fa0  PortTablesSkill  skill type domain; explicit registered/active predicates in mirror_fixes
 002464e0  PortTablesSkill  calculation script skill flag; explicit active predicate in mirror_fixes
@@ -1570,7 +1584,7 @@ One line per address: `<addr>  <owner>  <what it replaces>`. Claim an address he
 00202340  PortTablesSkill  effect counter skill panel name lookup through canonical skill accessor
 0013b420  PortTablesSkill  skill card description through owned native MSG text; retail bank recipe unchanged
 00114e50  PortTablesSkill  selected persona skill help through owned native MSG text; caller passes selected skill ID
-001f14f0  PortTables  native action/element resolution and expanded enemy-knowledge gate through the knowledge owner's observe API; brackets each resolved hit's HP amount for the final-damage stage (aimed-at unit, repel); PortTablesSkill coordinates endurance sentinel4096 when expanded, original576 otherwise
+001f14f0  PortTables  native action/element resolution and expanded enemy-knowledge gate through the knowledge owner's observe API; brackets each resolved hit's HP amount for the final-damage stage (aimed-at unit, repel); PortTablesSkill coordinates endurance sentinel4096 when expanded, original576 otherwise; PortSkillAffinity facet: the bracket also carries the command (item, weapon attack, skill) for the damage and recovery stages
 00313690  PortTablesSkill  expanded skill inheritance/mutation grade; unchanged signed retail selector byte
 00304410  PortTablesSkill  fusion mutation catalog enumeration without 576-row scratch bound; original retail RNG path retained
 00312c60  PortTablesSkill  inherited skill weights use explicit expanded rate and bounded inheritance group, never full-width element as19-column index
@@ -1648,7 +1662,7 @@ One line per address: `<addr>  <owner>  <what it replaces>`. Claim an address he
 002df020  PortTables  scoped quantity-popup item icons retain stable IDs before retail atlas classification
 00109e30  PortTables  scoped overlay-first accessory-ID read only; preserve original hero/party physical reads without an overlay; all persona arithmetic remains the future persona owner's scope
 002d5040  PortTables  scoped selected/equipped stats-header icons use authored new-ID resources; retail getter/sprite paths and stat arithmetic stay untouched
-00235520  PortTables  native element/action amount route, enemy-ID bank bound and the final-damage stage (ordered registered modifiers; Hardmode and Challenge register, never hook); PortTablesSkill coordinates existing registered/active skill predicate facet
+00235520  PortTables  native element/action amount route, enemy-ID bank bound and the final-damage stage (ordered registered modifiers; Hardmode and Challenge register, never hook); PortTablesSkill coordinates existing registered/active skill predicate facet; PortSkillAffinity facet: party-source persona fields and the recovery stage for formula heals
 00244110  PortTables  canonical physical formula shared by original ABI and explicit owning frame/target-query calculation; preserve every term/order/conversion
 00244540  PortTables  canonical magic formula shared by original ABI and explicit owning frame/target-query calculation
 002447c0  PortTables  canonical power-plus-magic-tier formula with explicit calculation frame transport
@@ -1661,10 +1675,11 @@ One line per address: `<addr>  <owner>  <what it replaces>`. Claim an address he
 00244e20  PortTables  canonical status ratio of products with explicit owning status rider frame
 00244f60  PortTables  original script operand/result stores plus explicit local owning frame/query dispatch; no global last-action slot
 00245030  PortTables  native calculation-script element route; PortTablesSkill coordinates existing skill active predicate facets
-00231af0  PortTables  datUnitInit enemy-ID bound follows the published enemy banks (mirror_fixes)
-00231f80  PortTables  enemy base HP bank bound (mirror_fixes)
-00232290  PortTables  enemy base SP bank bound (mirror_fixes)
+00231af0  PortTables  datUnitInit enemy-ID bound follows the published enemy banks (mirror_fixes); PortApiData override facet: an enemy's starting HP/SP pass the unit stage, the override keeps the published bound
+00231f80  PortTables  enemy base HP bank bound (mirror_fixes); PortApiData override facet: max HP passes the unit stage after the party cap, the override keeps the published bound
+00232290  PortTables  enemy base SP bank bound (mirror_fixes); PortApiData override facet: max SP passes the unit stage after the party cap, the override keeps the published bound
 00232b40  PortTables  enemy stat bank bound (mirror_fixes)
+00232c70  PortApiData  battle stat (datCalcGetBattleStat); each of the five stats passes the unit stage before Enervation halves it
 00235320  PortTables  enemy threshold flag bank bound (mirror_fixes)
 0023a6b0  PortTables  enemy affinity id2 bank bound (mirror_fixes)
 0023e140  PortTables  enemy skill-list bank bound (mirror_fixes)
@@ -1712,3 +1727,22 @@ One line per address: `<addr>  <owner>  <what it replaces>`. Claim an address he
 0036c7e0  PortTables  persona card image of an added persona is its model source's (mirror_fixes)
 002ecfc0  PortChallenge  fusion command rows: a fusion kind is omitted only when a p4.authorize "fusion" authorizer denies it; exact retail rows otherwise
 001b1d70  PortChallenge  battle party/enemy action creation: a p4.battle.formation projector may replace the player-side lineup; exact retail loop over the encounter party otherwise
+00192b90  PortTables  btlInit: side-ailment state begins with the battle (mirror_fixes)
+001b05d0  PortTables  btlActionExitUpdate: a unit's side-ailment state ends before its battle unit is freed (mirror_fixes)
+00192cd0  PortTables  btlRelease: every side ailment ends with the battle (mirror_fixes); PortMods' battle_end hook route is unchanged
+001d69f0  PortTables  btlFormationFormatName: an added skill's battle effect file (skill/%03X.BED) is its effect source's (mirror_fixes)
+001f7d90  PortTables  btlSoundSkillSEInit: an added skill's sound bank (skill/%03X.se) is its effect source's (mirror_fixes)
+001f7e30  PortTables  btlSoundSkillSEUpdate: the same sound-bank name on a deferred load (mirror_fixes)
+002e7ac0  PortChallenge  Velvet Room menu dispatcher: a p4.authorize "fusion" denial of kind 6 (roster pair fusion, flag 0x1305) returns its entry to the root menu; exact retail dispatch otherwise. + PortFusionArts: a p4.velvet.command (mask test) draws its hint at the idle three-row root (f1 0x18) and opens its page on Square in the Velvet task's own Config child (f0 0x40, unused by retail) until that page closes
+0047b0c0  PortModelPipeline  mdlReadAuxChunks: unchanged retail RMD chunk reader plus the [resource-model] glTF override seam (overrides/0047b0c0.c, src/platform/models/p4model_build.c); an empty override table takes the retail path
+001747d0  PortApiCore  FldEvent_TriggerUpdate: a port field host slot after the eleven retail trigger pairs (the give.skill choice panel); exact retail controller with no host request
+002eb270  PortSeamlessUI  fclCombineLayoutTransition: the entry lets the native-rows service add or drop a mod card; a list with one is laid out for any count up to ten (p4VelvetLayout); exact retail otherwise
+002e90d0  PortSeamlessUI  fclCombineMenuRoot: card-list rows (0x1A, 0x1C) read through the native-rows side row, the mod card hosts its page in sub-state 0xF1; exact retail rows otherwise
+00317900  PortSeamlessUI  fclCombineDrawEntryCell: entry 9 (the mod card) draws from the native-rows slots; entries 0..8 exactly retail
+00318840  PortSeamlessUI  fclCombineUpdateEntryHighlight: entry 9 from the native-rows slots and extended pack; entries 0..8 exactly retail
+00318f30  PortSeamlessUI  fclCombineMarkRow: row 9 marks the mod card's symbol pair; rows 0..8 exactly retail
+003190d0  PortSeamlessUI  fclCombineRowsBusy: rows read through the native-rows side row; exact retail rows otherwise
+001e6d20  PortChallenge  battle script pick-by-character-id: an absent protagonist's action answers with the leader action the battle recorded, and any other failed lookup publishes -1 instead of faulting; exact retail lookup and result otherwise
+001e1530  PortChallenge  battle AI side-id HP query: with no protagonist action on the player side, his character-1 request asks about the leader-role action's character through the same retail lookup and condition; exact retail lookup and answer otherwise
+001e1800  PortChallenge  battle AI side-id bad-status query: with no protagonist action on the player side, his character-1 request asks about the leader-role action's character through the same retail lookup, status filter and condition; exact retail lookup and answer otherwise
+001a06d0  PortChallenge  turn start: count the selected leader's eligible ordinary turns for Shuffle Time when Yu is absent; retain the retail protagonist count when present

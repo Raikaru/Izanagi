@@ -35,8 +35,8 @@ Keep the ISO where it is; the port reads game files from it on every run.
 ## Playing
 
 - **Settings:** the game's own **Config** screen is extended with display, audio, controls
-  and mod options. Open it with **Esc**, **F1**, a **Select + Start** hold, or the corner
-  button on touch screens. Choices are saved to `p4pc.ini`
+  and mod options. Open it with **Esc**, **F1**, a **Select + Start** hold, or the
+  **CONFIG** button of the Android touch pad. Choices are saved to `p4pc.ini`
   ([where it lives](docs/platform/settings.md#file-and-precedence)).
 - **Widescreen:** `[video] aspect = 16:9` (or `auto` to follow the window, including
   ultrawide); `4:3` is the default. Movies use `movie_fit = bars`, `zoom` or `stretch`.

@@ -5,7 +5,7 @@
 #include "p4pc/mod_fidelity.h"
 #include "p4pc/package_memory.h"
 #define P4_PACKAGE_API_MAJOR 1
-#define P4_PACKAGE_API_MINOR 4
+#define P4_PACKAGE_API_MINOR 6
 #define P4_PACKAGE_API_STRINGIZE(x) #x
 #define P4_PACKAGE_API_VERSION_TEXT(major, minor) P4_PACKAGE_API_STRINGIZE(major) "." P4_PACKAGE_API_STRINGIZE(minor)
 #define P4_PACKAGE_API_TEXT P4_PACKAGE_API_VERSION_TEXT(P4_PACKAGE_API_MAJOR, P4_PACKAGE_API_MINOR)
@@ -30,6 +30,34 @@ typedef struct P4PackageField {
     const char *section, *argument, *key, *value;
     unsigned line;
 } P4PackageField;
+/* Package requirements (docs/modding/files.md "Requirements", api 1.6, capability manifest.require@1). One
+ * `[require <id>]` section per required package of the SAME kind: a mandatory
+ * `version=<major>.<minor>` minimum (same major, at least that minor) and any
+ * `setting.<key>=<choice>` rows naming the requirement's declared [setting]
+ * values. Metadata only: admission checks presence, version and settings, loads
+ * requirements first and refuses cycles; the hub enables and locks them.
+ * A `[companion <id>]` section (api 1.6, capability manifest.companion@1) carries only the version: it orders
+ * an admitted companion first and refuses an incompatible one, but an absent,
+ * disabled or refused companion is fine; nothing enables or locks it. */
+#define P4_PACKAGE_REQUIRES_MAX 16
+#define P4_PACKAGE_REQUIRE_SETTINGS 8
+typedef struct P4PackageRequirement {
+    char id[64];
+    int companion;
+    unsigned major, minor, line;
+    size_t setting_count;
+    struct { char key[49], value[32]; } settings[P4_PACKAGE_REQUIRE_SETTINGS];
+} P4PackageRequirement;
+/* Parses `self`'s [companion] and [require] sections (fields as admitted or
+ * scanned: sorted) into out[], companions first, each by id. An id may appear
+ * once. 0, or -1 with a bounded reason naming the line. */
+int p4_package_requirements(const P4PackageInfo *self, const P4PackageField *fields, size_t count,
+                            P4PackageRequirement out[P4_PACKAGE_REQUIRES_MAX], size_t *found,
+                            char *reason, size_t capacity);
+/* Whether a package `version` text satisfies a major.minor minimum: 1 yes,
+ * 0 older or another major, -1 not comparable (it must be N, N.N or N.N.N,
+ * optionally followed by a `-` or `+` suffix). */
+int p4_package_version_satisfies(const char *version, unsigned major, unsigned minor);
 typedef struct P4PackageRegistry P4PackageRegistry;
 typedef struct P4PackageProvider P4PackageProvider;
 typedef struct P4PackageFile P4PackageFile;
@@ -68,10 +96,18 @@ typedef struct P4PackageInstallation {
     size_t field_count;
     const char *diagnostic;
     unsigned line;
+    int bundled; /* found in the read-only root of packages shipped with the game */
+    /* A player installation hiding a shipped one: "player copy shadows bundled <id> <version>". */
+    const char *shadows;
 } P4PackageInstallation;
 typedef int (*P4PackageInstallationVisitor)(const P4PackageInstallation *installation, void *user);
 int p4_package_installations_scan(const P4PackageClient *client, const char *root,
                                   P4PackageInstallationVisitor visitor, void *user);
+/* Also visits bundled_root (packages shipped with the game; absent is empty)
+ * after root, hiding a bundled package whose id a valid player installation
+ * already has. Bundled packages are listed, never enabled, by installation. */
+int p4_package_installations_scan_bundled(const P4PackageClient *client, const char *root, const char *bundled_root,
+                                          P4PackageInstallationVisitor visitor, void *user);
 
 typedef enum P4PackageBootPhase {
     P4_PACKAGE_BOOT_SCHEMA = 0,
@@ -142,6 +178,12 @@ int p4_packages_source_tracking_seal(void);
  * strict/unhandled failures still publish no partial batch. */
 int p4_package_registry_load(P4PackageRegistry **out, const P4PackageClient *client,
                              const char *root, const char *enabled);
+/* As load, also finding enabled ids in bundled_root (read-only packages shipped
+ * with the game) after root: a player installation of an id wins over its
+ * bundled copy; duplicates within one root still refuse. Either root may be
+ * absent; with neither, enabled ids refuse as an unavailable root. */
+int p4_package_registry_load_bundled(P4PackageRegistry **out, const P4PackageClient *client,
+                                     const char *root, const char *bundled_root, const char *enabled);
 /* Optional explicit order for a staged selector. Unlisted ids retain their
  * default relative order after listed ids; applied only at publication. */
 int p4_package_registry_set_order(P4PackageRegistry *registry, const char *ids);
@@ -195,6 +237,18 @@ uint32_t p4_package_provider_claims(const P4PackageProvider *provider);
  * Raw files and typed resources are removed together before the final pass. */
 int p4_package_provider_refuse(const P4PackageProvider *provider, const char *reason);
 int p4_package_provider_require_cosmetic(const P4PackageProvider *provider);
+/* This process's most recent admission refusal of an enabled id (copied), or
+ * NULL: a later startup message (e.g. a refused save load) can say why. */
+const char *p4_package_refusal(P4PackageKind kind, const char *id);
+/* Game thread, during handler prepare or after publication: the first catalog
+ * package of the same kind that requires `provider` (with a `setting.<key>` row
+ * for `setting`, or any requirement when NULL), or NULL. Its locks follow. */
+const P4PackageProvider *p4_packages_requirer(const P4PackageProvider *provider, const char *setting);
+/* Same phases: whether `provider`'s declared [companion id] is in the current
+ * admission candidate or published catalog. 1 present, 0 absent, -1 when the
+ * provider does not declare that companion (or outside prepare/publication).
+ * A refused companion renews the candidate, so prepare sees the final answer. */
+int p4_packages_companion_admitted(const P4PackageProvider *provider, const char *id);
 /* Only indexed contained regular files open. 0=open, 1=absent, -1=refused/I/O.
  * max_bytes is a caller's actual parser/decoder bound, checked before exposure.
  * Each handle owns a generation pin and one stream (not concurrently shared). */

@@ -12,6 +12,7 @@
 #include "p4pc/battle_sim.h"
 #include "p4pc/os.h"
 #include "p4pc/package_boot.h"
+#include "p4pc/golden_producer.h"
 #include "p4pc/mod_bindings.h"
 #include "platform/mods/failure_native.h"
 #include "p4pc/content.h"
@@ -25,7 +26,55 @@
 #define main p4pc_main
 #endif
 
+/* `--help` (or -h, /?): what a player can pass; developer switches (battle simulator, test variables) are not listed. */
+#ifdef _WIN32
+#define P4PC_HELP_FOLDER "%APPDATA%\\p4pc\\Persona4\\"
+#elif defined(__APPLE__)
+#define P4PC_HELP_FOLDER "~/Library/Application Support/p4pc/Persona4/"
+#else
+#define P4PC_HELP_FOLDER "~/.local/share/p4pc/Persona4/ ($XDG_DATA_HOME/p4pc/Persona4/)"
+#endif
+static int usage(const char *argv0)
+{
+    static const char *const rows[][2] = {
+        {"", "play; the first run asks for your disc image"},
+        {"<SLUS_217.82>", "start from an extracted game executable instead"},
+        {"--import-save FILE_OR_FOLDER [--slot N]", "copy a PS2 save into the game's memory card"},
+        {"--help", "this text"},
+    };
+    const char *program = argv0 != NULL && *argv0 ? argv0 : "p4pc";
+
+    for (const char *p = program; *p; p++) {
+        if (*p == '/' || *p == '\\') program = p + 1;
+    }
+    fprintf(stdout, "%s: Persona 4 (USA) on PC, played from your own disc image.\n\nusage:\n", "Persona4-PC");
+    for (size_t i = 0; i < sizeof rows / sizeof rows[0]; i++) {
+        fprintf(stdout, "  %s %-40s %s\n", program, rows[i][0], rows[i][1]);
+    }
+    fprintf(stdout, "\nThe disc image is `iso` under [game] in p4pc.ini (or the P4PC_ISO environment variable).\n"
+            "p4pc.ini, p4pc.log and the saves are in %s.\n"
+            "Mods: choose them in Config > MODS. To make one, see p4mod --help.\n", P4PC_HELP_FOLDER);
+    return 0;
+}
+
+/* argv[1] is a help spelling. A byte loop: the game's own strcmp is the retail one, not for port startup. */
+static int is_help(const char *arg)
+{
+    static const char *const spellings[] = {"--help", "-h", "/?"};
+
+    for (size_t i = 0; i < sizeof spellings / sizeof spellings[0]; i++) {
+        const char *a = arg, *b = spellings[i];
+        while (*a != '\0' && *a == *b) {
+            a++;
+            b++;
+        }
+        if (*a == *b) return 1;
+    }
+    return 0;
+}
+
 int main(int argc, char **argv) {
+    if (argc > 1 && is_help(argv[1])) return usage(argv[0]);
     if (p4_os_restart_init(argc, argv) != 0) return 1;
     int import_status = p4save_import_cli(argc, argv);
     if (import_status >= 0) return import_status;
@@ -62,7 +111,7 @@ int main(int argc, char **argv) {
     fprintf(stderr, "p4pc: entering game (PS2 entry 0x%08x)\n", (unsigned)entry);
 
     p4_mod_save_native_init();
-    if (optional && (p4_mod_game_bindings_init() != 0 || p4_package_boot_install() != 0 ||
+    if (optional && (p4_mod_game_bindings_init() != 0 || p4_golden_producer_register() != 0 || p4_package_boot_install() != 0 ||
                      p4_mods_init() != 0 || p4_packs_init() != 0 ||
                      p4_package_registry_publish() != 0)) {
         /* The first selector may already be staged when the second fails. */

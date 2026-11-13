@@ -128,7 +128,8 @@ static uint32_t load(unsigned file, uint32_t arena)
     const char *path = p4_game_table_input_label(kinds[file]);
     const uint8_t *bytes = p4_game_table_input_bytes(fixture.inputs[file]);
     const uint32_t size = (uint32_t)p4_game_table_input_size(fixture.inputs[file]);
-    p4_game_table_admission_packed(descriptor, path, bytes, size, p4_game_tables_observe_packed);
+    /* The fixture's sealed input stands in for the loader's writable buffer. */
+    p4_game_table_admission_packed(descriptor, path, (uint8_t *)bytes, size, p4_game_tables_observe_packed);
     uint32_t offset = 0;
     for (unsigned block = 0; block < file_blocks[file]; ++block) {
         const uint32_t block_size = read_word(bytes + offset), slot = file_slots[file][block];

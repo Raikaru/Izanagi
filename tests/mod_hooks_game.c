@@ -39,3 +39,10 @@ void mod_test_void(u32 *value)
 {
     *value += 1;
 }
+
+// FUN_001DE640
+void mod_test_set_action_code(unsigned char *action, unsigned char *slot, u16 code)
+{
+    (void)action;
+    *(u16 *)slot = code;
+}

@@ -14,6 +14,13 @@ void p4_game_table_slot_publish(uint32_t slot, uint32_t base, uint32_t bytes);
  * catalog completed (all eight files), the slot still holds the recorded base,
  * the extent lies in RAM and the stride divides it exactly. */
 int p4_game_table_extent_rows(uint32_t slot, uint32_t stride, uint32_t *base, uint32_t *rows);
+/* One optional observer of every extent note, called after the registry entry
+ * is updated, with the block's bytes already in place (the native copy notes
+ * each block right after its memcpy; relocating commits after writing the new
+ * bank). NULL clears it. The observer must not note or publish itself. With no
+ * observer registered nothing changes. Port-owned; no guest/RNG effect. */
+typedef void (*P4GameTableExtentObserver)(void *user, uint32_t slot, uint32_t base, uint32_t bytes);
+void p4_game_table_extent_observe(P4GameTableExtentObserver observer, void *user);
 /* Content identity of the table catalog the banks were built from. 0 with
  * SHA-256("p4pc-table-catalog-v1:retail") while no expanded catalog is active;
  * 1 with a v1-tagged SHA-256 over every package table source (key, package

@@ -569,6 +569,11 @@ static int parse_sidecar(P4ModSaveLoad *load,unsigned char *data,size_t size,cha
     uint32_t count=get32(data+56);
     if(count){load->state.blocks=calloc(count,sizeof *load->state.blocks);if(!load->state.blocks)return fail(error,cap,"Cannot allocate save block index");}
     P4ModSaveReader reader={.data=data+HEADER_SIZE,.size=size-HEADER_SIZE-TRAILER_SIZE};
+    /* The first missing required provider, reported only after the package
+     * requirements: a provider is usually missing because a package that
+     * registers it is absent or was refused, and that package's reason is
+     * the one a player can act on. */
+    char missing[512]={0};
     for(uint32_t i=0;i<count;i++){
         unsigned char h[BLOCK_HEADER_SIZE];
         if(p4_mod_save_read(&reader,h,sizeof h))return fail(error,cap,"Truncated save block header");
@@ -580,7 +585,15 @@ static int parse_sidecar(P4ModSaveLoad *load,unsigned char *data,size_t size,cha
         if(i&&key_compare(load->state.blocks[i-1].owner,load->state.blocks[i-1].key,block->owner,block->key)>=0)return fail(error,cap,"Duplicate or noncanonical save block key");
         block->data=reader.data+reader.position;block->size=(size_t)length;reader.position+=block->size;load->state.block_count++;
         P4ModSaveRegistration *r=find_registration(block->owner,block->key);
-        if(!r&&(block->flags&P4_MOD_SAVE_REQUIRED))return fail(error,cap,"Missing required save provider %s:%s",block->owner,block->key);
+        if(!r&&(block->flags&P4_MOD_SAVE_REQUIRED)){
+            if(!*missing){
+                const char *why=p4_package_refusal(P4_PACKAGE_MOD,block->owner);
+                if(why)snprintf(missing,sizeof missing,"Missing required save provider %s:%s; %s was refused at startup: %s",
+                                block->owner,block->key,block->owner,why);
+                else snprintf(missing,sizeof missing,"Missing required save provider %s:%s",block->owner,block->key);
+            }
+            continue;
+        }
         if(r&&block->size>r->provider.max_bytes)return fail(error,cap,"Save block %s:%s exceeds provider bound",block->owner,block->key);
         if(!r){
             char message[384];
@@ -591,10 +604,18 @@ static int parse_sidecar(P4ModSaveLoad *load,unsigned char *data,size_t size,cha
     }
     if(parse_dependencies(&reader,&load->state.requirements,get32(data+60),count,0)||parse_dependencies(&reader,&load->state.history,get32(data+64),count,1)||p4_mod_save_remaining(&reader))
         return fail(error,cap,"Invalid save requirement/provenance stream");
+    const Dependency *unmet=NULL;
     for(size_t i=0;i<load->state.requirements.count;i++){
         const Dependency *d=&load->state.requirements.data[i];
-        if(d->required&&!package_matches(d))return fail(error,cap,"Save requires package kind%u %s version%s",d->kind,d->id,d->version);
+        if(!d->required||package_matches(d))continue;
+        const char *what=d->kind==P4_PACKAGE_ENGINE_PACK?"engine pack":"mod";
+        const char *why=p4_package_refusal((P4PackageKind)d->kind,d->id);
+        if(why)return fail(error,cap,"Save requires %s %s version %s; %s was refused at startup: %s",what,d->id,d->version,d->id,why);
+        if(!unmet)unmet=d;
     }
+    if(unmet)return fail(error,cap,"Save requires %s %s version %s, which is not enabled at that version",
+                         unmet->kind==P4_PACKAGE_ENGINE_PACK?"engine pack":"mod",unmet->id,unmet->version);
+    if(*missing)return fail(error,cap,"%s",missing);
     for(size_t i=0;i<load->state.history.count;i++){
         const Dependency *dependency=&load->state.history.data[i];
         if(package_matches(dependency))continue;

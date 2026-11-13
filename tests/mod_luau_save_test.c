@@ -1,5 +1,7 @@
 /* Actual Luau VM, native save codec and card-generation transport; synthetic image. */
 #include "lua_runtime.h"
+#include "native_bindings.h"
+#include "p4pc/game_passive_grant.h"
 #include "guest_test.h"
 #include "p4pc/image.h"
 #include "p4pc/mods.h"
@@ -22,13 +24,15 @@ float mod_test_mixed(int,float,unsigned char *,double);
 uint32_t *mod_test_pointer(uint32_t *);
 int mod_test_recursive(int);
 void mod_test_void(uint32_t *);
+void mod_test_set_action_code(unsigned char *, unsigned char *, uint16_t);
 const p4pc_native_t p4pc_native_table[] = {
     {0x100100,(void *)mod_test_unsigned,"mod_test_unsigned",NULL},
     {0x100120,(void *)mod_test_narrow,"mod_test_narrow",NULL},
     {0x100140,(void *)mod_test_mixed,"mod_test_mixed",NULL},
     {0x100160,(void *)mod_test_pointer,"mod_test_pointer",NULL},
     {0x100180,(void *)mod_test_recursive,"mod_test_recursive",NULL},
-    {0x1001a0,(void *)mod_test_void,"mod_test_void",NULL}
+    {0x1001a0,(void *)mod_test_void,"mod_test_void",NULL},
+    {0x1de640,(void *)mod_test_set_action_code,"mod_test_set_action_code",NULL}
 };
 const size_t p4pc_native_count=sizeof p4pc_native_table/sizeof p4pc_native_table[0];
 const p4pc_patch_t p4pc_patch_table[]={{0,NULL,NULL}};
@@ -78,6 +82,10 @@ static void expected_failure(size_t owner,const char *reason,void *user)
     (void)owner;(void)user;
     _Exit(reason&&strstr(reason,"intentional load callback failure")?42:43);
 }
+/* The real p4.passive binding (lua_passive.c) over the real grant table. */
+static void passive_initialize(lua_State *L){p4_lua_passive_initialize(L);}
+static void passive_before_destroy(P4LuaMod *mod){p4_lua_passive_close(mod);}
+static const P4LuaNativeBindings passive_bindings={passive_initialize,passive_before_destroy};
 static void run(P4LuaMod *mod,const char *source)
 {
     int result=p4_lua_compile(mod,source,strlen(source),"@save-fixture");
@@ -152,6 +160,7 @@ static int witness(int argc,char **argv)
     for(size_t i=0;i<p4pc_native_count;i++)p4_fn_register(p4pc_native_table[i].addr,p4pc_native_table[i].fn);
 #endif
     CHECK(func_004216d0()==1);
+    CHECK(!p4_lua_bind_native(&passive_bindings));
     char mods[P4_SAVE_PATH_CAP],directory[P4_SAVE_PATH_CAP],file[P4_SAVE_PATH_CAP],sidecar[P4_SAVE_PATH_CAP];
     p4_os_mkdir(root);path(card,root,"card");p4_os_mkdir(card);
     path(mods,root,"mods");p4_os_mkdir(mods);path(directory,mods,"test.luasave");p4_os_mkdir(directory);
@@ -271,6 +280,33 @@ static int witness(int argc,char **argv)
     /* Current semantic use remains as historical provenance even without a block. */
     CHECK(p4_os_is_file_nofollow(sidecar));
     CHECK(!p4_mod_save_unregister(registration));
+    /* p4.passive grants outlive loads and New Game. A mod drops its
+     * save-bound grants in its load callback, which runs for a real load
+     * ('load') and a session reset ('reset'), and grants again from the loaded
+     * value; another owner's grants are never touched. */
+    p4_lua_destroy(mod);CHECK(!p4_mod_save_reset_session(error,sizeof error));
+    CHECK(!p4_game_passive_count());
+    CHECK(p4_game_passive_grant("test.other",0xFFFFu,P4_PASSIVE_PARTY,3,0x1F6)==1);
+    mod=p4_lua_create(provider);CHECK(mod);
+    run(mod,"trait=true; origins={}\n"
+        "p4.save.register{schema=10,max_bytes=32,snapshot=function() return trait end,"
+        "load=function(v,o) table.insert(origins,o); p4.passive.clear(); if v==true then p4.passive.grant({party=2},0x1F6) end end}\n"
+        "assert(p4.passive.grant({party=2},0x1F6) and p4.passive.grant({persona=0x2a},0x1F7))");
+    CHECK(!begin_save());finish_save();
+    run(mod,"trait=false; assert(p4.passive.grant({enemy=40},0x1FB))");
+    CHECK(p4_game_passive_count()==4);
+    CHECK(!stage_load());commit_load();
+    run(mod,"assert(origins[1]=='load' and p4.passive.granted({party=2},0x1F6))\n"
+        "assert(not p4.passive.granted({persona=0x2a},0x1F7) and not p4.passive.granted({enemy=40},0x1FB))\n"
+        "assert(p4.passive.granted({party=3},0x1F6))");
+    CHECK(p4_game_passive_count()==2&&p4_game_passive_held(P4_PASSIVE_PARTY,3,0x1F6));
+    CHECK(!p4_mod_save_transport_reset(error,sizeof error));p4_mod_save_transport_reset_commit();
+    run(mod,"assert(#origins==2 and origins[2]=='reset' and not p4.passive.granted({party=2},0x1F6))");
+    CHECK(p4_game_passive_count()==1&&p4_game_passive_held(P4_PASSIVE_PARTY,3,0x1F6));
+    run(mod,"assert(p4.passive.grant({party=2},0x1F6))");
+    p4_lua_destroy(mod);CHECK(!p4_mod_save_reset_session(error,sizeof error));
+    CHECK(p4_game_passive_count()==1&&p4_game_passive_revoke_owner(0xFFFFu)==1);
+    mod=p4_lua_create(provider);CHECK(mod);
     /* Optional authorizers run before any slot byte or commit; a Lua error or a
      * nil answer refuses. Publication waits for the scheduler frame boundary. */
     p4_lua_destroy(mod);CHECK(!p4_mod_save_reset_session(error,sizeof error));

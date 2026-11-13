@@ -1,7 +1,11 @@
 # Host witness factories for Linux x86_64 and Windows x64. References are declared
 # in their owning areas; 290-port64-host-cases registers both ABIs after final
 # source-test policy. The original i386 targets remain the nightly reference.
+include("${CMAKE_SOURCE_DIR}/cmake/wine-tests.cmake")
 if(P4_PORT64_LINK AND P4_PORT64_OBJS)
+  # The NVIDIA port frames since the shaders truncate a colour as the GS does on a rounding GPU (docs/renderer_port.md 10.6a); the
+  # *-nvidia-rtx4080 frames, one step dark wherever the GS writes a whole step, stay pinned.
+  set(nvidiaFrame nvidia-rtx4080-trunc)
 
   # The renderer's reference gates on the 64-bit viewer (same scripts, limits and references as title_mad and field_mad): x86_64 measures the same
   # frames as i386 (title 1.14 %, field 1.775 %).
@@ -16,11 +20,6 @@ if(P4_PORT64_LINK AND P4_PORT64_OBJS)
     set_tests_properties(field_mad_ctxloss64 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;port64" TIMEOUT 600)
     set_tests_properties(title_mad64 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;port64" TIMEOUT 300)
     set_tests_properties(field_mad64 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;port64" TIMEOUT 600)
-    # Viewer modes are not auto-cloned with the p4pc game gates.
-    add_test(NAME widescreen_field_16_964 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/scene_mad.sh"
-      $<TARGET_FILE:p4pc_viewer64> "${CMAKE_BINARY_DIR}/64_widescreen_field_16_9.png"
-      field:7:2 port-wide-field-16-9 0.1 P4PC_ASPECT=16:9 P4PC_DRAW_WINDOW=4 "P4PC_GATE_RENDERER=llvmpipe (LLVM 19.1.7, 256 bits)")
-    set_tests_properties(widescreen_field_16_964 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes;widescreen;port64" TIMEOUT 600)
     # Viewer gates need explicit twins; the registration prelude clones only p4pc.
     add_test(NAME scene_resolution_title108064 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/scene_mad.sh" $<TARGET_FILE:p4pc_viewer64>
       "${CMAKE_BINARY_DIR}/64_resolution_title1080.png" title p4-resolution-title1080 0.5
@@ -46,7 +45,7 @@ if(P4_PORT64_LINK AND P4_PORT64_OBJS)
       PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;port64" TIMEOUT 600 ENVIRONMENT "P4PC_TITLE_EDGES=1")
     add_test(NAME widescreen_field_16_9_nvidia64 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/scene_mad.sh"
       $<TARGET_FILE:p4pc_viewer64> "${CMAKE_BINARY_DIR}/64_widescreen_field_16_9_nvidia.png"
-      field:7:2 port-wide-field-16-9-nvidia-rtx4080 0.1 P4PC_ASPECT=16:9 P4PC_DRAW_WINDOW=4
+      field:7:2 port-wide-field-16-9-${nvidiaFrame} 0.1 P4PC_ASPECT=16:9 P4PC_DRAW_WINDOW=4
       "P4PC_GATE_RENDERER=NVIDIA GeForce RTX 4080 Laptop GPU/PCIe/SSE2")
     set_tests_properties(widescreen_field_16_9_nvidia64 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes64;widescreen;port64" TIMEOUT 600)
     foreach(wideRatio IN ITEMS 16-9 21-9)
@@ -58,32 +57,21 @@ if(P4_PORT64_LINK AND P4_PORT64_OBJS)
         set(wideMode "16:9")
         set(wideWidth 1280)
       endif()
-      foreach(wideBackend IN ITEMS llvmpipe19 nvidia-rtx4080)
-        if(wideBackend STREQUAL "llvmpipe19")
-          set(wideSuffix 64)
-          set(wideRenderer "llvmpipe (LLVM 19.1.7, 256 bits)")
-          set(wideLabels "gl;scenes;widescreen;port64")
-        else()
-          set(wideSuffix _nvidia64)
-          set(wideRenderer "NVIDIA GeForce RTX 4080 Laptop GPU/PCIe/SSE2")
-          set(wideLabels "gl;scenes64;widescreen;port64")
-        endif()
-        add_test(NAME widescreen_title_cover_${wideName}${wideSuffix} COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/scene_mad.sh"
-          $<TARGET_FILE:p4pc_viewer64> "${CMAKE_BINARY_DIR}/64_widescreen_title_cover_${wideName}${wideSuffix}.png"
-          title port-wide-title-cover-${wideRatio}-${wideBackend} 0.1
-          P4PC_CONFIG=none P4PC_ASPECT=${wideMode} P4PC_WINDOW_W=${wideWidth} P4PC_WINDOW_H=720
-          P4PC_RESOLUTION=scale:1 P4PC_PRESENT=blit P4PC_TITLE_FRAME=400 P4PC_VIRTUAL_CLOCK=1 P4PC_CAPTURE_WINDOW=1
-          "P4PC_GATE_RENDERER=${wideRenderer}")
-        set_tests_properties(widescreen_title_cover_${wideName}${wideSuffix} PROPERTIES
-          SKIP_RETURN_CODE 77 LABELS "${wideLabels}" TIMEOUT 600 ENVIRONMENT "P4PC_TITLE_EDGES=1")
-      endforeach()
+      add_test(NAME widescreen_title_cover_${wideName}_nvidia64 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/scene_mad.sh"
+        $<TARGET_FILE:p4pc_viewer64> "${CMAKE_BINARY_DIR}/64_widescreen_title_cover_${wideName}_nvidia64.png"
+        title port-wide-title-cover-${wideRatio}-${nvidiaFrame} 0.1
+        P4PC_CONFIG=none P4PC_ASPECT=${wideMode} P4PC_WINDOW_W=${wideWidth} P4PC_WINDOW_H=720
+        P4PC_RESOLUTION=scale:1 P4PC_PRESENT=blit P4PC_TITLE_FRAME=400 P4PC_VIRTUAL_CLOCK=1 P4PC_CAPTURE_WINDOW=1
+        "P4PC_GATE_RENDERER=NVIDIA GeForce RTX 4080 Laptop GPU/PCIe/SSE2")
+      set_tests_properties(widescreen_title_cover_${wideName}_nvidia64 PROPERTIES
+        SKIP_RETURN_CODE 77 LABELS "gl;scenes64;widescreen;port64" TIMEOUT 600 ENVIRONMENT "P4PC_TITLE_EDGES=1")
     endforeach()
   endif()
   # Port frames are scoped to their qualified renderer, not compared across
   # software/hardware colour quantization with a looser limit.
   if(TARGET p4pc64)
     add_test(NAME widescreen_battle_16_9_nvidia64 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/battle_mad.sh"
-      $<TARGET_FILE:p4pc64> 532 port-wide-battle-16-9-nvidia-rtx4080 0 0.1
+      $<TARGET_FILE:p4pc64> 532 port-wide-battle-16-9-${nvidiaFrame} 0 0.1
       "cross@360:2/150,start@500:2/300" P4PC_ASPECT=16:9
       "P4PC_GATE_RENDERER=NVIDIA GeForce RTX 4080 Laptop GPU/PCIe/SSE2"
       P4PC_VIRTUAL_CLOCK=1 P4PC_CAPTURE_STATE=battle-menu,40,1,4000)
@@ -91,7 +79,7 @@ if(P4_PORT64_LINK AND P4_PORT64_OBJS)
     add_test(NAME widescreen_dialogue_16_9_nvidia64 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/event_scene_gate.sh"
       $<TARGET_FILE:p4pc64> velvet-windows-blurry 3630 0.1 story0415 save0415_to_river_scene.walk)
     set_tests_properties(widescreen_dialogue_16_9_nvidia64 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes64;widescreen;port64"
-      TIMEOUT 900 ENVIRONMENT "P4PC_ASPECT=16:9;P4PC_EVENT_REF=port-wide-dialogue-16-9-nvidia-rtx4080;P4PC_GATE_RENDERER=NVIDIA GeForce RTX 4080 Laptop GPU/PCIe/SSE2")
+      TIMEOUT 900 ENVIRONMENT "P4PC_ASPECT=16:9;P4PC_EVENT_REF=port-wide-dialogue-16-9-${nvidiaFrame};P4PC_GATE_RENDERER=NVIDIA GeForce RTX 4080 Laptop GPU/PCIe/SSE2")
     foreach(wideRatio IN ITEMS 16-9 21-9)
       string(REPLACE "-" "_" wideName "${wideRatio}")
       string(REPLACE "-" ":" wideAspect "${wideRatio}")
@@ -104,7 +92,7 @@ if(P4_PORT64_LINK AND P4_PORT64_OBJS)
           set(wideRef port-wide-allout-masked-${wideRatio})
         endif()
         add_test(NAME widescreen_${wideScene}_${wideVariant}_${wideName}_nvidia64 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/widescreen_saved_gate.sh"
-          $<TARGET_FILE:p4pc64> ${wideScene} ${wideAspect} ${wideRef}-nvidia-rtx4080)
+          $<TARGET_FILE:p4pc64> ${wideScene} ${wideAspect} ${wideRef}-${nvidiaFrame})
         set_tests_properties(widescreen_${wideScene}_${wideVariant}_${wideName}_nvidia64 PROPERTIES
           SKIP_RETURN_CODE 77 LABELS "gl;scenes64;widescreen;port64" TIMEOUT 900
           ENVIRONMENT "P4PC_GATE_RENDERER=NVIDIA GeForce RTX 4080 Laptop GPU/PCIe/SSE2")
@@ -112,7 +100,7 @@ if(P4_PORT64_LINK AND P4_PORT64_OBJS)
       foreach(wideCutin IN ITEMS allout-intro cast-eyes)
         string(REPLACE "-" "_" wideCutinName "${wideCutin}")
         add_test(NAME widescreen_${wideCutinName}_${wideName}_nvidia64 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/widescreen_saved_gate.sh"
-          $<TARGET_FILE:p4pc64> ${wideCutin} ${wideAspect} port-wide-${wideCutin}-${wideRatio}-nvidia-rtx4080)
+          $<TARGET_FILE:p4pc64> ${wideCutin} ${wideAspect} port-wide-${wideCutin}-${wideRatio}-${nvidiaFrame})
         set_tests_properties(widescreen_${wideCutinName}_${wideName}_nvidia64 PROPERTIES
           SKIP_RETURN_CODE 77 LABELS "gl;scenes64;widescreen;port64" TIMEOUT 900
           ENVIRONMENT "P4PC_GATE_RENDERER=NVIDIA GeForce RTX 4080 Laptop GPU/PCIe/SSE2")
@@ -160,44 +148,39 @@ if(P4_PORT64_LINK AND P4_PORT64_OBJS)
     p4_port_frame_properties(${frameTest} 600)
   endfunction()
 
-  foreach(portFrameBackend IN ITEMS llvmpipe nvidia)
-    if(portFrameBackend STREQUAL "llvmpipe")
-      set(portFrameRenderer "llvmpipe (LLVM 19.1.7, 256 bits)")
-      set(portFrameRef llvmpipe19)
-    else()
-      set(portFrameRenderer "NVIDIA GeForce RTX 4080 Laptop GPU/PCIe/SSE2")
-      set(portFrameRef nvidia-rtx4080)
-    endif()
-    if(TARGET p4pc64)
-      set(frameTest scene_port_fog_battle_${portFrameBackend}64)
-      add_test(NAME ${frameTest} COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/battle_mad.sh"
-        $<TARGET_FILE:p4pc64> 532 port-scene-fog-battle-${portFrameRef} 1700 0.05
-        "cross@360:2/150,start@500:2/300")
-      p4_port_frame_properties(${frameTest} 300)
-      set(frameTest scene_port_tv_entrance_${portFrameBackend}64)
-      add_test(NAME ${frameTest} COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/systems_gate.sh"
-        $<TARGET_FILE:p4pc64> entrance 0.05 port-scene-tv-entrance-${portFrameRef})
-      p4_port_frame_properties(${frameTest} 1200)
-      p4_port_event_frame(near_fog near-fog 4600 900 card save0411_to_near_fog_scene.walk
-        0,0,640,200 0.05)
-      p4_port_event_frame(velvet_windows_blurry velvet-windows-blurry 3630 900 story0415 save0415_to_river_scene.walk)
-      p4_port_event_frame(riverbank_vignette riverbank-vignette 5880 900 story0415 save0415_to_river_scene.walk)
-      p4_port_event_frame(rain rain 25100 1200 newgame newgame_to_rain_scene.walk)
-      p4_port_event_frame(arcana_rankup_sparkles arcana-rankup-sparkles 7300 900 story0415 save0415_to_street.walk)
-      p4_port_event_frame(tv_world_enter tv-world-enter 71778 1700 newgame newgame_to_0413.walk)
-      p4_port_event_frame(shadow_haze shadow-haze 103408 1700 newgame newgame_to_0413.walk)
-    endif()
-    if(TARGET p4pc_viewer64)
-      p4_port_viewer_frame(field field:7:2 field P4PC_DRAW_WINDOW=4)
-      p4_port_viewer_frame(field_ctxloss field:7:2 field P4PC_DRAW_WINDOW=4 P4PC_TEST_CONTEXT_LOSS=300)
-      p4_port_viewer_frame(sky_black_tint field:10:1 sky-black-tint
-        P4PC_FIELD_DATE=17 P4PC_FIELD_SLOT=4
-        "P4PC_FIELD_CAMERA=0.34202,0.0,-0.939693,0.0,0.0,1.0,0.0,0.0,0.939693,0.0,0.34202,0.0,491.663574,48.057514,-7614.540039,-131819.28125,0.511802,0.383852,50.000393,200000.0")
-      p4_port_viewer_frame(save_butterfly_glow field:8:2 save-butterfly-glow
-        P4PC_DRAW_WINDOW=30 P4PC_FIELD_PLAYER=311.5,0,-2216.1 P4PC_FIELD_DATE=16 P4PC_FIELD_SLOT=3
-        "P4PC_FIELD_CAMERA=-0.753238,0.0,0.657748,0.0,-0.181959,0.960974,-0.208375,1.0,-0.632078,-0.276639,-0.723842,0.0,616.131653,329.264832,-1461.691772,-172110.5625,0.511799,0.383849,100.0,63520.722656")
-    endif()
-  endforeach()
+  # The NVIDIA tests cover the retired llvmpipe-qualified port-frame scenes.
+  set(portFrameBackend nvidia)
+  set(portFrameRenderer "NVIDIA GeForce RTX 4080 Laptop GPU/PCIe/SSE2")
+  set(portFrameRef ${nvidiaFrame})
+  if(TARGET p4pc64)
+    set(frameTest scene_port_fog_battle_${portFrameBackend}64)
+    add_test(NAME ${frameTest} COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/battle_mad.sh"
+      $<TARGET_FILE:p4pc64> 532 port-scene-fog-battle-${portFrameRef} 1700 0.05
+      "cross@360:2/150,start@500:2/300")
+    p4_port_frame_properties(${frameTest} 300)
+    set(frameTest scene_port_tv_entrance_${portFrameBackend}64)
+    add_test(NAME ${frameTest} COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/systems_gate.sh"
+      $<TARGET_FILE:p4pc64> entrance 0.05 port-scene-tv-entrance-${portFrameRef})
+    p4_port_frame_properties(${frameTest} 1200)
+    p4_port_event_frame(near_fog near-fog 4600 900 card save0411_to_near_fog_scene.walk
+      0,0,640,200 0.05)
+    p4_port_event_frame(velvet_windows_blurry velvet-windows-blurry 3630 900 story0415 save0415_to_river_scene.walk)
+    p4_port_event_frame(riverbank_vignette riverbank-vignette 5880 900 story0415 save0415_to_river_scene.walk)
+    p4_port_event_frame(rain rain 25100 1200 newgame newgame_to_rain_scene.walk)
+    p4_port_event_frame(arcana_rankup_sparkles arcana-rankup-sparkles 7300 900 story0415 save0415_to_street.walk)
+    p4_port_event_frame(tv_world_enter tv-world-enter 71778 1700 newgame newgame_to_0413.walk)
+    p4_port_event_frame(shadow_haze shadow-haze 103408 1700 newgame newgame_to_0413.walk)
+  endif()
+  if(TARGET p4pc_viewer64)
+    p4_port_viewer_frame(field field:7:2 field P4PC_DRAW_WINDOW=4)
+    p4_port_viewer_frame(field_ctxloss field:7:2 field P4PC_DRAW_WINDOW=4 P4PC_TEST_CONTEXT_LOSS=300)
+    p4_port_viewer_frame(sky_black_tint field:10:1 sky-black-tint
+      P4PC_FIELD_DATE=17 P4PC_FIELD_SLOT=4
+      "P4PC_FIELD_CAMERA=0.34202,0.0,-0.939693,0.0,0.0,1.0,0.0,0.0,0.939693,0.0,0.34202,0.0,491.663574,48.057514,-7614.540039,-131819.28125,0.511802,0.383852,50.000393,200000.0")
+    p4_port_viewer_frame(save_butterfly_glow field:8:2 save-butterfly-glow
+      P4PC_DRAW_WINDOW=30 P4PC_FIELD_PLAYER=311.5,0,-2216.1 P4PC_FIELD_DATE=16 P4PC_FIELD_SLOT=3
+      "P4PC_FIELD_CAMERA=-0.753238,0.0,0.657748,0.0,-0.181959,0.960974,-0.208375,1.0,-0.632078,-0.276639,-0.723842,0.0,616.131653,329.264832,-1461.691772,-172110.5625,0.511799,0.383849,100.0,63520.722656")
+  endif()
 
   # ovdiff (retail interpreter against the native, docs/override_diff.md) on the 64-bit objects: the same verdicts as i386 are the M4 criterion.
   # Not on macOS: it is a Linux harness (personality(), /proc, the ucontext register file, GNU ld's --wrap), which macOS has none of.
@@ -616,6 +599,9 @@ if(P4_PORT64_LINK AND P4_PORT64_OBJS)
           set_tests_properties(${tn}${suffix} PROPERTIES ${prop} "${pv}")
         endif()
       endforeach()
+      if(suffix STREQUAL "64w")
+        p4_wine_scale_timeouts(${tn}${suffix})
+      endif()
       get_test_property(${tn} ENVIRONMENT oenv)
       set(env64)
       if(oenv)

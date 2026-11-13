@@ -117,14 +117,23 @@ if grep -n '@[A-Z_]*@' "$stage/$name/README.txt" "$stage/$name/THIRD_PARTY_NOTIC
 fi
 cp "$root/LICENSE" "$stage/$name/licenses/p4pc-MIT.txt"
 cp "$root/NOTICE" "$stage/$name/licenses/NOTICE.txt"
-for f in FFmpeg-LGPL-2.1.txt SDL3-zlib.txt LodePNG-zlib.txt Luau-MIT.txt Lua-MIT.txt yxml-MIT.txt fdlibm-Sun.txt recvx-decomp-MIT.txt \
+for f in FFmpeg-LGPL-2.1.txt SDL3-zlib.txt LodePNG-zlib.txt cgltf-MIT.txt Luau-MIT.txt Lua-MIT.txt yxml-MIT.txt fdlibm-Sun.txt newlib-BSD.txt recvx-decomp-MIT.txt \
          sky2hook-permission.txt; do
   cp "$root/third_party/licenses/$f" "$stage/$name/licenses/"
 done
 cp "$root/third_party/miniz/LICENSE" "$stage/$name/licenses/miniz-MIT.txt"
+[ -f "$deps/share/angle/LICENSES.chromium.html" ] && [ -f "$deps/share/angle/Electron-LICENSE.txt" ] || {
+  echo "package_macos: ANGLE/Electron licence files are missing from the Electron zip (ci/macos/build_deps.sh must extract LICENSE and LICENSES.chromium.html)" >&2; exit 1; }
 cp "$deps/share/angle/LICENSES.chromium.html" "$deps/share/angle/Electron-LICENSE.txt" "$stage/$name/licenses/"
 cp -R "$root/examples/mods/p4pc.example" "$stage/$name/examples/mods/"
+# Bundled mods in Contents/Resources (SDL_GetBasePath()/mods), disabled until chosen in MODS.
+! git -C "$root" cat-file -e HEAD:mods 2>/dev/null || git -C "$root" archive HEAD mods | tar -xf - -C "$contents/Resources"
 tar -C "$root" -czf "$stage/$name/source/luau-source.tar.gz" third_party/luau third_party/luau_patches
+# The FFmpeg source tarball and build recipe ship with the package, as on Linux/Android:
+# the exact tarball ci/macos/build_deps.sh pins, fetched and sha256-checked again here.
+curl -fsSL --retry 6 --retry-all-errors --retry-delay 10 "https://ffmpeg.org/releases/ffmpeg-$ffver.tar.xz" -o "$stage/$name/source/ffmpeg-$ffver.tar.xz"
+echo "$ffsha  $stage/$name/source/ffmpeg-$ffver.tar.xz" | shasum -a 256 -c -
+cp "$root/ci/macos/build_deps.sh" "$stage/$name/source/"
 {
   printf 'Toolchain provenance for macOS %s\n\nCompiler (llvm-mingw %s, macOS host build):\n' "$arch" "$(cat "$deps/llvm/release")"
   "$deps/llvm/bin/clang" --version

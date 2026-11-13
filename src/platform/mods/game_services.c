@@ -10,8 +10,12 @@
 #include "p4pc/mod_authorize.h"
 #include "p4pc/mod_entry.h"
 #include "p4pc/mod_events.h"
+#include "p4pc/mod_field_host.h"
 #include "p4pc/mod_hooks.h"
+#include "p4pc/mod_inventory.h"
+#include "p4pc/mod_party.h"
 #include "p4pc/mod_status.h"
+#include "p4pc/ui_overlay.h"
 #include "p4pc/game_enemies_native.h"
 #include "p4pc/game_table_extents.h"
 #include "p4pc/gmem.h"
@@ -19,8 +23,11 @@
 #include "p4pc/settings_native.h"
 #include "../files/vfs.h"
 #include "../../render/p4gl.h"
+#include "../../movie/mwply.h"
+#include "p4pc/pace.h"
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 /* Guest anchors (gp 0x007690F0). */
@@ -37,7 +44,7 @@
 #define TASK_WORK 0x38u
 #define TASK_NEXT 0x3cu
 
-enum { SEQ_NONE = -1, SEQ_BATTLE = 6, SEQ_FIELD = 9, SEQ_EVENT = 0xA, SEQ_FLOOR = 0xB };
+enum { SEQ_NONE = -1, SEQ_BATTLE = 6, SEQ_FIELD = 9, SEQ_EVENT = 0xA, SEQ_FLOOR = 0xB, SEQ_CALENDAR = 0x19 };
 
 static int range(uint32_t address, uint32_t size)
 {
@@ -58,19 +65,37 @@ static uint16_t half(uint32_t address)
 
 /* ---- scene state */
 
-static int task_named(const char *name)
+/* The port's 64-bit heap may extend above retail RAM. */
+static int player_range(uint32_t address, uint32_t size)
 {
-    static const uint32_t lists[3] = {0x00764adcu, 0x00764af4u, 0x00764ae8u};
+#ifdef P4_GUEST64
+    const uint32_t end = P4_GUEST_SIZE;
+#else
+    const uint32_t end = 0x02000000u;
+#endif
+    return address >= 0x00100000u && address < end && size <= end - address;
+}
+static uint32_t player_word(uint32_t address)
+{
+    uint32_t value = 0;
+    if (player_range(address, 4)) memcpy(&value, P4_G2H(address), 4);
+    return value;
+}
+static uint32_t task_node(const char *name)
+{
+    static const uint32_t lists[] = {0x00764adcu, 0x00764af4u, 0x00764ae8u};
     size_t length = strlen(name);
-    for (int l = 0; l < 3; ++l) {
-        uint32_t node = word(lists[l]);
+    for (size_t l = 0; l < sizeof lists / sizeof lists[0]; ++l) {
+        uint32_t node = player_word(lists[l]);
         for (int i = 0; node && i < 256; ++i) {
-            if (range(node, 0x40) && !memcmp(P4_G2H(node), name, length + 1)) return 1;
-            node = word(node + TASK_NEXT);
+            if (!player_range(node, 0x40)) break;
+            if (!memcmp(P4_G2H(node), name, length + 1)) return node;
+            node = player_word(node + TASK_NEXT);
         }
     }
     return 0;
 }
+static int task_named(const char *name) { return task_node(name) != 0; }
 
 static int sequence_state(int *pending)
 {
@@ -101,20 +126,80 @@ static struct {
 
 typedef struct Request {
     size_t owner;
-    int kind, state, battle_seen, outcome;
+    int owner_valid, kind, state, battle_seen, outcome, left_field;
     uint32_t field, room, entry, direction, encounter, waited;
     uint16_t back_field, back_room, back_entry, back_direction;
+    int16_t pass_date;
+    uint8_t pass_slot;
     const char *detail;
     char reason[128];
 } Request;
-enum { KIND_WARP = 1, KIND_ENCOUNTER };
+enum { KIND_WARP = 1, KIND_ENCOUNTER, KIND_PASS };
 enum { REQ_IDLE, REQ_QUEUED, REQ_TRANSITION, REQ_BATTLE, REQ_RETURN, REQ_DONE, REQ_REFUSED };
 static Request request;
+
+/* Practice speed owner (see "practice speed" below). */
+static struct {
+    int active;
+    size_t owner; /* mod owner ids start at 0 */
+    unsigned requested;
+    const char *held;
+} pace;
 
 static int request_busy(void)
 {
     return request.state == REQ_QUEUED || request.state == REQ_TRANSITION ||
            request.state == REQ_BATTLE || request.state == REQ_RETURN;
+}
+
+/* The scheduler has one in-flight request, but each owner retains its own last
+ * completed result when another owner takes the slot. Detail may point into
+ * request.reason, so the archived copy owns its text. */
+typedef struct RequestResult {
+    size_t owner;
+    int state, outcome;
+    char detail[128];
+    struct RequestResult *next;
+} RequestResult;
+static RequestResult *results;
+
+static RequestResult *result_for(size_t owner)
+{
+    for (RequestResult *r = results; r; r = r->next)
+        if (r->owner == owner) return r;
+    return NULL;
+}
+
+/* Called only after the new request has passed all other admission checks. */
+static int preserve_request(size_t next_owner, const char **reason)
+{
+    if (request.state == REQ_IDLE || !request.owner_valid || request.owner == next_owner) return 0;
+    RequestResult *r = result_for(request.owner);
+    if (!r) {
+        r = malloc(sizeof *r);
+        if (!r) { *reason = "cannot preserve the previous scene result"; return -1; }
+        r->owner = request.owner;
+        r->next = results;
+        results = r;
+    }
+    r->state = request.state;
+    r->outcome = request.outcome;
+    snprintf(r->detail, sizeof r->detail, "%s", request.detail ? request.detail : "");
+    return 0;
+}
+
+static void forget_result(size_t owner)
+{
+    RequestResult **link = &results;
+    while (*link) {
+        if ((*link)->owner == owner) {
+            RequestResult *old = *link;
+            *link = old->next;
+            free(old);
+            return;
+        }
+        link = &(*link)->next;
+    }
 }
 
 static void scene_state(P4ModSceneState *s, int include_request)
@@ -145,6 +230,7 @@ static void scene_state(P4ModSceneState *s, int include_request)
     if (s->context != P4_MOD_SCENE_FIELD && s->context != P4_MOD_SCENE_DUNGEON) s->reason = "not in a field";
     else if (root != 13) s->reason = "the field is loading or running a script";
     else if (s->pending) s->reason = "a scene change is already pending";
+    else if (p4_mod_field_host_busy()) s->reason = "the game's skill choice holds the field";
     else if (s->event) s->reason = "an event or message holds the input";
     else if (s->menu) s->reason = "a menu is open";
     else if (!s->control) s->reason = "the player is not in control";
@@ -156,6 +242,26 @@ void p4_mod_scene_state(P4ModSceneState *out)
 {
     activate_scene(); /* the first scene query starts observing field entries */
     scene_state(out, 1);
+}
+
+/* rotate pc owns the player matrix used by the walk controller
+ * (p4walk_player). */
+int p4_mod_scene_player_position(float *x, float *z)
+{
+    P4ModSceneState state;
+    p4_mod_scene_state(&state);
+    if (!state.ready) return 0;
+    uint32_t node = task_node("rotate pc");
+    uint32_t work = node ? player_word(node + TASK_WORK) : 0;
+    if (!player_range(work, 0x4c)) return 0;
+    uint32_t matrix = player_word(work + 0x48);
+    if (!player_range(matrix, 0x3c)) return 0;
+    float px, pz;
+    memcpy(&px, P4_G2H(matrix + 0x30), sizeof px);
+    memcpy(&pz, P4_G2H(matrix + 0x38), sizeof pz);
+    if (!isfinite(px) || !isfinite(pz)) return 0;
+    *x = px; *z = pz;
+    return 1;
 }
 
 /* ---- native seams */
@@ -322,9 +428,29 @@ static int seam_callback(P4ModCall *call, void *user)
         request.outcome = battle ? (int16_t)half(battle + 0x1c) : -1;
         break;
     }
-    case SEAM_DRAW:
+    case SEAM_DRAW: {
+        /* Overlay HUD items show where the native field HUD does: while the
+         * player walks a field or dungeon, never over a menu, an event, a
+         * message or a battle. Hidden frames restart the fade. */
+        int hud_shown = 0;
+        if (p4_ui_overlay_count(P4_UI_CONTEXT_HUD)) {
+            P4ModSceneState s;
+            scene_state(&s, 0);
+            hud_shown = (s.context == P4_MOD_SCENE_FIELD || s.context == P4_MOD_SCENE_DUNGEON) &&
+                        !s.event && !s.menu && s.control;
+            if (!hud_shown) p4_ui_overlay_context_begin(P4_UI_CONTEXT_HUD);
+        }
+        /* The layer opens (one depth-clear node at the 0xd7 tail) only in a
+         * frame that draws a row or item: earlier draws may have written a
+         * nearer depth (the battle command phase's Z-only TV outline). */
+        if (p4_mod_status_count(P4_MOD_STATUS_HUD) || p4_ui_overlay_drawable(P4_UI_CONTEXT_SCREEN) ||
+            (hud_shown && p4_ui_overlay_drawable(P4_UI_CONTEXT_HUD)))
+            p4_ui_overlay_layer_begin();
         p4_mod_status_draw_hud();
+        if (hud_shown) p4_ui_overlay_draw(P4_UI_CONTEXT_HUD);
+        p4_ui_overlay_draw(P4_UI_CONTEXT_SCREEN); /* returns at once without items */
         break;
+    }
     }
     return 0;
 }
@@ -397,9 +523,49 @@ int p4_mod_scene_warp(size_t owner, uint32_t field, uint32_t room, uint32_t entr
         return -1;
     }
     if (!field_resource(field, room)) { *reason = "the disc has no resources for that field and room"; return -1; }
+    if (preserve_request(owner, reason)) return -1;
     memset(&request, 0, sizeof request);
-    request = (Request){.owner = owner, .kind = KIND_WARP, .state = REQ_QUEUED, .outcome = -1,
+    request = (Request){.owner = owner, .owner_valid = 1, .kind = KIND_WARP, .state = REQ_QUEUED, .outcome = -1,
                         .field = field, .room = room, .entry = entry, .direction = direction, .detail = "queued"};
+    p4_mod_field_host_withdraw(); /* accepted after a skill choice's offer: the request goes first */
+    want_safe_point();
+    return 0;
+}
+
+const char *p4_mod_calendar_hold(void)
+{
+    switch (p4_mod_services_native_calendar_hold()) {
+    case P4_MOD_CALENDAR_HOLD_INVESTIGATION: return "the 12/05 investigation holds the day";
+    case P4_MOD_CALENDAR_HOLD_LAST_DAY: return "the last day holds the time";
+    case P4_MOD_CALENDAR_HOLD_SCHEDULE: return "the schedule still runs this time of day";
+    default: return NULL;
+    }
+}
+
+int p4_mod_calendar_pass(size_t owner, const char **reason)
+{
+    P4ModSceneState s;
+    int16_t date, next_date;
+    uint8_t slot, next_slot;
+    if (activate_scene()) { *reason = "the scene service seams are unavailable"; return -1; }
+    if (request_busy()) { *reason = "another scene request is in flight"; return -1; }
+    scene_state(&s, 0);
+    if (!s.ready || s.context != P4_MOD_SCENE_FIELD) {
+        *reason = s.ready ? "time passes from a fixed field" : s.reason;
+        return -1;
+    }
+    if (cam.active) { *reason = "a camera lease is active"; return -1; }
+    p4_mod_services_native_calendar_now(&date, &slot);
+    int staged = p4_mod_services_native_calendar_next(&next_date, &next_slot);
+    if (next_date != date || next_slot <= slot) { *reason = "the next time slot is tomorrow"; return -1; }
+    const char *held = p4_mod_calendar_hold();
+    if (held) { *reason = held; return -1; }
+    if (preserve_request(owner, reason)) return -1;
+    fprintf(stderr, "p4pc: mods: calendar pass from date %d slot %u to slot %u (%s)\n", date, slot, next_slot,
+            staged ? "staged by the game" : "computed and staged by the request");
+    memset(&request, 0, sizeof request);
+    request = (Request){.owner = owner, .owner_valid = 1, .kind = KIND_PASS, .state = REQ_QUEUED, .outcome = -1,
+                        .pass_date = next_date, .pass_slot = next_slot, .detail = "queued"};
     want_safe_point();
     return 0;
 }
@@ -446,10 +612,12 @@ int p4_mod_encounter_launch(size_t owner, uint32_t id, const char **reason)
         return -1;
     }
     if (p4_mod_encounter_info(id, enemies, &field, &variant)) { *reason = "not a valid loaded encounter"; return -1; }
+    if (preserve_request(owner, reason)) return -1;
     memset(&request, 0, sizeof request);
-    request = (Request){.owner = owner, .kind = KIND_ENCOUNTER, .state = REQ_QUEUED, .outcome = -1,
+    request = (Request){.owner = owner, .owner_valid = 1, .kind = KIND_ENCOUNTER, .state = REQ_QUEUED, .outcome = -1,
                         .encounter = id, .back_field = origin.field, .back_room = origin.room,
                         .back_entry = origin.entry, .back_direction = origin.direction, .detail = "queued"};
+    p4_mod_field_host_withdraw(); /* accepted after a skill choice's offer: the request goes first */
     want_safe_point();
     return 0;
 }
@@ -457,10 +625,20 @@ int p4_mod_encounter_launch(size_t owner, uint32_t id, const char **reason)
 const char *p4_mod_services_status(size_t owner, const char **detail, int *outcome)
 {
     static const char *const names[] = {"idle", "requested", "requested", "battle", "returning", "done", "refused"};
-    if (request.owner != owner || request.state == REQ_IDLE) { *detail = ""; *outcome = -1; return "idle"; }
-    *detail = request.detail ? request.detail : "";
-    *outcome = request.outcome;
-    return names[request.state];
+    if (request.owner_valid && request.owner == owner && request.state != REQ_IDLE) {
+        *detail = request.detail ? request.detail : "";
+        *outcome = request.outcome;
+        return names[request.state];
+    }
+    RequestResult *r = result_for(owner);
+    if (r) {
+        *detail = r->detail;
+        *outcome = r->outcome;
+        return names[r->state];
+    }
+    *detail = "";
+    *outcome = -1;
+    return "idle";
 }
 
 static int arrived(uint16_t field, uint16_t room)
@@ -492,6 +670,26 @@ static void run_request(void)
             request.detail = "loading";
             return;
         }
+        if (request.kind == KIND_PASS) {
+            int16_t date, next_date;
+            uint8_t slot, next_slot;
+            p4_mod_services_native_calendar_now(&date, &slot);
+            p4_mod_services_native_calendar_next(&next_date, &next_slot);
+            if (next_date != request.pass_date || next_slot != request.pass_slot || date != next_date) {
+                refuse("the calendar changed before the time could pass");
+                return;
+            }
+            /* Same boundary step as the staging below: no script runs between. */
+            const char *held = p4_mod_calendar_hold();
+            if (held) {
+                refuse(held);
+                return;
+            }
+            p4_mod_services_native_calendar_pass(next_date, next_slot);
+            request.state = REQ_TRANSITION;
+            request.detail = "passing";
+            return;
+        }
         if (p4_mod_authorize_mask & P4_MOD_AUTH_ENCOUNTER_BIT) {
             P4ModEvent context = {"encounter", 2, {{"encounter", request.encounter}, {"source", 1}}};
             char why[128] = "";
@@ -510,6 +708,59 @@ static void run_request(void)
         request.detail = "battle";
         return;
     case REQ_TRANSITION:
+        if (request.kind == KIND_PASS) {
+            /* left_field: 0 until sequence 25 runs, 1 while it runs, 2 after.
+             * After it the period's scheduler procedure picks the scene; field
+             * events and messages may hold the input first, so frames count
+             * only while the calendar runs or nothing is happening. */
+            int16_t date;
+            uint8_t slot;
+            int sequence = sequence_state(&pending);
+            if (request.left_field == 0) {
+                if (sequence == SEQ_CALENDAR) {
+                    request.left_field = 1;
+                    request.waited = 0;
+                } else if (++request.waited > 600) {
+                    request.state = REQ_DONE;
+                    request.detail = "the calendar sequence did not start";
+                }
+                return;
+            }
+            if (request.left_field == 1) {
+                if (sequence == SEQ_CALENDAR || pending) {
+                    if (++request.waited > 5400) {
+                        request.state = REQ_DONE;
+                        request.detail = "the calendar sequence did not finish";
+                    }
+                    return;
+                }
+                request.left_field = 2;
+                request.waited = 0;
+            }
+            scene_state(&s, 0);
+            int field_ready = s.context == P4_MOD_SCENE_FIELD && s.ready;
+            if (field_ready || (!pending && sequence != SEQ_NONE && sequence != SEQ_FIELD && sequence != SEQ_CALENDAR)) {
+                /* The slot is read back either way; a following event,
+                 * floor or battle is normal for an evening and is named. */
+                const char *followed = field_ready ? NULL
+                                     : sequence == SEQ_FLOOR ? "passed; a dungeon floor followed"
+                                     : sequence == SEQ_BATTLE ? "passed; a battle followed"
+                                     : "passed; an event followed";
+                p4_mod_services_native_calendar_now(&date, &slot);
+                request.state = REQ_DONE;
+                if (date == request.pass_date && slot == request.pass_slot) {
+                    request.detail = followed ? followed : "passed";
+                } else {
+                    snprintf(request.reason, sizeof request.reason,
+                             "the game is at date %d slot %u, not the expected slot %u", date, slot, request.pass_slot);
+                    request.detail = request.reason;
+                }
+            } else if (!pending && sequence == SEQ_NONE && ++request.waited > 5400) {
+                request.state = REQ_DONE;
+                request.detail = "the game did not return to a ready field";
+            }
+            return;
+        }
         if (arrived((uint16_t)request.field, (uint16_t)request.room)) {
             request.state = REQ_DONE;
             request.detail = "arrived";
@@ -567,6 +818,7 @@ static void check_leases(void)
         scene_state(&s, 1);
         if (word(FIELD_ROOT) != cam.root || s.context != P4_MOD_SCENE_FIELD) camera_end_lease("the scene changed");
         else if (s.event) camera_end_lease("an event took over the scene");
+        else if (p4_mod_field_host_busy()) camera_end_lease("the game's skill choice took over the scene");
         else if (s.menu) camera_end_lease("a menu opened");
     }
     if (any_hidden()) {
@@ -577,12 +829,93 @@ static void check_leases(void)
     }
 }
 
+/* ---- practice speed (include/p4pc/pace.h)
+ *
+ * One owner at a time. The kernel runs the requested rate only in gameplay:
+ * a ready field or floor, or a battle, with no Camp/Config menu, scene
+ * change or movie; anything else holds 1x until gameplay is back. Pacing
+ * changes wall time only, so it records no semantic use. */
+
+static const char *pace_hold(void)
+{
+    P4ModSceneState s;
+    scene_state(&s, 1);
+    if (p4pc_mwply_active()) return "a movie plays at 1x";
+    if (s.menu) return "menus run at 1x";
+    if (s.pending) return "a scene change runs at 1x";
+    if (s.context == P4_MOD_SCENE_BATTLE) return NULL;
+    if ((s.context == P4_MOD_SCENE_FIELD || s.context == P4_MOD_SCENE_DUNGEON) && s.ready) return NULL;
+    return "waiting for a ready field or battle";
+}
+
+static void pace_release(const char *why)
+{
+    if (!pace.active) return;
+    pace.active = 0;
+    pace.requested = 4;
+    pace.held = why;
+    p4pc_pace_request(4);
+}
+
+static void pace_update(void)
+{
+    P4ModSceneState s;
+    scene_state(&s, 0);
+    if (s.context == P4_MOD_SCENE_TITLE) {
+        pace_release("the game was reset");
+        return;
+    }
+    pace.held = pace_hold();
+    const unsigned want = pace.held ? 4u : pace.requested;
+    if (p4pc_pace_effective() != want) p4pc_pace_request(want);
+}
+
+int p4_mod_pace_set(size_t owner, unsigned quarters, const char **reason)
+{
+    if (quarters != 1 && quarters != 2 && quarters != 4 && quarters != 8 && quarters != 16) {
+        *reason = "the rate must be 0.25, 0.5, 1, 2 or 4";
+        return -1;
+    }
+    if (p4_os_virtual_clock()) {
+        *reason = "a virtual-clock, turbo or lockstep run keeps its own time";
+        return -1;
+    }
+    if (pace.active && pace.owner != owner) {
+        *reason = "another mod sets the practice speed";
+        return -1;
+    }
+    if (quarters == 4) {
+        pace_release(NULL);
+        return 0;
+    }
+    if (activate_scene()) {
+        *reason = "the scene service seams are unavailable";
+        return -1;
+    }
+    pace.active = 1;
+    pace.owner = owner;
+    pace.requested = quarters;
+    pace.held = NULL;
+    want_safe_point();
+    return 0;
+}
+
+void p4_mod_pace_state(unsigned *requested, unsigned *effective, const char **held)
+{
+    *requested = pace.active ? pace.requested : 4u;
+    *effective = p4pc_pace_effective();
+    *held = pace.held;
+}
+
 static int pump(uint32_t frame)
 {
     (void)frame;
     if (request_busy()) run_request();
     check_leases();
-    return request_busy() || cam.active || any_hidden();
+    if (pace.active) pace_update();
+    const int inventory = p4_mod_inventory_pump(); /* item/money changes queued during a battle */
+    const int party = p4_mod_party_pump();         /* skill/EXP changes queued during a battle */
+    return request_busy() || cam.active || any_hidden() || pace.active || inventory || party;
 }
 
 /* ---- clock */
@@ -619,6 +952,10 @@ uint32_t p4_mod_camera_acquire(size_t owner, const char *name, const char **reas
     scene_state(&s, 1);
     if (!s.ready || s.context != P4_MOD_SCENE_FIELD) {
         *reason = s.ready ? "the free camera supports fixed fields" : s.reason;
+        return 0;
+    }
+    if (p4_mod_skill_choice_claimed()) { /* it ended the last lease to take the field and the pad */
+        *reason = "the game's skill choice is about to take the field";
         return 0;
     }
     memset(&cam, 0, sizeof cam);
@@ -669,6 +1006,8 @@ void p4_mod_camera_release(size_t owner, uint32_t generation)
 }
 
 const char *p4_mod_camera_owner(void) { return cam.active ? cam.name : NULL; }
+
+void p4_mod_camera_revoke(const char *why) { camera_end_lease(why); }
 
 int p4_mod_camera_input(size_t owner, uint32_t generation, int exclusive)
 {
@@ -825,7 +1164,8 @@ int p4_mod_hud_hide(size_t owner, const char *group, int hidden, const char **re
 
 void p4_mod_hud_status_changed(void)
 {
-    hud_rows = p4_mod_status_count(P4_MOD_STATUS_HUD) != 0;
+    hud_rows = p4_mod_status_count(P4_MOD_STATUS_HUD) != 0 || p4_ui_overlay_count(P4_UI_CONTEXT_HUD) != 0 ||
+               p4_ui_overlay_count(P4_UI_CONTEXT_SCREEN) != 0;
     draw_seam_update();
 }
 
@@ -836,6 +1176,11 @@ void p4_mod_services_prepare(void) { prepare(); }
 void p4_mod_services_release_owner(size_t owner)
 {
     if (cam.active && cam.owner == owner) camera_end_lease("the mod shut down");
+    if (pace.active && pace.owner == owner) pace_release("the mod shut down");
     release_hides(owner, 0);
-    if (request.owner == owner && request.state == REQ_QUEUED) refuse("the mod shut down");
+    forget_result(owner);
+    if (request.owner_valid && request.owner == owner) {
+        if (request.state == REQ_QUEUED) refuse("the mod shut down");
+        request.owner_valid = 0;
+    }
 }

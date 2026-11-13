@@ -8,8 +8,8 @@
 /* Five parallel persona banks, each indexed by persona ID:
  * PERSONA0 metadata (0x007644C4), PERSONA1 growth (0x007644CC), MODEL2 battle
  * model parameters (0x007644D0), PERSONA5 replacement candidates (0x007644E0)
- * and MSG3 names (0x00764530). The party-growth, EXP-curve and shuffle-pair
- * blocks are not indexed by an added persona's ID and stay retail. */
+ * and MSG3 names (0x00764530). The party-growth, EXP-curve and skill-pair
+ * blocks are not indexed by an added persona's ID; added rows leave them retail. */
 #define P4_PERSONA_RETAIL_ROWS 256u
 #define P4_PERSONA_METADATA_SIZE 14u
 #define P4_PERSONA_GROWTH_SIZE 70u
@@ -19,6 +19,16 @@
 /* UNIT2 at 0x007644C8: sixteen u16 affinity words per persona, read by
  * datPersonaRunSkillSlot 0x001097C0 and datPersonaGetSkillSlot 0x00109870. */
 #define P4_PERSONA_AFFINITY_SIZE 32u
+/* PERSONA4 at 0x007644DC (iGpffffb3ec): skill-replacement pairs, u16 original
+ * and u16 replacement, read by Shuffle Time's skill change (0x0036F880), roster
+ * fusion's skill change (0x003096D0, 0x00304580) and the level-up pick
+ * (0x0011E490). Every reader stops at a zero pair half, never at a count:
+ * retail is 40 pairs and a (0, 0) terminator. Only a derived source replaces
+ * the list, with any length up to P4_PERSONA_SKILL_PAIR_MAX pairs
+ * (game_table_derived.h); 0x003096D0's index is a signed halfword. */
+#define P4_PERSONA_SKILL_PAIR_SPAN 4u
+#define P4_PERSONA_SKILL_PAIR_SIZE 4u
+#define P4_PERSONA_SKILL_PAIR_MAX 4096u
 /* Public added persona IDs are 256..511: fusion recipe material selectors are
  * signed 10-bit and name/list APIs signed16, so every carrier stays exact. */
 #define P4_PERSONA_MAX_ID 511u

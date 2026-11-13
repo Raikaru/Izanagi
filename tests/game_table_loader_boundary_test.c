@@ -52,7 +52,7 @@ static int H_Cdvd_IsFileLoaded(void *file) { assert(file); return loaded; }
 static void H_Cdvd_ReadSync(void *file) { assert(file == &packed_request); }
 static void H_Cdvd_Destroy(void *file) { assert(file == &item_request || file == &packed_request); ++destroyed; ++sequence; }
 static void datEntryTableUseBuiltin(void) { ++initialized; ++sequence; }
-void p4_game_table_admission_item(const char *path, const uint8_t *bytes, uint32_t size)
+void p4_game_table_admission_item(const char *path, uint8_t *bytes, uint32_t size)
 {
     assert(!strcmp(path, D_005E46A0) && bytes == item_request.fileMemory && size == (u32)item_request.fileSize);
     for (size_t i = 0; i < size; ++i) assert(D_0079BF00[i] == 0xa5);
@@ -65,7 +65,7 @@ void p4_game_tables_observe_packed(const uint8_t *descriptor, const char *path, 
     assert(descriptor == expected_descriptor && path == packed_path && bytes == packed_request.data && size == packed_request.size);
     assert(receipt == NULL); ++observer_calls; ++sequence;
 }
-void p4_game_table_admission_packed(const uint8_t *descriptor, const char *path, const uint8_t *bytes,
+void p4_game_table_admission_packed(const uint8_t *descriptor, const char *path, uint8_t *bytes,
     uint32_t size, P4GameTablePackedObserver observer)
 {
     assert(descriptor == expected_descriptor && path == packed_path && bytes == packed_request.data && size == packed_request.size);

@@ -13,9 +13,10 @@ option(P4_PORT64 "rewrite and compile the decomp mirror for x86_64 (the 64-bit m
 set(P4_PORT64_OPT "O0" CACHE STRING "optimisation level of the 64-bit mirror: O0 (compile-only check), O1, O2, O3")
 option(P4_PORT64_LINK "link the 64-bit executable p4pc64 (needs x86_64 SDL3 and FFmpeg)" OFF)
 set(P4_PORT64_OBJS)
-# The architecture of the 64-bit build: x86_64, or aarch64 cross compiled with clang and run under qemu-user (docs/port64.md 7: the arm64 Debian multiarch
-# libraries and the gcc cross files are the sysroot; -fsigned-char because char is unsigned on AArch64 and MIPS's is signed; the decomp is built for that).
-set(P4_PORT64_ARCH "x86_64" CACHE STRING "architecture of the 64-bit build: x86_64 or aarch64 (cross; tests run under qemu-user)")
+# The architecture of the 64-bit build: x86_64, or aarch64, compiled with clang either across from x86_64 and run under qemu-user or on an AArch64 Linux
+# host itself (GitHub's ARM runners, ci/Dockerfile.arm64) (docs/port64.md 7: the arm64 Debian multiarch libraries and gcc's files are the sysroot;
+# -fsigned-char because char is unsigned on AArch64 and MIPS's is signed; the decomp is built for that).
+set(P4_PORT64_ARCH "x86_64" CACHE STRING "architecture of the 64-bit build: x86_64 or aarch64 (cross under qemu-user, or native on AArch64)")
 if(P4_ANDROID64)
   # Android: the NDK clang finds bionic's headers itself, so the target is all the units and the port sources need. The libraries (bionic's stubs,
   # SDL3 and FFmpeg) are the 32-bit build's (the Android block above). PIC, because libmain.so is a shared library; the i386 layout oracle of the
@@ -65,9 +66,17 @@ elseif(P4_APPLE)
   set(P4_PORT64_ENV "${CMAKE_COMMAND}" -E env "P4_PORT64_TARGET=${P4_X64_TARGET_STRING}")
 elseif(P4_PORT64_ARCH STREQUAL "aarch64")
   set(P4_X64_TRIPLE aarch64-linux-gnu)
-  set(P4_X64_SYSROOT_FLAGS --gcc-install-dir=/usr/lib/gcc-cross/aarch64-linux-gnu/14 -isystem/usr/aarch64-linux-gnu/include -isystem/usr/include/aarch64-linux-gnu)
+  # gcc's files: Debian's cross install on an x86_64 build host, the machine's own on an AArch64 one.
+  if(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "^(aarch64|arm64)$")
+    set(P4_X64_GCC_DIR /usr/lib/gcc/aarch64-linux-gnu/14)
+  else()
+    set(P4_X64_GCC_DIR /usr/lib/gcc-cross/aarch64-linux-gnu/14)
+    # Its tests run under qemu-user (binfmt): a CPU-time budget test reports itself skipped there (P4PC_PERF_EMULATED).
+    set(P4_PORT64_EMULATED qemu-user)
+  endif()
+  set(P4_X64_SYSROOT_FLAGS --gcc-install-dir=${P4_X64_GCC_DIR} -isystem/usr/aarch64-linux-gnu/include -isystem/usr/include/aarch64-linux-gnu)
   set(P4_X64_TARGET_FLAGS --target=${P4_X64_TRIPLE} ${P4_X64_SYSROOT_FLAGS} -fsigned-char -ffp-contract=off)
-  set(P4_X64_LINK_FLAGS --target=${P4_X64_TRIPLE} --gcc-install-dir=/usr/lib/gcc-cross/aarch64-linux-gnu/14 -fuse-ld=lld -no-pie)
+  set(P4_X64_LINK_FLAGS --target=${P4_X64_TRIPLE} --gcc-install-dir=${P4_X64_GCC_DIR} -fuse-ld=lld -no-pie)
   set(P4_X64_LIBDIR /usr/lib/aarch64-linux-gnu)
   set(P4_X64_EXTRA_FLAGS -mno-outline-atomics)   # (the libgcc helper __aarch64_ldadd4_rel the outlined atomics call is not a host function the tables know)
   set(P4_X64_LIBDIR2 /lib/aarch64-linux-gnu)
@@ -113,9 +122,10 @@ function(p4_census_check var unitsdir baseline units)
   set(stamp "${unitsdir}/../census.ok")
   add_custom_command(OUTPUT "${stamp}"
     COMMAND "${P4_PYTHON}" -W ignore "${CMAKE_SOURCE_DIR}/tools/port64/unit64.py" report --dir "${unitsdir}" --census-baseline "${baseline}" --clang "${CMAKE_C_COMPILER}"
-            --active-units "${unitsdir}/../active_units.txt"
+            --active-units "${unitsdir}/../active_units.txt" --rw-clean-units "${P4_GEN}/rw_clean_units.txt"
+            --rw-clean-stripped "${P4_GEN}/decomp/src/rwclean/stripped_units.txt"
     COMMAND "${CMAKE_COMMAND}" -E touch "${stamp}"
-    DEPENDS ${ARGN} "${baseline}" "${CMAKE_SOURCE_DIR}/tools/port64/unit64.py" "${unitsdir}/../active_units.txt" VERBATIM)
+    DEPENDS ${ARGN} "${baseline}" "${CMAKE_SOURCE_DIR}/tools/port64/unit64.py" "${unitsdir}/../active_units.txt" "${P4_GEN}/rw_clean_units.txt" VERBATIM)
   set(${var} "${stamp}" PARENT_SCOPE)
 endfunction()
 set(P4_CENSUS_BASELINE)
@@ -133,7 +143,9 @@ elseif(P4_PORT64_ARCH STREQUAL "x86_64")
 elseif(P4_PORT64_ARCH STREQUAL "aarch64")
   set(P4_CENSUS_BASELINE "${CMAKE_SOURCE_DIR}/config/port64a64_census.txt")
 endif()
-if(P4_PORT64 AND NOT P4_WIN32 AND ((CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "x86_64|AMD64") OR P4_ANDROID64 OR P4_APPLE))
+# (CMake's if() combines AND and OR left to right: the AArch64-host conjunct needs its own parentheses.)
+if(P4_PORT64 AND NOT P4_WIN32 AND ((CMAKE_SYSTEM_NAME STREQUAL "Linux" AND (CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "x86_64|AMD64"
+    OR (CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "^(aarch64|arm64)$" AND P4_PORT64_ARCH STREQUAL "aarch64"))) OR P4_ANDROID64 OR P4_APPLE))
   execute_process(COMMAND "${CMAKE_C_COMPILER}" ${P4_X64_TARGET_FLAGS} -fsyntax-only -x c "${CMAKE_SOURCE_DIR}/include/p4pc/guest.h"
     RESULT_VARIABLE P4_X64_PROBE OUTPUT_QUIET ERROR_QUIET)
   if(P4_X64_PROBE EQUAL 0)
@@ -174,7 +186,12 @@ if(P4_PORT64 AND NOT P4_WIN32 AND ((CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE
     endforeach()
     set(P4_CENSUS_STAMP)
     p4_census_check(P4_CENSUS_STAMP "${P4_G64}/units" "${P4_CENSUS_BASELINE}" "${P4_PORT64_UNITS}" ${P4_PORT64_OBJS})
-    add_custom_target(p4decomp64 ALL DEPENDS ${P4_PORT64_OBJS} ${P4_CENSUS_STAMP})
+    # The objects and the census get a target of their own, with no dependencies: CMake's Ninja generator gives a custom command that several
+    # targets list the intersection of their dependency closures as order-only inputs, and p4decomp64 depends on the CRT audit (300-crt.cmake),
+    # which reads the mod and Luau libraries, so every unit used to wait for those libraries to compile.
+    add_custom_target(p4decomp64_objects DEPENDS ${P4_PORT64_OBJS} ${P4_CENSUS_STAMP})
+    add_custom_target(p4decomp64 ALL)
+    add_dependencies(p4decomp64 p4decomp64_objects)
     # The mobile land guard runs the same rewrite/ABI/census as the real build,
     # but keeps generated C instead of compiling 1,000+ NDK objects or linking.
     set(P4_G64_GENERATION "${P4_GEN}/census64")
@@ -218,7 +235,10 @@ if(P4_PORT64 AND NOT P4_WIN32 AND ((CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE
           list(APPEND P4_PORT64W_OBJS "${obj}")
         endforeach()
         p4_census_check(P4_CENSUS_STAMPW "${P4_G64W}/units" "${CMAKE_SOURCE_DIR}/config/port64w_census.txt" "${P4_PORT64_UNITS}" ${P4_PORT64W_OBJS})
-        add_custom_target(p4decomp64w ALL DEPENDS ${P4_PORT64W_OBJS} ${P4_CENSUS_STAMPW})
+        # (objects and census without dependencies, as p4decomp64_objects above)
+        add_custom_target(p4decomp64w_objects DEPENDS ${P4_PORT64W_OBJS} ${P4_CENSUS_STAMPW})
+        add_custom_target(p4decomp64w ALL)
+        add_dependencies(p4decomp64w p4decomp64w_objects)
       else()
         message(STATUS "port64: ${CMAKE_C_COMPILER} cannot target x86_64-w64-mingw32; the Windows x64 mirror check is skipped")
       endif()

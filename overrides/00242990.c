@@ -1,7 +1,11 @@
-/* 00242990: preserve substitution policy while classifying full-width families. */
+/* 00242990: preserve substitution policy while classifying full-width families.
+ * Each of the eight passive searches ends with the unit's passive grants
+ * (game_passive_grant_native.h), after its slots and accessory. */
 #include "p4pc/game_elements_native.h"
 #include "p4pc/game_skills_native.h"
 #include "p4pc/game_enemies_native.h"
+#include "p4pc/game_passive_grant_native.h"
+#include "p4pc/mod_entry.h"
 #pragma push
 /* measured: retail hoists loop-invariant values out of the skill-search loops. */
 #pragma opt_loop_invariants on
@@ -58,7 +62,7 @@ s32 datCalcResolveSkillId(DatUnit *unit, s32 baseSkill, DatUnit *attacker, u32 s
             }
         }
     }
-    found = 0;
+    found = P4_PASSIVE_UNIT_GRANTED(unit, 0x231);
 done1:
     if (found != 0) {
         return 0x231;
@@ -91,7 +95,7 @@ done1:
             }
         }
     }
-    found = 0;
+    found = P4_PASSIVE_UNIT_GRANTED(unit, 0x232);
 done2:
     if (found != 0) {
         return 0x232;
@@ -128,7 +132,8 @@ done2:
         } else {
             tmp = (datItemCount(0x340) & 0xFF) > 0;
         }
-        if (tmp != 0) {
+        if (tmp != 0 && (!(p4_mod_authorize_mask & P4_MOD_AUTH_BATTLE_PROTECTION_ITEM_BIT) ||
+            p4_mod_authorize_battle_protection_item(unit->id, 0x340, value))) {
             replacementSkill = 0x154;
         }
         if (!(unit->flags & 4)) {
@@ -159,7 +164,7 @@ done2:
                 }
             }
         }
-        found = 0;
+        found = P4_PASSIVE_UNIT_GRANTED(unit, 0x211);
 done3:
         if ((found != 0) && ((s32)(RpRandom() % 100U) < 0x32)) {
             replacementSkill = 0x211;
@@ -192,7 +197,7 @@ done3:
                 }
             }
         }
-        found = 0;
+        found = P4_PASSIVE_UNIT_GRANTED(unit, 0x221);
 done4:
         if (found != 0) {
             replacementSkill = 0x221;
@@ -203,7 +208,8 @@ done4:
         } else {
             tmp = (datItemCount(0x340) & 0xFF) > 0;
         }
-        if (tmp != 0) {
+        if (tmp != 0 && (!(p4_mod_authorize_mask & P4_MOD_AUTH_BATTLE_PROTECTION_ITEM_BIT) ||
+            p4_mod_authorize_battle_protection_item(unit->id, 0x340, value))) {
             replacementSkill = 0x154;
         }
         if (!(unit->flags & 4)) {
@@ -234,7 +240,7 @@ done4:
                 }
             }
         }
-        found = 0;
+        found = P4_PASSIVE_UNIT_GRANTED(unit, 0x212);
 done5:
         if ((found != 0) && ((s32)(RpRandom() % 100U) < 0x32)) {
             replacementSkill = 0x212;
@@ -267,7 +273,7 @@ done5:
                 }
             }
         }
-        found = 0;
+        found = P4_PASSIVE_UNIT_GRANTED(unit, 0x222);
 done6:
         if (found != 0) {
             replacementSkill = 0x222;
@@ -305,7 +311,7 @@ done6:
                 }
             }
         }
-        found = 0;
+        found = P4_PASSIVE_UNIT_GRANTED(unit, 0x210);
 done7:
         if (found != 0) {
             replacementSkill = 0x210;
@@ -343,7 +349,7 @@ done7:
             }
         }
     }
-    found = 0;
+    found = P4_PASSIVE_UNIT_GRANTED(unit, 0x20F);
 done8:
     if (found != 0) {
         replacementSkill = 0x20F;

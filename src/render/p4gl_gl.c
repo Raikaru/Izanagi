@@ -151,10 +151,24 @@ static const char kGlslBorder[] =
     "    return mix(a, b, f.y);\n"
     "}\n";
 
-/* 1 when the context converts a shader's float colour to the 8-bit framebuffer by rounding to nearest (hardware drivers), 0 when it truncates (Mesa's
- * llvmpipe on a thread whose MXCSR is the EE's round toward zero). The GS truncates, so on a rounding context every shader takes half a step off its
- * output (P4_ROUND_BIAS): every scene gate's MAD is 0.2 to 0.3 points lower on NVIDIA hardware, as on llvmpipe. Probed once per context. */
+/* 1 when the context converts a shader's float colour to the 8-bit framebuffer by rounding (hardware drivers), 0 when it truncates (Mesa's llvmpipe on a
+ * thread whose MXCSR is the EE's round toward zero). The GS truncates its colour, so on a rounding context every fragment shader truncates the colour
+ * itself (P4_ROUND_BIAS, kGlslRoundBias): every scene gate's MAD is 0.2 to 0.3 points lower on NVIDIA hardware, as on llvmpipe. Probed once per context. */
 static int sRoundBias;
+/* The GS's truncation on a rounding context. floor(255 c + 1/512) is the GS's 8-bit colour: the 1/512 step takes in the float error of a colour that is
+ * a whole step, and every fraction the GS truncates (multiples of 1/256) stays below the next step. The shader writes that step less 3/8. Rounding drivers
+ * do not split a step at its half: NVIDIA 610.88 turns n - 1/2 + d into n - 1 for d up to 1/16 of a step (measured for every n, renderer_port.md 10.6a),
+ * so the half step this used to take off put every whole-step colour one step low (white wrote 254, a movie frame was one step dark on 82 % of its
+ * channels). n - 3/8 is n on any conversion within 1/8 step of round to nearest. Blending stays the driver's: NVIDIA blends the 8-bit source and rounds
+ * where the GS truncates. */
+static const char kGlslRoundBias[] =
+    "#define P4_ROUND_BIAS 1\n"
+    "vec3 p4GsTruncate(vec3 c) { return max(floor(c * 255.0 + 1.0 / 512.0) - 0.375, 0.0) / 255.0; }\n";
+/* A colour's alpha on the GS's scale (0x80 is 1.0) for the alpha test and AA1. An alpha within 1/256 of a whole GS value is that value: the GS compares
+ * integers, and a vertex alpha interpolated across a primitive is not exact on every GPU (on AMD's radeonsi a constant 1.0 reads a hair below 128, which
+ * failed GEQUAL 0x80 and dropped AA1's coverage). Other fractions compare as they are. */
+static const char kGlslGsAlpha[] =
+    "float p4GsAlpha(float a) { float t = a * 128.0, n = floor(t + 0.5); return abs(t - n) < 1.0 / 256.0 ? n : t; }\n";
 /* 1 when a pixel centre exactly on the edge of a quad falls on another side than the GS's top-left rule puts it: the Im2D vertex shader then moves its
  * vertices a little up and left and the fragment shader takes that off the texture coordinates again (P4_TIE_BIAS). llvmpipe and an Adreno 650 include the
  * bottom edge of the picture and leave out the top one, so every sprite and letterbox bar was a row low at integer coordinates. Probed once per context
@@ -179,8 +193,9 @@ GLuint p4gl_gl_compile_shader(GLenum stage, const char *body, const char *what)
     }
     if (stage == GL_FRAGMENT_SHADER) {
         if (sRoundBias) {
-            sources[count++] = "#define P4_ROUND_BIAS 1\n";
+            sources[count++] = kGlslRoundBias;
         }
+        sources[count++] = kGlslGsAlpha;
         sources[count++] = kGlslBorder;
     }
     sources[count++] = body;
@@ -263,10 +278,10 @@ static int contains_nocase(const char *hay, const char *needle)
     return 0;
 }
 
-/* The limit (percent, as text) a gate judges a frame by. envName (P4PC_REF_MAX, P4PC_CAPTURE_REF_MAX) holds the ctest limit, written for
- * llvmpipe, where the gates are judged on the hosts. tests/gate_limits.txt (P4PC_GATE_LIMITS; set it on a machine
- * with a real GPU) lists limits for other renderers, one row per gate (P4PC_GATE_NAME) and renderer: `<gate> <substring of GL_RENDERER, any case> <limit>`.
- * The first row whose substring the loaded context's GL_RENDERER contains wins; no row, no file or no context: the ctest limit. */
+/* The limit (percent, as text) a gate judges a frame by. envName (P4PC_REF_MAX, P4PC_CAPTURE_REF_MAX) holds the CTest limit.
+ * tests/gate_limits.txt (P4PC_GATE_LIMITS) lists limits for specific renderers, one row per gate (P4PC_GATE_NAME)
+ * and renderer: `<gate> <substring of GL_RENDERER, any case> <limit>`. The first matching row wins; no row,
+ * no file or no context: the CTest limit. */
 const char *p4gl_gate_limit(const char *envName)
 {
     static char text[40];
@@ -1088,7 +1103,7 @@ static void probe_output_rounding(void)
     p4gl_glBindFramebuffer(GL_FRAMEBUFFER, 0);
     p4gl_glBindTexture(GL_TEXTURE_2D, 0);
     p4gl_glViewport(vp[0], vp[1], vp[2], vp[3]);
-    fprintf(stderr, "p4gl: colour output %s (127.6/255 reads back as %u)\n", sRoundBias ? "rounds to nearest, shaders take half a step off" : "truncates", (unsigned)px[0]);
+    fprintf(stderr, "p4gl: colour output %s (127.6/255 reads back as %u)\n", sRoundBias ? "rounds, shaders truncate as the GS does" : "truncates", (unsigned)px[0]);
 }
 
 /* Which side of an edge a pixel centre exactly on it falls on. A quad from (1, 1) to (3, 3) in a 4 x 4 target, mapped as the Im2D shader maps (a vertex at an
@@ -1252,6 +1267,21 @@ int p4gl_gl_load(void)
     missing |= p4gl_resolve((void **)&p4gl_glUniformMatrix4fv, "glUniformMatrix4fv");
     if (!missing) {
         context_probe();
+        /* CI must never turn an unavailable GPU into a passing software run.
+         * A host may additionally require its reviewed renderer by substring. */
+        const char *hardware = getenv("P4PC_CI_HARDWARE_GL");
+        const char *ciRenderer = getenv("P4PC_CI_GL_RENDERER");
+        if ((hardware != NULL && strcmp(hardware, "1") == 0 &&
+             (sRenderer[0] == '\0' || contains_nocase(sRenderer, "llvmpipe") ||
+              contains_nocase(sRenderer, "softpipe") || contains_nocase(sRenderer, "swiftshader") ||
+              contains_nocase(sRenderer, "warp") || contains_nocase(sRenderer, "software") ||
+              contains_nocase(sRenderer, "basic render") || contains_nocase(sRenderer, "gdi generic"))) ||
+            (ciRenderer != NULL && ciRenderer[0] != '\0' && !contains_nocase(sRenderer, ciRenderer))) {
+            fprintf(stderr, "p4gl: CI requires hardware renderer%s%s; got '%s'\n",
+                    ciRenderer != NULL && ciRenderer[0] != '\0' ? " containing " : "",
+                    ciRenderer != NULL ? ciRenderer : "", sRenderer);
+            exit(EXIT_FAILURE);
+        }
         /* Port-frame goldens are scoped to the renderer which produced them.
          * Do not judge another GPU's colour quantization against that image.
          * Ordinary player runs and unscoped retail gates are unchanged. */

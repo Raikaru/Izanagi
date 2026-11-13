@@ -36,6 +36,16 @@ target_link_libraries(game_table_extents_test m)
 add_test(NAME game_table_extents COMMAND game_table_extents_test)
 set_tests_properties(game_table_extents PROPERTIES SKIP_RETURN_CODE 77)
 
+# Session overlays of those banks (p4.tables) over synthetic guest banks.
+add_executable(game_table_overlay_test game_table_overlay_test.c
+  "${CMAKE_SOURCE_DIR}/src/platform/mods/game_table_overlay.c"
+  "${CMAKE_SOURCE_DIR}/src/platform/mods/game_table_extents.c" ${P4_GUEST_TEST_SRC})
+target_include_directories(game_table_overlay_test PRIVATE "${CMAKE_SOURCE_DIR}/include")
+target_compile_definitions(game_table_overlay_test PRIVATE ${P4_PORT_DEFINES})
+target_link_libraries(game_table_overlay_test m)
+add_test(NAME game_table_overlay COMMAND game_table_overlay_test)
+set_tests_properties(game_table_overlay PROPERTIES SKIP_RETURN_CODE 77)
+
 # Canonical saves, preparation wire, extent-bounded encounter start and the
 # post-battle skill-offer decline input.
 add_executable(battle_sim_table_test battle_sim_table_test.c
@@ -49,11 +59,28 @@ target_link_libraries(battle_sim_table_test m)
 add_test(NAME battle_sim_table COMMAND battle_sim_table_test)
 set_tests_properties(battle_sim_table PROPERTIES SKIP_RETURN_CODE 77)
 
+# Policy must follow the native battle item list when item-table rows relocate it.
+add_executable(battle_policy_items_test battle_policy_items_test.c)
+target_include_directories(battle_policy_items_test PRIVATE "${CMAKE_SOURCE_DIR}/include")
+# It is in p4_x64, so an AArch64 build directory on an x86_64 host builds it natively, linked as
+# PIE there (that directory drops -no-pie): compile it position-independent after the global -fno-pic.
+if(NOT P4_WIN32)
+  target_compile_options(battle_policy_items_test PRIVATE -fPIE)
+endif()
+add_test(NAME battle_policy_items COMMAND battle_policy_items_test)
+set_tests_properties(battle_policy_items PROPERTIES LABELS port64)
+
 # Host C broker contracts only; synthetic packets do not qualify combat.
 add_executable(battle_events_test battle_events_test.c
   "${CMAKE_SOURCE_DIR}/src/platform/battle_sim/events.c")
 target_include_directories(battle_events_test PRIVATE "${CMAKE_SOURCE_DIR}/include")
 add_test(NAME battle_events COMMAND battle_events_test)
+
+# The strategic candidate policy's (8) decision rules over the facts policy.c gathers.
+add_executable(battle_strategy_test battle_strategy_test.c
+  "${CMAKE_SOURCE_DIR}/src/platform/battle_sim/strategy.c")
+target_include_directories(battle_strategy_test PRIVATE "${CMAKE_SOURCE_DIR}/include")
+add_test(NAME battle_strategy COMMAND battle_strategy_test)
 
 add_executable(battle_live_entry_test battle_live_entry_test.c
   "${CMAKE_SOURCE_DIR}/src/platform/battle_sim/live_entry.c")
@@ -243,6 +270,19 @@ add_executable(p4iso_test p4iso_test.c "${CMAKE_SOURCE_DIR}/src/platform/config/
 target_link_libraries(p4iso_test m ${P4_SDL3_LIB})
 target_compile_definitions(p4iso_test PRIVATE ${P4_PORT_DEFINES})
 add_test(NAME p4iso COMMAND p4iso_test)
+# The game's own --help: usage on stdout, before any disc, window or settings file is opened.
+if(NOT P4_WIN32)
+  # This is a startup-only host test, not a GL/game gate. Register its 64-bit
+  # twin explicitly so it checks the same output without entering the gate clone cohort.
+  _add_test(NAME game_help COMMAND $<TARGET_FILE:p4pc> --help)
+  set_tests_properties(game_help PROPERTIES TIMEOUT 20 LABELS host
+    PASS_REGULAR_EXPRESSION "usage:.*--import-save FILE_OR_FOLDER \\[--slot N\\].*p4mod --help")
+  if(TARGET p4pc64)
+    _add_test(NAME game_help64 COMMAND $<TARGET_FILE:p4pc64> --help)
+    set_tests_properties(game_help64 PROPERTIES TIMEOUT 20 LABELS "host;port64"
+      PASS_REGULAR_EXPRESSION "usage:.*--import-save FILE_OR_FOLDER \\[--slot N\\].*p4mod --help")
+  endif()
+endif()
 target_compile_definitions(pad_keyboard_test PRIVATE ${P4_PORT_DEFINES})
 
 # File layer against the retail disc. Skipped (exit 77) unless P4PC_ISO names the image.

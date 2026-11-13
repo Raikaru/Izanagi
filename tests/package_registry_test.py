@@ -70,6 +70,21 @@ class NativePackages(unittest.TestCase):
         out, _ = self.run_mode("admit-duplicate")
         self.assertIn("Duplicate installed packages", out)
 
+    def test_bundled_root_adds_shipped_ids_and_player_copies_win(self):
+        shipped = self.root / "shipped"
+        shipped.mkdir()
+        self.package(shipped, "high", "mod.high", 10, "mod", "bundled copy")
+        self.package(shipped, "extra", "mod.shipped", 0, "mod", "shipped")
+        result = subprocess.run([*DRIVER, "bundled", str(self.mods), str(shipped)],
+                                capture_output=True, text=True, check=False)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("bundled root: PASS", result.stdout)
+        self.assertIn("player copy shadows bundled mod.high 1.0", result.stderr)
+        result = subprocess.run([*DRIVER, "bundled-only", str(self.mods), str(shipped)],
+                                capture_output=True, text=True, check=False)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("bundled root only: PASS", result.stdout)
+
     def test_unknown_native_section_is_a_pre_code_capability_refusal(self):
         path = self.mods / "high/mod.ini"
         path.write_text(path.read_text() + "[not_installed feature]\nvalue=1\n", encoding="utf-8")
@@ -246,6 +261,161 @@ class NativePackages(unittest.TestCase):
         self.assertIn("invalid=empty", out)
         self.assertIn("Empty extension section refused", out)
         self.assertIn("catalog=4 invalid=2 activation=0", out)
+
+    # Requirements: synthetic manifests only, no payload files.
+    def manifest(self, ident, extra="", version="1.2", api="1.6", priority=0, kind="mod"):
+        folder = (self.mods if kind == "mod" else self.packs) / ident
+        folder.mkdir()
+        (folder / f"{kind}.ini").write_text(
+            f"[{kind}]\nid={ident}\nname=Name {ident}\nversion={version}\napi={api}\n"
+            f"priority={priority}\norder=0\n{extra}", encoding="ascii")
+
+    def base_and_dependent(self, base_version="1.2", stored="on", requirement="version=1.0\nsetting.split=on\n"):
+        self.manifest("mod.base", "[setting split]\nkind=toggle\nlabel=SPLIT\n", version=base_version, priority=5)
+        self.manifest("mod.dep", f"[require mod.base]\n{requirement}", priority=-5)
+        store = self.root / "settings/mod-settings"
+        store.mkdir(parents=True, exist_ok=True)
+        (store / "mod.base.ini").write_text(f"split = {stored}\n", encoding="ascii")
+
+    def requirements(self, mods, order="", packs="", refused="", companion=""):
+        result = subprocess.run(
+            [*DRIVER, "requirements", str(self.mods), str(self.packs)], capture_output=True, text=True, check=False,
+            env=dict(os.environ, P4PC_TEST_MODS=mods, P4PC_TEST_ORDER=order, P4PC_TEST_PACKS=packs,
+                     P4PC_TEST_REFUSED=refused, P4PC_TEST_COMPANION=companion))
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("requirements: PASS", result.stdout)
+        return result.stdout
+
+    def test_requirements_load_first_whatever_the_selector_or_manifest_order(self):
+        self.base_and_dependent()
+        out = self.requirements("mod.dep,mod.base")
+        self.assertIn("admitted=mod.base,mod.dep\n", out)
+        self.assertNotIn("refused=", out)
+        out = self.requirements("mod.dep,mod.base", order="mod.dep,mod.base")
+        self.assertIn("admitted=mod.base,mod.dep\n", out)
+
+    def test_missing_old_incomparable_or_mismatched_requirement_refuses_only_the_dependent(self):
+        cases = (
+            ({}, "mod.dep", "Name mod.dep needs mod.base 1.0+, which is not enabled", "admitted=\n"),
+            ({"base_version": "0.9"}, "mod.base,mod.dep", "Name mod.dep needs Name mod.base 1.0+ (enabled: 0.9)",
+             "admitted=mod.base\n"),
+            ({"base_version": "2.0"}, "mod.base,mod.dep", "Name mod.dep needs Name mod.base 1.0+ (enabled: 2.0)",
+             "admitted=mod.base\n"),
+            ({"base_version": "beta"}, "mod.base,mod.dep",
+             "Name mod.dep needs Name mod.base 1.0+, but its version beta is not comparable", "admitted=mod.base\n"),
+            ({"stored": "off"}, "mod.base,mod.dep", "Name mod.dep needs Name mod.base with SPLIT on",
+             "admitted=mod.base\n"),
+            ({"requirement": "version=1.0\nsetting.split=maybe\n"}, "mod.base,mod.dep",
+             "Name mod.dep needs Name mod.base SPLIT maybe, which is not one of its choices", "admitted=mod.base\n"),
+            ({"requirement": "version=1.0\nsetting.other=on\n"}, "mod.base,mod.dep",
+             "Name mod.dep needs Name mod.base setting other, which it does not declare", "admitted=mod.base\n"),
+        )
+        for options, enabled, reason, admitted in cases:
+            with self.subTest(reason=reason):
+                self.remove_case()
+                self.base_and_dependent(**options)
+                out = self.requirements(enabled, refused="mod.dep")
+                self.assertIn(f"refused=mod.dep reason={reason}\n", out)
+                self.assertIn(f"refusal mod.dep={reason}\n", out)
+                self.assertIn(admitted, out)
+
+    def remove_case(self):
+        for name in ("mod.base", "mod.dep"):
+            for path in sorted((self.mods / name).glob("*"), reverse=True):
+                path.unlink()
+            if (self.mods / name).exists():
+                (self.mods / name).rmdir()
+
+    def test_refusal_cascades_and_cycles_refuse_their_members(self):
+        self.manifest("mod.a", "[require mod.b]\nversion=1.0\n")
+        self.manifest("mod.b", "[require mod.a]\nversion=1.0\n")
+        self.manifest("mod.c", "[require mod.a]\nversion=1.0\n")
+        self.manifest("mod.d", "")
+        out = self.requirements("mod.a,mod.b,mod.c,mod.d")
+        self.assertIn("refused=mod.a reason=Name mod.a is in a requirement cycle through Name mod.b\n", out)
+        self.assertIn("refused=mod.b reason=Name mod.b is in a requirement cycle through Name mod.a\n", out)
+        self.assertIn("refused=mod.c reason=Name mod.c needs mod.a 1.0+, which was refused: "
+                      "Name mod.a is in a requirement cycle through Name mod.b\n", out)
+        self.assertIn("admitted=mod.d\n", out)
+
+    def test_invalid_requirement_sections_are_refused_with_their_line(self):
+        cases = (
+            ("1.2", "[require mod.d]\nversion=1.0\n", "Line9: [require] sections require api=1.6"),
+            ("1.6", "[require mod.x]\nversion=1.0\n", "Line9: mod.x cannot require itself"),
+            ("1.6", "[require mod.d]\nsetting.a=on\n", "Line9: requirement mod.d needs version=<major>.<minor>"),
+            ("1.6", "[require mod.d]\nversion=1\n", "Line9: requirement mod.d version must be <major>.<minor>"),
+            ("1.6", "[require mod.d]\nversion=1.0\nwhen=always\n", "Line10: requirement mod.d has unknown field when"),
+            ("1.6", "[require Mod.D]\nversion=1.0\n", "Line9: invalid requirement id [require Mod.D]"),
+        )
+        self.manifest("mod.d", "")
+        for api, extra, reason in cases:
+            with self.subTest(reason=reason):
+                folder = self.mods / "mod.x"
+                if folder.exists():
+                    (folder / "mod.ini").unlink()
+                    folder.rmdir()
+                self.manifest("mod.x", extra, api=api)
+                out = self.requirements("mod.d,mod.x")
+                self.assertIn(f"refused=mod.x reason={reason}\n", out)
+                self.assertIn("admitted=mod.d\n", out)
+
+    def test_requirements_stay_within_their_kind(self):
+        self.manifest("shared.base", "")
+        self.manifest("pack.dep", "[require shared.base]\nversion=1.0\n", kind="pack")
+        out = self.requirements("shared.base", packs="pack.dep")
+        self.assertIn("refused=pack.dep reason=Name pack.dep needs shared.base 1.0+, which is not enabled\n", out)
+        self.assertIn("admitted=shared.base\n", out)
+
+    def remove(self, *names):
+        for name in names:
+            folder = self.mods / name
+            for path in folder.glob("*"):
+                path.unlink()
+            folder.rmdir()
+
+    def test_companions_order_when_present_and_refuse_only_incompatible_versions(self):
+        self.manifest("mod.hard", "", version="1.3", priority=5)
+        self.manifest("mod.arts", "[companion mod.hard]\nversion=1.2\n", api="1.6", priority=-5)
+        out = self.requirements("mod.arts", companion="mod.hard")
+        self.assertIn("admitted=mod.arts\n", out)
+        self.assertIn("companion mod.hard of mod.arts=0\n", out)
+        self.assertNotIn("refused=", out)
+        out = self.requirements("mod.arts,mod.hard", companion="mod.hard")
+        self.assertIn("admitted=mod.hard,mod.arts\n", out)
+        self.assertIn("companion mod.hard of mod.hard=-1\ncompanion mod.hard of mod.arts=1\n", out)
+        self.assertNotIn("refused=", out)
+        self.remove("mod.hard")
+        self.manifest("mod.hard", "", version="1.1", priority=5)
+        out = self.requirements("mod.arts,mod.hard", refused="mod.arts")
+        reason = "Name mod.arts needs companion Name mod.hard 1.2+ (enabled: 1.1)"
+        self.assertIn(f"refused=mod.arts reason={reason}\n", out)
+        self.assertIn("admitted=mod.hard\n", out)
+        # A companion refused for its own reasons is simply absent.
+        self.remove("mod.hard")
+        self.manifest("mod.hard", "[require mod.ghost]\nversion=1.0\n", version="1.3", priority=5)
+        out = self.requirements("mod.arts,mod.hard")
+        self.assertIn("refused=mod.hard reason=Name mod.hard needs mod.ghost 1.0+, which is not enabled\n", out)
+        self.assertIn("admitted=mod.arts\n", out)
+        self.assertNotIn("refused=mod.arts", out)
+
+    def test_invalid_companion_sections_are_refused_with_their_line(self):
+        cases = (
+            ("1.5", "[companion mod.d]\nversion=1.0\n", "Line9: [companion] sections require api=1.6"),
+            ("1.6", "[companion mod.x]\nversion=1.0\n", "Line9: mod.x cannot be its own companion"),
+            ("1.6", "[companion mod.d]\nversion=1.0\nsetting.split=on\n",
+             "Line10: companion mod.d has unknown field setting.split"),
+            ("1.6", "[companion mod.d]\nversion=1.0\n[require mod.d]\nversion=1.0\n",
+             "Line11: mod.d is both required and a companion"),
+        )
+        self.manifest("mod.d", "")
+        for api, extra, reason in cases:
+            with self.subTest(reason=reason):
+                if (self.mods / "mod.x").exists():
+                    self.remove("mod.x")
+                self.manifest("mod.x", extra, api=api)
+                out = self.requirements("mod.d,mod.x")
+                self.assertIn(f"refused=mod.x reason={reason}\n", out)
+                self.assertIn("admitted=mod.d\n", out)
 
 
 if __name__ == "__main__":

@@ -20,6 +20,16 @@ int p4_game_elements_affinity_effective(const P4GameTables *tables, void *unit,
  * call from metadata planning, binding or finite candidate preview. */
 int p4_game_elements_runtime_affinity_effective(const P4GameTables *tables, void *unit,
     const P4GameActionElement *element, uint32_t *native_value);
+/* The added-coverage sources of one battle unit, in the order the effective
+ * affinity reads them: its skill list (datCalcSkillList, skill_count u16
+ * entries), then a party member's three equipped items, each accessory
+ * followed by its granted skill (u16 +0x24). Enemies have no equipment. Then
+ * the unit's passive grants (game_passive_grant.h) it does not already have,
+ * each once, as skills. visit returns nonzero to stop with that result.
+ * Damage cover reads the same sources through this function. */
+typedef int (*P4GameUnitSourceFn)(void *user, uint32_t source_kind, uint32_t source_id);
+int p4_game_elements_unit_sources(const uint8_t *skills, uint32_t skill_count, uint32_t enemy, uint32_t unit_id,
+    P4GameUnitSourceFn visit, void *user);
 /* An unmodified retail component: retail leaf, standard channel, no owned
  * binding and no added effect pair. When its alias or side pair is absent it
  * keeps the ORIGINAL native resolver; native affinity and knowledge share it. */
@@ -78,6 +88,12 @@ int p4_game_elements_resolve_primary_frame(const P4GameTables *tables,
 int p4_game_elements_boot_stage(const P4GameTables *tables,
     const struct P4GameSkills *skills, const struct P4GameItems *items);
 const P4GameTables *p4_game_elements_active(void);
+/* The active tuple's sealed skill and item views (NULL when no snapshot is
+ * active), for pure display queries such as p4.elements. The generation is 0
+ * with no active snapshot and changes each time one is published. */
+const struct P4GameSkills *p4_game_elements_active_skills(void);
+const struct P4GameItems *p4_game_elements_active_items(void);
+uint32_t p4_game_elements_active_generation(void);
 /* Exact prepared owned view for later ordered cohort prepares (not active
  * gameplay capability). NULL until this element owner's prepare succeeds;
  * no pending/active/global-table substitution, cleared on session_end. */

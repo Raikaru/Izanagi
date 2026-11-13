@@ -26,4 +26,7 @@ void *p4pc_movie_audio_current(void);
  * buffers otherwise; see mwply.c). For tests and tools that read the buffer. Returns 0 or -1. */
 int p4pc_mwply_fill_tiled(void *h);
 
+/* 1 while a movie is being prepared or played. */
+int p4pc_mwply_active(void);
+
 #endif

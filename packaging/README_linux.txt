@@ -56,10 +56,31 @@ Where things are
 The folder is not inside the unpacked one, so the package can be replaced by a newer
 build without touching your saves.
 
+Optional mods made for this port ship in the mods folder beside the game program
+(usr/bin/mods inside the AppImage). None of them is active: choose one in Config >
+MODS, set its options on its MODS page, and restart. A copy with the same id in
+your own mods folder beside p4pc.ini replaces the shipped one.
+
+Fusion Arts offers WEAPON FUSION after Yukiko's Castle is cleared. Enable the
+mod and its WEAPON FUSION option, then restart. In the Velvet Room, use Square
+on the root menu to open the forge. Choose a fighter, an unequipped weapon and
+a carried Persona; the confirmation shows the result and fee. Forging consumes
+the weapon and Persona and cannot be undone. The equipped or last Persona cannot
+be consumed. You may equip a successful result immediately; your old equipped
+weapon returns to your items (EQUIP NOW is unavailable while you hold 99 of it).
+Physical Split, if enabled, also types forged weapons.
+
 The AppImage contains an inert example in examples/mods/p4pc.example. To try
 it, extract the AppImage, copy that folder into the mods folder beside
 p4pc.ini, enable p4pc.example in MODS, and restart. It logs time-slot setter calls;
-its counter is restored from the mod save sidecar when you load.
+its counter is restored from the mod save sidecar when you load. Its COUNT TIME
+SLOTS row under MODS turns the counter on and off, and it logs the text file it
+ships in files/DATA.
+
+To make a mod, run the AppImage with p4mod first: "./p4pc-linux64-*.AppImage p4mod
+--help" lists its commands. "p4mod setup --disc <your disc image>" once, then
+"p4mod new", "p4mod check", "p4mod test" and "p4mod pack". The API's types for a
+Luau editor are usr/bin/p4.d.luau in the extracted AppImage.
 
 This is a test build
 --------------------

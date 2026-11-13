@@ -19,6 +19,9 @@ target_link_libraries(mod_resources_render m ${P4_SDL3_LIB} ${P4_FFMPEG_LIBS})
 p4_ps2_exe(mod_resources_render)
 add_test(NAME mod_resources_render COMMAND mod_resources_render)
 set_tests_properties(mod_resources_render PROPERTIES SKIP_RETURN_CODE 77 LABELS gl TIMEOUT 120)
+# The same authored raster on the battle simulator's no-device backend: no GL context, shadow pixels only.
+add_test(NAME mod_resources_render_no_device COMMAND mod_resources_render no-device)
+set_tests_properties(mod_resources_render_no_device PROPERTIES SKIP_RETURN_CODE 77 LABELS "host" TIMEOUT 120)
 
 # Real selected provider plans, bounded PNG decoding, early/late products and
 # the actual RW resource backend. Python makes only synthetic authored inputs.

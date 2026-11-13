@@ -5,14 +5,17 @@
 #include "p4pc/image.h"
 #include "p4pc/platform.h"
 #include "p4pc/tables.h"
+#include "../src/platform/mods/game_elements_ai_commands.h"
 #include <stdio.h>
 #include <string.h>
 
 static void fixture_function(void) {}
+static void fixture_ai_query(void) {}
 const p4pc_native_t p4pc_native_table[] = {
-    {0x00100100u, (void *)fixture_function, "fixture_function", NULL}
+    {0x00100100u, (void *)fixture_function, "fixture_function", NULL},
+    {0x001e0060u, (void *)fixture_ai_query, "fixture_ai_query", NULL}
 };
-const size_t p4pc_native_count = 1;
+const size_t p4pc_native_count = 2;
 const p4pc_patch_t p4pc_patch_table[] = {
     {0x00101120u, (void *)fixture_function, NULL},
     {0x00101100u, (void *)fixture_function, NULL}
@@ -59,6 +62,7 @@ int main(void)
 {
 #ifdef P4_GUEST64
     p4_fn_register(0x00100100u, (void *)fixture_function);
+    p4_fn_register(0x001e0060u, (void *)fixture_ai_query);
 #endif
     unsigned char bytes[16] = {0};
     uint32_t word = 0x12345678u;
@@ -74,6 +78,11 @@ int main(void)
     CHECK(!p4_mod_memory_function_known(0xdeadbeefu));
     CHECK(p4_mod_memory_function_encode(0x00100101u, &word) == -1);
     CHECK(p4_mod_memory_function_encode(0x00100100u, NULL) == -1);
+    CHECK(p4_mod_memory_function_encode(0x001e0060u, &word) == 0);
+    CHECK(p4_ai_semantic_binding_matches(0x2015u, word));
+    CHECK(!p4_ai_semantic_binding_matches(0x2015u, word ^ 1u));
+    CHECK(!p4_ai_semantic_binding_matches(0x2016u, word)); /* Missing identity fails closed. */
+    CHECK(p4_ai_semantic_binding_matches(0u, word)); /* No semantic binding required. */
     CHECK(p4_mod_memory_check(0x00101080u, 4, 1, 0, bytes) == NULL);
     CHECK(p4_mod_memory_check(0x00100880u, 4, 1, 1, bytes) != NULL);
     CHECK(p4_mod_memory_check(0x00102080u, 4, 1, 1, bytes) != NULL);

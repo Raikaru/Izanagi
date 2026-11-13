@@ -61,8 +61,9 @@ static const P4GameTableAllocator allocator = {NULL, guest_allocate, guest_relea
 
 enum { SLASH = 19u };
 static const P4ResourceRef slash_icon = {"phys.split", "phys.split:slash", 1};
+static const P4ResourceRef slash_header = {"phys.split", "phys.split:slash-header", 1};
 typedef struct Scenario {
-    int slash_icon, slash_visible_without_icon, enemy_slash_row, persona_slash_row, light_damage_rows;
+    int slash_icon, slash_visible_without_icon, enemy_slash_row, persona_slash_row, light_damage_rows, slash_header;
 } Scenario;
 static void row(P4GameTables *tables, uint32_t kind, uint32_t id, uint32_t profile,
     uint32_t leaf, uint32_t channel, uint32_t value)
@@ -84,6 +85,7 @@ static P4GameTables *tables_for(const Scenario *scenario)
         P4_ELEMENT_AFFINITY | P4_ELEMENT_VISIBLE, .family = 0, .order = 19, .revision = 1,
         .key = "phys.split:slash", .display_name = "Slash", .short_name = "Slash"};
     if (scenario->slash_icon) slash.icon = slash_icon;
+    if (scenario->slash_header) slash.header_icon = slash_header;
     assert(p4_game_tables_element(tables, "phys.split", &slash) == P4_TABLE_OK);
     if (scenario->slash_visible_without_icon) {
         P4ElementDesc pierce = {.id = 20, .flags = P4_ELEMENT_OFFENSIVE | P4_ELEMENT_VISIBLE, .order = 20,
@@ -247,6 +249,8 @@ static void freeze_and_pins(void)
     const P4GameElementUiPreparedColumn *slash = p4_game_elements_ui_column(ui, 0);
     assert(slash->art_kind == P4_ELEMENT_UI_AUTHORED_ART && slash->icon_token == token);
     assert(slash->image_width == 4 && slash->image_height == 4);
+    /* Without a header icon the header is the skill icon. */
+    assert(slash->header_token == token && slash->header_width == 4 && slash->header_height == 4);
     assert(slash->primary.valid && slash->primary.element_id == SLASH && !slash->marker.valid);
     const P4GameElementUiPreparedColumn *fire = p4_game_elements_ui_column(ui, 1);
     assert(fire->art_kind == P4_ELEMENT_UI_RETAIL_ART && fire->native_affinity_sprite == 0x2fu);
@@ -259,6 +263,8 @@ static void freeze_and_pins(void)
     assert(p4_game_elements_ui_art_find(ui, SLASH, &art) == P4_TABLE_OK && art == 0);
     art = 99;
     assert(p4_game_elements_ui_art_find(ui, 1, &art) == P4_TABLE_NOT_FOUND && art == 99);
+    /* No header icon declared: no header art, never the skill art. */
+    assert(p4_game_elements_ui_header_art_find(ui, SLASH, &art) == P4_TABLE_NOT_FOUND && art == 99);
     const uint32_t first = p4_game_elements_ui_ko_text(ui, P4_KO_NORMAL);
     assert(first && p4_game_elements_ui_ko_text(ui, P4_ELEMENT_UI_KO_UNKNOWN) == first + 20u);
     assert(!p4_game_elements_ui_ko_text(ui, P4_ELEMENT_UI_KO_UNKNOWN + 1u));
@@ -281,6 +287,116 @@ static void freeze_and_pins(void)
     discard(tables, ui);
     assert(p4_resources_retire_unpinned(resources) == P4_RESOURCE_OK && !rasters);
 }
+/* A header icon is a second art of its leaf: declared, pinned and drawn at its
+ * own size, while the skill icon and art_find keep the skill art. */
+static void header_art(void)
+{
+    P4GameElementUiColumn columns[P4_ELEMENT_UI_MAX_COLUMNS];
+    const uint32_t count = split_layout(columns);
+    const Scenario headed = {1, 0, 1, 1, 1, 1};
+    P4GameTables *tables;
+    P4GameElementUi *ui;
+    assert(plan(&headed, columns, count, &tables, &ui) == P4_TABLE_OK);
+    P4ResourceImagesPrepared images = {&slash_icon, 1};
+    assert(p4_game_elements_ui_check_images(ui, &images) == P4_TABLE_NOT_FOUND); /* The header is undeclared. */
+    const P4ResourceRef both[] = {slash_icon, slash_header};
+    images = (P4ResourceImagesPrepared){both, 2};
+    assert(p4_game_elements_ui_check_images(ui, &images) == P4_TABLE_OK);
+    static uint8_t small[4 * 4 * 4], header[30 * 23 * 4];
+    uint32_t icon_token, header_token;
+    P4Resources *resources = p4_resources_create(16384); assert(resources);
+    assert(p4_resources_image(resources, "phys.split", "phys.split:slash", &source, small, sizeof small,
+        4, 4, 1, &icon_token) == P4_RESOURCE_OK);
+    const P4ContentSource header_source = {.origin = P4_TEXTURE_OVERRIDE, .rank = 3, .provider = "phys.split",
+        .key = "icons/slash-header.png"};
+    assert(p4_resources_image(resources, "phys.split", "phys.split:slash-header", &header_source, header,
+        sizeof header, 30, 23, 1, &header_token) == P4_RESOURCE_OK);
+    assert(p4_resources_freeze(resources, 1) == P4_RESOURCE_OK);
+    assert(p4_game_elements_ui_freeze(ui, resources) == P4_TABLE_OK);
+    const P4GameElementUiPreparedColumn *slash = p4_game_elements_ui_column(ui, 0);
+    assert(slash->art_kind == P4_ELEMENT_UI_AUTHORED_ART && slash->icon_token == icon_token &&
+        slash->image_width == 4 && slash->image_height == 4);
+    assert(slash->header_token == header_token && slash->header_width == 30 && slash->header_height == 23);
+    uint32_t art = 99;
+    assert(p4_game_elements_ui_art_find(ui, SLASH, &art) == P4_TABLE_OK && art == 0); /* The skill art. */
+    assert(p4_game_elements_ui_header_art_find(ui, SLASH, &art) == P4_TABLE_OK && art == 1); /* Its header art. */
+    assert(p4_game_elements_ui_header_art_find(ui, 1, &art) == P4_TABLE_NOT_FOUND && art == 1);
+    assert(p4_game_elements_ui_column(ui, 1)->art_kind == P4_ELEMENT_UI_RETAIL_ART &&
+        !p4_game_elements_ui_column(ui, 1)->header_token);
+    assert(p4_resources_retire_unpinned(resources) == P4_RESOURCE_CONFLICT); /* Both pinned. */
+    discard(tables, ui);
+    assert(p4_resources_retire_unpinned(resources) == P4_RESOURCE_OK);
+}
+/* A manifest [element-header] gives a leaf without a header icon of its own (a
+ * retail ailment leaf) header art that only the header lookup returns. */
+static void element_headers(void)
+{
+    P4GameElementUiColumn columns[P4_ELEMENT_UI_MAX_COLUMNS];
+    const uint32_t count = split_layout(columns);
+    const Scenario complete = {1, 0, 1, 1, 1, 0}, headed = {1, 0, 1, 1, 1, 1};
+    const P4ResourceRef panic = {"phys.split", "phys.split:panic-header", 1}, unnamed = {"phys.split", "", 1};
+    const P4ResourceRef prompt = {"phys.split", "phys.split:ailments-prompt", 1};
+    P4GameTables *tables = tables_for(&complete);
+    P4GameElementUi *ui = p4_game_elements_ui_create(&allocator); assert(ui);
+    assert(p4_game_elements_ui_layout(ui, "phys.split", columns, count, 3) == P4_TABLE_OK);
+    assert(p4_game_elements_ui_element_header(ui, 8, &unnamed) == P4_TABLE_INVALID);
+    assert(p4_game_elements_ui_element_header(ui, 8, &panic) == P4_TABLE_OK);
+    assert(p4_game_elements_ui_element_header(ui, 8, &panic) == P4_TABLE_CONFLICT);
+    assert(p4_game_elements_ui_prompt(ui, P4_ELEMENT_UI_PROMPTS, &prompt) == P4_TABLE_INVALID);
+    assert(p4_game_elements_ui_prompt(ui, P4_ELEMENT_UI_PROMPT_ANALYZE_AILMENTS, &prompt) == P4_TABLE_OK);
+    assert(p4_game_elements_ui_prompt(ui, P4_ELEMENT_UI_PROMPT_ANALYZE_AILMENTS, &prompt) == P4_TABLE_CONFLICT);
+    assert(p4_game_elements_ui_prepare(ui, tables) == P4_TABLE_OK);
+    assert(p4_game_elements_ui_element_header(ui, 9, &panic) == P4_TABLE_FROZEN);
+    assert(p4_game_elements_ui_prompt(ui, P4_ELEMENT_UI_PROMPT_ANALYZE_AFFINITIES, &prompt) == P4_TABLE_FROZEN);
+    P4ResourceImagesPrepared images = {&slash_icon, 1};
+    assert(p4_game_elements_ui_check_images(ui, &images) == P4_TABLE_NOT_FOUND); /* The header image is undeclared. */
+    const P4ResourceRef all[] = {slash_icon, panic, prompt};
+    images = (P4ResourceImagesPrepared){all, 3};
+    assert(p4_game_elements_ui_check_images(ui, &images) == P4_TABLE_OK);
+    static uint8_t small[4 * 4 * 4], header[30 * 23 * 4], banner[40 * 16 * 4];
+    uint32_t icon_token, header_token, prompt_token;
+    P4Resources *resources = p4_resources_create(32768); assert(resources);
+    assert(p4_resources_image(resources, "phys.split", "phys.split:slash", &source, small, sizeof small,
+        4, 4, 1, &icon_token) == P4_RESOURCE_OK);
+    const P4ContentSource panic_source = {.origin = P4_TEXTURE_OVERRIDE, .rank = 3, .provider = "phys.split",
+        .key = "icons/panic-header.png"};
+    assert(p4_resources_image(resources, "phys.split", "phys.split:panic-header", &panic_source, header,
+        sizeof header, 30, 23, 1, &header_token) == P4_RESOURCE_OK);
+    const P4ContentSource prompt_source = {.origin = P4_TEXTURE_OVERRIDE, .rank = 3, .provider = "phys.split",
+        .key = "icons/ailments-prompt.png"};
+    assert(p4_resources_image(resources, "phys.split", "phys.split:ailments-prompt", &prompt_source, banner,
+        sizeof banner, 40, 16, 1, &prompt_token) == P4_RESOURCE_OK);
+    assert(p4_resources_freeze(resources, 1) == P4_RESOURCE_OK);
+    assert(p4_game_elements_ui_freeze(ui, resources) == P4_TABLE_OK);
+    /* Arts are ordered by (leaf, kind): the prompt (key 0), the ailment leaf's
+     * header, then Slash's icon. */
+    uint32_t art = 99;
+    assert(p4_game_elements_ui_prompt_find(ui, P4_ELEMENT_UI_PROMPT_ANALYZE_AILMENTS, &art) == P4_TABLE_OK && art == 0);
+    assert(p4_game_elements_ui_prompt_find(ui, P4_ELEMENT_UI_PROMPT_ANALYZE_AFFINITIES, &art) == P4_TABLE_NOT_FOUND && art == 0);
+    assert(p4_game_elements_ui_header_art_find(ui, 8, &art) == P4_TABLE_OK && art == 1);
+    assert(p4_game_elements_ui_art_find(ui, 8, &art) == P4_TABLE_NOT_FOUND && art == 1);
+    assert(p4_game_elements_ui_art_find(ui, SLASH, &art) == P4_TABLE_OK && art == 2);
+    assert(p4_game_elements_ui_header_art_find(ui, SLASH, &art) == P4_TABLE_NOT_FOUND && art == 2);
+    /* Columns are unaffected: Slash's header is still its skill icon. */
+    assert(p4_game_elements_ui_column(ui, 0)->header_token == icon_token);
+    assert(p4_resources_retire_unpinned(resources) == P4_RESOURCE_CONFLICT); /* All pinned. */
+    discard(tables, ui);
+    assert(p4_resources_retire_unpinned(resources) == P4_RESOURCE_OK);
+
+    /* An unregistered leaf, or one whose descriptor has its own header icon, refuses. */
+    tables = tables_for(&complete);
+    ui = p4_game_elements_ui_create(&allocator); assert(ui);
+    assert(p4_game_elements_ui_layout(ui, "phys.split", columns, count, 3) == P4_TABLE_OK);
+    assert(p4_game_elements_ui_element_header(ui, 200, &panic) == P4_TABLE_OK);
+    assert(p4_game_elements_ui_prepare(ui, tables) == P4_TABLE_NOT_FOUND);
+    discard(tables, ui);
+    tables = tables_for(&headed);
+    ui = p4_game_elements_ui_create(&allocator); assert(ui);
+    assert(p4_game_elements_ui_layout(ui, "phys.split", columns, count, 3) == P4_TABLE_OK);
+    assert(p4_game_elements_ui_element_header(ui, SLASH, &panic) == P4_TABLE_OK);
+    assert(p4_game_elements_ui_prepare(ui, tables) == P4_TABLE_INVALID);
+    discard(tables, ui);
+}
 
 int main(void)
 {
@@ -288,6 +404,8 @@ int main(void)
     layout_validation();
     plan_and_coverage();
     freeze_and_pins();
-    puts("game_elements_ui: layout, CPU coverage, art set, exact image pins and marker stream passed; no draw/boot/capture claim");
+    header_art();
+    element_headers();
+    puts("game_elements_ui: layout, CPU coverage, art set, header and element-header art, exact image pins and marker stream passed; no draw/boot/capture claim");
     return 0;
 }

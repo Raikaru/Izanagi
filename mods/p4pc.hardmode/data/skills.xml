@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="us-ascii"?>
+<!-- p4pc.hardmode elemental physical skills, hardmode-design 8.1 and 15.1.1 (G2, G4;
+     approved 2026-11-05); skill-rebalance-design family 2 mid tier: power 100,
+     accuracy 90, critical 20, 11% HP. Each is derived from Assault Dive (0x7A), so it
+     costs HP and lands as a physical attack (crit, counter, the physical-only damage
+     term) while its element decides affinity, shields and Boost. The cast plays a
+     retail physical skill's effect: Rainy Death (0xA9) and Atom Smasher (0xA2).
+     Inheritance rate 0: fusion never passes them on. Riders (Freeze, Shock) come with
+     those ailments, not here. -->
+<p4-tables schema="1">
+<skill id="700" active="1" element="2" element-aux="0" inheritance-group="2" inheritance-rate="0"
+  key="p4pc.hardmode:frost-dive" derive="0x7A" power="100" cost="11" accuracy="90" critical="20"
+  delivery="physical" effect-source="0xA9"/>
+<string table="1" id="700" role="0" bytes="46726f7374204469766500"/>
+<string table="1" id="700" role="1" bytes="4d656469756d2049636520706879736963616c2061747461636b206f6e203120666f652e00"/>
+<skill id="701" active="1" element="3" element-aux="0" inheritance-group="3" inheritance-rate="0"
+  key="p4pc.hardmode:thunder-dive" derive="0x7A" power="100" cost="11" accuracy="90" critical="20"
+  delivery="physical" effect-source="0xA2"/>
+<string table="1" id="701" role="0" bytes="5468756e646572204469766500"/>
+<string table="1" id="701" role="1" bytes="4d656469756d20456c656320706879736963616c2061747461636b206f6e203120666f652e00"/>
+</p4-tables>

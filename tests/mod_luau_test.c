@@ -14,6 +14,17 @@
 #include "../src/platform/memcard/mod_save_internal.h"
 #include "p4pc/mod_setting_store.h"
 #include "p4pc/mod_lifecycle.h"
+#include "p4pc/game_damage_stage.h"
+#include "p4pc/mod_artifacts.h"
+#include "p4pc/game_recovery_stage.h"
+#include "p4pc/game_cost_stage.h"
+#include "p4pc/game_chance_stage.h"
+#include "p4pc/game_wearoff_stage.h"
+#include "p4pc/game_buff_stage.h"
+#include "p4pc/game_reward_stage.h"
+#include "p4pc/game_unit_stage.h"
+#include "p4pc/game_hit_stage.h"
+#include "p4pc/game_passive_grant.h"
 #ifdef P4_MOD_NATIVE_RECOVERY
 #include "p4pc/crt.h"
 #include "failure_native.h"
@@ -28,6 +39,11 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#if defined(__SSE__)
+#include <xmmintrin.h>
+#endif
+#include "p4pc/game_elements_ai_native.h"
+#include "p4pc/table_result.h"
 
 uint32_t mod_test_unsigned(uint32_t value);
 int16_t mod_test_narrow(int8_t value, uint16_t add);
@@ -35,13 +51,15 @@ float mod_test_mixed(int value, float real, unsigned char *byte, double wide);
 uint32_t *mod_test_pointer(uint32_t *value);
 int mod_test_recursive(int depth);
 void mod_test_void(uint32_t *value);
+void mod_test_set_action_code(unsigned char *action, unsigned char *slot, uint16_t code);
 const p4pc_native_t p4pc_native_table[] = {
     {0x100100, (void *)mod_test_unsigned, "mod_test_unsigned", NULL},
     {0x100120, (void *)mod_test_narrow, "mod_test_narrow", NULL},
     {0x100140, (void *)mod_test_mixed, "mod_test_mixed", NULL},
     {0x100160, (void *)mod_test_pointer, "mod_test_pointer", NULL},
     {0x100180, (void *)mod_test_recursive, "mod_test_recursive", NULL},
-    {0x1001a0, (void *)mod_test_void, "mod_test_void", NULL}
+    {0x1001a0, (void *)mod_test_void, "mod_test_void", NULL},
+    {0x1de640, (void *)mod_test_set_action_code, "mod_test_set_action_code", NULL}
 };
 const size_t p4pc_native_count = sizeof p4pc_native_table / sizeof p4pc_native_table[0];
 const p4pc_patch_t p4pc_patch_table[] = {{0, NULL, NULL}};
@@ -59,6 +77,20 @@ int32_t func_004215e0(void *parameter);
 int32_t func_00421600(int32_t id, uint32_t arg);
 int32_t func_00421670(int32_t id, int32_t priority);
 int32_t func_00421690(int32_t priority);
+/* Stub enemy AI carrier for p4.battle.substitute: 227 is authorized, 128 has
+ * another target scope, anything else is not an active skill. */
+static void *substitute_action;
+static uint32_t substitute_skill;
+static unsigned substitute_calls;
+int p4_game_elements_ai_native_substitute(void *source_action, uint32_t skill)
+{
+    ++substitute_calls;
+    substitute_action = source_action;
+    substitute_skill = skill;
+    return skill == 227u ? P4_TABLE_OK : skill == 128u ? P4_TABLE_CONFLICT : P4_TABLE_NOT_FOUND;
+}
+/* The p4.passive game facts (tests/mod_passive_facts.c). */
+extern int passive_facts_catalog_ready;
 int32_t func_004216d0(void);
 static int failures;
 static unsigned canonical_copies, watched_invalidations;
@@ -183,10 +215,19 @@ static void native_initialize(lua_State *L)
 {
     ++native_initializations;
     lua_pushboolean(L, 1); lua_setfield(L, -2, "fixture_native");
+    p4_lua_stages_initialize(L); /* the real binding over the real amount stages */
+    p4_lua_passive_initialize(L); /* the real binding over the real grant table */
+    /* The real p4.battle.substitute binding over the stub carrier below. */
+    lua_newtable(L);
+    lua_pushcfunction(L, p4_lua_battle_substitute, "substitute");
+    lua_setfield(L, -2, "substitute");
+    lua_setfield(L, -2, "battle");
 }
 static void native_before_destroy(P4LuaMod *mod)
 {
     ++native_destructions;
+    p4_lua_stages_close(mod);
+    p4_lua_passive_close(mod);
     /* Real Lua state remains alive; no fake settings backend is installed. */
     lua_getglobal(mod->state, "p4");
     lua_rawgetfield(mod->state, -1, "fixture_native");
@@ -194,6 +235,317 @@ static void native_before_destroy(P4LuaMod *mod)
     lua_pop(mod->state, 2);
 }
 static const P4LuaNativeBindings fixture_bindings = {native_initialize, native_before_destroy};
+/* p4.damage: order, frozen snapshot hits, disable/remove, identity values and
+ * teardown, through p4_game_damage_apply exactly as datCalcSkillAmount calls it. */
+static void damage_witness(P4LuaMod *mod, const P4PackageProvider *other_provider)
+{
+    P4GameDamageHit hit = {.skill_id = 16, .source_side = P4_DAMAGE_SIDE_PARTY, .source_id = 1,
+        .target_side = P4_DAMAGE_SIDE_ENEMY, .target_id = 258, .origin_side = P4_DAMAGE_SIDE_ENEMY,
+        .origin_id = 258, .hit_kind = P4_DAMAGE_HIT_WEAK, .element_valid = 1, .element_id = 1,
+        .resolved = 1, .stock = 100, .source_status = 0x2, .target_status = 0x10,
+        .origin = P4_DAMAGE_ORIGIN_SKILL, .source_persona = 0x2a, .source_persona_level = 31};
+    CHECK(p4_game_damage_count() == 0 && p4_game_damage_apply(&hit) == 100);
+    run(mod, "p4.damage.on{kind='divide', fn=function() end}", 0);
+    run(mod, "p4.damage.on{kind='add'}", 0);
+    run(mod, "p4.damage.on{kind='add', priority=0.5, fn=function() end}", 0);
+    /* A start-up declaration: refused inside any callback, not only snapshots. */
+    run(mod, "hooked=p4.hook(0x100100,'II','before',function(c)\n"
+             " refused=not pcall(p4.damage.on, {kind='add', fn=function() end}) end)", 1);
+    (void)mod_test_unsigned(10);
+    run(mod, "assert(refused); hooked:remove(); hooked=nil; refused=nil", 1);
+    CHECK(p4_game_damage_count() == 0);
+    run(mod,
+        "seen={}\n"
+        "late=p4.damage.on{kind='add', priority=5, fn=function(h) table.insert(seen,'add'); return 7 end}\n"
+        "double=p4.damage.on{kind='multiply', fn=function(h)\n"
+        " table.insert(seen,'mul')\n"
+        " assert(h.source_side=='party' and h.source_id==1 and h.target_side=='enemy' and h.target_id==258)\n"
+        " assert(h.origin_side=='enemy' and h.origin_id==258 and h.hit_kind=='weak' and h.element==1)\n"
+        " assert(h.resolved and not h.reflected and h.stock==100 and h.source_status==2 and h.target_status==0x10)\n"
+        " assert(h.origin=='skill' and h.source_persona==0x2a and h.source_persona_level==31)\n"
+        " assert(not pcall(function() h.stock=1 end))\n"
+        " assert(not pcall(p4.damage.on, {kind='add', fn=function() end}))\n"
+        " assert(not pcall(p4.call, 0x100100, 'II', 1))\n"
+        " if h.skill==17 then return nil elseif h.skill==18 then return 1 end\n"
+        " return 2 end}\n", 1);
+    CHECK(p4_game_damage_count() == 2);
+    CHECK(p4_game_damage_apply(&hit) == 207); /* priority 0 multiply, then priority 5 add */
+    run(mod, "assert(table.concat(seen,',')=='mul,add'); seen={}", 1);
+    hit.skill_id = 17;
+    CHECK(p4_game_damage_apply(&hit) == 107);
+    hit.skill_id = 18;
+    CHECK(p4_game_damage_apply(&hit) == 107);
+    run(mod, "double:disable(); seen={}", 1);
+    hit.skill_id = 16;
+    CHECK(p4_game_damage_apply(&hit) == 107);
+    run(mod, "assert(table.concat(seen,',')=='add'); double:enable(); late:remove(); late:remove()\n"
+             "assert(not pcall(late.enable, late))", 1);
+    CHECK(p4_game_damage_count() == 1 && p4_game_damage_apply(&hit) == 200);
+    P4LuaMod *other = p4_lua_create(other_provider);
+    CHECK(other != NULL);
+    if (other) {
+        run(other, "half=p4.damage.on{kind='multiply', priority=-1, fn=function(h) if h.skill==18 then return 1 end return 0.5 end}", 1);
+        CHECK(!other->semantic_used && p4_game_damage_count() == 2);
+        hit.skill_id = 18;
+        CHECK(p4_game_damage_apply(&hit) == 100 && !other->semantic_used); /* identity is not semantic use */
+        hit.skill_id = 16;
+        CHECK(p4_game_damage_apply(&hit) == 100 && other->semantic_used); /* 100 x 0.5 x 2 */
+        p4_lua_destroy(other); /* VM teardown unregisters its modifiers */
+        CHECK(p4_game_damage_count() == 1);
+    }
+    run(mod, "double:remove(); double=nil; late=nil; seen=nil", 1);
+    CHECK(p4_game_damage_count() == 0);
+    /* A hit without a persona source reports nil persona fields and its command. */
+    run(mod, "probe=p4.damage.on{kind='multiply', fn=function(h)\n"
+             " assert(h.origin=='attack' and h.source_persona==nil and h.source_persona_level==nil) end}", 1);
+    hit.origin = P4_DAMAGE_ORIGIN_ATTACK; hit.source_persona = hit.source_persona_level = 0;
+    CHECK(p4_game_damage_apply(&hit) == 100);
+    run(mod, "probe:remove(); probe=nil", 1);
+    CHECK(p4_game_damage_count() == 0);
+}
+/* --stage-failure recovery|chance|cost: a modifier that raises must reach the
+ * native failure owner (p4_mod_failure), as a damage modifier's error does;
+ * each stage pushes its own hit table. Exits 42 from the owner, 3 otherwise. */
+static const char *stage_failure_mode;
+static void expected_stage_failure(size_t owner, const char *reason, void *user)
+{
+    (void)owner;
+    (void)user;
+    _Exit(reason && strstr(reason, "intentional stage failure") ? 42 : 43);
+}
+static void stage_failure(P4LuaMod *mod)
+{
+    static const char fn[] = "{kind='multiply', fn=function(h) error('intentional stage failure') end}";
+    char source[160];
+    snprintf(source, sizeof source, "boom=p4.%s.on%s", stage_failure_mode, fn);
+    run(mod, source, 1);
+    if (!strcmp(stage_failure_mode, "recovery")) {
+        const P4GameRecoveryHit heal = {.skill_id = 0xc0, .source_side = P4_DAMAGE_SIDE_PARTY, .source_id = 1,
+            .target_side = P4_DAMAGE_SIDE_PARTY, .target_id = 2, .resolved = 1, .origin = P4_DAMAGE_ORIGIN_SKILL,
+            .stock = 100};
+        (void)p4_game_recovery_apply(&heal);
+    } else if (!strcmp(stage_failure_mode, "chance")) {
+        const P4GameChanceHit chance = {.skill_id = 0x53, .source_side = P4_DAMAGE_SIDE_PARTY, .source_id = 1,
+            .target_side = P4_DAMAGE_SIDE_ENEMY, .target_id = 40, .component = P4_CHANCE_COMPONENT_AILMENT,
+            .statuses = 0x10, .stock = 45};
+        (void)p4_game_chance_apply(&chance);
+    } else if (!strcmp(stage_failure_mode, "cost")) {
+        const P4GameCostHit cost = {.skill_id = 2, .side = P4_DAMAGE_SIDE_PARTY, .unit_id = 1,
+            .resource = P4_COST_RESOURCE_SP, .stock = 12};
+        (void)p4_game_cost_apply(&cost);
+    }
+    fprintf(stderr, "mod_luau: the %s modifier's error did not reach the failure owner\n", stage_failure_mode);
+    _Exit(3);
+}
+/* p4.recovery, p4.cost and p4.chance: the same binding over their own stages
+ * and hit tables, the same refusals, order, identity rule and teardown. */
+static void stages_witness(P4LuaMod *mod, const P4PackageProvider *other_provider)
+{
+    if (stage_failure_mode) stage_failure(mod);
+    run(mod, "p4.cost.on{kind='divide', fn=function() end}", 0);
+    run(mod, "p4.recovery.on{kind='add'}", 0);
+    run(mod, "p4.chance.on{kind='add', priority=0.5, fn=function() end}", 0);
+    run(mod,
+        "heal=p4.recovery.on{kind='multiply', priority=20, fn=function(h)\n"
+        " assert(h.skill==0xc0 and h.source_side=='party' and h.source_id==1 and h.target_side=='party' and h.target_id==2)\n"
+        " assert(h.resolved and h.origin=='skill' and h.stock==100 and h.source_persona==0x2a and h.source_persona_level==31)\n"
+        " assert(not pcall(function() h.stock=1 end))\n"
+        " return 1.15 end}\n"
+        "cost=p4.cost.on{kind='multiply', priority=20, fn=function(h)\n"
+        " assert(h.skill==2 and h.side=='party' and h.unit==1 and h.resource=='sp' and h.stock==12)\n"
+        " if h.persona==nil then assert(h.persona_level==nil) return nil end\n"
+        " assert(h.persona==0x55 and h.persona_level==60)\n"
+        " return 0.81 end}\n"
+        "chance=p4.chance.on{kind='multiply', priority=20, fn=function(h)\n"
+        " assert(h.skill==0x53 and h.component=='ailment' and h.statuses==0x10 and h.item==false and h.stock==45)\n"
+        " assert(h.source_side=='party' and h.target_side=='enemy' and h.target_id==40 and h.source_persona==0x2a)\n"
+        " assert(h.afflictions==2)\n"
+        " return 1.1 end}\n", 1);
+    CHECK(p4_game_recovery_count() == 1 && p4_game_cost_count() == 1 && p4_game_chance_count() == 1);
+    const P4GameRecoveryHit heal = {.skill_id = 0xc0, .source_side = P4_DAMAGE_SIDE_PARTY, .source_id = 1,
+        .target_side = P4_DAMAGE_SIDE_PARTY, .target_id = 2, .resolved = 1, .origin = P4_DAMAGE_ORIGIN_SKILL,
+        .stock = 100, .source_persona = 0x2a, .source_persona_level = 31};
+    CHECK(p4_game_recovery_apply(&heal) == 114); /* 100 x 1.15 truncated once */
+    P4GameCostHit cost = {.skill_id = 2, .side = P4_DAMAGE_SIDE_PARTY, .unit_id = 1,
+        .resource = P4_COST_RESOURCE_SP, .stock = 12, .persona = 0x55, .persona_level = 60};
+    CHECK(p4_game_cost_apply(&cost) == 10); /* 12 x 0.81 = 9.72, rounded half up */
+    cost.persona = cost.persona_level = 0;
+    CHECK(p4_game_cost_apply(&cost) == 12);
+    const P4GameChanceHit chance = {.skill_id = 0x53, .source_side = P4_DAMAGE_SIDE_PARTY, .source_id = 1,
+        .target_side = P4_DAMAGE_SIDE_ENEMY, .target_id = 40, .component = P4_CHANCE_COMPONENT_AILMENT,
+        .statuses = 0x10, .stock = 45, .source_persona = 0x2a, .source_persona_level = 31, .afflictions = 2};
+    CHECK(p4_game_chance_apply(&chance) == 49); /* 45 x 1.1 = 49.5, truncated */
+    P4LuaMod *other = p4_lua_create(other_provider);
+    CHECK(other != NULL);
+    if (other) {
+        run(other, "more=p4.cost.on{kind='add', priority=30, fn=function(h) return 2 end}", 1);
+        cost.persona = 0x55; cost.persona_level = 60;
+        CHECK(p4_game_cost_count() == 2 && p4_game_cost_apply(&cost) == 12); /* 12 x 0.81 + 2 = 11.72 */
+        p4_lua_destroy(other);
+        CHECK(p4_game_cost_count() == 1);
+    }
+    run(mod, "heal:remove(); cost:remove(); chance:disable()", 1);
+    CHECK(p4_game_chance_apply(&chance) == 45 && p4_game_chance_count() == 1);
+    run(mod, "chance:remove(); heal=nil; cost=nil; chance=nil", 1);
+    CHECK(!p4_game_recovery_count() && !p4_game_cost_count() && !p4_game_chance_count());
+}
+/* p4.status.wearoff, p4.buff, p4.reward, p4.unit and p4.hit: what a mod's
+ * callback sees for each stage's frozen query, each stage's clamp, the
+ * readonly p4.status namespace and teardown. */
+static void formula_stages_witness(P4LuaMod *mod)
+{
+    run(mod, "p4.status.wearoff.on{kind='divide', fn=function() end}", 0);
+    run(mod, "p4.buff.on{kind='add'}", 0);
+    run(mod, "p4.status.extra=1", 0);
+    run(mod, "p4.status.wearoff=nil", 0);
+    run(mod,
+        "assert(p4.has('status.wearoff@1') and p4.has('status.afflictions@1') and p4.has('buff@1'))\n"
+        "assert(p4.has('reward@1') and p4.has('unit@1') and p4.has('hit@1'))\n"
+        "wear=p4.status.wearoff.on{kind='add', fn=function(r)\n"
+        " assert(r.side=='party' and r.unit==1 and r.status=='confusion' and r.level==30 and r.luck==20)\n"
+        " assert(r.turns==2 and r.limit==3 and r.stock==40 and r.afflictions==1)\n"
+        " assert(not pcall(function() r.stock=1 end))\n"
+        " return 15 * (r.turns - 1) end}\n"
+        "buff=p4.buff.on{kind='multiply', fn=function(q)\n"
+        " assert(q.side=='enemy' and q.unit==40 and q.stat=='defense' and q.rank==-1 and q.charged==false and q.stock==1.5)\n"
+        " return 2 end}\n"
+        "reward=p4.reward.on{kind='multiply', fn=function(q)\n"
+        " if q.reward=='money' then assert(q.recipient==nil and q.id==nil and q.stock==190) return 2 end\n"
+        " assert(q.recipient=='persona' and q.id==0x2a and q.level==31 and q.equipped==true and q.stock==100)\n"
+        " return 0 end}\n"
+        "unit=p4.unit.on{kind='multiply', fn=function(q)\n"
+        " if q.side=='enemy' then assert(q.unit==40 and q.stat=='max_hp' and q.level==10 and q.stock==40000) end\n"
+        " if q.side=='party' then assert(q.unit==2 and q.stat=='strength' and q.level==30 and q.stock==60) end\n"
+        " return 2 end}\n"
+        "hit=p4.hit.on{kind='add', fn=function(q)\n"
+        " assert(q.skill==1 and q.source_side=='party' and q.source_id==1 and q.target_side=='enemy' and q.target_id==40)\n"
+        " assert((q.roll=='critical' and q.stock==35) or (q.roll=='accuracy' and q.stock==95))\n"
+        " return 10 end}\n", 1);
+    CHECK(p4_game_wearoff_count() == 1 && p4_game_buff_count() == 1 && p4_game_reward_count() == 1 &&
+        p4_game_unit_count() == 1 && p4_game_hit_count() == 1);
+    const P4GameWearoffRoll roll = {.side = P4_DAMAGE_SIDE_PARTY, .id = 1, .status = 0x10, .level = 30, .luck = 20,
+        .turns = 2, .limit = 3, .stock = 40, .afflictions = 1};
+    CHECK(p4_game_wearoff_apply(&roll) == 55);
+    const P4GameBuffQuery buff = {.side = P4_DAMAGE_SIDE_ENEMY, .id = 40, .stat = P4_BUFF_DEFENSE, .rank = -1,
+        .stock = 1.5};
+    CHECK(p4_game_buff_apply(&buff) == 3.0f);
+    const P4GameRewardQuery award = {.reward = P4_REWARD_EXP, .recipient = P4_REWARD_PERSONA, .id = 0x2a, .level = 31,
+        .equipped = 1, .stock = 100};
+    const P4GameRewardQuery money = {.reward = P4_REWARD_MONEY, .stock = 190};
+    CHECK(p4_game_reward_apply(&award) == 0 && p4_game_reward_apply(&money) == 380);
+    CHECK(p4_game_reward_apply(&money) == 380); /* the results screen asks again: the same answer */
+    const P4GameUnitQuery hp = {.side = P4_DAMAGE_SIDE_ENEMY, .id = 40, .stat = P4_UNIT_MAX_HP, .level = 10,
+        .stock = 40000};
+    const P4GameUnitQuery strength = {.side = P4_DAMAGE_SIDE_PARTY, .id = 2, .stat = P4_UNIT_STRENGTH, .level = 30,
+        .stock = 60};
+    CHECK(p4_game_unit_apply(&hp) == P4_UNIT_ENEMY_POOL_MAX && p4_game_unit_apply(&strength) == P4_UNIT_STAT_MAX);
+    const P4GameHitQuery critical = {.roll = P4_HIT_CRITICAL, .skill_id = 1, .source_side = P4_DAMAGE_SIDE_PARTY,
+        .source_id = 1, .target_side = P4_DAMAGE_SIDE_ENEMY, .target_id = 40, .stock = 35};
+    P4GameHitQuery accuracy = critical;
+    accuracy.roll = P4_HIT_ACCURACY;
+    accuracy.stock = 95;
+    CHECK(p4_game_hit_apply(&critical) == 45 && p4_game_hit_apply(&accuracy) == P4_HIT_MAX);
+    run(mod, "wear:disable()", 1);
+    CHECK(p4_game_wearoff_apply(&roll) == 40 && p4_game_wearoff_count() == 1);
+    run(mod, "wear:remove(); buff:remove(); reward:remove(); unit:remove(); hit:remove()\n"
+             "wear=nil; buff=nil; reward=nil; unit=nil; hit=nil", 1);
+    CHECK(!p4_game_wearoff_count() && !p4_game_buff_count() && !p4_game_reward_count() && !p4_game_unit_count() &&
+        !p4_game_hit_count());
+}
+/* p4.passive: a grant reaches its target's native passive checks and nothing
+ * else; owners hold grants independently and order never matters; queries
+ * are pure; snapshot callbacks cannot grant; a mod's grants end with it. */
+static void passive_witness(P4LuaMod *mod, const P4PackageProvider *other_provider)
+{
+    const uint16_t member[8] = {0, 2}, other_member[8] = {0, 3}, enemy[8] = {4, 40};
+    CHECK(!p4_game_passive_live && !P4_PASSIVE_UNIT_GRANTED(member, 0x1F6) && !P4_PASSIVE_LEADER_GRANTED(0x205));
+    run(mod, "assert(p4.has('passive.grant@1'))", 1);
+    run(mod, "p4.passive.grant({party = 'yosuke'}, 1)", 0); /* an active skill */
+    run(mod, "p4.passive.grant({party = 'yosuke'}, 600)", 0); /* not a registered skill */
+    run(mod, "p4.passive.grant({party = 'marie'}, 0x1F6)", 0);
+    run(mod, "p4.passive.grant({party = 9}, 0x1F6)", 0);
+    run(mod, "p4.passive.grant({party = 2, enemy = 40}, 0x1F6)", 0);
+    run(mod, "p4.passive.grant({}, 0x1F6)", 0);
+    run(mod, "p4.passive.grant({enemy = 0x150}, 0x1F6)", 0);
+    run(mod, "p4.passive.grant({item = 0x8000}, 0x1F6)", 0);
+    run(mod, "p4.passive.extra = 1", 0);
+    CHECK(!p4_game_passive_count());
+    /* With the catalog loaded a new grant's Persona, item or enemy must be a
+     * row of it; before that only the ID ranges are known. Revocations and
+     * queries take any in-range target, so such a grant can still be taken back. */
+    run(mod, "local ok, why = pcall(p4.passive.grant, {persona = 0x2b}, 0x1F6)\n"
+             "assert(not ok and string.find(why, 'no persona of the loaded tables', 1, true))\n"
+             "assert(not pcall(p4.passive.grant, {item = 7}, 0x1F6) and not pcall(p4.passive.grant, {enemy = 42}, 0x1F6))", 1);
+    CHECK(!p4_game_passive_count());
+    passive_facts_catalog_ready = 0;
+    run(mod, "assert(p4.passive.grant({persona = 0x2b}, 0x1F6))", 1);
+    passive_facts_catalog_ready = 1;
+    run(mod, "assert(p4.passive.granted({persona = 0x2b}, 0x1F6) and p4.passive.revoke({persona = 0x2b}, 0x1F6))", 1);
+    CHECK(!p4_game_passive_count());
+    run(mod,
+        "assert(p4.passive.grant({party = 'yosuke'}, 0x1F6) == true)\n"
+        "assert(p4.passive.grant({party = 2}, {id = 0x1F6}) == false)\n"
+        "assert(p4.passive.grant({enemy = 40}, 0x1FB))\n"
+        "assert(p4.passive.grant({item = {id = 5}}, 0x1F8))\n"
+        "assert(p4.passive.grant({persona = 0x2a}, 0x1F7))\n"
+        "assert(p4.passive.granted({party = 2}, 0x1F6) and not p4.passive.granted({party = 3}, 0x1F6))\n"
+        "local list = p4.passive.list()\n"
+        "assert(#list == 4 and list[1].target.party == 'yosuke' and list[1].skill == 0x1F6 and list[1].owner == p4.id)\n"
+        "assert(list[2].target.persona == 0x2a and list[3].target.item == 5 and list[4].target.enemy == 40)\n"
+        "assert(list[1].kind == 'party' and list[1].id == 2 and list[2].kind == 'persona' and list[2].id == 0x2a)\n"
+        "assert(list[3].kind == 'item' and list[3].id == 5 and list[4].kind == 'enemy' and list[4].id == 40)\n", 1);
+    CHECK(p4_game_passive_live == 4);
+    CHECK(P4_PASSIVE_UNIT_GRANTED(member, 0x1F6) && P4_PASSIVE_UNIT_GRANTED(member, 0x1F7) &&
+        P4_PASSIVE_UNIT_GRANTED(member, 0x1F8) && !P4_PASSIVE_UNIT_GRANTED(member, 0x1FB));
+    CHECK(!P4_PASSIVE_UNIT_GRANTED(other_member, 0x1F6) && !P4_PASSIVE_UNIT_GRANTED(other_member, 0x1F7) &&
+        !P4_PASSIVE_UNIT_GRANTED(other_member, 0x1F8));
+    CHECK(P4_PASSIVE_UNIT_GRANTED(enemy, 0x1FB) && !P4_PASSIVE_COUNTER_GRANTED(enemy) && P4_PASSIVE_COUNTER_GRANTED(member));
+    /* Two mods: overlapping tuples are held separately; neither can revoke or
+     * clear the other's; tearing one down leaves the other's grants. */
+    P4LuaMod *other = p4_lua_create(other_provider);
+    CHECK(other != NULL);
+    if (other) {
+        run(other, "assert(p4.passive.grant({party = 2}, 0x1F6) and p4.passive.grant({persona = 0x2a}, 0x1F7))\n"
+                   "assert(p4.passive.revoke({enemy = 40}, 0x1FB) == false)\n"
+                   "local mine = 0\n"
+                   "for _, g in p4.passive.list() do if g.owner == p4.id then mine += 1 end end\n"
+                   "assert(mine == 2 and #p4.passive.list() == 6)", 1);
+        run(mod, "local owners = {}\n"
+                 "for _, g in p4.passive.list() do\n"
+                 " if g.kind == 'party' and g.id == 2 and g.skill == 0x1F6 then table.insert(owners, g.owner) end\n"
+                 "end\n"
+                 "assert(#owners == 2 and owners[1] ~= owners[2])\n"
+                 "assert(p4.passive.revoke({party = 'yosuke'}, 0x1F6) == true)\n"
+                 "assert(p4.passive.revoke({party = 2}, 0x1F6) == false)\n"
+                 "assert(p4.passive.granted({party = 2}, 0x1F6))", 1);
+        CHECK(P4_PASSIVE_UNIT_GRANTED(member, 0x1F6)); /* the other mod's grant remains */
+        run(other, "assert(p4.passive.clear() == 2)", 1);
+        CHECK(!P4_PASSIVE_UNIT_GRANTED(member, 0x1F6) && P4_PASSIVE_UNIT_GRANTED(member, 0x1F7) &&
+            p4_game_passive_count() == 3); /* the first mod's Persona grant stays */
+        run(other, "assert(p4.passive.grant({party = 2}, 0x1F6) and p4.passive.grant({enemy = 40}, 0x1FB))", 1);
+        CHECK(p4_game_passive_count() == 5);
+        p4_lua_destroy(other);
+        CHECK(!P4_PASSIVE_UNIT_GRANTED(member, 0x1F6) && P4_PASSIVE_UNIT_GRANTED(enemy, 0x1FB) &&
+            p4_game_passive_count() == 3);
+    }
+    /* A full table refuses only a new grant, with a readable error a mod can
+     * catch; a grant already held still answers false; room comes back. */
+    for (uint32_t i = 0; p4_game_passive_count() < P4_PASSIVE_GRANT_MAX; ++i)
+        CHECK(p4_game_passive_grant("test.filler", 0xFFFFu, P4_PASSIVE_PERSONA, 0x1000u + i, 0x1F6) == 1);
+    run(mod, "local ok, why = pcall(p4.passive.grant, {party = 1}, 0x1F6)\n"
+             "assert(not ok and string.find(why, 'grant table is full', 1, true))\n"
+             "assert(p4.passive.grant({enemy = 40}, 0x1FB) == false)", 1);
+    CHECK(p4_game_passive_revoke_owner(0xFFFFu) == P4_PASSIVE_GRANT_MAX - 3 && p4_game_passive_count() == 3);
+    run(mod, "refused = nil\n"
+             "probe = p4.unit.on{kind='add', fn=function(q) refused = not pcall(p4.passive.grant, {party = 1}, 0x1F6); return nil end}", 1);
+    const P4GameUnitQuery hp = {.side = P4_DAMAGE_SIDE_PARTY, .id = 1, .stat = P4_UNIT_MAX_HP, .level = 10, .stock = 100};
+    CHECK(p4_game_unit_apply(&hp) == 100);
+    run(mod, "assert(refused == true and not p4.passive.granted({party = 1}, 0x1F6)); probe:remove(); probe = nil", 1);
+    run(mod, "assert(p4.passive.clear() == 3 and #p4.passive.list() == 0)", 1);
+    CHECK(!p4_game_passive_live && !P4_PASSIVE_UNIT_GRANTED(member, 0x1F7));
+    run(mod, "assert(p4.passive.grant({party = 'protagonist'}, 0x205))", 1);
+    CHECK(P4_PASSIVE_LEADER_GRANTED(0x205) && p4_game_passive_count() == 1); /* revoked at this mod's teardown */
+}
 static void adopt_native_context(void)
 {
     #ifdef P4_GUEST64
@@ -342,6 +694,8 @@ static void setting_declarations_witness(void)
 static int witness(int argc, char **argv)
 {
     if (argc != 2) return 2;
+    /* The failure owner must be installed while no hook or event exists. */
+    if (stage_failure_mode && p4_mod_failure_handler(expected_stage_failure, NULL)) return 2;
     uint64_t setup_start=benchmark_requested?benchmark_cpu():0;
     CHECK(p4_lua_bind_native(&fixture_bindings) == 0);
     adopt_native_context();
@@ -362,11 +716,14 @@ static int witness(int argc, char **argv)
     if (length < 0 || (size_t)length >= sizeof mod_root) return 2;
     p4_os_mkdir(mod_root);
     static const char *const ids[] = {"test.luau", "test.isolation"};
-    /* test.luau declares three settings; boot=on is stored before admission. */
+    /* test.luau declares four settings; boot=on is stored before admission.
+     * test.isolation requires test.luau 1.0 with lock on, which locks that row. */
     static const char settings[] =
         "[setting flag]\nkind=toggle\nlabel=FLAG\n"
         "[setting style]\nkind=choice\nchoices=A|B|C\nlabel=STYLE\n"
-        "[setting boot]\nkind=toggle\nlabel=BOOT\napply=restart\n";
+        "[setting boot]\nkind=toggle\nlabel=BOOT\napply=restart\n"
+        "[setting lock]\nkind=toggle\nlabel=LOCK\ndefault=on\n";
+    static const char requires[] = "[require test.luau]\nversion=1.0\nsetting.lock=on\n";
     for (unsigned i = 0; i < 2; ++i) {
         length = snprintf(path, sizeof path, "%s/%s", mod_root, ids[i]);
         if (length < 0 || (size_t)length >= sizeof path) return 2;
@@ -378,8 +735,8 @@ static int witness(int argc, char **argv)
             fixture = fopen(path, "wb");
             if (!fixture) return 2;
             wrote = source ? fputs("-- Native VM witness supplies source below.\n", fixture) :
-                fprintf(fixture, "[mod]\nid=%s\nname=Native VM witness\nversion=1.0\napi=1.2\npriority=%u\norder=0\n%s",
-                        ids[i], i, i ? "" : settings);
+                fprintf(fixture, "[mod]\nid=%s\nname=Native VM witness\nversion=1.0\napi=1.6\npriority=%u\norder=0\n%s",
+                        ids[i], i, i ? requires : settings);
             closed = fclose(fixture);
             if (wrote < 0 || closed) return 2;
         }
@@ -442,7 +799,26 @@ static int witness(int argc, char **argv)
         "assert(p4.settings.set('note',nil) and p4.settings.get('note')==nil)\n"
         "assert(p4.settings.set('done',false) and p4.settings.get('done')==false)\n"
         "assert(not pcall(p4.settings.set,'Bad Key',1) and not pcall(p4.settings.set,'x',0/0))\n"
-        "assert(not pcall(p4.settings.set,'x',' edge') and not pcall(p4.settings.set,'x',{}))\n", 1);
+        "assert(not pcall(p4.settings.set,'x',' edge') and not pcall(p4.settings.set,'x',{}))\n"
+        /* An admitted dependent locks the row it requires; reads stay legal. */
+        "local ok, why = p4.settings.set('lock', false)\n"
+        "assert(ok == false and why == 'locked: required by Native VM witness' and p4.settings.get('lock') == true)\n"
+        "assert(not pcall(p4.mods.required, 'test.isolation'))\n", 1);
+    CHECK(p4_packages_requirer(provider, "lock") == other_provider && p4_packages_requirer(provider, "flag") == NULL);
+    CHECK(p4_packages_requirer(provider, NULL) == other_provider && p4_packages_requirer(other_provider, NULL) == NULL);
+    /* p4.contract: frozen plain values published while main.luau runs. */
+    run(mod,
+        "p4.contract.publish('profile', 3, {mode='hard', list={1,2}, nested={deep=true}})\n"
+        "assert(not pcall(p4.contract.publish,'profile',4,true))\n"
+        "assert(not pcall(p4.contract.publish,'other',1,nil) and not pcall(p4.contract.publish,'Bad Name',1,true))\n"
+        "assert(not pcall(p4.contract.publish,'zero',0,true) and not pcall(p4.contract.publish,'f',1,function() end))\n"
+        "assert(not pcall(p4.contract.publish,'big',1,string.rep('x',70000)))\n"
+        "for i=1,15 do p4.contract.publish('c'..i,1,i) end\n"
+        "assert(not pcall(p4.contract.publish,'c16',1,16))\n"
+        "assert(not pcall(p4.contract.read,'test.isolation','profile'))\n", 1);
+    run(mod, "late_hook=p4.hook(0x100100,'II','before',function(c) late_ok=pcall(p4.contract.publish,'late',1,true) end)", 1);
+    CHECK(mod_test_unsigned(10) == 11);
+    run(mod, "assert(late_ok==false); late_hook:remove(); late_hook=nil", 1);
     {
         /* The file round-trips from disk, and the admitted restart value stays put. */
         char value[P4_MOD_SETTING_VALUE_MAX];
@@ -481,9 +857,46 @@ static int witness(int argc, char **argv)
              "assert(p4.lifecycle.crashed(s) == false and p4.lifecycle.consume(s) == true)\n"
              "assert(not pcall(p4.lifecycle.crashed, 0) and not pcall(p4.lifecycle.tag, {}))", 1);
     CHECK(p4_mod_lifecycle_root(NULL) == 0);
+#if defined(__SSE__)
+    {
+        /* A script entered from the game's EE float mode (state_dump.c: MXCSR
+         * round-toward-zero, flush and denormal zeroing) runs in the default
+         * mode, and the game gets its mode back. Runtime values, not folded
+         * constants; the win32/64w twins use mingw's fesetenv, which keeps MXCSR. */
+        const unsigned ee = 0xE0C0u, game = _mm_getcsr() | ee;
+        _mm_setcsr(game);
+        run(mod, "local a, b = tonumber('0.1'), tonumber('0.2')\n"
+                 "assert(a + b == 0.30000000000000004, 'rounds to nearest')\n"
+                 "assert(tonumber('1e-310') * tonumber('1') > 0, 'keeps denormals')\n"
+                 "assert(string.format('%.2f %.2f', tonumber('1.15'), tonumber('0.87')) == '1.15 0.87')", 1);
+        CHECK((_mm_getcsr() & ee) == ee);
+        _mm_setcsr(game & ~ee);
+    }
+#endif
+    /* p4.artifacts: refused without a settings directory, then mod-confined files. */
+    CHECK(p4_mod_artifact_root(NULL) == 0);
+    run(mod, "local ok, why = p4.artifacts.write('a.txt', 'x'); assert(ok == false and why)\n"
+             "assert(p4.artifacts.folder() == nil and p4.artifacts.read('a.txt') == nil)", 1);
+    CHECK(p4_mod_artifact_root(settings_root) == 0);
+    run(mod, "assert(p4.artifacts.write('runs/r1/spoiler.txt', 'seed 0') == true)\n"
+             "local b = buffer.create(3); buffer.writeu8(b, 2, 7)\n"
+             "assert(p4.artifacts.write('runs/r1/layer.bin', b) == true)\n"
+             "assert(buffer.tostring(p4.artifacts.read('runs/r1/spoiler.txt')) == 'seed 0')\n"
+             "assert(buffer.readu8(p4.artifacts.read('runs/r1/layer.bin', 3), 2) == 7)\n"
+             "local none, why = p4.artifacts.read('runs/r1/layer.bin', 2); assert(none == nil and why)\n"
+             "assert(p4.artifacts.read('runs/r1/missing.txt') == nil)\n"
+             "assert(string.find(p4.artifacts.folder(), 'mod%-artifacts/test%.luau$'))\n"
+             "assert(not pcall(p4.artifacts.write, '../x', 'y') and not pcall(p4.artifacts.write, 'nul', 'y'))\n"
+             "assert(not pcall(p4.artifacts.write, 'x', {}) and not pcall(p4.artifacts.read, '.x'))\n"
+             "local ok, why2 = p4.artifacts.write('RUNS/x', 'y'); assert(ok == false and why2)", 1);
+    CHECK(p4_mod_artifact_root(NULL) == 0);
+    /* p4.budget: what this invocation may still spend (here the startup fuel). */
+    run(mod, "local first = p4.budget(); assert(first > 4096 and first <= 65536)\n"
+             "local n = 0; for i = 1, 200 do n += i end\n"
+             "assert(p4.budget() < first - 150)", 1);
     run(mod,
-        "assert(p4.language=='Luau' and p4.language_version=='0.744' and p4.api_version=='1.4')\n"
-        "assert(p4.fixture_native and p4.ui==nil and p4.scene==nil and p4.camera==nil and p4.clock==nil)\n"
+        "assert(p4.language=='Luau' and p4.language_version=='0.744' and p4.api_version=='" P4_PACKAGE_API_TEXT "')\n"
+        "assert(p4.fixture_native and p4.ui==nil and p4.scene==nil and p4.camera==nil and p4.clock==nil and p4.elements==nil and p4.audio==nil and p4.battle.menu==nil and p4.encounter==nil and p4.hud==nil and p4.calendar==nil and p4.pace==nil)\n"
         "for _,key in {'os','io','debug','package','require','load','loadstring','loadfile','dofile','vector','integer'} do assert(_G[key]==nil,key) end\n"
         "assert(type(pcall)=='function' and type(xpcall)=='function' and type(getfenv)=='function' and type(coroutine.resume)=='function')\n"
         "assert(string.dump==nil and p4.mem._pin==nil)\n"
@@ -509,8 +922,26 @@ static int witness(int argc, char **argv)
     run(mod, "assert(buffer.tostring(p4.files.read('cdrom0:\\\\data\\\\test.txt;1'))=='mod-resource')", 1);
     run(mod, "for i=1,100 do assert(not pcall(p4.files.read,'DATA/TEST.TXT',3)) end; assert(buffer.len(p4.files.read('DATA/TEST.TXT'))==12)", 1);
     run(mod, "p4.files.read('../outside')", 0);
+    run(mod, "assert(p4.has('core') and p4.has('core@1') and p4.has('capabilities@1') and not p4.has('core@999'))\n"
+             "assert(not p4.has('made.up') and p4.capabilities().core == 1 and p4.capabilities()['capabilities'] == 1)\n"
+             "assert(not pcall(p4.has, 'Core') and not pcall(p4.has, 'core@0') and not pcall(p4.has, {}))", 1);
     run(mod, "p4.mem.read('u32',0x1fffffe)", 0);
     run(mod, "p4.mem.write('u8',a,256)", 0);
+    run(mod, "assert(p4.has('table-source.item-derive@1') and p4.has('table-source.skill-source@1') and p4.has('table-source.status@1') and p4.has('manifest.element-ui@2'))", 1);
+    run(mod, "assert(p4.has('calendar.pass@2') and p4.has('calendar.hold@1') and p4.has('manifest.table-derived@2'))", 1);
+    run(mod, "assert(p4.has('tables.overlay@2') and p4.has('artifacts@1') and p4.has('budget@1') and p4.has('sha256@1'))", 1);
+    run(mod, "assert(p4.has('battle.menu@1'))", 1);
+    run(mod, "assert(p4.has('pace@1') and p4.has('party.record@1'))", 1);
+    run(mod, "assert(p4.has('manifest.resource-model@1') and p4.has('manifest.resource-model@2') and p4.has('manifest.resource-model@3') and not p4.has('manifest.resource-model@4'))", 1);
+    run(mod, "assert(p4.has('stage.damage@2') and p4.has('stage.recovery@1') and p4.has('stage.cost@1') and p4.has('stage.chance@1'))", 1);
+    run(mod, "assert(p4.has('battle.substitute@1'))", 1);
+    run(mod, "assert(p4.has('manifest.table-delta@1'))", 1);
+    run(mod, "assert(p4.has('table-source.skill-derive@1') and p4.has('table-source.skill-delivery@1'))", 1);
+    run(mod, "assert(p4.has('manifest.element-header@1') and p4.has('manifest.element-prompt@1'))", 1);
+    run(mod, "assert(p4.has('tables.source@1') and p4.has('scene.player-position@1'))", 1);
+    run(mod, "assert(p4.has('authorize.weapon_fusion@1') and p4.has('persona.stock@1') and p4.has('social.rank@1')"
+             " and p4.has('forge@1') and p4.has('velvet.command@1') and p4.has('manifest.companion-setting@1')"
+             " and p4.has('party.hero_level@1') and p4.has('forge.vessel@1'))", 1);
     run(mod, "p4.mem.write('i16',a,32768)", 0);
     run(mod, "p4.mem.write('u32',a,0/0)", 0);
     run(mod, "p4.mem.write('u64',a,9007199254740992)", 0);
@@ -556,11 +987,48 @@ static int witness(int argc, char **argv)
     CHECK(mod_test_unsigned(10) == 26);
     run(mod, "before:remove(); replacement:enable()", 1);
     CHECK(mod_test_unsigned(10) == 32);
+    {
+        /* p4.battle.substitute: only inside a before-hook on 0x001de640, for
+         * that call's own action; the carrier decides, success rewrites args[3]. */
+        unsigned char *action = p4t_galloc(0x40, 16), *slot = p4t_galloc(4, 4);
+        run(mod, "assert(not pcall(p4.battle.substitute, 0x1000, 227))\n"
+                 "sub_hook=p4.hook(0x1de640,'vppH','before',function(c)\n"
+                 "  assert(not pcall(p4.battle.substitute, c.args[1] + 4, 227))\n"
+                 "  local ok, why = p4.battle.substitute(c.args[1], 128); assert(ok == false and why)\n"
+                 "  local nf, nwhy = p4.battle.substitute(c.args[1], 4000); assert(nf == false and nwhy)\n"
+                 "  assert(c.args[3] == 151 and p4.battle.substitute(c.args[1], 227) == true and c.args[3] == 227)\n"
+                 "end)\n"
+                 "sub_after=p4.hook(0x1de640,'vppH','after',function(c) assert(not pcall(p4.battle.substitute, c.args[1], 227)) end)\n"
+                 "elsewhere=p4.hook(0x100100,'II','after',function(c) assert(not pcall(p4.battle.substitute, 0x1000, 227)) end)", 1);
+        substitute_calls = 0;
+        mod_test_set_action_code(action, slot, 151);
+        CHECK(substitute_calls == 3 && substitute_action == action && substitute_skill == 227);
+        CHECK(*(uint16_t *)slot == 227);
+        CHECK(mod_test_unsigned(10) == 32);
+        run(mod, "sub_hook:remove(); sub_after:remove(); elsewhere:remove(); sub_hook=nil; sub_after=nil; elsewhere=nil", 1);
+        mod_test_set_action_code(action, slot, 151);
+        CHECK(*(uint16_t *)slot == 151 && substitute_calls == 3);
+        /* A replace hook on the same function is not a before-hook either. */
+        run(mod, "sub_replace=p4.hook(0x1de640,'vppH','replace',function(c)\n"
+                 "  assert(not pcall(p4.battle.substitute, c.args[1], 227)); sub_replaced=true end)", 1);
+        mod_test_set_action_code(action, slot, 228);
+        CHECK(*(uint16_t *)slot == 151 && substitute_calls == 3);
+        run(mod, "assert(sub_replaced); sub_replace:remove(); sub_replace=nil; sub_replaced=nil", 1);
+    }
     P4LuaMod *other = p4_lua_create(other_provider);
     CHECK(other != NULL);
     if (other) {
         run(other, "assert(scratch==nil and saved==nil and type(buffer.create)=='function')", 1);
         run(other, "assert(p4.settings.get('flag')==nil and p4.settings.get('run.count')==nil)", 1);
+        run(other, "local r = p4.mods.required('test.luau')\n"
+                   "assert(r.version == '1.0' and r.settings.lock == true and next(r.settings, 'lock') == nil)\n"
+                   "assert(not pcall(p4.mods.required, 'test.missing') and not pcall(p4.mods.required, 'test.isolation'))", 1);
+        run(other, "local v, version = p4.contract.read('test.luau','profile')\n"
+                   "assert(version == 3 and v.mode == 'hard' and v.list[2] == 2 and v.nested.deep == true)\n"
+                   "assert(not pcall(function() v.mode = 'easy' end) and not pcall(function() v.nested.deep = false end))\n"
+                   "local again = p4.contract.read('test.luau','profile'); assert(again ~= v and again.mode == 'hard')\n"
+                   "assert(p4.contract.read('test.luau','missing') == nil and p4.contract.read('test.luau','c15') == 15)\n"
+                   "assert(p4.contract.read('test.luau','late') == nil and not pcall(p4.contract.read,'test.ghost','profile'))", 1);
         run(other, "p4.hook(0x100100,'II','replace',function(c) c.result=0 end)", 0);
         lua_getglobal(mod->state, "a");
         uint32_t address = lua_tounsigned(mod->state, -1);
@@ -631,10 +1099,24 @@ static int witness(int argc, char **argv)
         CHECK(p4_luau_memory_used(other->vm) < (4u << 20));
         p4_lua_destroy(other);
     }
+    p4pc_vsync_wait(); /* a fresh frame budget for the stage callbacks */
+    damage_witness(mod, other_provider);
+    p4pc_vsync_wait();
+    stages_witness(mod, other_provider);
+    p4pc_vsync_wait();
+    formula_stages_witness(mod);
+    passive_witness(mod, other_provider);
     lua_getglobal(mod->state, "a");
     watched_scratch = P4_G2H(lua_tounsigned(mod->state, -1));
     lua_pop(mod->state, 1);
     p4_lua_destroy(mod);
+    /* A destroyed owner's contracts are gone; readers see nil, never stale bytes. */
+    other = p4_lua_create(other_provider);
+    CHECK(other != NULL);
+    if (other) {
+        run(other, "assert(p4.contract.read('test.luau','profile') == nil)", 1);
+        p4_lua_destroy(other);
+    }
     CHECK(canonical_copies > 0 && watched_invalidations == 1 && watched_value == 0xee);
     CHECK(p4pc_bytes_observer(NULL) == 0);
     p4_mod_events_clear();
@@ -736,6 +1218,13 @@ int main(int argc, char **argv)
     if(argc==2&&!strcmp(argv[1],"--frame-cpu"))
         return p4t_on_guest_stack(frame_cpu_witness,argc,argv);
     if(argc==3&&!strcmp(argv[1],"--hook-cost")) {
+        /* A CPU-time budget holds only natively: under qemu-user (an AArch64 build tested on an x86_64 host) every
+           call costs the emulation, so the case reports itself skipped (CTest SKIP_RETURN_CODE 77) with the reason. */
+        const char *emulated=getenv("P4PC_PERF_EMULATED");
+        if(emulated&&*emulated) {
+            printf("hook_cost skipped: its CPU-time budget is native-only and this run is emulated (%s)\n",emulated);
+            return 77;
+        }
         benchmark_requested=1;
         return p4t_on_guest_stack(witness,argc-1,argv+1);
     }
@@ -746,5 +1235,11 @@ int main(int argc, char **argv)
                       !strcmp(argv[1], "--managed-exit-failure")))
         return p4t_on_guest_stack(managed_witness, argc, argv);
     #endif
+    if (argc == 4 && !strcmp(argv[1], "--stage-failure") &&
+        (!strcmp(argv[2], "recovery") || !strcmp(argv[2], "chance") || !strcmp(argv[2], "cost"))) {
+        stage_failure_mode = argv[2];
+        argv[2] = argv[0];
+        return p4t_on_guest_stack(witness, argc - 2, argv + 2);
+    }
     return p4t_on_guest_stack(witness, argc, argv);
 }

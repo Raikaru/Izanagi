@@ -1,0 +1,44 @@
+{
+ "about": "Reviewed Golden path globs per image-resident PS2 table (tools/golden_mode/sources.py). The first rule whose table equals the key or prefixes it (at a dot) applies. Globs match whole lowercase inventory paths. A table whose globs match nothing is reported missing. Name-level candidates only: a match is not proof of layout or content equivalence. Golden names from the build 10836033 inventory (init_free.bin init/fclTable.bin, a PAK v2 of 105 .ftd tables).",
+ "rules": [
+  {
+   "table": "player_exp_threshold",
+   "golden": [],
+   "note": "PS2 sPlayerExpThreshold (decomp src/Main/g_data.c, 99 u32). No Golden archive object is named for the protagonist's level curve: PERSONA.TBL block 3 holds Persona EXP curves and fclComuLvExp.ftd Social Link EXP, both different tables. [INFERENCE] Golden keeps it in its protected executable, which is off limits."
+  },
+  {
+   "table": "skill",
+   "golden": ["*::init/fcltable.bin::fclcombineskillaffinity.ftd", "*::init/fcltable.bin::fclcombineskilllimit.ftd",
+              "*::init/fcltable.bin::fclcombineskilltargetlv.ftd"],
+   "note": "PS2 skill-inheritance pool tiers, inheritance weights and per-skill rates, read by the fusion inheritance code. Golden's fusion skill tables by name: fclCombineSkillAffinity / SkillLimit / SkillTargetLv (.ftd). Golden lets the player choose inherited skills, so the semantics may differ; FTD layouts unmeasured (M3)."
+  },
+  {
+   "table": "fusion.gate",
+   "golden": ["*::init/fcltable.bin::cmbcmmchecktbl.ftd", "*::init/fcltable.bin::fclcombinelift.ftd"],
+   "note": "PS2 fusion gate rows (persona key s16@4). Candidates by name: CmbCmmCheckTbl (combine/community check) and fclCombineLift (fusion unlocks). Which one, if either, holds the gate is unmeasured (M3)."
+  },
+  {
+   "table": "fusion.chart",
+   "golden": ["*::init/fcltable.bin::fclcombinetable_normal.ftd", "*::init/fcltable.bin::fclcombinetable_normalsp.ftd",
+              "*::init/fcltable.bin::fclcombinetable_third_?.ftd", "*::init/fcltable.bin::fclcombinetable_thirdsp.ftd"],
+   "note": "PS2 arcana fusion charts (normal pair, alternate pair, triple first/final; 24-byte rows reached through index aliases). Candidates by name: fclCombineTable_Normal/_NormalSP/_Third_1/_Third_2/_ThirdSP. Golden adds arcana (Aeon, Jester), so row counts differ; layouts unmeasured (M3)."
+  },
+  {
+   "table": "fusion.special_recipes",
+   "golden": ["*::init/fcltable.bin::fclcombinetable_fourth.ftd", "*::init/fcltable.bin::fclcombinetable_fifth.ftd",
+              "*::init/fcltable.bin::fclcombinetable_sixth.ftd", "*::init/fcltable.bin::fclcombinetable_twelfth.ftd"],
+   "note": "PS2 special fusion recipe groups (32-byte rows). Candidates by name: fclCombineTable_Fourth/_Fifth/_Sixth/_Twelfth (multi-persona fusions). Layouts unmeasured (M3)."
+  },
+  {
+   "table": "fusion.special_recipe_descriptors",
+   "golden": ["*::init/fcltable.bin::fclcombinetable_fourth.ftd", "*::init/fcltable.bin::fclcombinetable_fifth.ftd",
+              "*::init/fcltable.bin::fclcombinetable_sixth.ftd", "*::init/fcltable.bin::fclcombinetable_twelfth.ftd"],
+   "note": "PS2 descriptors (guest pointer + count per recipe group): image-internal pointers, generated from the converted recipe groups rather than read from Golden; the groups' candidates are listed."
+  },
+  {
+   "table": "fusion",
+   "golden": ["*::init/fcltable.bin::fclcombine*.ftd"],
+   "note": "Other catalogued fusion objects: Golden fusion tables by name (fclCombine*.ftd)."
+  }
+ ]
+}

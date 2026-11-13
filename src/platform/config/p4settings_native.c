@@ -17,16 +17,12 @@ extern void sdkSpriteFreeNode(void *node);
 extern void sdkSpriteDrawAt(void *sprite, float x, float y,
     uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha);
 extern void radarAnimateValue(unsigned char *motion, int32_t frame, int32_t mode);
-extern void sflDataDrawNarrowRoundedFrame(int32_t x, int32_t y, float depth,
-    int32_t width, int32_t height, int32_t rgb, int32_t alpha, int32_t mode,
-    int32_t pivotX, int16_t pivotY, void *queue, float angle, float scaleX, float scaleY);
-extern int frFontExDrawTextDeferredWithCharWidth(float x, float y, float depth,
-    int color, signed char mode, int font, const char *text, int flags,
-    int unused, void *queue, int spacing);
 extern uint32_t frFontExCreateText(float x, float y, float depth, int color,
     signed char palette, int font, const char *text, int flags, int32_t *width);
 extern void frFontExFreeText(int32_t unused, uint32_t font);
 extern uint32_t frFontListRelease(uint32_t font);
+extern int32_t nLineSelectSet(int32_t set);
+extern void nLineSetActive(int32_t active);
 enum { NATIVE_INFO_TEXT_WIDTH = 360 };
 
 /* Same 48-byte record consumed by radarAnimateValue/001437b0. System's scrollbar
@@ -94,11 +90,15 @@ typedef struct PageFrame {
 static PageSlot pages[P4_SETTINGS_PAGE_MAX];
 static PageFrame history[P4_SETTINGS_PAGE_DEPTH_MAX];
 static int historyCount, callbackDepth, requestedView = -1, requestedRouted;
+/* One registered flow hosted by a game parent's own cmpConfigCreate child. */
+static uint32_t hostWork;
+static int hostView, hosted;
 static int pageFeedback = -1;
 static int pageRefresh(NativeStorage *s, int selected);
 static void pageDescribe(NativeStorage *s, int slot, int logical);
 static void closeFrames(int first);
 static int pageError(const char *message);
+static int pageSlot(const char *key);
 static int validText(const char *text, size_t capacity);
 static int copyText(char *to, size_t capacity, const char *from);
 static int fontLines(char *text, size_t capacity);
@@ -405,6 +405,7 @@ void p4_settings_native_begin(uint32_t work, int mode)
         retailOnly = value && !strcmp(value, "1");
     }
     if (retailOnly) {
+        if (hostWork == work) fail("a hosted Config flow cannot run in retail-only mode");
         qualificationWork = work; /* host-only observation, no guest writes */
         return;
     }
@@ -422,7 +423,8 @@ void p4_settings_native_begin(uint32_t work, int mode)
     for (unsigned i = 0; i < sizeof s->pcTimers / sizeof s->pcTimers[0]; ++i)
         s->pcTimers[i] = 5;
     s->scroll.endFrame = s->scrollFrame = 3;
-    if (mode == 0 && routeWork && routeStage == 2)
+    hosted = hostWork != 0 && hostWork == work;
+    if (mode == 0 && routeWork && routeStage == 2 && !hosted)
         s->state.flags = P4_SETTINGS_NATIVE_SHORTCUT;
     routeWork = 0;
     routeStage = 0;
@@ -448,17 +450,45 @@ void p4_settings_native_begin(uint32_t work, int mode)
     history[0].view = P4_SETTINGS_NATIVE_ROOT;
     pageFeedback = -1;
     p4_settings_model_reset();
-    if (requestedView >= 2) {
+    if (hosted) {
+        /* The hidden root frame is never presented; leaving the page closes. */
+        hostWork = 0;
+        s->state.flags = P4_SETTINGS_NATIVE_HOSTED;
+        p4_settings_native_view(work, hostView, 0);
+        if (historyCount != 2) s->state.navigation = P4_SETTINGS_NATIVE_CLOSE;
+    } else if (requestedView >= 2) {
         int view = requestedView;
         requestedView = -1;
         p4_settings_native_view(work, view, 0);
     }
     requestedRouted = 0;
 }
+int p4_settings_native_host(uint32_t task, const char *key)
+{
+    int slot = pageSlot(key);
+    if (slot < 0) return pageError("Page is not registered.");
+    if (retailOnly < 0) {
+        const char *value = getenv("P4PC_SETTINGS_RETAIL_ONLY");
+        retailOnly = value && !strcmp(value, "1");
+    }
+    if (retailOnly || qualificationWork) return pageError("Pages are disabled in retail-only mode.");
+    if (!task || owner || hostWork || requestedView >= 0 || request || routeParent || routeWork)
+        return pageError("Config is busy and cannot be hosted.");
+    uint32_t work = P4_G32(task + 0x38u);
+    if (!work) return pageError("Hosted Config task has no work block.");
+    /* Mode 0 waits on Camp's nLine forever outside Camp; mode 1 drives its own. */
+    if (P4_G32(work + 0x1Cu) != 1) return pageError("Hosted Config requires title mode 1.");
+    hostWork = work;
+    hostView = slot + 2;
+    return 0;
+}
 void p4_settings_native_end(uint32_t work)
 {
     if (qualificationWork == work) qualificationWork = 0;
+    if (hostWork == work) hostWork = 0; /* destroyed before its first update */
     if (owner != work) return;
+    int wasHosted = hosted;
+    hosted = 0;
     closeFrames(0);
     requestedView = -1;
     NativeStorage *s = storage();
@@ -471,6 +501,12 @@ void p4_settings_native_end(uint32_t work)
         s->state.choiceArrows[i] = 0;
     }
     p4_settings_cursor_end();
+    if (wasHosted) {
+        /* Title mode set nLine active at creation; a hosted parent runs outside
+         * Camp/title with it off, as cmpMainTaskDestroy leaves it. */
+        nLineSelectSet(0);
+        nLineSetActive(0);
+    }
     owner = 0;
     p4_settings_model_reset();
 }
@@ -629,6 +665,8 @@ void p4_settings_native_view(uint32_t work, int view, int cursor)
     } else if (view == P4_SETTINGS_NATIVE_BACK && historyCount > 1) {
         closeFrames(historyCount - 1);
     }
+    if (hosted)
+        s->state.flags = P4_SETTINGS_NATIVE_HOSTED | (historyCount == 2 ? P4_SETTINGS_NATIVE_HOSTED_TOP : 0);
     PageFrame *current = &history[historyCount - 1];
     s->state.view = current->view;
     s->state.scroll = current->scroll;
@@ -694,10 +732,7 @@ void p4_settings_native_jump(int last)
 }
 void p4_settings_native_touch(float x, float y)
 {
-    if (!owner) {
-        if (x >= 544 && x <= 640 && y >= 0 && y < 48) p4_settings_native_request();
-        return;
-    }
+    if (!owner) return;
     P4SettingsNativeState *s = &storage()->state;
     touchFrame = inputFrame;
     if (y >= 388) {
@@ -786,17 +821,6 @@ void p4_settings_native_frame_end(void)
     }
     ++inputFrame;
     p4_settings_model_frame_end();
-}
-void p4_settings_native_corner(void)
-{
-    if (!p4_settings_touch_active() || owner || qualificationWork || routeWork) return;
-    /* Camp's centered table 0xb1, not the field banner's left-anchored 0x4a.
-     * The same 640x448 touch coordinates stay correct in widescreen. */
-    void *queue = P4_G2H(0x00793e80u + 0xb1u * 0x30u);
-    sflDataDrawNarrowRoundedFrame(548, 10, 59000.0f, 80, 30, 0x191919,
-        255, 1, 40, 15, queue, 0.0f, 1.0f, 1.0f);
-    frFontExDrawTextDeferredWithCharWidth(588.0f, 13.0f, 58990.0f,
-        (int)0xfaff20ffu, 8, 1, P4_GPTR(char, p4_gport_str("CONFIG")), 8, 0, queue, -1);
 }
 
 static size_t textLength(const char *text, size_t capacity)
@@ -906,7 +930,9 @@ int p4_settings_page_unregister(const char *key)
         for (int i = 1; i < historyCount; ++i) {
             if (history[i].view != view) continue;
             closeFrames(i); /* descendants close before their owning page */
-            if (s->navigation != P4_SETTINGS_NATIVE_CLOSE) {
+            if (hosted && i == 1) {
+                s->navigation = P4_SETTINGS_NATIVE_CLOSE; /* never reveal the hidden root */
+            } else if (s->navigation != P4_SETTINGS_NATIVE_CLOSE) {
                 s->nextView = P4_SETTINGS_NATIVE_RESTORE;
                 s->navigation = P4_SETTINGS_NATIVE_SWITCH;
             }
@@ -923,7 +949,7 @@ int p4_settings_page_open(const char *key)
     if (qualificationWork || (retailOnly == 1))
         return pageError("Pages are disabled in retail-only mode.");
     if (!owner) {
-        if (requestedView >= 0 || request || routeParent || routeWork)
+        if (requestedView >= 0 || request || routeParent || routeWork || hostWork)
             return pageError("A menu request is already pending.");
         requestedView = slot + 2;
         requestedRouted = 0;
@@ -944,8 +970,11 @@ int p4_settings_page_back(void)
     P4SettingsNativeState *s = &storage()->state;
     if (p4_settings_model_capturing()) return pageError("Finish binding capture first.");
     if (s->navigation) return pageError("Page navigation is busy.");
-    s->nextView = P4_SETTINGS_NATIVE_BACK;
-    s->navigation = P4_SETTINGS_NATIVE_SWITCH;
+    if (hosted && historyCount == 2) s->navigation = P4_SETTINGS_NATIVE_CLOSE;
+    else {
+        s->nextView = P4_SETTINGS_NATIVE_BACK;
+        s->navigation = P4_SETTINGS_NATIVE_SWITCH;
+    }
     return 0;
 }
 int p4_settings_page_close(void)

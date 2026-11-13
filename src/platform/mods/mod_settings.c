@@ -9,6 +9,7 @@
 #include "p4pc/crt.h"
 #include "../config/p4cfg.h"
 #include <ctype.h>
+#include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,14 +25,19 @@ typedef struct HubLink {
 } HubLink;
 typedef struct HubInstallation {
     P4PackageInfo info;
-    int valid, active;
+    int valid, active, bundled;
     char *diagnostic;
+    char shadows[192]; /* "player copy shadows bundled <id> <version>", or empty */
     /* Declared [setting] rows, drawn even while the mod is disabled. plan[i] is a
      * declaration index, or -(index + 1) for the group heading above it. */
     P4ModSettingDecl *settings;
     size_t settingCount, planCount;
     int *plan;
     char *settingError;
+    /* Declared [require] sections (same kind), or the reason they are invalid. */
+    P4PackageRequirement *requires;
+    size_t requireCount;
+    char *requireError;
 } HubInstallation;
 typedef struct HubIds {
     size_t count;
@@ -60,6 +66,7 @@ static HubSelection selections[P4_SETTINGS_PAGE_DEPTH_MAX], pending;
 static char *details[P4_SETTINGS_PAGE_DEPTH_MAX];
 static char rowKey[32], rowLabel[P4_SETTINGS_PAGE_LABEL_MAX], rowValue[P4_SETTINGS_PAGE_VALUE_MAX];
 static char settingKey[P4_MOD_SETTING_KEY_MAX + 8];
+static char lockLabel[P4_SETTINGS_PAGE_LABEL_MAX], lockHelp[P4_SETTINGS_PAGE_LABEL_MAX + 32];
 
 static int error(const char *text)
 {
@@ -213,6 +220,8 @@ static void catalog_free(HubCatalog *catalog)
         free(catalog->items[i].settings);
         free(catalog->items[i].plan);
         free(catalog->items[i].settingError);
+        free(catalog->items[i].requires);
+        free(catalog->items[i].requireError);
     }
     free(catalog->items);
     free(catalog);
@@ -237,18 +246,24 @@ static int installation_active(const P4PackageInfo *info)
     }
     return 0;
 }
+/* A manifest reason kept for display: the native font gets printable ASCII only. */
+static char *display_reason(const char *reason)
+{
+    size_t size = strlen(reason) + 1;
+    char *copy = malloc(size);
+    if (!copy) return NULL;
+    memcpy(copy, reason, size);
+    for (char *c = copy; *c; ++c)
+        if ((unsigned char)*c < 32 || (unsigned char)*c > 126) *c = '?';
+    return copy;
+}
 static int collect_settings(HubInstallation *item, const P4PackageInstallation *source)
 {
     char reason[256];
     if (p4_mod_setting_declarations(source->fields, source->field_count, &item->settings,
                                     &item->settingCount, reason, sizeof reason)) {
-        size_t size = strlen(reason) + 1;
-        item->settingError = malloc(size);
-        if (!item->settingError) return error("Package settings allocation failed.");
-        memcpy(item->settingError, reason, size);
-        for (char *c = item->settingError; *c; ++c)
-            if ((unsigned char)*c < 32 || (unsigned char)*c > 126) *c = '?';
-        return 0;
+        item->settingError = display_reason(reason);
+        return item->settingError ? 0 : error("Package settings allocation failed.");
     }
     if (!item->settingCount) return 0;
     item->plan = malloc(2 * item->settingCount * sizeof *item->plan);
@@ -260,6 +275,27 @@ static int collect_settings(HubInstallation *item, const P4PackageInstallation *
         group = item->settings[i].group;
         item->plan[item->planCount++] = (int)i;
     }
+    return 0;
+}
+/* Invalid [require] sections keep their reason: enabling refuses with it, as admission would. */
+static int collect_requirements(HubInstallation *item, const P4PackageInstallation *source)
+{
+    P4PackageRequirement *requires = malloc(P4_PACKAGE_REQUIRES_MAX * sizeof *requires);
+    char reason[256];
+    if (!requires) return error("Package requirement allocation failed.");
+    if (p4_package_requirements(source->info, source->fields, source->field_count, requires,
+                                &item->requireCount, reason, sizeof reason)) {
+        free(requires);
+        item->requireCount = 0;
+        item->requireError = display_reason(reason);
+        return item->requireError ? 0 : error("Package requirement allocation failed.");
+    }
+    if (!item->requireCount) {
+        free(requires);
+        return 0;
+    }
+    item->requires = realloc(requires, item->requireCount * sizeof *requires);
+    if (!item->requires) item->requires = requires;
     return 0;
 }
 static int collect(const P4PackageInstallation *source, void *userdata)
@@ -286,7 +322,10 @@ static int collect(const P4PackageInstallation *source, void *userdata)
         return error("Package directory exceeds catalog bounds.");
     }
     item.info.kind = catalog->collecting_kind;
-    if (item.valid && item.info.kind == P4_PACKAGE_MOD && collect_settings(&item, source)) {
+    item.bundled = source->bundled;
+    if (source->shadows) snprintf(item.shadows, sizeof item.shadows, "%s", source->shadows);
+    if (item.valid && ((item.info.kind == P4_PACKAGE_MOD && collect_settings(&item, source)) ||
+                       collect_requirements(&item, source))) {
         free(item.settings);
         free(item.plan);
         free(item.settingError);
@@ -379,7 +418,9 @@ static int hub_row(void *unused, int index, P4SettingsPageRow *out)
     out->label = rowLabel;
     out->value = !item->valid ? "INVALID" :
         ids_find(pack ? &catalog->packs_enabled : &catalog->enabled, item->info.id) >= 0 ? "ENABLED" : "DISABLED";
-    out->help = "Open package information and settings.";
+    out->help = item->shadows[0] ? "Your installation replaces the copy shipped with the game. Open package information." :
+        item->bundled ? "Shipped with the game. Open package information and settings." :
+        "Open package information and settings.";
     out->kind = P4_SETTINGS_PAGE_ACTION;
     return 0;
 }
@@ -430,6 +471,198 @@ static HubInstallation *current_installation(void)
 {
     return selectionDepth ? selected(selections[selectionDepth - 1]) : NULL;
 }
+static HubCatalog *current_catalog(void)
+{
+    return selectionDepth ? catalog_find(selections[selectionDepth - 1].catalog) : NULL;
+}
+
+/* Requirements (docs/modding/files.md "Requirements"). Enabling a package also
+ * enables everything it requires and sets the settings it names; while it is
+ * enabled those rows stay locked. The admission check remains authoritative. */
+static char hubMessage[320];
+static const char *display_text(char *text)
+{
+    for (char *c = text; *c; ++c)
+        if ((unsigned char)*c < 32 || (unsigned char)*c > 126) *c = '?';
+    return text;
+}
+static int failf(const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    vsnprintf(hubMessage, sizeof hubMessage, format, args);
+    va_end(args);
+    return error(display_text(hubMessage));
+}
+static const HubInstallation *unique_item(const HubCatalog *catalog, P4PackageKind kind, const char *id)
+{
+    const HubInstallation *found = NULL;
+    for (size_t i = 0; i < catalog->count; ++i) {
+        const HubInstallation *item = &catalog->items[i];
+        if (!item->valid || item->info.kind != kind || strcmp(item->info.id, id)) continue;
+        if (found) return NULL;
+        found = item;
+    }
+    return found;
+}
+static int item_enabled(const HubCatalog *catalog, const HubInstallation *item)
+{
+    return ids_find(item->info.kind == P4_PACKAGE_ENGINE_PACK ? &catalog->packs_enabled : &catalog->enabled,
+                    item->info.id) >= 0;
+}
+static const P4PackageRequirement *requirement_of(const HubInstallation *dependent, const char *id)
+{
+    for (size_t i = 0; i < dependent->requireCount; ++i)
+        if (!strcmp(dependent->requires[i].id, id)) return &dependent->requires[i];
+    return NULL;
+}
+static const char *required_value(const P4PackageRequirement *need, const char *setting)
+{
+    for (size_t s = 0; need && s < need->setting_count; ++s)
+        if (!strcmp(need->settings[s].key, setting)) return need->settings[s].value;
+    return NULL;
+}
+/* The first enabled package of the same kind that requires `item` (naming
+ * `setting`, when given). It locks that row until it is disabled itself. */
+static const HubInstallation *locked_by(const HubCatalog *catalog, const HubInstallation *item, const char *setting)
+{
+    for (size_t i = 0; catalog && i < catalog->count; ++i) {
+        const HubInstallation *other = &catalog->items[i];
+        if (other == item || !other->valid || other->info.kind != item->info.kind || !item_enabled(catalog, other) ||
+            unique_item(catalog, other->info.kind, other->info.id) != other) continue;
+        const P4PackageRequirement *need = requirement_of(other, item->info.id);
+        if (need && !need->companion && (!setting || required_value(need, setting))) return other;
+    }
+    return NULL;
+}
+static const char *lock_label(const HubInstallation *by)
+{
+    snprintf(lockLabel, sizeof lockLabel, "REQUIRED BY %s", by->info.name);
+    for (char *c = lockLabel; *c; ++c) *c = (char)toupper((unsigned char)*c);
+    return display_text(lockLabel);
+}
+static const char *lock_help(const HubInstallation *by)
+{
+    snprintf(lockHelp, sizeof lockHelp, "Required by %s. Disable it first.", by->info.name);
+    return display_text(lockHelp);
+}
+typedef struct HubPlan {
+    const HubInstallation *items[P4_PACKAGE_MAX]; /* requirements before their dependents */
+    size_t count;
+} HubPlan;
+/* An enabled mod that names `item` as its companion needs a compatible version. */
+static int companion_fits(const HubCatalog *catalog, const HubInstallation *item)
+{
+    for (size_t i = 0; i < catalog->count; ++i) {
+        const HubInstallation *other = &catalog->items[i];
+        if (other == item || !other->valid || other->info.kind != item->info.kind || !item_enabled(catalog, other))
+            continue;
+        const P4PackageRequirement *need = requirement_of(other, item->info.id);
+        if (!need || !need->companion) continue;
+        int satisfied = p4_package_version_satisfies(item->info.version, need->major, need->minor);
+        if (satisfied <= 0)
+            return failf(satisfied ? "%s needs companion %s %u.%u+; version %s is not comparable."
+                                   : "%s needs companion %s %u.%u+; version %s is installed.",
+                         other->info.name, item->info.name, need->major, need->minor, item->info.version);
+    }
+    return 0;
+}
+/* Depth first, so every requirement precedes its dependents, each listed once.
+ * Companions are never enabled here; an enabled one must still be compatible. */
+static int plan_requirements(const HubCatalog *catalog, const HubInstallation *item, HubPlan *plan,
+                             const HubInstallation **stack, size_t depth)
+{
+    if (item->requireError) return failf("%s: %s", item->info.name, item->requireError);
+    for (size_t i = 0; i < depth; ++i)
+        if (stack[i] == item) return failf("%s is in a requirement cycle.", item->info.name);
+    if (depth == P4_PACKAGE_MAX) return error("Requirements are nested too deeply.");
+    stack[depth] = item;
+    for (size_t r = 0; r < item->requireCount; ++r) {
+        const P4PackageRequirement *need = &item->requires[r];
+        const HubInstallation *have = unique_item(catalog, item->info.kind, need->id);
+        if (need->companion) {
+            if (!have || !item_enabled(catalog, have)) continue;
+            int satisfied = p4_package_version_satisfies(have->info.version, need->major, need->minor);
+            if (satisfied <= 0)
+                return failf(satisfied ? "%s needs companion %s %u.%u+; version %s is not comparable."
+                                       : "%s needs companion %s %u.%u+; version %s is installed.",
+                             item->info.name, have->info.name, need->major, need->minor, have->info.version);
+            continue;
+        }
+        if (!have)
+            return failf("%s needs %s %u.%u+, which is not installed (or installed twice).",
+                         item->info.name, need->id, need->major, need->minor);
+        int satisfied = p4_package_version_satisfies(have->info.version, need->major, need->minor);
+        if (satisfied <= 0)
+            return failf(satisfied ? "%s needs %s %u.%u+; version %s is not comparable."
+                                   : "%s needs %s %u.%u+; version %s is installed.",
+                         item->info.name, have->info.name, need->major, need->minor, have->info.version);
+        for (size_t s = 0; s < need->setting_count; ++s) {
+            const P4ModSettingDecl *decl = p4_mod_setting_find(have->settings, have->settingCount, need->settings[s].key);
+            unsigned choice = 0;
+            while (decl && choice < decl->choice_count && strcmp(decl->choices[choice], need->settings[s].value)) ++choice;
+            if (!decl || choice == decl->choice_count)
+                return failf("%s needs %s setting %s=%s, which it does not declare.", item->info.name,
+                             have->info.name, need->settings[s].key, need->settings[s].value);
+        }
+        if (plan_requirements(catalog, have, plan, stack, depth + 1)) return -1;
+    }
+    for (size_t i = 0; i < plan->count; ++i)
+        if (plan->items[i] == item) return 0;
+    if (companion_fits(catalog, item)) return -1;
+    if (plan->count == P4_PACKAGE_MAX) return error("Too many required packages.");
+    plan->items[plan->count++] = item;
+    return 0;
+}
+/* A newly enabled mod goes in front of the first enabled mod that requires it
+ * or names it as a companion, otherwise last, so the hub shows the order
+ * admission uses. The caller has checked the capacity. */
+static void order_insert(const HubCatalog *catalog, HubIds *order, const char *id)
+{
+    size_t position = order->count;
+    for (size_t i = 0; i < order->count && position == order->count; ++i) {
+        const HubInstallation *other = unique_item(catalog, P4_PACKAGE_MOD, order->ids[i]);
+        if (other && requirement_of(other, id)) position = i;
+    }
+    for (size_t i = order->count; i > position; --i) memcpy(order->ids[i], order->ids[i - 1], sizeof order->ids[0]);
+    strcpy(order->ids[position], id);
+    ++order->count;
+}
+/* Writes every setting the plan requires, refusing a value that another
+ * enabled or planned package requires differently. Runs before the selection
+ * write: a failed selection leaves valid settings, never a half-enabled mod. */
+static int apply_required_settings(const HubCatalog *catalog, const HubPlan *plan)
+{
+    for (size_t p = 0; p < plan->count; ++p) {
+        const HubInstallation *dependent = plan->items[p];
+        for (size_t r = 0; r < dependent->requireCount; ++r) {
+            const P4PackageRequirement *need = &dependent->requires[r];
+            const HubInstallation *have = unique_item(catalog, dependent->info.kind, need->id);
+            for (size_t s = 0; have && s < need->setting_count; ++s) {
+                const char *key = need->settings[s].key, *value = need->settings[s].value;
+                for (size_t i = 0; i < catalog->count; ++i) {
+                    const HubInstallation *other = &catalog->items[i];
+                    int planned = 0;
+                    for (size_t q = 0; q < plan->count; ++q) planned |= plan->items[q] == other;
+                    if (!other->valid || other->info.kind != have->info.kind ||
+                        (!planned && !item_enabled(catalog, other))) continue;
+                    const char *wanted = required_value(requirement_of(other, have->info.id), key);
+                    if (wanted && strcmp(wanted, value))
+                        return failf("%s needs %s %s=%s, but %s requires %s.", dependent->info.name,
+                                     have->info.name, key, value, other->info.name, wanted);
+                }
+                const P4ModSettingDecl *decl = p4_mod_setting_find(have->settings, have->settingCount, key);
+                char stored[P4_MOD_SETTING_VALUE_MAX], reason[192];
+                int found = p4_mod_setting_stored(have->info.id, key, stored, sizeof stored, reason, sizeof reason);
+                if (found < 0) return failf("%s", reason);
+                if (decl && !strcmp(decl->choices[p4_mod_setting_choice(decl, found > 0 ? stored : NULL)], value))
+                    continue;
+                if (p4_mod_setting_store(have->info.id, key, value, reason, sizeof reason)) return failf("%s", reason);
+            }
+        }
+    }
+    return 0;
+}
 static int owns_installation(HubLink *link, const HubInstallation *item)
 {
     return item->valid && item->active && item->info.kind == P4_PACKAGE_MOD &&
@@ -464,6 +697,11 @@ static void setting_row(const HubInstallation *item, size_t row, P4SettingsPageR
     out->label = decl->label;
     out->help = decl->help[0] ? decl->help : decl->restart ? "Takes effect after restart." : NULL;
     out->flags = decl->restart ? P4_SETTINGS_PAGE_RESTART : 0;
+    const HubInstallation *by = locked_by(current_catalog(), item, decl->key);
+    if (by) {
+        out->flags |= P4_SETTINGS_PAGE_DISABLED;
+        out->help = lock_help(by);
+    }
     if (decl->kind == P4_MOD_SETTING_TOGGLE) {
         out->kind = P4_SETTINGS_PAGE_TOGGLE;
         out->checked = choice == 1;
@@ -489,6 +727,8 @@ static int setting_adjust(const HubInstallation *item, const char *key, int dire
     const P4ModSettingDecl *decl = item->valid && !item->settingError ?
         p4_mod_setting_find(item->settings, item->settingCount, key + 4) : NULL;
     if (!decl) return -1;
+    const HubInstallation *by = locked_by(current_catalog(), item, decl->key);
+    if (by) return failf("Required by %s. Disable it first.", by->info.name);
     char stored[P4_MOD_SETTING_VALUE_MAX], reason[192];
     int found = p4_mod_setting_stored(item->info.id, decl->key, stored, sizeof stored, reason, sizeof reason);
     if (found < 0) return error(reason);
@@ -535,6 +775,12 @@ static int installation_row(void *unused, int index, P4SettingsPageRow *out)
             out->checked = item->valid && ids_find(&catalog->packs_enabled, item->info.id) >= 0;
             out->flags = P4_SETTINGS_PAGE_RESTART | (usable ? 0 : P4_SETTINGS_PAGE_DISABLED);
             if (!usable) out->help = "Invalid or duplicate pack ID cannot be selected.";
+            const HubInstallation *by = out->checked ? locked_by(catalog, item, NULL) : NULL;
+            if (by) {
+                out->label = lock_label(by);
+                out->flags |= P4_SETTINGS_PAGE_DISABLED;
+                out->help = lock_help(by);
+            }
         } else {
             out->label = "PACKAGE DETAILS";
             out->value = "VIEW";
@@ -565,6 +811,12 @@ static int installation_row(void *unused, int index, P4SettingsPageRow *out)
             out->checked = enabled;
             out->flags = P4_SETTINGS_PAGE_RESTART | (usable ? 0 : P4_SETTINGS_PAGE_DISABLED);
             if (!usable) out->help = "Invalid or duplicate mod ID cannot be selected.";
+            const HubInstallation *by = enabled ? locked_by(catalog, item, NULL) : NULL;
+            if (by) {
+                out->label = lock_label(by);
+                out->flags |= P4_SETTINGS_PAGE_DISABLED;
+                out->help = lock_help(by);
+            }
         } else if (index == 3) {
             out->label = "LOAD ORDER";
             if (position >= 0) snprintf(rowValue, sizeof rowValue, "%d / %u", position + 1, (unsigned)catalog->order.count);
@@ -648,9 +900,11 @@ static int detail_opened(void *unused)
         item->valid ? item->info.version : "Unavailable",
         item->active ? "Active" : "Not active",
         item->info.directory,
+        item->bundled ? "Shipped with the game (read-only)" : item->shadows[0] ? item->shadows : "Player installation",
         item->diagnostic ? item->diagnostic : "None"
     };
-    static const char *labels[] = {"Kind: ", "ID: ", "Name: ", "Version: ", "State: ", "Directory: ", "Diagnostic: "};
+    static const char *labels[] = {"Kind: ", "ID: ", "Name: ", "Version: ", "State: ", "Directory: ", "Source: ",
+        "Diagnostic: "};
     static const char suffix[] = "\nMetadata discovery does not activate a package or qualify its payload. Non-ASCII bytes are shown as \\xNN.";
     size_t size = sizeof suffix;
     for (unsigned i = 0; i < sizeof values / sizeof values[0]; ++i)
@@ -696,10 +950,19 @@ static int installation_adjust(void *unused, const char *key, int direction)
         if (strcmp(key, "enabled")) return 0;
         HubIds enabled = catalog->packs_enabled;
         int found = ids_find(&enabled, item->info.id);
-        if (found >= 0) ids_remove(&enabled, (size_t)found);
-        else {
-            if (enabled.count == P4_PACKAGE_MAX) return error("Too many enabled packs.");
-            strcpy(enabled.ids[enabled.count++], item->info.id);
+        if (found >= 0) {
+            const HubInstallation *by = locked_by(catalog, item, NULL);
+            if (by) return failf("Required by %s. Disable it first.", by->info.name);
+            ids_remove(&enabled, (size_t)found);
+        } else {
+            HubPlan plan = {0};
+            const HubInstallation *stack[P4_PACKAGE_MAX];
+            if (plan_requirements(catalog, item, &plan, stack, 0)) return -1;
+            for (size_t p = 0; p < plan.count; ++p) {
+                if (ids_find(&enabled, plan.items[p]->info.id) >= 0) continue;
+                if (enabled.count == P4_PACKAGE_MAX) return error("Too many enabled packs.");
+                strcpy(enabled.ids[enabled.count++], plan.items[p]->info.id);
+            }
         }
         return save_packs_selection(catalog, &enabled);
     }
@@ -708,14 +971,28 @@ static int installation_adjust(void *unused, const char *key, int direction)
     int found = ids_find(&enabled, item->info.id);
     if (!strcmp(key, "enabled")) {
         if (found >= 0) {
+            const HubInstallation *by = locked_by(catalog, item, NULL);
+            if (by) return failf("Required by %s. Disable it first.", by->info.name);
             ids_remove(&enabled, (size_t)found);
             int position = ids_find(&order, item->info.id);
             if (position >= 0) ids_remove(&order, (size_t)position);
         } else {
-            if (enabled.count == P4_PACKAGE_MAX || order.count == P4_PACKAGE_MAX)
+            /* Requirements are enabled with it, in front of it; their required
+             * settings are written first. Already enabled ones keep their place. */
+            HubPlan plan = {0};
+            const HubInstallation *stack[P4_PACKAGE_MAX];
+            if (plan_requirements(catalog, item, &plan, stack, 0)) return -1;
+            size_t added = 0;
+            for (size_t p = 0; p < plan.count; ++p) added += ids_find(&enabled, plan.items[p]->info.id) < 0;
+            if (enabled.count + added > P4_PACKAGE_MAX || order.count + added > P4_PACKAGE_MAX)
                 return error("Too many enabled mods.");
-            strcpy(enabled.ids[enabled.count++], item->info.id);
-            strcpy(order.ids[order.count++], item->info.id);
+            if (apply_required_settings(catalog, &plan)) return -1;
+            for (size_t p = 0; p < plan.count; ++p) {
+                const char *id = plan.items[p]->info.id;
+                if (ids_find(&enabled, id) >= 0) continue;
+                strcpy(enabled.ids[enabled.count++], id);
+                if (ids_find(&order, id) < 0) order_insert(catalog, &order, id);
+            }
         }
         return save_selection(catalog, &enabled, &order);
     }
@@ -727,6 +1004,14 @@ static int installation_adjust(void *unused, const char *key, int direction)
         memcpy(temp, order.ids[position], sizeof temp);
         memcpy(order.ids[position], order.ids[other], sizeof temp);
         memcpy(order.ids[other], temp, sizeof temp);
+        size_t lo = (size_t)(other < position ? other : position), hi = lo + 1;
+        const HubInstallation *earlier = unique_item(catalog, P4_PACKAGE_MOD, order.ids[lo]);
+        const P4PackageRequirement *need = earlier ? requirement_of(earlier, order.ids[hi]) : NULL;
+        if (need) {
+            const HubInstallation *later = unique_item(catalog, P4_PACKAGE_MOD, order.ids[hi]);
+            return failf(need->companion ? "%s loads after its companion %s." : "%s requires %s, which must load first.",
+                         earlier->info.name, later ? later->info.name : order.ids[hi]);
+        }
         return save_selection(catalog, &enabled, &order);
     }
     return 0;

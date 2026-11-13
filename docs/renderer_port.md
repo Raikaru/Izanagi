@@ -245,7 +245,7 @@ Open: the Im3D render terminal node (no `.csl` name found); the identity of `0x4
 
 | Knob | Effect |
 |---|---|
-| CMake `-DP4PC_GLES=ON\|OFF` | the default API of the build (`P4PC_GL_API_ES_DEFAULT`, `src/render/p4gl_api.h`). ON. If the default ES context cannot be created (a Windows driver without the ES profile, no EGL library) `p4gl_context_open` falls back to desktop 3.3 core and says so; an explicit request below fails instead |
+| CMake `-DP4PC_GLES=ON\|OFF` | the default API of the build (`P4PC_GL_API_ES_DEFAULT`, `src/render/p4gl_api.h`). ON. If the default ES context cannot be created (a Windows driver without the ES profile, no EGL library) `p4gl_context_open` falls back to desktop 3.3 core and says so; an explicit request below fails instead. Without any context (SDL's offscreen or dummy video driver on Windows has no GL) the game exits 1 at the device's OPEN with the reason (`p4gl_context_open_device`, `tests/gl_open_failure.sh`) |
 | `P4PC_GL_API=gl\|gles` | this run's API, whatever the build default is |
 | `P4PC_ANGLE=1\|d3d11\|vulkan\|gl\|metal\|swiftshader` | run the ES path on ANGLE (`libEGL` and `libGLESv2` found by the loader, on Windows next to the exe): sets `SDL_HINT_OPENGL_ES_DRIVER=1` (SDL then uses EGL instead of the platform's own ES, which on Windows is WGL's ES profile, i.e. the vendor driver) and, with a name, `ANGLE_DEFAULT_PLATFORM`. Implies `gles` |
 | `P4PC_GLES_BORDER=shader\|native` | force the texture-border emulation, or the hardware mode, on any context (the default asks the context: desktop, ES 3.2, `GL_EXT_texture_border_clamp` and `GL_OES_texture_border_clamp` are native) |
@@ -275,7 +275,7 @@ The renderer's whole GL surface is `src/render/p4gl_gl.h` (about 70 entry points
 | `glReadPixels` `GL_RGBA`/`GL_UNSIGNED_BYTE` | captures, `p4gl_readback_rgba` | native (the one format ES guarantees for RGBA8) | none |
 | Depth: `GL_DEPTH_COMPONENT24` renderbuffer, `DEPTH_TEST`, `LEQUAL`/`ALWAYS`, depth mask | targets, the window | native (24-bit depth is a required renderbuffer format; the EGL config asks for 24) | none. Metal has no 24-bit depth on iOS (D24S8 only on macOS, and not on AMD), so ANGLE has to use a 32-bit float format there: GS Z reaches GL as `(1 - z/65535) * 0.999`, 65536 values that any of these formats holds, but 3D perspective depth tie-breaks (z-fighting) can differ |
 | Blending: `glBlendFuncSeparate`, `glBlendEquation` (ADD, REVERSE_SUBTRACT), `glBlendColor` with `CONSTANT_ALPHA` | the GS ALPHA register (`p4gl_gs_alpha_apply`) | native. ES forbids mixing `CONSTANT_COLOR` with `CONSTANT_ALPHA` factors in one blend: only alpha constants are used | none. Dual-source blending is not used: the one combination that would need it (the over-bright `(Cs-Cd)*FIX+Cs`) already falls back to source-alpha blending with a one-time warning on both paths. An exact version could read the destination in the shader the way DATE does (copy, then texel fetch), which is portable; `EXT_blend_func_extended` (ANGLE's Metal backend has it) and framebuffer fetch (Apple GPUs only) are not |
-| Alpha test, AFAIL modes (FB_ONLY, RGB_ONLY, ZB_ONLY), alpha ref | `discard` in the fragment shaders; colour mask and depth mask for the failure modes | native (no fixed-function alpha test in either profile) | none |
+| Alpha test, AFAIL modes (FB_ONLY, RGB_ONLY, ZB_ONLY), alpha ref | `discard` in the fragment shaders; colour mask and depth mask for the failure modes | native (no fixed-function alpha test in either profile) | interpolation is not exact everywhere: AMD's radeonsi (Renoir, Mesa 25.0.7) gives a vertex alpha of 1.0 interpolated across a quad a hair below 1.0, which failed GEQUAL 0x80 (an alpha-tested glyph stem vanished) and kept AA1 lines at full alpha. The test and AA1 read the alpha through `p4GsAlpha` (`p4gl_gl.c`), which takes a value within 1/256 of a whole GS alpha as that alpha |
 | Destination alpha test (DATE/DATM) | Im2D program 2: `texelFetch(uDest, ivec2(gl_FragCoord.xy), 0).a >= 0.99` on a copy of the target | `texelFetch` and `gl_FragCoord` are ES 3.0 core (origin lower left in both) | none |
 | Frame-feedback quad, +0.5 px rule | Im2D vertex shader adds 0.5 px, fragment shader adds 1/64 texel to a nearest sample; `p4gl_camera_object_matrix` adds half a pixel in clip space | shader arithmetic only, same in both | none. Which texel a nearest sample on an exact texel boundary picks is the one thing the GPU decides: 78 pixels of the title differ by up to 2 levels between hardware and emulated border on Mesa, and single pixels differ between GPUs (§10.3) |
 | Primitives: `GL_TRIANGLES`, `TRIANGLE_STRIP`, `TRIANGLE_FAN`, `LINES`, `LINE_STRIP` | Im2D, Im3D, atomic, PTank | native. No `glLineWidth` (width 1 is all ES guarantees), no points, no primitive restart, no `glPolygonMode` | none. Metal has no fan primitive, so ANGLE has to rewrite the index list for fans; lines are rasterized by each API's own rule |
@@ -372,6 +372,23 @@ forces it) and, on a rounding context, compiles the fragment shaders with `P4_RO
 shader). On llvmpipe nothing changes (it truncates). Results: Android emulator, all six viewer gates pass (field 1.7890, sky 3.1286, near_fog 15.2975, riverbank 8.4635,
 arcana 12.8303, title 1.2093); Windows NVIDIA, ES and desktop GL, all eight pass (butterfly 3.4867); Linux llvmpipe unchanged (field 1.7747). Blending is still the driver's: only
 the shader's own output is biased.
+
+**The half step was a tie (fixed 2026-11-06).** The first native Windows run of the Win64 GL host tests (RTX 4080 Laptop, NVIDIA 610.88, ES 3.2 and GL 3.3)
+failed `render_smoke`, `movie_smoke` and `mod_resources_render`: wherever the GS writes a whole step the port wrote one step less (white 254, the movie one step dark
+on 82 % of its channels, `movie_smoke` 0.821 from the player's frame). A whole step less half a step is exactly n - 1/2, and NVIDIA does not split a step at its half:
+a float texture drawn into an RGBA8 target shows that every n - 1/2 + d with d up to d_n still gives n - 1, d_n between 1/2048 and 1/16 of a step depending on n (a
+sawtooth with period 16: the conversion keeps about 12 bits of fraction). llvmpipe, which truncates, never compiles the bias. The shaders now truncate the colour
+themselves on a rounding context (`p4GsTruncate`, `p4gl_gl.c`): floor(255 c + 1/512) is the GS's 8-bit colour (the 1/512 takes in the float error of a whole step,
+every GS fraction is a multiple of 1/256), written as that step less 3/8, which any conversion within 1/8 step of round to nearest turns back into the step. All 22
+Win64 GL host tests pass natively; the opening movie in a real run is one step brighter on 82 % of its channels, the player's frames exactly.
+
+Blending is still the driver's, and NVIDIA blends the 8-bit source (an offset below the step changes no blended pixel): a GS alpha blend `(Cs - Cd) * As >> 7 + Cd`
+truncates where NVIDIA rounds, so over every 8-bit source and alpha a blend reads 0.48 step brighter than the GS and is exact on 52 % of them. Taking a whole step
+off every source had hidden that in blended scenes, at the price of every unblended one. Against the retail frames (NVIDIA, x64): title 0.7900 -> 0.7237 %,
+tv_world_enter 1.5559 -> 1.3667, velvet_windows_blurry 0.9753 -> 0.8494, riverbank_vignette 1.2404 -> 1.1276, shadow_haze 1.5238 -> 1.4245, rain 2.9171 -> 2.8343,
+newgame_to_field 0.8341 -> 0.7508; near_fog 3.6716 -> 3.8654, field 1.2784 -> 1.3953, sky_black_tint 2.4649 -> 2.6038, fog_battle 3.3445 -> 3.3945, Daidara
+5.8288 -> 6.0191 (the blended fog layers, light shafts and the shop's dimmed background). `tests/gate_limits.txt` has their NVIDIA rows from ten runs; the NVIDIA
+port frames were recaptured as `*-nvidia-rtx4080-trunc`.
 
 ### 10.6b The missing caption: decomp calls to sinf bound to glibc (fixed)
 
@@ -694,9 +711,12 @@ GPU gates. This also runs when the smoke/check scripts themselves change.
 The queue compares the checked batch with `origin/main`; unrelated changes
 do not add the reference-ABI build. The shard sets
 `P4PC_SCENE_ARTIFACTS=/lane/build/gs-smoke`: a failed corpus scene retains its
-PNG and guest RAM there, and New Game corpus runs retain their boot log.
-Successful runs remove their scratch directory as before. This avoids losing
-the compositor phase and image when a parallel reference check fails.
+PNG and guest RAM there, including the nested story/save boot log. Direct
+story and save gates retain each attempt's boot log under a unique
+`p4pc_story.log.*/boot.log` or `p4pc_save_play.log.*/boot.log` directory.
+Successful scratch trees are removed; log-copy errors produce warnings and
+retain the available scratch without changing the game verdict. This avoids
+losing the compositor phase and image when a parallel reference check fails.
 
 #### Tight port witnesses and independent AFAIL controls
 
@@ -1044,7 +1064,7 @@ The `widescreen_*_16_9` scene gates use separately named native port-frame
 goldens; the established 4:3 retail references are not replaced.
 The original wide frames were captured on Mesa llvmpipe. They require the
 exact `GL_RENDERER` identity `llvmpipe (LLVM 19.1.7, 256 bits)`; the separate
-`_nvidia64` x64 cases and `*-nvidia-rtx4080.rgb` port frames require
+`_nvidia64` x64 cases and `*-nvidia-rtx4080-trunc.rgb` port frames (10.6a) require
 `NVIDIA GeForce RTX 4080 Laptop GPU/PCIe/SSE2`. `P4PC_GATE_RENDERER` is an
 explicit, case-insensitive exact reference-test scope: another loaded
 renderer exits 77 before gameplay rather than comparing incompatible colour

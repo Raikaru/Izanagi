@@ -18,6 +18,7 @@ import errno
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 import shutil
 import signal
@@ -41,6 +42,7 @@ SKILL_LIMIT = 0x1B8  # datCalcSkillCost's retail skill-ID bound
 SILENCE = 0x8  # DatUnit +0xC ailment (datCalcChkBadStatus): the Skill command refuses
 CHARGED = 0xC0000  # DatUnit +0x14: Power/Mind Charge (record word 2)
 GUARDING = 0x200  # DatUnit +0x00 flags: guarding, datCalcIsGuarding (record word 0)
+KNOCKED_OUT = 0x80000  # DatUnit +0xC ailment word: down, never a TARGET entry (walk_script.c battle_bound_target)
 
 
 class SearchError(RuntimeError):
@@ -87,15 +89,19 @@ class Ram:
         return struct.unpack_from("<I", self.data, address - RAM_START)[0]
 
 
+RESTORES = {2, 5, 7, 9, 11, 15}  # restoring HP/SP effect modes (the native policies' is_healing)
+
+
 def skill_row(ram, skill):
     """DatSkillEntry (0x28 bytes): flags01 bit 2 lists it (the walker's skill_active), cost kind @3 (1 HP %, 2 SP),
     cost @4, target class @8 (1 every target), side @9 (1 allies, 2 enemies), filter @10 (4 downed members),
-    HP effect @0x11 (1 damage, 2/5/11 restore, 0 none), power @0x12, status mode @0x18 (2 removes the ailments
-    in the low 24 bits @0x1C)."""
+    HP effect @0x11 (1 damage, 2/5/11 restore, 0 none), power @0x12, SP effect @0x14 (same modes; the SP items),
+    status mode @0x18 (2 removes the ailments in the low 24 bits @0x1C)."""
     row = ram.u32(SKILL_BANK_SLOT) + skill * 0x28
     return {"id": skill, "listed": bool(ram.u8(row + 1) & 2), "cost_kind": ram.u8(row + 3), "cost": ram.u16(row + 4),
             "all": ram.u8(row + 8) == 1, "side": ram.u8(row + 9), "filter": ram.u8(row + 10),
             "effect": ram.u8(row + 0x11), "power": struct.unpack("<h", struct.pack("<H", ram.u16(row + 0x12)))[0],
+            "sp_effect": ram.u8(row + 0x14),
             "cures": ram.u32(row + 0x1C) & 0xFFFFFF if ram.u8(row + 0x18) == 2 else 0}
 
 
@@ -120,15 +126,25 @@ def menu(ram, members):
     return party, items
 
 
+def standing(unit):
+    """Alive and targetable: HP left and no knock-out ailment (walk_script.c battle_bound_target's 0x80000 test)."""
+    return bool(unit["hp"]) and not unit["status"] & KNOCKED_OUT
+
+
 def ally_targets(row, state, limits):
     """Ally targets the native menu accepts: a downed member to revive, a member with an ailment the row removes, a hurt
-    member to restore, anyone for an effect without HP (a buff). The menu refuses a cure or restore with nothing to do."""
-    alive = [u for u in state["party"] if u["hp"]]
+    member to restore (HP, or SP for a row that restores only SP), anyone for an effect without HP or SP (a buff). The
+    menu refuses a cure or restore with nothing to do."""
+    alive = [u for u in state["party"] if standing(u)]
     if row["filter"] == 4:
-        downed = [u["id"] for u in state["party"] if not u["hp"]]
+        downed = [u["id"] for u in state["party"] if not standing(u)]
         return [] if not downed else [None] if row["all"] else downed
+    pool = "hp"
     if row["cures"]:
         needy = [u for u in alive if u["status"] & row["cures"]]
+    elif row["effect"] == 0 and row["sp_effect"] in RESTORES:
+        pool = "sp"
+        needy = [u for u in alive if u["sp"] < limits[u["id"]]["max_sp"]]
     elif row["effect"] == 0:
         needy = alive
     else:
@@ -137,14 +153,14 @@ def ally_targets(row, state, limits):
         return []
     if row["all"]:
         return [None]
-    return [min(needy, key=lambda u: (u["hp"] * 1000 // max(limits[u["id"]]["max_hp"], 1), u["id"]))["id"]]
+    return [min(needy, key=lambda u: (u[pool] * 1000 // max(limits[u["id"]]["max_" + pool], 1), u["id"]))["id"]]
 
 
 def candidates(actor, state, party_menu, items, limits, used_items):
     """(key, battleturn line) pairs for this fresh command, in a stable order."""
     if actor not in limits:
         raise SearchError("no party admission identifies the acting member (%r)" % (actor,))
-    enemies = sorted({u["id"] for u in state["enemies"] if u["hp"]})
+    enemies = sorted({u["id"] for u in state["enemies"] if standing(u)})
     me = next((u for u in state["party"] if u["id"] == actor), None)
     out = [(("attack", enemy), "enemy:%d=%s" % (enemy, KEYS_ATTACK)) for enemy in enemies]
     out.append((("guard",), KEYS_GUARD))
@@ -194,15 +210,15 @@ def score(state, limits):
     """Search ranking only: enemy HP lost dominates, then the party's HP and SP fractions (current values above the
     maximum count as full) and living members. With record words, each charged enemy (Power/Mind Charge) costs every
     living member an expected 80% of maximum HP, 40% while guarding, so the beam keeps guarded and healed states."""
-    enemy = sum(u["hp"] for u in state["enemies"])
+    enemy = sum(u["hp"] for u in state["enemies"] if standing(u))
     party = [(u, limits[u["id"]]) for u in state["party"] if u["id"] in limits]
-    hp = sum(min(u["hp"], limit["max_hp"]) / max(limit["max_hp"], 1) for u, limit in party)
+    hp = sum(min(u["hp"], limit["max_hp"]) / max(limit["max_hp"], 1) for u, limit in party if standing(u))
     sp = sum(min(u["sp"], limit["max_sp"]) / max(limit["max_sp"], 1) for u, limit in party)
-    alive = sum(1 for u, _ in party if u["hp"])
-    charged = sum(1 for u in state["enemies"] if u["hp"] and u.get("words") and u["words"][2] & CHARGED)
+    alive = sum(1 for u, _ in party if standing(u))
+    charged = sum(1 for u in state["enemies"] if standing(u) and u.get("words") and u["words"][2] & CHARGED)
     risk = 0.0
     for u, limit in party if charged else ():
-        if not u["hp"]:
+        if not standing(u):
             continue
         guarding = u.get("words") and u["words"][0] & GUARDING
         loss = min(u["hp"], (0.4 if guarding else 0.8) * charged * limit["max_hp"])
@@ -263,25 +279,84 @@ def send(node, commands, deadline):
     while True:
         try:
             fd = os.open(node.path / "control", os.O_WRONLY | os.O_NONBLOCK)
-            break
         except OSError as error:
             if error.errno != errno.ENXIO or time.monotonic() > deadline:
                 raise SearchError("checkpoint %s is not serving its control FIFO" % node.name) from error
             time.sleep(0.01)
-    try:
-        os.set_blocking(fd, True)
-        os.write(fd, data)
-    finally:
-        os.close(fd)
+            continue
+        try:
+            os.set_blocking(fd, True)
+            os.write(fd, data)
+            return
+        except BrokenPipeError as error:
+            # The open met only a just-forked child's inherited read end, closed before the write; the checkpoint
+            # itself is reopening its FIFO, so write again.
+            if time.monotonic() > deadline:
+                raise SearchError("checkpoint %s is not serving its control FIFO" % node.name) from error
+            time.sleep(0.01)
+        finally:
+            os.close(fd)
+
+
+def fork(child, deadline):
+    """Sends `fork NAME LINE` until the checkpoint's pid or fork_failed marker confirms it. A command written while only
+    a just-forked sibling still held the FIFO open is discarded with that sibling's read end, so it is sent again; a
+    repeated NAME is ignored by the checkpoint (its directory exists), so a late first copy never forks twice."""
+    for _ in range(5):
+        send(child.parent, ["fork %s %s" % (child.name, child.line)], deadline)
+        settled = time.monotonic() + 3
+        while time.monotonic() < settled:
+            if (child.path / "pid").exists() or (child.path / "fork_failed").exists():
+                return
+            time.sleep(0.02)
+    raise SearchError("checkpoint %s never forked %s" % (child.parent.name, child.name))
+
+
+def discard(nodes):
+    """Deletes ended leaf nodes' files (no descendants, never on a returned tape's path); nodes.jsonl keeps their record.
+    Without this a long search keeps a trace, lockstep log and logs for every candidate (tens of GB)."""
+    for node in nodes:
+        shutil.rmtree(node.path, ignore_errors=True)
 
 
 def release(nodes):
+    """Ends checkpoints; `exit` is resent while the process remains (a write can be lost as in fork())."""
     for node in nodes:
-        if node.checkpoint is not None and node.result is None:
+        if node.checkpoint is None or node.result is not None:
+            continue
+        for _ in range(5):
             try:
                 send(node, ["exit"], time.monotonic() + 30)
             except SearchError:
-                pass
+                break
+            gone = time.monotonic() + 1
+            while time.monotonic() < gone and not exited(node):
+                time.sleep(0.02)
+            if exited(node):
+                break
+
+
+def bound_target(line):
+    """("enemy"/"ally"/"dead", ID) of a battleturn line's COND binding, or () when it has none."""
+    match = re.match(r"(enemy|ally|dead):(\d+)=", line)
+    return (match.group(1), int(match.group(2))) if match else ()
+
+
+def absent_target(node):
+    """The binding the walker reported absent from TARGET before the node's process exited, if that is why it did."""
+    try:
+        with (node.path / "stderr.log").open("rb") as log:
+            log.seek(0, os.SEEK_END)
+            log.seek(max(0, log.tell() - 4096))
+            tail = log.read().decode("utf-8", "replace")
+    except OSError:
+        return None
+    match = re.search(r"battle turn \d+'s (enemy|ally) (\d+) is absent from TARGET", tail)
+    if not match:
+        return None
+    kind = bound_target(node.line)
+    # The walker names a revive's downed target "ally"; keep the binding's own verb.
+    return (kind[0] if kind and kind[1] == int(match.group(2)) else match.group(1), int(match.group(2)))
 
 
 def exited(node):
@@ -442,64 +517,98 @@ def search(args):
     frontier, counter, winner, seen = [root], 0, None, set()
     best = root
     # A command the native menu refuses loops until the step timeout. Refusal depends on state the checkpoint does not
-    # carry (buffs to dispel, for one), so a command refused at least twice and twice as often as accepted is dropped.
+    # carry (buffs to dispel, an ailment a cure's mask names but the menu does not accept, for two), so an actor's
+    # command on a target refused at least twice and twice as often as accepted is dropped.
     refused, taken = {}, {}
+    def refusing(actor, key):
+        return refused.get((actor,) + key, 0) >= max(2, 2 * taken.get((actor,) + key, 0))
     audit = (out / "nodes.jsonl").open("w", encoding="utf-8")
     for depth in range(args.max_depth):
-        if args.max_seconds and time.monotonic() - started > args.max_seconds:
+        if args.max_seconds and time.monotonic() - started - log.get("paused_seconds", 0.0) > args.max_seconds:
             log["stopped"] = "max_seconds"
             break
         queue = []
         for node in frontier:
             for key, line in candidates(node.actor, node.state, party_menu, items, limits, node.used_items):
-                if refused.get(key[:2], 0) >= max(2, 2 * taken.get(key[:2], 0)):
+                if refusing(node.actor, key):
                     continue
                 counter += 1
                 queue.append(Node("n%d" % counter, node, line, fork_dir / ("n%d" % counter), key))
         children, inflight, deadlines = len(queue), [], {}
-        kept, wins, failed, duplicates = [], [], 0, 0
+        kept, wins, failed, duplicates, paused_since = [], [], 0, 0, None
+        absent = set()  # (parent, "enemy"/"ally"/"dead", ID) that the walker found absent from TARGET at that checkpoint
+        gone = set()  # checkpoints that no longer serve their control FIFO
         while queue or inflight:
             # Keep --jobs continuations running: one fork per freed slot, never a wave waiting on its slowest member.
+            # Study admission: no new fork while the host's land check runs (p4pc-run keeps the file present); running
+            # children finish. Their step deadlines start at their own fork, so a pause never times one out.
             while queue and len(inflight) < args.jobs and not wins:
+                if args.pause_file and args.pause_file.exists():
+                    if paused_since is None:
+                        paused_since = time.monotonic()
+                    break
+                if paused_since is not None:
+                    log["paused_seconds"] = log.get("paused_seconds", 0.0) + time.monotonic() - paused_since
+                    paused_since = None
                 child = queue.pop(0)
-                send(child.parent, ["fork %s %s" % (child.name, child.line)], time.monotonic() + 60)
+                if child.parent.name in gone or (child.parent.name,) + bound_target(child.line) in absent or \
+                        refusing(child.parent.actor, child.key):
+                    log["skipped"] = log.get("skipped", 0) + 1
+                    continue
+                try:
+                    fork(child, time.monotonic() + 60)
+                except SearchError as error:
+                    # A checkpoint that no longer serves loses its remaining candidates, never the search.
+                    gone.add(child.parent.name)
+                    log.setdefault("lost_checkpoints", []).append(str(error))
+                    continue
                 deadlines[child.name] = time.monotonic() + args.step_timeout
                 inflight.append(child)
             if wins:
                 queue = []
             done = [child for child in inflight if poll(child, deadlines[child.name])]
             if not done:
-                time.sleep(0.02)
+                time.sleep(0.02 if inflight else 2)
                 continue
             for child in done:
                 inflight.remove(child)
                 status = child.failed or ("result" if child.result is not None else "checkpoint")
-                if child.failed in ("step_timeout", "exited_without_checkpoint_or_result"):
-                    refused[child.key[:2]] = refused.get(child.key[:2], 0) + 1
+                target = absent_target(child) if child.failed == "exited_without_checkpoint_or_result" else None
+                if target:
+                    absent.add((child.parent.name,) + target)  # a property of the state, not a refusal of the command
+                elif child.failed in ("step_timeout", "exited_without_checkpoint_or_result"):
+                    refused[(child.parent.actor,) + child.key] = refused.get((child.parent.actor,) + child.key, 0) + 1
                 elif not child.failed:
-                    taken[child.key[:2]] = taken.get(child.key[:2], 0) + 1
+                    taken[(child.parent.actor,) + child.key] = taken.get((child.parent.actor,) + child.key, 0) + 1
                 audit.write(json.dumps({"depth": depth, "node": child.name, "parent": child.parent.name,
                                         "actor": child.parent.actor, "line": child.line, "status": status,
                                         "outcome": (child.result or {}).get("outcome"),
                                         "score": score(child.state, limits) if child.checkpoint else None}) + "\n")
                 if child.failed:
                     failed += 1
+                    release([child])
+                    discard([child])
                 elif child.result is not None:
                     if child.result.get("outcome") == "win":
                         wins.append(child)
+                    else:
+                        discard([child])
                 elif child.checkpoint is not None:
                     child.phases = child.parent.phases | (phase_ids & {u["id"] for u in child.state["enemies"]})
                     key = state_key(child)
                     if key in seen:
                         duplicates += 1
                         release([child])
+                        discard([child])
                         continue
                     seen.add(key)
                     kept.append(child)
             audit.flush()
             kept.sort(key=lambda c: (-rank(c, limits), int(c.name[1:])))
             beam = trim(kept, args.beam, args.guard_reserve)
-            release([c for c in kept if c not in beam])
+            dropped = [c for c in kept if c not in beam]
+            release(dropped)
+            discard(dropped)
             kept = sorted(beam, key=lambda c: (-rank(c, limits), int(c.name[1:])))
             if kept and rank(kept[0], limits) > rank(best, limits):
                 best = kept[0]
@@ -545,6 +654,36 @@ def search(args):
     return 0 if log["witness"]["equal"] else 2
 
 
+def check_tape(args):
+    """One fresh process runs a finished tape; OUT/check.json records the native outcome (0 exit only for a win)."""
+    out = Path(args.out).resolve()
+    out.mkdir(parents=True)
+    tape = args.check_tape.resolve()
+    entry = out / "fight.entry"
+    entry.write_bytes(live_entry(args.mode, args.encounter, args.occurrence, args.route_limit, args.fight_limit,
+                                 args.action_limit))
+    while args.pause_file and args.pause_file.exists():
+        time.sleep(5)
+    started = time.monotonic()
+    process = start_worker(args, out / "replay", tape, entry)
+    try:
+        code = process.wait(timeout=args.replay_timeout)
+    except subprocess.TimeoutExpired:
+        process.kill()
+        process.wait()
+        code = None
+    published = out / "replay" / "result.json"
+    result = json.loads(published.read_text(encoding="utf-8")) if published.exists() else {}
+    report = {"schema": 1, "tape": str(tape), "tape_sha256": hashlib.sha256(tape.read_bytes()).hexdigest(),
+              "worker": str(args.worker), "worker_sha256": hashlib.sha256(args.worker.read_bytes()).hexdigest(),
+              "exit_code": code, "seconds": time.monotonic() - started,
+              "outcome": result.get("outcome"), "terminal_cause": result.get("terminal_cause"),
+              "fight_updates": result.get("fight_updates")}
+    (out / "check.json").write_text(json.dumps(report, indent=1) + "\n", encoding="utf-8")
+    print(json.dumps(report), flush=True)
+    return 0 if report["outcome"] == "win" else 1
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--worker", type=Path, required=True, help="Linux p4pc64 built with the battle fork")
@@ -558,7 +697,13 @@ def main(argv=None):
     parser.add_argument("--phase-enemy", type=int, action="append", default=[],
                         help="native ID of a later form in the same battle; reaching it outranks any earlier-form HP")
     parser.add_argument("--guard-reserve", type=int, default=0, help="best Guard nodes always kept in the beam")
-    parser.add_argument("--max-seconds", type=float, help="stop searching after this long and report the closest node")
+    parser.add_argument("--max-seconds", type=float,
+                        help="search time, admission pauses excluded, before stopping with the closest node")
+    admission = os.environ.get("P4PC_ADMISSION_DIR")
+    parser.add_argument("--pause-file", type=Path, default=Path(admission) / "land-busy" if admission else None,
+                        help="fork nothing new while this file exists (default $P4PC_ADMISSION_DIR/land-busy, which "
+                             "p4pc-run keeps present while a land check runs on the host)")
+    parser.add_argument("--no-admission", action="store_true", help="run without study admission (no land checks here)")
     parser.add_argument("--driver", default="plan=%s;delay=80" % KEYS_GUARD,
                         help="battle: options, identical in search and gate (the walker requires a plan)")
     parser.add_argument("--mode", type=int, default=1, help="P4BLIVE1 request mode (1 script sequence)")
@@ -575,12 +720,17 @@ def main(argv=None):
     parser.add_argument("--step-timeout", type=float, default=10,
                         help="seconds a candidate may take to reach the next fresh command (a refused command loops)")
     parser.add_argument("--replay-timeout", type=float, default=1800)
+    parser.add_argument("--check-tape", type=Path,
+                        help="instead of searching, run this finished tape once without the fork (a new worker, say)")
     parser.add_argument("--out", type=Path, required=True, help="new private output directory")
     args = parser.parse_args(argv)
     if not sys.platform.startswith("linux"):
         parser.error("the fork search needs a Linux worker (P4PC_BATTLE_FORK)")
+    if args.pause_file is None and not args.no_admission:
+        parser.error("launch through p4pc-run with P4PC_PRIORITY=study (P4PC_ADMISSION_DIR), pass --pause-file, or "
+                     "--no-admission on a host without land checks")
     try:
-        return search(args)
+        return check_tape(args) if args.check_tape else search(args)
     except SearchError as error:
         print("battle_tas: %s" % error, file=sys.stderr)
         return 1

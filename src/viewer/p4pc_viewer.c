@@ -26,6 +26,7 @@
 #include "p4pc/ps2_libc.h"
 #include "p4pc/content.h"
 #include "p4pc/content_source.h"
+#include "p4pc/mod_models.h"
 #include "../render/p4gl.h"
 #include "../render/p4gl_gl.h"
 #include "../render/p4gl_readback.h"
@@ -418,6 +419,10 @@ static int render_rmd(const char *rmdPath, const char *pngPath) {
             }
             model = mdlCreateModelObjectFromMemory(9, 0xFF01, rmd, rmdSize, 0);
         } else {
+            /* P4PC_VIEWER_MODEL: the RMD gets that glTF as its override (docs/modding/models.md). */
+            if (p4_model_viewer_override(rmdPath) != 0) {
+                return 1;
+            }
             model = mdlCreateModelObjectFromData(4, 0, P4_G2H(p4_gport_str(rmdPath)), 0);
         }
     }
@@ -461,6 +466,9 @@ static int render_rmd(const char *rmdPath, const char *pngPath) {
     clump = model != NULL ? mdlGetClump(model) : NULL;
     if (clump == NULL && !ptankMode) {
         fprintf(stderr, "p4pc_viewer: cannot load %s\n", rmdPath);
+        return 1;
+    }
+    if (clump != NULL && p4_model_viewer_dump(clump) != 0) {   /* P4PC_VIEWER_DUMP */
         return 1;
     }
     if (p4gl_context_open() != 0) {

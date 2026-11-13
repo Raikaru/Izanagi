@@ -164,8 +164,11 @@ static int32_t p4_knowledge_ai_collect_body(void *script_work, uint8_t *action, 
         if (use_selector) {
             if (typed_element) {
                 const P4GameActionElement *element = &candidate->frame.element;
+                /* A typed argument names an element, never a delivery: an
+                 * authored delivery skill still answers its element. */
+                const uint32_t flags = element->flags & ~(P4_ELEMENT_DELIVERY_PHYSICAL | P4_ELEMENT_DELIVERY_MAGIC);
                 if (element->valid != typed_element->valid || element->element_id != typed_element->element_id ||
-                    element->channel_id != typed_element->channel_id || element->flags != typed_element->flags ||
+                    element->channel_id != typed_element->channel_id || flags != typed_element->flags ||
                     element->family != typed_element->family || element->component != typed_element->component) continue;
             } else if (!p4_knowledge_ai_legacy_match(&candidate->frame, selector)) continue;
         } else if (!p4_knowledge_ai_effect_match(&candidate->frame, effect_filter)) {

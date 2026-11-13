@@ -1,0 +1,3 @@
+--!capability manifest.table-delta@1
+--!covers section:table-delta
+-- mod.ini [table-delta]: named-field changes to skill rows and party learnsets, composed after every derived producer.

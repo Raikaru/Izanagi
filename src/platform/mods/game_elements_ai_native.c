@@ -104,8 +104,7 @@ static int validate_dispatch(const P4GameAiPrepared *product)
             uint32_t entry = tables[group] + index * 8u;
             if (!P4_G32(entry) || P4_G32(entry + 4u) != node->command_arity ||
                 p4_ai_command_arity(command) != node->command_arity) return P4_TABLE_CONFLICT;
-            uint32_t expected = p4_ai_semantic_binding(command);
-            if (expected && P4_G32(entry) != expected) return P4_TABLE_CONFLICT;
+            if (!p4_ai_semantic_binding_matches(command, P4_G32(entry))) return P4_TABLE_CONFLICT;
         }
     }
     return P4_TABLE_OK;
@@ -297,7 +296,8 @@ int p4_game_elements_ai_native_select(void *source, void *target,
     P4AiCarrier *carrier = p4_ai_native_carrier(source);
     if (!carrier) return P4_TABLE_NOT_READY;
     if (!candidate || candidate->query_valid > 1u || !candidate->eligibility ||
-        (candidate->eligibility & ~(P4_GAME_AI_CANDIDATE_EQUIPPED | P4_GAME_AI_CANDIDATE_TABLE)) ||
+        (candidate->eligibility & ~(P4_GAME_AI_CANDIDATE_EQUIPPED | P4_GAME_AI_CANDIDATE_TABLE |
+            P4_GAME_AI_CANDIDATE_AUTHORED)) ||
         (decision && (decision->valid > 1u || decision->condition_mask > 7u))) return P4_TABLE_INVALID;
     if (candidate->query_valid && (!target || candidate->query.mode > P4_AFFINITY_QUERY_PROVIDED ||
         candidate->query.value != (candidate->query.mode == P4_AFFINITY_QUERY_PROVIDED ? 100u : 0u)))

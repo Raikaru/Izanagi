@@ -191,6 +191,11 @@ int p4_os_rename(const char *from, const char *to);
 /* Atomically replaces a file with another file on the same filesystem.
  * Returns 0, or -1 with errno set; never removes the destination first. */
 int p4_os_replace_file(const char *from, const char *to);
+/* p4_os_replace_file whose replace is on the storage device when it returns:
+ * POSIX fsyncs the destination's directory after the rename, Windows passes
+ * MOVEFILE_WRITE_THROUGH. Only the directory entry is made durable; the caller
+ * syncs the file's own bytes first (p4_os_sync_file). */
+int p4_os_replace_file_durable(const char *from, const char *to);
 /* Synchronously visits raw entry names (including "." and ".." where supplied).
  * A name is valid only during its callback. Supports extended-length Windows
  * roots without MinGW dirent's MAX_PATH cap. Returns 0, or -1 with errno set. */

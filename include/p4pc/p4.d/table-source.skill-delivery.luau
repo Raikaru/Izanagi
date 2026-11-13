@@ -1,0 +1,3 @@
+--!capability table-source.skill-delivery@1
+--!covers section:table-source.skill-delivery
+-- Table-source skill rows can land as physical or magic hits independently of their element.

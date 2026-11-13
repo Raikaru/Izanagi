@@ -41,11 +41,14 @@ fi
 export P4PC_CAPTURE_STATE="$capture_spec" P4PC_CAPTURE_PNG="$work/frame_%d.png"
 export P4PC_DUMP_RAM="$work/state" P4PC_TURBO_WINDOW="${P4PC_TURBO_WINDOW:-150}"
 if [ "$seed" = newgame ]; then
-    P4PC_SCENE_ARTIFACTS="${P4PC_SCENE_ARTIFACTS:+$work}" sh "$here/story_gate.sh" "$prog" "$deadline" -1:-1 "" "$limit" "$walk"
+    P4PC_GATE_ARTIFACT_FAILURE_FILE="$work/.gate-artifact-copy-failed" \
+        P4PC_SCENE_ARTIFACTS="${P4PC_SCENE_ARTIFACTS:+$work}" sh "$here/story_gate.sh" "$prog" "$deadline" -1:-1 "" "$limit" "$walk"
 else
-    P4PC_SCENE_ARTIFACTS="${P4PC_SCENE_ARTIFACTS:+$work}" sh "$here/save_play_gate.sh" "$prog" "$deadline" -1:-1 "$seed" "$walk"
+    P4PC_GATE_ARTIFACT_FAILURE_FILE="$work/.gate-artifact-copy-failed" \
+        P4PC_SCENE_ARTIFACTS="${P4PC_SCENE_ARTIFACTS:+$work}" sh "$here/save_play_gate.sh" "$prog" "$deadline" -1:-1 "$seed" "$walk"
 fi
 rc=$?
+if [ -f "$work/.gate-artifact-copy-failed" ]; then gate_artifact_copy_failed=1; fi
 [ "$rc" -eq 0 ] || exit "$rc"
 set -- "$work"/state_*.bin
 if [ "$#" -ne 1 ] || [ ! -f "$1" ]; then

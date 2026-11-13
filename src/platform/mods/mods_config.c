@@ -1,8 +1,10 @@
 #include "p4pc/mods.h"
 #include "p4pc/mod_setting_store.h"
 #include "p4pc/mod_lifecycle.h"
+#include "p4pc/mod_artifacts.h"
 #include "../config/p4cfg.h"
 #include "p4pc/os.h"
+#include <SDL3/SDL.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -35,6 +37,7 @@ static void settings_root(void)
     if (!config || strlen(config) >= sizeof directory) {
         p4_mod_setting_store_root(NULL);
         p4_mod_lifecycle_root(NULL);
+        p4_mod_artifact_root(NULL);
         return;
     }
     strcpy(directory, config);
@@ -47,12 +50,31 @@ static void settings_root(void)
     /* The lifecycle session lives beside them; nothing is written until a mod asks. */
     if (p4_mod_lifecycle_root(directory[0] ? directory : "/"))
         fprintf(stderr, "p4pc: mods: cannot use the settings directory for mod lifecycle records\n");
+    /* Mod artifacts (p4.artifacts) too; folders are created on a mod's first write. */
+    if (p4_mod_artifact_root(directory[0] ? directory : "/"))
+        fprintf(stderr, "p4pc: mods: cannot use the settings directory for mod artifacts\n");
+}
+/* Mods shipped with the game live, read-only, in the program's own `mods`
+ * directory (an installed package's base path); nothing there is enabled until
+ * the player selects it. P4PC_BUNDLED_MOD_DIR replaces it (empty: none). */
+const char *p4_mods_bundled_root(char path[1200])
+{
+    const char *override = getenv("P4PC_BUNDLED_MOD_DIR");
+    if (override) {
+        if (!override[0] || strlen(override) >= 1200) return NULL;
+        strcpy(path, override);
+        return path;
+    }
+    const char *base = SDL_GetBasePath();
+    if (!base || strlen(base) + sizeof "mods" > 1200) return NULL;
+    snprintf(path, 1200, "%smods", base);
+    return path;
 }
 int p4_mods_configured_installations_scan(P4PackageInstallationVisitor visitor, void *user)
 {
     p4cfg_load();
     settings_root();
-    char path[1200];
+    char path[1200], bundled[1200];
     const char *root = configured_root(path);
     if (!root) return -1;
     /* A fresh settings directory need not contain a mods folder. Only the
@@ -63,9 +85,9 @@ int p4_mods_configured_installations_scan(P4PackageInstallationVisitor visitor, 
             !p4_os_is_dir_nofollow(root)) {
         char resolved[1200];
         if (p4_os_resolved_path(root, resolved, sizeof resolved) && errno == ENOENT)
-            return 0;
+            root = NULL;
     }
-    return p4_mods_installations_scan(root, visitor, user);
+    return p4_mods_installations_scan_bundled(root, p4_mods_bundled_root(bundled), visitor, user);
 }
 int p4_mods_init(void)
 {
@@ -90,9 +112,9 @@ int p4_mods_init(void)
         return -1;
     }
     settings_root();
-    char path[1200];
+    char path[1200], bundled[1200];
     const char *root = configured_root(path);
-    if (!root || p4_mods_stage(root, enabled)) return -1;
+    if (!root || p4_mods_stage_bundled(root, p4_mods_bundled_root(bundled), enabled)) return -1;
     const char *order = p4cfg_get("mods.load_order");
     if (order && order[0] && p4_mods_set_load_order(order)) {
         fprintf(stderr, "p4pc: mods: invalid load_order selector\n");

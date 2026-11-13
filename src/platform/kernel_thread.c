@@ -39,6 +39,7 @@
 #include "p4pc/platform.h"
 #include "p4pc/frame_alarm_seam.h"
 #include "p4pc/vblank_hook.h"
+#include "p4pc/pace.h"
 #ifdef P4_MOD_GAME_BINDINGS
 #include "p4pc/mod_entry.h"
 #endif
@@ -50,9 +51,9 @@
 #define KT_MAIN_ID 1
 #define KT_MAIN_PRIORITY 0
 #define KT_DEFAULT_STACK (64u * 1024u)
-/* The game's own thread stacks are as small as the PS2 code needed (the ADX server thread has 4 KB); the same code compiled for a 64-bit host, and the host
- * library calls it makes (printf needs more than 4 KB of stack on Windows, where the frames are checked against the stack limit), need more. On a 64-bit host
- * a thread whose stack is smaller than this runs on a default stack of the guest stack arena; the game never addresses the memory of its own stack. */
+/* Retail stacks can be only 4 KiB, too small for native VFS, mod and libc
+ * frames on either host ABI. Keep the declared stack in thread status, but
+ * run small stacks on the default owned stack. */
 #define KT_MIN_NATIVE_STACK (64u * 1024u)
 #define KT_VBLANK_START 2
 #define KT_VSYNC_NS (1000000000ull / 60u)
@@ -158,14 +159,62 @@ static int kt_virtual_clock(void) {
     return p4_os_virtual_clock();
 }
 
+/* Practice speed (p4pc_pace_request, the mod services' p4.pace): real-time
+ * play only. kt_pace_quarters is the effective rate in quarters, 0 while no
+ * pace was ever applied, so the clock is then exactly the host's. Paced, the
+ * scheduler clock is kt_pace_sched + (host - kt_pace_host) * quarters / 4; a
+ * new rate is taken at a VBLANK with the anchor at the current scheduler
+ * time, so the clock never jumps. Every timer (VBLANK, alarms, timed waits)
+ * keeps its spacing in scheduler time: the game runs the same updates per
+ * frame, the host only waits less or more between them. */
+static unsigned kt_pace_quarters, kt_pace_pending;
+static uint64_t kt_pace_host, kt_pace_sched;
+static uint64_t kt_pace_periods; /* VBLANK periods run at a rate other than 1x, for the change log */
+
+static uint64_t kt_paced(uint64_t host) {
+    return kt_pace_sched + (host - kt_pace_host) * kt_pace_quarters / 4u;
+}
+
 static uint64_t kt_now_ns(void) {
     if (!kt_virtual_clock())
-        return p4_os_now_ns();
+        return kt_pace_quarters ? kt_paced(p4_os_now_ns()) : p4_os_now_ns();
     if (++kt_virtual_polls >= 4096u) {
         kt_virtual_polls = 0;
         kt_virtual_ns += 1000u;
     }
     return kt_virtual_ns;
+}
+
+/* 1..16 quarters; refused (-1) on a virtual clock, where time is the run's. */
+int p4pc_pace_request(unsigned quarters) {
+    if (kt_virtual_clock() || quarters < 1 || quarters > 16)
+        return -1;
+    kt_pace_pending = quarters;
+    return 0;
+}
+
+unsigned p4pc_pace_effective(void) {
+    return kt_pace_quarters ? kt_pace_quarters : 4u;
+}
+
+void (*p4pc_pace_audio_hook)(int frame_driven);
+
+/* At a VBLANK: the pending rate, anchored at the current scheduler time. */
+static void kt_pace_apply(void) {
+    const uint64_t host = p4_os_now_ns();
+    const uint64_t sched = kt_pace_quarters ? kt_paced(host) : host;
+    const unsigned before = kt_pace_quarters ? kt_pace_quarters : 4u;
+    const unsigned after = kt_pace_pending;
+    kt_pace_pending = 0;
+    if (after == before)
+        return;
+    kt_pace_host = host;
+    kt_pace_sched = sched;
+    kt_pace_quarters = after;
+    fprintf(stderr, "p4pc: practice speed %u/4 (was %u/4) at flip %u, paced VBLANK periods %llu\n", after, before,
+            (unsigned)p4pc_flip_count(), (unsigned long long)kt_pace_periods);
+    if ((before != 4u) != (after != 4u) && p4pc_pace_audio_hook != NULL)
+        p4pc_pace_audio_hook(after != 4u);
 }
 
 uint64_t p4pc_scheduler_time_ns(void) {
@@ -295,11 +344,19 @@ static void kt_idle(void) {
     if (due > now) {
         if (kt_virtual_clock()) {
             kt_virtual_ns = due;
-        } else {
+        } else if (!kt_pace_quarters) {
             const uint64_t spin = 300000u;
             if (due - now > spin)
                 p4_os_sleep_ns(due - now - spin);
             while (p4_os_now_ns() < due) {
+            }
+        } else {
+            /* Paced: the scheduler interval in host time. */
+            const uint64_t spin = 300000u;
+            const uint64_t wait = (due - now) * 4u / kt_pace_quarters;
+            if (wait > spin)
+                p4_os_sleep_ns(wait - spin);
+            while (kt_now_ns() < due) {
             }
         }
     }
@@ -320,14 +377,18 @@ static void kt_service_timers(void) {
     now = kt_now_ns();
     if (now >= kt_vsync_next_ns) {
         uint64_t periods = (now - kt_vsync_next_ns) / KT_VSYNC_NS + 1;
+        if (kt_pace_quarters && kt_pace_quarters != 4u)
+            kt_pace_periods += periods;
         kt_vsync_next_ns += KT_VSYNC_NS;
         if (kt_vsync_next_ns <= now)
             kt_vsync_next_ns = now + KT_VSYNC_NS;
-        if (kt_virtual_clock() && p4pc_vblank_period_hook != NULL) {
+        if ((kt_virtual_clock() || (kt_pace_quarters && kt_pace_quarters != 4u)) && p4pc_vblank_period_hook != NULL) {
             while (periods-- > 0)
                 p4pc_vblank_period_hook();
         }
         p4pc_intc_raise(KT_VBLANK_START);
+        if (kt_pace_pending)
+            kt_pace_apply();
     }
     for (i = 1; i <= KT_MAX_THREADS; i++) {
         kt_thread *t = &kt_threads[i];
@@ -453,13 +514,12 @@ int32_t func_004215e0(void *param) {
     } else if (p->stackSize <= 0) {
         return -1;
     }
-#if __SIZEOF_POINTER__ == 8
+    /* Both i386 and 64-bit native call chains can exceed retail stack sizes. */
     else if ((uint32_t)p->stackSize < KT_MIN_NATIVE_STACK) {
         owned = p4_guest_stack_alloc(KT_DEFAULT_STACK);
         if (owned == NULL)
             return -1;
     }
-#endif
     for (id = 2; id <= KT_MAX_THREADS && kt_threads[id].used; id++) {
     }
     if (id > KT_MAX_THREADS) {

@@ -96,9 +96,15 @@ _Static_assert(sizeof(P4Sky2Vertex) == 64, "RwSky2DVertex layout");
 
 /* GL context on the pad window. p4gl_context_open is idempotent; it returns 0 on success. */
 int p4gl_context_open(void);
+/* The RenderWare device's OPEN: p4gl_context_open, or, when that fails, the reason on stderr (and in a message box for a player's run)
+ * and exit status 1. Returns only with a context. */
+void p4gl_context_open_device(void);
 void p4gl_context_close(void);
 /* True only when this thread owns the live game's SDL/EGL context. */
 int p4gl_context_is_current(void);
+/* True when the device can take raster creation and draws: this thread owns the live context, or the battle simulator's
+ * no-device backend is open (rasters keep their CPU shadows; uploads and draws go to its sinks). False with no device at all. */
+int p4gl_device_ready(void);
 
 /* Present the back buffer (RASTERSHOWRASTER / retail stdFunc slot 20). */
 void p4gl_context_present(void);

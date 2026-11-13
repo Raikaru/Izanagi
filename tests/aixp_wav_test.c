@@ -315,6 +315,10 @@ static int test_main(int argc, char **argv)
         int i;
 
         func_004de2e8(0);
+        /* ADXM_ExecVint counts a server pass every second VBLANK; the renderer's IOP clock runs on it */
+        if ((ticks & 1) == 0) {
+            *(uint32_t *)P4_G2H(0x007188b8u) += 1;
+        }
         ADXT_ExecServer();
         stat = ((uint8_t *)aixp)[1];
         if (stat == AIXP_STAT_END) {
@@ -354,13 +358,15 @@ static int test_main(int argc, char **argv)
         fail("write WAV");
     }
 
-    /* duration: from the first frame the voice played to the end state */
+    /* duration: from the first frame the voice played to the end state, which follows the last sample
+     * by the renderer's report (docs/audio.md, "End of a voice"): up to 7.25 IOP blocks of 10.67 ms,
+     * one server pass and one block */
     {
         double played = (double)(endFrame - startFrame) / P4SND_RATE;
         double want = (double)total / rate;
 
         fprintf(stderr, "aixp_wav_test: played %.3f s, header %.3f s\n", played, want);
-        if (fabs(played - want) > 0.1) {
+        if (played - want < -0.1 || played - want > 0.1 + 0.125) {
             fail("played time differs from the header duration");
         }
     }

@@ -29,6 +29,23 @@ extern double p4gl_context_capture_mad(void);
 extern const char *p4gl_gate_limit(const char *envName);
 extern int16_t datGetDateIndex(void);
 extern int32_t calDayOfYearFromMonthDay(int32_t month, int32_t day);
+extern int p4pc_title_ready_state, p4pc_title_confirmed; /* title_driver.c */
+extern unsigned p4pc_title_ready_flip, p4pc_title_confirmed_flip;
+
+/* P4PC_GATE_RESULT=<path>: the gate's outcome as a small file the engine writes at the
+ * gate's exit, for a caller (p4mod test) that must not trust the mixed engine and mod
+ * log. One "key value" per line after the "p4pc-gate-result 1" header. 0 written. */
+static int write_gate_result(const char *path, int ok, unsigned frame, int field, int room)
+{
+    FILE *out = fopen(path, "wb");
+    if (out == NULL) return -1;
+    int bad = fprintf(out, "p4pc-gate-result 1\nok %d\nflip %u\nfield %d\nroom %d\ntitle_ready_state %d\n"
+                           "title_ready_flip %u\ntitle_confirmed %d\ntitle_confirmed_flip %u\n",
+                      ok, frame, field, room, p4pc_title_ready_state, p4pc_title_ready_flip, p4pc_title_confirmed,
+                      p4pc_title_confirmed_flip) < 0;
+    bad |= fclose(out) != 0;
+    return bad ? -1 : 0;
+}
 
 
 /* The facing check of P4PC_FACING_GATE (above). */
@@ -234,6 +251,13 @@ void p4pc_newgame_gate_frame(unsigned frame)
         fprintf(stderr, "p4pc: new-game gate %s at flip %u: field %d room %d (want %d:%d), date index %d (want %d/%d = %d), frame MAD %.4f%% (limit %s)\n", ok ? "PASS" : "FAIL",
                 frame, field, room, wantField, wantRoom, date, wantMonth, wantDay, wantMonth < 0 ? -1 : calDayOfYearFromMonthDay(wantMonth, wantDay), mad, max != NULL ? max : "none");
         fflush(stderr);
+        {
+            const char *result = getenv("P4PC_GATE_RESULT");
+            if (result != NULL && *result != '\0' && write_gate_result(result, ok, frame, field, room)) {
+                fprintf(stderr, "p4pc: new-game gate: cannot write its result to %s\n", result);
+                ok = 0;
+            }
+        }
         p4pc_exit(ok ? 0 : 1);
     }
 }

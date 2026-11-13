@@ -1,4 +1,5 @@
 #include "p4pc/game_skills.h"
+#include "p4pc/game_elements_native.h"
 #include "p4pc/game_table_inputs.h"
 #include <stdlib.h>
 #include <string.h>
@@ -107,11 +108,38 @@ void p4_game_skills_destroy(P4GameSkills *skills)
     free(skills->rows);
     free(skills);
 }
+static int derive_valid(const P4GameSkillDesc *desc)
+{
+    if (desc->delivery > P4_DELIVERY_MAGIC || (desc->delivery && !desc->active)) return 0;
+    if (!desc->derive) return !desc->derive_fields;
+    if (!desc->active || desc->derive >= P4_SKILL_RETAIL_ACTIVE_COUNT ||
+        (desc->derive_fields & ~(P4_SKILL_DERIVE_POWER | P4_SKILL_DERIVE_COST | P4_SKILL_DERIVE_ACCURACY |
+                                 P4_SKILL_DERIVE_CRITICAL))) return 0;
+    if ((desc->derive_fields & P4_SKILL_DERIVE_POWER) && (!desc->derive_power || desc->derive_power > 9999u)) return 0;
+    if ((desc->derive_fields & P4_SKILL_DERIVE_COST) && (!desc->derive_cost || desc->derive_cost > 999u)) return 0;
+    if ((desc->derive_fields & P4_SKILL_DERIVE_ACCURACY) && (!desc->derive_accuracy || desc->derive_accuracy > 100u))
+        return 0;
+    return !(desc->derive_fields & P4_SKILL_DERIVE_CRITICAL) || desc->derive_critical <= 100u;
+}
+/* A derived row takes its anchor's SKILL1 row and EFFECT0 presentation from the
+ * selected inputs (after any derived producer and table delta), then the
+ * fields it names. */
+static void derive_row(P4GameSkillDesc *desc, const uint8_t *metadata, const uint8_t *presentation)
+{
+    memcpy(desc->metadata, metadata + (size_t)desc->derive * P4_SKILL_ROW_SIZE, P4_SKILL_ROW_SIZE);
+    memcpy(desc->presentation, presentation + (size_t)desc->derive * 4u, 4);
+    uint8_t *row = desc->metadata;
+    if (desc->derive_fields & P4_SKILL_DERIVE_POWER) { row[0x12] = (uint8_t)desc->derive_power; row[0x13] = (uint8_t)(desc->derive_power >> 8); }
+    if (desc->derive_fields & P4_SKILL_DERIVE_COST) { row[0x04] = (uint8_t)desc->derive_cost; row[0x05] = (uint8_t)(desc->derive_cost >> 8); }
+    if (desc->derive_fields & P4_SKILL_DERIVE_ACCURACY) row[0x0E] = (uint8_t)desc->derive_accuracy;
+    if (desc->derive_fields & P4_SKILL_DERIVE_CRITICAL) row[0x25] = (uint8_t)desc->derive_critical;
+}
 int p4_game_skills_register(P4GameSkills *skills, const char *owner, const P4GameSkillDesc *desc)
 {
     if (!skills || !desc || !owned_key(owner, desc->key) || !desc->schema || !desc->revision ||
         desc->id < P4_SKILL_RETAIL_COUNT || desc->id > P4_SKILL_MAX_ID || desc->active > 1 ||
-        desc->inheritance_group >= P4_SKILL_INHERITANCE_GROUP_COUNT)
+        desc->inheritance_group >= P4_SKILL_INHERITANCE_GROUP_COUNT || desc->effect_source >= P4_SKILL_RETAIL_ACTIVE_COUNT ||
+        !derive_valid(desc))
         return P4_TABLE_INVALID;
     if (skills->semantic_revision) return P4_TABLE_FROZEN;
     for (size_t i = 0; i < skills->count; ++i) {
@@ -194,7 +222,14 @@ int p4_game_skills_seal(P4GameSkills *skills,
         if (!np || !dp || np->encoding != P4_TEXT_ENCODING_US_RAW_NATIVE ||
             dp->encoding != P4_TEXT_ENCODING_US_NATIVE) return P4_TABLE_INVALID;
         for (size_t i = 0; i < skills->count; ++i) {
-            const P4GameSkillDesc *row = &skills->rows[i].view.desc;
+            P4GameSkillDesc *row = &skills->rows[i].view.desc;
+            if (row->derive)
+                derive_row(row, p4_game_table_input_span_bytes(metadata), p4_game_table_input_span_bytes(presentation));
+            /* A delivery names the row's own damage class (+0x02: 1 physical,
+             * 2 magic), so a crit and counter never pair with the magic
+             * formula, nor the reverse; a derived row's class is its anchor's. */
+            if (row->delivery && row->active &&
+                row->metadata[2] != (row->delivery == P4_DELIVERY_PHYSICAL ? 1u : 2u)) return P4_TABLE_INVALID;
             P4GameTextDefinition definition;
             int result = p4_game_tables_text_definition_find(names, P4_TEXT_SKILL,
                 row->id, P4_TEXT_NAME, &definition);

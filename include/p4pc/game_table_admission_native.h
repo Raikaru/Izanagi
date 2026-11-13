@@ -11,13 +11,16 @@ typedef void (*P4GameTablePackedObserver)(const uint8_t *descriptor, const char 
 int p4_game_table_admission_consume(P4GameTableAdmissionReceipt *receipt,
     const uint8_t *descriptor, const char *path, const uint8_t *bytes, uint32_t size);
 /* No staged ITEM input leaves the original load untouched. Otherwise verify
- * the actual completed request before the retail destination is written. */
-void p4_game_table_admission_item(const char *path, const uint8_t *bytes, uint32_t size);
+ * the actual completed request before the retail destination is written. When
+ * a derived source composed the input, the verified loader buffer is then
+ * overwritten with the composed bytes (same size) before the native copy. */
+void p4_game_table_admission_item(const char *path, uint8_t *bytes, uint32_t size);
 /* Validate before any GP slot or bank copy, then invoke exactly one observer.
  * A successful selected-input check hands its stack-local receipt to the
- * observer; unrelated/no-stage loads invoke it with NULL. */
+ * observer; unrelated/no-stage loads invoke it with NULL. A composed derived
+ * input is written into the verified buffer before the observer runs. */
 void p4_game_table_admission_packed(const uint8_t *descriptor, const char *path,
-    const uint8_t *bytes, uint32_t size, P4GameTablePackedObserver observer);
+    uint8_t *bytes, uint32_t size, P4GameTablePackedObserver observer);
 /* One block of the loader's twenty-slot descriptor: its GP pointer slot and the
  * ORIGINAL block size, exactly as 0x00193840 copies it. */
 typedef struct P4GameTablePackedBlock { uint32_t slot, size; } P4GameTablePackedBlock;

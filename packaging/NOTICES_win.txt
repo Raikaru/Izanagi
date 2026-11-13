@@ -15,8 +15,8 @@ FFmpeg libraries (avcodec-*.dll, avutil-*.dll, swscale-*.dll)
   ffmpeg-@FFMPEG_VER@.tar.xz (https://ffmpeg.org/releases/ffmpeg-@FFMPEG_VER@.tar.xz, sha256
   @FFMPEG_SHA@) with --disable-gpl --disable-nonfree and only these components
   enabled: libavcodec (MPEG-2 video decoder and parser, ADX audio decoder) and
-  libswscale. The configure options and build recipe are in the port's source
-  (ci/win32/build_deps.sh). The libraries are separate DLLs: you may replace them
+  libswscale. Complete sources and the build recipe are in source/
+  (ffmpeg-@FFMPEG_VER@.tar.xz and build_deps.sh). The libraries are separate DLLs: you may replace them
   with your own build of FFmpeg @FFMPEG_VER@ of the same ABI, which is what the LGPL asks of
   a program that uses them. p4pc.exe contains no FFmpeg code.
 
@@ -25,6 +25,8 @@ SDL3 (SDL3.dll)
   (licenses/SDL3-zlib.txt). Unmodified release build.
 
 LodePNG 20261006: zlib license (licenses/LodePNG-zlib.txt).
+
+cgltf 1.15 (Johannes Kuhlmann): MIT license (licenses/cgltf-MIT.txt).
 
 mingw-w64 runtime and winpthreads (linked into p4pc.exe)
   Permissive licences, licenses/mingw-w64-runtime.txt and licenses/winpthreads.txt.
@@ -44,10 +46,12 @@ LLVM libc++ / libc++abi and unwind (when the C++ adapter is linked)
   source/runtime-provenance.txt.
 
 dlmalloc (Doug Lea): public domain.
+Okumura LZARI and Ross Ridge mymc, adapted in the MAX save importer: public domain.
 
 miniz 3.0.2 (licenses/miniz-MIT.txt) and yxml (licenses/yxml-MIT.txt): MIT.
 
 fdlibm (Sun Microsystems), in the translated libm cores: licenses/fdlibm-Sun.txt.
+newlib stdio/stdlib (UC Berkeley, AT&T), adapted in the translated EE stdio cores: BSD, licenses/newlib-BSD.txt.
 
 CRI middleware headers from recvx-decomp (AshfordFamily): MIT, licenses/recvx-decomp-MIT.txt.
 

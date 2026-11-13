@@ -1,6 +1,9 @@
 #include "p4pc/game_table_xml.h"
+#include "p4pc/game_elements_native.h"
+#include "p4pc/game_skills.h"
 #include "p4pc/packages.h"
 #include "../../../third_party/yxml/yxml.h"
+#include <stddef.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -19,6 +22,10 @@ typedef struct Parser {
     char *error;
     size_t error_capacity;
     unsigned depth, root_checked, rows, doctype;
+#ifdef P4_TABLE_XML_CHECK
+    P4GameTableXmlVisit visit;
+    void *visit_user;
+#endif
 } Parser;
 static int fail(Parser *parser, const char *reason)
 {
@@ -26,6 +33,23 @@ static int fail(Parser *parser, const char *reason)
         snprintf(parser->error, parser->error_capacity, "%s (line%lu)", reason, (unsigned long)parser->xml.line);
     return P4_TABLE_INVALID;
 }
+/* P4_TABLE_XML_CHECK: p4mod check's build of this file. Each record gets the
+ * same lexical, root, field and attribute checks, then DECODED stops before
+ * registration: no builder, ID claims, family sealing or source binding. */
+#ifdef P4_TABLE_XML_CHECK
+static int decoded(Parser *parser)
+{
+    const Node *node = &parser->node;
+    const char *names[ATTRIBUTE_LIMIT];
+    for (size_t i = 0; i < node->count; ++i) names[i] = node->attributes[i].name;
+    if (parser->visit) parser->visit(parser->visit_user, node->name, names, node->count, (unsigned long)parser->xml.line);
+    ++parser->rows;
+    return P4_TABLE_OK;
+}
+#define DECODED(parser) return decoded(parser)
+#else
+#define DECODED(parser) ((void)0)
+#endif
 static char *take(Node *node, const char *name)
 {
     for (size_t i = 0; i < node->count; ++i)
@@ -66,15 +90,21 @@ static int all_used(const Node *node)
     for (size_t i = 0; i < node->count; ++i) if (!node->attributes[i].used) return 0;
     return 1;
 }
-static int reference(Node *node, P4ResourceRef *reference)
+/* An optional all-or-none <prefix>owner/key/revision resource reference. */
+static int named_reference(Node *node, const char *prefix, P4ResourceRef *reference)
 {
-    const char *owner = take(node, "icon-owner"), *key = take(node, "icon-key"), *revision = take(node, "icon-revision");
+    char names[3][32];
+    snprintf(names[0], sizeof names[0], "%sowner", prefix);
+    snprintf(names[1], sizeof names[1], "%skey", prefix);
+    snprintf(names[2], sizeof names[2], "%srevision", prefix);
+    const char *owner = take(node, names[0]), *key = take(node, names[1]), *revision = take(node, names[2]);
     if (!owner && !key && !revision) return 1;
     if (!owner || !*owner || !key || !*key || !number(revision, &reference->revision) || !reference->revision ||
         strlen(owner) >= sizeof reference->owner || strlen(key) >= sizeof reference->key) return 0;
     strcpy(reference->owner, owner); strcpy(reference->key, key);
     return 1;
 }
+static int reference(Node *node, P4ResourceRef *reference) { return named_reference(node, "icon-", reference); }
 static int hex_digit(unsigned char c)
 {
     return c >= '0' && c <= '9' ? c - '0' :
@@ -119,12 +149,71 @@ static int action_reference(Node *node, P4GameItemActionRef *reference)
     strcpy(reference->owner, owner); strcpy(reference->key, key);
     return 1;
 }
+/* Comma-separated numbers; a decimal or hex magnitude may carry a '-'. */
+static int number_list(const char *text, int64_t *out, size_t count)
+{
+    for (size_t i = 0; i < count; ++i) {
+        const char *end = text ? strchr(text, ',') : NULL;
+        char item[24];
+        const size_t length = !text ? 0 : end ? (size_t)(end - text) : strlen(text);
+        if (!length || length >= sizeof item || (i + 1 < count) != (end != NULL)) return 0;
+        memcpy(item, text, length); item[length] = 0;
+        const int negative = item[0] == '-';
+        uint32_t magnitude;
+        if (!number(item + negative, &magnitude)) return 0;
+        out[i] = negative ? -(int64_t)magnitude : (int64_t)magnitude;
+        text = end ? end + 1 : NULL;
+    }
+    return 1;
+}
+/* A derived item's optional overrides, each one P4ItemRow field. */
+static int derive_overrides(Node *node, P4GameItemDerive *derive)
+{
+    static const struct { const char *name; uint32_t bit; size_t count; int64_t min, max; } fields[] = {
+        {"primary-value", P4_ITEM_DERIVE_PRIMARY, 1, 0, UINT16_MAX},
+        {"secondary-value", P4_ITEM_DERIVE_SECONDARY, 1, 0, UINT16_MAX},
+        {"property", P4_ITEM_DERIVE_PROPERTY, 1, 0, UINT8_MAX},
+        {"stat-bonus", P4_ITEM_DERIVE_STATS, 5, INT16_MIN, INT16_MAX},
+        {"granted-skill", P4_ITEM_DERIVE_GRANTED, 1, 0, UINT32_MAX},
+        {"value", P4_ITEM_DERIVE_VALUE, 1, 0, UINT16_MAX},
+        {"accessory-percent", P4_ITEM_DERIVE_ACCESSORY, 1, 0, UINT16_MAX},
+        {"element", P4_ITEM_DERIVE_ELEMENT, 1, 0, UINT16_MAX},
+        {"category-mask", P4_ITEM_DERIVE_CATEGORY, 1, 0, UINT32_MAX},
+        {"price", P4_ITEM_DERIVE_PRICE, 1, 0, UINT32_MAX},
+        {"available", P4_ITEM_DERIVE_AVAILABLE, 2, INT8_MIN, INT8_MAX},
+        {"moon-gates", P4_ITEM_DERIVE_MOON, 2, 0, UINT32_MAX},
+    };
+    P4ItemRow *o = &derive->overrides;
+    for (size_t i = 0; i < sizeof fields / sizeof fields[0]; ++i) {
+        const char *text = take(node, fields[i].name);
+        int64_t v[5];
+        if (!text) continue;
+        if (!number_list(text, v, fields[i].count)) return 0;
+        for (size_t j = 0; j < fields[i].count; ++j) if (v[j] < fields[i].min || v[j] > fields[i].max) return 0;
+        derive->mask |= fields[i].bit;
+        switch (fields[i].bit) {
+        case P4_ITEM_DERIVE_PRIMARY: o->primary_value = (uint16_t)v[0]; break;
+        case P4_ITEM_DERIVE_SECONDARY: o->secondary_value = (uint16_t)v[0]; break;
+        case P4_ITEM_DERIVE_PROPERTY: o->property = (uint8_t)v[0]; break;
+        case P4_ITEM_DERIVE_STATS: for (size_t j = 0; j < 5; ++j) o->stat_bonus[j] = (int16_t)v[j]; break;
+        case P4_ITEM_DERIVE_GRANTED: o->granted_skill = (uint32_t)v[0]; break;
+        case P4_ITEM_DERIVE_VALUE: o->value = (uint16_t)v[0]; break;
+        case P4_ITEM_DERIVE_ACCESSORY: o->accessory_percent = (uint16_t)v[0]; break;
+        case P4_ITEM_DERIVE_ELEMENT: o->element = (uint16_t)v[0]; break;
+        case P4_ITEM_DERIVE_CATEGORY: o->category_mask = (uint32_t)v[0]; break;
+        case P4_ITEM_DERIVE_PRICE: o->price = (uint32_t)v[0]; break;
+        case P4_ITEM_DERIVE_AVAILABLE: o->available_month = (int8_t)v[0]; o->available_day = (int8_t)v[1]; break;
+        default: o->first_moon_gate = (uint32_t)v[0]; o->second_moon_gate = (uint32_t)v[1]; break;
+        }
+    }
+    return 1;
+}
 static int record(Parser *parser)
 {
     const P4GameTableXmlTarget *target = parser->target;
     Node *node = &parser->node;
     P4TableSourceEntry entry = {.schema = 1, .revision = target->source_revision};
-    const void *binding_view = target->builder->tables;
+    const void *binding_view = target->builder ? target->builder->tables : NULL;
     int result;
     if (!strcmp(node->name, "element")) {
         P4ElementDesc value = {.revision = target->source_revision};
@@ -132,9 +221,11 @@ static int record(Parser *parser)
             !field(node, "family", &value.family) || !field(node, "order", &value.order) ||
             !text(node, "key", value.key, sizeof value.key) ||
             !text(node, "display-name", value.display_name, sizeof value.display_name) ||
-            !text(node, "short-name", value.short_name, sizeof value.short_name) || !reference(node, &value.icon))
+            !text(node, "short-name", value.short_name, sizeof value.short_name) || !reference(node, &value.icon) ||
+            !named_reference(node, "header-icon-", &value.header_icon))
             return fail(parser, "Invalid element fields");
         if (!all_used(node)) return fail(parser, "Unknown element attribute");
+        DECODED(parser);
         result = p4_game_tables_element(target->builder->tables, target->owner, &value);
         entry.domain = P4_TABLE_SOURCE_ELEMENT; entry.ids[0] = value.id; strcpy(entry.key, value.key);
     } else if (!strcmp(node->name, "channel")) {
@@ -143,6 +234,7 @@ static int record(Parser *parser)
             !text(node, "key", value.key, sizeof value.key) || !text(node, "display-name", value.display_name, sizeof value.display_name))
             return fail(parser, "Invalid channel fields");
         if (!all_used(node)) return fail(parser, "Unknown channel attribute");
+        DECODED(parser);
         result = p4_game_tables_channel(target->builder->tables, target->owner, &value);
         entry.domain = P4_TABLE_SOURCE_CHANNEL; entry.ids[0] = value.id; strcpy(entry.key, value.key);
     } else if (!strcmp(node->name, "affinity")) {
@@ -161,6 +253,7 @@ static int record(Parser *parser)
                 !field(node, "value", &value.value) || !field(node, "scalar", &value.scalar)))
             return fail(parser, "Invalid affinity fields (value+scalar or retail-row+retail-element)");
         if (!all_used(node)) return fail(parser, "Unknown affinity attribute");
+        DECODED(parser);
         if (retail) {
             result = p4_game_tables_builder_request_input(target->builder, P4_TABLE_INPUT_UNIT);
             if (!result) result = p4_game_tables_affinity_retail(target->builder->tables, target->owner, &value, row_index, column);
@@ -175,6 +268,7 @@ static int record(Parser *parser)
             !field(node, "channel", &value.channel_id) || !text(node, "key", value.key, sizeof value.key))
             return fail(parser, "Invalid action fields");
         if (!all_used(node)) return fail(parser, "Unknown action attribute");
+        DECODED(parser);
         result = p4_game_tables_action_element(target->builder->tables, target->owner, &value);
         entry.domain = P4_TABLE_SOURCE_ACTION; entry.ids[0] = value.source_kind; entry.ids[1] = value.source_id;
         entry.ids[2] = value.component; strcpy(entry.key, value.key);
@@ -185,6 +279,7 @@ static int record(Parser *parser)
             !field(node, "knowledge", &value.knowledge_id) || !text(node, "key", value.key, sizeof value.key))
             return fail(parser, "Invalid alias fields");
         if (!all_used(node)) return fail(parser, "Unknown alias attribute");
+        DECODED(parser);
         result = p4_game_tables_affinity_alias(target->builder->tables, target->owner, &value);
         entry.domain = P4_TABLE_SOURCE_ALIAS; entry.ids[0] = value.entity_kind; entry.ids[1] = value.entity_id;
         entry.ids[2] = value.native_profile; strcpy(entry.key, value.key);
@@ -195,21 +290,74 @@ static int record(Parser *parser)
             !field(node, "flags", &value.flags) || !text(node, "key", value.key, sizeof value.key))
             return fail(parser, "Invalid effect fields");
         if (!all_used(node)) return fail(parser, "Unknown effect attribute");
+        DECODED(parser);
         result = p4_game_tables_affinity_effect(target->builder->tables, target->owner, &value);
         entry.domain = P4_TABLE_SOURCE_EFFECT; entry.ids[0] = value.source_kind; entry.ids[1] = value.source_id;
         entry.ids[2] = value.element_id; entry.ids[3] = value.channel_id; strcpy(entry.key, value.key);
+    } else if (!strcmp(node->name, "damage-cover")) {
+        P4DamageCoverBinding value = {.schema = 1, .revision = target->source_revision};
+        if (!field(node, "source-kind", &value.source_kind) || !field(node, "source-id", &value.source_id) ||
+            !field(node, "element", &value.element_id) || !field(node, "channel", &value.channel_id) ||
+            !field(node, "percent", &value.percent) || !text(node, "family", value.family, sizeof value.family) ||
+            !text(node, "key", value.key, sizeof value.key))
+            return fail(parser, "Invalid damage-cover fields");
+        if (!all_used(node)) return fail(parser, "Unknown damage-cover attribute");
+        DECODED(parser);
+        result = p4_game_tables_damage_cover(target->builder->tables, target->owner, &value);
+        entry.domain = P4_TABLE_SOURCE_COVER; entry.ids[0] = value.source_kind; entry.ids[1] = value.source_id;
+        entry.ids[2] = value.element_id; entry.ids[3] = value.channel_id; strcpy(entry.key, value.key);
+    } else if (!strcmp(node->name, "status-ailment")) {
+        /* default-from and crit-bonus are optional: no default, no bonus. */
+        P4SideAilmentDef value = {.default_from = P4_SIDE_DEFAULT_NONE, .schema = 1, .revision = target->source_revision};
+        const char *from = take(node, "default-from"), *bonus = take(node, "crit-bonus");
+        if (!field(node, "element", &value.leaf) || !field(node, "flags", &value.flags) ||
+            !field(node, "cure-mask", &value.cure_mask) || (from && !number(from, &value.default_from)) ||
+            (bonus && !number(bonus, &value.crit_bonus)) || !text(node, "key", value.key, sizeof value.key))
+            return fail(parser, "Invalid status-ailment fields");
+        if (!all_used(node)) return fail(parser, "Unknown status-ailment attribute");
+        DECODED(parser);
+        result = p4_game_tables_side_ailment(target->builder->tables, target->owner, &value);
+        entry.domain = P4_TABLE_SOURCE_SIDE_AILMENT; entry.ids[0] = value.leaf; strcpy(entry.key, value.key);
     } else if (!strcmp(node->name, "skill")) {
         P4GameSkillDesc value = {.schema = 1, .revision = target->source_revision};
         uint32_t auxiliary, group;
+        const char *derive = take(node, "derive");
         if (!field(node, "id", &value.id) || !field(node, "active", &value.active) ||
             !field(node, "element", &value.element_id) || !field(node, "element-aux", &auxiliary) || auxiliary > UINT8_MAX ||
             !field(node, "inheritance-group", &group) || group > UINT8_MAX ||
             !signed_byte(node, "inheritance-rate", &value.inheritance_rate) ||
-            !text(node, "key", value.key, sizeof value.key) ||
-            !hex_bytes(take(node, "metadata"), value.metadata, sizeof value.metadata) ||
+            !text(node, "key", value.key, sizeof value.key))
+            return fail(parser, "Invalid skill fields");
+        if (derive) {
+            /* A derived row copies a retail anchor's metadata and presentation at
+             * seal and names only the fields it overrides. */
+            static const struct { const char *name; uint32_t field; size_t offset; } overrides[] = {
+                {"power", P4_SKILL_DERIVE_POWER, offsetof(P4GameSkillDesc, derive_power)},
+                {"cost", P4_SKILL_DERIVE_COST, offsetof(P4GameSkillDesc, derive_cost)},
+                {"accuracy", P4_SKILL_DERIVE_ACCURACY, offsetof(P4GameSkillDesc, derive_accuracy)},
+                {"critical", P4_SKILL_DERIVE_CRITICAL, offsetof(P4GameSkillDesc, derive_critical)},
+            };
+            if (!number(derive, &value.derive) || !value.derive || take(node, "metadata") || take(node, "presentation"))
+                return fail(parser, "A derived skill names a retail anchor and no metadata or presentation");
+            for (size_t i = 0; i < sizeof overrides / sizeof overrides[0]; ++i) {
+                const char *text_value = take(node, overrides[i].name);
+                if (!text_value) continue;
+                if (!number(text_value, (uint32_t *)(void *)((char *)&value + overrides[i].offset)))
+                    return fail(parser, "Invalid derived skill override");
+                value.derive_fields |= overrides[i].field;
+            }
+        } else if (!hex_bytes(take(node, "metadata"), value.metadata, sizeof value.metadata) ||
             !hex_bytes(take(node, "presentation"), value.presentation, sizeof value.presentation))
-            return fail(parser, "Invalid skill fields or exact40/4-byte little-endian rows");
+            return fail(parser, "Invalid skill exact40/4-byte little-endian rows");
+        const char *effect = take(node, "effect-source");
+        if (effect && (!number(effect, &value.effect_source) || !value.effect_source))
+            return fail(parser, "Invalid skill effect-source");
+        const char *delivery = take(node, "delivery");
+        if (delivery && !strcmp(delivery, "physical")) value.delivery = P4_DELIVERY_PHYSICAL;
+        else if (delivery && !strcmp(delivery, "magic")) value.delivery = P4_DELIVERY_MAGIC;
+        else if (delivery) return fail(parser, "Invalid skill delivery (physical or magic)");
         if (!all_used(node)) return fail(parser, "Unknown skill attribute");
+        DECODED(parser);
         value.element_aux = (uint8_t)auxiliary; value.inheritance_group = (uint8_t)group;
         P4GameSkills *skills = p4_game_tables_builder_skills(target->builder);
         if (!skills) return fail(parser, "Skill family is unavailable or already sealed");
@@ -219,26 +367,36 @@ static int record(Parser *parser)
     } else if (!strcmp(node->name, "item")) {
         char key[P4_TABLE_KEY_SIZE];
         P4GameItemDesc value = {.revision = target->source_revision, .key = key};
+        P4GameItemDerive derive = {0};
         uint32_t required[2] = {0}, quantities[2] = {0}, right = P4_ITEM_MODEL_NONE, left = P4_ITEM_MODEL_NONE;
         unsigned gates[2];
         const char *right_text = take(node, "right-model"), *left_text = take(node, "left-model");
+        const char *metadata = take(node, "metadata"), *anchor = take(node, "derive");
+        const char *icon_source = take(node, "icon-source");
+        if (icon_source) {
+            if (!anchor || strcmp(icon_source, "anchor"))
+                return fail(parser, "Item icon-source must be anchor on a derived item");
+            derive.icon_from_anchor = 1;
+        }
         if (!field(node, "id", &value.id) || !text(node, "key", key, sizeof key) ||
-            !hex_bytes(take(node, "metadata"), &value.metadata, sizeof value.metadata) || !reference(node, &value.icon) ||
+            (anchor ? metadata || !number(anchor, &derive.anchor) || !derive_overrides(node, &derive) :
+                !hex_bytes(metadata, &value.metadata, sizeof value.metadata)) || !reference(node, &value.icon) ||
             !optional_pair(node, "require0-id", "require0-quantity", required, quantities, gates) ||
             !optional_pair(node, "require1-id", "require1-quantity", required + 1, quantities + 1, gates + 1) ||
             (right_text && !number(right_text, &right)) || (left_text && (!right_text || !number(left_text, &left))))
-            return fail(parser, "Invalid item fields, dependencies or exact68-byte little-endian row");
+            return fail(parser, "Invalid item fields, dependencies, derived overrides or exact68-byte little-endian row");
         if (!all_used(node)) return fail(parser, "Unknown item attribute");
+        DECODED(parser);
         P4GameItems *items = p4_game_tables_builder_items(target->builder);
         if (!items) return fail(parser, "Item family is unavailable or already sealed");
-        result = p4_game_tables_items_register(items, target->owner, &value);
+        result = anchor ? p4_game_tables_items_register_derived(items, target->owner, &value, &derive) :
+            p4_game_tables_items_register(items, target->owner, &value);
         for (uint32_t gate = 0; !result && gate < 2; ++gate)
             if (gates[gate]) result = p4_game_tables_items_requirement_register(items, target->owner,
                 value.id, gate, required[gate], quantities[gate]);
-        if (!result && right_text) {
-            result = p4_game_tables_items_models_register(items, target->owner, value.id, right, left);
-            if (!result) result = p4_game_tables_builder_request_input(target->builder, P4_TABLE_INPUT_MODEL);
-        }
+        if (!result && right_text) result = p4_game_tables_items_models_register(items, target->owner, value.id, right, left);
+        /* A derived weapon binds its anchor's models unless it names its own. */
+        if (!result && (right_text || anchor)) result = p4_game_tables_builder_request_input(target->builder, P4_TABLE_INPUT_MODEL);
         binding_view = items; entry.domain = P4_TABLE_SOURCE_ITEM;
         entry.ids[0] = value.id; strcpy(entry.key, key);
     } else if (!strcmp(node->name, "category")) {
@@ -249,6 +407,7 @@ static int record(Parser *parser)
             !text(node, "key", key, sizeof key) || !reference(node, &value.icon) || !action_reference(node, &value.action))
             return fail(parser, "Invalid category fields or script-action reference");
         if (!all_used(node)) return fail(parser, "Unknown category attribute");
+        DECODED(parser);
         P4GameItems *items = p4_game_tables_builder_items(target->builder);
         if (!items) return fail(parser, "Category family is unavailable or already sealed");
         result = p4_game_tables_items_category_register(items, target->owner, &value);
@@ -264,6 +423,7 @@ static int record(Parser *parser)
             !hex_bytes(take(node, "ai"), value.ai, sizeof value.ai))
             return fail(parser, "Invalid enemy fields or exact60/32/232/164-byte little-endian rows");
         if (!all_used(node)) return fail(parser, "Unknown enemy attribute");
+        DECODED(parser);
         P4GameEnemies *enemies = p4_game_tables_builder_enemies(target->builder);
         if (!enemies) return fail(parser, "Enemy family is unavailable or already sealed");
         result = p4_game_enemies_register(enemies, target->owner, &value);
@@ -280,6 +440,7 @@ static int record(Parser *parser)
             !hex_bytes(take(node, "affinity"), value.affinity, sizeof value.affinity))
             return fail(parser, "Invalid persona fields or exact14/70/88/4/32-byte little-endian rows");
         if (!all_used(node)) return fail(parser, "Unknown persona attribute");
+        DECODED(parser);
         P4GamePersonas *personas = p4_game_tables_builder_personas(target->builder);
         if (!personas) return fail(parser, "Persona family is unavailable or already sealed");
         result = p4_game_personas_register(personas, target->owner, &value);
@@ -295,6 +456,7 @@ static int record(Parser *parser)
          * later attribute offsets stay unchanged. Registration copies once. */
         if (!hex_bytes(encoded, encoded, size) || !all_used(node))
             return fail(parser, "Invalid encoded string hex or unknown attribute");
+        DECODED(parser);
         P4GameText *strings = p4_game_tables_builder_text(target->builder, role);
         if (!strings) return fail(parser, "String role is invalid or already sealed");
         result = p4_game_tables_text_register(strings, target->owner, table, id, role,
@@ -329,10 +491,17 @@ static int initialize(Parser *parser, const P4GameTableXmlTarget *target,
     uint64_t size, char *error, size_t error_capacity)
 {
     if (error && error_capacity) *error = 0;
+#ifdef P4_TABLE_XML_CHECK
+    /* No builder: records are decoded and checked, never registered. */
+    if (!target || !target->owner || !*target->owner || !target->source_revision || !size ||
+        size > P4_GAME_TABLE_SOURCE_XML_MAX)
+        return P4_TABLE_INVALID;
+#else
     if (!target || !target->builder || !target->builder->tables || !target->builder->sources ||
         target->builder->sealing || target->builder->sealed || !target->owner || !*target->owner ||
         !target->source_revision || !target->builder->registry_revision || !size || size > P4_GAME_TABLE_SOURCE_XML_MAX)
         return P4_TABLE_INVALID;
+#endif
     parser->target = target; parser->error = error; parser->error_capacity = error_capacity;
     parser->depth = parser->root_checked = parser->rows = parser->doctype = 0;
     yxml_init(&parser->xml, parser->xml_stack, sizeof parser->xml_stack);
@@ -395,6 +564,23 @@ int p4_game_tables_source_xml(const P4GameTableXmlTarget *target,
     if (!result) result = feed(&parser, bytes, size);
     return result ? result : finish(&parser);
 }
+#ifdef P4_TABLE_XML_CHECK
+int p4_game_tables_source_xml_check(const char *owner, uint32_t revision, const uint8_t *bytes, size_t size,
+    P4GameTableXmlVisit visit, void *user, char *error, size_t error_capacity)
+{
+    const P4GameTableXmlTarget target = {NULL, owner, 0, revision, NULL};
+    Parser parser;
+    if (!bytes || initialize(&parser, &target, size, error, error_capacity)) {
+        if (error && error_capacity)
+            snprintf(error, error_capacity, "Empty table source, over %u bytes, or no owner/revision",
+                (unsigned)P4_GAME_TABLE_SOURCE_XML_MAX);
+        return P4_TABLE_INVALID;
+    }
+    parser.visit = visit; parser.visit_user = user;
+    int result = feed(&parser, bytes, size);
+    return result ? result : finish(&parser);
+}
+#else
 int p4_game_tables_source_xml_file(const P4GameTableXmlTarget *target,
     P4PackageFile *file, char *error, size_t error_capacity)
 {
@@ -414,3 +600,4 @@ int p4_game_tables_source_xml_file(const P4GameTableXmlTarget *target,
     }
     return finish(&parser);
 }
+#endif

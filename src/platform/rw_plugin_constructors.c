@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: LicenseRef-reconstructed */
 /* Retail 003c95a0 (0x003c95a0..0x003c9638): constructor for RW plugin 0x507, registered in
  * code1_003c.c as func_003e8930(0xC, 0x507, func_003c95a0, func_003c9530). Called by
  * _rwPluginRegistryInitObject as constructCB(object, offset).

@@ -1,0 +1,30 @@
+# From story0418tv: enter Yukiko's Castle 1F the way save0418tv_to_castle_3f.walk does, then
+# run to the upstairs (walk:goal) with battles skipped; the QoL DUNGEON DASH witness compares the
+# frames that run takes with the feature on and off.
+timeout:6000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+# The dungeon navigator is the NPC at (93,580), not the central Quit-exploring CHECK.
+walk:93,470,50
+push:93,580,8
+wait:20
+press:cross
+choose:1
+skipmsg
+walk:0,200,40
+press:cross
+timeout:12000
+skipfield:40:0
+skipmsg
+battle:first=cross,cross,cross;plan=cross,cross,cross;skip=0;delay=20
+battleskip:on
+plan:on
+wait:120
+log
+walk:goal
+log

@@ -13,6 +13,7 @@
 #include "p4pc/guest.h"
 #include "p4pc/capture_state.h"
 #include "p4pc/lockstep.h"
+#include "p4pc/pace.h"
 #include "p4pc/settings.h"
 #include "p4pc/settings_native.h"
 #include "p4pc/ps2_libc.h"
@@ -25,10 +26,16 @@
 #include "../viewer/p4png.h"
 
 static P4GlContext sContext;
+/* Set once the battle simulator's no-device backend has replaced the GL entry points (p4gl_context_open). */
+static int sNoDevice;
 
 int p4gl_context_is_current(void)
 {
     return sContext && p4gl_win_current_context() == sContext;
+}
+int p4gl_device_ready(void)
+{
+    return sNoDevice || p4gl_context_is_current();
 }
 /* P4PC_OFFSCREEN=1: draw into an offscreen framebuffer object instead of the window and never swap. SwapBuffers on a window costs about
  * half a frame on a real GPU (0.6 of 1.3 ms measured on an RTX 4080, Windows) and an unattended run (a gate runner sets this)
@@ -235,6 +242,7 @@ int p4gl_context_open(void)
         }
         updateAspect(NULL);
         if (p4_battle_sim_graphics_open() != 0) return -1;
+        sNoDevice = 1;
         p4pc_fpu_check("the no-device backend's startup");
         p4gl_frame_rasters_open();
         return 0;
@@ -304,8 +312,25 @@ int p4gl_context_open(void)
     return 0;
 }
 
+/* The game's start-up does not stop when the device fails to open: it went on and jumped to address 0 (an access violation, e.g. on
+ * Windows with SDL's offscreen driver, which has no GL). Nothing can be drawn without a context, so the run ends here, after the p4gl
+ * line that names the reason. */
+void p4gl_context_open_device(void)
+{
+    if (p4gl_context_open() == 0) {
+        return;
+    }
+    fprintf(stderr, "p4pc: no OpenGL context, the game cannot start\n");
+    if (p4cfg_player_run()) {
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Persona 4",
+                                 "Persona 4 could not create an OpenGL context. Update the graphics driver; the log names the reason.", NULL);
+    }
+    exit(1);
+}
+
 void p4gl_context_close(void)
 {
+    sNoDevice = 0;
     if (sContext != NULL) {
         p4gl_profile_close();
         p4gl_win_destroy_context(sContext);
@@ -719,6 +744,22 @@ static int turboNeedsDraw(unsigned frame)
     return 0;
 }
 
+/* Practice speed above 1x (include/p4pc/pace.h): only every (rate)th frame is drawn and presented,
+ * so the display keeps its own rate while the game updates faster; harness shot windows still draw.
+ * At 1x and below every frame draws. */
+static int paceNeedsDraw(unsigned frame)
+{
+    const unsigned quarters = p4pc_pace_effective();
+
+    if (quarters <= 4u) {
+        return 1;
+    }
+    if (frame + 1u >= sDrawFrom && frame + 1u < sDrawUntil) {
+        return 1;
+    }
+    return (frame + 1u) % (quarters / 4u) == 0;
+}
+
 /* Where the picture goes in a ww x wh window: stretch fills it; 4:3 is the largest 4:3 rectangle in it, centred; integer is the largest whole multiple of 640x480 that
  * fits (4:3 where the window is smaller than one). The PS2's 640x448 frame is shown 4:3. */
 static void fitRect(int ww, int wh, int fit, GLint *dx, GLint *dy, GLint *dw, GLint *dh)
@@ -760,7 +801,7 @@ static void fitRect(int ww, int wh, int fit, GLint *dx, GLint *dy, GLint *dw, GL
     }
 }
 
-/* The native Config and touch corner live in the centered 640x448 UI layout.
+/* The native Config lives in the centered 640x448 UI layout.
  * Invert the actual presenter rectangle and active (not pending) aspect. */
 int p4gl_context_menu_bounds(float rect[4])
 {
@@ -977,7 +1018,7 @@ void p4gl_context_present(void)
         }
         swapNs += p4_os_now_ns() - t1;
         p4_settings_native_frame_end();
-        p4gl_gl_set_draw(turboNeedsDraw(frame));
+        p4gl_gl_set_draw(turboNeedsDraw(frame) && paceNeedsDraw(frame));
         p4pc_fpu_check("the swap");
         presentNs += p4_os_now_ns() - t0;
         if (frame % 1000u == 0) {

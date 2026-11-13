@@ -16,8 +16,8 @@ libswscale.*.dylib)
   ffmpeg-@FFMPEG_VER@.tar.xz (https://ffmpeg.org/releases/ffmpeg-@FFMPEG_VER@.tar.xz, sha256
   @FFMPEG_SHA@) with --disable-gpl --disable-nonfree and only these components
   enabled: libavcodec (MPEG-2 video decoder and parser, ADX audio decoder) and
-  libswscale. The configure options and build recipe are in the port's source
-  (ci/macos/build_deps.sh). The libraries are separate dylibs: you may replace them
+  libswscale. Complete sources and the build recipe are in source/
+  (ffmpeg-@FFMPEG_VER@.tar.xz and build_deps.sh). The libraries are separate dylibs: you may replace them
   with your own build of FFmpeg @FFMPEG_VER@ of the same ABI (install name
   @rpath/<library>), which is what the LGPL asks of a program that uses them. The
   program, Contents/MacOS/p4pc, contains no FFmpeg code.
@@ -37,6 +37,8 @@ ANGLE (Contents/Frameworks/libEGL.dylib, libGLESv2.dylib)
 
 LodePNG 20261006: zlib license (licenses/LodePNG-zlib.txt).
 
+cgltf 1.15 (Johannes Kuhlmann): MIT license (licenses/cgltf-MIT.txt).
+
 Luau 0.744 (when enabled)
   MIT, including inherited Lua notices: licenses/Luau-MIT.txt and
   licenses/Lua-MIT.txt. The exact vendored source and local patches are in
@@ -46,10 +48,12 @@ The C and C++ runtime are macOS's own (libSystem, libc++); nothing of them is
 shipped. The compiler and SDK versions are recorded in source/runtime-provenance.txt.
 
 dlmalloc (Doug Lea): public domain.
+Okumura LZARI and Ross Ridge mymc, adapted in the MAX save importer: public domain.
 
 miniz 3.0.2 (licenses/miniz-MIT.txt) and yxml (licenses/yxml-MIT.txt): MIT.
 
 fdlibm (Sun Microsystems), in the translated libm cores: licenses/fdlibm-Sun.txt.
+newlib stdio/stdlib (UC Berkeley, AT&T), adapted in the translated EE stdio cores: BSD, licenses/newlib-BSD.txt.
 
 CRI middleware headers from recvx-decomp (AshfordFamily): MIT, licenses/recvx-decomp-MIT.txt.
 

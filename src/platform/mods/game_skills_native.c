@@ -80,6 +80,19 @@ uint16_t p4_game_skill_endurance_sentinel(void)
 {
     return active ? (uint16_t)(P4_SKILL_MAX_ID + 1u) : P4_SKILL_RETAIL_COUNT;
 }
+uint32_t p4_game_skill_effect(uint32_t id)
+{
+    if (id < P4_SKILL_RETAIL_COUNT) return id;
+    const P4GameSkillView *row = p4_game_skills_find(active, id);
+    if (!row) return id; /* Not an added skill: the original file name. */
+    use_owned(id);
+    if (!row->desc.effect_source) {
+        char reason[160];
+        snprintf(reason, sizeof reason, "Added skill %u (%s) was cast but declares no effect-source", (unsigned)id, row->desc.key);
+        p4_package_boot_runtime_failed(reason);
+    }
+    return row->desc.effect_source;
+}
 int p4_game_skills_expanded(void) { return active != NULL; }
 int32_t p4_game_skill_inheritance_rate(uint32_t id)
 {

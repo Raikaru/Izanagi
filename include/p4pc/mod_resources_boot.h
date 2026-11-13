@@ -18,6 +18,11 @@ int p4_resources_images_prepared_find(const P4ResourceImagesPrepared *prepared,
                                       uint32_t revision);
 size_t p4_resources_images_prepared_count(const P4ResourceImagesPrepared *prepared);
 
+/* The frozen runtime generation published by runtime_prepare, or NULL before
+ * it, when no image is declared, or after session end. Borrowed, game thread;
+ * UI products look references up here and pin the tokens they keep. */
+const P4Resources *p4_resources_images_runtime(void);
+
 /* Game/context thread only, after the core has independently drained tasks,
  * queues and native consumers and UI has released every resource pin. Refuses
  * while pins still exist. Never call this as startup rollback after exposure. */

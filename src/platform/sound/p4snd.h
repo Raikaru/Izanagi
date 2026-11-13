@@ -59,6 +59,25 @@ void p4snd_set_master(float gain);
 void p4snd_set_user_volume(float gain);
 
 
+/* Volume categories. A voice belongs to one: sample voices start as effects and stream
+ * voices as music; producers that know better (movie audio, a mod tagging a voice stream)
+ * set it. Each category's gain, 0..1 (default exactly 1), scales its voices inside
+ * p4snd_render, dry and reverb sends alike, under the player's volume on the device stream;
+ * at 1 every sample mixes exactly as before. Gains are process state (p4.audio composes the
+ * mods' requests into them). */
+typedef enum P4SndCategory {
+    P4SND_CAT_MUSIC = 0, P4SND_CAT_EFFECTS, P4SND_CAT_VOICE, P4SND_CAT_MOVIE, P4SND_CAT_COUNT
+} P4SndCategory;
+void p4snd_voice_set_category(P4SndVoice *v, int category);
+/* 0 on success; -1 for an unknown category or a gain outside 0..1 (nothing changes). */
+int p4snd_set_category_gain(int category, float gain);
+/* The category's gain, or -1 for an unknown category. */
+float p4snd_category_gain(int category);
+/* Tag the stream voice an ADXT handle (guest address) plays through: 0, or -1 when the word
+ * at handle +0x0c does not name a live AXRNA renderer (src/platform/sound/axrna.c). The
+ * caller guarantees that word is readable guest memory. */
+int p4snd_adxt_set_category(uint32_t adxt, int category);
+
 /* Registers a function called with the elapsed seconds before every 5 ms chunk of p4snd_render,
  * on whichever thread renders, outside the mixer lock (so it may start and release voices).
  * The SE sequencer and the movie audio pump use it as their clock. Up to four, each added
@@ -71,6 +90,9 @@ void p4snd_add_tick_hook(void (*hook)(double seconds));
  * Explicit P4PC_LOCKSTEP_LIVE=1 also sends these samples to a playback-only device; its consumption never advances this clock.
  * Does nothing otherwise, or when no voice has opened the mixer yet. */
 void p4snd_virtual_tick(void);
+/* Paced practice play (kernel_thread.c p4pc_pace_request): on, the device plays silence and every VBLANK period renders its
+ * share through p4snd_virtual_tick, discarded; off, the device renders in real time again. No effect on a virtual-clock run. */
+void p4snd_set_frame_driven(int on);
 
 /* Frames rendered since the device was opened (for tests and clocks). */
 uint64_t p4snd_frames_rendered(void);

@@ -1,6 +1,15 @@
-/* 00238940: tagged status and KO affinity at the original query boundary. */
+/* 00238940: tagged status and KO affinity at the original query boundary.
+ * A rolled attempt's chance then passes through the status/KO chance stage,
+ * which never runs while no modifier is registered; it reports the target's
+ * afflictions this battle. */
 #include "p4pc/game_elements_native.h"
+#include "p4pc/game_knowledge_native.h"
 #include "p4pc/game_skills_native.h"
+#include "p4pc/game_afflictions_native.h"
+#include "p4pc/game_chance_stage_native.h"
+/* The chance stage reports a party source's active persona record. */
+extern u16 datPersonaGetRecordId(u16 partyId);
+extern u8 datPersonaGetLevelByPcId(u16 pcId);
 #pragma push
 /* measured: retail hoists loop invariants in this function. */
 #pragma opt_loop_invariants on
@@ -30,6 +39,8 @@ s32 options;
     s32 element;
     u8 active;
     s16 message;
+    P4GameActionFrame statusFrame;
+    u32 observed = 0; /* routed status payload aimed at an enemy */
     extern s32 datCalcIsGuarding(u16 *unitFlags);
     extern s32 datCalcStatusElement(s32 skillId, s32 statusMask);
 
@@ -113,10 +124,10 @@ return_zero_1:
             break;
         }
         if (p4_game_elements_native_enabled()) {
-            P4GameActionFrame statusFrame;
             const u32 component = statuses == 0x80000u ? P4_ACTION_COMPONENT_INSTANT_KO : P4_ACTION_COMPONENT_STATUS;
             p4_game_elements_native_action_frame(source, skillId, component, statuses, options, &statusFrame);
             resistance = p4_game_elements_native_affinity(target, &statusFrame);
+            observed = component == P4_ACTION_COMPONENT_STATUS && (((DatUnit *)target)->flags & 4) != 0;
         } else {
             resistance = datCalcGetAffinity((u8 *)target, (s16)datCalcStatusElement((s16)skillId, (s32)statuses));
         }
@@ -189,6 +200,15 @@ return_zero_1:
         chance = (f32)datScriptRunCalc(DAT_SCRIPT_CALC_RATIO_OF_PRODUCTS, (u16 *)(source), (u16 *)(target), skillId, (s32)statuses);
         chance = chance * multiplier;
         rate = (s32)chance;
+        if (p4_game_chance_native_active()) {
+            const u32 sourceEnemy = (source->flags & 4) != 0;
+            const u32 item = (options & 1) != 0;
+            rate = p4_game_chance_native_rate((u32)(u16)skillId, sourceEnemy, source->id,
+                (((DatUnit *)target)->flags & 4) != 0, ((DatUnit *)target)->id, statuses, item, rate,
+                sourceEnemy || item ? 0u : (u32)datPersonaGetRecordId(source->id),
+                sourceEnemy || item ? 0u : (u32)datPersonaGetLevelByPcId(source->id),
+                p4_game_afflictions_native_count(target));
+        }
         if (rate > 99) {
             rate = 99;
         } else if (rate < 0) {
@@ -215,6 +235,13 @@ return_zero_1:
         break;
     default:
         break;
+    }
+    /* An ailment that lands on an enemy is what Analyze's ailment row reveals
+     * (docs/modding/tables.md "Enemy knowledge"). Routed only: retail learns
+     * no status here. */
+    if (observed && statuses != 0) {
+        const int learned = p4_game_knowledge_native_observe(target, &statusFrame);
+        if (learned) p4_game_elements_native_calculation_refuse(learned);
     }
     return (s32)statuses;
 }

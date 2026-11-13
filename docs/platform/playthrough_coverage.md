@@ -35,12 +35,19 @@ school days, free nights, automatic days and 05/22's Sunday out until evening.
 
 ## Calendar from June 4
 
+Every day from June 4 to March 20 has a gate. A leg whose next collection card sits days
+away plays on to that card's date and saves there: the `*_aftermath_*` gates continue a boss
+victory through the rescue story, and `collection_june_0615`, `collection_evening_0726`,
+`collection_evening_0830` and `collection_evening_1222` extend a card's own leg. Each such day
+is one of four checked macros (school home by the map, evening sleep, the futon, or out until
+evening), chosen by the field, room and date index it waits for first.
+
 | Dates | Anchor | Gate | Kind | Covers |
 |---|---|---|---|---|
 | 06/04–06/05 | card2-slot09 descendant | `collection_sunday_0605` | save | Sunday, home save |
 | 06/05–06/06 | descendant | `collection_kanji_reunion_0606` | save | Kanji reunion |
 | 06/06–06/07 | descendant | `collection_school_0607` | save | school day |
-| 06/08–06/14 | none | — | — | no anchor |
+| 06/04–06/15 | card2-slot09 | `collection_june_0615` | save | 06/05 holiday, 06/06 reunion, 06/07 school, 06/08–06/14 school days and free nights, 06/15 evening home |
 | 06/15–06/20 | card2-slot10 | `collection_camping_0620` | save | 06/16, free night, 06/17–06/18 camping trip, 06/19, 06/20 school |
 | 06/19–06/21 | card2-slot11 | `collection_evening_0621` | save | out and home, 06/20 school, free night, 06/21 school, home |
 | 06/21–06/23 | card2-slot12 | `collection_evening_0623` | save | two automatic days to 06/23 evening |
@@ -55,7 +62,7 @@ school days, free nights, automatic days and 05/22's Sunday out until evening.
 | 07/08–07/09 | card3-slot01 | `collection_school_0709` | save | school |
 | 07/09–07/18 | card3-slot02 | `collection_evening_0718` | save | 07/10–07/17 school days and free nights, 07/18 home |
 | 07/18–07/24 | card3-slot03 | `collection_final_exams_0724` | save | exam week |
-| 07/25 | none | — | — | no anchor |
+| 07/18–07/26 | card3-slot03 | `collection_evening_0726` | save | exam week, 07/24 home, 07/25, 07/26 evening home |
 | 07/26–08/01 | card3-slot04 | `collection_evening_0801` | save | 07/27 Junes meeting, home, summer days to 08/01 evening |
 | 08/01–08/03 | card3-slot05 | `collection_evening_0803` | save | day out, 08/02, 08/03's automatic day, 08/03 evening home |
 | 08/03 | card3-slot06 | `collection_voidquest_entry_0803` (+ `_linux`) | walk, digest | Void Quest title, Chapter 1's floor, Chapter 2 arrival |
@@ -64,7 +71,7 @@ school days, free nights, automatic days and 05/22's Sunday out until evening.
 | 08/03–08/12 | card3-slot07 | `collection_mitsuo_aftermath_0812` | save | Shadow Mitsuo's defeat, the rescue story, summer days and free nights, 08/12 evening home |
 | 08/12–08/14 | card3-slot08 | `collection_summer_break_0814` | save | summer break |
 | 08/14–08/22 | card3-slot09 | `collection_summer_festival_0822` | save | summer job, festival |
-| 08/23–08/29 | none | — | — | no anchor |
+| 08/14–08/30 | card3-slot09 | `collection_evening_0830` | save | summer job, festival, 08/23–08/29 automatic days and days out until evening, 08/30 evening home |
 | 08/30–09/07 | card3-slot10 | `collection_evening_0907` | save | end of summer, 09/02–09/06 school, 09/07 home |
 | 09/07–09/11 | card3-slot11 | `collection_school_trip_0911` | save | school trip |
 | 09/11–09/15 | card3-slot12 | `collection_evening_0915` | save | day out, school 09/12–09/14, 09/15 evening home |
@@ -94,15 +101,18 @@ school days, free nights, automatic days and 05/22's Sunday out until evening.
 | 12/04–12/05 | card4-slot13 | `collection_culprit_1205` | save | 12/05 information search (every townsperson, both questions), Aiya, naming Adachi, questioning him, 12/05 home |
 | 12/05–12/06 | card4-slot14 | `collection_adachi_1206` | save | the search's last answer, Aiya, naming Adachi, 12/06 story, 12/06 home |
 | 12/06–12/07 | card4-slot15 | `collection_evening_1207` | save | 12/07 home |
-| 12/08–12/22 | none | — | — | no anchor |
+| 12/06–12/22 | card4-slot15 | `collection_evening_1222` | save | 12/07 home, 12/08–12/21 school days and free nights, 12/22 evening home |
 | 12/23 | card4-slot16 | `collection_adachi_opening_1223` | walk | Magatsu Inaba top: Adachi's first COMMAND |
 | 12/23 | card4-slot16 | `collection_adachi_victory_1223` | walk | Yu's Persona switch, Adachi defeated by battle rules, Ameno-sagiri's first COMMAND |
+| 12/23–12/24 | card4-slot16 | `collection_ameno_sagiri_victory_1223` | save | Adachi as above, Ameno-sagiri defeated by a searched battle tape, the story home, 12/24 evening home |
 | 12/24–03/20 | card5-slot01 | `collection_departure_calendar_0320` | walk | Christmas, calendar jump, farewell map |
 | 03/20 | card5-slot02 | `collection_normal_ending_0320` | save | home, departure, normal ending, credits, new-cycle save |
 | 03/20 | card5-slot02 | `collection_true_trigger_0320` | save | true-ending trigger: Junes refusal, food court, Dojima, Velvet Room, attendant, TV Entrance save |
 | 03/20 | card5-slot04 | `collection_attendant_0320` | save | the attendant and Izanami's reveal, TV Entrance save |
 | 03/20 | card5-slot05 | `collection_yomotsu_entrance_0320` | walk | Search for Izanami: Yomotsu Hirasaka exterior |
 | 03/20 | card5-slot06 | `collection_izanami_opening_0320` | walk | Path 9: Izanami's first COMMAND, one round of Attacks |
+| 03/20 | card5-slot06 | `collection_izanami_victory_0320` | walk | Izanami and Izanami-no-Okami with a searched battle tape to Thousand Curses, Yu's final battle (Myriad Truths), Yomotsu Hirasaka exterior |
+| 03/20 | card5-slot06 | `collection_true_ending_0320` | save | the same victory, the true ending's epilogue and credits, new-cycle save |
 | 03/20 | CBS18506 (NG+) | `collection_margaret_0320` | walk | Margaret victory |
 | 04/10–04/11 | card5-slot07 | `collection_new_cycle_0411` | save | true-ending clear data: new cycle to 04/11 home |
 
@@ -116,8 +126,8 @@ school days, free nights, automatic days and 05/22's Sunday out until evening.
 | Void Quest | `collection_voidquest_entry_0803` | Chapter 1, Chapter 2 arrival; later chapters uncovered | Shadow Mitsuo: `collection_mitsuo_victory_0803` |
 | Secret Laboratory | `collection_secretlab_entrance_0918` | exterior, B9F; B1F–B8F uncovered | Shadow Naoto: `collection_naoto_victory_0918` |
 | Heaven | `collection_heaven_entrance_1106` | gates, 10F; 1F–9F uncovered | Kunino-sagiri: `collection_kunino_sagiri_victory_1106` |
-| Magatsu Inaba | none | final field only | Adachi: `collection_adachi_victory_1223`; Ameno-sagiri: opening only |
-| Yomotsu Hirasaka | `collection_yomotsu_entrance_0320` | exterior, Path 9; Paths 1–8 uncovered | Izanami: opening and first round |
+| Magatsu Inaba | none | final field only | Adachi: `collection_adachi_victory_1223`; Ameno-sagiri: `collection_ameno_sagiri_victory_1223` |
+| Yomotsu Hirasaka | `collection_yomotsu_entrance_0320` | exterior, Path 9; Paths 1–8 uncovered | Izanami: `collection_izanami_victory_0320` |
 
 ## Bosses
 
@@ -133,33 +143,52 @@ school days, free nights, automatic days and 05/22's Sunday out until evening.
 | Shadow Naoto | 09/18 | card3-slot15 | `collection_naoto_victory_0918` | defeated by walker battle rules |
 | Kunino-sagiri | 11/06 | card4-slot09 | `collection_kunino_sagiri_victory_1106` | defeated by walker battle rules |
 | Adachi | 12/23 | card4-slot16 | `collection_adachi_victory_1223` | defeated by walker battle rules |
-| Ameno-sagiri | 12/23 | card4-slot16 | `collection_adachi_victory_1223` | opening (the same walk stops at its first COMMAND); victory handed to the battle-tape search |
-| Izanami | 03/20 | card5-slot06 | `collection_izanami_opening_0320` | opening and first round; victory handed to the battle-tape search |
+| Ameno-sagiri | 12/23 | card4-slot16 | `collection_ameno_sagiri_victory_1223` (opening: `collection_adachi_victory_1223`) | defeated by a searched `battleturn:` tape |
+| Izanami | 03/20 | card5-slot06 | `collection_izanami_victory_0320` (opening and first round: `collection_izanami_opening_0320`) | defeated by a searched `battleturn:` tape to Thousand Curses' scripted defeat, then Yu's Myriad Truths |
 | Margaret (optional) | 03/20 | CBS18506 (NG+) | `collection_margaret_0320` | defeated |
 
 A win tape is the boss walk's own prefix, a `battle:` line and one `battleturn:` line per
 fresh party command (see [testing](testing.md)), found by the battle simulator's fork
 search on that walk's real state; the gate then runs it unchanged in an ordinary walk.
 
+### Scripted battle inventory
+
+The player's own disc can provide a preliminary inventory of selected scripted
+battle starts, party commands and battle-unit lookups:
+
+```sh
+python tools/campaign_battles.py --iso <p4.iso> --elf <SLUS_217.82> --out <private.json> --summary
+```
+
+The tool scans non-media files for candidate flowscripts and linearly approximates
+their stacks using the ELF's command parameter counts. It lists selected
+`btlScriptStartEncounter`, `CALL_BATTLE`, `Cmd_PickEncounter`, `PARTY_IN`,
+`PARTY_OUT`, `GetPartyMember` and battle-unit command calls with their inferred
+arguments and, where available, encounter enemies and escape bit. This is not
+control-flow analysis: inferred arguments and reachability may be wrong, and
+dynamic arguments, excluded media, unrecognized blocks or commands, field symbol
+encounters and native tutorial, advantage and results paths leave gaps. It is not
+a complete battle list or proof that a solo-member rule is qualified for a fight.
+
+The ISO and ELF are read only. Output contains retail-derived data: choose a new
+private path outside this checkout and the configured retail area; existing files
+are never overwritten. The tool requests owner-only file permissions where
+supported, but the user must ensure the destination, stdout, summary and any
+redirected output are private and never committed. Never redirect stdout onto an
+input or other evidence: the shell may truncate it before the tool starts.
+
 ## Endings
 
 - **Bad ending:** `collection_hospital_bad_1203` (to the native new-cycle save prompt, no write).
 - **Normal ending:** `collection_normal_ending_0320`, through the credits and a native
   new-cycle save.
-- **True-ending route:** `collection_true_trigger_0320` (farewell to the Entrance),
-  `collection_yomotsu_entrance_0320` and `collection_izanami_opening_0320`; the clear data it
-  produces is exercised by `collection_new_cycle_0411`. Izanami's defeat and the true ending
-  itself are uncovered until an Izanami win tape exists; the ending would then be gated by
-  continuing that tape through the epilogue and credits to the clear-data prompt, as the
-  bad ending is.
+- **True ending:** `collection_true_trigger_0320` (farewell to the Entrance),
+  `collection_yomotsu_entrance_0320`, then `collection_true_ending_0320` from the Path 9
+  card: Izanami's defeat, the epilogue, the staff roll and the new-cycle save. The clear data
+  it produces is exercised by `collection_new_cycle_0411`.
 
 ## Uncovered and why
 
-- **Days with no anchor** (rows marked "no anchor" above): no collection card sits inside
-  them or at their start, and chained private descendants are kept out of the collection
-  gates. Every leg that could be played through to the next card's date was, including the
-  days after each rescue: a boss victory walk continues through the rescue story to the next
-  card's date (the `*_aftermath_*` gates).
 - **Dungeon floors between anchors** (Marukyu 4F–10F, Void Quest after Chapter 2's
   arrival, Secret Laboratory B1F–B8F, Heaven 1F–9F, Magatsu Inaba, Yomotsu Paths 1–8): no
   anchor inside them. Generated floors are stable across targets: the Marukyu and Void
@@ -170,10 +199,5 @@ search on that walk's real state; the gate then runs it unchanged in an ordinary
   arithmetic an attack-only Yu loses the third 1F encounter, so the Marukyu walk escapes
   every encounter. With an attack-only plan, Void Quest Chapter 2 also lost an ordinary
   encounter on Windows.
-- **Boss victories** (Ameno-sagiri, Izanami): see Bosses above. Izanami's first form holds
-  at 1 HP (Izanami Endure) and turns into Izanami-no-Okami (8000 HP) in the same battle, and
-  Megidolaon after Mind Charge outlasts every rule plan tried; Ameno-sagiri's rule plans lost
-  too. Each card, walk prefix and closest rule plan is with the battle-tape search, which
-  already found the Shadow Kanji, Teddie and Mitsuo tapes after every rule plan lost to them.
 - **First-cycle hospital card card4-slot11 (12/02):** the same hospital segment as the
   gated MAX18657 card; Cross-only input plays it into the bad ending.

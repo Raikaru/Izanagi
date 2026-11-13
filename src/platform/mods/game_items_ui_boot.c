@@ -18,8 +18,8 @@ static int prepare(void *user)
     const P4ResourceImagesPrepared *images = images_product;
     for (size_t i = 0; items && i < p4_game_tables_items_count(items); ++i) {
         const P4GameItemView *row = p4_game_tables_items_at(items, i);
-        if (!row || !images || p4_resources_images_prepared_find(images,
-                row->icon.owner, row->icon.key, row->icon.revision) != 1)
+        if (!row || (!row->icon_anchor_plus_one && (!images || p4_resources_images_prepared_find(images,
+                row->icon.owner, row->icon.key, row->icon.revision) != 1)))
             return p4_package_boot_fail(NULL, "Item UI image reference is unavailable");
     }
     for (size_t i = 0; items && i < p4_game_tables_items_category_count(items); ++i) {
@@ -44,8 +44,6 @@ static int runtime_prepare(void *user)
     if (!items || (!p4_game_tables_items_count(items) && !p4_game_tables_items_category_count(items)))
         return p4_package_boot_provide(NULL);
     const P4Resources *resources = resources_product;
-    if (!resources || !p4_resources_revision(resources))
-        return p4_package_boot_fail(NULL, "Item UI requires the frozen authored-resource product");
     if (owned_ui)
         return p4_package_boot_fail(NULL, "Item UI product already exists");
     P4GameItemsUi *ui = NULL;

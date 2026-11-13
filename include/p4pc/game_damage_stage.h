@@ -16,6 +16,13 @@
 #define P4_DAMAGE_HIT_NORMAL 1u
 #define P4_DAMAGE_HIT_CRITICAL 2u
 #define P4_DAMAGE_HIT_WEAK 4u
+/* What 001f14f0 is resolving: its BtlAction command (item when the action
+ * uses an item, attack for the weapon-property skills Attack and its
+ * follow-ups, otherwise skill). An estimate outside that bracket is unknown. */
+#define P4_DAMAGE_ORIGIN_UNKNOWN 0u
+#define P4_DAMAGE_ORIGIN_SKILL 1u
+#define P4_DAMAGE_ORIGIN_ITEM 2u
+#define P4_DAMAGE_ORIGIN_ATTACK 3u
 /* The retail equation's own range: work is clamped to 1..31000 before the
  * 95..105% variance, and a zero result becomes 1. */
 #define P4_DAMAGE_MIN 1
@@ -32,7 +39,11 @@ typedef enum P4GameDamageKind { P4_DAMAGE_MULTIPLY = 0, P4_DAMAGE_ADD = 1 } P4Ga
  * the unit the hit was aimed at: it differs from the target only when a repel
  * delivered the hit back to its source. resolved is 1 for a hit 001f14f0 is
  * resolving and 0 for an estimate (AI target choice, previews); neither draws
- * RNG in the stage. */
+ * RNG in the stage. origin is a P4_DAMAGE_ORIGIN_* value. source_persona is
+ * the persona ID of a party source's active persona record
+ * (datPersonaGetRecordId 0x00109360) and source_persona_level that record's
+ * level (datPersonaGetLevelByPcId 0x00109400) when the hit is a skill or an
+ * unbracketed estimate; both are 0 for an enemy source, an item or an attack. */
 typedef struct P4GameDamageHit {
     uint32_t skill_id;
     uint32_t source_side, source_id, source_status;
@@ -42,6 +53,7 @@ typedef struct P4GameDamageHit {
     uint32_t element_valid, element_id;
     uint32_t reflected, resolved;
     int32_t stock;
+    uint32_t origin, source_persona, source_persona_level;
 } P4GameDamageHit;
 /* Returns 1 with *value set (a factor for MULTIPLY, an addend for ADD) to
  * apply, 0 to leave the hit alone. A modifier must be a pure function of the

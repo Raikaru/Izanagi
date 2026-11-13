@@ -1039,5 +1039,26 @@ class FunctionPointerWordsTest(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
 
+class ObjectChunksTest(unittest.TestCase):
+    """nm and objdump get the objects in groups that fit a Windows command line (32,767 characters)."""
+
+    def test_groups_keep_order_and_stay_within_both_bounds(self):
+        objs = [pathlib.PurePosixPath("E:/lanes/x/build/win32/CMakeFiles/p4decomp.dir/gen/decomp/src/cri/unit%04d.c.obj" % i)
+                for i in range(1200)]
+        groups = list(gen_port.object_chunks(objs))
+        self.assertEqual([path for group in groups for path in group], [str(o) for o in objs])
+        for group in groups:
+            self.assertLessEqual(len(group), 400)
+            self.assertLessEqual(sum(len(path) + 1 for path in group), 24000)
+        self.assertGreater(len(groups), 3)      # 400 of these paths alone are over 32,000 characters
+
+    def test_short_paths_still_group_by_count_and_empty_input_makes_no_command(self):
+        self.assertEqual([len(g) for g in gen_port.object_chunks(["a.o"] * 1000)], [400, 400, 200])
+        self.assertEqual(list(gen_port.object_chunks([])), [])
+
+    def test_a_single_overlong_path_is_still_sent_alone(self):
+        self.assertEqual(list(gen_port.object_chunks(["x" * 30000, "b.o"])), [["x" * 30000], ["b.o"]])
+
+
 if __name__ == "__main__":
     unittest.main()

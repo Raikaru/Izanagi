@@ -1,3 +1,4 @@
+#include "game_table_derived_internal.h"
 #include "game_table_inputs_internal.h"
 #include "p4pc/game_table_admission.h"
 #include "p4pc/game_items_native.h"
@@ -44,7 +45,10 @@ static int verify(const P4GameTableInput *input, const void *bytes, size_t size,
     const P4PackageProvider *provider = p4_game_table_input_provider(input);
     if (failed) *failed = provider;
     if (provider && !p4_package_provider_selected(provider)) return P4_TABLE_NOT_READY;
-    if (!p4_game_table_input_matches(input, bytes, size)) return P4_TABLE_INVALID;
+    /* A loader buffer already rewritten to the derived composition (the item
+     * path verifies its full buffer twice) is the same authenticated input. */
+    if (!p4_game_table_input_matches(input, bytes, size) && !p4_game_tables_derived_matches(input, bytes, size))
+        return P4_TABLE_INVALID;
     if (failed) *failed = NULL;
     return P4_TABLE_OK;
 }
@@ -60,7 +64,7 @@ int p4_game_table_admission_check_item(const char *path, const uint8_t *bytes,
     }
     return verify(input, bytes, size, failed);
 }
-void p4_game_table_admission_item(const char *path, const uint8_t *bytes, uint32_t size)
+void p4_game_table_admission_item(const char *path, uint8_t *bytes, uint32_t size)
 {
     const P4GameTableInput *item = input_for(P4_TABLE_INPUT_ITEM);
     if (!item) return;
@@ -71,6 +75,7 @@ void p4_game_table_admission_item(const char *path, const uint8_t *bytes, uint32
         if (failed) p4_package_boot_source_failed(failed, "Selected item input differs before copy");
         p4_package_boot_runtime_failed("Native item input differs before copy");
     }
+    p4_game_tables_derived_rewrite(item, bytes, size);
 }
 static int prepare(void *user, const char *table, const char *path, uint32_t rows,
     const uint8_t *bytes, size_t size)
@@ -211,7 +216,7 @@ int p4_game_table_admission_consume(P4GameTableAdmissionReceipt *receipt,
     return P4_TABLE_OK;
 }
 void p4_game_table_admission_packed(const uint8_t *descriptor, const char *path,
-    const uint8_t *bytes, uint32_t size, P4GameTablePackedObserver observer)
+    uint8_t *bytes, uint32_t size, P4GameTablePackedObserver observer)
 {
     const P4PackageProvider *failed = NULL;
     const P4GameTableInput *accepted = NULL;
@@ -221,6 +226,7 @@ void p4_game_table_admission_packed(const uint8_t *descriptor, const char *path,
         if (failed) p4_package_boot_source_failed(failed, "Selected packed table input or descriptor differs before copy");
         p4_package_boot_runtime_failed("Native packed table input or descriptor differs before copy");
     }
+    if (accepted) p4_game_tables_derived_rewrite(accepted, bytes, size);
     P4GameTableAdmissionReceipt receipt = {&receipt, accepted, descriptor, bytes, path, size, 0};
     observer(descriptor, path, bytes, size, accepted ? &receipt : NULL);
     receipt.self = NULL;

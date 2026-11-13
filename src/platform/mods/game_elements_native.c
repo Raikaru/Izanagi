@@ -28,6 +28,7 @@ static const P4GameTables *active_tables;
 static const P4GameSkills *active_skills;
 static const P4GameItems *active_items;
 static int route_active;
+static uint32_t active_generation;
 static int prepare_complete(void *user);
 static void commit_complete(void *user);
 /* The element-route participant is this build's complete native battle
@@ -88,6 +89,9 @@ int p4_game_elements_boot_stage(const P4GameTables *tables,
     return P4_TABLE_OK;
 }
 const P4GameTables *p4_game_elements_active(void) { return active_tables; }
+const P4GameSkills *p4_game_elements_active_skills(void) { return active_tables ? active_skills : NULL; }
+const P4GameItems *p4_game_elements_active_items(void) { return active_tables ? active_items : NULL; }
+uint32_t p4_game_elements_active_generation(void) { return active_tables ? active_generation : 0; }
 const P4GameTables *p4_game_elements_prepared_snapshot(void) { return staged.prepared && staged.expanded ? staged.tables : NULL; }
 const P4GameSkills *p4_game_elements_prepared_skills(void) { return staged.prepared && staged.expanded ? staged.skills : NULL; }
 int p4_game_elements_prepared_required_pair(uint32_t leaf, uint32_t channel)
@@ -168,7 +172,12 @@ static int pair_compare(const void *left, const void *right)
 static void require_pair(RequiredPair *pairs, size_t *count, uint32_t leaf, uint32_t channel)
 {
     const P4ElementDesc *element = p4_game_tables_find_element(staged.tables, leaf);
-    if (element->flags & P4_ELEMENT_AFFINITY) pairs[(*count)++] = (RequiredPair){leaf, channel};
+    if (!(element->flags & P4_ELEMENT_AFFINITY)) return;
+    /* A side ailment's default answers every unit without its status row. */
+    const P4SideAilmentDef *side = channel == P4_CHANNEL_STATUS ?
+        p4_game_tables_find_side_ailment(staged.tables, leaf) : NULL;
+    if (side && side->default_from != P4_SIDE_DEFAULT_NONE) return;
+    pairs[(*count)++] = (RequiredPair){leaf, channel};
 }
 static int validate_graph(RequiredPair *pairs, size_t *count)
 {
@@ -297,6 +306,7 @@ static void commit_complete(void *user)
     active_skills = staged.skills;
     active_items = staged.items;
     active_tables = staged.tables;
+    if (++active_generation == 0) active_generation = 1;
 }
 int p4_game_elements_session_end(void)
 {

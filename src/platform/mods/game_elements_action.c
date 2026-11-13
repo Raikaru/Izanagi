@@ -17,6 +17,7 @@ static uint32_t le32(const uint8_t *bytes)
 typedef struct SkillElementFacts {
     uint32_t valid, leaf, active, flags;
     const uint8_t *metadata;
+    uint32_t delivery; /* an authored skill's P4_DELIVERY_* */
 } SkillElementFacts;
 static int skill_facts(const P4GameSkills *skills, uint32_t id, SkillElementFacts *facts)
 {
@@ -28,7 +29,8 @@ static int skill_facts(const P4GameSkills *skills, uint32_t id, SkillElementFact
     const uint32_t raw = definition.authored ? definition.authored->element_id : definition.retail_element[0];
     if (!definition.authored && raw > 127u && raw != P4_SKILL_LEGACY_ELEMENT_INVALID) return P4_TABLE_INVALID;
     *facts = (SkillElementFacts){definition.authored || raw != P4_SKILL_LEGACY_ELEMENT_INVALID,
-        raw, definition.active, definition.active ? definition.metadata[0] : 0, definition.metadata};
+        raw, definition.active, definition.active ? definition.metadata[0] : 0, definition.metadata,
+        definition.authored ? definition.authored->delivery : P4_DELIVERY_DEFAULT};
     return P4_TABLE_OK;
 }
 static int weapon_facts(const P4GameTables *tables, const P4GameItems *items,
@@ -179,15 +181,24 @@ static int resolve_action(const P4GameTables *tables, const P4GameSkills *skills
         if (runtime) {
             result = p4_game_tables_runtime_use_row(tables, P4_TABLE_SOURCE_ACTION, binding);
             if (result) return result;
-            /* One diagnostic line per authored leaf a battle action actually
-             * resolves (mod-witness evidence); retail leaves never print. */
-            static uint8_t reported[32];
+            /* One diagnostic line per authored leaf and action source a battle
+             * actually resolves (mod-witness evidence, the first 64 pairs);
+             * retail leaves never print. */
+            static struct { uint32_t leaf, kind, source; } reported[64];
+            static size_t reported_count;
             const uint32_t leaf = binding->element_id;
-            if (leaf >= P4_ELEMENT_RETAIL_COUNT && leaf < 256u && !(reported[leaf >> 3] & (1u << (leaf & 7u)))) {
-                reported[leaf >> 3] |= (uint8_t)(1u << (leaf & 7u));
-                fprintf(stderr, "p4pc: element leaf %u resolves %s %u\n", (unsigned)leaf,
-                    kind == P4_ACTION_ELEMENT_WEAPON ? "weapon" : kind == P4_ACTION_ELEMENT_SKILL ? "skill" : "enemy attack",
-                    (unsigned)source);
+            if (leaf >= P4_ELEMENT_RETAIL_COUNT && reported_count < sizeof reported / sizeof *reported) {
+                size_t seen = 0;
+                while (seen < reported_count && (reported[seen].leaf != leaf || reported[seen].kind != kind ||
+                    reported[seen].source != source)) ++seen;
+                if (seen == reported_count) {
+                    reported[reported_count].leaf = leaf;
+                    reported[reported_count].kind = kind;
+                    reported[reported_count++].source = source;
+                    fprintf(stderr, "p4pc: element leaf %u resolves %s %u\n", (unsigned)leaf,
+                        kind == P4_ACTION_ELEMENT_WEAPON ? "weapon" : kind == P4_ACTION_ELEMENT_SKILL ? "skill" : "enemy attack",
+                        (unsigned)source);
+                }
             }
         }
         declared.valid = 1; declared.element_id = binding->element_id; declared.channel_id = binding->channel_id;
@@ -196,6 +207,12 @@ static int resolve_action(const P4GameTables *tables, const P4GameSkills *skills
     result = runtime ? p4_game_tables_classify_runtime_action_element(tables, &declared, frame ? &resolved : element) :
         p4_game_tables_classify_action_element(tables, &declared, frame ? &resolved : element);
     if (result) return result;
+    /* An authored skill's delivery (hardmode-design 8.1) marks its damage
+     * frame; without one the delivery follows the element, so retail rows are
+     * unchanged. */
+    if (facts.delivery && kind == P4_ACTION_ELEMENT_SKILL && component == P4_ACTION_COMPONENT_DAMAGE)
+        (frame ? &resolved : element)->flags |=
+            facts.delivery == P4_DELIVERY_PHYSICAL ? P4_ELEMENT_DELIVERY_PHYSICAL : P4_ELEMENT_DELIVERY_MAGIC;
     if (frame) *frame = (P4GameActionFrame){.element = resolved, .skill_id = skill_id,
         .source_kind = kind, .source_id = source, .native_options = native_options, .owned_binding = binding != NULL};
     return P4_TABLE_OK;

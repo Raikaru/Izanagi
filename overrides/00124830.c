@@ -4,8 +4,8 @@ extern s32 sdkListStateSeek(u8 *state, s32 value);
 
 /* 00124830..0012496c: despite its decomp name, this is the three-entry
  * title-menu selector, not a music selector. Returning 3 invokes title state
- * 14's existing cmpConfigCreate(task, 1) path. The no-request/no-touch path
- * preserves the retail list, cursor history, return values and COMSE calls. */
+ * 14's existing cmpConfigCreate(task, 1) path. The no-request path preserves
+ * the retail list, cursor history, return values and COMSE calls. */
 s32 titleSelectMenu(u8 *context)
 {
     u8 listState[0x30];
@@ -16,7 +16,6 @@ s32 titleSelectMenu(u8 *context)
     s32 shortcut;
     TitleScene *titleScene = (TitleScene *)context;
 
-    p4_settings_native_corner();
     shortcut = p4_settings_native_title_request();
     confirmed = 0;
     sdkListStateConfigure(listState, 3, 3, titleScene->cursor, 0);

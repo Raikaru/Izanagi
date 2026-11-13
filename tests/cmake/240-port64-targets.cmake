@@ -1,12 +1,12 @@
 # The 64-bit builds and tests as one unit (the target p4_x64): it builds everything the tests labelled port64 need and nothing of the i386
 # mirror, and every 64-bit test carries the label.
-foreach(t boot64 port64_coro port64_task port64_task_retail port64_coro_win port64_mirror port64_census seam_abi_mirror)
+foreach(t boot64 gl_open_failure64 port64_coro port64_task port64_task_retail port64_coro_win port64_mirror port64_census seam_abi_mirror)
   if(TEST ${t})
     set_property(TEST ${t} APPEND PROPERTY LABELS port64)
   endif()
 endforeach()
 add_custom_target(p4_x64)
-foreach(t p4pc64 p4pc_viewer64 p4decomp64 port64_task64 port64_task_test)
+foreach(t p4pc64 p4pc_viewer64 p4decomp64 port64_task64 port64_task_test battle_policy_items_test)
   if(TARGET ${t})
     add_dependencies(p4_x64 ${t})
   endif()
@@ -29,12 +29,24 @@ endif()
 # The properties of the cloned full-game gates (add_test in the registration prelude): the i386 original's, labelled port64.
 get_property(P4_GATE_CLONES GLOBAL PROPERTY P4_GATE_CLONES)
 foreach(t IN LISTS P4_GATE_CLONES)
-  foreach(prop TIMEOUT SKIP_RETURN_CODE WORKING_DIRECTORY ENVIRONMENT)
+  foreach(prop TIMEOUT SKIP_RETURN_CODE WORKING_DIRECTORY)
     get_test_property(${t} ${prop} v)
     if(v)
       set_tests_properties(${t}64 PROPERTIES ${prop} "${v}")
     endif()
   endforeach()
+  # The original's environment, but a save root of the clone's own (as the host64 clones of 220-port64-host.cmake):
+  # a shared root is a shared memory-card lock.
+  get_test_property(${t} ENVIRONMENT v)
+  set(clone_env)
+  foreach(e IN LISTS v)
+    if(e AND NOT e MATCHES "^P4PC_SAVE_DIR=")
+      list(APPEND clone_env "${e}")
+    endif()
+  endforeach()
+  file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/save/${t}64")
+  list(APPEND clone_env "P4PC_SAVE_DIR=${CMAKE_BINARY_DIR}/save/${t}64")
+  set_tests_properties(${t}64 PROPERTIES ENVIRONMENT "${clone_env}")
   # `slow`: minutes natively, hours under qemu-user (the a64 scope runs -LE ^(slow|gl)$: no renderer tests either).
   # Keep the 75k/110k corpus walks and 90k/110k castle walks in the long-run class.
   if(t MATCHES "^(story_to_0415|street_0417|castle_gate_0417|castle_2f_0417|home_0417|save_play|fields_load|newgame_to_field|systems_club_floor_menu|scene_tv_world_enter|scene_shadow_haze)$")
@@ -45,7 +57,7 @@ foreach(t IN LISTS P4_GATE_CLONES)
 endforeach()
 
 # The game gates of the 64-bit build: every test labelled `scenes` that has a 64-bit twin gives the twin the label `scenes64`. They need the disc
-# (P4PC_ISO) and the reference captures, and run on llvmpipe in the container or on a real GPU.
+# (P4PC_ISO) and the reference captures, and run on a hardware GPU.
 foreach(t IN LISTS P4_ALL_TESTS)
   get_test_property(${t} LABELS lbl)
   if(lbl MATCHES "(^|;)scenes(;|$)" AND TEST ${t}64)

@@ -92,17 +92,23 @@ static size_t registry_count(const P4GameTables *tables, uint32_t domain)
     case 2: return p4_game_tables_affinity_count(tables);
     case 3: return p4_game_tables_action_element_count(tables);
     case 4: return p4_game_tables_affinity_alias_count(tables);
-    default: return p4_game_tables_affinity_effect_count(tables);
+    case 5: return p4_game_tables_affinity_effect_count(tables);
+    case 6: return p4_game_tables_damage_cover_count(tables);
+    default: return p4_game_tables_side_ailment_count(tables);
     }
 }
+/* Registry cursor domains 0..5 are ELEMENT..EFFECT; 6 and 7 are the later
+ * COVER and SIDE_AILMENT. */
+#define REGISTRY_DOMAINS 8u
 static int registry_next(const P4GameTables *tables, P4TableSourceCursor *cursor, P4TableSourceEntry *out)
 {
-    while (cursor->domain < 6u) {
+    while (cursor->domain < REGISTRY_DOMAINS) {
         if (cursor->index >= registry_count(tables, cursor->domain)) {
             ++cursor->domain; cursor->index = 0; continue;
         }
         const size_t index = cursor->index++;
-        P4TableSourceEntry entry = {.domain = cursor->domain + 1u};
+        P4TableSourceEntry entry = {.domain = cursor->domain == 6u ? P4_TABLE_SOURCE_COVER :
+            cursor->domain == 7u ? P4_TABLE_SOURCE_SIDE_AILMENT : cursor->domain + 1u};
         const char *owner, *key = "";
         uint32_t schema = 1, revision = p4_game_tables_revision(tables);
         switch (entry.domain) {
@@ -139,11 +145,26 @@ static int registry_next(const P4GameTables *tables, P4TableSourceCursor *cursor
             key = row->key; schema = row->schema; revision = row->revision;
             break;
         }
-        default: {
+        case P4_TABLE_SOURCE_EFFECT: {
             const P4AffinityEffectBinding *row = p4_game_tables_affinity_effect_at(tables, index);
             owner = p4_game_tables_affinity_effect_owner(tables, index);
             entry.ids[0] = row->source_kind; entry.ids[1] = row->source_id;
             entry.ids[2] = row->element_id; entry.ids[3] = row->channel_id;
+            key = row->key; schema = row->schema; revision = row->revision;
+            break;
+        }
+        case P4_TABLE_SOURCE_COVER: {
+            const P4DamageCoverBinding *row = p4_game_tables_damage_cover_at(tables, index);
+            owner = p4_game_tables_damage_cover_owner(tables, index);
+            entry.ids[0] = row->source_kind; entry.ids[1] = row->source_id;
+            entry.ids[2] = row->element_id; entry.ids[3] = row->channel_id;
+            key = row->key; schema = row->schema; revision = row->revision;
+            break;
+        }
+        default: {
+            const P4SideAilmentDef *row = p4_game_tables_side_ailment_at(tables, index);
+            owner = p4_game_tables_side_ailment_owner(tables, index);
+            entry.ids[0] = row->leaf;
             key = row->key; schema = row->schema; revision = row->revision;
             break;
         }
@@ -160,7 +181,7 @@ static int registry_next(const P4GameTables *tables, P4TableSourceCursor *cursor
         *out = entry;
         return P4_TABLE_OK;
     }
-    return cursor->domain == 6u ? P4_TABLE_NOT_FOUND : P4_TABLE_INVALID;
+    return cursor->domain == REGISTRY_DOMAINS ? P4_TABLE_NOT_FOUND : P4_TABLE_INVALID;
 }
 int p4_game_table_sources_next(P4TableSourceViewKind kind, const void *view,
     P4TableSourceCursor *cursor, P4TableSourceEntry *out)
@@ -315,7 +336,7 @@ int p4_game_table_sources_bind(P4GameTableSources *sources, const void *view,
     const P4TableSourceEntry *entry, uint32_t source)
 {
     if (!sources || !view || !entry || source >= sources->origins_count ||
-        entry->domain < P4_TABLE_SOURCE_ELEMENT || entry->domain > P4_TABLE_SOURCE_PERSONA ||
+        entry->domain < P4_TABLE_SOURCE_ELEMENT || entry->domain > P4_TABLE_SOURCE_SIDE_AILMENT ||
         !entry->schema || !entry->revision || !bounded_string(entry->owner, sizeof entry->owner, 0) ||
         !bounded_string(entry->key, sizeof entry->key, 1)) return P4_TABLE_INVALID;
     if (sources->sealed) return P4_TABLE_FROZEN;
@@ -525,7 +546,7 @@ const P4TableSourceOrigin *p4_game_table_sources_native_mode_next(const P4GameTa
 int p4_game_table_sources_resolve_entry(const P4GameTableSources *sources, const void *view,
     uint32_t domain, const uint32_t ids[5], P4TableSourceResolved *out)
 {
-    if (!sources || !view || !ids || !out || domain < P4_TABLE_SOURCE_ELEMENT || domain > P4_TABLE_SOURCE_PERSONA)
+    if (!sources || !view || !ids || !out || domain < P4_TABLE_SOURCE_ELEMENT || domain > P4_TABLE_SOURCE_SIDE_AILMENT)
         return P4_TABLE_INVALID;
     if (!sources->frozen) return P4_TABLE_NOT_READY;
     size_t index = view_index(sources, view);

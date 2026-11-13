@@ -584,9 +584,9 @@
       }
     },
     "src/render/p4gl_context.c": {
-      "reason": "Native SDL/context, presentation, capture paths and host-only renderer settings. Parsers affect presentation controls, not guest numeric fields. resolutionAdjust uses strcmp and compiler-emitted bcmp/memcmp only for equality against fixed resolution strings, so comparison magnitude is never observed. Capture storage and formatter results remain native; guest RAM is read only for requested dumps. Android internal-storage lookup selects only the host PNG capture directory, and its error path prints/exits on the host. Bionic's pass_object_size formatter retains those same native destinations. Retained ELF32 pattern-init memset sites in p4gl_context_present fill only inlined captureFrame path[512]/dpath[512] and captureWindow path[600] native stack buffers with 0xff before bounded formatting and host file/PNG output. The no-device early return also causes O2 to outline captureWindow, swapWindow and p4gl_api_explicit: captureWindow frees only capturePixels' host malloc storage and formats a native path; PNG failure diagnostics/exit, SDL swap/error queries and API environment selection remain the same host boundaries.",
+      "reason": "Native SDL/context, presentation, capture paths and host-only renderer settings. Parsers affect presentation controls, not guest numeric fields. resolutionAdjust uses strcmp and compiler-emitted bcmp/memcmp only for equality against fixed resolution strings, so comparison magnitude is never observed. Capture storage and formatter results remain native; guest RAM is read only for requested dumps. Android internal-storage lookup selects only the host PNG capture directory, and its error path prints/exits on the host. Bionic's pass_object_size formatter retains those same native destinations. Retained ELF32 pattern-init memset sites in p4gl_context_present fill only inlined captureFrame path[512]/dpath[512] and captureWindow path[600] native stack buffers with 0xff before bounded formatting and host file/PNG output. The no-device early return also causes O2 to outline captureWindow, swapWindow and p4gl_api_explicit: captureWindow frees only capturePixels' host malloc storage and formats a native path; PNG failure diagnostics/exit, SDL swap/error queries and API environment selection remain the same host boundaries. p4gl_context_open_device, the RenderWare device's OPEN, only prints the failure, shows it in a message box on a player's run and exits on the host when no GL context opens.",
       "calls": {
-        "__stderrp": ["applySettings", "capturePixels", "captureWindow", "context_recover", "p4gl_context_open", "p4gl_context_present", "setSwapInterval"],
+        "__stderrp": ["applySettings", "capturePixels", "captureWindow", "context_recover", "p4gl_context_open", "p4gl_context_open_device", "p4gl_context_present", "setSwapInterval"],
         "SDL_GetAndroidInternalStoragePath": ["writeCapturePng"],
         "__vsnprintf_chk": ["_ZL8snprintfPcU17pass_object_size1mPKcz"],
         "__acrt_iob_func": [
@@ -595,6 +595,7 @@
           "captureWindow",
           "context_recover",
           "p4gl_context_open",
+          "p4gl_context_open_device",
           "p4gl_context_present",
           "setSwapInterval"
         ],
@@ -629,7 +630,8 @@
         ],
         "SDL_GL_GetCurrentContext": [
           "context_recover",
-          "p4gl_context_is_current"
+          "p4gl_context_is_current",
+          "p4gl_device_ready"
         ],
         "SDL_GL_GetProcAddress": [
           "p4gl_context_present"
@@ -707,6 +709,9 @@
           "applySettings",
           "p4gl_context_present"
         ],
+        "SDL_ShowSimpleMessageBox": [
+          "p4gl_context_open_device"
+        ],
         "SDL_setenv_unsafe": [
           "p4gl_context_open"
         ],
@@ -715,6 +720,7 @@
         ],
         "exit": [
           "captureWindow",
+          "p4gl_context_open_device",
           "p4gl_context_present",
           "settingsPresent",
           "writeCapturePng"
@@ -734,6 +740,7 @@
           "captureWindow",
           "context_recover",
           "p4gl_context_open",
+          "p4gl_context_open_device",
           "p4gl_context_present",
           "setSwapInterval",
           "writeCapturePng"
@@ -746,6 +753,7 @@
         "fwrite": [
           "context_recover",
           "p4gl_context_open",
+          "p4gl_context_open_device",
           "p4gl_context_present",
           "settingsPresent"
         ],
@@ -781,6 +789,7 @@
           "captureWindow",
           "context_recover",
           "p4gl_context_open",
+          "p4gl_context_open_device",
           "p4gl_context_present",
           "setSwapInterval",
           "settingsPresent",
@@ -961,7 +970,8 @@
           "probe_output_rounding"
         ],
         "strlen": [
-          "p4gl_gate_limit"
+          "p4gl_gate_limit",
+          "p4gl_gl_load"
         ],
         "strncmp": [
           "p4gl_gl_load"
@@ -1403,21 +1413,23 @@
       }
     },
     "src/loader.c": {
-      "reason": "Host bootstrap diagnostics only; the user-selected retail image and explicit command-line arguments are external inputs, not computed CRT game values. UCRT FILE access supplies those diagnostic streams; compiler-emitted __main performs native process constructor initialization, not a game CRT computation. Retained ELF32 pattern-init disassembly proves both main memset sites fill only the native elf[1100] executable-path stack buffer with 0xff; the no-argument branch passes that same span to bounded p4iso_prepare before host image loading, never to guest RAM.",
+      "reason": "Host bootstrap diagnostics only; the user-selected retail image and explicit command-line arguments are external inputs, not computed CRT game values. UCRT FILE access supplies those diagnostic streams; compiler-emitted __main performs native process constructor initialization, not a game CRT computation. Retained ELF32 pattern-init disassembly proves both main memset sites fill only the native elf[1100] executable-path stack buffer with 0xff; the no-argument branch passes that same span to bounded p4iso_prepare before host image loading, never to guest RAM. --help (usage) prints fixed usage text and the program name from argv[0] to stdout and returns before any image, disc or settings access.",
       "calls": {
         "__stderrp": ["main"],
-        "__acrt_iob_func": ["main"],
+        "__stdoutp": ["main", "usage"],
+        "__acrt_iob_func": ["main", "usage"],
         "__main": ["main"],
-        "fprintf": ["main", "p4pc_main"],
+        "fprintf": ["main", "p4pc_main", "usage"],
         "memset": ["main"],
-        "stderr": ["main", "p4pc_main"]
+        "stderr": ["main", "p4pc_main"],
+        "stdout": ["main", "p4pc_main", "usage"]
       }
     },
     "src/viewer/p4pc_viewer.c": {
       "reason": "Standalone developer model-viewer frontend: host capture names, diagnostics and native draw-window/MAD controls only. Numeric values entering guest fields, dates, player/camera coordinates or guest-frame counts use the retail parsers; the synthetic camera's radius uses retail sqrtf. AArch64 frame_camera zeroes its native Bounds stack object and inlines f32_at as three four-byte copies from the guest camera view window into native stack floats. Host malloc is restricted to native input/capture scratch; bytes may be copied into guest allocations, never host pointers. Explicit main pairs cover the same operations when i386 inlines viewer_main. UCRT FILE access serves those same diagnostics, and compiler-emitted __main initializes the native process constructors. UCRT atoi/atof are only the existing native draw-window and MAD controls; fopen opens the same host viewer input as glibc fopen64.",
       "calls": {
         "__stderrp": ["main", "make_ptank", "viewer_main", "write_frame"],
-        "__acrt_iob_func": ["main", "make_ptank", "viewer_main", "write_frame"],
+        "__acrt_iob_func": ["frame_camera", "main", "make_ptank", "viewer_main", "write_frame"],
         "__main": ["main"],
         "__vsnprintf_chk": ["_ZL8snprintfPcU17pass_object_size1mPKcz"],
         "atof": ["write_frame"],

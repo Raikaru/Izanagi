@@ -10,6 +10,7 @@
 #include "p4pc/guest.h"
 #include "p4pc/battle_events.h"
 #include "p4pc/battle_events_native.h"
+#include "p4pc/game_side_ailment_native.h"
 
 s32 btlTargetApplyHpSpChange(u8 *work)
 {
@@ -92,6 +93,11 @@ s32 btlTargetApplyHpSpChange(u8 *work)
         btlSoundClearStatusCounters(action, MEMBER(s32, work, BtlTargetPacketWork, result.addedStatus));
         datCalcSetBadStatus((u8 *)((BtlUnit *)unit)->datUnit, MEMBER(s32, work, BtlTargetPacketWork, result.addedStatus));
         datCalcClearBadStatus((u8 *)targetUnit->datUnit, MEMBER(s32, work, BtlTargetPacketWork, result.removedStatus));
+        p4_side_ailment_native_commit((u8 *)targetUnit->datUnit,
+            (u32)MEMBER(s32, work, BtlTargetPacketWork, result.removedStatus),
+            ((BtlTargetPacketWork *)work)->result.hpDelta,
+            packetWork->source ? (u8 *)packetWork->source->unit->datUnit : NULL,
+            packetWork->source ? (u32)packetWork->source->unk_6e : 0u);
         if (observed) observedHit.statuses_applied = 1;
     }
     buffMask = (s32)(((BtlTargetPacketWork *)work)->result.field10);
@@ -127,6 +133,7 @@ s32 btlTargetApplyHpSpChange(u8 *work)
         } else {
             datCalcSetHp((u8 *)(((BtlUnit *)deadUnit)->datUnit), 0);
             datCalcClearBadStatus((u8 *)defeatedUnit->datUnit, 0xffffff);
+            p4_side_ailment_native_defeat((u8 *)defeatedUnit->datUnit);
             datCalcSetBadStatus((u8 *)defeatedUnit->datUnit, 0x80000);
             unitFlags = (s32)(((BtlUnit *)deadUnit)->flags3) | 1;
             ((BtlUnit *)deadUnit)->flags3 = unitFlags;

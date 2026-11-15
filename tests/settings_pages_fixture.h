@@ -7,7 +7,7 @@
 enum { PF_HOME, PF_TOGGLES, PF_CATALOG, PF_CHOICES, PF_DETAIL, PF_DEEP, PF_EMPTY, PF_GONE, PF_BAD, PF_COUNT };
 typedef struct PageFixtureContext { int kind; } PageFixtureContext;
 static struct {
-    int initialized, toggles[37], choice, shift, deadGone, deadCalls;
+    int initialized, toggles[37], choice, shift, deadGone, deadCalls, infoState;
     int opened[PF_COUNT], closed[PF_COUNT], lastClosed[2], full, callbackUnregister, hubDetached;
     unsigned rowCalls, findCalls;
     uint64_t revision;
@@ -76,8 +76,16 @@ static int pageFixtureRow(void *userdata, int index, P4SettingsPageRow *out)
         strcpy(pageFixture.help, "A native toggle with stable identity. This help deliberately exceeds one retail help line, so its complete text must be measured and paged rather than clipped or replaced.");
         if (index == 36) out->flags = P4_SETTINGS_PAGE_RESTART;
     } else if (kind == PF_CATALOG) {
-        snprintf(pageFixture.label, sizeof pageFixture.label, "Record %d", index + pageFixture.shift);
-        strcpy(pageFixture.value, "VIEW");
+        if (index < 2) {
+            snprintf(pageFixture.label, sizeof pageFixture.label, "%s",
+                index ? "Full width information" : "Information value");
+            out->kind = P4_SETTINGS_PAGE_INFO;
+            if (!index && pageFixture.infoState != 2)
+                strcpy(pageFixture.value, pageFixture.infoState ? "OTHER VALUE" : "VISIBLE VALUE");
+        } else {
+            snprintf(pageFixture.label, sizeof pageFixture.label, "Record %d", index + pageFixture.shift);
+            strcpy(pageFixture.value, "VIEW");
+        }
     } else if (kind == PF_CHOICES) {
         snprintf(pageFixture.label, sizeof pageFixture.label, "Choice %d", index);
         if (index == pageFixture.choice) out->flags = P4_SETTINGS_PAGE_CURRENT;
@@ -197,6 +205,8 @@ static void settingsPagesFixtureCommand(const char *command)
     int result = 0;
     if (!strcmp(command, "request")) result = p4_settings_page_open(pageFixtureKeys[PF_HOME]);
     else if (!strcmp(command, "revise")) { pageFixture.shift = 1; ++pageFixture.revision; }
+    else if (!strcmp(command, "info-alt")) { pageFixture.infoState = 1; ++pageFixture.revision; }
+    else if (!strcmp(command, "info-empty")) { pageFixture.infoState = 2; ++pageFixture.revision; }
     else if (!strcmp(command, "unregister-deep")) result = p4_settings_page_unregister(pageFixtureKeys[PF_DEEP]);
     else if (!strcmp(command, "unregister-gone")) {
         result = p4_settings_page_unregister(pageFixtureKeys[PF_GONE]);

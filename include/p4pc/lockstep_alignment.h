@@ -213,6 +213,95 @@ static inline int p4la_packet_frame(FILE *file, const P4WalkHost *h) {
     }
     return fputc('\n',file)!=EOF;
 }
+/* Per-presentation message-window provenance, read-only evidence never used by a verdict.
+ * itfMesManager's globals are at 0x008817e0 (active entry list at +0xc, entry next +0x4, window
+ * +0xc; decomp/include/itf_mes_objects.h). Each active window is written as
+ * flags:kind:row state:row flags:page index:page count:elapsed:transition:runs:enabled runs:
+ * glyphs:revealed:glyph frames:last command:last duration:last enabled. The text runs are walked
+ * from the row list's root like frFontMeasureList (run next +0x28, glyphs from +0x1c by +0x28):
+ * `revealed` sums each glyph's intensity (its colour's low byte) and `glyph frames` its frame
+ * halfword, the typewriter position. The last run's command and duration are the page wait
+ * (0xf223/0xf226 with duration -1 wait while voice channel 1 plays). Voice channel 1 is sdkSnd's
+ * SndCh slot at 0x008d2b90 + 0x134 (active, fading, state, request mode, whether it has a handle).
+ * The bust-up banks (decomp/include/fcl_bank_internal.h: manager at 0x00764678, its pending
+ * request list at +0x4, record at +0x24 with two 0x14-byte slots from +0x4; displays at 0x00796700,
+ * 0x370 apart) are written as pending;flags:state:descriptor:fade ticks:display state:alpha:
+ * timers 0x364/0x368/0x36c for both slots, or "-" without a manager. A list that is not walkable
+ * is written as "unwalkable". */
+#define P4LA_MES_MANAGER 0x008817e0u
+#define P4LA_SND_VOICE 0x008d2cc4u
+#define P4LA_BUSTUP_MANAGER 0x00764678u
+#define P4LA_BUSTUP_DISPLAYS 0x00796700u
+static inline uint32_t p4la_half(const P4WalkHost *h, uint32_t a) {
+    return (p4la_word(h,a&~3u)>>((a&2u)*8u))&0xffffu;
+}
+static inline uint32_t p4la_byte(const P4WalkHost *h, uint32_t a) {
+    return (p4la_word(h,a&~3u)>>((a&3u)*8u))&0xffu;
+}
+static inline int p4la_message_header(FILE *file) {
+    return fprintf(file,"game_frame\twindow_count\tmanager_flags\tvoice_active\tvoice_fading\tvoice_state\t"
+                   "voice_mode\tvoice_handle\tbustup\twindows\n")>0;
+}
+static inline int p4la_bustup(FILE *file, const P4WalkHost *h) {
+    const uint32_t work=p4la_word(h,P4LA_BUSTUP_MANAGER);
+    const uint32_t record=p4la_address(work,0x28u) ? p4la_word(h,work+0x24u) : 0;
+    if (!p4la_address(work,0x28u) || !p4la_address(record,0x30u)) return fputc('-',file)!=EOF;
+    if (fprintf(file,"%u",(unsigned)(p4la_word(h,work+4u)!=0))<0) return 0;
+    for (unsigned i=0;i<2;i++) {
+        const uint32_t slot=record+4u+i*0x14u, display=P4LA_BUSTUP_DISPLAYS+i*0x370u;
+        if (fprintf(file,";%x:%d:%x:%d:%d:%u:%u:%u:%u",p4la_half(h,slot),(int)(int16_t)p4la_half(h,slot+2u),
+                    p4la_word(h,slot+4u),(int)(int16_t)p4la_half(h,slot+0x10u),
+                    (int)(int16_t)p4la_half(h,display),p4la_byte(h,display+0x1fu),p4la_word(h,display+0x364u),
+                    p4la_word(h,display+0x368u),p4la_word(h,display+0x36cu))<0) return 0;
+    }
+    return 1;
+}
+static inline int p4la_message_window(FILE *file, const P4WalkHost *h, uint32_t window) {
+    uint32_t runs=0, enabled=0, glyphs=0, revealed=0, frames=0, command=0, duration=0, last_enabled=0;
+    const uint32_t list=p4la_word(h,window+0x20u);
+    if (list) {
+        if (!p4la_address(list,0x44u)) return 0;
+        for (uint32_t run=p4la_word(h,list+0x2cu); run; run=p4la_word(h,run+0x28u)) {
+            if (runs==256u || !p4la_address(run,0x44u)) return 0;
+            runs++;
+            last_enabled=p4la_word(h,run+0x40u);
+            enabled+=last_enabled!=0;
+            command=p4la_word(h,run+0x30u);
+            duration=p4la_word(h,run+0x3cu);
+            for (uint32_t glyph=p4la_word(h,run+0x1cu); glyph; glyph=p4la_word(h,glyph+0x28u)) {
+                if (glyphs==4096u || !p4la_address(glyph,0x2cu)) return 0;
+                glyphs++;
+                revealed+=p4la_word(h,glyph+0x10u)&0xffu;
+                frames+=p4la_half(h,glyph+2u);
+            }
+        }
+    }
+    return fprintf(file,"%x:%u:%d:%u:%d:%d:%u:%d:%u:%u:%u:%u:%u:%x:%d:%u",p4la_word(h,window),
+                   p4la_word(h,window+0x10u),(int)(int8_t)p4la_byte(h,window+0x24u),p4la_byte(h,window+0x25u),
+                   (int)(int16_t)p4la_half(h,window+0x2cu),(int)(int16_t)p4la_half(h,window+0x2eu),
+                   p4la_word(h,window+0x30u),(int)(int16_t)p4la_half(h,window+0x34u),runs,enabled,glyphs,
+                   revealed,frames,command,(int)duration,last_enabled)>0;
+}
+static inline int p4la_message_frame(FILE *file, const P4WalkHost *h) {
+    const uint32_t voice=P4LA_SND_VOICE;
+    if (fprintf(file,"%u\t%u\t%u\t%u\t%u\t%d\t%d\t%u\t",p4la_word(h,P4LS_GAME_FRAME),
+                p4la_word(h,P4LA_MES_MANAGER),p4la_half(h,P4LA_MES_MANAGER+8u),p4la_word(h,voice),
+                p4la_word(h,voice+4u),(int)(int16_t)p4la_half(h,voice+0xcu),(int)(int16_t)p4la_half(h,voice+0x14u),
+                (unsigned)(p4la_word(h,voice+0x10u)!=0))<0) return 0;
+    if (!p4la_bustup(file,h) || fputc('\t',file)==EOF) return 0;
+    const char *separator="";
+    uint32_t entry=p4la_word(h,P4LA_MES_MANAGER+0xcu);
+    for (unsigned count=0;entry;count++,entry=p4la_word(h,entry+4u)) {
+        const uint32_t window=p4la_word(h,entry+0xcu);
+        if (count==64 || !p4la_address(entry,0x20u) || (window && !p4la_address(window,0x130u)))
+            return fprintf(file,"%sunwalkable",separator)>0 && fputc('\n',file)!=EOF;
+        if (!window) continue;
+        if (fputs(separator,file)==EOF) return 0;
+        if (!p4la_message_window(file,h,window)) return fprintf(file,"unwalkable")>0 && fputc('\n',file)!=EOF;
+        separator=",";
+    }
+    return fputc('\n',file)!=EOF;
+}
 /* Before-input title/card checkpoints preserve confirmation edges while either
  * participant waits for its own card I/O. They are transport metadata only;
  * the first field-ready boundary still requires the complete state proof. */
@@ -369,9 +458,14 @@ static inline int p4la_layer_animation_word(const P4WalkHost *h, uint32_t layer,
 }
 /* Words a battle-qualification response may write on the native participant:
  * the shared effect bank, a battle unit's model-layer time/previous_time and the
- * animation state behind it, or a battle action's state timer (the load-wait clocks). */
+ * animation state behind it, a battle action's state timer (the load-wait clocks), and
+ * CRI's server-pass count with every open ADXT handle's start count (the clock the PS2RNA
+ * model hears IOP blocks on; tools/lockstep_alignment.py cri_pass_clock_patches). */
 static inline int p4la_battle_patch_word(const P4WalkHost *h, uint32_t a) {
     if (a>=P4LA_EFFECT_BANK && a<P4LA_EFFECT_BANK+16u) return !(a&3u);
+    if (a==0x007188b8u) return 1;
+    if (a>=0x007188c0u && a<0x007188c0u+16u*0xc8u && (a-0x007188c0u)%0xc8u==0xa0u)
+        return (p4la_word(h,a-0xa0u)&0xffu)==1u;
     const uint32_t context=p4la_word(h,0x0076449cu);
     if (!p4la_address(context,0x300u)) return 0;
     for (unsigned g=0;g<3;g++) {

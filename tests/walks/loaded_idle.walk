@@ -1,0 +1,14 @@
+# LOAD GAME (the title driver's P4PC_AUTOPRESS_LOAD): the card, its first save, confirm;
+# then wait for control, idle and exit.
+timeout:6000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+timeout:20000
+waitcontrol:on
+wait:600
+log
+exit

@@ -1,0 +1,3 @@
+--!capability budget@1
+--!covers p4.budget
+-- Inspect the remaining Luau execution budget.

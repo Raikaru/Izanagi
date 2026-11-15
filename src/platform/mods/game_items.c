@@ -4,11 +4,14 @@
 
 typedef P4GameItemMutable ItemState;
 typedef struct ItemTextBinding { uint32_t name, description; } ItemTextBinding;
+typedef struct ItemDerive { uint32_t id; P4GameItemDerive derive; } ItemDerive;
 struct P4GameItems {
     P4GameItemView *rows;
     P4GameItemCategoryView *categories;
     ItemState *state;
     ItemTextBinding *texts;
+    ItemDerive *derives;
+    size_t derives_count, derives_capacity;
     const uint8_t *retail_file;
     const P4GameText *names, *descriptions;
     size_t count, capacity, categories_count, categories_capacity;
@@ -101,7 +104,7 @@ void p4_game_tables_items_destroy(P4GameItems *t)
 {
     if (!t) return;
     if (t->arena) t->allocator.release(t->allocator.user, t->guest, t->arena, t->allocation_size);
-    free(t->state); free(t->texts); free(t->categories); free(t->rows); free(t);
+    free(t->state); free(t->texts); free(t->categories); free(t->rows); free(t->derives); free(t);
 }
 int p4_game_tables_items_bind_runtime_use(P4GameItems *t, P4GameItemUseFn use, void *context)
 {
@@ -144,10 +147,11 @@ int p4_game_tables_items_text_runtime_use(const P4GameItems *t, uint32_t table, 
     if (role > P4_TEXT_DESCRIPTION) return P4_TABLE_INVALID;
     return p4_game_tables_text_runtime_use(role == P4_TEXT_NAME ? t->names : t->descriptions, table, id, role);
 }
-int p4_game_tables_items_register(P4GameItems *t, const char *owner, const P4GameItemDesc *row)
+static int register_item(P4GameItems *t, const char *owner, const P4GameItemDesc *row, uint32_t icon_anchor_plus_one)
 {
-    if (!t || !row || !owned_key(owner, row->key) || !image_ref_valid(&row->icon) || !row->revision ||
-        row->id < P4_ITEM_RETAIL_COUNT || row->id > P4_ITEM_MAX_ID || row->metadata.kind > 31) return P4_TABLE_INVALID;
+    if (!t || !row || !owned_key(owner, row->key) ||
+        (icon_anchor_plus_one ? (row->icon.owner[0] || row->icon.key[0] || row->icon.revision) : !image_ref_valid(&row->icon)) ||
+        !row->revision || row->id < P4_ITEM_RETAIL_COUNT || row->id > P4_ITEM_MAX_ID || row->metadata.kind > 31) return P4_TABLE_INVALID;
     if (t->semantic_revision) return P4_TABLE_FROZEN;
     for (size_t i = 0; i < t->count; ++i)
         if (t->rows[i].id == row->id || !strcmp(t->rows[i].key, row->key)) return P4_TABLE_CONFLICT;
@@ -155,10 +159,36 @@ int p4_game_tables_items_register(P4GameItems *t, const char *owner, const P4Gam
     if (result) return result;
     P4GameItemView *view = &t->rows[t->count]; memset(view, 0, sizeof *view);
     view->id = row->id; view->revision = row->revision;
+    view->icon_anchor_plus_one = icon_anchor_plus_one;
     strcpy(view->owner, owner); strcpy(view->key, row->key); view->icon = row->icon;
     view->metadata = row->metadata;
     if (t->limit <= row->id) t->limit = row->id + 1;
     ++t->count;
+    return P4_TABLE_OK;
+}
+int p4_game_tables_items_register(P4GameItems *t, const char *owner, const P4GameItemDesc *row)
+{
+    return register_item(t, owner, row, 0);
+}
+static const ItemDerive *derive_find(const P4GameItems *t, uint32_t id)
+{
+    for (size_t i = 0; i < t->derives_count; ++i) if (t->derives[i].id == id) return &t->derives[i];
+    return NULL;
+}
+int p4_game_tables_items_register_derived(P4GameItems *t, const char *owner,
+    const P4GameItemDesc *row, const P4GameItemDerive *derive)
+{
+    if (!t || !row || !derive || derive->anchor >= P4_ITEM_RETAIL_COUNT || derive->icon_from_anchor > 1 ||
+        (derive->mask & ~P4_ITEM_DERIVE_FIELDS))
+        return P4_TABLE_INVALID;
+    if (t->semantic_revision) return P4_TABLE_FROZEN;
+    int result = reserve((void **)&t->derives, &t->derives_capacity, t->derives_count + 1, sizeof *t->derives);
+    if (result) return result;
+    P4GameItemDesc pending = *row;
+    memset(&pending.metadata, 0, sizeof pending.metadata); /* Resolved at seal. */
+    result = register_item(t, owner, &pending, derive->icon_from_anchor ? derive->anchor + 1u : 0u);
+    if (result) return result;
+    t->derives[t->derives_count++] = (ItemDerive){row->id, *derive};
     return P4_TABLE_OK;
 }
 int p4_game_tables_items_requirement_register(P4GameItems *t, const char *owner,
@@ -177,6 +207,12 @@ int p4_game_tables_items_requirement_register(P4GameItems *t, const char *owner,
     }
     return P4_TABLE_NOT_FOUND;
 }
+/* The native type7 keys a weapon's metadata accepts (see models_register). */
+static int models_valid(const P4ItemRow *metadata, uint32_t right_model_id, uint32_t left_model_id)
+{
+    return !metadata->kind && ((metadata->category_mask & 0x40u) != 0) == (left_model_id != P4_ITEM_MODEL_NONE) &&
+        (!(metadata->category_mask & 0x80u) || (right_model_id >= 0x70u && right_model_id < 0x96u));
+}
 int p4_game_tables_items_models_register(P4GameItems *t, const char *owner,
     uint32_t id, uint32_t right_model_id, uint32_t left_model_id)
 {
@@ -189,9 +225,8 @@ int p4_game_tables_items_models_register(P4GameItems *t, const char *owner,
         if (row->id != id) continue;
         if (strcmp(row->owner, owner) || row->models_registered) return P4_TABLE_CONFLICT;
         const P4ItemRow *metadata = &row->metadata;
-        if (metadata->kind || ((metadata->category_mask & 0x40u) != 0) != (left_model_id != P4_ITEM_MODEL_NONE) ||
-            ((metadata->category_mask & 0x80u) && (right_model_id < 0x70u || right_model_id >= 0x96u)))
-            return P4_TABLE_INVALID;
+        if (!derive_find(t, id) && !models_valid(metadata, right_model_id, left_model_id))
+            return P4_TABLE_INVALID; /* A derived row's metadata is checked at seal. */
         row->models_registered = 1;
         row->right_model_id = right_model_id; row->left_model_id = left_model_id;
         return P4_TABLE_OK;
@@ -301,6 +336,46 @@ static uint32_t little_word(const uint8_t *p)
 {
     return (uint32_t)p[0] | (uint32_t)p[1] << 8 | (uint32_t)p[2] << 16 | (uint32_t)p[3] << 24;
 }
+/* Copies each derived row's anchor from the retail file and applies its
+ * overrides; a weapon without models takes the anchor's own native keys. */
+static int resolve_derived(P4GameItems *t, const uint8_t *file)
+{
+    for (size_t i = 0; i < t->derives_count; ++i) {
+        const P4GameItemDerive *d = &t->derives[i].derive;
+        const P4ItemRow *o = &d->overrides;
+        P4GameItemView *view = NULL;
+        for (size_t j = 0; !view && j < t->count; ++j) if (t->rows[j].id == t->derives[i].id) view = &t->rows[j];
+        P4ItemRow *m = &view->metadata;
+        memcpy(m, file + P4_ITEM_FILE_HEADER_SIZE + d->anchor * P4_ITEM_ROW_SIZE, sizeof *m);
+        if (d->mask & P4_ITEM_DERIVE_PRIMARY) m->primary_value = o->primary_value;
+        if (d->mask & P4_ITEM_DERIVE_SECONDARY) m->secondary_value = o->secondary_value;
+        if (d->mask & P4_ITEM_DERIVE_PROPERTY) m->property = o->property;
+        if (d->mask & P4_ITEM_DERIVE_STATS) memcpy(m->stat_bonus, o->stat_bonus, sizeof m->stat_bonus);
+        if (d->mask & P4_ITEM_DERIVE_GRANTED) m->granted_skill = o->granted_skill;
+        if (d->mask & P4_ITEM_DERIVE_VALUE) m->value = o->value;
+        if (d->mask & P4_ITEM_DERIVE_ACCESSORY) m->accessory_percent = o->accessory_percent;
+        if (d->mask & P4_ITEM_DERIVE_ELEMENT) m->element = o->element;
+        if (d->mask & P4_ITEM_DERIVE_CATEGORY) m->category_mask = o->category_mask;
+        if (d->mask & P4_ITEM_DERIVE_PRICE) m->price = o->price;
+        if (d->mask & P4_ITEM_DERIVE_AVAILABLE) { m->available_month = o->available_month; m->available_day = o->available_day; }
+        if (d->mask & P4_ITEM_DERIVE_MOON) { m->first_moon_gate = o->first_moon_gate; m->second_moon_gate = o->second_moon_gate; }
+        if (m->kind > 31) return P4_TABLE_INVALID;
+        /* Native anchor inheritance is supported only for weapon-family icons. */
+        if (view->icon_anchor_plus_one && (m->kind != 0 || !(m->flags & 0x3fffu))) return P4_TABLE_INVALID;
+        if (m->kind) {
+            if (view->models_registered) return P4_TABLE_INVALID; /* Models are a weapon's. */
+            continue;
+        }
+        if (!view->models_registered) {
+            if (d->anchor > 255u) return P4_TABLE_INVALID;
+            view->right_model_id = d->anchor;
+            view->left_model_id = (m->category_mask & 0x40u) ? d->anchor + 1000u : P4_ITEM_MODEL_NONE;
+            view->models_registered = 1;
+        }
+        if (!models_valid(m, view->right_model_id, view->left_model_id)) return P4_TABLE_INVALID;
+    }
+    return P4_TABLE_OK;
+}
 int p4_game_tables_items_seal(P4GameItems *t, const uint8_t *file, size_t size,
     const P4GameText *names, const P4GameText *descriptions, uint32_t revision)
 {
@@ -313,6 +388,8 @@ int p4_game_tables_items_seal(P4GameItems *t, const uint8_t *file, size_t size,
         if (!np || !dp || np->encoding != P4_TEXT_ENCODING_US_RAW_NATIVE || dp->encoding != P4_TEXT_ENCODING_US_NATIVE ||
             !p4_game_tables_text_semantic_revision(names) || !p4_game_tables_text_semantic_revision(descriptions)) return P4_TABLE_INVALID;
     }
+    int derived = resolve_derived(t, file);
+    if (derived) return derived;
     if (t->count > 1) qsort(t->rows, t->count, sizeof *t->rows, item_compare);
     for (size_t i = 0; i < t->count; ++i) {
         const P4GameItemView *view = &t->rows[i];

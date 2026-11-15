@@ -33,6 +33,12 @@ before its sharp 125/128 run threshold. SDL already converts XInput Y; do not in
 `input.deadzone` / `P4PC_STICK_DEADZONE` optionally adds a circular inner dead zone
 (0..50 percent, default 0), without rescaling the remaining travel.
 
+On Android the touch pad's stick (see [Android](../android.md)) is a second source for the
+left stick: `p4pc_pad_touch_stick(x, y)` takes the thumb offset in units of the stick's travel
+(y down), clamps it to the unit circle and rescales away its own 15 percent dead zone;
+`p4pc_pad_sdl_read` then converts it like a gamepad axis, through `input.deadzone` and the
+PCSX2 quantization above, only while the gamepad's left stick is idle (it then outranks the D-pad's synthesized stick).
+
 ## Libpad packet and request lifetime
 
 Port 0 slot 0 is the controller; port 1 reports disconnected (0). Packets are 32-byte

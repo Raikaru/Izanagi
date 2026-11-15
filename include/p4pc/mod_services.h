@@ -20,7 +20,7 @@ enum P4ModSceneContext {
 };
 typedef struct P4ModSceneState {
     int context, sequence;
-    int ready;          /* idle: ready field/floor, player in control, no event, menu, battle, fade or request */
+    int ready;          /* idle: ready field/floor, player in control, no event, menu, battle, fade, request or skill choice (mod_field_host.h) */
     int control;        /* the player-control task ("rotate pc") exists */
     int event;          /* a message window or event holds the player's input */
     int menu;           /* the Camp root or native Config is open */
@@ -30,6 +30,8 @@ typedef struct P4ModSceneState {
 } P4ModSceneState;
 
 void p4_mod_scene_state(P4ModSceneState *out);
+/* Player's horizontal world position in a ready field or floor; 0 if unavailable. */
+int p4_mod_scene_player_position(float *x, float *z);
 
 /* Requests. Each returns 0 when queued, or -1 with reason (static text) when
  * refused before anything changed. Only one request is in flight at a time. */
@@ -40,10 +42,23 @@ uint32_t p4_mod_encounter_count(void);
 /* Enemy IDs of one encounter record (five slots, zero is empty) and its formation. */
 int p4_mod_encounter_info(uint32_t id, uint16_t enemies[5], uint16_t *field, uint16_t *variant);
 int p4_mod_encounter_launch(size_t owner, uint32_t id, const char **reason);
+/* Ends the current time slot the way an activity does: the calendar sequence
+ * applies the next slot of the same day and its scheduler procedure runs.
+ * Refused across midnight and during a hold (checked when requested and again
+ * at the frame boundary, just before the slot is staged). Status "done" with
+ * detail "passed" once the game is back in a ready field at that slot. */
+int p4_mod_calendar_pass(size_t owner, const char **reason);
+/* What holds the time, so that no activity may spend it: NULL when nothing
+ * does, else why (static text). A retail story hold, or the slot's scheduler
+ * procedure still running. */
+const char *p4_mod_calendar_hold(void);
 
-/* Status of the owner's last request: "idle", "requested", "battle",
- * "returning", "done" or "refused". detail is static text (refusal reason or
- * battle outcome name) and outcome the retail battle outcome (0..3, -1 none). */
+/* Status of the owner's last accepted request: "idle", "requested", "battle",
+ * "returning", "done" or "refused". Other owners cannot overwrite it; it is
+ * replaced on this owner's next accepted request and cleared on owner release.
+ * Serialize same-owner requests when each result matters. Copy detail before
+ * the next service operation or scheduler pump; it is borrowed and may change
+ * or become invalid. outcome is the retail battle outcome (0..3, -1 none). */
 const char *p4_mod_services_status(size_t owner, const char **detail, int *outcome);
 
 /* Clock. updates counts completed kwlnRunFrame updates (not its reset
@@ -64,6 +79,9 @@ const char *p4_mod_camera_owner(void);
 /* Exclusive input: the game receives a neutral pad while set; after it is
  * cleared or the lease ends, neutral continues until every button is up. */
 int p4_mod_camera_input(size_t owner, uint32_t generation, int exclusive);
+/* Ends the active lease, whoever holds it, as an event taking the scene does
+ * (game_party.c, before a skill choice takes the field); its input drains. */
+void p4_mod_camera_revoke(const char *why);
 /* Called by the renderer's camera seam (src/render/p4gl_camera.c) while
  * p4_mod_camera_override is set; begin before frame sync, end after drawing. */
 extern int p4_mod_camera_override;
@@ -76,6 +94,12 @@ int p4_mod_hud_hide(size_t owner, const char *group, int hidden, const char **re
 int p4_mod_hud_hidden(const char *group);
 /* Status rows with the "hud" placement changed (lua_ui.c). */
 void p4_mod_hud_status_changed(void);
+
+/* Practice speed (include/p4pc/pace.h): one owner; quarters 1, 2, 4, 8 or 16;
+ * 4 releases. The requested rate runs only in gameplay (held reason set
+ * otherwise). Refused on a virtual clock. Changes wall time only. */
+int p4_mod_pace_set(size_t owner, unsigned quarters, const char **reason);
+void p4_mod_pace_state(unsigned *requested, unsigned *effective, const char **held);
 
 /* Input fence for exclusive camera input (src/platform/pad/ps2_pad.c). */
 extern int p4_mod_input_fence;
@@ -92,4 +116,18 @@ int p4_mod_services_native_encounter(uint32_t id);
 int p4_mod_services_native_resources_ready(void);
 int p4_mod_services_native_battle_running(void);
 void p4_mod_services_native_revive_party(void);
+/* The current date index and slot, and the slot the next calendar step
+ * applies: 1 when the game has staged it, 0 when computed by the step's own
+ * rule from the current slot. */
+void p4_mod_services_native_calendar_now(int16_t *date, uint8_t *slot);
+int p4_mod_services_native_calendar_next(int16_t *date, uint8_t *slot);
+/* Stages date/slot through the game's setters when nothing is staged, then
+ * requests the calendar sequence (25), as K_Cmd_CALL_TV (00176320) does. */
+void p4_mod_services_native_calendar_pass(int16_t date, uint8_t slot);
+/* Which hold is active (services_native.c names its flags and task). */
+enum {
+    P4_MOD_CALENDAR_HOLD_NONE, P4_MOD_CALENDAR_HOLD_INVESTIGATION, P4_MOD_CALENDAR_HOLD_LAST_DAY,
+    P4_MOD_CALENDAR_HOLD_SCHEDULE
+};
+int p4_mod_services_native_calendar_hold(void);
 #endif

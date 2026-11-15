@@ -1,5 +1,7 @@
 # The retail float libm cores (newlib, EE-GCC), translated by tools/mips2c.py into src/platform/ee_libm.c.
 # window <from> <to>: data the code reads (constants and tables), copied from the retail image.
+# Direct LWC1 displacements into a window also use its native words, including
+# logf's 0xffffffff and powf's 0x7fffffff NaN payloads; no guest image is needed.
 # func <addr> <ret> <args> <end> [name]
 window 0x755098 0x7550a0
 window 0x755b90 0x755ee8

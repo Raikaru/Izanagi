@@ -32,6 +32,12 @@ int p4_game_skill_draw_description(uint32_t id, float x, float y, float scale,
 /* The legacy endurance-cache empty value 576 is a valid new skill. Expanded
  * sessions use the first value outside the allocatable skill domain. */
 uint16_t p4_game_skill_endurance_sentinel(void);
+/* The skill ID whose battle effect (skill/%03X.BED, 0x001D69F0) and sound bank
+ * (skill/%03X.se, 0x001F7D90/0x001F7E30) a cast uses: the ID itself for retail
+ * IDs and for any ID no package registers, an added skill's effect_source
+ * otherwise; an added skill without one refuses the session (fail-closed, not
+ * a missing-file hang). */
+uint32_t p4_game_skill_effect(uint32_t id);
 int p4_game_skills_expanded(void);
 int32_t p4_game_skill_inheritance_rate(uint32_t id);
 /* This selector indexes the legacy19-column inheritance matrix; it is not an

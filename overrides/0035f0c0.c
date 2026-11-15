@@ -95,7 +95,7 @@ s32 cmpConfigStepInput(u32 *phase, s32 *active, u8 *configWork)
                     sdkSndStartStream(0, 0, 0, 2);
                     goto native_done;
                 }
-                cmpConfigSyncFlags(configWork);
+                if (!(pc->flags & P4_SETTINGS_NATIVE_HOSTED)) cmpConfigSyncFlags(configWork);
                 cmpConfigSetMode(configWork, 1);
                 *phase = 2;
                 nLineSelectSet(0x22);
@@ -170,7 +170,7 @@ s32 cmpConfigStepInput(u32 *phase, s32 *active, u8 *configWork)
                 goto native_adjust;
             }
             if (pressed & 0x20) {
-                if (pc->view != P4_SETTINGS_NATIVE_ROOT) {
+                if (pc->view != P4_SETTINGS_NATIVE_ROOT && !(pc->flags & P4_SETTINGS_NATIVE_HOSTED_TOP)) {
                     pc->nextView = P4_SETTINGS_NATIVE_BACK;
                     cmpConfigSetMode(configWork, 1);
                     *phase = 6;
@@ -185,7 +185,7 @@ s32 cmpConfigStepInput(u32 *phase, s32 *active, u8 *configWork)
                 goto native_done;
             }
             if (pressed & 0x10) {
-                if (((CmpConfigWork *)configWork)->mode == 0) {
+                if (((CmpConfigWork *)configWork)->mode == 0 && !(pc->flags & P4_SETTINGS_NATIVE_HOSTED)) {
                     ((CmpConfigWork *)configWork)->background = datCommunityRequestExit();
                     *phase = 5;
                 }

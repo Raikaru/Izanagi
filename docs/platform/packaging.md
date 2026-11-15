@@ -7,13 +7,20 @@ Build from a clean committed checkout, in the `p4pc-ci` container ([BUILDING.md]
 The `build` workflow (`.github/workflows/build.yml`) runs both desktop packagers for
 every pushed `v*` tag and attaches their output to the release.
 
+Every package carries the committed `mods/` tree (bundled mods, present but
+disabled) where the game's `SDL_GetBasePath()` points: beside the exe on Windows,
+`usr/bin/mods` in the AppImage, `Contents/Resources/mods` in the macOS app. The
+Android package ships none ([bundled mods](../modding/files.md)).
+
 ## Windows
 
 `sh tools/package_win.sh [--build DIR] [--out DIR]` builds `p4pc64w.exe` and creates
 `<out>/p4pc-win64-<version>.zip` (default `dist/`; `<version>` is `git describe --tags --always --dirty`):
-the exe, the SDL3 and LGPL-only FFmpeg DLLs it loads, `README.txt`, `THIRD_PARTY_NOTICES.txt`,
-`licenses/`, the Luau source and `VERSION.txt`. Before it zips, it checks that the exe
-imports only system DLLs and the shipped ones, and runs `tests/ffmpeg_license_test.c`
+the exe, the SDL3 and LGPL-only FFmpeg DLLs it loads, `p4mod.exe` (the modder's CLI,
+[p4mod](../modding/p4mod.md)) with the `p4.d.luau` and `p4mod-capabilities.txt` it reads, `README.txt`,
+`THIRD_PARTY_NOTICES.txt`, `licenses/`, the Luau source, the FFmpeg source tarball and build recipe in `source/`,
+and `VERSION.txt`. Before it zips, it checks that both exes import only system DLLs and the shipped ones, and runs
+`tests/ffmpeg_license_test.c`
 under Wine against the shipped FFmpeg DLLs with `P4PC_REQUIRE_LGPL=1`.
 `P4PC_ISO=<your disc image> sh tools/package_smoke.sh <zip>` boots a package on a
 Windows machine the way a player starts it (Git Bash), hidden and with scripted input.
@@ -33,6 +40,8 @@ Make the file executable and run it. Without FUSE, use
 extract with `--appimage-extract`, replace ABI-compatible `squashfs-root/usr/lib/`
 objects and run `squashfs-root/AppRun`. Complete FFmpeg/SDL sources and the build
 recipe are in `usr/share/p4pc/source`; notices and licences are in the AppDir.
+`usr/bin/p4mod` and its two data files sit beside the game; `AppRun p4mod ...` (the AppImage with
+`p4mod` as its first argument) runs it instead of the game.
 The launcher does not override XDG paths: settings, saves and logs remain under
 `$XDG_DATA_HOME/p4pc/Persona4/` (default `~/.local/share/p4pc/Persona4/`).
 
@@ -46,6 +55,9 @@ the unsigned arm64-v8a release APK and AAB. Align and sign them with your own re
 `zipalign -f -p 4`, then `apksigner sign` / `apksigner verify` for the APK and `jarsigner`
 for the AAB. Keep the keystore and its password outside the repository and back them up:
 a later release must be signed with the same key to update an installed one.
+The build workflow builds the unsigned APK for every push and keeps it as a workflow artifact, so Android
+breakage shows up publicly; the signed APK is attached to releases by hand from the local signer. The AAB is
+a Play Store upload format and is not attached to GitHub releases.
 
 Set `P4PC_ANDROID_VERSION_NAME` to `git describe --tags --always --long` and
 `P4PC_ANDROID_VERSION_CODE` to the commit count of that revision, so it increases along the release branch.
@@ -105,9 +117,9 @@ retain data without the bridge. Never silently uninstall on a signature mismatch
 architecture: `p4pc-macos-arm64-<version>.zip` on Apple silicon, `p4pc-macos-x86_64-<version>.zip` on Intel.
 Each holds `Persona 4 PC.app` (the 64-bit player as `Contents/MacOS/p4pc`; SDL3, the LGPL-only FFmpeg and
 ANGLE in `Contents/Frameworks`, found through the run path `@executable_path/../Frameworks`), `README.txt`,
-`THIRD_PARTY_NOTICES.txt`, `licenses/` (with Chromium's notice file for ANGLE) and the Luau source. It checks
+`THIRD_PARTY_NOTICES.txt`, `licenses/` (with Chromium's notice file for ANGLE), the Luau source and the FFmpeg source tarball and build recipe in `source/`. It checks
 every Mach-O's load commands, runs the FFmpeg licence check against the bundled dylibs, signs ad hoc and verifies
-the signature. There is no Developer ID: the README tells players how to get past Gatekeeper the first time.
+the signature. ANGLE/Electron licence texts are fetched at packaging time from the SHA-pinned Electron zip and shipped in the macOS package; they are not committed to this repository. There is no Developer ID: the README tells players how to get past Gatekeeper the first time.
 Settings, saves and logs are in `~/Library/Application Support/p4pc/Persona4/`. Details: [macOS](macos.md).
 
 ## Native crash logs

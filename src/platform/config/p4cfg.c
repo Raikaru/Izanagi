@@ -33,6 +33,7 @@ static const struct {
     {"video.aspect", "P4PC_ASPECT"},
     {"video.movie_fit", "P4PC_MOVIE_FIT"},
     {"lockstep.directory", "P4PC_LOCKSTEP_DIR"}, {"lockstep.hotkey", "P4PC_LOCKSTEP_HOTKEY"}, {"lockstep.interval", "P4PC_LOCKSTEP_INTERVAL"},
+    {"game.mode", "P4PC_MODE"},
 };
 
 const char *p4cfg_template(void)

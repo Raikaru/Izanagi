@@ -165,6 +165,10 @@ pages, global windows, VU0 registers). The golden data (`golden9`, the per-call 
 - **libm against retail polynomials**: sin/cos/acos/atan agree to about 1e-5 relative.
 - **Aligned VU0 loads**: retail `lqc2`/`sqc2` mask the low 4 address bits; the native helpers use aligned SSE accesses, so an
   unaligned operand crashes the native (real callers pass 16-byte aligned data).
+- **VU0 sums** are the exact sum truncated (the natives' `include/p4pc/vu0.h` and PCSX2's SSE recompiler both): the interpreter
+  adds in an x87 `long double`, which rounds to nearest at 64 bits first, so it corrects the sum with its rounding error (`vu_sum`
+  in `tools/mipsdiff/r5900.c`). Before that, operands more than 64 bits apart could truncate to one ulp more, and a cancellation
+  near FLT_MAX could leave 0 where the VU leaves an ulp.
 
 ## Mismatches
 

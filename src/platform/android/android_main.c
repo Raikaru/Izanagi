@@ -24,6 +24,67 @@
 #include "p4pc/guest.h"
 #include "p4pc/os.h"
 #include "p4pc/settings.h"
+#include "../pad/pad_sdl.h"
+#include "../config/p4cfg.h"
+
+/* Java's UI thread queues writes; p4cfg is owned by the game thread. */
+static pthread_mutex_t pad_layout_mutex = PTHREAD_MUTEX_INITIALIZER;
+static char pad_layout_pending[600];
+static int pad_layout_dirty;
+
+JNIEXPORT void JNICALL Java_org_p4pc_game_P4Activity_nativeSavePadLayout(JNIEnv *env, jclass cls, jstring value)
+{
+    (void)cls;
+    const char *text = (*env)->GetStringUTFChars(env, value, NULL);
+    if (!text) return;
+    pthread_mutex_lock(&pad_layout_mutex);
+    snprintf(pad_layout_pending, sizeof pad_layout_pending, "%s", text);
+    pad_layout_dirty = 1;
+    pthread_mutex_unlock(&pad_layout_mutex);
+    (*env)->ReleaseStringUTFChars(env, value, text);
+}
+
+void p4_android_pad_layout_pump(void)
+{
+    static int loaded;
+    char pending[600];
+    int dirty;
+    pthread_mutex_lock(&pad_layout_mutex);
+    dirty = pad_layout_dirty;
+    if (dirty) {
+        memcpy(pending, pad_layout_pending, sizeof pending);
+        pad_layout_dirty = 0;
+    }
+    pthread_mutex_unlock(&pad_layout_mutex);
+    if (dirty && p4cfg_set_str("input.touch_layout", pending) != 0)
+        fputs("p4pc: cannot save touch layout\n", stderr);
+    if (loaded) return;
+    JNIEnv *env = SDL_GetAndroidJNIEnv();
+    if (!env || (*env)->PushLocalFrame(env, 4) < 0) return;
+    jobject activity = SDL_GetAndroidActivity();
+    jclass cls = activity ? (*env)->GetObjectClass(env, activity) : NULL;
+    jmethodID method = cls ? (*env)->GetMethodID(env, cls, "loadPadLayout", "(Ljava/lang/String;)V") : NULL;
+    const char *text = p4cfg_str("input.touch_layout", "");
+    jstring value = method ? (*env)->NewStringUTF(env, text) : NULL;
+    if (value) {
+        (*env)->CallVoidMethod(env, activity, method, value);
+        if (!(*env)->ExceptionCheck(env)) loaded = 1;
+    }
+    if ((*env)->ExceptionCheck(env)) (*env)->ExceptionClear(env);
+    (*env)->PopLocalFrame(env, NULL);
+}
+
+void p4_android_edit_pad_layout(void)
+{
+    JNIEnv *env = SDL_GetAndroidJNIEnv();
+    if (!env || (*env)->PushLocalFrame(env, 3) < 0) return;
+    jobject activity = SDL_GetAndroidActivity();
+    jclass cls = activity ? (*env)->GetObjectClass(env, activity) : NULL;
+    jmethodID method = cls ? (*env)->GetMethodID(env, cls, "editPadLayout", "()V") : NULL;
+    if (method) (*env)->CallVoidMethod(env, activity, method);
+    if ((*env)->ExceptionCheck(env)) (*env)->ExceptionClear(env);
+    (*env)->PopLocalFrame(env, NULL);
+}
 
 int p4pc_main(int argc, char **argv);
 int p4pc_viewer_main(int argc, char **argv); /* src/viewer/p4pc_viewer.c, built into libmain for the scene gates */
@@ -45,6 +106,13 @@ JNIEXPORT void JNICALL Java_org_p4pc_game_P4Activity_nativeHardwareKeyboardChang
     (void)env;
     (void)cls;
     p4_settings_android_keyboard_presence(connected != JNI_FALSE);
+}
+/* The touch pad's analog stick: PadOverlay's thumb offset, read by pad_sdl.c on the game thread. */
+JNIEXPORT void JNICALL Java_org_p4pc_game_P4Activity_nativeTouchStick(JNIEnv *env, jclass cls, jfloat x, jfloat y)
+{
+    (void)env;
+    (void)cls;
+    p4pc_pad_touch_stick(x, y);
 }
 void p4_settings_android_keyboard_watch(int enabled)
 {

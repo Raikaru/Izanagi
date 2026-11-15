@@ -1,0 +1,3 @@
+--!capability events.save@1
+--!covers event:save
+-- p4.events.on("save") (API 1.0).

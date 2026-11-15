@@ -1,0 +1,37 @@
+# Mod-witness only (p4pc.challenge NO FUSION): from story0422personas, enter the
+# Velvet Room and choose the root menu's third row, which is roster pair fusion when
+# flag 0x1305 is set (the witness fixture sets it). Then wait in place.
+timeout:6000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+walk:400,500,50
+face:90
+wait:20
+press:cross
+timeout:20000
+skip:900
+log
+wait:600
+press:circle
+wait:100
+press:circle
+wait:100
+press:circle
+wait:600
+log
+wait:600
+# The root menu slides in first; then Down twice reaches the third row.
+wait:300
+press:down
+wait:60
+press:down
+wait:60
+press:cross
+wait:900
+log
+wait:60000

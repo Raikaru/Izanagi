@@ -13,11 +13,24 @@ s32 initDataReadStep(u8 *task)
     state = ((InitDataReadWork *)work)->state;
     switch (state) {
     case 0:
+        {
+            int found = p4_game_table_admission_golden_load_item((const char *)P4_G2H(0x005e46a0u),
+                P4_G2H(0x0079bf00u), P4_ITEM_RETAIL_FILE_SIZE);
+            if (found < 0) p4_game_table_admission_golden_fail("item cache input is missing or invalid", found);
+            if (found) {
+                datEntryTableUseBuiltin();
+                p4_game_tables_items_native_use_builtin();
+                return -1;
+            }
+        }
         func_00440b68(&D_00762CB8, &D_00762CC0, 0x1FA);
         ((InitDataReadWork *)work)->file = H_Cdvd_AcquireDirectory(D_005E46A0, 0);
         ((InitDataReadWork *)work)->state += 1;
         break;
     case 1:
+        if (p4_game_table_admission_golden_active()) {
+            p4_game_table_admission_golden_fail("item load refused a stale disc request", 0);
+        }
         if (H_Cdvd_IsFileLoaded((HCdvd *)((InitDataReadWork *)work)->file) == 1) {
             s32 result;
             file = readWork->file;

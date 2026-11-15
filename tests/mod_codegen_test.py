@@ -27,8 +27,8 @@ class ModCodegen(unittest.TestCase):
     def test_scalar_signedness_and_guest_pointer_marshalling(self):
         text = (ROOT / "tests/mod_hooks_game.c").read_text(encoding="utf-8")
         count, game, bridge = self.generate(text)
-        self.assertEqual(count, 6)
-        for signature in ('"II"', '"hbH"', '"fifpd"', '"pp"', '"ii"', '"vp"'):
+        self.assertEqual(count, 7)
+        for signature in ('"II"', '"hbH"', '"fifpd"', '"pp"', '"ii"', '"vp"', '"vppH"'):
             self.assertIn(signature, bridge)
         self.assertNotIn("P4ModValue", game)
         self.assertIn("P4_H2G(a2)", bridge)
@@ -38,7 +38,7 @@ class ModCodegen(unittest.TestCase):
         self.assertIn('#include "p4pc/mod_entry.h"', game)
         self.assertNotIn("P4ModFunction", game)
         self.assertNotIn("__attribute__((noinline))", game)
-        self.assertEqual(bridge.count("__attribute__((noinline))"), 6)
+        self.assertEqual(bridge.count("__attribute__((noinline))"), 7)
         self.assertIn("p4_mod_f32_number(a1)", bridge)
         self.assertIn("p4_mod_f32_value(result.d)", bridge)
         self.assertIn("(int64_t)(int32_t)(a0)", bridge)

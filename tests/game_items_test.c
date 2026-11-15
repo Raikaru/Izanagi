@@ -4,6 +4,7 @@
 #include "p4pc/game_items.h"
 #include "p4pc/game_items_ui.h"
 #include "p4pc/game_tables_native.h"
+#include "p4pc/game_table_overlay.h"
 #include "../src/platform/mods/mod_resources_native.h"
 #include "guest_test.h"
 #include <assert.h>
@@ -305,11 +306,23 @@ static int compile_items(P4GameItems *items, const uint8_t *file, size_t size,
     int result = p4_game_tables_items_seal(items, file, size, names, descriptions, revision);
     return result ? result : p4_game_tables_items_materialize(items);
 }
+/* The table service's session overlay of the retail item table re-applies after
+ * every publication of the built-in copy (game_table_overlay.c, API 1.11). */
+static unsigned retail_publications;
+void p4_game_tables_overlay_static_published(uint32_t address, uint32_t bytes)
+{
+    assert(address == 0x0079bf10u && bytes == P4_ITEM_RETAIL_COUNT * P4_ITEM_ROW_SIZE);
+    assert(P4_G32(0x007642a0u) == address);
+    ++retail_publications;
+}
 static void native_read(const uint8_t *file)
 {
     assert(p4_game_tables_items_native_load("init/itemtbl.bin", file, P4_ITEM_RETAIL_FILE_SIZE) == P4_TABLE_OK);
     memcpy(P4_G2H(0x0079bf00u), file, P4_ITEM_RETAIL_FILE_SIZE);
+    const unsigned before = retail_publications;
     p4_game_tables_items_native_use_builtin();
+    /* Only the built-in retail table is announced; a catalog's own base is not. */
+    assert(retail_publications == before + (P4_G32(0x007642a0u) == 0x0079bf10u));
 }
 static P4GameItemsUi *runtime_prepare(P4GameItems *items, const uint8_t *file,
     const P4GameText *names, const P4GameText *descriptions, const P4Resources *resources)
@@ -621,6 +634,142 @@ static void semantic_phase(const P4GameTableAllocator *allocator, const uint8_t 
     p4_game_tables_text_destroy(names); p4_game_tables_text_destroy(descriptions);
     assert(live_arenas == live);
 }
+/* Derived rows: an anchor's retail row, copied at seal, with named overrides;
+ * weapons without models bind the anchor's own native keys. */
+static void anchor_row(uint8_t *file, uint32_t id, const P4ItemRow *row)
+{
+    memcpy(file + P4_ITEM_FILE_HEADER_SIZE + id * P4_ITEM_ROW_SIZE, row, sizeof *row);
+}
+static int derived_seal(const P4GameTableAllocator *allocator, const uint8_t *file,
+    const P4GameText *names, const P4GameText *descriptions, uint32_t anchor, uint32_t right, uint32_t left)
+{
+    P4GameItems *items = p4_game_tables_items_create(allocator); assert(items);
+    const P4GameItemDesc row = {.id = 1610, .revision = 1, .key = "gear:derived-case", .icon = {"art", "art:square", 1}};
+    const P4GameItemDerive derive = {.anchor = anchor};
+    assert(p4_game_tables_items_register_derived(items, "gear", &row, &derive) == P4_TABLE_OK);
+    if (right != P4_ITEM_MODEL_NONE)
+        assert(p4_game_tables_items_models_register(items, "gear", 1610, right, left) == P4_TABLE_OK);
+    const int result = p4_game_tables_items_seal(items, file, P4_ITEM_RETAIL_FILE_SIZE, names, descriptions, 4);
+    p4_game_tables_items_destroy(items);
+    return result;
+}
+static void derived_rows(const P4GameTableAllocator *allocator, const uint8_t *retail)
+{
+    uint8_t *file = malloc(P4_ITEM_RETAIL_FILE_SIZE); assert(file);
+    memcpy(file, retail, P4_ITEM_RETAIL_FILE_SIZE);
+    const P4ItemRow sword = {.kind = 0, .flags = 0x11, .primary_value = 30, .secondary_value = 90, .property = 5,
+        .stat_bonus = {1, 0, 0, 0, 0}, .value = 0, .element = 0, .category_mask = 0x20, .price = 500,
+        .available_month = 4, .available_day = 20, .first_moon_gate = 7};
+    P4ItemRow knives = sword, shoes = sword, ward = {.kind = 2, .flags = 0x22, .stat_bonus = {0, 3, 0, 0, 0},
+        .category_mask = 0x3E0, .price = 1000};
+    knives.category_mask = 0x40; shoes.category_mask = 0x80;
+    anchor_row(file, 4, &sword); anchor_row(file, 48, &knives); anchor_row(file, 0x70, &shoes);
+    anchor_row(file, 0x204, &ward); anchor_row(file, 0x300, &sword);
+    P4TextProfile raw = {P4_TEXT_ENCODING_US_RAW_NATIVE, P4_TEXT_FONT_US_NATIVE};
+    P4TextProfile message = {P4_TEXT_ENCODING_US_NATIVE, P4_TEXT_FONT_US_NATIVE};
+    P4GameText *names = p4_game_tables_text_create(allocator, &raw);
+    P4GameText *descriptions = p4_game_tables_text_create(allocator, &message);
+    assert(names && descriptions);
+    for (uint32_t id = 1600; id <= 1610; ++id) {
+        text(names, P4_TEXT_ITEM, id, P4_TEXT_NAME, "Forged");
+        text(descriptions, P4_TEXT_ITEM, id, P4_TEXT_DESCRIPTION, "Forged description");
+    }
+    assert(!p4_game_tables_text_seal(names, 3) && !p4_game_tables_text_seal(descriptions, 4));
+    P4GameItems *items = p4_game_tables_items_create(allocator); assert(items);
+    P4GameItemDesc row = {.id = 1600, .revision = 1, .key = "gear:forged", .icon = {"art", "art:square", 1},
+        .metadata = {.kind = 9, .price = 1}}; /* A derived row's own metadata is ignored. */
+    P4GameItemDerive derive = {.anchor = 4, .mask = P4_ITEM_DERIVE_PRICE | P4_ITEM_DERIVE_ELEMENT |
+        P4_ITEM_DERIVE_VALUE | P4_ITEM_DERIVE_PROPERTY,
+        .overrides = {.price = 1200, .element = 2, .value = 0x24, .property = 9, .primary_value = 999}};
+    assert(p4_game_tables_items_register_derived(items, "gear", &row, &derive) == P4_TABLE_OK);
+    row.id = 1601; row.key = "gear:forged-knives"; derive = (P4GameItemDerive){.anchor = 48};
+    assert(p4_game_tables_items_register_derived(items, "gear", &row, &derive) == P4_TABLE_OK);
+    row.id = 1602; row.key = "gear:forged-ward";
+    derive = (P4GameItemDerive){.anchor = 0x204, .mask = P4_ITEM_DERIVE_STATS | P4_ITEM_DERIVE_AVAILABLE |
+        P4_ITEM_DERIVE_MOON, .overrides = {.stat_bonus = {-1, 2, 0, 0, 5}, .available_month = -1,
+            .available_day = 3, .first_moon_gate = 0, .second_moon_gate = 0x10}};
+    assert(p4_game_tables_items_register_derived(items, "gear", &row, &derive) == P4_TABLE_OK);
+    row.id = 1603; row.key = "gear:forged-shoes"; derive = (P4GameItemDerive){.anchor = 0x70};
+    assert(p4_game_tables_items_register_derived(items, "gear", &row, &derive) == P4_TABLE_OK);
+    /* An explicit model on a derived weapon is checked against its anchor at seal. */
+    row.id = 1604; row.key = "gear:forged-model"; derive = (P4GameItemDerive){.anchor = 4};
+    assert(p4_game_tables_items_register_derived(items, "gear", &row, &derive) == P4_TABLE_OK);
+    assert(p4_game_tables_items_models_register(items, "gear", 1604, 9, P4_ITEM_MODEL_NONE) == P4_TABLE_OK);
+    row.id = 1605; row.key = "gear:bad-anchor"; derive = (P4GameItemDerive){.anchor = P4_ITEM_RETAIL_COUNT};
+    assert(p4_game_tables_items_register_derived(items, "gear", &row, &derive) == P4_TABLE_INVALID);
+    derive = (P4GameItemDerive){.anchor = 4, .mask = P4_ITEM_DERIVE_FIELDS + 1};
+    assert(p4_game_tables_items_register_derived(items, "gear", &row, &derive) == P4_TABLE_INVALID);
+    assert(p4_game_tables_items_seal(items, file, P4_ITEM_RETAIL_FILE_SIZE, names, descriptions, 4) == P4_TABLE_OK);
+    const P4GameItemView *view = p4_game_tables_items_find(items, 1600);
+    P4ItemRow expected = sword;
+    expected.price = 1200; expected.element = 2; expected.value = 0x24; expected.property = 9; /* Only the named fields. */
+    assert(view && !memcmp(&view->metadata, &expected, sizeof expected));
+    assert(view->models_registered && view->right_model_id == 4 && view->left_model_id == P4_ITEM_MODEL_NONE);
+    view = p4_game_tables_items_find(items, 1601);
+    assert(view && !memcmp(&view->metadata, &knives, sizeof knives) &&
+        view->right_model_id == 48 && view->left_model_id == 1048); /* Unit 2's left key. */
+    view = p4_game_tables_items_find(items, 1602);
+    expected = ward; expected.stat_bonus[0] = -1; expected.stat_bonus[1] = 2; expected.stat_bonus[4] = 5;
+    expected.available_month = -1; expected.available_day = 3; expected.second_moon_gate = 0x10;
+    assert(view && !memcmp(&view->metadata, &expected, sizeof expected) && !view->models_registered);
+    view = p4_game_tables_items_find(items, 1603);
+    assert(view && view->right_model_id == 0x70 && view->left_model_id == P4_ITEM_MODEL_NONE);
+    view = p4_game_tables_items_find(items, 1604);
+    assert(view && view->right_model_id == 9 && !memcmp(&view->metadata, &sword, sizeof sword));
+    p4_game_tables_items_destroy(items);
+    /* Seal refusals: models on a non-weapon, unit 2 without a left key, unit 3
+     * outside 0x70..0x95, and a weapon anchor with no native key of its own. */
+    assert(derived_seal(allocator, file, names, descriptions, 0x204, 4, P4_ITEM_MODEL_NONE) == P4_TABLE_INVALID);
+    assert(derived_seal(allocator, file, names, descriptions, 48, 48, P4_ITEM_MODEL_NONE) == P4_TABLE_INVALID);
+    assert(derived_seal(allocator, file, names, descriptions, 0x70, 0x60, P4_ITEM_MODEL_NONE) == P4_TABLE_INVALID);
+    assert(derived_seal(allocator, file, names, descriptions, 0x300, P4_ITEM_MODEL_NONE, P4_ITEM_MODEL_NONE) == P4_TABLE_INVALID);
+    assert(derived_seal(allocator, file, names, descriptions, 4, P4_ITEM_MODEL_NONE, P4_ITEM_MODEL_NONE) == P4_TABLE_OK);
+    /* Explicit native inheritance is distinct from missing or conflicting art,
+     * retains the selected retail ID, and needs no authored resource service. */
+    items = p4_game_tables_items_create(allocator); assert(items);
+    row = (P4GameItemDesc){.id = 1605, .revision = 1, .key = "gear:native-icon"};
+    derive = (P4GameItemDerive){.anchor = 4, .icon_from_anchor = 1};
+    assert(p4_game_tables_items_register(items, "gear", &row) == P4_TABLE_INVALID);
+    row.icon = (P4ResourceRef){"art", "art:square", 1};
+    assert(p4_game_tables_items_register_derived(items, "gear", &row, &derive) == P4_TABLE_INVALID);
+    row.icon = (P4ResourceRef){0};
+    derive.icon_from_anchor = 2;
+    assert(p4_game_tables_items_register_derived(items, "gear", &row, &derive) == P4_TABLE_INVALID);
+    derive.icon_from_anchor = 1;
+    assert(p4_game_tables_items_register_derived(items, "gear", &row, &derive) == P4_TABLE_OK);
+    assert(p4_game_tables_items_seal(items, file, P4_ITEM_RETAIL_FILE_SIZE, names, descriptions, 4) == P4_TABLE_OK);
+    view = p4_game_tables_items_find(items, 1605);
+    assert(view && view->icon_anchor_plus_one == 5 && !memcmp(&view->metadata, &sword, sizeof sword));
+    P4GameItemsUi *native_ui = NULL;
+    assert(p4_game_tables_items_ui_prepare(items, NULL, &native_ui) == P4_TABLE_OK && native_ui);
+    assert(p4_game_tables_items_ui_item(native_ui, 1605) == 0);
+    p4_game_tables_items_ui_destroy(native_ui);
+    p4_game_tables_items_destroy(items);
+    items = p4_game_tables_items_create(allocator); assert(items);
+    assert(p4_game_tables_items_register_derived(items, "gear", &row, &derive) == P4_TABLE_OK);
+    P4GameItemDesc authored = {.id = 1606, .revision = 1, .key = "gear:authored-icon",
+        .icon = {"art", "art:square", 1}};
+    P4GameItemDerive authored_derive = {.anchor = 4};
+    assert(p4_game_tables_items_register_derived(items, "gear", &authored, &authored_derive) == P4_TABLE_OK);
+    assert(p4_game_tables_items_seal(items, file, P4_ITEM_RETAIL_FILE_SIZE, names, descriptions, 4) == P4_TABLE_OK);
+    native_ui = NULL;
+    assert(p4_game_tables_items_ui_prepare(items, NULL, &native_ui) == P4_TABLE_NOT_READY && !native_ui);
+    p4_game_tables_items_destroy(items);
+    items = p4_game_tables_items_create(allocator); assert(items);
+    derive.anchor = 0x204; /* Non-weapons cannot opt into this provider. */
+    assert(p4_game_tables_items_register_derived(items, "gear", &row, &derive) == P4_TABLE_OK);
+    assert(p4_game_tables_items_seal(items, file, P4_ITEM_RETAIL_FILE_SIZE, names, descriptions, 4) == P4_TABLE_INVALID);
+    p4_game_tables_items_destroy(items);
+    items = p4_game_tables_items_create(allocator); assert(items);
+    P4ItemRow no_icon = sword; no_icon.flags = 0;
+    anchor_row(file, 5, &no_icon);
+    derive.anchor = 5;
+    assert(p4_game_tables_items_register_derived(items, "gear", &row, &derive) == P4_TABLE_OK);
+    assert(p4_game_tables_items_seal(items, file, P4_ITEM_RETAIL_FILE_SIZE, names, descriptions, 4) == P4_TABLE_INVALID);
+    p4_game_tables_items_destroy(items);
+    p4_game_tables_text_destroy(names); p4_game_tables_text_destroy(descriptions);
+    free(file);
+}
 
 int main(void)
 {
@@ -923,6 +1072,7 @@ int main(void)
     p4_game_tables_items_ui_destroy(ui);
     p4_game_tables_items_destroy(items);
     semantic_phase(&allocator, file);
+    derived_rows(&allocator, file);
     memset(file, 0, P4_ITEM_RETAIL_FILE_SIZE); free(file);
     assert(!p4_resources_query(icon) && !p4_resources_query(category_icon) && rasters == 2 && destroyed == 2);
     p4_game_tables_text_destroy(names); p4_game_tables_text_destroy(descriptions);

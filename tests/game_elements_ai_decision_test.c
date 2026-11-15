@@ -1,6 +1,8 @@
 /* Production decision/weight carrier with labeled scalar boundaries. This does
  * not certify native BF/bank admission, actual RNG, or gameplay parity. */
 #include "../src/platform/mods/game_elements_ai_state.h"
+#include "guest_test.h"
+#include "p4pc/game_skills_native.h"
 #include <assert.h>
 #include <string.h>
 
@@ -8,6 +10,10 @@ static P4AiCarrier carrier;
 static unsigned char actor, record[P4_GAME_AI_RECORD_BYTES];
 static unsigned selections, constructions, plan_calls, prediction_calls;
 static uint32_t prediction[P4_GAME_AI_CANDIDATE_COUNT];
+static int expanded = 1;
+enum { SELF_SKILL = 227, ALL_SKILL = 145, SINGLE_SKILL = 7 };
+int p4_game_elements_ai_native_enabled(void) { return expanded; }
+int p4_game_skill_active(uint32_t id) { return id < P4_SKILL_RETAIL_ACTIVE_COUNT; }
 P4AiCarrier *p4_ai_native_carrier(void *source)
 {
     return source == &actor ? &carrier : NULL;
@@ -40,7 +46,11 @@ int p4_game_elements_ai_native_command(void *source, uint32_t command, P4GameAiS
         if (carrier.available[i].command == command) {
             *out = (P4GameAiSelection){.valid = 1, .candidate = carrier.available[i]}; return 0;
         }
-    return P4_TABLE_NOT_FOUND;
+    /* Any active skill outside the actor's sources, as the real constructor builds it. */
+    *out = (P4GameAiSelection){.valid = 1, .candidate = {.command = command,
+        .eligibility = P4_GAME_AI_CANDIDATE_TABLE}};
+    out->candidate.frame.skill_id = command;
+    return 0;
 }
 int p4_game_elements_ai_native_plan_begin(void *work, void *source, uint32_t parameter,
     int32_t selector, P4GameAiQueryPlan *out)
@@ -152,11 +162,98 @@ static void one_query_and_epoch_bound_capture(void)
     assert(p4_game_elements_ai_native_decision_group(&actor, 0, 1, 0, &eligible) == P4_TABLE_CONFLICT && eligible == 42);
     assert(!selections && !constructions);
 }
+static void weighted_pick_of_seven(void)
+{
+    reset(); entry(0, 0, SINGLE_SKILL, 100);
+    assert(!p4_game_elements_ai_native_decision_begin(&actor, NULL)); condition(0, 2, 1);
+    uint32_t eligible;
+    assert(!p4_game_elements_ai_native_decision_group(&actor, 0, 1, 0, &eligible) && eligible);
+    assert(!p4_game_elements_ai_native_decision_end(&actor));
+    assert(!p4_game_elements_ai_native_weight_pick(&actor, 0, 0));
+    assert(carrier.selected.candidate.command == SINGLE_SKILL);
+}
+static void authored_substitution_replaces_only_its_decode(void)
+{
+    weighted_pick_of_seven();
+    unsigned built = constructions;
+    assert(p4_game_elements_ai_native_substitute(&actor, SINGLE_SKILL) == P4_TABLE_CONFLICT);
+    assert(p4_game_elements_ai_native_substitute(&actor, P4_SKILL_RETAIL_ACTIVE_COUNT) == P4_TABLE_NOT_FOUND);
+    assert(!carrier.substitute_valid);
+    /* Unauthorized, a command outside the drawn group's permission is refused. */
+    assert(p4_game_elements_ai_native_decoded(&actor, 2, SELF_SKILL) == P4_TABLE_CONFLICT);
+    assert(!p4_game_elements_ai_native_substitute(&actor, SELF_SKILL) && carrier.substitute_valid);
+    assert(!p4_game_elements_ai_native_decoded(&actor, 2, SELF_SKILL) && !carrier.substitute_valid);
+    assert(carrier.selected.candidate.command == SELF_SKILL && constructions == built + 1);
+    assert(carrier.selected.candidate.eligibility & P4_GAME_AI_CANDIDATE_AUTHORED);
+    assert(carrier.selected.decision.conditions[0] == 0x80000000u); /* The original draw's decision. */
+    /* One shot: the next decode of that command is ordinary again. */
+    assert(p4_game_elements_ai_native_decoded(&actor, 2, SELF_SKILL) == P4_TABLE_CONFLICT);
+    /* It covers only the command it named, and that decode discards it. */
+    assert(!p4_game_elements_ai_native_substitute(&actor, ALL_SKILL));
+    assert(p4_game_elements_ai_native_decoded(&actor, 2, SELF_SKILL) == P4_TABLE_CONFLICT && !carrier.substitute_valid);
+    assert(!p4_game_elements_ai_native_substitute(&actor, ALL_SKILL));
+    assert(!p4_game_elements_ai_native_root_end(&actor) && !carrier.substitute_valid);
+}
+static void script_decode_window(void)
+{
+    reset();
+    void *work = p4t_galloc(P4_GAME_AI_VM_WORK_PAYLOAD, 16), *found = &actor;
+    uint32_t parameter = 0;
+    assert(work);
+    assert(!p4_game_elements_ai_native_decode_work(&actor, &found, &parameter) && !found && parameter == UINT32_MAX);
+    assert(!p4_game_elements_ai_native_substitute(&actor, ALL_SKILL));
+    assert(!p4_game_elements_ai_native_decode_begin(&actor, work, 1) && !carrier.substitute_valid);
+    assert(p4_game_elements_ai_native_decode_begin(&actor, work, 1) == P4_TABLE_CONFLICT);
+    assert(!p4_game_elements_ai_native_decode_work(&actor, &found, &parameter) && found == work && parameter == 1);
+    assert(!p4_game_elements_ai_native_substitute(&actor, ALL_SKILL) && carrier.substitute_valid);
+    /* A replacing hook may skip the decode: the end of the call discards it. */
+    assert(!p4_game_elements_ai_native_decode_end(&actor) && !carrier.substitute_valid);
+    assert(p4_game_elements_ai_native_decode_end(&actor) == P4_TABLE_CONFLICT);
+    assert(!p4_game_elements_ai_native_decode_work(&actor, &found, &parameter) && !found && parameter == UINT32_MAX);
+}
+static void retail_mode_checks_scope_only(void)
+{
+    reset(); expanded = 0;
+    assert(!p4_game_elements_ai_native_substitute(&actor, SELF_SKILL) && !carrier.substitute_valid);
+    assert(p4_game_elements_ai_native_substitute(&actor, SINGLE_SKILL) == P4_TABLE_CONFLICT);
+    expanded = 1;
+}
+static void decide_rebinds_any_scope_after_release(void)
+{
+    weighted_pick_of_seven();
+    unsigned built = constructions;
+    /* p4.battle.decide: the released record names a single-target skill the
+     * drawn group never permitted; the selected frame follows it, authored,
+     * keeping the original draw's decision, and no authorization is left. */
+    assert(!p4_game_elements_ai_native_decide(&actor, 2, ALL_SKILL + 1));
+    assert(carrier.selected.valid && carrier.selected.candidate.command == ALL_SKILL + 1);
+    assert(carrier.selected.candidate.eligibility & P4_GAME_AI_CANDIDATE_AUTHORED);
+    assert(carrier.selected.decision.conditions[0] == 0x80000000u && constructions == built + 1);
+    assert(!carrier.substitute_valid);
+    assert(p4_game_elements_ai_native_decide(&actor, 2, P4_SKILL_RETAIL_ACTIVE_COUNT) == P4_TABLE_NOT_FOUND);
+    assert(p4_game_elements_ai_native_decide(&actor, 3, SELF_SKILL) == P4_TABLE_INVALID);
+    /* A pass selects no frame. */
+    assert(!p4_game_elements_ai_native_decide(&actor, 7, 0) && !carrier.selected.valid);
+    /* Without the expanded carrier there is nothing to bind. */
+    expanded = 0;
+    assert(!p4_game_elements_ai_native_decide(&actor, 2, SINGLE_SKILL));
+    expanded = 1;
+}
 int main(void)
 {
+    if (p4t_guest_map(0x00764000u, 0x2000u)) return 77;
+    uint8_t *rows = p4t_galloc(P4_SKILL_RETAIL_ACTIVE_COUNT * P4_SKILL_ROW_SIZE, 16);
+    assert(rows);
+    rows[SELF_SKILL * P4_SKILL_ROW_SIZE + 0x0a] = 1; /* Target filter: the actor itself. */
+    rows[ALL_SKILL * P4_SKILL_ROW_SIZE + 0x08] = 1; /* Target class: every collected unit. */
+    P4_G32(0x007644a8u) = P4_H2G(rows);
     different_frames_do_not_conjoin();
     zero_total_is_only_the_original_basic_sentinel();
     table_command_keeps_full_identity();
     one_query_and_epoch_bound_capture();
+    authored_substitution_replaces_only_its_decode();
+    script_decode_window();
+    retail_mode_checks_scope_only();
+    decide_rebinds_any_scope_after_release();
     return 0;
 }

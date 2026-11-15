@@ -16,6 +16,10 @@ void p4_settings_android_keyboard_watch(int enabled)
     (void)enabled;
 }
 
+/* Script-only runner has no Activity or touch overlay. */
+void p4_android_pad_layout_pump(void) { }
+void p4_android_edit_pad_layout(void) { }
+
 /* There is no Activity to hand a restart to; the normal error path handles it. */
 int p4_android_prepare_restart(void)
 {

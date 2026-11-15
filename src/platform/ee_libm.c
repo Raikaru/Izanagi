@@ -2513,7 +2513,7 @@ float func_00449680(float arg0)
     { int c_ = (int32_t)t7 != 0;
       t7 = W(0x750000u);
       if (c_) goto L_4496ac; }
-    f0 = *(float *)(uintptr_t)(t7+23716);
+    f0 = float_of(K_755b90[69]);
     return f0;
 L_4496ac:;
     t6 = W(0x4a0000u);
@@ -2815,7 +2815,7 @@ L_449b2c:;
     f0 = float_of((uint32_t)0);
     goto L_4499e4;
 L_449b34:;
-    f0 = *(float *)(uintptr_t)(t7+23908);
+    f0 = float_of(K_755b90[117]);
     goto L_4499e4;
 L_449b3c:;
     t7 = W(0x3f800007u);
@@ -2824,7 +2824,7 @@ L_449b3c:;
     if ((int32_t)t7 == 0) goto L_449b60;
     t7 = W(0x750000u);
     if ((int32_t)s1 <= 0) goto L_449b2c;
-    f0 = *(float *)(uintptr_t)(t7+23908);
+    f0 = float_of(K_755b90[117]);
     goto L_4499e4;
 L_449b60:;
     t6 = W(0x750000u);

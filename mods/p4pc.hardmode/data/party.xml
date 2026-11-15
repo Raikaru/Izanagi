@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="us-ascii"?>
+<!-- p4pc.hardmode early party changes, hardmode-design 15.1.1 (G1-G4; approved
+     2026-11-05). Learn-event deltas over the composed party block (tables.md "Table
+     deltas"), so they apply over Golden's learnsets as over the disc's; each names the
+     event by the skill it teaches, and the row is re-sorted by level. A first-form
+     Persona's change is repeated on its second form, whose learnset continues it.
+     Frost Dive (700) and Thunder Dive (701) are this mod's skills (data/skills.xml). -->
+<p4-table-deltas schema="1">
+<!-- G1: Jiraiya and Susano-o learn Garula (0x0F) at 23 instead of 29. -->
+<learn-delta persona="0xC0" skill="0x0F" level="23"/>
+<learn-delta persona="0xC1" skill="0x0F" level="23"/>
+<!-- G2: Tomoe and Suzuka Gongen learn Frost Dive where they learned Assault Dive (0x7A). -->
+<learn-delta persona="0xC2" skill="0x7A" replace="700"/>
+<learn-delta persona="0xC3" skill="0x7A" replace="700"/>
+<!-- G3: Konohana Sakuya and Amaterasu learn Maragion (0x05) at 34 instead of 39. -->
+<learn-delta persona="0xC4" skill="0x05" level="34"/>
+<learn-delta persona="0xC5" skill="0x05" level="34"/>
+<!-- G4: Take-Mikazuchi and Rokuten Maoh know Hysterical Slap (0x9D, Rage) from the
+     start, learn Thunder Dive at 28 (Take-Mikazuchi's base level 25, join + 3) and
+     Mazionga (0x2B) at 36 instead of 40. -->
+<learn-delta persona="0xC6" add="0x9D" level="0"/>
+<learn-delta persona="0xC6" add="701" level="28"/>
+<learn-delta persona="0xC6" skill="0x2B" level="36"/>
+<learn-delta persona="0xC7" add="0x9D" level="0"/>
+<learn-delta persona="0xC7" add="701" level="28"/>
+<learn-delta persona="0xC7" skill="0x2B" level="36"/>
+</p4-table-deltas>

@@ -39,7 +39,7 @@ for check in home toggle last-toggle catalog-last catalog-identity detail detail
     exit 1
   fi
 done
-if ! grep -Fq '14 shots, 0 dark, 0 failed writes' boot.log; then
+if ! grep -Fq '17 shots, 0 dark, 0 failed writes' boot.log; then
   echo "settings_pages: missing or stale native capture"
   exit 1
 fi
@@ -58,6 +58,20 @@ for left, right in (
 ):
     if Path(left).read_bytes() == Path(right).read_bytes():
         raise SystemExit("identical native captures: " + left + " / " + right)
+images = [read_png(name) for name in ("menu_pages_info.png", "menu_pages_info_alt.png", "menu_pages_info_empty.png")]
+if len({image[:3] for image in images}) != 1:
+    raise SystemExit("INFO captures have different dimensions")
+width, height, channels, first = images[0]
+_, _, _, alternate = images[1]
+_, _, _, empty = images[2]
+def pixel(image, x, y):
+    offset = ((y * height // 448) * width + x * width // 640) * channels
+    return image[offset:offset + 3]
+if not any(pixel(first, x, y) != pixel(alternate, x, y)
+           for y in range(110, 160) for x in range(480, 590)):
+    raise SystemExit("changing an INFO value did not change its rendered value")
+if max(pixel(empty, 592, 149)) >= 96:
+    raise SystemExit("empty INFO selection strip stops before its right cap")
 width, height, channels, pixels = read_png("menu_pages_detail.png")
 for x in (592, 596):
     offset = ((149 * height // 448) * width + x * width // 640) * channels

@@ -1,6 +1,7 @@
 #ifndef P4PC_GAME_ELEMENTS_AI_COMMANDS_H
 #define P4PC_GAME_ELEMENTS_AI_COMMANDS_H
 #include <stdint.h>
+#include "p4pc/mod_memory.h"
 /* Immutable executable contracts, not resource-provider identities.
  * Qualified D_00748530 groups in SLUS_217.82 sha1
  * 4eeec0360cf2715535d9f7e52eb69d786fb0158c; decomp/docs/dispatch_tables.md:47–575.
@@ -121,6 +122,13 @@ static inline uint32_t p4_ai_semantic_binding(uint32_t command)
     case 0x20fau: return 0x001e9950u;
     default: return 0u;
     }
+}
+/* Dispatch words are retail addresses on 64-bit, but patched native pointers
+ * on i386. Compare the actual word against the same encoded function identity. */
+static inline int p4_ai_semantic_binding_matches(uint32_t command, uint32_t word)
+{
+    uint32_t expected = p4_ai_semantic_binding(command), encoded;
+    return !expected || (!p4_mod_memory_function_encode(expected, &encoded) && word == encoded);
 }
 static inline int p4_ai_command_uses_frames(uint32_t command)
 {

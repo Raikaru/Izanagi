@@ -11,5 +11,5 @@ out = pathlib.Path(sys.argv[1])
 out.mkdir(parents=True, exist_ok=True)
 gen_port.write_if_changed(out / "game.c", (root / "tests/mod_hooks_game.c").read_text(encoding="utf-8"))
 count = mod_codegen.instrument(out, ["game.c"], out, gen_port)
-if count != 6:
-    raise SystemExit(f"expected six typed fixture entries, generated {count}")
+if count != 7:
+    raise SystemExit(f"expected seven typed fixture entries, generated {count}")

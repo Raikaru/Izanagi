@@ -1,0 +1,3 @@
+--!capability events.battle_start@1
+--!covers event:battle_start
+-- p4.events.on("battle_start") (API 1.0).

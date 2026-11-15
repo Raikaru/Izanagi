@@ -177,6 +177,13 @@ int p4_os_extended_path(char *path, size_t capacity);
 int p4_os_resolved_path(const char *path,char *out,size_t capacity);
 /* Creates one directory (mode 0777 on Linux). Returns 0, or -1 with errno set. */
 int p4_os_mkdir(const char *path);
+/* UTF-8 path variants for private files that cannot use the active Windows
+ * ANSI codepage. fopen accepts only "rb" and "wb"; no fd: syntax. */
+FILE *p4_os_fopen_utf8(const char *path, const char *mode);
+int p4_os_mkdir_utf8(const char *path);
+int p4_os_remove_utf8(const char *path);
+/* Synchronously enumerates UTF-8 entry names without an ANSI codepage round-trip. */
+int p4_os_list_dir_utf8(const char *path, void (*visit)(const char *name, void *user), void *user);
 /* Nonblocking exclusive directory ownership against other processes, without
  * creating a lockfile/changing directory contents. Caller serializes logical
  * transactions (Windows ownership is per OS thread). Native token[2] starts
@@ -191,6 +198,11 @@ int p4_os_rename(const char *from, const char *to);
 /* Atomically replaces a file with another file on the same filesystem.
  * Returns 0, or -1 with errno set; never removes the destination first. */
 int p4_os_replace_file(const char *from, const char *to);
+/* p4_os_replace_file whose replace is on the storage device when it returns:
+ * POSIX fsyncs the destination's directory after the rename, Windows passes
+ * MOVEFILE_WRITE_THROUGH. Only the directory entry is made durable; the caller
+ * syncs the file's own bytes first (p4_os_sync_file). */
+int p4_os_replace_file_durable(const char *from, const char *to);
 /* Synchronously visits raw entry names (including "." and ".." where supplied).
  * A name is valid only during its callback. Supports extended-length Windows
  * roots without MinGW dirent's MAX_PATH cap. Returns 0, or -1 with errno set. */

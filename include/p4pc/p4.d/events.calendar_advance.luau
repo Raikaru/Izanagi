@@ -1,0 +1,3 @@
+--!capability events.calendar_advance@1
+--!covers event:calendar_advance
+-- p4.events.on("calendar_advance") (API 1.0).

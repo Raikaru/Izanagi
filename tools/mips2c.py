@@ -310,6 +310,12 @@ class Lifter:
                     return f"*(int32_t *){mem_addr(o[1])} = (int32_t){R(o[0])}; shw[{so >> 2}] = {R(o[0])};"
                 return f"*(int32_t *){mem_addr(o[1])} = (int32_t){R(o[0])};"
             if m == "lwc1":
+                operand = re.fullmatch(r"(-?\d+|0x[0-9a-f]+)\((\w+)\)", o[1])
+                if operand and operand[2] in const and operand[2] not in taint:
+                    address = (const[operand[2]] + int(operand[1], 0)) & 0xFFFFFFFF
+                    if in_window(address) and address % 4 == 0:
+                        offset = (address - self.win_base(address)) // 4
+                        return f"{fp(o[0])} = float_of(K_{self.win_id(address)}[{offset}]);"
                 return f"{fp(o[0])} = *(float *){mem_addr(o[1])};"
             if m == "swc1":
                 return f"*(float *){mem_addr(o[1])} = {fp(o[0])};"

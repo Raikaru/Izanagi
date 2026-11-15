@@ -11,8 +11,10 @@ The gate scripts (tests/*.sh) take the program as an argument and set P4PC_* var
 call `run`, so passing them to a gate script in place of the host executables runs that gate on the device with the same script the
 host runs. The environment crosses to the app as launch extras (P4Activity): P4PC_* variables only (SDL_VIDEODRIVER and the like are the host's
 business, not the phone's). Variables that name host paths are translated: P4PC_REF_RGB and P4PC_CAPTURE_REF are copied to the device first;
+a P4PC_CONFIG file (with the mod-settings/ folder beside it) and the P4PC_MOD_DIR tree are copied fresh to the device for each run;
 P4PC_CAPTURE_PNG, P4PC_CAPTURE_RGB, P4PC_DUMP_RAM and a viewer's output .png argument are copied back; P4PC_WALK_SCRIPT is copied into the app's media directory;
-P4PC_SAVE_DIR is the app's save folder for the run, seeded from the host directory if it has files and copied back after. P4PC_ISO and P4PC_ELF are the device's (the app reads SLUS_217.82 from the disc
+P4PC_SAVE_DIR is the app's save folder for the run, seeded from the host directory if it has files (copied in as the app, which must own a card it
+saves into) and copied back after. P4PC_ISO and P4PC_ELF are the device's (the app reads SLUS_217.82 from the disc
 image). Only org.p4pc.game.debug is accepted: tests never install, launch, stop or clear the player's release app.
 The app must be a debuggable build: the log (boot.log) is read with run-as.
 
@@ -37,7 +39,7 @@ ADB = os.environ.get("ANDROID_ADB", "adb")
 # Variables that name host paths (translated below) or the host's own business (never forwarded).
 NOT_FORWARDED = {"P4PC_ISO", "P4PC_ELF", "P4PC_REF_DIR", "P4PC_HIDDEN_WINDOW", "P4PC_LOCAL_ISO", "P4PC_LOCAL_ELF", "P4PC_ANDROID_TIMEOUT",
                  "P4PC_HOST", "P4PC_PYTHON", "P4PC_SAVE_DIR", "P4PC_REF_RGB", "P4PC_CAPTURE_REF", "P4PC_CAPTURE_PNG", "P4PC_CAPTURE_RGB", "P4PC_DUMP_RAM", "P4PC_WALK_SCRIPT",
-                 "P4PC_LOG_FILE", "P4PC_PROGRAM", "P4PC_ARGS", "P4PC_MOD_WITNESS_OUT"}
+                 "P4PC_LOG_FILE", "P4PC_PROGRAM", "P4PC_ARGS", "P4PC_MOD_WITNESS_OUT", "P4PC_CONFIG", "P4PC_MOD_DIR"}
 
 
 def adb(*args, check=True, timeout=None, binary=False):
@@ -141,8 +143,22 @@ def run(args):
 
     if env.get("SDL_AUDIODRIVER"):
         e("SDL_AUDIODRIVER", env["SDL_AUDIODRIVER"])  # the gate scripts ask for the dummy driver: a real one paces an unattended run at real time
-    if "P4PC_CONFIG" not in env:
+    config = env.get("P4PC_CONFIG", "none")
+    if config == "none":
         e("P4PC_CONFIG", "none")  # no settings file on the device: a gate does not depend on what a player saved
+    else:
+        # A fixture's settings file and the per-mod settings beside it (mod-settings/<id>.ini) are
+        # copied fresh; the app may rewrite them on the device, never the host copies.
+        shell("rm -rf %s/config; mkdir -p %s/config" % (BASE, BASE))
+        adb("push", config, BASE + "/config/" + os.path.basename(config), timeout=600)
+        settings = os.path.join(os.path.dirname(os.path.abspath(config)), "mod-settings")
+        if os.path.isdir(settings):
+            adb("push", settings, BASE + "/config/mod-settings", timeout=600)
+        e("P4PC_CONFIG", BASE + "/config/" + os.path.basename(config))
+    if env.get("P4PC_MOD_DIR"):
+        shell("rm -rf %s/mods; mkdir -p %s/mods" % (BASE, BASE))
+        adb("push", env["P4PC_MOD_DIR"] + "/.", BASE + "/mods", timeout=600)
+        e("P4PC_MOD_DIR", BASE + "/mods")
     e("P4PC_LOGCAT", "0")  # boot.log is read here; logcat is slow when a game prints thousands of lines a second
     for name, value in sorted(env.items()):
         if name.startswith("P4PC_") and name not in NOT_FORWARDED:
@@ -169,7 +185,11 @@ def run(args):
     if env.get("P4PC_SAVE_DIR"):
         host = env["P4PC_SAVE_DIR"]
         if os.path.isdir(host) and os.listdir(host):
-            adb("push", host + "/.", BASE + "/save", timeout=600)
+            # Saving renames the previous generation, and Android refuses that on
+            # a directory adb created: stage the seed, then copy it as the app.
+            shell("rm -rf %s/save-seed" % BASE)
+            adb("push", host + "/.", BASE + "/save-seed", timeout=600)
+            shell("run-as %s cp -r %s/save-seed/. %s/save && rm -rf %s/save-seed" % (PKG, BASE, BASE, BASE))
         e("P4PC_SAVE_DIR", BASE + "/save")
         cleanup_pulls.append((BASE + "/save/.", host, True))
     words = []

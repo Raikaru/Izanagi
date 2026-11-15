@@ -130,11 +130,13 @@ static const char kAtomicFragmentSource[] =
     "uniform int uLit;\n"
     "uniform vec3 uLightDir;\n"
     "uniform sampler2D uTex;\n"
+    "uniform sampler2D uDest;\n"
+    "uniform int uDate;\n"
     "uniform int uAlphaFunc;\n"
     "uniform float uAlphaRef;\n"
     "uniform int uAlphaInvert;\n"
     "bool alphaPasses(float a) {\n"
-    "    float t = a * 128.0;\n"
+    "    float t = p4GsAlpha(a);\n"
     "    if (uAlphaFunc == 8) return false;\n"
     "    if (uAlphaFunc == 2) return t < uAlphaRef;\n"
     "    if (uAlphaFunc == 3) return t <= uAlphaRef;\n"
@@ -146,6 +148,10 @@ static const char kAtomicFragmentSource[] =
     "}\n"
     "out vec4 fragColor;\n"
     "void main() {\n"
+    "    if (uDate != 0) {\n"
+    "        bool set = texelFetch(uDest, ivec2(gl_FragCoord.xy), 0).a >= (254.5 / 255.0);\n"
+    "        if (set != (uDate == 2)) discard;\n"
+    "    }\n"
     "    /* Expanded portrait masks may sample beyond their image, never tile it. */\n"
     "    if (uModelUv.x > 1.0 && (any(lessThan(vUv, vec2(0.0))) || any(greaterThan(vUv, vec2(1.0))))) discard;\n"
     "    vec4 c = (vCol / vFogZ) * uMatColor;\n"
@@ -167,7 +173,7 @@ static const char kAtomicFragmentSource[] =
     "                    clamp((uFogEnd - vFogZ) / max(uFogEnd - uFogStart, 1e-3), 0.0, 1.0));\n"
     "    }\n"
     "#ifdef P4_ROUND_BIAS\n"
-    "    c.rgb = max(c.rgb - 0.5 / 255.0, 0.0);\n"
+    "    c.rgb = p4GsTruncate(c.rgb);\n"
     "#endif\n"
     "    fragColor = c;\n"
     "}\n";
@@ -207,6 +213,8 @@ static GLint sLocDirCol;
 static GLint sLocMatColor;
 static GLint sLocTextured;
 static GLint sLocTexture;
+static GLint sLocDest;
+static GLint sLocDate;
 static GLint sLocAlphaFunc;
 static GLint sLocAlphaRef;
 static GLint sLocAlphaInvert;
@@ -296,6 +304,8 @@ static int ensure_ready(void)
     sLocMatColor = p4gl_glGetUniformLocation(sProgram, "uMatColor");
     sLocTextured = p4gl_glGetUniformLocation(sProgram, "uTextured");
     sLocTexture = p4gl_glGetUniformLocation(sProgram, "uTex");
+    sLocDest = p4gl_glGetUniformLocation(sProgram, "uDest");
+    sLocDate = p4gl_glGetUniformLocation(sProgram, "uDate");
     sLocAlphaFunc = p4gl_glGetUniformLocation(sProgram, "uAlphaFunc");
     sLocAlphaRef = p4gl_glGetUniformLocation(sProgram, "uAlphaRef");
     sLocAlphaInvert = p4gl_glGetUniformLocation(sProgram, "uAlphaInvert");
@@ -314,6 +324,7 @@ static int ensure_ready(void)
 
     p4gl_glUseProgram(sProgram);
     p4gl_glUniform1i(sLocTexture, 0);
+    p4gl_glUniform1i(sLocDest, 1);
     sReady = 1;
     return 1;
 }
@@ -1109,6 +1120,7 @@ static void gather_lights(void)
     }
 }
 
+
 static char sLogMat[160];
 
 static void bind_material(const void *mat)
@@ -1334,6 +1346,7 @@ int p4gl_atomic_draw(void *atomic)
     p4gl_glUniform1i(sLocAlphaFunc, p4gl_sky_alpha_func());
     p4gl_glUniform1f(sLocAlphaRef, p4gl_sky_alpha_ref());
     p4gl_glUniform1i(sLocAlphaInvert, 0);
+    p4gl_glUniform1i(sLocDate, p4gl_sky_date());
     fbOnly = p4gl_gs_alpha_color_fail(p4gl_sky_test_raw(), &fbFunc, &fbRef);
     if (fbOnly) {
         p4gl_glUniform1i(sLocAlphaFunc, fbFunc);
@@ -1415,6 +1428,11 @@ int p4gl_atomic_draw(void *atomic)
             if (skipped) {
                 continue;
             }
+        }
+        if (p4gl_sky_date()) {
+            int width, height;
+            if (!p4gl_target_pixel_size(&width, &height)) return 0;
+            p4gl_dest_alpha_snapshot(width, height);
         }
         p4gl_glDrawElements(GL_TRIANGLES, (GLsizei)count, GL_UNSIGNED_INT,
                             (const void *)(uintptr_t)(e->ranges[2u * b] * sizeof(uint32_t))); /* byte offset into the bound index buffer */

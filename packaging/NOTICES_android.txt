@@ -4,6 +4,7 @@ No Persona 4 disc data is included. Supply your own USA PS2 disc image.
 
 SDL 3.2.10: https://libsdl.org, zlib licence (licenses/SDL3-zlib.txt).
 LodePNG 20261006: zlib licence (licenses/LodePNG-zlib.txt).
+cgltf 1.15 (Johannes Kuhlmann): MIT licence (licenses/cgltf-MIT.txt).
 FFmpeg 7.1.1: https://ffmpeg.org, LGPL 2.1 or later
 (licenses/FFmpeg-LGPL-2.1.txt). Only MPEG-2 video, ADX audio, avutil and
 swscale are built. No GPL or nonfree components are enabled.
@@ -30,5 +31,8 @@ version, source revision, archive hashes and source location are in
 assets/source/runtime-provenance.txt.
 
 dlmalloc: public domain; miniz 3.0.2: MIT (see source third_party/miniz/LICENSE).
+Okumura LZARI and Ross Ridge mymc, adapted in the MAX save importer: public domain.
+newlib stdio/stdlib (UC Berkeley, AT&T), adapted in the translated EE stdio cores: BSD (licenses/newlib-BSD.txt).
+CRI middleware headers from recvx-decomp (AshfordFamily): MIT (licenses/recvx-decomp-MIT.txt).
 Parts of the renderer follow sky2hook by tge-was-taken, used with permission;
 see third_party/README.md in the port source.

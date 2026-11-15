@@ -1,0 +1,3 @@
+--!capability manifest.resource-image@1
+--!covers section:resource-image
+-- mod.ini [resource-image]: authored images decoded at boot (docs/modding/files.md).

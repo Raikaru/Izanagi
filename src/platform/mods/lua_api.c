@@ -45,3 +45,29 @@ void p4_lua_library(lua_State *L, const luaL_Reg *methods)
     luaL_register(L, NULL, methods);
     lua_setreadonly(L, -1, 1);
 }
+
+void p4_lua_namespace_merge(lua_State *L, const char *name)
+{
+    lua_rawgetfield(L, -2, name);
+    if (lua_isnil(L, -1)) {
+        lua_pop(L, 1);
+        lua_setreadonly(L, -1, 1);
+        lua_rawsetfield(L, -2, name);
+        return;
+    }
+    /* Refuse duplicate fields instead of silently replacing a provider. */
+    if (!lua_istable(L, -1)) luaL_error(L, "p4.%s is not a namespace table", name);
+    if (lua_getmetatable(L, -2)) luaL_error(L, "p4.%s: a merged table cannot carry a metatable", name);
+    lua_setreadonly(L, -1, 0);
+    for (lua_pushnil(L); lua_next(L, -3);) {
+        lua_pushvalue(L, -2);
+        lua_rawget(L, -4);
+        if (!lua_isnil(L, -1)) luaL_error(L, "p4.%s.%s is defined by two initializers", name, lua_tostring(L, -3));
+        lua_pop(L, 1);
+        lua_pushvalue(L, -2);
+        lua_insert(L, -2);
+        lua_rawset(L, -4);
+    }
+    lua_setreadonly(L, -1, 1);
+    lua_pop(L, 2);
+}

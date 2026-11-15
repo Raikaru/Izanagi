@@ -1,5 +1,6 @@
 /* Real package plans, PNG decode and guest RW resource materialization. */
 #include "p4pc/mod_resources_boot.h"
+#include "p4pc/battle_sim.h"
 #include "p4pc/image.h"
 #include "p4pc/game_items_ui.h"
 #include "p4pc/game_table_boot.h"
@@ -7,6 +8,7 @@
 #include "p4pc/os.h"
 #include "p4gl.h"
 #include "guest_test.h"
+#include "resource_png.h"
 #include "package_boot_internal.h"
 #include <assert.h>
 #include <stdio.h>
@@ -62,7 +64,12 @@ static int early(void *unused)
         assert(p4_resources_images_prepared_find(view, "boot.a", "boot.a:icon", 8) == 0);
         assert(p4_resources_images_prepared_find(view, "boot.b", "boot.a:icon", 7) == -1);
         assert(p4_resources_images_prepared_find(view, NULL, "boot.a:icon", 7) == -1);
-        if (!strcmp(mode, "changed")) {
+        P4PackageFile *stream = NULL;
+        char error[80];
+        assert(!p4_package_file_open(p4_packages_provider(0), "icon.png", 1024 * 1024, &stream));
+        assert(p4_resource_png_decode(stream, NULL, error, sizeof error) < 0);
+        assert(!strcmp(error, "invalid image input") && !p4_package_file_close(stream));
+        if (!strcmp(mode, "changed") || !strcmp(mode, "headless-changed")) {
             char path[2048];
             assert(snprintf(path, sizeof path, "%s/boot.a/icon.png", fixture_root) > 0);
             FILE *file = fopen(path, "wb"); assert(file);
@@ -105,9 +112,11 @@ static int run(int argc, char **argv)
     p4pc_load_image(elf); p4pc_apply_patches(); p4pc_kernel_pre_init();
     int item_mode = !strncmp(mode, "item-ui", 7);
     int item_invalid = !strcmp(mode, "item-ui-missing") || !strcmp(mode, "item-ui-revision");
-    int early_only = !strcmp(mode, "early-only") || !strcmp(mode, "override-early") || !strcmp(mode, "late-fail") ||
+    int headless = !strncmp(mode, "headless", 8);
+    int early_only = headless || !strcmp(mode, "early-only") || !strcmp(mode, "override-early") || !strcmp(mode, "late-fail") ||
         !strcmp(mode, "bad-crc") || !strcmp(mode, "bad-zlib") ||
         !strcmp(mode, "bad-revision") || !strcmp(mode, "missing") || !strcmp(mode, "changed") || item_invalid;
+    if (headless) p4_battle_sim_renderless = 1;
     if (!early_only) {
         kwlnProbeHeapBudget(); kwlnInitEngine();
         assert(p4gl_context_is_current());
@@ -146,9 +155,11 @@ static int run(int argc, char **argv)
         puts("item UI boot: real table and resource products resolved and drained");
         return 0;
     }
-    if (!strcmp(mode, "bad-crc") || !strcmp(mode, "bad-zlib") ||
+    if (!strcmp(mode, "bad-crc") || !strcmp(mode, "bad-zlib") || !strcmp(mode, "headless-invalid") ||
+        !strcmp(mode, "headless-dimensions") || !strcmp(mode, "headless-revision") || !strcmp(mode, "headless-changed") ||
         !strcmp(mode, "bad-revision") || !strcmp(mode, "missing") || !strcmp(mode, "changed")) {
-        assert(result < 0 && early_seen == !strcmp(mode, "changed") && !late_seen && !runtime);
+        int changed = !strcmp(mode, "changed") || !strcmp(mode, "headless-changed");
+        assert(result < 0 && early_seen == changed && !late_seen && !runtime);
         assert(p4_resources_images_session_end() == P4_RESOURCE_OK);
         puts("resource boot: invalid authored input refused before publication");
         return 0;
@@ -179,15 +190,20 @@ static int run(int argc, char **argv)
     if (runtime) {
         const P4ResourceImage *image = p4_resources_find(runtime, "boot.a:icon");
         assert(image && image->revision == 7 && image->width == 2 && image->height == 2);
-        const char *provider = !strcmp(mode, "override") ? "boot.b" : "boot.a";
+        const char *provider = (!strcmp(mode, "override") || !strcmp(mode, "headless-override")) ? "boot.b" : "boot.a";
         assert(!strcmp(image->owner, "boot.a") && !strcmp(image->source.provider, provider));
         assert(!strcmp(image->source.key, "icon.png") && image->source.rank == P4_CONTENT_RANK_PACKAGE_PLAN);
-        assert(p4_resources_conflicts(runtime) == (!strcmp(mode, "override") ? 1u : 0u));
-        const uint8_t a[] = {255,0,0,255, 0,255,0,128, 0,0,255,64, 255,255,0,0};
-        const uint8_t b[] = {1,2,3,4, 5,6,7,8, 9,10,11,12, 13,14,15,16};
-        const uint8_t *expected = !strcmp(mode, "override") ? b : a;
-        const uint8_t *pixels = P4_G2H(image->pixels);
-        assert(!memcmp(pixels, expected, 8) && !memcmp(pixels + image->stride, expected + 8, 8));
+        assert(p4_resources_conflicts(runtime) == (!strcmp(mode, "override") || !strcmp(mode, "headless-override") ? 1u : 0u));
+        if (headless) {
+            assert(!image->raster && !image->pixels && !p4gl_context_is_current());
+            assert(p4_resources_draw(image->token, 1, 2, 0, 0xffffffffu, 1, 1) == P4_RESOURCE_OK);
+        } else {
+            const uint8_t a[] = {255,0,0,255, 0,255,0,128, 0,0,255,64, 255,255,0,0};
+            const uint8_t b[] = {1,2,3,4, 5,6,7,8, 9,10,11,12, 13,14,15,16};
+            const uint8_t *expected = !strcmp(mode, "override") ? b : a;
+            const uint8_t *pixels = P4_G2H(image->pixels);
+            assert(!memcmp(pixels, expected, 8) && !memcmp(pixels + image->stride, expected + 8, 8));
+        }
         uint32_t token = image->token;
         assert(p4_resources_pin(token) == P4_RESOURCE_OK);
         assert(p4_resources_images_session_end() == P4_RESOURCE_CONFLICT);

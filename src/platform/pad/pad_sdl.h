@@ -76,6 +76,12 @@ int p4pc_pad_walk_status(void);
 /* Optional source for the walk's battle driver once its battleturn: lines are spent (P4WalkHost.battle_turn); NULL by default.
  * The battle simulator's fork search sets it (src/platform/battle_sim/live.c). */
 void p4pc_pad_set_battle_turn_hook(int (*hook)(unsigned n, char *line, size_t size));
+/* The game's active-skill predicate for the walk driver's Skill/Item list model (P4WalkHost.skill_active), so it lists an added
+ * skill as the native list does; NULL (the default) keeps the retail split. Kernel init sets p4_game_skill_active. */
+void p4pc_pad_set_skill_active(int (*active)(uint32_t id));
+/* The game's passive grant query for an enemy kind (P4WalkHost.passive_granted), so the battle driver's affinity model sees granted
+ * passives; NULL (the default) sees none. Kernel init sets p4_game_passive_enemy_has. */
+void p4pc_pad_set_passive_granted(int (*granted)(uint32_t enemy, uint32_t skill));
 
 /* ORs every scripted press that is down at `now` seconds into the snapshot. */
 void p4pc_pad_autopress_apply(const P4PadAutoPress *list, int count, double now, P4PadSnapshot *out);
@@ -83,6 +89,15 @@ void p4pc_pad_autopress_apply(const P4PadAutoPress *list, int count, double now,
 /* SDL axes (-32768..32767) to PS2 bytes, matching PCSX2's default 1.33
  * per-axis sensitivity and half-axis quantization; optional round dead zone. */
 void p4pc_pad_stick(int x, int y, int dead, uint8_t *ox, uint8_t *oy);
+
+/* The Android touch pad's left stick (src/platform/android/android_main.c, from PadOverlay). x and y are the
+ * thumb's offset in units of the stick's travel, y positive down; its own 15 percent dead zone is rescaled away
+ * and the offset clamped to the unit circle. Thread-safe; (0, 0) releases. */
+void p4pc_pad_touch_stick(float x, float y);
+/* Puts the touch stick into the snapshot's left stick when that stick is still idle (a deflected gamepad stick
+ * wins), through `dead` (raw axis units, the settings file's input.deadzone) like a gamepad stick. With `menu`,
+ * a deliberate deflection also presses the digital direction the native Config list reads. Returns 1 when applied. */
+int p4pc_pad_touch_stick_apply(P4PadSnapshot *out, int dead, int menu);
 
 /* Initialise SDL video and gamepad, and create the window. Returns 0 on success. */
 int p4pc_pad_sdl_init(void);

@@ -27,6 +27,8 @@ SDL3 (usr/lib/libSDL3.so.*)
 
 LodePNG 20261006: zlib license (licenses/LodePNG-zlib.txt).
 
+cgltf 1.15 (Johannes Kuhlmann): MIT license (licenses/cgltf-MIT.txt).
+
 Luau 0.744 (when enabled)
   MIT, including inherited Lua notices: licenses/Luau-MIT.txt and
   licenses/Lua-MIT.txt. The exact vendored source and local patches are in
@@ -39,10 +41,12 @@ GCC libstdc++ and libgcc (when the C++ adapter is linked)
   source archive location are in usr/share/p4pc/source/runtime-provenance.txt.
 
 dlmalloc (Doug Lea): public domain.
+Okumura LZARI and Ross Ridge mymc, adapted in the MAX save importer: public domain.
 
 miniz 3.0.2 (licenses/miniz-MIT.txt) and yxml (licenses/yxml-MIT.txt): MIT.
 
 fdlibm (Sun Microsystems), in the translated libm cores: licenses/fdlibm-Sun.txt.
+newlib stdio/stdlib (UC Berkeley, AT&T), adapted in the translated EE stdio cores: BSD, licenses/newlib-BSD.txt.
 
 CRI middleware headers from recvx-decomp (AshfordFamily): MIT, licenses/recvx-decomp-MIT.txt.
 

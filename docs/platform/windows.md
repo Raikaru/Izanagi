@@ -58,6 +58,13 @@ Ship/run the executable beside `SDL3.dll`, `avcodec-61.dll`, `avutil-59.dll` and
 with `-DCMAKE_CROSSCOMPILING_EMULATOR=wine`; GL-labeled tests require a real context
 and are not qualified by container Wine. Land builds x64; nightlies retain this ABI.
 
+Wine host tests require `LANG=C.UTF-8` and `LC_ALL=C.UTF-8`, set by the CI and lane
+launchers before Wine starts. This selects Wine's Unix filename encoding, not the
+Windows ANSI codepage or the program's C locale. With the host locale unset, Wine
+can reject even `CreateDirectoryW` and `_wfopen` Unicode paths; changing the
+product's explicit UTF-8-to-wide conversions or weakening the Unicode tests is
+not a substitute for that host requirement.
+
 For automated native Windows runs use the local lease/scene/boot runner with
 `P4PC_HIDDEN_WINDOW=1`, `SDL_AUDIODRIVER=dummy` and `P4PC_INPUT=script`.
 A hidden WGL window provides a context without desktop UI. SDL's offscreen EGL driver

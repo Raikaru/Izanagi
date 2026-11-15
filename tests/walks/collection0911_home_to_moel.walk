@@ -1,0 +1,40 @@
+# Candidate from pristine card3-slot12: 09/11 daytime at home. The departure
+# sequence follows collection0911_to_home0915; the town-map route combines
+# the residence-to-Junes and Shopping-District-to-residence walks. It still
+# needs a real-player hardware witness before it can be treated as proven.
+timeout:20000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+waitstate16:0x00797b7a==163
+waitcontrol:on
+press:square
+wait:600
+choose:2
+choose:1
+timeout:12000
+waittask:L map
+wait:600
+# Residence is three entries below the Shopping District.
+press:up
+wait:30
+press:up
+wait:30
+press:up
+wait:30
+press:cross
+timeout:12000
+skipfield:8:2
+skipmsg
+waitfield:8:2
+waitstate16:0x00797b7a==163
+waitcontrol:on
+plan:on
+timeout:8000
+walk:-594,-813,150
+plan:off
+push:-594,-813,10

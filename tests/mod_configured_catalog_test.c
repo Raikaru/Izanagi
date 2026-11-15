@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
-static int seen, failed;
+static int seen, bundled, shadowed, failed;
 static int installation(const P4PackageInstallation *entry, void *user)
 {
     if (user != &seen || !entry || !entry->info || entry->diagnostic ||
@@ -11,6 +11,11 @@ static int installation(const P4PackageInstallation *entry, void *user)
         entry->info->generation || entry->info->ordinal != SIZE_MAX || entry->field_count != 1 ||
         p4_mods_count() || p4_packages_count()) failed = 1;
     ++seen;
+    bundled += entry->bundled != 0;
+    if (entry->shadows) {
+        if (strcmp(entry->shadows, "player copy shadows bundled catalog.first 1.0")) failed = 1;
+        ++shadowed;
+    }
     return 0;
 }
 int main(int argc, char **argv)
@@ -27,6 +32,6 @@ int main(int argc, char **argv)
     if (p4_mods_init() || p4_package_registry_publish()) return 1;
     p4_mod_fidelity_check_start();
     p4_package_registry_retire();
-    printf("configured catalog: PASS seen=%d activation=0\n", seen);
+    printf("configured catalog: PASS seen=%d activation=0 bundled=%d shadowed=%d\n", seen, bundled, shadowed);
     return 0;
 }

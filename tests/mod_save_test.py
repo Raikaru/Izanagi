@@ -27,6 +27,15 @@ class NativeSaveCodec(unittest.TestCase):
             (other / "mod.ini").write_text(
                 "[mod]\nid=save.other\nname=Second authored save dependency\n"
                 "version=9.8.7\napi=1.1\npriority=1\norder=1\n", encoding="utf-8")
+            needs = root / "needs"
+            needs.mkdir()
+            (needs / "mod.ini").write_text(
+                "[mod]\nid=save.needs\nname=Needs a ghost\nversion=1.0\napi=1.6\npriority=2\norder=0\n"
+                "[require save.ghost]\nversion=1.0\n", encoding="utf-8")
+            ghost = root / "ghost"
+            ghost.mkdir()
+            (ghost / "mod.ini").write_text(
+                "[mod]\nid=save.ghost\nname=Ghost\nversion=1.0\napi=1.0\npriority=3\norder=0\n", encoding="utf-8")
             environment = dict(os.environ, P4PC_MODS="0", P4PC_PACKS="0",
                                P4PC_INPUT="script", P4PC_CONFIG="none",
                                SDL_AUDIODRIVER="dummy")
@@ -39,6 +48,16 @@ class NativeSaveCodec(unittest.TestCase):
                                     capture_output=True, text=True, check=False)
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             self.assertIn("native sidecar history: synthetic fixture complete", result.stdout)
+            result = subprocess.run([*DRIVER, str(root), "refused"], env=environment,
+                                    capture_output=True, text=True, check=False)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertIn("native sidecar refused owner: synthetic fixture complete", result.stdout)
+            sidecar = root / "requirement.p4mods"
+            for mode in ("requirement-capture", "requirement-load"):
+                result = subprocess.run([*DRIVER, str(root), mode, str(sidecar)], env=environment,
+                                        capture_output=True, text=True, check=False)
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                self.assertIn(f"native sidecar {mode}: synthetic fixture complete", result.stdout)
 
 
 if __name__ == "__main__":

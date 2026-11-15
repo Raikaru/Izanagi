@@ -462,6 +462,33 @@ class RealClangCacheTest(CacheFixture):
         self.assertFalse(any("-fdump-record-layouts" in call.args[0] for call in executed.call_args_list))
         self.assertTrue(any("-E" in call.args[0] for call in executed.call_args_list))
 
+    def test_rewrite_key_holds_only_the_rows_of_the_names_the_unit_spells(self):
+        source, work = self.source()
+        compiler = shutil.which("clang")
+        take = gr.collect_abi(str(source), ["--target=x86_64-linux-gnu"], str(work), str(self.root), compiler)["take"]
+        def rewrite(syms, abi):
+            with mock.patch.object(gr.Rewriter, "run", autospec=True, side_effect=gr.Rewriter.run) as visited:
+                _, output = unit64.rewrite_outputs(str(source), ["--target=x86_64-linux-gnu"], str(work), str(self.root), syms,
+                                                   ["--target=i386-linux-gnu"], compiler, abi,
+                                                   (str(work / "rewritten.c.d"), str(work / "rewritten.c")))
+            return output, visited.called
+        syms = {"D_00100000": [0x100000, "data"]}
+        reference, computed = rewrite(syms, {"take": take, "elsewhere": take})
+        self.assertTrue(computed)
+        # rows of names the unit never spells are not part of its key
+        output, computed = rewrite({"D_00100004": [0x100004, "data"]}, {"take": take, "elsewhere": dict(take, rt="long")})
+        self.assertEqual((output, computed), (reference, False))
+        # a row it spells is
+        _, computed = rewrite(syms, {"take": dict(take, reviewed=1), "elsewhere": take})
+        self.assertTrue(computed)
+        # and a computed rewrite may not read a row outside its key
+        original_run = gr.Rewriter.run
+        def reads_elsewhere(rewriter):
+            rewriter.abi.get("elsewhere")
+            return original_run(rewriter)
+        with mock.patch.object(gr.Rewriter, "run", reads_elsewhere), self.assertRaisesRegex(SystemExit, "elsewhere"):
+            rewrite(syms, {"take": dict(take, reviewed=2), "elsewhere": take})
+
     def test_printf_cache_reuses_exact_bytes_across_temporary_preprocessor_directories(self):
         import ee_float_cc
         source, work = self.source()

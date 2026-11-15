@@ -28,6 +28,7 @@ import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import build_cache
+import gen_port
 
 sys.setrecursionlimit(1000000)
 
@@ -292,8 +293,6 @@ class Census(dict):
 
 # ------------------------------------------------------------------------------------------ the rewriter
 ABS_RE = re.compile(r"^(?:D|DAT|PTR_DAT|jtbl)_([0-9A-Fa-f]{8})(?:_abs)?$")
-GP_RE = re.compile(r"^(?:[if]Gp|gp0x)([0-9A-Fa-f]{8})$")
-GP_VALUE = 0x007690F0
 
 
 def ret_text(fn_qt):
@@ -600,12 +599,11 @@ class Rewriter:
                 if re.match(r"^(?:func|FUN)_[0-9A-Fa-f]{8}", linked):
                     return None       # the address of a function symbol declared as data (`u8 p4cb_x[] __asm__("func_003bcbc0")`): a host function
                 name = linked
-        # the symbol lists are the evidence of where retail data is: a handful of D_XXXXXXXX names sit at another address than the
-        # one they spell (D_00724840 is 0x00764840), which is also what gen_port's tables step places them at
-        m = GP_RE.match(name)
-        if m:       # gp-relative: gp plus the sign-extended 16-bit offset in the name, as gen_port's place_undefined computes it
-            v = int(m[1], 16)
-            return (GP_VALUE + (v - (1 << 32 if v & 0x80000000 else 0))) & 0xFFFFFFFF
+        # The i386 linker placement and the 64-bit rewrite must select exactly
+        # the same evidence-checked retail address, including misnamed GP aliases.
+        a = gen_port.gp_data_address(name, self.syms)
+        if a is not None:
+            return a
         s = self.syms.get(name)
         if s and s[1] == "data":
             return s[0]

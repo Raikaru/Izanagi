@@ -185,6 +185,32 @@ def _read(entry, key):
         raise CacheCorruption(f"immutable build cache mutation at {entry}: {error}; entry retained, never regenerated") from error
 
 
+def _locate(kind, inputs):
+    request = inputs() if callable(inputs) else inputs
+    request = {"schema": 1, "kind": kind, "inputs": request,
+               "engine": versions(__file__), "python": sys.version,
+               "profile": os.environ.get("P4PC_BUILD_PROFILE", "")}
+    key = digest(canonical(request))
+    root = Path(os.environ["P4PC_BUILD_CACHE_DIR"])
+    return root, key, root / "entries" / key[:2] / key
+
+
+def lookup(kind, inputs):
+    """An existing entry's verified bytes, else None; never computes or publishes.
+
+    A caller with many requests finds its misses first, computes them
+    concurrently and publishes each through run_bytes. A miss records nothing.
+    """
+    if not enabled():
+        return None
+    root, key, entry = _locate(kind, inputs)
+    if not (entry.exists() or entry.is_symlink()):
+        return None
+    with timed(kind, key=key, entry=str(entry), cache="hit"):
+        with timed("cache.verify", kind=kind, key=key):
+            return _read(entry, key)
+
+
 def run_bytes(kind, inputs, producer):
     """Run once per exact request, or return a byte-verified immutable winner.
 
@@ -196,13 +222,7 @@ def run_bytes(kind, inputs, producer):
         if not enabled():
             trace["cache"] = "disabled"
             return producer()
-        request = inputs() if callable(inputs) else inputs
-        request = {"schema": 1, "kind": kind, "inputs": request,
-                   "engine": versions(__file__), "python": sys.version,
-                   "profile": os.environ.get("P4PC_BUILD_PROFILE", "")}
-        key = digest(canonical(request))
-        root = Path(os.environ["P4PC_BUILD_CACHE_DIR"])
-        entry = root / "entries" / key[:2] / key
+        root, key, entry = _locate(kind, inputs)
         trace.update(key=key, entry=str(entry))
         with timed("cache.lock", kind=kind, key=key):
             lock = _locked(root / "locks" / (key + ".lock"))

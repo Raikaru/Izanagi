@@ -79,6 +79,11 @@ typedef struct P4AiCarrier {
     uint32_t choice_generation;
     uint32_t weighted_valid, weighted_group, weighted_mask;
     uint32_t weighted_candidate[P4_GAME_AI_WEIGHT_ENTRIES];
+    /* A script decode's explicit caller work for its one synchronous pass
+     * through the hookable 001DE640 entry, and a mod's one-shot authored
+     * substitution for the decode that entry is about to perform. */
+    uint32_t decode_active, decode_work_guest, decode_parameter;
+    uint32_t substitute_valid, substitute_command;
 } P4AiCarrier;
 typedef struct P4AiVmState {
     uint32_t active, work_guest, program, generation, call_depth, control_count;

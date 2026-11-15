@@ -94,12 +94,19 @@ void p4_game_tables_items_native_set_quantity(uint32_t id, int32_t quantity);
 int32_t p4_game_tables_items_native_availability(uint32_t id);
 void p4_game_tables_items_native_set_availability(uint32_t id, uint32_t availability);
 uint32_t p4_game_tables_items_native_name(uint32_t id);
+/* A retail item a producer or a p4.data layer renamed (game_table_derived.h):
+ * its guest string once battle-table completion published the names, else 0
+ * (the executable's name stands). */
+uint32_t p4_game_tables_derived_item_name_stream(uint32_t id);
 /* One metadata getter for both domains: the active immutable projection when
  * expanded, otherwise the game's actual loaded retail base. Call after item
  * loading; an unknown new ID never aliases a retail row or bank. */
 const uint8_t *p4_game_tables_items_native_metadata(uint32_t id);
 uint32_t p4_game_tables_items_native_description(uint32_t id);
 uint32_t p4_game_tables_items_native_category_name(uint32_t id);
+/* New item only: returns its explicitly inherited retail anchor, or -1 for
+ * authored art. Records use of both the row and its selected ITEM source. */
+int32_t p4_game_tables_items_native_icon_anchor(uint32_t id);
 void p4_game_tables_items_native_draw_icon(uint32_t id, float x, float y, float depth, uint32_t rgba, float scale_y);
 int p4_game_tables_items_native_draw_category_icon(uint32_t id, float x, float y, float depth, uint32_t rgba);
 /* Uses the actual primitive queue. The active item snapshot must remain alive

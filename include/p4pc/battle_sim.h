@@ -33,6 +33,9 @@ int p4_battle_policy_input(uint32_t selection);
 void p4_battle_policy_target(uint32_t action);
 void p4_battle_policy_before_update(void);
 const char *p4_battle_policy_error(void);
+/* Mode 6's Persona ratings payload ("P4AFFRT1", u32 count, count x {u16 Persona id ascending, s8 rating[8] per retail
+ * element}); set before p4_battle_policy_begin(6). 1 on success. */
+int p4_battle_policy_set_ratings(const uint8_t *data, size_t size);
 void p4_battle_sim_command_ready(uint32_t action);
 /* Post-battle skill-offer prompt, read from the live shdPersonaSkillSelectSeq
  * task, its persona panel and the current message window. */

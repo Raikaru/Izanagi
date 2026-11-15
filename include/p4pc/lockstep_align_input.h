@@ -6,77 +6,90 @@
 typedef struct P4AlignInput {
     FILE *file;
     uint8_t *batch;
-    size_t count, capacity, index, pads, reads, delivered;
-    uint32_t marker[8], frame;
+    size_t count, capacity, index, pads, reads, delivered, body, gates;
+    uint32_t marker[8], frame, gate_frame;
     uint8_t presented[P4LS_RECORD_SIZE], last_pad[P4LS_RECORD_SIZE];
     uint64_t records, pad_records, actual_pad_reads, held_reads, skipped_records;
-    int have_pad, mapped, restore_mapped, gate_held, eof;
+    int have_pad, mapped, restore_mapped, gate_held, eof, pending_gate, complete;
+    /* Streaming (the online disc replay, after the initial anchor): a pad read takes the
+     * frame's next pad record as soon as it arrives, before the source has presented the
+     * frame; the presentation still waits for the whole frame. */
+    int streaming;
     int64_t offset;
     const char *error;
 } P4AlignInput;
+/* Appends one record of the current frame to the batch: 1 for a pad, gate or milestone
+ * record, 2 when the frame record completes it, 0 at EOF before a frame or on an error.
+ * `body` counts the pad and gate records, which precede the milestone and frame records. */
+static inline int p4la_append(P4AlignInput *in) {
+    if (!in->count) {
+        in->index=in->pads=in->reads=in->delivered=in->body=in->gates=0;
+        in->pending_gate=0; in->gate_frame=0;
+    }
+    uint8_t row[P4LS_RECORD_SIZE];
+    const size_t n=fread(row,1,sizeof row,in->file);
+    if (!n && feof(in->file) && !in->count) { in->eof=1; return 0; }
+    if (n!=sizeof row) { in->error="incomplete state-aligned input frame"; return 0; }
+    const uint32_t kind=p4ls_get(row)&255u;
+    if (kind!=P4LS_PAD && kind!=P4LS_FRAME && kind!=P4LA_META && kind!=P4LA_PAD_GATE) {
+        in->error="unknown state-aligned input kind"; return 0;
+    }
+    if (in->count==in->capacity) {
+        const size_t cap=in->capacity ? in->capacity*2 : 16;
+        void *p=realloc(in->batch,cap*P4LS_RECORD_SIZE);
+        if (!p) { in->error="allocating aligned input frame"; return 0; }
+        in->batch=p; in->capacity=cap;
+    }
+    memcpy(in->batch+in->count++*P4LS_RECORD_SIZE,row,sizeof row);
+    if (kind==P4LA_PAD_GATE) {
+        if (in->pending_gate) { in->error="consecutive title input gates"; return 0; }
+        in->pending_gate=1; in->gate_frame=p4ls_get(row+4); in->gates++; in->body++;
+        return 1;
+    }
+    if (kind==P4LS_PAD) {
+        if (in->pending_gate && in->gate_frame!=p4ls_get(row+4)) {
+            in->error="title input gate/pad counters differ"; return 0;
+        }
+        in->pending_gate=0; in->pads++; in->body++;
+        return 1;
+    }
+    if (in->pending_gate) { in->error="title input gate has no pad"; return 0; }
+    if (kind!=P4LS_FRAME) return 1;
+    if (in->count!=in->pads+in->gates+2 || !(p4ls_get(row)&P4LA_FLAG)) {
+        in->error="aligned frame lacks exactly one milestone record"; return 0;
+    }
+    const uint8_t *meta=in->batch+(in->count-2)*P4LS_RECORD_SIZE;
+    if ((p4ls_get(meta)&255u)!=P4LA_META || p4ls_get(meta+4)!=p4ls_get(row+4)) {
+        in->error="milestone record is out of order"; return 0;
+    }
+    in->frame=p4ls_get(row+4);
+    for (unsigned i=0;i<8;i++) in->marker[i]=p4ls_get(meta+8+i*4);
+    if (in->gates && in->marker[1]!=P4LA_BOOT) {
+        in->error="title input gates outside the initial load"; return 0;
+    }
+    memcpy(in->presented,row,sizeof row);
+    in->complete=1;
+    return 2;
+}
 static inline int p4la_fill(P4AlignInput *in) {
-    if (in->count) return 1;
-    in->index=in->pads=in->reads=in->delivered=0;
-    size_t gates=0;
-    int pending_gate=0;
-    uint32_t gate_frame=0;
+    if (in->complete) return 1;
     for (;;) {
-        uint8_t row[P4LS_RECORD_SIZE];
-        const size_t n=fread(row,1,sizeof row,in->file);
-        if (!n && feof(in->file) && !in->count) { in->eof=1; return 0; }
-        if (n!=sizeof row) { in->error="incomplete state-aligned input frame"; return 0; }
-        const uint32_t kind=p4ls_get(row)&255u;
-        if (kind!=P4LS_PAD && kind!=P4LS_FRAME && kind!=P4LA_META && kind!=P4LA_PAD_GATE) {
-            in->error="unknown state-aligned input kind"; return 0;
-        }
-        if (in->count==in->capacity) {
-            const size_t cap=in->capacity ? in->capacity*2 : 16;
-            void *p=realloc(in->batch,cap*P4LS_RECORD_SIZE);
-            if (!p) { in->error="allocating aligned input frame"; return 0; }
-            in->batch=p; in->capacity=cap;
-        }
-        memcpy(in->batch+in->count++*P4LS_RECORD_SIZE,row,sizeof row);
-        if (kind==P4LA_PAD_GATE) {
-            if (pending_gate) { in->error="consecutive title input gates"; return 0; }
-            pending_gate=1; gate_frame=p4ls_get(row+4); gates++;
-        } else if (kind==P4LS_PAD) {
-            if (pending_gate && gate_frame!=p4ls_get(row+4)) {
-                in->error="title input gate/pad counters differ"; return 0;
-            }
-            pending_gate=0; in->pads++;
-        } else if (pending_gate) {
-            in->error="title input gate has no pad"; return 0;
-        }
-        if (kind==P4LS_FRAME) {
-            if (in->count!=in->pads+gates+2 || !(p4ls_get(row)&P4LA_FLAG)) {
-                in->error="aligned frame lacks exactly one milestone record"; return 0;
-            }
-            const uint8_t *meta=in->batch+(in->count-2)*P4LS_RECORD_SIZE;
-            if ((p4ls_get(meta)&255u)!=P4LA_META || p4ls_get(meta+4)!=p4ls_get(row+4)) {
-                in->error="milestone record is out of order"; return 0;
-            }
-            in->frame=p4ls_get(row+4);
-            for (unsigned i=0;i<8;i++) in->marker[i]=p4ls_get(meta+8+i*4);
-            if (gates && in->marker[1]!=P4LA_BOOT) {
-                in->error="title input gates outside the initial load"; return 0;
-            }
-            memcpy(in->presented,row,sizeof row);
-            return 1;
-        }
+        const int appended=p4la_append(in);
+        if (appended!=1) return appended==2;
     }
 }
 static inline void p4la_consume(P4AlignInput *in) {
     in->records+=in->count; in->pad_records+=in->pads;
-    in->count=0; in->index=in->reads=in->delivered=0; in->gate_held=0;
+    in->count=0; in->index=in->reads=in->delivered=in->body=0; in->gate_held=0; in->complete=0;
 }
 /* The port is the recorded-input source, not a lagging retail receiver.
  * Replay its exact reads/counters and observe fresh milestones; old transport
  * metadata must never hold, skip, or retime the source's input. */
 static inline const uint8_t *p4la_source_pad(P4AlignInput *in, uint32_t actual_frame) {
     if (!p4la_fill(in)) return NULL;
-    if (in->index<in->count-2 &&
+    if (in->index<in->body &&
         (p4ls_get(in->batch+in->index*P4LS_RECORD_SIZE)&255u)==P4LA_PAD_GATE) in->index++;
-    if (in->index>=in->count-2) {
+    if (in->index>=in->body) {
         in->error="extra recorded-source pad read"; return NULL;
     }
     const uint8_t *row=in->batch+in->index*P4LS_RECORD_SIZE;
@@ -88,7 +101,7 @@ static inline const uint8_t *p4la_source_pad(P4AlignInput *in, uint32_t actual_f
 }
 static inline int p4la_source_frame(P4AlignInput *in, uint32_t actual_frame) {
     if (!p4la_fill(in)) return in->eof ? 3 : -1;
-    if (in->index!=in->count-2 || in->reads!=in->pads || in->frame!=actual_frame) {
+    if (in->index!=in->body || in->reads!=in->pads || in->frame!=actual_frame) {
         in->error="recorded-source input/presentation schedule differs"; return -1;
     }
     p4la_consume(in);
@@ -96,13 +109,16 @@ static inline int p4la_source_frame(P4AlignInput *in, uint32_t actual_frame) {
 }
 static inline const uint8_t *p4la_pad(P4AlignInput *in, uint32_t actual_frame,
                                     int receiver_loading, const P4WalkHost *host) {
-    if (!p4la_fill(in)) return NULL;
+    if (in->streaming) {
+        while (!in->complete && in->index>=in->body)
+            if (!p4la_append(in)) return NULL;
+    } else if (!p4la_fill(in)) return NULL;
     const int load=in->marker[1]!=P4LA_LOCKED || receiver_loading;
     if (!load && !in->mapped) {
         in->error="frame-locked pad has no proved counter offset"; return NULL;
     }
     const uint8_t *row;
-    if (in->index<in->count-2) {
+    if (in->index<in->body) {
         row=in->batch+in->index*P4LS_RECORD_SIZE;
         if ((p4ls_get(row)&255u)==P4LA_PAD_GATE) {
             uint32_t gate[8];
@@ -137,7 +153,7 @@ static inline int p4la_frame(P4AlignInput *in, uint32_t actual_frame,
                             const uint32_t actual[8], int receiver_loading) {
     if (!p4la_fill(in)) return in->eof ? 3 : -1;
     if (in->marker[1]==P4LA_LOCKED && !receiver_loading) {
-        if (!in->mapped || in->index!=in->count-2 || in->reads!=in->pads ||
+        if (!in->mapped || in->index!=in->body || in->reads!=in->pads ||
             (int64_t)actual_frame!=(int64_t)in->frame+in->offset) {
             in->error="frame-locked input/presentation schedule differs"; return -1;
         }

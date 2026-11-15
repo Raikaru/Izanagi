@@ -1,5 +1,6 @@
 #include "lua_runtime.h"
 #include "p4pc/guest.h"
+#include "p4pc/capabilities.h"
 #include "p4pc/mod_events.h"
 #include "p4pc/mod_hooks.h"
 #include "p4pc/mod_memory.h"
@@ -10,10 +11,14 @@
 #include "native_bindings.h"
 #include "p4pc/mod_failure.h"
 #include "p4pc/mod_save.h"
+#include "p4pc/content_digest.h"
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#if defined(__SSE__)
+#include <xmmintrin.h>
+#endif
 
 #define LUA_MEMORY_LIMIT (8u * 1024u * 1024u)
 #define CALLBACK_FUEL 4096u
@@ -22,6 +27,18 @@
 #define PRESSURE_STEP_KB 512u
 static P4LuaMod *active[P4_PACKAGE_MAX];
 static int script_phase; /* 0 empty, 1 compiled only, 2 executing init, 3 initialized */
+/* Scripts run in the host's default float state, never the game's EE mode
+ * (MXCSR round-toward-zero with flush and denormal zeroing, state_dump.c).
+ * llvm-mingw's fesetenv(FE_DFL_ENV) resets only the x87 word and keeps MXCSR,
+ * and Windows' printf rounds by MXCSR: string.format("%.2f", 1.15) read "1.14"
+ * there and arithmetic differed from Linux. fesetenv(&saved) does restore it. */
+static void enter_script_float(void)
+{
+    fesetenv(FE_DFL_ENV);
+#if defined(__SSE__)
+    _mm_setcsr(0x1F80u);
+#endif
+}
 static const P4LuaNativeBindings *native_bindings;
 int p4_lua_bind_native(const P4LuaNativeBindings *bindings)
 {
@@ -186,7 +203,7 @@ int p4_lua_protected(P4LuaMod *mod, lua_State *L, int arguments, int results, in
     thread->frame = &frame;
     ++thread->depth;
     thread->executing = 1;
-    fesetenv(FE_DFL_ENV);
+    enter_script_float();
     int status = lua_pcall(L, arguments, results, 0);
     if (over_budget(mod, thread)) mod->budget_failed = 1;
     if (mod->budget_failed) {
@@ -259,6 +276,31 @@ int p4_lua_invoke(P4LuaMod *mod, lua_CFunction function, void *data, int results
     return p4_lua_protected(mod, thread->state, 1, results, flags);
 }
 
+/* Capability registry queries (include/p4pc/p4.d/capabilities.luau): pure, legal anywhere. */
+static int capability_has(lua_State *L)
+{
+    size_t size;
+    const char *text = luaL_checklstring(L, 1, &size);
+    char key[P4_CAPABILITY_KEY_MAX];
+    unsigned revision;
+    if (p4_capability_parse(text, size, key, &revision))
+        luaL_error(L, "p4.has: \"%s\" is not a capability key; expected name or name@revision, e.g. \"events.ailment@1\"",
+                   text);
+    lua_pushboolean(L, p4_capability_revision(key) >= revision);
+    return 1;
+}
+static int capability_list(lua_State *L)
+{
+    size_t count = p4_capability_count();
+    lua_createtable(L, 0, (int)count);
+    for (size_t i = 0; i < count; ++i) {
+        unsigned revision;
+        const char *key = p4_capability_at(i, &revision);
+        lua_pushunsigned(L, revision);
+        lua_setfield(L, -2, key);
+    }
+    return 1;
+}
 static int log_message(lua_State *L)
 {
     P4LuaMod *mod = p4_luau_user(L);
@@ -284,6 +326,49 @@ static int split_wide(lua_State *L)
     return 2;
 }
 
+/* p4.budget(): interpreter units this invocation may still use, the smallest of
+ * its nested callback frames and (outside startup) this presentation frame. It
+ * is advisory pacing for cooperative chunked work; outputs must not depend on it. */
+static int budget_remaining(lua_State *L)
+{
+    P4LuaMod *mod = p4_luau_user(L);
+    P4LuaThread *thread = current_thread(mod);
+    if (thread == NULL || thread->frame == NULL) {
+        lua_pushunsigned(L, 0);
+        return 1;
+    }
+    unsigned remaining = thread->frame->fuel;
+    for (const P4LuaFrame *frame = thread->frame; frame != NULL; frame = frame->previous)
+        if (frame->fuel < remaining) remaining = frame->fuel;
+    if (!thread->frame->startup) {
+        unsigned frame_fuel = mod->has_budget_frame && mod->budget_frame == p4pc_flip_count() ? mod->frame_fuel
+                                                                                             : FRAME_FUEL;
+        if (frame_fuel < remaining) remaining = frame_fuel;
+    }
+    lua_pushunsigned(L, mod->budget_failed ? 0 : remaining);
+    return 1;
+}
+
+/* p4.sha256(data): the 32-byte SHA-256 digest of a string or buffer, through
+ * the shared native content digest (API 1.9). Deterministic on every platform. */
+static int sha256_digest(lua_State *L)
+{
+    size_t size = 0;
+    const void *bytes = lua_type(L, 1) == LUA_TSTRING ? (const void *)lua_tolstring(L, 1, &size)
+                                                      : luaL_checkbuffer(L, 1, &size);
+    if (size > 16u * 1024u * 1024u) luaL_argerror(L, 1, "p4.sha256 input exceeds 16 MiB");
+    char hex[P4_CONTENT_DIGEST_HEX + 1];
+    p4_content_digest(bytes, size, hex);
+    char digest[32];
+    for (int i = 0; i < 32; ++i) {
+        int high = hex[2 * i] <= '9' ? hex[2 * i] - '0' : hex[2 * i] - 'a' + 10;
+        int low = hex[2 * i + 1] <= '9' ? hex[2 * i + 1] - '0' : hex[2 * i + 1] - 'a' + 10;
+        digest[i] = (char)(high << 4 | low);
+    }
+    lua_pushlstring(L, digest, sizeof digest);
+    return 1;
+}
+
 static void initialize(lua_State *L, void *user)
 {
     P4LuaMod *mod = user;
@@ -298,16 +383,23 @@ static void initialize(lua_State *L, void *user)
     lua_pushstring(L, version); lua_setfield(L, -2, "api_version");
     lua_pushliteral(L, "Luau"); lua_setfield(L, -2, "language");
     lua_pushliteral(L, "0.744"); lua_setfield(L, -2, "language_version");
+    lua_pushcfunction(L, capability_has, "p4.has"); lua_setfield(L, -2, "has");
+    lua_pushcfunction(L, capability_list, "p4.capabilities"); lua_setfield(L, -2, "capabilities");
     lua_pushstring(L, mod->info->id); lua_setfield(L, -2, "id");
     lua_pushcfunction(L, log_message, "p4.log"); lua_setfield(L, -2, "log");
     lua_pushcfunction(L, wide_value, "p4.u64"); lua_setfield(L, -2, "u64");
     lua_pushcfunction(L, split_wide, "p4.split64"); lua_setfield(L, -2, "split64");
+    lua_pushcfunction(L, budget_remaining, "p4.budget"); lua_setfield(L, -2, "budget");
+    lua_pushcfunction(L, sha256_digest, "p4.sha256"); lua_setfield(L, -2, "sha256");
     p4_lua_memory(L); lua_setfield(L, -2, "mem");
     p4_lua_events(L); lua_setfield(L, -2, "events");
     p4_lua_input(L); lua_setfield(L, -2, "input");
     p4_lua_files(L); lua_setfield(L, -2, "files");
     p4_lua_settings(L); lua_setfield(L, -2, "settings");
     p4_lua_lifecycle(L); lua_setfield(L, -2, "lifecycle");
+    p4_lua_mods(L); lua_setfield(L, -2, "mods");
+    p4_lua_contract(L); lua_setfield(L, -2, "contract");
+    p4_lua_artifacts(L); lua_setfield(L, -2, "artifacts");
     p4_lua_save_library(L); lua_setfield(L, -2, "save");
     if (mod->native_bindings) mod->native_bindings->initialize(L);
     lua_setglobal(L, "p4");
@@ -355,7 +447,7 @@ P4LuaMod *p4_lua_create(const P4PackageProvider *provider)
     };
     fenv_t native_environment;
     fegetenv(&native_environment);
-    fesetenv(FE_DFL_ENV);
+    enter_script_float();
     mod->vm = p4_luau_create(&config);
     fesetenv(&native_environment);
     if (mod->vm == NULL) {
@@ -363,7 +455,7 @@ P4LuaMod *p4_lua_create(const P4PackageProvider *provider)
         goto fail;
     }
     fegetenv(&native_environment);
-    fesetenv(FE_DFL_ENV);
+    enter_script_float();
     int status = p4_luau_load_source(mod->vm, "@p4/layout", p4_mod_layout_api, sizeof p4_mod_layout_api - 1);
     fesetenv(&native_environment);
     if (status != LUA_OK || p4_lua_invoke(mod, install_layout, mod, 0, 1) != 0) {
@@ -399,6 +491,7 @@ static void destroy_idle_vm(P4LuaMod *mod)
 {
     if (mod == NULL) return;
     p4_lua_save_destroy(mod);
+    p4_lua_contract_destroy(mod);
     free(mod->settings);
     if (mod->vm && mod->native_bindings) mod->native_bindings->before_destroy(mod);
     p4_mod_events_remove_owner(mod->owner);
@@ -442,7 +535,7 @@ int p4_lua_compile(P4LuaMod *mod, const char *source, size_t size, const char *n
     p4_luau_reset_interrupt(mod->vm);
     fenv_t native_environment;
     fegetenv(&native_environment);
-    fesetenv(FE_DFL_ENV);
+    enter_script_float();
     int status = p4_luau_load_source(mod->vm, name, source, size);
     fesetenv(&native_environment);
     if (status != LUA_OK) return record_error(mod, p4_luau_error(mod->vm));

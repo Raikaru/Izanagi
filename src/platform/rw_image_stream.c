@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: LicenseRef-reconstructed */
 /* func_003ebbf0 (496 bytes): RwImageStreamRead(stream arg0): finds the struct chunk (func_003df050(stream, 1, &size, &version), 0 when it is missing), reads the four word header {width,
  * height, depth, stride} (func_003e2910) and creates the image: a 0x30018 byte request to the allocator slot 0x008873F8 for the pool pointed to by the word at 0x008872E0 + *(int32_t *)P4_G2H(0x007648B8u)
  * (gp - 0x4838; gp is 0x007690F0), with image[0] = 0, image[1] = width, image[2] = height, image[3] = depth, image[5] = image[6] = 0, registered by func_003e3b70(0x0070B7C0, image) and given its

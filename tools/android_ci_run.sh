@@ -89,7 +89,7 @@ assets="$src/build/android/package-assets"
 mkdir -p "$assets/licenses" "$assets/source"
 cp "$src/third_party/licenses/FFmpeg-LGPL-2.1.txt" "$src/third_party/licenses/SDL3-zlib.txt" "$assets/licenses/"
 cp "$src/third_party/miniz/LICENSE" "$assets/licenses/miniz-MIT.txt"
-cp "$src/third_party/licenses/LodePNG-zlib.txt" "$src/third_party/licenses/yxml-MIT.txt" "$src/third_party/licenses/fdlibm-Sun.txt" \
+cp "$src/third_party/licenses/LodePNG-zlib.txt" "$src/third_party/licenses/cgltf-MIT.txt" "$src/third_party/licenses/yxml-MIT.txt" "$src/third_party/licenses/fdlibm-Sun.txt" "$src/third_party/licenses/newlib-BSD.txt" \
   "$src/third_party/licenses/recvx-decomp-MIT.txt" "$src/third_party/licenses/sky2hook-permission.txt" "$assets/licenses/"
 cp "$src/LICENSE" "$assets/licenses/p4pc-MIT.txt"
 cp "$src/NOTICE" "$assets/licenses/NOTICE.txt"

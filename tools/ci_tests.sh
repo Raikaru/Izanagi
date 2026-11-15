@@ -14,6 +14,8 @@ rc=0
 xvfb-run -a ctest --test-dir "$build" -j "$jobs" --timeout 900 --output-on-failure -LE port64win "$@" || rc=$?
 (
   unset DISPLAY WAYLAND_DISPLAY
+  # Match the Win32/x64w lane environment for Unicode filenames under Wine.
+  export LANG=C.UTF-8 LC_ALL=C.UTF-8
   export WINEPREFIX="$build/wineprefix" WINEARCH=win64 WINEDEBUG=-all WINEDLLOVERRIDES="winedbg.exe=d;mscoree,mshtml="
   mkdir -p "$WINEPREFIX"
   trap 'wineserver -k >/dev/null 2>&1 || true' EXIT

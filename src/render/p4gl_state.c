@@ -188,8 +188,8 @@ int32_t RpSkyRenderStateGet(int32_t state, void *out)
  * B=0, D=Cd; 0x48), subtractive (A=0, B=Cs, D=Cd; 0x42, reverse subtract), modulate (A=Cs, B=0,
  * D=0) and keep-destination (A=0, B=0, D=Cd). All zero fields give Cs, which is blending off.
  * Anything else (the FIX+1 over-bright combination A=Cs, B=Cd, C=FIX, D=Cs, and unused fields)
- * blends as source-alpha over and logs once. The alpha channel takes the source alpha (GS: the frame buffer alpha is As, not blended). Not applied: the destination alpha test and the
- * framebuffer's own alpha as a blend factor beyond Ad. */
+ * blends as source-alpha over and logs once. The alpha channel takes the source alpha (GS: the frame buffer alpha is As, not blended).
+ * DATE is handled by the draw shaders rather than by the blend state. */
 void p4gl_gs_alpha_apply(uint64_t reg)
 {
     const uint32_t fieldA = (uint32_t)(reg & 3u);
@@ -258,8 +258,8 @@ void p4gl_sky_apply_blend(void)
  * writes colour (FB_ONLY and RGB_ONLY, which is how ATST NEVER with FB_ONLY means "write colour,
  * skip depth") or Z (ZB_ONLY with NEVER writes depth and no colour: p4gl_frame_mask_apply masks the colour). 2..7 are LESS, LEQUAL, EQUAL, GEQUAL, GREATER and NOTEQUAL; 8 is NEVER with a
  * failure mode that writes no colour. The shaders compare PS2 alpha, where 0x80 is 1.0, so GL alpha
- * is scaled by 128 before the comparison against the AREF value. The destination alpha test (DATE)
- * is not applied. */
+ * is scaled by 128 before the comparison against the AREF value. DATE is decoded separately
+ * by p4gl_sky_date(). */
 int32_t p4gl_gs_test_func(uint32_t test)
 {
     const uint32_t atst = (test >> 1) & 7u;

@@ -10,10 +10,14 @@
 #include <string.h>
 
 /* One selected provider may own the layout: [element-ui] with schema, revision
- * and order, plus [element-column KEY] for every ordered key. Parsed from the
- * core's immutable manifest fields; keys resolve against the exact frozen
- * Tables product. An expanded cohort with no authored layout uses the retail
- * seven-column row. Retail sessions stay inactive and allocate nothing. */
+ * and order, plus [element-column KEY] for every ordered key. Any selected
+ * provider may add [element-header KEY] images for leaves without a header
+ * icon of their own and [element-prompt NAME] images (owner, key, revision of
+ * its own [resource-image]).
+ * Parsed from the core's immutable manifest fields; keys resolve against the
+ * exact frozen Tables product. An expanded cohort with no authored layout uses
+ * the retail seven-column row. Retail sessions stay inactive and allocate
+ * nothing. */
 typedef struct UiColumnInput {
     const char *leaf, *component, *channel, *marker_component, *marker_channel;
     const char *legacy_primary, *legacy_marker;
@@ -110,7 +114,8 @@ static int parse_layout(const P4PackageProvider *provider, const P4PackageField 
         if (!strcmp(fields[i].key, "schema")) schema = fields[i].value;
         else if (!strcmp(fields[i].key, "revision")) revision = fields[i].value;
         else if (!strcmp(fields[i].key, "order")) order = fields[i].value;
-        else if (!strcmp(fields[i].key, P4_MOD_SETTING_GATE_FIELD)) continue; /* evaluated by prepare() */
+        else if (!strcmp(fields[i].key, P4_MOD_SETTING_GATE_FIELD) || !strcmp(fields[i].key, P4_MOD_COMPANION_GATE_FIELD) ||
+                 !strcmp(fields[i].key, P4_MOD_COMPANION_SETTING_FIELD)) continue; /* evaluated by prepare() */
         else return refuse(provider, boot.line, "unknown [element-ui] field");
     }
     uint32_t schema_number;
@@ -182,6 +187,71 @@ static int plan_failed(const char *stage, int result)
     fprintf(stderr, "p4pc: retail element-ui layout refused for the expanded cohort: %s\n", reason);
     return -1;
 }
+/* Every selected provider's [element-header KEY] and [element-prompt NAME]
+ * images, each section gated by its own `when`; fields arrive sorted by
+ * (section, argument, key). */
+static int prompt_index(const char *name, uint32_t *prompt)
+{
+    if (!strcmp(name, "analyze-ailments")) *prompt = P4_ELEMENT_UI_PROMPT_ANALYZE_AILMENTS;
+    else if (!strcmp(name, "analyze-affinities")) *prompt = P4_ELEMENT_UI_PROMPT_ANALYZE_AFFINITIES;
+    else return 0;
+    return 1;
+}
+static int element_images(int expanded)
+{
+    for (size_t package = 0; package < p4_packages_count(); ++package) {
+        const P4PackageProvider *provider = p4_packages_provider(package);
+        size_t count = 0;
+        const P4PackageField *fields = p4_package_provider_fields(provider, &count);
+        for (size_t first = 0; first < count;) {
+            const char *section = fields[first].section;
+            const int header = !strcmp(section, "element-header");
+            if (!header && strcmp(section, "element-prompt")) { ++first; continue; }
+            size_t last = first;
+            while (last < count && !strcmp(fields[last].section, section) &&
+                !strcmp(fields[last].argument, fields[first].argument)) ++last;
+            const unsigned line = fields[first].line;
+            char reason[192];
+            const int gate = p4_mod_setting_section_gate(provider, fields + first, last - first, reason, sizeof reason);
+            if (gate < 0) return refuse(provider, line, reason);
+            if (gate) {
+                if (!expanded) return refuse(provider, line, "element-header/element-prompt require an expanded element table-source cohort");
+                const P4PackageInfo *info = p4_package_provider_info(provider);
+                const char *owner = NULL, *key = NULL, *revision = NULL;
+                for (size_t i = first; i < last; ++i) {
+                    if (!strcmp(fields[i].key, "owner")) owner = fields[i].value;
+                    else if (!strcmp(fields[i].key, "key")) key = fields[i].value;
+                    else if (!strcmp(fields[i].key, "revision")) revision = fields[i].value;
+                    else if (strcmp(fields[i].key, P4_MOD_SETTING_GATE_FIELD))
+                        return refuse(provider, fields[i].line, "unknown element-header/element-prompt field");
+                }
+                P4ResourceRef image = {{0}, {0}, 0};
+                if (!info || !owner || !key || strcmp(owner, info->id) || strlen(key) >= sizeof image.key ||
+                    !decimal(revision, &image.revision))
+                    return refuse(provider, line, "an image needs owner (this package), key and a nonzero revision");
+                strcpy(image.owner, owner);
+                strcpy(image.key, key);
+                int result;
+                if (header) {
+                    const P4ElementDesc *element = p4_game_tables_element_key(boot.tables, fields[first].argument);
+                    if (!element) return refuse(provider, line, "[element-header] key is not a registered element");
+                    result = p4_game_elements_ui_element_header(boot.ui, element->id, &image);
+                } else {
+                    uint32_t prompt;
+                    if (!prompt_index(fields[first].argument, &prompt))
+                        return refuse(provider, line, "[element-prompt] is analyze-ailments or analyze-affinities");
+                    result = p4_game_elements_ui_prompt(boot.ui, prompt, &image);
+                }
+                if (result == P4_TABLE_CONFLICT) return refuse(provider, line, "another package already declares this image");
+                if (result) return refuse(provider, line, p4_game_tables_error(result));
+                if (p4_package_provider_claim(provider, P4_PACKAGE_CLAIM_COSMETIC))
+                    return refuse(provider, line, "cannot claim the selected element image");
+            }
+            first = last;
+        }
+    }
+    return 0;
+}
 
 static int prepare(void *unused)
 {
@@ -198,7 +268,7 @@ static int prepare(void *unused)
         size_t i = 0;
         while (i < count && strcmp(fields[i].section, "element-ui") && strcmp(fields[i].section, "element-column")) ++i;
         if (i == count) continue;
-        /* The layout's `when` gates the whole layout, its columns included. */
+        /* The layout's `when` and `companion` gate the whole layout, its columns included. */
         size_t first = 0;
         while (first < count && strcmp(fields[first].section, "element-ui")) ++first;
         size_t last = first;
@@ -214,6 +284,7 @@ static int prepare(void *unused)
     const int expanded = root && p4_game_elements_requested(root->tables);
     if (!expanded) {
         if (boot.provider) return refuse(boot.provider, boot.line, "a layout requires an expanded element table-source cohort");
+        if (element_images(0)) return -1;
         return p4_package_boot_provide(NULL);
     }
     boot.tables = root->tables;
@@ -235,6 +306,7 @@ static int prepare(void *unused)
     if (!boot.ui) return plan_failed("layout", P4_TABLE_NOMEM);
     int result = p4_game_elements_ui_layout(boot.ui, owner, layout, boot.count, boot.revision);
     if (result) return plan_failed("layout", result);
+    if (element_images(1)) return -1;
     result = p4_game_elements_ui_prepare(boot.ui, boot.tables);
     if (result) return plan_failed("element columns", result);
     result = p4_game_elements_ui_check_images(boot.ui, images_product);
@@ -285,7 +357,7 @@ int p4_game_elements_ui_boot_session_end(void)
     memset(&boot, 0, sizeof boot);
     return P4_TABLE_OK;
 }
-static const char *const sections[] = {"element-ui", "element-column", NULL};
+static const char *const sections[] = {"element-ui", "element-column", "element-header", "element-prompt", NULL};
 static const char *const dependencies[] = {P4_GAME_TABLES_BOOT_PROVIDER, P4_RESOURCES_IMAGES_HANDLER,
     P4_MOD_SETTINGS_HANDLER, NULL};
 const P4PackageHandler p4_game_elements_ui_boot_provider = {

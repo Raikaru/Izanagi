@@ -33,7 +33,9 @@ cd "$work" || exit 1
 env SDL_VIDEODRIVER="${SDL_VIDEODRIVER:-offscreen}" SDL_AUDIODRIVER=dummy P4PC_TRAP_CONTINUE=1 P4PC_SAVE_DIR="$work/card" P4PC_TURBO=2 \
   P4PC_AUTOPRESS_FRAMES=1 P4PC_AUTOPRESS_LOAD=0 P4PC_WALK_SCRIPT="$here/../tools/systems/save0411_to_morning.txt" P4PC_WALK_DIGEST=1 P4PC_BATTLE_LOG=1 \
   P4PC_NEWGAME_GATE="$goal" timeout -s KILL 560 "$prog" "$P4PC_ELF" > "$work/boot.log" 2>&1
-if [ $? -ne 0 ] || ! grep -aq "new-game gate PASS at flip ${goal%%,*}:" "$work/boot.log"; then
+rc=$?
+gate_watchdog_status "$rc"
+if [ "$rc" -ne 0 ] || ! grep -aq "new-game gate PASS at flip ${goal%%,*}:" "$work/boot.log"; then
   echo "walk_digest_gate: the run did not finish its $goal goal"
   tail -n 12 "$work/boot.log"
   exit 1

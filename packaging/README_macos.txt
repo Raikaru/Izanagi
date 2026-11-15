@@ -71,10 +71,25 @@ Where things are
 inside the app, so the app can be replaced by a newer build without touching your
 saves.
 
+Optional mods made for this port ship in the mods folder beside the game program
+(Contents/Resources/mods inside the app). None of them is active: choose one in
+Config > MODS, set its options on its MODS page, and restart. A copy with the same
+id in your own mods folder beside p4pc.ini replaces the shipped one.
+
+Fusion Arts offers WEAPON FUSION after Yukiko's Castle is cleared. Enable the
+mod and its WEAPON FUSION option, then restart. In the Velvet Room, use Square
+on the root menu to open the forge. Choose a fighter, an unequipped weapon and
+a carried Persona; the confirmation shows the result and fee. Forging consumes
+the weapon and Persona and cannot be undone. The equipped or last Persona cannot
+be consumed. You may equip a successful result immediately; your old equipped
+weapon returns to your items (EQUIP NOW is unavailable while you hold 99 of it).
+Physical Split, if enabled, also types forged weapons.
+
 The package contains an inert example in examples/mods/p4pc.example. To try it, copy
 that folder into the mods folder beside p4pc.ini, enable p4pc.example in MODS, and
 restart. It logs time-slot setter calls; its counter is restored from the mod save
-sidecar when you load.
+sidecar when you load. Its COUNT TIME SLOTS row under MODS turns the counter on
+and off, and it logs the text file it ships in files/DATA.
 
 This is a test build
 --------------------

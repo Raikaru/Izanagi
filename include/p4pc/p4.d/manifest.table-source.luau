@@ -1,0 +1,3 @@
+--!capability manifest.table-source@1
+--!covers section:table-source
+-- mod.ini [table-source] and its XML row vocabulary as of the registry's introduction (docs/modding/tables.md).

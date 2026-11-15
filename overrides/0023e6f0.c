@@ -1,7 +1,11 @@
-/* 0023e6f0: preserve retail flow while resolving owned wide action frames. */
+/* 0023e6f0: preserve retail flow while resolving owned wide action frames.
+ * PortApiData facet: a rolled hit's chance passes the hit stage after its
+ * 50..99 clamp; the stage never runs while no modifier is registered. */
 #include "p4pc/game_elements_native.h"
 #include "p4pc/game_elements_calc_native.h"
+#include "p4pc/game_hit_stage_native.h"
 #include "p4pc/game_skills_native.h"
+#include "p4pc/game_side_ailment_native.h"
 s32 datCalcResolveSkillHit(source, target, skillId, options)
 u8 *source;
 u8 *target;
@@ -119,11 +123,21 @@ s32 options;
     }
     if (hasActionFrame ? p4_game_action_element_has_affinity(&actionFrame.element) :
         !(elementMask & 0xE0001)) {
+        /* Shields follow the element (hardmode-design 8.1): Tetrakarn for a
+         * physical element, Makarakarn for every other non-Almighty one. */
         if (hasActionFrame ? p4_game_action_element_is_physical(&actionFrame.element) : (elementMask & 2)) {
             if ((s8)(active = (((DatCalcUnitState *)target)->buffFlags & 0x10000) != 0) > 0) {
                 ((DatCalcUnitState *)target)->consumedFlags |= 0x10000;
                 return 0x200;
             }
+        } else if ((hasActionFrame ? actionFrame.element.family != 5u : !(elementMask & 0x40)) &&
+            (s8)(active = (((DatCalcUnitState *)target)->buffFlags & 0x20000) != 0) > 0) {
+            ((DatCalcUnitState *)target)->consumedFlags |= 0x20000;
+            return 0x200;
+        }
+        /* Counters follow the delivery, after the shield: for every retail
+         * action the delivery is the element's, so order and draws are unchanged. */
+        if (hasActionFrame ? p4_game_action_frame_physical(&actionFrame) : (elementMask & 2)) {
             if (!(options & 2) && !(iGpffffb3b8[offset] & 0x40)) {
                 counterRate = 0;
                 if (datCalcHasFixedSkill(target, 0x1F8) ||
@@ -150,10 +164,6 @@ s32 options;
                     return 0x200;
                 }
             }
-        } else if ((hasActionFrame ? actionFrame.element.family != 5u : !(elementMask & 0x40)) &&
-            (s8)(active = (((DatCalcUnitState *)target)->buffFlags & 0x20000) != 0) > 0) {
-            ((DatCalcUnitState *)target)->consumedFlags |= 0x20000;
-            return 0x200;
         }
         resistance = hasActionFrame ? (s32)p4_game_elements_native_element_affinity(target, &actionFrame) :
             datCalcGetElementAffinity(target, rawElement);
@@ -180,6 +190,11 @@ s32 options;
         return 1;
     }
     if (*(u16 *)target & 0x40) {
+        return 1;
+    }
+    /* A side ailment that costs the unit's turn takes away its evasion, as
+     * retail Dizzy below does (hardmode-design §4.F). */
+    if (p4_side_ailment_native_lose_turn(target)) {
         return 1;
     }
     switch (targetRecord->bad & 0xFFFFF) {
@@ -336,6 +351,10 @@ s32 options;
         baseRate = 99;
     } else if (baseRate < 50) {
         baseRate = 50;
+    }
+    if (p4_game_hit_native_active()) {
+        baseRate = p4_game_hit_native_rate(P4_HIT_ACCURACY, (u32)(u16)skillId, (*(u16 *)source & 4) != 0,
+            ((DatUnit *)source)->id, (targetRecord->flags & 4) != 0, targetRecord->id, baseRate);
     }
     if ((s32)(RpRandom() % 100U) >= baseRate) {
         ((DatCalcUnitState *)target)->message = evadeCause;

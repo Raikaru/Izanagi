@@ -1,0 +1,23 @@
+# From the 04/17 evening checkpoint (story0417), loaded with P4PC_AUTOPRESS_LOAD=0: the route of
+# qol_backlog_0418.walk into the 04/18 morning classroom conversation, then no input at all, so the
+# QoL AUTO DIALOGUE witness (tests/mod_qol_game_test.py) shows the conversation running on to
+# Chie's first choice by itself.
+timeout:6000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+timeout:40000
+waitcontrol:on
+wait:30
+walk:314,-360,25
+face:100
+wait:20
+press:cross
+wait:40
+skipfield:6:6
+wait:1560
+log

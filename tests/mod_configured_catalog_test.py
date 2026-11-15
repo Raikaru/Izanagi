@@ -18,9 +18,9 @@ class ConfiguredCatalog(unittest.TestCase):
         self.root = Path(self.temporary.name)
         self.ini = self.root / "fixture.ini"
 
-    def packages(self, directory):
+    def packages(self, directory, names=("first", "second")):
         directory.mkdir()
-        for name in ("first", "second"):
+        for name in names:
             package = directory / name
             package.mkdir()
             (package / "mod.ini").write_text(
@@ -31,16 +31,21 @@ class ConfiguredCatalog(unittest.TestCase):
             (package / "files").write_text("not a directory", encoding="ascii")
             (package / "main.luau").write_text("local = invalid source", encoding="ascii")
 
-    def invoke(self, *, directory=None, no_config=False, success=True, empty=False):
+    def invoke(self, *, directory=None, no_config=False, success=True, empty=False, bundled_root=None, bundled=0,
+               shadowed=0):
         env = dict(os.environ, P4PC_CONFIG="none" if no_config else str(self.ini),
-                   P4PC_MODS="0", P4PC_PACKS="0", P4PC_INPUT="script")
+                   P4PC_MODS="0", P4PC_PACKS="0", P4PC_INPUT="script",
+                   P4PC_BUNDLED_MOD_DIR=str(bundled_root) if bundled_root else "")
         env.pop("P4PC_MOD_DIR", None)
         if directory is not None:
             env["P4PC_MOD_DIR"] = str(directory)
         result = subprocess.run([*DRIVER, "empty" if empty else "ok" if success else "error"], env=env,
                                 capture_output=True, text=True, check=False)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn(f"configured catalog: PASS seen={2 if success and not empty else 0} activation=0", result.stdout)
+        self.assertIn(f"configured catalog: PASS seen={2 if success and not empty else 0} activation=0 "
+                      f"bundled={bundled} shadowed={shadowed}", result.stdout)
+        if shadowed:
+            self.assertIn("player copy shadows bundled catalog.first 1.0", result.stderr)
 
     def write_ini(self, root=None):
         text = "[mods]\nenabled=not.installed\n"
@@ -77,6 +82,22 @@ class ConfiguredCatalog(unittest.TestCase):
         directory = self.root / "explicit root"
         self.packages(directory)
         self.invoke(directory=directory, no_config=True)
+
+    def test_bundled_root_lists_shipped_packages_without_a_player_root(self):
+        self.packages(self.root / "shipped")
+        self.write_ini()
+        self.invoke(bundled_root=self.root / "shipped", bundled=2)
+
+    def test_player_installation_hides_the_bundled_copy_of_its_id(self):
+        self.packages(self.root / "mods")
+        self.packages(self.root / "shipped", names=("first",))
+        self.write_ini()
+        self.invoke(bundled_root=self.root / "shipped", bundled=0, shadowed=1)
+
+    def test_missing_bundled_root_is_empty(self):
+        self.packages(self.root / "mods")
+        self.write_ini()
+        self.invoke(bundled_root=self.root / "not-shipped", bundled=0)
 
     def test_absent_settings_and_root_are_an_explicit_error_not_activation(self):
         self.invoke(no_config=True, success=False)

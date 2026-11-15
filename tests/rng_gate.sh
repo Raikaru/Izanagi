@@ -22,6 +22,7 @@ case $scenario in
     boot)
         env SDL_VIDEODRIVER="${SDL_VIDEODRIVER:-offscreen}" SDL_AUDIODRIVER=dummy P4PC_TRAP_CONTINUE=1 P4PC_TURBO=2 P4PC_LOG_RANDOM=700 \
             P4PC_NEWGAME_GATE=700 P4PC_SAVE_DIR="$work/card" timeout -s KILL 600 "$prog" "$P4PC_ELF" > "$work/boot.log" 2>&1
+        gate_watchdog_status "$?"
         grep -a "RngSeed seed=000014bc draws=310" "$work/boot.log" > /dev/null || { echo "rng_gate: second boot seed is not 0x14bc"; grep -a RngSeed "$work/boot.log" | head -3; exit 1; }
         grep -a "RngDraw 311 6b0c7ac3" "$work/boot.log" > /dev/null || { echo "rng_gate: draw 311 differs from retail (6b0c7ac3)"; grep -a "RngDraw 311 " "$work/boot.log"; exit 1; }
         grep -a "RngDraw 620 0d656b36" "$work/boot.log" > /dev/null || { echo "rng_gate: draw 620 differs from retail (0d656b36)"; grep -a "RngDraw 620 " "$work/boot.log"; exit 1; }
@@ -38,6 +39,7 @@ case $scenario in
         env SDL_VIDEODRIVER="${SDL_VIDEODRIVER:-offscreen}" SDL_AUDIODRIVER=dummy P4PC_TRAP_CONTINUE=1 P4PC_TURBO=2 P4PC_AUTOPRESS_FRAMES=1 P4PC_AUTOPRESS_LOAD=0 \
             P4PC_SAVE_DIR="$work/card" P4PC_WALK_SCRIPT="$here/../tools/systems/apollo_club_1f.txt" P4PC_BOARD_SEED=0x19c3 P4PC_DUMP_CHECKS=1 \
             P4PC_NEWGAME_GATE="$floor_goal" timeout -s KILL 1500 "$prog" "$P4PC_ELF" > "$work/boot.log" 2>&1
+        gate_watchdog_status "$?"
         # Include the populated 900-update diagnostic after floor entry, not just
         # its early 60-update header. Keep the first complete grid's retail checksum.
         grep -a "CHECKS field 42" "$work/boot.log" > /dev/null || { echo "rng_gate: the club floor was not reached"; tail -n 5 "$work/boot.log"; exit 1; }

@@ -1,0 +1,3 @@
+--!capability table-source.skill-source@1
+--!covers section:table-source.skill-source
+-- Table-source skill rows can select a retail skill as their effect source.

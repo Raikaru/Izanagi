@@ -1,0 +1,3 @@
+--!capability manifest.element-ui@2
+--!covers section:element-ui section:element-column
+-- mod.ini [element-ui] and [element-column]: element presentation, header icons and native-size art.

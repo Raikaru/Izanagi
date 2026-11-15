@@ -16,6 +16,15 @@ typedef enum P4AffinityKind { P4_ENTITY_PERSONA = 0, P4_ENTITY_ENEMY = 1 } P4Aff
 #define P4_ELEMENT_OFFENSIVE 2u
 #define P4_ELEMENT_AFFINITY 4u
 #define P4_ELEMENT_VISIBLE 8u
+/* A resolved action's delivery (hardmode-design 8.1) rides in its element's
+ * flags, so the 44-byte frame and the AI candidate guest layouts stay as they
+ * are. Neither bit set: the delivery follows the element (P4_ELEMENT_PHYSICAL).
+ * An authored <skill delivery> sets one; registry element flags never do. */
+#define P4_ELEMENT_DELIVERY_PHYSICAL 0x100u
+#define P4_ELEMENT_DELIVERY_MAGIC 0x200u
+#define P4_DELIVERY_DEFAULT 0u
+#define P4_DELIVERY_PHYSICAL 1u
+#define P4_DELIVERY_MAGIC 2u
 #define P4_AFF_NULL 0x01000000u
 #define P4_AFF_REPEL 0x02000000u
 #define P4_AFF_DRAIN 0x04000000u
@@ -60,6 +69,17 @@ static inline int p4_game_action_element_is_physical(const P4GameActionElement *
 {
     return element->valid && (element->flags & P4_ELEMENT_PHYSICAL) != 0;
 }
+/* Physical delivery: the crit roll, the counter roll and the physical-only
+ * damage term. Affinity, shields, Boost/Amp and evasion passives keep asking
+ * the element. Reflected and countered hits carry their frame, so they keep
+ * the original delivery. */
+static inline int p4_game_action_frame_physical(const P4GameActionFrame *frame)
+{
+    const uint32_t flags = frame->element.flags;
+    if (flags & P4_ELEMENT_DELIVERY_PHYSICAL) return frame->element.valid;
+    if (flags & P4_ELEMENT_DELIVERY_MAGIC) return 0;
+    return p4_game_action_element_is_physical(&frame->element);
+}
 static inline int p4_game_action_element_is_offensive(const P4GameActionElement *element)
 {
     return element->valid && (element->flags & P4_ELEMENT_OFFENSIVE) != 0;
@@ -102,6 +122,10 @@ uint32_t p4_game_elements_native_hit_class_bits(void *unit, uint32_t skill_id);
  * row resolved the uncured KO payload (0x80000), the INSTANT_KO frame; the
  * knowledge owner alone writes the retail bitmap. Refuses on any failure. */
 void p4_game_elements_native_learn(void *defender, void *attacker, uint32_t skill_id, uint32_t ko_status);
+/* A side-ailment rider's landing on an enemy (game_side_ailment_battle.c, from
+ * the same 001F14F0 gate): observes the (leaf, status channel) frame, which
+ * the knowledge owner keys like an ailment skill's pair. Refuses on failure. */
+void p4_game_elements_native_learn_leaf(void *defender, uint32_t leaf);
 /* The original amount equation with the caller's owning full frame and
  * optional target-affinity policy; no global last-action state. */
 int32_t p4_game_elements_native_amount(uint32_t skill_id, void *source, void *target,
@@ -114,6 +138,9 @@ void p4_game_elements_native_skill_use(uint32_t skill_id);
 uint32_t p4_game_elements_native_affinity(void *unit, const P4GameActionFrame *frame);
 uint32_t p4_game_elements_native_affinity_leaf(void *unit,
     uint32_t leaf, uint32_t channel, uint32_t component);
+/* The classified frame of one declared (leaf, channel, component) without a
+ * skill, as affinity_leaf resolves it. Refuses an unclassifiable pair. */
+void p4_game_elements_native_leaf_frame(uint32_t leaf, uint32_t channel, uint32_t component, P4GameActionFrame *frame);
 _Noreturn void p4_game_elements_native_mask_refuse(uint32_t leaf);
 int p4_game_elements_unit_identity(void *unit, P4GameUnitIdentity *identity);
 int p4_game_elements_native_enemy_context(void *unit, P4GameEnemyContext *context);

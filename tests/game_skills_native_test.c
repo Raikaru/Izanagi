@@ -104,8 +104,9 @@ int main(void)
     P4GameTableInput *owned[] = {inputs.skill, inputs.effect, inputs.message};
     assert(!p4_game_table_admission_stage(owned, 3));
     assert(!p4_game_skills_boot_stage(inputs.skills));
+    /* The fixture's sealed input stands in for the loader's writable buffer. */
     p4_game_table_admission_packed(descriptor, "battle/SKILL.TBL",
-        p4_game_table_input_bytes(inputs.skill), (uint32_t)p4_game_table_input_size(inputs.skill),
+        (uint8_t *)p4_game_table_input_bytes(inputs.skill), (uint32_t)p4_game_table_input_size(inputs.skill),
         p4_game_tables_observe_packed);
     assert(observed == 1 && p4_game_skills_boot_unstage(inputs.skills) == P4_TABLE_FROZEN);
     assert(!p4_game_skills_revision(inputs.skills) && !p4_game_skills_active());

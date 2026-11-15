@@ -956,6 +956,13 @@ int p4_game_elements_ai_vm_query_role(void *work, void *source, uint32_t *role)
     *role = vm->command_role;
     return P4_TABLE_OK;
 }
+/* A mod's authored substitution is not a candidate the script's control flow
+ * permitted; it names its command outright. */
+static int authored_choice(const P4AiCarrier *carrier, const P4GameActionFrame *frame)
+{
+    return carrier->selected.valid && (carrier->selected.candidate.eligibility & P4_GAME_AI_CANDIDATE_AUTHORED) &&
+        same_frame(frame, &carrier->selected.candidate.frame);
+}
 int p4_game_elements_ai_vm_candidate_allowed(void *work, void *source, const P4GameActionFrame *frame)
 {
     if (!work) return 1;
@@ -963,6 +970,7 @@ int p4_game_elements_ai_vm_candidate_allowed(void *work, void *source, const P4G
     P4AiCarrier *carrier = p4_ai_native_carrier(source);
     if (!frame || !vm || !carrier || !vm->running || !vm->command_active ||
         !same_owner(&carrier->owner, &vm->owner)) return P4_TABLE_NOT_READY;
+    if (authored_choice(carrier, frame)) return 1;
     Permit permit;
     int result = current_permit(p4_ai_native_product(), vm, 1, &permit);
     return result ? result : (int)frame_proof(&permit, carrier, frame);
@@ -974,10 +982,12 @@ int p4_game_elements_ai_vm_commit_choice(void *work, void *source, const P4GameA
     P4AiCarrier *carrier = p4_ai_native_carrier(source);
     if (!vm || !carrier || !frame || !vm->running || !vm->command_active ||
         !same_owner(&carrier->owner, &vm->owner)) return P4_TABLE_NOT_READY;
-    Permit permit;
-    int result = current_permit(p4_ai_native_product(), vm, 1, &permit);
-    if (result) return result;
-    if (!frame_proof(&permit, carrier, frame)) return P4_TABLE_CONFLICT;
+    if (!authored_choice(carrier, frame)) {
+        Permit permit;
+        int result = current_permit(p4_ai_native_product(), vm, 1, &permit);
+        if (result) return result;
+        if (!frame_proof(&permit, carrier, frame)) return P4_TABLE_CONFLICT;
+    }
     if (++carrier->choice_generation == 0u) return P4_TABLE_CONFLICT;
     vm->choice_valid = 1u; vm->choice_generation = carrier->choice_generation;
     vm->choice_frame = *frame;
@@ -1000,7 +1010,7 @@ int p4_game_elements_ai_vm_decoded(void *work, void *source, uint32_t command_pa
             P4GameAiSelection argument_selection;
             int tagged = p4_game_elements_ai_vm_argument_selection(work, command_parameter, source, &argument_selection);
             if (tagged < 0) return tagged;
-            if (tagged) {
+            if (tagged && !(carrier->selected.candidate.eligibility & P4_GAME_AI_CANDIDATE_AUTHORED)) {
                 if (argument_selection.candidate.command != carrier->selected.candidate.command ||
                     !same_frame(&argument_selection.candidate.frame, &carrier->selected.candidate.frame))
                     return P4_TABLE_CONFLICT;

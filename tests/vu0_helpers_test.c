@@ -82,13 +82,34 @@ static void test_q_register(void)
 
 static void test_opmula(void)
 {
-    /* Cross product: ACC.xyz = vs x vt, here (1,0,0) x (0,1,0) = (0,0,1). */
-    setv(12, 1.0f, 0.0f, 0.0f, 0.0f);
-    setv(13, 0.0f, 1.0f, 0.0f, 0.0f);
+    /* OPMULA is only the first half; OPMSUB with reversed operands finishes
+     * the cross product.  Preserve W and support destination/source aliasing. */
+    setv(12, 1.0f, 2.0f, 3.0f, 7.0f);
+    setv(13, 4.0f, 5.0f, 6.0f, 8.0f);
+    p4pc_vu0.acc.f[3] = 9.0f;
     p4_vu0_opmula(12, 13);
-    CHECK(p4pc_vu0.acc.f[0] == 0.0f);
-    CHECK(p4pc_vu0.acc.f[1] == 0.0f);
-    CHECK(p4pc_vu0.acc.f[2] == 1.0f);
+    CHECK(p4pc_vu0.acc.f[0] == 12.0f);
+    CHECK(p4pc_vu0.acc.f[1] == 12.0f);
+    CHECK(p4pc_vu0.acc.f[2] == 5.0f);
+    CHECK(p4pc_vu0.acc.f[3] == 9.0f);
+    p4_vu0_opmsub(12, 13, 12);
+    CHECK(same4(12, -3.0f, 6.0f, -3.0f, 7.0f));
+
+    /* The particle quaternion routine adds its two scalar terms between the
+     * instructions; a full cross product in each instruction doubles the
+     * cross term and produces a non-unit orientation. */
+    setv(10, 0.5f, 0.5f, 0.5f, 0.5f);
+    setv(11, 0.5f, -0.5f, 0.5f, 0.5f);
+    p4_vu0_mul(2, P4_VU_XYZW, 10, 11, P4_VU_NOBC);
+    p4_vu0_opmula(10, 11);
+    p4_vu0_madd(P4_VU_ACC, P4_VU_XYZ, 11, 10, P4_VU_BC_W);
+    p4_vu0_madd(P4_VU_ACC, P4_VU_XYZ, 10, 11, P4_VU_BC_W);
+    p4_vu0_opmsub(10, 11, 10);
+    p4_vu0_mul(P4_VU_ACC, P4_VU_W, 10, 11, P4_VU_NOBC);
+    p4_vu0_msub(P4_VU_ACC, P4_VU_W, 0, 2, P4_VU_BC_X);
+    p4_vu0_msub(P4_VU_ACC, P4_VU_W, 0, 2, P4_VU_BC_Y);
+    p4_vu0_msub(10, P4_VU_W, 0, 2, P4_VU_BC_Z);
+    CHECK(same4(10, 1.0f, 0.0f, 0.0f, 0.0f));
 }
 
 static void test_colour_pack(void)

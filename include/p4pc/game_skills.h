@@ -16,7 +16,26 @@ typedef struct P4GameSkillDesc {
     uint8_t element_aux;
     uint8_t inheritance_group; /* Legacy19-column matrix selector, independent of element_id. */
     int8_t inheritance_rate; /* Signed inheritance divisor/mutation grade; zero gives no inheritance weight. */
+    /* Retail active skill (1..439) whose battle effect and sound bank files a
+     * cast of this skill loads (p4_game_skill_effect); 0 = none, and casting
+     * the skill refuses the session. */
+    uint32_t effect_source;
+    /* P4_DELIVERY_* (game_elements_native.h): DEFAULT resolves the damage
+     * component's delivery from its element; PHYSICAL makes an elemental
+     * skill crit, take the counter roll and the physical-only damage term
+     * (hardmode-design 8.1) while its affinity stays the element's. */
+    uint32_t delivery;
+    /* A derived row: retail active anchor (1..439) whose SKILL1 row and EFFECT0
+     * presentation the skill copies when the family seals, instead of
+     * metadata/presentation; 0 = authored rows. derive_fields names the
+     * P4_SKILL_DERIVE_* overrides that replace the copied fields. */
+    uint32_t derive, derive_fields;
+    uint32_t derive_power, derive_cost, derive_accuracy, derive_critical;
 } P4GameSkillDesc;
+#define P4_SKILL_DERIVE_POWER 1u    /* +0x12 s16, 1..9999 */
+#define P4_SKILL_DERIVE_COST 2u     /* +0x04 u16, 1..999 */
+#define P4_SKILL_DERIVE_ACCURACY 4u /* +0x0E u8, 1..100 */
+#define P4_SKILL_DERIVE_CRITICAL 8u /* +0x25 u8, 0..100 */
 typedef struct P4GameSkillView {
     P4GameSkillDesc desc;
     char owner[64];

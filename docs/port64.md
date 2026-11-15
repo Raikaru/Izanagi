@@ -24,6 +24,68 @@ Baseline: Android, iOS, macOS, Linux and Windows ([pc_port.md](pc_port.md)), so 
 
 `tools/port64/inventory.py <i386 build dir> <out>` compiles every unit of an existing i386 build tree twice, for `--target=i386-linux-gnu -m32 -malign-double` (what ships) and for `--target=x86_64-linux-gnu` (same mirror, same flags otherwise), with the pointer warnings on, and dumps the record layouts of both (`-S -emit-llvm -O0 -Xclang -fdump-record-layouts`; `-complete` ignores a typedef's `aligned(16)`, so `struct Model` is 720 bytes on i386 and not what it prints). It also does the port-owned `src/`. `tools/port64/census.py` then runs the rewriter (below) over every preprocessed unit and counts how often each rule fires: it reads clang's own AST, so it sees implicit conversions that no warning reports. Both run in about a minute on 24 cores. Mirror: 1231 units compiled from 1415 files, 847k lines of decomp C, plus 567 override files (38k lines) that are spliced into those units; port-owned `src/`: 105 files, 34k lines.
 
+### GP address resolution audit (2026-11-14)
+
+`gen_port.gp_data_address` is shared by i386 linker placement and the 64-bit
+AST rewriter. Explicit data symbols win over recovered spellings, but must
+equal retail `0x007690f0 + signed displacement`. An unknown disagreement,
+non-data row, malformed displacement, or missing symbol for a reviewed alias
+stops generation. The two misnamed aliases retain independently decoded retail
+offsets; this is not permission to accept arbitrary symbol/name disagreements.
+
+Census at decomp `18016afe60c6c73bdc5d0c72177a29c6f25878c6`:
+918 GP symbol rows; 933 distinct GP identifiers / 13,740 identifier occurrences
+(including declarations) across `decomp/{src,include}`, `overrides`, `src`,
+and `include`; 946 names in their union. Exactly two names differed under
+the old name-first policy in **both** resolvers, at these four expression sites:
+
+| Source site / function | Retail instruction | Old address | Correct address |
+|---|---|---|---|
+| `Graphics/Model/mdlManager.c:2856`, `mdlSetupNamedFrameAnims` | `00474ea4: addiu a1,gp,-0x4f30` | `00762e00` | `007641c0` |
+| `Graphics/Model/mdlManager.c:3075`, `mdlStartAnimation` | `00475528: addiu a1,gp,-0x4f30` | `00762e00` | `007641c0` |
+| `unplaced/unplaced_inferred_00210c70.c:384`, `btlDamageDrawGaugeBar` | `002117a4: lwc1 f0,-0x7b50(gp)` | `00761590` | `007615a0` |
+| `unplaced/unplaced_inferred_00210c70.c:396`, `btlDamageDrawGaugeBar` | `002118bc: lwc1 f0,-0x7b50(gp)` | `00761590` | `007615a0` |
+
+Source paths above are relative to `decomp/src`. The model alias
+`gp0xffff9d10` is declared at line 164; the gauge alias `fGpffff84a0` at
+lines 68 and 356. These declarations do not add runtime access sites.
+Both corrected addresses agree with `config/symbols_recovered.txt`;
+neither alias has an overriding row in the earlier symbol inputs.
+Retail ELF SHA-256:
+`f90675b8a38138ddb5dc5cdf641550f41800fcb86bb499c586073e964fb41836`.
+
+Behavioral impact: `007641c0` is the five-byte `step_` frame-name prefix,
+so model setup and animation start now select the retail step-animation
+loop/copy callbacks instead of comparing unrelated bytes at `00762e00`.
+The gauge now uses the retail Y origin `420.5f` instead of approximately
+`-0.785398f`, restoring its bar position. Both changes can affect visible
+output and require scene witnesses, not only a generator test.
+
+Correct classification also exposes two pre-existing raw code-address stores
+in `mdlSetupNamedFrameAnims` (lines 2860/2861). On i386, the recovered
+`LAB_00474a50_abs` / `LAB_00474a90_abs` data aliases are EE addresses, not
+host-executable callbacks. The reviewed mirror fixes install the existing
+`mdlKeyFrameBlendCopy` / `mdlKeyFrameInterpolateCopy`, following the existing
+type-erased stores in the same unit. On 64-bit hosts the native-image window
+allows both data-pointer and function-pointer views to recover the same native
+callback, restoring the comparisons at lines 2974/2975 and 3130/3131. Linker
+thunks would not. No record layout or pointer-width rule changes.
+
+This intentionally corrects x64 behavior too: setup previously stored raw EE
+callback words there, making the data-pointer identity checks silently false.
+`mdlSetAnimControlTime` now retains the copy hooks after updating the material's
+UV animation time. `mdlStepSecondary` selects `mdlAnimLoopCallback`, which
+restarts looping animations and reinstalls their copy hooks, rather than the
+rewind-only callback. These are MatFX base/dual UV transforms (effect kinds 5/6):
+the intended visible behavior is discrete `step_` UV frames with the correct
+loop/stop handling, not a fallback to the animation scheme's interpolation.
+
+`python tests/gen_port_test.py GPAddressTest -v` checks both resolvers,
+fail-closed cases, asm labels, executed rewritten prefix/gauge reads and native
+callback identity/execution, and an empty residual symbol/source census.
+Set `P4PC_ELF` (or `P4_RETAIL`) to independently check all four retail
+instruction offsets; normal builds still read no retail bytes.
+
 ### 1.2 What a 64-bit compiler says about the decomp mirror
 
 | Diagnostic (x86_64) | Sites | What it is |
@@ -288,7 +350,7 @@ The CMake target `p4decomp64w` (option `P4_PORT64_WIN`, on when `CMAKE_C_COMPILE
 **What Windows x64 needed beyond the compile.**
 - The coroutine switch (`os_win32.c`): rbx, rbp, rdi, rsi, r12..r15, xmm6..xmm15 and the NT_TIB stack fields (StackBase, StackLimit, DeallocationStack) are switched with the stack pointer, on the stack memory the caller gives (the guest stack arena), so locals are guest addresses and exception dispatch accepts the stack. `tests/port64_coro_win_test.c` checks the registers, 100000 switches, a 64 KB frame (`__chkstk`), the TIB and an access violation reaching a vectored handler on a coroutine stack; it passes natively and under Wine.
 - Stacks have a guard page below them and start on a page boundary (`p4_guest_stack_alloc`): `__chkstk` probes page by page from StackLimit down to the frame it is asked for and stops only on equality with a page, so an unaligned limit made it zero the whole guest block below an overflowing 4 KB thread stack. An overflow is now an access violation, and the fault note names it ("a coroutine stack overflowed into its guard page").
-- A game thread whose own stack is smaller than 64 KB (the ADX server thread has 4 KB) runs on a default stack of the arena on a 64-bit host: native ABI/stdio and mirror frames can need more stack than the PS2 code. This is not permission to use a host formatter; the [CRT boundary](platform/crt_boundary.md) binds formatting to the retail engine. `ReferThreadStatus` still reports what the game declared.
+- A game thread whose own stack is smaller than 64 KB (the ADX server thread has 4 KB) runs on an owned default stack on both i386 and 64-bit hosts: native ABI, VFS, mod and mirror frames can need more stack than the PS2 code. This is not permission to use a host formatter; the [CRT boundary](platform/crt_boundary.md) binds formatting to the retail engine. `ReferThreadStatus` still reports what the game declared.
 - A call whose declaration makes an argument 8 or 16 bits wide and whose definition makes it 32 (m2c `s16`, definition `s32`) is made through the definition's types (`abi-narrow-adapted`): clang's x86-64 System V callers extend narrow arguments, Windows x64 callers do not, and `calGetDayTableValue(s16, u8)` read garbage in the upper halves. The same for a narrow result read wide.
 - Indirect-call adapters by position (`guest.c`): on Windows x64 a parameter is in rcx/rdx/r8/r9 or, as a float or double, in xmm0..xmm3 *of its own position* (the System V adapters count integer and xmm registers separately), and the fifth and sixth are on the stack. Each of the 1024 entry points is a stub in assembly (`p4_ad_common`) that saves the four integer and four xmm registers and the address of the stack arguments, calls `adapted_w64`, and returns {rax, xmm0}; the target is called by `p4_call_w64`, which loads them back. An adapter is never adapted again: `fn_for_sig` first looks through an adapter to the function behind it (a callback handed on twice made `ad0xEB` call `ad0xEA`).
 - The crash handler (`os_win32.c`) is 64-bit: the registers, a first line that needs no C library (the heap may be what failed), the call stack by the PE unwind tables, and the guest address of an access (`p4_os_fault_note`).
@@ -680,6 +742,12 @@ minutes on an idle host and over an hour with the llvmpipe scene gates on a load
 in binfmt_misc with the F flag is what lets the container run an AArch64 binary directly). Its first full result (25 of 31 gates; near_fog read 72 % until the compiler runtime became a host
 library, see CMakeLists.txt; the original full-history sky, riverbank and arcana viewer runs exceeded their 2400 s limits).
 
+Natively on AArch64 (2026-11-05, GitHub's `ubuntu-24.04-arm` runners, `ci/Dockerfile.arm64`: Debian trixie arm64 with the same clang 19 and CMake as `p4pc-ci-a64`, the i386 headers and libraries
+for the layout oracle and the name tables): the same CMake configuration builds on the machine's own architecture (gcc's files from `/usr/lib/gcc/aarch64-linux-gnu/14` instead of the cross
+install), the census equals `config/port64a64_census.txt` (1206 units, clang 19), and the a64 scope's tests that need no game files pass: 175 of 214 selected, 39 skipped for the disc, build
+9 minutes and tests under one minute on 4 cores (run 42088893499). `mod_hook_cost64`, red under qemu since 11-02, passes natively: its host-performance budget was qemu's. The land check and
+the nightly run this job through the GitHub offload (docs/land_orchestrator.md); qemu-user on the a64 host confirms what it fails and runs the job when GitHub is unavailable.
+
 The full-game clone loop labels the long workloads `slow`: `story_to_0415`, `street_0417`, `castle_gate_0417`, `castle_2f_0417`, `home_0417`, `save_play`, `fields_load`, `newgame_to_field`, `systems_club_floor_menu`, `scene_tv_world_enter` and `scene_shadow_haze`. The two castle walks contain 90,000 and 110,000 flips; the real-play TV-world and shadow-haze captures contain 75,594 and 110,560, so their clones use the same policy. Native x86 scopes continue to run them. The shorter `voiced_event_0417`, rain, riverbank, arcana and near-fog scenes stay in the default AArch64 nightly; a slow label is not a substitute for diagnosing a failing gate.
 Only the AArch64 `scene_sky_black_tint64` viewer twin retains `slow`: it keeps all 600 rasterised field frames for feedback history. The original viewer versions of riverbank and arcana had the same classification, but their canonical real-play replacements use a 150-frame raster window and run in the ordinary AArch64 nightly. Native x86_64 coverage remains ordinary. This cutover does not relax a MAD limit; the real-play gates also check the captured guest state against retail.
 
@@ -737,6 +805,8 @@ sandbox and mod interpreter executables whenever those providers are enabled.
   (`rofs_open`) links the selected ABI's tables and objects. Other object libraries are rebuilt for that ABI, preserving their compiler launcher
   (including the EE float launcher); original link options preserve live-boundary wraps. The OS source and SDL/FFmpeg imports use the selected platform. Existing twins (`render_smoke64`, `adx_wav64`, `ovdiff64`, ...) are reused with
   the other tests' arguments: `render_smoke_gl33/es30`, `adx_stream_*`, `movie_task_opening/p4ct001`, `ovdiff_dblcores`.
+  `battle_defeat_seams` explicitly maps its retail unit records and field-party pointer before accessing them; its i386 test must not rely on another linked object to map those pages.
+  The scene-position host fixture supplies a controllable field-host busy stub and checks that a held skill-choice field refuses a position query.
 - **The retail override tests** (`spline`, `bmp`, `rxheap`, `rtanim`, `matrix_override`, `palquant`, `promoted_leaf`) compile the override sources against stubs and memory
   at the retail globals. On i386 the override is linked as it is; on a 64-bit host the shipped override is a rewritten piece of a mirror unit (guest-memory globals,
   4-byte guest pointers, the register ABI), so both twins compile the same source through `tools/port64/unit64.py build --src`, with its normal layout oracle,

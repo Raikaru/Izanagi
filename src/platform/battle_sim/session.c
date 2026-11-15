@@ -9,6 +9,8 @@
 #include "p4pc/battle_events.h"
 #include "p4pc/battle_prepare.h"
 #include "p4pc/content_digest.h"
+#include "p4pc/game_items.h"
+#include "p4pc/game_items_native.h"
 #include "p4pc/game_table_extents.h"
 #include "p4pc/mods.h"
 #include "p4pc/walk_script.h"
@@ -61,6 +63,10 @@ static struct {
     char plan_hash[65];
     int mod_cohort;                /* a declared mod set: explicit mod-witness simulation only */
     char mod_identity[65];
+    /* The cohort's declared equipment of added items (P4PC_BATTLE_SIM_EQUIPMENT), applied to the active item
+     * table's expanded-equipment side state once the ENTRY image is restored. */
+    struct { uint16_t actor, slot, item; } mod_equipment[30];
+    unsigned mod_equipment_count;
 } session;
 
 extern void *kwlnTaskGetTaskByName(const void *name);
@@ -119,8 +125,12 @@ static void finish(const char *outcome, const char *cause, int code);
  * battle driver as gate walks. Only battle:/battlerule:/battleturn: lines, printable ASCII; the worker appends
  * the waits that keep the driver running until the battle task ends. Inputs come from ENTRY only. */
 #define WALK_POLICY 4u
-#define LAST_POLICY 5u /* policy 5: attentive player (policy.c) */
+/* Policy 6: attentive with Persona ratings (policy.c); +32 is its ratings payload's byte count, as for a walk plan. */
+#define AFFINITY_POLICY 6u
+#define LAST_POLICY 8u /* 7: technical player, 8: strategic candidate (policy.c) */
+#define TEXT_POLICY(p) ((p) == WALK_POLICY || (p) == AFFINITY_POLICY)
 #define WALK_PLAN_MAX 16384u
+#define RATINGS_PAYLOAD_MAX (12u + 512u * 10u)
 static uint32_t sim_walk_read32(void *user, uint32_t address)
 {
     (void)user;
@@ -212,16 +222,18 @@ static int read_entry(const char *path)
     session.latency = le32(h + 52);
     session.action_limit = le32(h + 56);
     session.effect_seed = le32(h + 60);
-    /* Policy 4 carries a walker battle plan: +32 is its byte count, the text follows the RNG block. */
-    const uint64_t payload = session.policy == WALK_POLICY ? (uint64_t)session.tape_count : (uint64_t)session.tape_count * 12;
+    /* Policies 4 and 6 carry a payload (walk plan, Persona ratings): +32 is its byte count, it follows the RNG block. */
+    const uint64_t payload = TEXT_POLICY(session.policy) ? (uint64_t)session.tape_count : (uint64_t)session.tape_count * 12;
     const uint64_t expected = 64u + (uint64_t)session.save_size + session.rng_size + payload;
     if (session.flags & ~7u || session.encounter > 65535u || !session.limit || !session.boot_limit ||
         !session.action_limit || session.policy > LAST_POLICY || expected != (uint64_t)length ||
         session.rng_size != ((session.flags & 2) ? RNG_WORDS * 4u : 0u)) return error("invalid BattleEntry counts/flags/limits");
-    if (session.policy && session.policy != WALK_POLICY && session.tape_count)
+    if (session.policy && !TEXT_POLICY(session.policy) && session.tape_count)
         return error("named party policy cannot compete with a controller tape");
     if (session.policy == WALK_POLICY && (!session.tape_count || session.tape_count > WALK_PLAN_MAX))
         return error("invalid walk battle plan size");
+    if (session.policy == AFFINITY_POLICY && (!session.tape_count || session.tape_count > RATINGS_PAYLOAD_MAX))
+        return error("invalid Persona ratings size");
     session.save = session.entry + 64;
     session.rng = session.save + session.save_size;
     session.tape = session.rng + session.rng_size;
@@ -232,6 +244,11 @@ static int read_entry(const char *path)
             return error("invalid captured RNG cursor");
     }
     if (session.policy == WALK_POLICY) return walk_plan((const char *)session.tape, session.tape_count);
+    if (session.policy == AFFINITY_POLICY) {
+        if (!p4_battle_policy_set_ratings(session.tape, session.tape_count)) return error("invalid Persona ratings payload");
+        p4_content_digest(session.tape, session.tape_count, session.plan_hash);
+        return 0;
+    }
     uint32_t end = 0;
     for (uint32_t i = 0; i < session.tape_count; i++) {
         const uint8_t *r = session.tape + i * 12;
@@ -275,6 +292,33 @@ int p4_battle_sim_cli(int argc, char **argv, const char **elf)
         session.mod_cohort = 1;
         memcpy(session.mod_identity, mod_set, sizeof session.mod_identity);
     } else if (getenv("P4PC_MOD_WITNESS")) return error("mod witness is incompatible with simulator fidelity");
+    const char *equipment = getenv("P4PC_BATTLE_SIM_EQUIPMENT");
+    if (equipment) {
+        /* "actor:slot:item" entries, comma-separated: added items only (the retail fields belong to preparation). */
+        if (!session.mod_cohort) return error("declared mod equipment requires a declared mod set");
+        for (const char *p = equipment; *p;) {
+            char *end;
+            const unsigned long actor = strtoul(p, &end, 10);
+            if (end == p || *end != ':') return error("invalid P4PC_BATTLE_SIM_EQUIPMENT");
+            p = end + 1;
+            const unsigned long slot = strtoul(p, &end, 10);
+            if (end == p || *end != ':') return error("invalid P4PC_BATTLE_SIM_EQUIPMENT");
+            p = end + 1;
+            const unsigned long item = strtoul(p, &end, 10);
+            if (end == p || (*end && *end != ',') || !actor || actor > 10 || slot > 2 || item < P4_ITEM_RETAIL_COUNT ||
+                item > 0xFFFF || session.mod_equipment_count == sizeof session.mod_equipment / sizeof *session.mod_equipment)
+                return error("invalid P4PC_BATTLE_SIM_EQUIPMENT");
+            for (unsigned i = 0; i < session.mod_equipment_count; i++)
+                if (session.mod_equipment[i].actor == actor && session.mod_equipment[i].slot == slot)
+                    return error("duplicate P4PC_BATTLE_SIM_EQUIPMENT slot");
+            session.mod_equipment[session.mod_equipment_count].actor = (uint16_t)actor;
+            session.mod_equipment[session.mod_equipment_count].slot = (uint16_t)slot;
+            session.mod_equipment[session.mod_equipment_count++].item = (uint16_t)item;
+            p = *end ? end + 1 : end;
+            if (*end && !*p) return error("invalid P4PC_BATTLE_SIM_EQUIPMENT");
+        }
+        if (!session.mod_equipment_count) return error("invalid P4PC_BATTLE_SIM_EQUIPMENT");
+    }
     if (requested == 3) return error("battle simulation and preparation are mutually exclusive");
     session.preparing = requested == 2;
     *elf = NULL;
@@ -461,6 +505,16 @@ void p4_battle_sim_command_ready(uint32_t action)
         session.observation_error = "first_protagonist_command_resources";
         return;
     }
+    /* The declared added-item equipment must still be in place once the battle asks for its first command. */
+    for (unsigned i = 0; i < session.mod_equipment_count; i++) {
+        uint32_t item = 0;
+        if (p4_game_tables_items_equipment_get(p4_game_tables_items_active(), session.mod_equipment[i].actor,
+                                               session.mod_equipment[i].slot, &item) != P4_TABLE_OK ||
+            item != session.mod_equipment[i].item) {
+            session.observation_error = "mod_equipment_lost_before_battle";
+            return;
+        }
+    }
     session.first_command_seen = 1;
     session.first_command_update = session.updates + 1;
     fprintf(session.trace, "{\"kind\":\"first_protagonist_command\",\"boundary\":\"native_input_ready\",\"update\":%u,\"party\":[%s]}\n",
@@ -645,20 +699,33 @@ static void finish(const char *outcome, const char *cause, int code)
             json_text(f, info ? info->version : "");
             fputc('}', f);
         }
-        fputs("]},", f);
+        fputs("]", f);
+        if (session.mod_equipment_count) {
+            fputs(",\"equipment\":[", f);
+            for (unsigned i = 0; i < session.mod_equipment_count; i++)
+                fprintf(f, "%s{\"actor\":%u,\"slot\":%u,\"item\":%u}", i ? "," : "", session.mod_equipment[i].actor,
+                        session.mod_equipment[i].slot, session.mod_equipment[i].item);
+            fputc(']', f);
+        }
+        fputs("},", f);
     }
     fprintf(f, "\"result_prompt_capability\":\"%s\",\"result_prompts\":{\"skill_offers_declined\":%u},",
             session.policy ? "periodic_cross_native_skill_offer_decline_v1" : "controller_tape", session.skill_offers_declined);
     static const char *policy_names[] = {"controller-tape-v1", "greedy-weakness-v1", "cautious-healer-v1", "typical-player-v1",
-                                         "walk-battle-rules-v1", "attentive-player-v1"};
+                                         "walk-battle-rules-v1", "attentive-player-v1", "attentive-player-affinity-v1",
+                                         "technical-player-v1", "strategic-player-candidate-v1"};
     static const char *policy_knowledge[] = {"controller_tape", "observed_damage_weakness_only", "observed_damage_weakness_only",
                                              "observed_damage_weakness_only", "walker_battle_rules_native_unit_records",
-                                             "observed_damage_weakness_public_charge_guard"};
+                                             "observed_damage_weakness_public_charge_guard",
+                                             "observed_damage_weakness_public_charge_guard_declared_persona_ratings",
+                                             "observed_damage_weakness_public_charge_guard_ailment_landings",
+                                             "observed_damage_weakness_public_charge_guard_ailment_landings_buff_state_fixed_heal_amounts_owned_persona_skills"};
     fprintf(f, "\"party_policy\":{\"id\":%u,\"name\":\"%s\",\"latency_updates\":%u,\"party_control\":\"%s\",\"knowledge\":\"%s\"",
             session.policy, policy_names[session.policy], session.latency,
             session.policy ? "native_direct_commands" : "source_tactics", policy_knowledge[session.policy]);
     /* Each plan is its own cohort; its delay= option, not latency_updates, times the walker's input. */
     if (session.policy == WALK_POLICY) fprintf(f, ",\"plan_sha256\":\"%s\"", session.plan_hash);
+    if (session.policy == AFFINITY_POLICY) fprintf(f, ",\"ratings_sha256\":\"%s\"", session.plan_hash);
     fputs("},", f);
     fputs("\"entry_observations\":{\"first_protagonist_command\":{\"boundary\":\"native_input_ready\",\"observed\":", f);
     if (session.first_command_seen)
@@ -921,6 +988,16 @@ void p4_battle_sim_before_update(void)
         if (!boot_ready()) return;
         const char *reason = restore_source();
         if (reason) finish("engine_error", reason, 4);
+        if (session.mod_equipment_count) {
+            /* After the ENTRY image's load (which resets the side state) and before the party and encounter are
+             * built: the item service checks each row's kind/slot and the unit's compatibility bit. */
+            P4GameItems *items = p4_game_tables_items_active();
+            if (!items) finish("engine_error", "mod_equipment_without_item_table", 4);
+            for (unsigned i = 0; i < session.mod_equipment_count; i++)
+                if (p4_game_tables_items_equipment_set(items, session.mod_equipment[i].actor, session.mod_equipment[i].slot,
+                                                       session.mod_equipment[i].item) != P4_TABLE_OK)
+                    finish("engine_error", "mod_equipment_refused", 4);
+        }
         if (session.policy) {
             for (unsigned i = 0; i < 3; i++) {
                 const int16_t id = datGetPartyId((int32_t)i);
@@ -957,7 +1034,7 @@ void p4_battle_sim_before_update(void)
     if (session.policy && result_skill_prompt()) return;
     p4_battle_policy_before_update();
     if (session.walk) { walk_plan_update(); return; }
-    if (session.tape_index < session.tape_count) {
+    if (!session.policy && session.tape_index < session.tape_count) {
         const uint8_t *record = session.tape + session.tape_index * 12;
         if (le32(record) == session.updates) {
             p4pc_pad_inject(le32(record + 4), le32(record + 8));

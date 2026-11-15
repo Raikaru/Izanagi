@@ -15,7 +15,9 @@ sys.argv = [sys.argv[0], *sys.argv[separator + 1:]]
 
 class TableSourceBoot(unittest.TestCase):
     def test_declared_source_lifecycle(self):
-        for mode in ("empty", "good", "gated-on", "gated-off", "gated-live", "families", "item-only", "skill-only", "bound-category", "unbound-category", "bad-format", "zero-revision", "bad-schema",
+        for mode in ("empty", "good", "gated-on", "gated-off", "gated-live", "companion-on", "companion-off", "companion-undeclared",
+                     "companion-setting-on", "companion-setting-off", "companion-setting-invalid", "companion-setting-malformed",
+                     "families", "item-only", "skill-only", "bound-category", "unbound-category", "bad-format", "zero-revision", "bad-schema",
                      "outside", "missing", "unknown-record", "truncated", "split-dtd"):
             with self.subTest(mode=mode), tempfile.TemporaryDirectory(prefix="p4-table-boot-") as temporary:
                 root = Path(temporary)
@@ -30,11 +32,40 @@ class TableSourceBoot(unittest.TestCase):
                     gate = ("[setting split]\nkind=toggle\nlabel=SPLIT\n"
                             f"default={'off' if mode == 'gated-off' else 'on'}\n"
                             f"apply={'live' if mode == 'gated-live' else 'restart'}\n")
+                # companion-on/off: a table-source gated on a declared [companion]
+                # that is enabled or absent; companion-undeclared names one the
+                # manifest does not declare. companion-setting-*: the enabled
+                # companion's restart toggle `split` is on, off, or the section
+                # names a setting the companion does not declare.
+                companion = mode.startswith("companion-")
+                setting = mode.startswith("companion-setting-")
+                if companion:
+                    other = root / "companion"
+                    other.mkdir()
+                    declared = (f"[setting split]\nkind=toggle\nlabel=SPLIT\n"
+                                f"default={'off' if mode == 'companion-setting-off' else 'on'}\napply=restart\n"
+                                if setting else "")
+                    (other / "mod.ini").write_text(
+                        "[mod]\nid=source.companion\nname=Synthetic companion\nversion=1.0.0\n"
+                        f"api={'1.2' if setting else '1.1'}\npriority=0\norder=0\n" + declared,
+                        encoding="utf-8", newline="\n")
+                    if mode != "companion-undeclared":
+                        gate = "[companion source.companion]\nversion=1.0\n"
+                api = "1.6" if companion else "1.2" if gate else "1.1"
+                gating = ""
+                if companion:
+                    gating = "companion=source.companion\n"
+                    if mode == "companion-setting-malformed":
+                        gating += "companion-setting=split\n"  # no value; refused even with the companion absent
+                    elif setting:
+                        gating += f"companion-setting={'nope' if mode == 'companion-setting-invalid' else 'split'}=on\n"
+                elif gate:
+                    gating = "when=split\n"
                 (package / "mod.ini").write_text(
                     "[mod]\nid=source.owner\nname=Synthetic tables\nversion=1.2.3\n"
-                    f"api={'1.2' if gate else '1.1'}\npriority=0\norder=0\n" + gate +
+                    f"api={api}\npriority=0\norder=0\n" + gate +
                     f"[table-source xml:combat]\nfile={filename}\nformat={format_name}\nschema={schema}\nrevision={revision}\n"
-                    + ("when=split\n" if gate else ""),
+                    + gating,
                     encoding="utf-8", newline="\n",
                 )
                 xml = " " * 5000 + '<p4-tables schema="1"><element id="19" flags="7" family="0" order="0" key="xml:leaf" display-name="Synthetic" short-name="Test"/></p4-tables>'
@@ -105,7 +136,8 @@ class TableSourceBoot(unittest.TestCase):
                                    P4PC_INPUT="script", P4PC_CONFIG="none", SDL_AUDIODRIVER="dummy")
                 environment.pop("P4PC_OVERRIDE_DIR", None)
                 environment.pop("P4PC_ISO", None)
-                if mode in ("good", "gated-on", "families", "item-only", "skill-only", "bound-category", "unbound-category"):
+                if mode in ("good", "gated-on", "companion-on", "companion-setting-on", "families", "item-only", "skill-only",
+                            "bound-category", "unbound-category"):
                     image = root / "inputs.iso"
                     image.write_bytes(input_disc(effective_ai=True))
                     environment["P4PC_ISO"] = str(image)

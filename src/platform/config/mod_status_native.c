@@ -6,8 +6,8 @@
  * bounded resources are the font manager's (frFontInitManager(0x100, 0x100),
  * 0x2713b0): 256 text runs, 1024 glyph nodes and 256 glyph rasters. A row is
  * one frame node and one deferred text run of at most 47 glyphs, so four rows
- * plus the CONFIG corner take at most 5 runs, 4 * 47 + 6 = 194 glyph nodes and
- * at most 95 distinct RAW rasters per frame, freed by the queue each frame. */
+ * take at most 4 runs, 4 * 47 = 188 glyph nodes and at most one RAW raster
+ * per glyph per frame, freed by the queue each frame. */
 #include "p4pc/mod_status.h"
 #include "p4pc/native_glyphs.h"
 #include "p4pc/gmem.h"
@@ -25,9 +25,8 @@ extern uint32_t frFontExCreateText(float x, float y, float depth, int color,
     signed char palette, int font, const char *text, int flags, int32_t *width);
 extern uint32_t frFontListRelease(uint32_t font);
 
-/* Camp's centered draw table 0xb1, the same queue as the CONFIG corner. On the
- * 640x448 canvas the first two rows are a top band above the menu header,
- * clear of the CONFIG corner (x >= 508); a third and fourth sit above the help
+/* Camp's centered draw table 0xb1. On the 640x448 canvas the first two rows
+ * are a top band above the menu header; a third and fourth sit above the help
  * line at the bottom. A line wider than the band is narrowed to fit. */
 enum { LEFT = 10, TOP = 10, BOTTOM = 300, ROW_HEIGHT = 24, PAD = 8, TEXT_WIDTH = 470 };
 #define CAMP_QUEUE (0x00793e80u + 0xb1u * 0x30u)

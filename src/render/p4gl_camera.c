@@ -479,7 +479,6 @@ int32_t func_003f79b0(void *pOut, void *pInOut, int32_t nI)
     p4pc_lockstep_frame(p4gl_context_capture_next);
     p4gl_context_present();
     p4pc_lockstep_presented();
-    if (p4_battle_live_active) p4_battle_live_after_present();
     p4pc_vsync_wait();
     return 1;
 }

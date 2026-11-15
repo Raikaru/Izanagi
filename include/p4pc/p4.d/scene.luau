@@ -1,0 +1,3 @@
+--!capability scene@2
+--!covers p4.scene
+-- p4.scene.state, available, warp and owner-retained request status.

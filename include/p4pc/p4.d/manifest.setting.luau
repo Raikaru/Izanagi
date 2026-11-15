@@ -1,0 +1,3 @@
+--!capability manifest.setting@1
+--!covers section:setting
+-- mod.ini [setting <key>] rows and the automatic MODS settings page (API 1.2).

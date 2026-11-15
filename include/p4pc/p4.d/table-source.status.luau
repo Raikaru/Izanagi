@@ -1,0 +1,3 @@
+--!capability table-source.status@3
+--!covers section:table-source.status
+-- Table-source status-ailment rows define battle-scoped side ailments; revision 2 adds status-rider rows, the status-ailment transfer attribute and the break-on-hit flag (8); revision 3 adds the status-ailment enemy-scale attribute.

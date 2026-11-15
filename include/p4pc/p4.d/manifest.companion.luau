@@ -1,0 +1,3 @@
+--!capability manifest.companion@1
+--!covers section:companion
+-- mod.ini [companion <id>] sections: an admitted companion loads first and must satisfy the version; an absent one is fine.

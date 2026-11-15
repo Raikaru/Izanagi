@@ -1,11 +1,15 @@
 """Synthetic mod manifests/data only: never mounts or copies a retail asset."""
 import os
 import pathlib
+import re
 import subprocess
 import sys
 import tempfile
 import unittest
 
+# The runtime's own API minor: release cuts change only include/p4pc/packages.h.
+API_MINOR = int(re.search(r"#define P4_PACKAGE_API_MINOR (\d+)", (pathlib.Path(__file__).resolve().parents[1]
+                          / "include/p4pc/packages.h").read_text(encoding="utf-8")).group(1))
 # Host twins may insert Wine before the executable. Keep that command prefix
 # intact rather than mistaking its second word for a unittest test selector.
 separator = sys.argv.index("--driver-end")
@@ -85,7 +89,7 @@ class FileMods(unittest.TestCase):
     def test_missing_duplicate_and_incompatible_refused(self):
         self.mod("valid", "valid", files={"DATA/TEST.TXT": "valid"})
         self.mod("future", "future", api="2.0")
-        self.mod("new-minor", "new-minor", api="1.5")
+        self.mod("new-minor", "new-minor", api=f"1.{API_MINOR + 1}")
         self.mod("dup-one", "duplicate")
         self.mod("dup-two", "duplicate")
         for ids in ("valid,missing", "valid,future", "new-minor", "duplicate", "valid,valid", "valid,", "../valid"):
@@ -94,10 +98,22 @@ class FileMods(unittest.TestCase):
                 self.assertIn("activation=-1 count=0 conflicts=0", out)
 
     def test_supported_minor_uses_common_runtime(self):
-        self.mod("supported", "supported", api="1.1", files={"DATA/TEST.TXT": "minor"})
+        self.mod("supported", "supported", api="1.6", files={"DATA/TEST.TXT": "minor"})
         out, _ = self.run_mods("supported")
         self.assertIn("activation=0 count=1", out)
         self.assertIn("file=minor size=5", out)
+
+    def test_two_digit_minor_is_a_number(self):
+        # Compare numeric minors against the released runtime, not the
+        # pre-capability planned release numbers.
+        for minor in (1, 9, 10):
+            api = f"1.{minor}"
+            with self.subTest(api=api):
+                name = "minor" + api.replace(".", "-")
+                self.mod(name, name, api=api, files={"DATA/TEST.TXT": "minor"})
+                out, _ = self.run_mods(name)
+                expected = "activation=0 count=1" if minor <= API_MINOR else "activation=-1 count=0"
+                self.assertIn(expected, out)
 
     def test_lowercase_refused(self):
         self.mod("lower", "lower", files={"DATA/test.txt": "bad"})
@@ -130,6 +146,29 @@ class FileMods(unittest.TestCase):
             (mod / "mod.ini").write_text(text, encoding="utf-8")
             out, _ = self.run_mods("example")
             self.assertIn("activation=-1 count=0", out)
+
+    def test_requires_capabilities_at_admission(self):
+        mod = self.mod("needs", "needs", files={"DATA/TEST.TXT": "needs"})
+        original = (mod / "mod.ini").read_text(encoding="utf-8")
+        for requires in ("core", "core@1, capabilities@1", "advanced@1,events.load"):
+            with self.subTest(requires=requires):
+                (mod / "mod.ini").write_text(original + f"requires = {requires}\n", encoding="utf-8")
+                out, _ = self.run_mods("needs")
+                self.assertIn("activation=0 count=1", out)
+                self.assertIn("file=needs size=5", out)
+        for requires, reason in (("core@999", "Requires capability core@999, but this build provides core@1"),
+                                 ("made.up@1", "Requires capability made.up@1, which this build does not provide")):
+            with self.subTest(requires=requires):
+                (mod / "mod.ini").write_text(original + f"requires = {requires}\n", encoding="utf-8")
+                out, err = self.run_mods("needs")
+                self.assertNotIn("file=needs", out)
+                self.assertIn(reason, err)
+        for requires in ("", "core,", "Core@1", "core@0", "core@one"):
+            with self.subTest(requires=requires):
+                (mod / "mod.ini").write_text(original + f"requires = {requires}\n", encoding="utf-8")
+                out, err = self.run_mods("needs")
+                self.assertIn("activation=-1 count=0", out)
+                self.assertIn("Invalid requires= list", err)
 
 
     def test_compendium_wrapper_preserves_original_host_case(self):

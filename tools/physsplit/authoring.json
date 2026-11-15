@@ -1,0 +1,25 @@
+{
+ "schema": 1,
+ "elements": [
+  {"id": 19, "key": "slash", "display": "Slash", "short": "Slash", "icon_revision": 1},
+  {"id": 20, "key": "strike", "display": "Strike", "short": "Strike", "icon_revision": 1},
+  {"id": 21, "key": "pierce", "display": "Pierce", "short": "Pierce", "icon_revision": 1}
+ ],
+ "unit_weapon_defaults": {"1": "slash", "2": "slash", "3": "strike", "4": "pierce", "6": "strike", "7": "pierce", "8": "slash"},
+ "shared_weapon_default": "strike",
+ "weapon_overrides": {},
+ "fixed_phys_default": "strike",
+ "skills": {
+  "0x78": "strike", "0x79": "slash", "0x7a": "strike", "0x7b": "strike", "0x7c": "pierce", "0x7d": "strike",
+  "0x7e": "strike", "0x7f": "pierce", "0x80": "slash", "0x81": "slash", "0x82": "pierce", "0x83": "strike",
+  "0x84": "strike", "0x85": "slash", "0x86": "slash", "0x87": "pierce", "0x88": "strike", "0x89": "slash",
+  "0x8a": "slash", "0x8b": "pierce", "0x8c": "strike", "0x8d": "pierce", "0x8e": "pierce", "0x8f": "slash",
+  "0x90": "slash", "0x91": "slash", "0x92": "slash", "0x93": "strike", "0x94": "strike", "0x95": "pierce",
+  "0x96": "pierce", "0x97": "pierce", "0x98": "pierce", "0x99": "strike", "0x9a": "strike", "0x9b": "strike",
+  "0x9c": "slash", "0x9d": "strike", "0x9e": "strike", "0x9f": "pierce", "0xa0": "strike", "0xa1": "slash",
+  "0xa2": "strike", "0xa3": "strike", "0xa4": "strike", "0xa5": "strike", "0xa6": "strike", "0xa7": "strike",
+  "0xa8": "pierce", "0xa9": "pierce", "0xaa": "slash", "0xab": "strike", "0xac": "pierce", "0xad": "strike",
+  "0xae": "pierce", "0xaf": "pierce", "0xb0": "strike", "0x161": "strike", "0x16d": "strike"
+ },
+ "persona_overrides": {}
+}

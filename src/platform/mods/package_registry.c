@@ -1,6 +1,7 @@
 #define _POSIX_C_SOURCE 200809L
 #define _FILE_OFFSET_BITS 64
 #include "p4pc/packages.h"
+#include "p4pc/capabilities.h"
 #include "p4pc/os.h"
 #include "../files/vfs.h"
 #include "compendium.h"
@@ -8,9 +9,11 @@
 #include "package_memory_internal.h"
 #include "package_sort.h"
 #include "package_boot_internal.h"
+#include "package_identifier.h"
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>
+#include <stdarg.h>
 #include <stdatomic.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -36,6 +39,7 @@ struct P4PackageProvider {
     P4PackageField *fields;
     size_t field_count, field_capacity, manifest_bytes;
     int require_cosmetic;
+    const char *requires; /* mod.ini `requires=` capability list, inside manifest */
     const char *diagnostic;
     unsigned diagnostic_line;
 };
@@ -70,7 +74,8 @@ typedef struct Discovery {
     P4PackageRegistry *registry;
     char ids[P4_PACKAGE_MAX][64];
     size_t requested;
-    unsigned char found[P4_PACKAGE_MAX];
+    int bundled; /* scanning the read-only root of packages shipped with the game */
+    unsigned char found[P4_PACKAGE_MAX], player[P4_PACKAGE_MAX];
     const char *reasons[P4_PACKAGE_MAX]; /* parser diagnostics are static literals */
     int failed;
 } Discovery;
@@ -118,15 +123,8 @@ static int join(char *dst, size_t cap, const char *dir, const char *name)
     int n = snprintf(dst, cap, "%s/%s", dir, name);
     return n >= 0 && (size_t)n < cap ? 0 : -1;
 }
-static int identifier(const char *s)
-{
-    size_t size = strlen(s);
-    if (!size || size >= sizeof ((P4PackageInfo *)0)->id) return 0;
-    for (size_t i = 0; i < size; ++i)
-        if (!((s[i] >= 'a' && s[i] <= 'z') || (s[i] >= '0' && s[i] <= '9') ||
-              s[i] == '-' || s[i] == '_' || s[i] == '.')) return 0;
-    return s[0] != '.' && s[size - 1] != '.';
-}
+_Static_assert(sizeof ((P4PackageInfo *)0)->id == P4_PACKAGE_ID_SIZE, "package_identifier.h id bound");
+static int identifier(const char *s) { return p4_package_identifier(s); }
 static char *trim(char *s)
 {
     while (isspace((unsigned char)*s)) ++s;
@@ -156,6 +154,99 @@ static int version(const char *s, unsigned *major, unsigned *minor)
     if (errno || *end || b > P4_PACKAGE_API_MINOR) return -1;
     *major = (unsigned)a; *minor = (unsigned)b;
     return 0;
+}
+
+/* Generated from include/p4pc/p4.d/<key>.luau (cmake/sources/052-capabilities.cmake). */
+static const struct { const char *key; unsigned revision; } capabilities[] = {
+#define P4_CAPABILITY(key, revision) {key, revision},
+#include "p4_capabilities.inc"
+#undef P4_CAPABILITY
+};
+unsigned p4_capability_revision(const char *key)
+{
+    for (size_t i = 0; key && i < sizeof capabilities / sizeof *capabilities; ++i)
+        if (!strcmp(capabilities[i].key, key)) return capabilities[i].revision;
+    return 0;
+}
+size_t p4_capability_count(void) { return sizeof capabilities / sizeof *capabilities; }
+const char *p4_capability_at(size_t index, unsigned *revision)
+{
+    if (index >= p4_capability_count()) return NULL;
+    if (revision) *revision = capabilities[index].revision;
+    return capabilities[index].key;
+}
+static int capability_key_char(char c, int first)
+{
+    return (c >= 'a' && c <= 'z') || (!first && ((c >= '0' && c <= '9') || c == '_' || c == '-'));
+}
+int p4_capability_parse(const char *text, size_t size, char *key, unsigned *revision)
+{
+    size_t length = 0;
+    while (length < size && text[length] != '@') ++length;
+    if (!length || length >= P4_CAPABILITY_KEY_MAX) return -1;
+    for (size_t i = 0, first = 1; i < length; ++i) {
+        if (text[i] == '.' && !first && i + 1 < length) { first = 1; continue; }
+        if (!capability_key_char(text[i], (int)first)) return -1;
+        first = 0;
+    }
+    unsigned long value = 1;
+    if (length < size) {
+        const char *digits = text + length + 1;
+        size_t count = size - length - 1;
+        if (!count || count > 9 || *digits == '0') return -1;
+        value = 0;
+        for (size_t i = 0; i < count; ++i) {
+            if (digits[i] < '0' || digits[i] > '9') return -1;
+            value = value * 10u + (unsigned)(digits[i] - '0');
+        }
+    }
+    memcpy(key, text, length);
+    key[length] = 0;
+    *revision = (unsigned)value;
+    return 0;
+}
+/* Visits each trimmed comma-separated entry; -1 on an empty or malformed entry. */
+static int requires_each(const char *list, int (*visit)(const char *key, unsigned revision, void *user), void *user)
+{
+    for (const char *s = list;;) {
+        while (*s == ' ' || *s == '\t') ++s;
+        const char *end = s;
+        while (*end && *end != ',') ++end;
+        const char *last = end;
+        while (last > s && (last[-1] == ' ' || last[-1] == '\t')) --last;
+        char key[P4_CAPABILITY_KEY_MAX];
+        unsigned revision;
+        if (p4_capability_parse(s, (size_t)(last - s), key, &revision)) return -1;
+        if (visit && visit(key, revision, user)) return 1;
+        if (!*end) return 0;
+        s = end + 1;
+    }
+}
+int p4_capability_requires_valid(const char *list) { return list && requires_each(list, NULL, NULL) == 0 ? 0 : -1; }
+typedef struct RequiresReason { char *text; size_t capacity; } RequiresReason;
+static int requires_missing(const char *key, unsigned revision, void *user)
+{
+    RequiresReason *reason = user;
+    unsigned provided = p4_capability_revision(key);
+    if (provided >= revision) return 0;
+    if (provided)
+        snprintf(reason->text, reason->capacity,
+                 "Requires capability %s@%u, but this build provides %s@%u. Update Persona4-PC or use an older version of the mod.",
+                 key, revision, key, provided);
+    else
+        snprintf(reason->text, reason->capacity,
+                 "Requires capability %s@%u, which this build does not provide. Update Persona4-PC or check the key's spelling.",
+                 key, revision);
+    return 1;
+}
+int p4_capability_requires_check(const char *list, char *reason, size_t capacity)
+{
+    RequiresReason state = {reason, capacity};
+    if (capacity) reason[0] = 0;
+    if (!list) return 0;
+    int result = requires_each(list, requires_missing, &state);
+    if (result < 0 && capacity) snprintf(reason, capacity, "Invalid requires= list");
+    return result ? -1 : 0;
 }
 static int copy_value(char *dst, size_t cap, const char *value)
 {
@@ -325,6 +416,15 @@ static int manifest(const P4PackageClient *client, const char *directory, P4Pack
         else if (!strcmp(key, "api")) { bit = 8; result = version(value, &info->api_major, &info->api_minor); }
         else if (!strcmp(key, "priority")) { bit = 16; result = number(value, &info->priority); }
         else if (!strcmp(key, "order")) { bit = 32; result = number(value, &info->order); }
+        else if (!strcmp(key, "requires")) {
+            bit = 64;
+            if (!(seen & bit) && p4_capability_requires_valid(value)) {
+                provider->diagnostic = "Invalid requires= list: use comma-separated capability keys such as events.ailment@1";
+                goto fail;
+            }
+            provider->requires = value;
+            result = 0;
+        }
         if (seen & bit) { provider->diagnostic = "Duplicate metadata key"; goto fail; }
         if (result) {
             provider->diagnostic = !strcmp(key, "api") ? "Unsupported required API version (runtime" P4_PACKAGE_API_TEXT ")" :
@@ -340,7 +440,7 @@ next_line:
         provider->diagnostic = "Empty extension section refused";
         goto fail;
     }
-    if (seen != 63 || !identifier(provider->info.id) || strlen(directory) >= sizeof provider->info.directory) {
+    if ((seen & 63) != 63 || !identifier(provider->info.id) || strlen(directory) >= sizeof provider->info.directory) {
         provider->diagnostic = "Require valid id/name/version/api/priority/order exactly once";
         goto fail;
     }
@@ -369,6 +469,11 @@ typedef struct InstallationScan {
     void *user;
     size_t count;
     int failed;
+    enum { SCAN_SHIPPED, SCAN_PLAYER, SCAN_BUNDLED } pass;
+    /* Ids (and the shipped versions) of the bundled census and of the valid
+     * player installations: a player copy hides, and reports, its bundled id. */
+    char (*shipped)[2][64], (*seen)[64];
+    size_t shipped_count, shipped_capacity, seen_count, seen_capacity;
 } InstallationScan;
 static void probe_manifest(const char *name, void *user)
 {
@@ -408,6 +513,39 @@ static void scan_installation(const char *name, void *user)
     } else {
         installation.diagnostic = "No supported native package manifest";
     }
+    char shadows[192] = {0};
+    if (valid && scan->pass == SCAN_SHIPPED) {
+        if (scan->shipped_count == scan->shipped_capacity) {
+            size_t capacity = scan->shipped_capacity ? scan->shipped_capacity * 2u : 16u;
+            char (*shipped)[2][64] = realloc(scan->shipped, capacity * sizeof *shipped);
+            if (!shipped) { scan->failed = 1; provider_destroy(&provider); return; }
+            scan->shipped = shipped; scan->shipped_capacity = capacity;
+        }
+        snprintf(scan->shipped[scan->shipped_count][0], 64, "%s", provider.info.id);
+        snprintf(scan->shipped[scan->shipped_count++][1], 64, "%s", provider.info.version);
+        provider_destroy(&provider);
+        return;
+    }
+    if (!valid && scan->pass == SCAN_SHIPPED) { provider_destroy(&provider); return; }
+    if (valid && scan->pass == SCAN_BUNDLED) {
+        for (size_t i = 0; i < scan->seen_count; ++i)
+            if (!strcmp(scan->seen[i], provider.info.id)) { provider_destroy(&provider); return; }
+    }
+    if (valid && scan->pass == SCAN_PLAYER) {
+        if (scan->seen_count == scan->seen_capacity) {
+            size_t capacity = scan->seen_capacity ? scan->seen_capacity * 2u : 16u;
+            char (*seen)[64] = realloc(scan->seen, capacity * sizeof *seen);
+            if (!seen) { scan->failed = 1; provider_destroy(&provider); return; }
+            scan->seen = seen; scan->seen_capacity = capacity;
+        }
+        strcpy(scan->seen[scan->seen_count++], provider.info.id);
+        for (size_t i = 0; i < scan->shipped_count; ++i) {
+            if (strcmp(scan->shipped[i][0], provider.info.id)) continue;
+            snprintf(shadows, sizeof shadows, "player copy shadows bundled %s %s", scan->shipped[i][0], scan->shipped[i][1]);
+            fprintf(stderr, "p4pc: %s: %s\n", scan->client->diagnostic_name, shadows);
+            installation.shadows = shadows;
+        }
+    }
     if (valid) {
         provider.info.kind = scan->client->kind;
         provider.info.ordinal = SIZE_MAX;
@@ -415,23 +553,75 @@ static void scan_installation(const char *name, void *user)
         installation.fields = provider.fields;
         installation.field_count = provider.field_count;
     }
+    installation.bundled = scan->pass == SCAN_BUNDLED;
     if (scan->visitor(&installation, scan->user)) scan->failed = 1;
     provider_destroy(&provider);
+}
+int p4_package_installations_scan_bundled(const P4PackageClient *client, const char *root, const char *bundled_root,
+                                          P4PackageInstallationVisitor visitor, void *user)
+{
+    if (!client || !client->diagnostic_name || !client->manifest_name || !client->section ||
+        (client->kind != P4_PACKAGE_MOD && client->kind != P4_PACKAGE_ENGINE_PACK) || !visitor) return -1;
+    InstallationScan scan = {.client = client, .visitor = visitor, .user = user};
+    int failed = 0;
+    /* The bundled root is optional: a missing one shows nothing. */
+    const int shipped = bundled_root && *bundled_root && p4_os_is_dir_nofollow(bundled_root);
+    if (shipped) {
+        scan.root = bundled_root;
+        scan.pass = SCAN_SHIPPED;
+        failed = p4_os_list_dir(bundled_root, scan_installation, &scan) || scan.failed;
+        scan.count = 0;
+    }
+    if (!failed && root && *root) {
+        if (!p4_os_is_dir_nofollow(root)) failed = 1;
+        else {
+            scan.root = root;
+            scan.pass = SCAN_PLAYER;
+            failed = p4_os_list_dir(root, scan_installation, &scan) || scan.failed;
+        }
+    }
+    if (!failed && shipped) {
+        scan.root = bundled_root;
+        scan.pass = SCAN_BUNDLED;
+        failed = p4_os_list_dir(bundled_root, scan_installation, &scan) || scan.failed;
+    }
+    free(scan.shipped);
+    free(scan.seen);
+    return failed ? -1 : 0;
 }
 int p4_package_installations_scan(const P4PackageClient *client, const char *root,
                                   P4PackageInstallationVisitor visitor, void *user)
 {
-    if (!client || !client->diagnostic_name || !client->manifest_name || !client->section ||
-        (client->kind != P4_PACKAGE_MOD && client->kind != P4_PACKAGE_ENGINE_PACK) || !visitor) return -1;
-    if (!root || !*root) return 0;
-    if (!p4_os_is_dir_nofollow(root)) return -1;
-    InstallationScan scan = {.client = client, .root = root, .visitor = visitor, .user = user};
-    return p4_os_list_dir(root, scan_installation, &scan) || scan.failed ? -1 : 0;
+    return p4_package_installations_scan_bundled(client, root, NULL, visitor, user);
 }
 
+/* Admission refusals of this process, so later messages can say why an enabled
+ * id is absent. One slot per selector id; the newest reason wins. */
+typedef struct Refusal { P4PackageKind kind; char id[64], reason[512]; } Refusal;
+static Refusal refusals[2 * P4_PACKAGE_MAX];
+static size_t refusal_count;
+static void remember_refusal(P4PackageKind kind, const char *id, const char *reason)
+{
+    size_t i = 0;
+    while (i < refusal_count && (refusals[i].kind != kind || strcmp(refusals[i].id, id))) ++i;
+    if (i == refusal_count) {
+        if (refusal_count == sizeof refusals / sizeof refusals[0]) return;
+        ++refusal_count;
+    }
+    refusals[i].kind = kind;
+    snprintf(refusals[i].id, sizeof refusals[i].id, "%s", id);
+    snprintf(refusals[i].reason, sizeof refusals[i].reason, "%s", reason);
+}
+const char *p4_package_refusal(P4PackageKind kind, const char *id)
+{
+    for (size_t i = 0; id && i < refusal_count; ++i)
+        if (refusals[i].kind == kind && !strcmp(refusals[i].id, id)) return refusals[i].reason;
+    return NULL;
+}
 static int reject_id(const P4PackageClient *client, const char *id, const char *reason)
 {
     fprintf(stderr, "p4pc: %s: refused %s: %s\n", client->diagnostic_name, id, reason);
+    remember_refusal(client->kind, id, reason);
     return client->refuse ? client->refuse(id, reason, client->user) : -1;
 }
 static int reject_provider(P4PackageProvider *provider, const char *reason)
@@ -440,6 +630,121 @@ static int reject_provider(P4PackageProvider *provider, const char *reason)
     if (!reason || !reason[0] || reject_id(provider->registry->client, provider->info.id, reason)) return -1;
     atomic_store(&provider->refused, 1);
     ++admission_serial;
+    return 0;
+}
+
+static int requirement_fail(char *reason, size_t capacity, const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    if (reason && capacity) vsnprintf(reason, capacity, format, args);
+    va_end(args);
+    return -1;
+}
+static int decimal(const char **cursor, unsigned *out)
+{
+    const char *s = *cursor;
+    if (*s < '0' || *s > '9') return -1;
+    unsigned long value = 0;
+    while (*s >= '0' && *s <= '9') {
+        value = value * 10 + (unsigned long)(*s++ - '0');
+        if (value > 0xffffu) return -1;
+    }
+    *out = (unsigned)value;
+    *cursor = s;
+    return 0;
+}
+int p4_package_version_satisfies(const char *version, unsigned major, unsigned minor)
+{
+    unsigned parts[3] = {0, 0, 0};
+    const char *s = version;
+    if (!s || decimal(&s, &parts[0])) return -1;
+    for (int i = 1; i < 3 && *s == '.'; ++i) {
+        ++s;
+        if (decimal(&s, &parts[i])) return -1;
+    }
+    if (*s && *s != '-' && *s != '+') return -1;
+    return parts[0] == major && parts[1] >= minor;
+}
+int p4_package_requirements(const P4PackageInfo *self, const P4PackageField *fields, size_t count,
+                            P4PackageRequirement out[P4_PACKAGE_REQUIRES_MAX], size_t *found,
+                            char *reason, size_t capacity)
+{
+    if (!self || !out || !found || (count && !fields)) return requirement_fail(reason, capacity, "Invalid requirement query");
+    *found = 0;
+    for (size_t first = 0; first < count;) {
+        size_t last = first + 1;
+        while (last < count && !strcmp(fields[first].section, fields[last].section) &&
+               !strcmp(fields[first].argument, fields[last].argument)) ++last;
+        const char *section = fields[first].section;
+        int companion = !strcmp(section, "companion");
+        if (!companion && strcmp(section, "require")) { first = last; continue; }
+        const char *id = fields[first].argument, *what = companion ? "companion" : "requirement";
+        unsigned line = fields[first].line;
+        if (self->api_major == 1 && self->api_minor < 6u)
+            return requirement_fail(reason, capacity, "Line%u: [%s] sections require api=1.6", line, section);
+        if (!identifier(id))
+            return requirement_fail(reason, capacity, "Line%u: invalid %s id [%s %.70s]", line, what, section, id);
+        if (!strcmp(id, self->id))
+            return requirement_fail(reason, capacity, companion ? "Line%u: %s cannot be its own companion"
+                                                                : "Line%u: %s cannot require itself", line, id);
+        for (size_t i = 0; i < *found; ++i)
+            if (!strcmp(out[i].id, id))
+                return requirement_fail(reason, capacity, "Line%u: %s is both required and a companion", line, id);
+        if (*found == P4_PACKAGE_REQUIRES_MAX)
+            return requirement_fail(reason, capacity, "More than %u requirements and companions", P4_PACKAGE_REQUIRES_MAX);
+        P4PackageRequirement *need = &out[(*found)++];
+        memset(need, 0, sizeof *need);
+        strcpy(need->id, id);
+        need->companion = companion;
+        int versioned = 0;
+        for (size_t i = first; i < last; ++i) {
+            const P4PackageField *field = &fields[i];
+            if (field->line < line) line = field->line;
+            if (!strcmp(field->key, "version")) {
+                const char *s = field->value;
+                if (decimal(&s, &need->major) || *s++ != '.' || decimal(&s, &need->minor) || *s)
+                    return requirement_fail(reason, capacity, "Line%u: %s %s version must be <major>.<minor>",
+                                            field->line, what, id);
+                versioned = 1;
+            } else if (!companion && !strncmp(field->key, "setting.", 8)) {
+                const char *key = field->key + 8;
+                size_t key_size = strlen(key), value_size = strlen(field->value);
+                if (!key_size || key_size >= sizeof need->settings[0].key ||
+                    !value_size || value_size >= sizeof need->settings[0].value)
+                    return requirement_fail(reason, capacity, "Line%u: requirement %s setting row is out of bounds",
+                                            field->line, id);
+                if (need->setting_count == P4_PACKAGE_REQUIRE_SETTINGS)
+                    return requirement_fail(reason, capacity, "Line%u: requirement %s names more than %u settings",
+                                            field->line, id, P4_PACKAGE_REQUIRE_SETTINGS);
+                memcpy(need->settings[need->setting_count].key, key, key_size + 1);
+                memcpy(need->settings[need->setting_count++].value, field->value, value_size + 1);
+            } else {
+                return requirement_fail(reason, capacity, "Line%u: %s %s has unknown field %.40s",
+                                        field->line, what, id, field->key);
+            }
+        }
+        if (!versioned)
+            return requirement_fail(reason, capacity, "Line%u: %s %s needs version=<major>.<minor>", line, what, id);
+        need->line = line;
+        first = last;
+    }
+    return 0;
+}
+static int declares_setting(const P4PackageProvider *provider, const char *key)
+{
+    for (size_t i = 0; i < provider->field_count; ++i)
+        if (!strcmp(provider->fields[i].section, "setting") && !strcmp(provider->fields[i].argument, key)) return 1;
+    return 0;
+}
+/* Whether `dependent`'s manifest requires `id` (and names `setting`, when given). */
+static int field_requires(const P4PackageProvider *dependent, const char *id, const char *setting)
+{
+    for (size_t i = 0; i < dependent->field_count; ++i) {
+        const P4PackageField *field = &dependent->fields[i];
+        if (strcmp(field->section, "require") || strcmp(field->argument, id)) continue;
+        if (!setting || (!strncmp(field->key, "setting.", 8) && !strcmp(field->key + 8, setting))) return 1;
+    }
     return 0;
 }
 
@@ -471,6 +776,12 @@ static void discover(const char *name, void *user)
     }
     for (size_t i = 0; i < discovery->requested; ++i) {
         if (strcmp(discovery->ids[i], provider.info.id)) continue;
+        /* A player installation hides, and reports, the bundled copy of the same id. */
+        if (discovery->bundled && discovery->player[i]) {
+            fprintf(stderr, "p4pc: %s: player copy shadows bundled %s %s\n", client->diagnostic_name,
+                provider.info.id, provider.info.version);
+            goto discard;
+        }
         if (discovery->found[i]) {
             for (size_t entry = 0; entry < registry->count; ++entry) {
                 P4PackageProvider *previous = &registry->packages[entry];
@@ -482,6 +793,7 @@ static void discover(const char *name, void *user)
             goto discard;
         }
         discovery->found[i] = 1;
+        discovery->player[i] = !discovery->bundled;
         provider.registry = registry;
         provider.info.kind = client->kind;
         provider.info.ordinal = SIZE_MAX;
@@ -539,8 +851,14 @@ static int index_provider(P4PackageProvider *provider)
 int p4_package_registry_load(P4PackageRegistry **out, const P4PackageClient *client,
                              const char *root, const char *enabled)
 {
+    return p4_package_registry_load_bundled(out, client, root, NULL, enabled);
+}
+int p4_package_registry_load_bundled(P4PackageRegistry **out, const P4PackageClient *client,
+                                     const char *root, const char *bundled_root, const char *enabled)
+{
     if (phase || !out || *out || !client || !client->diagnostic_name || !client->manifest_name ||
         !client->section || (client->kind != P4_PACKAGE_MOD && client->kind != P4_PACKAGE_ENGINE_PACK)) return -1;
+    if (!first) refusal_count = 0; /* a new staging batch */
     if (p4_package_startup_blocked || !enabled || !enabled[0]) return 0;
     for (P4PackageRegistry *existing = first; existing; existing = existing->next)
         if (existing->client->kind == client->kind) return -1;
@@ -564,7 +882,9 @@ int p4_package_registry_load(P4PackageRegistry **out, const P4PackageClient *cli
         enabled = end + 1;
         if (!*enabled) goto fail;
     }
-    if (!root || !root[0] || !p4_os_is_dir_nofollow(root) || generation == UINT32_MAX) {
+    const int player_root = root && root[0] && p4_os_is_dir_nofollow(root);
+    const int shipped_root = bundled_root && bundled_root[0] && p4_os_is_dir_nofollow(bundled_root);
+    if ((!player_root && !shipped_root) || generation == UINT32_MAX) {
         for (size_t i = 0; i < discovery.requested; ++i)
             if (reject_id(client, discovery.ids[i], "The configured package root is unavailable")) goto fail;
         return 0;
@@ -581,7 +901,12 @@ int p4_package_registry_load(P4PackageRegistry **out, const P4PackageClient *cli
     atomic_init(&registry->retired, 0);
     ++generation;
     discovery.registry = registry;
-    if (p4_os_list_dir(root, discover, &discovery) || discovery.failed) goto fail;
+    if (player_root && (p4_os_list_dir(root, discover, &discovery) || discovery.failed)) goto fail;
+    if (shipped_root) {
+        discovery.root = bundled_root;
+        discovery.bundled = 1;
+        if (p4_os_list_dir(bundled_root, discover, &discovery) || discovery.failed) goto fail;
+    }
     for (size_t i = 0; i < discovery.requested; ++i) {
         if (!discovery.found[i]) {
             const char *reason = discovery.reasons[i] ? discovery.reasons[i] : "Enabled id not found, or its manifest was refused";
@@ -660,7 +985,8 @@ int p4_package_handler_register(const P4PackageHandler *handler)
     size_t sections = 0;
     if (handler->sections)
         for (const char *const *section = handler->sections; *section; ++section)
-            if (++sections > 16 || !identifier(*section)) return -1;
+            if (++sections > 16 || !identifier(*section) || !strcmp(*section, "require") ||
+                !strcmp(*section, "companion")) return -1;
     if (sections && !handler->prepare) return -1; /* payload checks cannot be deferred */
     if ((!sections && !handler->boot_phase) || handler_count == HANDLER_LIMIT) return -1;
     if (handler->dependencies) {
@@ -847,6 +1173,7 @@ static int renew_candidate(void)
             copy->field_count = data->field_count;
             copy->field_capacity = data->field_capacity;
             copy->manifest_bytes = data->manifest_bytes;
+            copy->requires = data->requires;
         }
     }
     P4PackageRegistry *old = first, *replacement = next_first;
@@ -873,6 +1200,144 @@ fail:
         next_first = next;
     }
     return -1;
+}
+/* Requirements are admission metadata. Each requirement of a catalog package
+ * must be a selected package of the same kind whose version satisfies the
+ * minimum and which declares the named settings (their values belong to the
+ * mod-settings handler). Requirements then move before their dependents inside
+ * that kind's catalog slots, otherwise keeping the selector/manifest order, and
+ * a cycle refuses its members. Refusals cascade through later rebuilds.
+ * 0 admitted, 1 someone was refused (rebuild), -1 strict failure. */
+static int admit_requirements(void)
+{
+    enum { LIMIT = 2 * P4_PACKAGE_MAX };
+    if (catalog_count > LIMIT) return -1;
+    unsigned char edges[LIMIT][P4_PACKAGE_REQUIRES_MAX], edge_count[LIMIT] = {0};
+    int refused = 0;
+    for (size_t i = 0; i < catalog_count; ++i) {
+        P4PackageProvider *provider = catalog[i];
+        P4PackageRequirement requires[P4_PACKAGE_REQUIRES_MAX];
+        size_t count = 0;
+        char reason[512] = "";
+        if (p4_package_requirements(&provider->info, provider->fields, provider->field_count,
+                                    requires, &count, reason, sizeof reason) && !reason[0])
+            strcpy(reason, "Invalid requirements");
+        for (size_t r = 0; r < count && !reason[0]; ++r) {
+            const P4PackageRequirement *need = &requires[r];
+            size_t j = 0;
+            while (j < catalog_count &&
+                   (catalog[j]->info.kind != provider->info.kind || strcmp(catalog[j]->info.id, need->id))) ++j;
+            if (j == catalog_count && need->companion) continue; /* an absent companion is fine */
+            if (j == catalog_count) {
+                const char *why = p4_package_refusal(provider->info.kind, need->id);
+                if (why)
+                    snprintf(reason, sizeof reason, "%s needs %s %u.%u+, which was refused: %s",
+                             provider->info.name, need->id, need->major, need->minor, why);
+                else
+                    snprintf(reason, sizeof reason, "%s needs %s %u.%u+, which is not enabled",
+                             provider->info.name, need->id, need->major, need->minor);
+                break;
+            }
+            const P4PackageInfo *have = &catalog[j]->info;
+            const char *role = need->companion ? "companion " : "";
+            int satisfied = p4_package_version_satisfies(have->version, need->major, need->minor);
+            if (satisfied <= 0) {
+                snprintf(reason, sizeof reason, satisfied ? "%s needs %s%s %u.%u+, but its version %s is not comparable"
+                                                          : "%s needs %s%s %u.%u+ (enabled: %s)",
+                         provider->info.name, role, have->name, need->major, need->minor, have->version);
+                break;
+            }
+            for (size_t s = 0; s < need->setting_count && !reason[0]; ++s)
+                if (!declares_setting(catalog[j], need->settings[s].key))
+                    snprintf(reason, sizeof reason, "%s needs %s setting %s, which it does not declare",
+                             provider->info.name, have->name, need->settings[s].key);
+            if (!reason[0]) edges[i][edge_count[i]++] = (unsigned char)j;
+        }
+        if (reason[0]) {
+            if (reject_provider(provider, reason)) return -1;
+            refused = 1;
+        }
+    }
+    if (refused) return 1;
+    /* Kahn's algorithm, always taking the earliest ready catalog position. */
+    unsigned char emitted[LIMIT] = {0};
+    P4PackageProvider *sorted[LIMIT];
+    size_t used = 0;
+    for (;;) {
+        size_t pick = catalog_count;
+        for (size_t i = 0; i < catalog_count && pick == catalog_count; ++i) {
+            if (emitted[i]) continue;
+            int ready = 1;
+            for (unsigned e = 0; e < edge_count[i]; ++e)
+                if (!emitted[edges[i][e]]) ready = 0;
+            if (ready) pick = i;
+        }
+        if (pick == catalog_count) break;
+        emitted[pick] = 1;
+        sorted[used++] = catalog[pick];
+    }
+    if (used < catalog_count) {
+        /* Stuck: every remaining package waits on another remaining one, so some
+         * sit on cycles. Refuse exactly those; their dependents cascade. */
+        for (size_t i = 0; i < catalog_count; ++i) {
+            if (emitted[i]) continue;
+            unsigned char seen[LIMIT] = {0};
+            size_t stack[LIMIT], depth = 0, through = catalog_count;
+            for (unsigned e = 0; e < edge_count[i]; ++e)
+                if (!emitted[edges[i][e]] && !seen[edges[i][e]]) { seen[edges[i][e]] = 1; stack[depth++] = edges[i][e]; }
+            while (depth && !seen[i]) {
+                size_t node = stack[--depth];
+                for (unsigned e = 0; e < edge_count[node]; ++e) {
+                    size_t next = edges[node][e];
+                    if (emitted[next] || seen[next]) continue;
+                    seen[next] = 1;
+                    stack[depth++] = next;
+                }
+            }
+            if (!seen[i]) continue;
+            for (unsigned e = 0; e < edge_count[i] && through == catalog_count; ++e)
+                if (!emitted[edges[i][e]]) through = edges[i][e];
+            char reason[512];
+            snprintf(reason, sizeof reason, "%s is in a requirement cycle through %s",
+                     catalog[i]->info.name, catalog[through]->info.name);
+            if (reject_provider(catalog[i], reason)) return -1;
+            refused = 1;
+        }
+        return refused ? 1 : -1;
+    }
+    /* Each kind keeps its own catalog slots; only its members are reordered. */
+    for (int kind = P4_PACKAGE_MOD; kind <= P4_PACKAGE_ENGINE_PACK; ++kind) {
+        size_t next = 0;
+        for (size_t slot = 0; slot < catalog_count; ++slot) {
+            if ((int)catalog[slot]->info.kind != kind) continue;
+            while ((int)sorted[next]->info.kind != kind) ++next;
+            catalog[slot] = sorted[next++];
+        }
+    }
+    return 0;
+}
+const P4PackageProvider *p4_packages_requirer(const P4PackageProvider *provider, const char *setting)
+{
+    int state = atomic_load(&phase);
+    if (!provider || (state != 1 && state != 2)) return NULL;
+    for (size_t i = 0; i < catalog_count; ++i) {
+        const P4PackageProvider *other = catalog[i];
+        if (other != provider && other->info.kind == provider->info.kind &&
+            field_requires(other, provider->info.id, setting)) return other;
+    }
+    return NULL;
+}
+int p4_packages_companion_admitted(const P4PackageProvider *provider, const char *id)
+{
+    int state = atomic_load(&phase);
+    if (!provider || !id || (state != 1 && state != 2)) return -1;
+    int declared = 0;
+    for (size_t i = 0; i < provider->field_count && !declared; ++i)
+        declared = !strcmp(provider->fields[i].section, "companion") && !strcmp(provider->fields[i].argument, id);
+    if (!declared) return -1;
+    for (size_t i = 0; i < catalog_count; ++i)
+        if (catalog[i]->info.kind == provider->info.kind && !strcmp(catalog[i]->info.id, id)) return 1;
+    return 0;
 }
 
 int p4_package_registry_publish(void)
@@ -940,6 +1405,9 @@ rebuild:
         }
         catalog[destination] = item;
     }
+    int requirements = admit_requirements();
+    if (requirements < 0) goto fail;
+    if (requirements) goto rebuild;
     for (size_t i = 0; i < handler_count; ++i)
         used_handlers[i] = handlers[i]->boot_phase != P4_PACKAGE_BOOT_SCHEMA;
     for (size_t i = 0; i < catalog_count; ++i) {
@@ -949,6 +1417,11 @@ rebuild:
     }
     for (size_t i = 0; i < catalog_count; ++i) {
         P4PackageProvider *provider = catalog[i];
+        char missing[256];
+        if (p4_capability_requires_check(provider->requires, missing, sizeof missing)) {
+            if (reject_provider(provider, missing)) goto fail;
+            goto rebuild;
+        }
         if (p4_package_provider_has_file(provider, "main.luau")) {
             if (provider->info.kind == P4_PACKAGE_ENGINE_PACK) {
                 if (reject_provider(provider, "Engine packs cannot contain a player main.luau")) goto fail;
@@ -962,7 +1435,7 @@ rebuild:
         }
         for (size_t entry = 0; entry < provider->field_count; ++entry) {
             const P4PackageField *field = &provider->fields[entry];
-            int found = 0;
+            int found = !strcmp(field->section, "require") || !strcmp(field->section, "companion"); /* the core's own */
             for (size_t h = 0; h < handler_count; ++h) {
                 if (!handlers[h]->sections) continue;
                 for (const char *const *section = handlers[h]->sections; *section; ++section)

@@ -4,4 +4,6 @@
 -keepclassmembers class org.p4pc.game.P4Activity {
     public void trackHardwareKeyboard(boolean);
     public boolean prepareRestart();
+    public void loadPadLayout(java.lang.String);
+    public void editPadLayout();
 }

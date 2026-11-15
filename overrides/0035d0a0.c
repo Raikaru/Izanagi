@@ -97,6 +97,8 @@ void cmpConfigDraw(u8 *work) {
         pendingOption = -1;
         for (; index < 7; index++) {
             P4SettingsNativeRow *nativeRow = pc ? &pc->rows[index] : NULL;
+            int fullInfo = nativeRow && nativeRow->kind == P4_SETTINGS_NATIVE_INFO &&
+                !(nativeRow->flags & P4_SETTINGS_NATIVE_ROW_INFO_VALUE);
             if (nativeRow && nativeRow->kind == P4_SETTINGS_NATIVE_EMPTY) continue;
             s32 retailIndex = nativeRow
                 ? (nativeRow->kind == P4_SETTINGS_NATIVE_RETAIL ? nativeRow->index : -1) : index;
@@ -131,7 +133,7 @@ void cmpConfigDraw(u8 *work) {
                     selected = 1;
                     selectedPalette = D_0064B2E8;
                     sprite = menu->sprites[6];
-                    if (nativeRow && nativeRow->kind == P4_SETTINGS_NATIVE_INFO)
+                    if (fullInfo)
                         p4_settings_native_draw_info_bar(sprite, pos.x, pairY,
                             ((u32)selectedPalette[0] << 24) | ((u32)selectedPalette[1] << 16) |
                             ((u32)selectedPalette[2] << 8) | alpha);
@@ -140,7 +142,7 @@ void cmpConfigDraw(u8 *work) {
                                       selectedPalette[2], alpha);
                     sprite = menu->sprites[8];
                     sdkSpriteDrawAt(sprite,
-                        (nativeRow && nativeRow->kind == P4_SETTINGS_NATIVE_INFO ? 380.0f : 247.0f) + pos.x,
+                        (fullInfo ? 380.0f : 247.0f) + pos.x,
                         pairY, selectedPalette[0], selectedPalette[1], selectedPalette[2], alpha);
                     if ((retailIndex == 2) && (menu->options[1] == 0)) {
                         textColor = (alpha & 0xFF) | 0xB4B4B400;
@@ -165,7 +167,7 @@ void cmpConfigDraw(u8 *work) {
                 else
                     frFontExDrawTextWithCharWidth(pos.x, pos.y, 0.0f, textColor, 8, 1, (const char *)(nativeRow ? nativeRow->label : D_0064D230[index]), 2, -1);
             }
-            if (nativeRow && nativeRow->kind == P4_SETTINGS_NATIVE_INFO) continue;
+            if (fullInfo) continue;
             if (nativeRow ? (nativeRow->kind == P4_SETTINGS_NATIVE_RETAIL ||
                 nativeRow->kind == P4_SETTINGS_NATIVE_TOGGLE) : index != 6) {
                 u16 *timer = nativeRow ? (u16 *)nativeRow->timer : &menu->timers[index];
@@ -212,12 +214,14 @@ void cmpConfigDraw(u8 *work) {
                 }
                 if (nativeRow && (nativeRow->kind == P4_SETTINGS_NATIVE_VALUE ||
                     nativeRow->kind == P4_SETTINGS_NATIVE_BINDING ||
-                    nativeRow->kind == P4_SETTINGS_NATIVE_CHOICE)) {
+                    nativeRow->kind == P4_SETTINGS_NATIVE_CHOICE ||
+                    nativeRow->kind == P4_SETTINGS_NATIVE_INFO)) {
                     p4_settings_native_draw_value(535.0f + (baseX + *buttonX),
                         pos.y - 5.0f, (u32)textColor, index);
                     /* Equipment's real stat-arrow art, through the stock
                        rotation/pivot path, fits within the value pill. */
-                    if (nativeRow->kind != P4_SETTINGS_NATIVE_CHOICE) {
+                    if (nativeRow->kind != P4_SETTINGS_NATIVE_CHOICE &&
+                        nativeRow->kind != P4_SETTINGS_NATIVE_INFO) {
                     sdkSpriteDrawSized((u8 *)pc->choiceArrows[0],
                         474.0f + (baseX + *buttonX), pos.y + 7.0f, 0.0f,
                         buttonColor[0], buttonColor[1], buttonColor[2], alpha,

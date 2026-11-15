@@ -43,13 +43,7 @@ env SDL_VIDEODRIVER="${SDL_VIDEODRIVER:-offscreen}" SDL_AUDIODRIVER=dummy P4PC_T
     P4PC_AUTOPRESS_FRAMES=1 P4PC_AUTOPRESS_LOAD=0 P4PC_WALK_SCRIPT="$walk" P4PC_NEWGAME_GATE="$gate,$want" \
     timeout -s KILL "${P4PC_GATE_TIMEOUT:-1300}" "$prog" "$P4PC_ELF" > "$work/boot.log" 2>&1
 rc=$?
-if [ -n "${P4PC_GATE_BOOT_LOG:-}" ] && ! cp "$work/boot.log" "$P4PC_GATE_BOOT_LOG"; then
-    echo "save_play_gate: cannot retain log at $P4PC_GATE_BOOT_LOG"
-    rc=1
-fi
-if [ -n "${P4PC_SCENE_ARTIFACTS:-}" ]; then
-    cp "$work/boot.log" "$P4PC_SCENE_ARTIFACTS/boot.log" || exit 1
-fi
+gate_artifacts_boot_log p4pc_save_play
 # Checkpoint gates must finish their walk and write a save, not merely reach the same
 # field/date earlier in a scene (04/18 morning and after school both use Class 2-2).
 if [ $rc -eq 0 ] && [ "${P4PC_GATE_REQUIRE_SAVE:-0}" = 1 ]; then

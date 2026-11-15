@@ -129,6 +129,9 @@ def fake_worker():
             manifest = (packages / name / "mod.ini").read_text(encoding="utf-8")
             active.append({"id": name, "version": manifest.split("version = ", 1)[1].split("\n", 1)[0]})
         reported = {"identity": "0" * 64 if mode == "mods_wrong" else declared, "witness": True, "active": active}
+        equipment = os.environ.get("P4PC_BATTLE_SIM_EQUIPMENT")
+        if equipment:
+            reported["equipment"] = [dict(zip(("actor", "slot", "item"), map(int, row.split(":")))) for row in equipment.split(",")]
     body = {"schema": 1, "outcome": outcome, "terminal_cause": "protagonist_ko" if outcome == "defeat" else "native_terminal",
             "counter_capability": "fake-contract-v1", "trace_capability": "fake-trace-v1", "observer_attached": 1,
             "turns": {"actor_turns": index + 1, "actions": index + 3,
@@ -244,6 +247,14 @@ class BattleSimTest(unittest.TestCase):
                             for cohort in report["measurement_cohorts"]))
         self.assertIn("not a retail reference", (out / "summary.md").read_text(encoding="utf-8"))
 
+    def test_mod_cohort_uses_mod_section_version_not_dependency_version(self):
+        package = self.mods()
+        with (package / "mod.ini").open("a", encoding="utf-8") as manifest:
+            manifest.write("\n[companion test.other]\nversion = 0.1\n")
+        report = self.batch()
+        self.assertEqual(report["errors"], 0)
+        self.assertEqual(report["identity"]["mods"]["packages"], [{"id": "test.cohort", "version": "1.2.3"}])
+
     def test_mod_identity_covers_content_and_settings(self):
         package = self.mods()
         first = sim.mod_cohort(self.scenario["mods"], self.root)["identity"]
@@ -252,6 +263,49 @@ class BattleSimTest(unittest.TestCase):
         (package / "main.luau").write_text("--!strict\n", encoding="utf-8")
         third = sim.mod_cohort(self.scenario["mods"], self.root)["identity"]
         self.assertEqual(len({first, second, third}), 3)
+
+    def equipment(self):
+        self.mods()
+        self.declarative(self.definition("synthetic_lab"))
+        self.scenario["mods"]["equipment"] = [{"actor": 1, "slot": 1, "item": 1704}, {"actor": 2, "slot": 2, "item": 1700}]
+
+    def test_declared_mod_equipment_is_strict_synthetic_and_part_of_the_identity(self):
+        self.equipment()
+        sim.validate_scenario(self.scenario)
+        with_gear = sim.mod_cohort(self.scenario["mods"], self.root)
+        self.assertEqual(with_gear["equipment"], self.scenario["mods"]["equipment"])
+        env = sim.worker_environment({}, self.root, {**with_gear, "root": str(self.root / "packages")})
+        self.assertEqual(env["P4PC_BATTLE_SIM_EQUIPMENT"], "1:1:1704,2:2:1700")
+        bare = copy.deepcopy(self.scenario["mods"])
+        bare.pop("equipment")
+        self.assertNotEqual(sim.mod_cohort(bare, self.root)["identity"], with_gear["identity"])
+        self.assertNotIn("P4PC_BATTLE_SIM_EQUIPMENT",
+                         sim.worker_environment({}, self.root, {**sim.mod_cohort(bare, self.root), "root": "x"}))
+        changes = [(lambda s: s["mods"]["equipment"][0].update(item=0x10B), "mods.equipment\\[0\\].item"),
+                   (lambda s: s["mods"]["equipment"][1].update(actor=1, slot=1), "duplicate actor slot"),
+                   (lambda s: s["mods"]["equipment"][0].update(actor=11), "actor"),
+                   (lambda s: s["mods"].update(equipment=[]), "1..30 entries"),
+                   (lambda s: s["entry"]["source"]["definition"].update(classification="source_attested"), "synthetic_lab")]
+        for change, message in changes:
+            with self.subTest(message=message):
+                scenario = copy.deepcopy(self.scenario)
+                change(scenario)
+                with self.assertRaisesRegex(sim.ScenarioError, message):
+                    sim.validate_scenario(scenario)
+
+    def test_result_must_echo_the_declared_mod_equipment(self):
+        self.equipment()
+        cohort = sim.mod_cohort(self.scenario["mods"], self.root)
+        result = {"outcome": "win", "mods": {"identity": cohort["identity"], "witness": True,
+                                             "active": [{"id": "test.cohort", "version": "1.2.3"}],
+                                             "equipment": copy.deepcopy(cohort["equipment"])}}
+        sim.check_reported_mods(result, cohort)
+        result["mods"]["equipment"].pop()
+        with self.assertRaisesRegex(sim.ScenarioError, "applied equipment differs"):
+            sim.check_reported_mods(result, cohort)
+        result["mods"].pop("equipment")
+        with self.assertRaisesRegex(sim.ScenarioError, "applied equipment differs"):
+            sim.check_reported_mods(result, cohort)
 
     def test_mod_cohort_declarations_are_strict(self):
         self.mods()
@@ -279,6 +333,17 @@ class BattleSimTest(unittest.TestCase):
         with self.assertRaisesRegex(sim.ScenarioError, "do not declare"):
             self.batch()
         self.assertEqual(self.admissions, 0)
+
+    def test_mod_version_comes_from_its_own_section(self):
+        # A [require] section's `version` names the required package, not this one.
+        package = self.mods()
+        (package / "mod.ini").write_text("[mod]\nid = test.cohort\nversion = 1.2.3\napi = 1.12\n\n"
+                                         "[require other.mod]\nversion = 1.0\n", encoding="utf-8")
+        cohort = sim.mod_cohort(self.scenario["mods"], self.root)
+        self.assertEqual([(p["id"], p["version"]) for p in cohort["packages"]], [("test.cohort", "1.2.3")])
+        (package / "mod.ini").write_text("[require other.mod]\nid = test.cohort\nversion = 1.0\n", encoding="utf-8")
+        with self.assertRaisesRegex(sim.ScenarioError, "do not declare"):
+            sim.mod_cohort(self.scenario["mods"], self.root)
 
     def test_mod_cohort_result_identity_must_match(self):
         self.mods()
@@ -403,6 +468,125 @@ class BattleSimTest(unittest.TestCase):
         binary = sim.compile_entry(self.scenario, self.image.read_bytes(), sim.derive_seeds(self.scenario["master_seed"], 0))
         fields = struct.unpack("<8s14I", binary[:64])
         self.assertEqual((fields[7], fields[11]), (0, 5))
+
+    def test_technical_policy_is_named_policy_seven_without_payload(self):
+        self.scenario["policy"] = {"kind": "technical", "version": 1}
+        sim.validate_scenario(self.scenario)
+        binary = sim.compile_entry(self.scenario, self.image.read_bytes(), sim.derive_seeds(self.scenario["master_seed"], 0))
+        fields = struct.unpack("<8s14I", binary[:64])
+        self.assertEqual((fields[7], fields[11]), (0, 7))
+        self.scenario["policy"]["ratings"] = {"path": "ratings.json", "sha256": "0" * 64}
+        with self.assertRaisesRegex(sim.ScenarioError, "only valid with, the attentive-affinity"):
+            sim.validate_scenario(self.scenario)
+
+    def test_strategic_policy_is_named_policy_eight_without_payload(self):
+        self.scenario["policy"] = {"kind": "strategic", "version": 1}
+        sim.validate_scenario(self.scenario)
+        binary = sim.compile_entry(self.scenario, self.image.read_bytes(), sim.derive_seeds(self.scenario["master_seed"], 0))
+        fields = struct.unpack("<8s14I", binary[:64])
+        self.assertEqual((fields[7], fields[11]), (0, 8))
+        self.assertEqual(len(binary), 64 + len(self.image.read_bytes()))
+        for key, value, message in (("ratings", {"path": "ratings.json", "sha256": "0" * 64}, "only valid with, the attentive-affinity"),
+                                    ("plan", "x", "only valid with, the walk"),
+                                    ("tape", [], "only valid for tape")):
+            with self.subTest(key=key):
+                policy = {"kind": "strategic", "version": 1, key: value}
+                with self.assertRaisesRegex(sim.ScenarioError, message):
+                    sim.validate_scenario(dict(self.scenario, policy=policy))
+        with self.assertRaisesRegex(sim.ScenarioError, "version: expected 1"):
+            sim.validate_scenario(dict(self.scenario, policy={"kind": "strategic", "version": 2}))
+
+    def test_strategic_result_reports_only_its_candidate_identity(self):
+        base = {"schema": 1, "outcome": "win", "party_policy": {
+            "id": 8, "name": "strategic-player-candidate-v1", "latency_updates": 1, "party_control": "native_direct_commands",
+            "knowledge": "observed_damage_weakness_public_charge_guard_ailment_landings_buff_state_fixed_heal_amounts_owned_persona_skills"}}
+        sim.validate_result(copy.deepcopy(base))
+        changes = [lambda p: p.update(name="technical-player-v1"), lambda p: p.update(name="expert-player-v1"),
+                   lambda p: p.update(knowledge="observed_damage_weakness_public_charge_guard"),
+                   lambda p: p.update(ratings_sha256="0" * 64)]
+        for change in changes:
+            value = copy.deepcopy(base)
+            change(value["party_policy"])
+            with self.subTest(policy=value["party_policy"]), self.assertRaises(sim.ScenarioError):
+                sim.validate_result(value)
+        # Older policies keep their own reported identity: the pin covers the candidate only.
+        technical = copy.deepcopy(base)
+        technical["party_policy"].update(id=7, name="technical-player-v1",
+                                         knowledge="observed_damage_weakness_public_charge_guard_ailment_landings")
+        sim.validate_result(technical)
+        with self.assertRaises(sim.ScenarioError):
+            sim.validate_result(dict(base, party_policy=dict(base["party_policy"], id=9)))
+
+    def ratings_table(self, split=False):
+        def row(base):
+            values = {"fire": base, "ice": base - 9, "elec": 2, "wind": 3, "almighty": 0, "light": 1, "dark": -7,
+                      "healing": 4, "support": 2, "ailment": 1}
+            values.update({"slash": base, "strike": base + 2, "pierce": 1} if split else {"phys": base + 2})
+            return values
+        table = {"rules": 1, "digest": "19351f9e", "split": split, "personas": {"0x10": row(3), "0x2": row(5)},
+                 "companions": {}, "designations": {}, "skills": {}}
+        path = self.root / "ratings.json"
+        path.write_text(json.dumps(table), encoding="utf-8")
+        self.scenario["policy"] = {"kind": "attentive-affinity", "version": 1,
+                                   "ratings": {"path": "ratings.json", "sha256": sim.digest(path.read_bytes())}}
+        return table
+
+    def test_affinity_policy_pins_its_ratings_table_and_compiles_native_order(self):
+        self.ratings_table()
+        sim.validate_scenario(self.scenario)
+        ratings = sim.load_ratings(self.scenario["policy"], self.root)
+        payload = ratings["payload"]
+        self.assertEqual(payload[:12], b"P4AFFRT1" + struct.pack("<I", 2))
+        # Ascending ids; phys, fire, ice, elec, wind, almighty, light, dark; signed (the mod's damage ratings run -7..+9).
+        self.assertEqual(struct.unpack("<H8b", payload[12:22]), (2, 7, 5, -4, 2, 3, 0, 1, -7))
+        self.assertEqual(struct.unpack("<H8b", payload[22:32]), (0x10, 5, 3, -6, 2, 3, 0, 1, -7))
+        self.assertEqual(ratings["table_digest"], "19351f9e")
+        image = self.image.read_bytes()
+        binary = sim.compile_entry(self.scenario, image, sim.derive_seeds(self.scenario["master_seed"], 0), ratings=ratings)
+        fields = struct.unpack("<8s14I", binary[:64])
+        self.assertEqual((fields[7], fields[11]), (len(payload), 6))
+        self.assertEqual(binary[64 + len(image):], payload)
+        with self.assertRaisesRegex(sim.ScenarioError, "only it, compiles"):
+            sim.compile_entry(self.scenario, image, sim.derive_seeds(self.scenario["master_seed"], 0))
+
+    def test_affinity_split_phys_is_the_best_leaf_and_bad_tables_are_refused(self):
+        self.ratings_table(split=True)
+        payload = sim.load_ratings(self.scenario["policy"], self.root)["payload"]
+        self.assertEqual(struct.unpack("<H8b", payload[12:22])[1], 7)  # max(slash 5, strike 7, pierce 1)
+        changes = [(lambda p: p.pop("ratings"), "policy.ratings: required"),
+                   (lambda p: p["ratings"].update(sha256="A" * 64), "lowercase SHA-256"),
+                   (lambda p: p.update(kind="attentive"), "only valid with, the attentive-affinity")]
+        for change, message in changes:
+            with self.subTest(message=message):
+                value = copy.deepcopy(self.scenario)
+                change(value["policy"])
+                with self.assertRaisesRegex(sim.ScenarioError, message):
+                    sim.validate_scenario(value)
+        policy = copy.deepcopy(self.scenario["policy"])
+        policy["ratings"]["sha256"] = "0" * 64
+        with self.assertRaisesRegex(sim.ScenarioError, "hash mismatch"):
+            sim.load_ratings(policy, self.root)
+        for table, message in (({"digest": "ab", "personas": {}}, "no personas"),
+                               ({"digest": "ab", "personas": {"0x1": {"phys": 1}}}, "fire"),
+                               ({"digest": "ab", "personas": {"0x0": {}}}, "nonzero"),
+                               ({"digest": "ab", "personas": {"0x1": dict.fromkeys(sim.RATING_ELEMENTS, 128)}}, "-128..127"),
+                               ({"digest": "AB", "personas": {"0x1": {}}}, "lowercase hex")):
+            with self.subTest(message=message), self.assertRaisesRegex(sim.ScenarioError, message):
+                sim.compile_ratings(table)
+
+    def test_affinity_result_carries_its_ratings_identity_only(self):
+        base = {"schema": 1, "outcome": "win", "party_policy": {"id": 6, "name": "attentive-player-affinity-v1",
+                                                               "latency_updates": 1, "party_control": "native_direct_commands",
+                                                               "knowledge": "observed_damage_weakness_public_charge_guard_declared_persona_ratings"}}
+        with self.assertRaisesRegex(sim.ScenarioError, "ratings_sha256"):
+            sim.validate_result(copy.deepcopy(base))
+        affinity = copy.deepcopy(base)
+        affinity["party_policy"]["ratings_sha256"] = "b" * 64
+        sim.validate_result(affinity)
+        attentive = copy.deepcopy(affinity)
+        attentive["party_policy"]["id"] = 5
+        with self.assertRaisesRegex(sim.ScenarioError, "ratings_sha256"):
+            sim.validate_result(attentive)
 
     def test_walk_result_carries_its_plan_identity_only(self):
         base = {"schema": 1, "outcome": "win", "party_policy": {"id": 4, "name": "walk-battle-rules-v1", "latency_updates": 1,
@@ -544,11 +728,67 @@ class BattleSimTest(unittest.TestCase):
 
     def test_exact_admission_api(self):
         machine = mock.Mock()
+        environment = {k: v for k, v in os.environ.items() if k != "P4PC_ADMISSION_DIR"}
         with mock.patch.dict(sys.modules, {"local_gates": mock.Mock(Machine=machine)}), \
+                mock.patch.dict(os.environ, environment, clear=True), \
                 mock.patch.object(sim, "LOCAL_GATES", Path(__file__)):
             sim.admitted_case(7)
             machine.assert_called_once_with(priority="study")
             machine.return_value.case.assert_called_once_with(7, cpu=True)
+
+    def test_off_windows_a_p4pc_run_study_container_is_the_admission(self):
+        # PortHardmode 2026-11-04: an 80-seed cohort under p4pc-run on a Linux study host failed at native preparation because
+        # admission only knew the PC's Machine. Off Windows the container's P4PC_ADMISSION_DIR admits; on Windows the
+        # Machine still does, whatever the environment says.
+        machine = mock.MagicMock()
+        with tempfile.TemporaryDirectory() as admission, \
+                mock.patch.dict(sys.modules, {"local_gates": mock.Mock(Machine=machine)}), \
+                mock.patch.dict(os.environ, {"P4PC_ADMISSION_DIR": admission}), \
+                mock.patch.object(sim, "LOCAL_GATES", Path(__file__)):
+            with sim.admitted_case(-1):
+                pass
+        if os.name == "nt":
+            machine.return_value.case.assert_called_once_with(-1, cpu=True)
+        else:
+            machine.assert_not_called()
+
+    def test_host_admission_starts_each_case_only_while_no_land_check_holds_the_host(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            admission = Path(tmp)
+            busy = admission / "land-busy"
+            busy.write_text("land-x64\n")
+            events = []
+
+            def sleep(seconds):
+                events.append(("sleep", seconds))
+                if len(events) == 2:
+                    busy.unlink()   # the land check released its lane
+
+            with mock.patch("sys.stderr"):
+                with sim.host_admitted_case(admission, False, poll=5.0, sleep=sleep) as admitted:
+                    events.append(("case", admitted))
+            self.assertEqual(events, [("sleep", 5.0), ("sleep", 5.0), ("case", None)])
+            with sim.host_admitted_case(admission, False, sleep=lambda s: self.fail("waited while idle")):
+                pass
+            with self.assertRaisesRegex(sim.ScenarioError, "GPU admission"):
+                with sim.host_admitted_case(admission, True):
+                    pass
+            with self.assertRaisesRegex(sim.ScenarioError, "not a p4pc-run admission directory"):
+                with sim.host_admitted_case(admission / "absent", False):
+                    pass
+
+    def test_off_windows_without_p4pc_run_the_refusal_names_the_launcher(self):
+        machine = mock.Mock(side_effect=AttributeError("windll"))
+        environment = {k: v for k, v in os.environ.items() if k != "P4PC_ADMISSION_DIR"}
+        with mock.patch.dict(sys.modules, {"local_gates": mock.Mock(Machine=machine)}), \
+                mock.patch.dict(os.environ, environment, clear=True), \
+                mock.patch.object(sim, "LOCAL_GATES", Path(__file__)):
+            if os.name == "nt":
+                with self.assertRaises(AttributeError):
+                    sim.admitted_case(7)
+            else:
+                with self.assertRaisesRegex(sim.ScenarioError, "p4pc-run with P4PC_PRIORITY=study"):
+                    sim.admitted_case(7)
 
     def test_unresolved_are_not_silently_removed(self):
         rows = [{"run_index": i, "seeds": sim.derive_seeds("0" * 32, i),
@@ -645,6 +885,13 @@ class BattleSimTest(unittest.TestCase):
         self.assertEqual(report["errors"], 0)
         self.assertEqual(report["runs"][0]["result"]["worker_environment"],
                          {"P4PC_ISO": None, "SDL_VIDEODRIVER": None})
+
+    def test_worker_launch_is_quiet(self):
+        env = sim.worker_environment({}, self.root)
+        self.assertEqual(env["SDL_AUDIODRIVER"], "dummy")
+        self.assertEqual(env["P4PC_HIDDEN_WINDOW"], "1")
+        if os.name == "nt":
+            self.assertTrue(sim.WINDOWS_WORKER_FLAGS & 0x08000000)  # CREATE_NO_WINDOW
 
     def test_declared_runtime_files_are_hashed_and_passed_explicitly(self):
         iso = self.root / "private-disc.iso"

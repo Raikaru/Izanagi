@@ -32,6 +32,9 @@ LICENSES/LicenseRef-reconstructed.txt. It applies to:
   src/platform/rw_rtanim.c       RenderWare RtAnim functions, translated
   src/platform/rw_rtanim_record.c
   src/platform/rw_skytran.c      the RenderWare sky driver's VU0 multiplies, translated
+  src/platform/rw_device_register.c, rw_image_stream.c, rw_normalize2.c,
+  rw_normalize3.c, rw_p2_stalac.c, rw_plugin_constructors.c,
+  rw_skin_callees.c              RenderWare functions transcribed from the retail asm
 
 These files carry an SPDX-License-Identifier: LicenseRef-reconstructed line,
 except overrides/: the build splices those files byte for byte into the decomp

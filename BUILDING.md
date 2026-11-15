@@ -84,6 +84,11 @@ your executable as described above.
 The first build compiles the whole decompilation mirror and takes a while. Later
 builds are incremental, and the `p4pc-ccache` volume keeps compiler results across
 containers and fresh build trees.
+The mirror excludes the decoder units explicitly removed by
+`config/inactive_movie_decoder.json` from its declared outputs. Their source and
+the manifest remain dependencies: changing either still regenerates the mirror.
+An unchanged build no longer regenerates it because a deliberately removed
+decoder file is missing.
 
 ### Linking against your own SDL3 / FFmpeg
 

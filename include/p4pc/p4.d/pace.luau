@@ -1,0 +1,3 @@
+--!capability pace@1
+--!covers p4.pace
+-- Set and inspect the practice speed in real-time play.

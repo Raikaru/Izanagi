@@ -69,7 +69,7 @@ static const char kIm3DFragmentSource[] =
     "uniform float uAlphaRef;\n"
     "uniform int uAlphaInvert;\n"
     "bool alphaPasses(float a) {\n"
-    "    float t = a * 128.0;\n"
+    "    float t = p4GsAlpha(a);\n"
     "    if (uAlphaFunc == 8) return false;\n"
     "    if (uAlphaFunc == 2) return t < uAlphaRef;\n"
     "    if (uAlphaFunc == 3) return t <= uAlphaRef;\n"
@@ -89,7 +89,7 @@ static const char kIm3DFragmentSource[] =
     "        discard;\n"
     "    }\n"
     "#ifdef P4_ROUND_BIAS\n"
-    "    c.rgb = max(c.rgb - 0.5 / 255.0, 0.0);\n"
+    "    c.rgb = p4GsTruncate(c.rgb);\n"
     "#endif\n"
     "    fragColor = c;\n"
     "}\n";

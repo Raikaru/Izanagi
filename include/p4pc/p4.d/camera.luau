@@ -1,0 +1,3 @@
+--!capability camera@1
+--!covers p4.camera
+-- p4.camera.acquire and owner (API 1.4).

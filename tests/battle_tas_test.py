@@ -34,7 +34,7 @@ class FakeRam:
 
 
 def skill(ram, skill_id, listed=True, cost_kind=2, cost=4, everyone=False, side=2, target_filter=0, effect=1, power=40,
-          cures=0):
+          cures=0, sp_effect=0):
     row = SKILLS + skill_id * 0x28
     ram.put(row + 1, [2 if listed else 0])
     ram.put(row + 3, [cost_kind])
@@ -42,6 +42,7 @@ def skill(ram, skill_id, listed=True, cost_kind=2, cost=4, everyone=False, side=
     ram.put(row + 8, [1 if everyone else 0, side, target_filter])
     ram.put(row + 0x11, [effect])
     ram.put(row + 0x12, struct.pack("<h", power))
+    ram.put(row + 0x14, [sp_effect])
     if cures:
         ram.put(row + 0x18, [2])
         ram.put(row + 0x1C, struct.pack("<I", cures))
@@ -70,10 +71,12 @@ def fixture():
     skill(ram, 301, cost_kind=0, side=1, everyone=True, effect=0, power=1)       # buff every ally
     skill(ram, 302, cost_kind=0, side=1, effect=0, power=15, cures=0x30)         # cures ailments 0x10 and 0x20
     skill(ram, 303, listed=False, cost_kind=0)                                   # not a battle item
+    skill(ram, 304, cost_kind=0, side=1, effect=0, power=0, sp_effect=5)         # restores SP only
     item(ram, 0x30F, 1, 300)
     item(ram, 0x316, 2, 301)
     item(ram, 0x319, 1, 302)
     item(ram, 0x31A, 3, 303)
+    item(ram, 0x30B, 1, 304)
     item(ram, 0x320, 0, 301)                                        # out of stock
     return ram
 
@@ -81,9 +84,9 @@ def fixture():
 LIMITS = {1: {"id": 1, "max_hp": 300, "max_sp": 100}, 2: {"id": 2, "max_hp": 200, "max_sp": 80}}
 
 
-def state(hero_hp=300, ally_hp=200, ally_status=0, hero_status=0):
-    return {"party": [{"id": 1, "hp": hero_hp, "sp": 20, "status": hero_status},
-                      {"id": 2, "hp": ally_hp, "sp": 30, "status": ally_status}],
+def state(hero_hp=300, ally_hp=200, ally_status=0, hero_status=0, hero_sp=20, ally_sp=30):
+    return {"party": [{"id": 1, "hp": hero_hp, "sp": hero_sp, "status": hero_status},
+                      {"id": 2, "hp": ally_hp, "sp": ally_sp, "status": ally_status}],
             "enemies": [{"id": 261, "hp": 5000, "sp": 0, "status": 0}, {"id": 262, "hp": 0, "sp": 0, "status": 0}]}
 
 
@@ -97,13 +100,14 @@ class BattleTasTest(unittest.TestCase):
     def test_menu_follows_the_native_list_rules(self):
         self.assertEqual([row["id"] for row in self.party[1]], [10, 11, 12, 14])
         self.assertEqual([row["id"] for row in self.party[2]], [20])
-        self.assertEqual(sorted(self.items), [0x30F, 0x316, 0x319])
+        self.assertEqual(sorted(self.items), [0x30B, 0x30F, 0x316, 0x319])
 
     def test_full_party_offers_attack_guard_affordable_skills_and_buffs(self):
-        self.assertEqual(self.lines(state()), [
+        self.assertEqual(self.lines(state(hero_sp=100, ally_sp=80)), [
             "enemy:261=" + tas.KEYS_ATTACK,
             tas.KEYS_GUARD,
             "enemy:261=" + tas.KEYS_SKILL % 10,
+            "enemy:261=" + tas.KEYS_SKILL % 11,
             tas.KEYS_ITEM % 0x316,
         ])
 
@@ -126,9 +130,31 @@ class BattleTasTest(unittest.TestCase):
         self.assertIn("ally:2=" + tas.KEYS_SKILL % 12, lines)
         self.assertNotIn("ally:1=" + tas.KEYS_SKILL % 12, lines)
 
+    def test_sp_restore_targets_only_members_short_of_sp(self):
+        self.assertIn("ally:1=" + tas.KEYS_ITEM % 0x30B, self.lines(state(hero_sp=20, ally_sp=60)))
+        self.assertIn("ally:2=" + tas.KEYS_ITEM % 0x30B, self.lines(state(hero_sp=90, ally_sp=30)))
+        self.assertFalse([line for line in self.lines(state(hero_sp=100, ally_sp=80)) if "item:%d" % 0x30B in line])
+
     def test_every_enemy_skill_has_no_binding_and_spent_stock_is_not_offered(self):
         self.assertIn(tas.KEYS_SKILL % 20, self.lines(state(), actor=2))
         self.assertNotIn(tas.KEYS_ITEM % 0x316, self.lines(state(), used={0x316: 2}))
+
+    def test_knocked_out_enemy_is_neither_a_target_nor_ranked(self):
+        current = state()
+        current["enemies"].append({"id": 271, "hp": 1, "sp": 0, "status": tas.KNOCKED_OUT})
+        self.assertFalse([line for line in self.lines(current) if "enemy:271=" in line])
+        self.assertEqual(tas.score(current, LIMITS), tas.score(state(), LIMITS))
+
+    def test_absent_target_is_read_from_the_walker_failure(self):
+        self.assertEqual(tas.bound_target("enemy:262=circle,cross,cross"), ("enemy", 262))
+        self.assertEqual(tas.bound_target(tas.KEYS_GUARD), ())
+        with tempfile.TemporaryDirectory() as directory:
+            node = tas.Node("n1", None, "dead:3=" + tas.KEYS_ITEM % 0x30F, Path(directory), ("item", 0x30F, 3))
+            (Path(directory) / "stderr.log").write_bytes(
+                b"p4pc: WALK SCRIPT FAILED at command 28 'waittask:battle:off': battle turn 4's ally 3 is absent from TARGET\n")
+            self.assertEqual(tas.absent_target(node), ("dead", 3))
+            (Path(directory) / "stderr.log").write_bytes(b"p4pc: battle turn 1 for character 1\n")
+            self.assertIsNone(tas.absent_target(node))
 
     def test_unknown_actor_is_an_error(self):
         with self.assertRaisesRegex(tas.SearchError, "acting member"):

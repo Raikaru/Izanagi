@@ -18,6 +18,8 @@ float func_0044b340(float x);           /* atanf (retail 0x0044b340, named by it
 float func_004494b8(float y, float x);  /* atan2f (retail 0x004494b8, likewise) */
 float func_0044b6d8(float x);           /* floorf */
 float func_0044a4d0(float x);           /* __ieee754_sqrtf */
+float func_00449680(float x);           /* __ieee754_logf */
+float func_00449938(float x, float y);  /* __ieee754_powf */
 
 static uint32_t bits(float f)
 {
@@ -72,6 +74,52 @@ struct row {
     uint32_t expect;
 };
 
+/* These early exits used to dereference 0x755ca4/0x755d64 instead of the
+ * identical words already in the native coefficient bank. Run without a
+ * guest image: both NaN payloads, including their signs, must survive intact.
+ * The other cases exercise the unchanged normal arithmetic paths. */
+static int check_native_coefficients(void)
+{
+    static const struct {
+        uint32_t input, expect;
+    } logs[] = {
+        {0x00000000u, 0xffffffffu},
+        {0x80000000u, 0xffffffffu},
+        {0x00000001u, 0xffffffffu},
+        {0x3f800000u, 0x00000000u},
+        {0x40000000u, 0x3f317217u},
+    };
+    static const struct {
+        float x, y;
+        uint32_t expect;
+    } powers[] = {
+        {0.5f, -1.0e20f, 0x7fffffffu},
+        {2.0f, 1.0e20f, 0x7fffffffu},
+        {2.0f, 3.0f, 0x41000000u},
+        {2.0f, -3.0f, 0x3e000000u},
+        {1.0f, 3.0f, 0x3f800000u},
+    };
+    unsigned i;
+    int bad = 0;
+    for (i = 0; i < sizeof logs / sizeof logs[0]; ++i) {
+        const uint32_t actual = bits(func_00449680(from_bits(logs[i].input)));
+        if (actual != logs[i].expect) {
+            printf("ee_libm_test: logf(%08x)=%08x expected %08x\n",
+                   logs[i].input, actual, logs[i].expect);
+            bad = 1;
+        }
+    }
+    for (i = 0; i < sizeof powers / sizeof powers[0]; ++i) {
+        const uint32_t actual = bits(func_00449938(powers[i].x, powers[i].y));
+        if (actual != powers[i].expect) {
+            printf("ee_libm_test: powf(%g,%g)=%08x expected %08x\n",
+                   powers[i].x, powers[i].y, actual, powers[i].expect);
+            bad = 1;
+        }
+    }
+    return bad;
+}
+
 int main(void)
 {
     static struct row rows[] = {
@@ -86,6 +134,7 @@ int main(void)
         fprintf(stderr, "ee_libm_test: no EE float mode on this target\n");
         return 77;
     }
+    bad |= check_native_coefficients();
     for (i = 0; i < 7; i++) {
         h[i] = 2166136261u;
     }
@@ -107,7 +156,7 @@ int main(void)
         printf("ee_libm_test: %s %08x\n", rows[i].name, h[i]);
     }
     if (print) {
-        return 0;
+        return bad;
     }
     {
         static const uint32_t expect[7] = {EXPECT_HASHES};

@@ -37,6 +37,14 @@ def main():
     if result.returncode != 77 or "reference renderer mismatch:" not in result.stdout:
         print(f"renderer_scope: partial identities must also skip, got {result.returncode}")
         return 1
+    environment["P4PC_CI_HARDWARE_GL"] = "1"
+    environment["P4PC_CI_GL_RENDERER"] = "__p4pc_intentionally_unmatched_ci_renderer__"
+    result = subprocess.run(sys.argv[1:], env=environment, stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT, text=True, timeout=60)
+    print(result.stdout, end="")
+    if result.returncode != 1 or "CI requires hardware renderer" not in result.stdout:
+        print(f"renderer_scope: CI renderer mismatch must fail, got {result.returncode}")
+        return 1
     print("renderer_scope: another renderer cannot silently judge this port-frame reference")
     return 0
 

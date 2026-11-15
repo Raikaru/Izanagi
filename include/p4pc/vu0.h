@@ -199,33 +199,29 @@ static inline void p4_vu0_move(int dst, unsigned mask, int s)
     p4_vu0_store(dst, mask, r);
 }
 
-/* vopmula.xyz: ACC.xyz = vs x vt (cross product). */
+/* vopmula.xyz: first products of an outer product, accumulated in ACC.xyz. */
 static inline void p4_vu0_opmula(int s, int t)
 {
     float r[4];
     const P4Vu0Reg *a = &p4pc_vu0.vf[s];
     const P4Vu0Reg *b = &p4pc_vu0.vf[t];
 
-    r[0] = a->f[1] * b->f[2] - a->f[2] * b->f[1];
-    r[1] = a->f[2] * b->f[0] - a->f[0] * b->f[2];
-    r[2] = a->f[0] * b->f[1] - a->f[1] * b->f[0];
+    r[0] = a->f[1] * b->f[2];
+    r[1] = a->f[2] * b->f[0];
+    r[2] = a->f[0] * b->f[1];
     r[3] = p4pc_vu0.acc.f[3];
     p4_vu0_store(P4_VU_ACC, P4_VU_XYZ, r);
 }
 
-/* vopmsub.xyz: vd.xyz = ACC.xyz - (vs x vt). */
+/* vopmsub.xyz: subtract the first products for the supplied operand order. */
 static inline void p4_vu0_opmsub(int dst, int s, int t)
 {
     float r[4];
     const P4Vu0Reg *a = &p4pc_vu0.vf[s];
     const P4Vu0Reg *b = &p4pc_vu0.vf[t];
-    float cx = a->f[1] * b->f[2] - a->f[2] * b->f[1];
-    float cy = a->f[2] * b->f[0] - a->f[0] * b->f[2];
-    float cz = a->f[0] * b->f[1] - a->f[1] * b->f[0];
-
-    r[0] = p4pc_vu0.acc.f[0] - cx;
-    r[1] = p4pc_vu0.acc.f[1] - cy;
-    r[2] = p4pc_vu0.acc.f[2] - cz;
+    r[0] = p4pc_vu0.acc.f[0] - a->f[1] * b->f[2];
+    r[1] = p4pc_vu0.acc.f[1] - a->f[2] * b->f[0];
+    r[2] = p4pc_vu0.acc.f[2] - a->f[0] * b->f[1];
     r[3] = p4pc_vu0.vf[dst].f[3];
     p4_vu0_store(dst, P4_VU_XYZ, r);
 }

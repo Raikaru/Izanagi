@@ -42,7 +42,7 @@ int p4_game_tables_source_metadata(const P4PackageField *fields, size_t count,
     const char *format = NULL, *schema = NULL, *revision = NULL;
     if (!source_owner(candidate.key, candidate.owner))
         return refuse(error, capacity, "table-source requires a bounded qualified owner:key");
-    size_t gates = 0;
+    size_t whens = 0, companions = 0, settings = 0;
     for (size_t i = 0; i < count; ++i) {
         const char *name = fields[i].key;
         if (!name) return refuse(error, capacity, "Missing table-source declaration field");
@@ -50,10 +50,13 @@ int p4_game_tables_source_metadata(const P4PackageField *fields, size_t count,
         else if (!strcmp(name, "format")) format = fields[i].value;
         else if (!strcmp(name, "schema")) schema = fields[i].value;
         else if (!strcmp(name, "revision")) revision = fields[i].value;
-        else if (!strcmp(name, "when")) ++gates; /* p4_mod_setting_section_gate evaluates it. */
+        else if (!strcmp(name, "when")) ++whens; /* p4_mod_setting_section_gate evaluates it. */
+        else if (!strcmp(name, "companion")) ++companions; /* p4_mod_setting_section_gate evaluates it too. */
+        else if (!strcmp(name, "companion-setting")) ++settings; /* and this one. */
         else return refuse(error, capacity, "Unknown table-source declaration field");
     }
-    if (gates > 1 || count - gates != 4 || !candidate.file || !*candidate.file || !format || strcmp(format, "p4-tables-xml") ||
+    if (whens > 1 || companions > 1 || settings > 1 || count - whens - companions - settings != 4 || !candidate.file ||
+        !*candidate.file || !format || strcmp(format, "p4-tables-xml") ||
         !positive_decimal(schema, &candidate.schema) || candidate.schema != 1 || !positive_decimal(revision, &candidate.revision))
         return refuse(error, capacity, "table-source requires explicit file, supported p4-tables-xml/schema1 and nonzero authored revision");
     *out = candidate;

@@ -36,6 +36,10 @@ typedef struct P4GameTablesBootProduct {
  * an inactive provider must not allocate a fabricated default cohort.
  * NULL after seal/exposure or on allocation failure; never a Lua runtime API. */
 P4GameTablesDefinitionBuilder *p4_game_tables_boot_builder(void);
+/* True only after publication of all nine inputs from one verified Golden cache. */
+int p4_game_tables_boot_golden_ready(void);
+/* Loader only: request Golden-mode table preparation before package boot. */
+void p4_game_tables_boot_require_golden(void);
 /* Sole actual Core action bridge, registered before source preparation. Does
  * not allocate a builder for inactive SDKs. Context outlives early retries and
  * all owning views; registration survives candidate rollback, not session_end. */

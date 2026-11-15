@@ -173,6 +173,12 @@ typedef struct P4WalkHost {
     /* Optional: the battle driver's command N (0-based) once its battleturn: lines are spent. Write `KEYS` or `COND=KEYS` (battleturn: syntax) to
      * `line` and return 1, or return 0 for the driver's normal input. Called synchronously when that command is armed. */
     int (*battle_turn)(void *user, unsigned n, char *line, size_t size);
+    /* Optional (the port only): the game's active-skill predicate (p4_game_skill_active), so the driver's Skill and Item lists keep
+     * an added skill exactly as btlSelectionRefreshList (00207140) does. NULL keeps the retail split: an ID below 0x1B8. */
+    int (*skill_active)(void *user, unsigned id);
+    /* Optional (the port only): whether an enemy kind has a passive skill granted (p4_game_passive_enemy_has), so the planner's
+     * affinity model sees a granted resist/null/repel/absorb passive as datCalcGetAffinity does. NULL: nothing granted. */
+    int (*passive_granted)(void *user, unsigned enemy, unsigned skill);
 } P4WalkHost;
 
 typedef struct P4Walk P4Walk;

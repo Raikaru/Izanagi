@@ -252,7 +252,7 @@ void p4gl_atomic_context_lost(void);
 void p4gl_atomic_model_scope_begin(void);
 /* Textures are rebuilt from the rasters' CPU shadows (the same upload as at unlock); render targets and frame copies are recreated by their next use. */
 void p4gl_raster_context_lost(void);
-/* 1 when the context rounds the shaders' float colours to 8 bits (and the shaders take half a step off, P4_ROUND_BIAS), 0 when it truncates like the GS. */
+/* 1 when the context rounds the shaders' float colours to 8 bits (and the shaders truncate them as the GS does, P4_ROUND_BIAS), 0 when it truncates like the GS. */
 int p4gl_gl_round_bias(void);
 /* Clears the bound framebuffer's colour to black, ignoring the colour mask the game recorded (the letterbox bars of the present blit). */
 void p4gl_gl_clear_black(void);

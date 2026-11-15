@@ -34,11 +34,20 @@ chmod +x "$cache/appimagetool-1.9.1" "$cache/runtime-$arch"
 # This runtime's --appimage-license is unimplemented; ship its actual licence
 # and dependency notices/sources rather than trusting an empty generated file.
 fetch https://raw.githubusercontent.com/AppImage/type2-runtime/fedfad51acc2860b2916a1eef32ba4a500ff31ef/LICENSE AppImage-runtime.txt
+echo "aa154fc9070614bbe7921f89db11efd1dba7a1f3a41685958110e2230f9c0ca1  $cache/AppImage-runtime.txt" | sha256sum -c -
 fetch https://raw.githubusercontent.com/libfuse/libfuse/fuse-3.15.0/LGPL2.txt libfuse-LGPL2.txt
+echo "dc626520dcd53a22f727af3ee42c770e56c97a64fe3adb063799d8ab032fe551  $cache/libfuse-LGPL2.txt" | sha256sum -c -
 fetch https://raw.githubusercontent.com/vasi/squashfuse/0.5.2/LICENSE squashfuse-LICENSE.txt
-fetch https://git.musl-libc.org/cgit/musl/plain/COPYRIGHT musl-COPYRIGHT.txt
-fetch https://raw.githubusercontent.com/facebook/zstd/dev/LICENSE zstd-LICENSE.txt
-fetch https://zlib.net/zlib_license.html zlib-LICENSE.html
+echo "9e909cc8a8ba27b1a649c964cf9eda37de911f3138c2b64e6d2f01703904ac13  $cache/squashfuse-LICENSE.txt" | sha256sum -c -
+# musl, zstd and zlib are the Alpine 3.21 versions the pinned type2-runtime
+# (fedfad51, scripts/docker/Dockerfile FROM alpine:3.21) builds against:
+# musl 1.2.5, zstd 1.5.6, zlib 1.3.2 (Alpine 3.21 at that commit).
+fetch "https://git.musl-libc.org/cgit/musl/plain/COPYRIGHT?h=v1.2.5" musl-COPYRIGHT.txt
+echo "f9bc4423732350eb0b3f7ed7e91d530298476f8fec0c6c427a1c04ade22655af  $cache/musl-COPYRIGHT.txt" | sha256sum -c -
+fetch https://raw.githubusercontent.com/facebook/zstd/v1.5.6/LICENSE zstd-LICENSE.txt
+echo "7055266497633c9025b777c78eb7235af13922117480ed5c674677adc381c9d8  $cache/zstd-LICENSE.txt" | sha256sum -c -
+fetch https://raw.githubusercontent.com/madler/zlib/v1.3.2/LICENSE zlib-LICENSE.txt
+echo "e32ff4e00d9d94930537635291da39e7e612703334bf6fde8c7f1686fe8a45a2  $cache/zlib-LICENSE.txt" | sha256sum -c -
 cp "$cache/"*LICENSE* "$cache/"*COPYRIGHT* "$cache/AppImage-runtime.txt" "$cache/libfuse-LGPL2.txt" "$app/licenses/"
 fetch https://github.com/AppImage/type2-runtime/archive/fedfad51acc2860b2916a1eef32ba4a500ff31ef.tar.gz runtime-source.tar.gz
 fetch https://github.com/libfuse/libfuse/releases/download/fuse-3.15.0/fuse-3.15.0.tar.xz fuse-3.15.0.tar.xz
@@ -46,6 +55,9 @@ echo "70589cfd5e1cff7ccd6ac91c86c01be340b227285c5e200baa284e401eea2ca0  $cache/f
 fetch https://github.com/vasi/squashfuse/archive/0.5.2.tar.gz squashfuse-0.5.2.tar.gz
 echo "db0238c5981dabbd80ee09ae15387f390091668ca060a7bc38047912491443d3  $cache/squashfuse-0.5.2.tar.gz" | sha256sum -c -
 cp "$cache/runtime-source.tar.gz" "$cache/fuse-3.15.0.tar.xz" "$cache/squashfuse-0.5.2.tar.gz" "$app/usr/share/p4pc/source/"
+guard=$stage/check_package_golden_cache.py
+[ -f "$guard" ] || guard=$(dirname "$0")/check_package_golden_cache.py
+python3 "$guard" "$app"
 ARCH=$arch nice -n 15 "$cache/appimagetool-1.9.1" --appimage-extract-and-run --no-appstream \
   --mksquashfs-opt=-processors --mksquashfs-opt=2 \
   --runtime-file "$cache/runtime-$arch" "$app" "$stage/$name.AppImage"

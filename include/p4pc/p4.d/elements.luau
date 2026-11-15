@@ -1,0 +1,3 @@
+--!capability elements@1
+--!covers p4.elements
+-- p4.elements.active, revision, of_skill and of_weapon (API 1.5).

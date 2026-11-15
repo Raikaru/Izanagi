@@ -1,0 +1,20 @@
+# The native AArch64 Linux image (GitHub's ubuntu-24.04-arm runners, .github/workflows/land.yml): the 64-bit build compiled and run on the
+# machine's own architecture, with Debian's clang and arm64 SDL3, FFmpeg and Mesa (llvmpipe), the same packages ci/Dockerfile.a64 adds as
+# the cross sysroot on x86_64. The i386 headers and libraries are the layout oracle's and the name tables' (compiled and read, never run).
+#   docker build -t p4pc-ci-arm64 -f ci/Dockerfile.arm64 ci/
+FROM debian:trixie-slim
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN dpkg --add-architecture i386 \
+ && apt-get update \
+ && apt-get install -y --no-install-recommends \
+      ca-certificates git python3 python3-pil cmake ninja-build ccache file make \
+      clang lld llvm binutils gcc g++ gdb \
+      libsdl3-dev libsdl3-0 libavcodec-dev libavutil-dev libswscale-dev \
+      libgl1-mesa-dri libglx-mesa0 libegl-mesa0 libgl1 libegl1 libgles2 \
+      xvfb xauth \
+      libc6-dev:i386 libsdl3-dev:i386 libavcodec-dev:i386 libavutil-dev:i386 libswscale-dev:i386 \
+ && rm -rf /var/lib/apt/lists/*
+
+ENV CCACHE_DIR=/ccache
+WORKDIR /lane

@@ -20,8 +20,7 @@ int p4_game_knowledge_save_unregister(void);
 int p4_game_knowledge_native_boot_stage(const P4GameTables *tables);
 /* Quiesced teardown only; frees the published and any prepared state. */
 void p4_game_knowledge_native_discard(void);
-/* Committed snapshot (NULL before commit) and its observations, which are NULL
- * when that snapshot has no enemy side rows. */
+/* Committed snapshot and its observations (both NULL before commit). */
 const P4GameTables *p4_game_knowledge_native_snapshot(void);
 P4GameKnowledge *p4_game_knowledge_native_active(void);
 #endif

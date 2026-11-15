@@ -1,0 +1,3 @@
+--!capability hud@1
+--!covers p4.hud
+-- p4.hud.groups, hide and hidden (API 1.4).

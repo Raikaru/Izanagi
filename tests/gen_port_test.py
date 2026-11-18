@@ -254,6 +254,25 @@ class MatchContractsTest(unittest.TestCase):
         self.unit.write_text("old old", encoding="utf-8")
         self.assertEqual(gen_port.apply_mirror_fixes(self.mirror), 1)
         self.assertEqual(self.unit.read_text(), "new new")
+    def test_pick_list_state_buffers_cover_the_configure_clear(self):
+        repo = pathlib.Path(__file__).resolve().parents[1]
+        decomp = pathlib.Path(os.environ.get("P4PC_TEST_DECOMP", repo / "decomp"))
+        unit = "src/unplaced/unplaced_inferred_0013ad40.c"
+        clear_unit = "src/sdkListState.c"
+        with mock.patch.object(gen_port, "ROOT", repo):
+            fixes = [row for row in gen_port.read_mirror_fixes() if row[1] in (unit, clear_unit)]
+        for path in (unit, clear_unit):
+            target = self.mirror / path
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text((decomp / path).read_text(encoding="utf-8"), encoding="utf-8")
+        with mock.patch.object(gen_port, "read_mirror_fixes", return_value=fixes):
+            gen_port.apply_mirror_fixes(self.mirror)
+        pick = (self.mirror / unit).read_text(encoding="utf-8")
+        clear = (self.mirror / clear_unit).read_text(encoding="utf-8")
+        self.assertEqual(pick.count("u8 listState[sizeof(SdkListState)];"), 3)
+        self.assertEqual(pick.count('_Static_assert(sizeof(SdkListState) == 0x2C, "list state clear size");'), 3)
+        self.assertEqual(clear.count("memset(state, 0, sizeof(SdkListState));"), 2)
+
 
     def test_battle_selector_script_query_uses_one_i386_argument(self):
         repo = pathlib.Path(__file__).resolve().parents[1]

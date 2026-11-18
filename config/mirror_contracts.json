@@ -6033,6 +6033,23 @@
       ],
       "input_sha256": "429c237c6d884a82292b28b820c154977c3c7442e3b0c30afcdfe4ed67378d28"
     },
+    "src/sdkListState.c": {
+      "hunks": [
+        [
+          1,
+          1,
+          "f50324f48e75490728e45b76b4db1e39c8a9ab64da682f1dbfa0ea188dfebfd0",
+          "6f88d6a0a6ac254fabb77e5d285e1aedb6cac3c2175dd178f6694bd5a8997a1d"
+        ],
+        [
+          1,
+          1,
+          "f50324f48e75490728e45b76b4db1e39c8a9ab64da682f1dbfa0ea188dfebfd0",
+          "6f88d6a0a6ac254fabb77e5d285e1aedb6cac3c2175dd178f6694bd5a8997a1d"
+        ]
+      ],
+      "input_sha256": "779c0727f8b7428c2187138155d00a592487eeb4b7f5f42107c0da56b26ee5ad"
+    },
     "src/shdPersona.c": {
       "hunks": [
         [
@@ -6217,10 +6234,28 @@
           "55cb63e89be64150c9a0e7bbddd9882963bd997667e536ba7780b22b65eeb518"
         ],
         [
+          1,
+          2,
+          "394cae6624b1b9d5d9efa517ec33c3611f044cbc438daa12ee2e8a35c0a93fe1",
+          "c09ae46912a40bb72ef0d3a6ceaf8f149d13db2ccac1b2720d137cd80277e418"
+        ],
+        [
           2,
           1,
           "1c368799ab192a197a596dce12af6a932052a62da32af1510ce48342c3a7028f",
           "ac44093eb8492af39d0b60ebf490b52801ccc7f50ba5b209c5b755f2866c3e7b"
+        ],
+        [
+          1,
+          2,
+          "394cae6624b1b9d5d9efa517ec33c3611f044cbc438daa12ee2e8a35c0a93fe1",
+          "c09ae46912a40bb72ef0d3a6ceaf8f149d13db2ccac1b2720d137cd80277e418"
+        ],
+        [
+          1,
+          2,
+          "394cae6624b1b9d5d9efa517ec33c3611f044cbc438daa12ee2e8a35c0a93fe1",
+          "c09ae46912a40bb72ef0d3a6ceaf8f149d13db2ccac1b2720d137cd80277e418"
         ]
       ],
       "input_sha256": "d39d09662b6fc708fbcb1bd9436bbe6586540b7e66811cd3f14be93bd6fdad79"
@@ -72581,7 +72616,7 @@
           "4bab95b7d0df900307e3895ed6a25594cf83a5dbe867186603c57dc70806493e"
         ]
       ],
-      "input_sha256": "d79b2201aa26e84e210ea79873382a821edd8d3dc51f6f6531237a977ba5b11d"
+      "input_sha256": "0726ca91977b8ae19d3b496fb3f3a679eb22e57be94dbb3d62506d705708a8ee"
     },
     "src/unplaced/unplaced_inferred_001537c0.c": {
       "hunks": [

@@ -5,6 +5,8 @@
 # exceptions retain the measured retail form; host ABI, memory, SIMD, provenance
 # and backend adaptations do not belong in PS2 source.
 # Missing or extra literal matches stop generation; multi-site counts stay explicit.
+src/unplaced/unplaced_inferred_0013ad40.c	    u8 listState[0x28];	    u8 listState[sizeof(SdkListState)];\n    _Static_assert(sizeof(SdkListState) == 0x2C, "list state clear size");	[host memory] all three pick-list helpers need the entire list state cleared by sdkListStateConfigure; the retail-sized stack slot corrupts host callee-saved registers	3
+src/sdkListState.c	memset(state, 0, 0x2C);	memset(state, 0, sizeof(SdkListState));	[host memory] tie both list-state clears to the asserted native list-state size	2
 src/cmmMisc.c	cmmCommunityHasRecord() == 0	cmmCommunityHasRecord(communityId) == 0	[unfixable in matching C] retail 00248a60 calls cmmCommunityHasRecord with its own a0 untouched (move s3,a0 then jal) Canonical call changes 175 normalized bytes.
 src/nmCmdList_inferred_002ba080.c	*(u32 *)&color, ((DigitStoredWord *)(u32)&color)->word	fclPacketColor(*(u32 *)&color), fclPacketColor(((DigitStoredWord *)(u32)&color)->word)	[unfixable in matching C] fcl_draw_task.h declares the colours as FclDrawColor structs; the decomp passed the raw u32 words (same four bytes on the stack) Canonical aggregate color arguments change 911 normalized bytes.	2
 src/nmCmdList_inferred_002ba080.c	((const DigitStoredWord *)(&((FclObject *)(draw - 4))->color))->word,	fclPacketColor(((const DigitStoredWord *)(&((FclObject *)(draw - 4))->color))->word),	[unfixable in matching C] see above Canonical aggregate color arguments change 911 normalized bytes.	2

@@ -23,6 +23,7 @@
 
 #include "adxf_host.h"
 #include "p4pc/gmem.h"
+#include "p4pc/lockstep_disc.h"
 #include "p4pc/platform.h"
 #include "vfs.h"
 
@@ -157,6 +158,7 @@ int func_004c9820(void *handle)
         return ADXF_STAT_ERROR;
     }
     if (file->stat == 2) {
+        p4pc_lockstep_disc_poll(file); /* an online lockstep replay answers it with retail's poll */
         p4pc_poll_devices();
     }
     return file->stat;

@@ -1,5 +1,6 @@
 #include "game_table_inputs_internal.h"
 #include <limits.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -83,7 +84,21 @@ static P4GameTableInput *allocate_input(P4GameTableInputKind kind, uint64_t size
     input->retail_size = input->retail_footprint = 0;
     input->retail_bounds_valid = input->retail_is_selected = 0;
     input->native_uses = NULL; input->native_used = 0; input->digest_valid = 0;
+    input->golden_origin[0] = 0;
     input->bytes = (uint8_t *)(input->spans + specs[kind].blocks);
+    return input;
+}
+P4GameTableInput *p4_game_table_input_from_golden_cache(P4GameTableInputKind kind,
+    const uint8_t *bytes, size_t size, const char *cache_key)
+{
+    if ((unsigned)kind >= P4_TABLE_INPUT_COUNT || !bytes || !cache_key || strlen(cache_key) != 64) return NULL;
+    for (const char *p = cache_key; *p; ++p)
+        if (!((*p >= '0' && *p <= '9') || (*p >= 'a' && *p <= 'f'))) return NULL;
+    P4GameTableInput *input = allocate_input(kind,size,NULL,NULL,NULL);
+    if (!input) return NULL;
+    memcpy(input->bytes,bytes,size);
+    snprintf(input->golden_origin,sizeof input->golden_origin,"golden-cache/%s/%s",cache_key,specs[kind].label);
+    if (p4_game_table_input_seal(input)) { p4_game_table_input_destroy(input); return NULL; }
     return input;
 }
 void p4_game_table_input_destroy(P4GameTableInput *input)

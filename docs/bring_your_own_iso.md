@@ -1,8 +1,8 @@
 # Bring your own ISO
 
-Izanagi contains no game data and never downloads any. Everything the game
-shows and plays (its code, models, textures, music, voices, movies and text) is read
-from a disc image you make from your own copy of the game.
+Izanagi contains no game data and never downloads any. The port runs recompiled
+game code and reads the game's executable and assets from a disc image you make
+from your own copy of the game.
 
 ## Which disc
 
@@ -68,6 +68,7 @@ the per-user data folder:
 |---|---|
 | Windows | `%APPDATA%\p4pc\Persona4\` |
 | Linux | `~/.local/share/p4pc/Persona4/` |
+| macOS | `~/Library/Application Support/p4pc/Persona4/` |
 | Android | the app's private storage |
 
 ## Existing PS2 saves

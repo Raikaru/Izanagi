@@ -1,5 +1,5 @@
 # From story0526tv: register the improved Personas, fuse Senri/Omoikane/Orobas into physical-strong Obariyon, assign and save.
-# Fool-rank bonus reaches level 15; replace Sonic Punch with Silence Boost while retaining inherited Tarunda.
+# Replace the offered skill while retaining the prepared one.
 timeout:10000
 wait:140
 press:cross
@@ -65,12 +65,12 @@ press:down
 wait:20
 press:cross
 wait:600
-# The real preview is physical/fire-strong Obariyon 13 with inherited Patra, Sukunda and Tarunda. Confirm the fusion.
+# Confirm the prepared fusion.
 press:cross
 wait:600
 press:cross
 skip:1800
-# Fool-rank bonus reaches level 15 and fills the skill list. Replace the offered Sonic Punch, preserving inherited Tarunda.
+# Replace the offered skill while retaining the prepared one.
 press:cross
 wait:100
 choose:1

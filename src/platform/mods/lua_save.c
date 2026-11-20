@@ -52,6 +52,8 @@ typedef struct Key {
 } Key;
 typedef struct Encode {
     P4LuaSave *save;
+    const char *what; /* "save snapshot" or another plain-value user, for errors */
+    size_t maximum;
     Snapshot *result;
     Key *keys;
     size_t bytes, nodes, keys_count, keys_used, position;
@@ -60,7 +62,7 @@ typedef struct Encode {
 typedef struct Decode {
     const unsigned char *bytes;
     size_t size, position, nodes;
-    int reference;
+    int reference, readonly;
 } Decode;
 
 enum { V_NIL=0, V_FALSE=1, V_TRUE=2, V_NUMBER=3, V_STRING=4, V_TABLE=5 };
@@ -101,25 +103,25 @@ static int key_compare(const void *a,const void *b)
 }
 static void need(lua_State *L,Encode *e,size_t amount)
 {
-    if(amount>e->save->maximum-e->bytes)luaL_error(L,"save snapshot exceeds declared byte limit");
+    if(amount>e->maximum-e->bytes)luaL_error(L,"%s exceeds declared byte limit",e->what);
     e->bytes+=amount;
 }
 static void node(lua_State *L,Encode *e)
 {
-    if(++e->nodes>VALUE_MAX_NODES)luaL_error(L,"save snapshot exceeds node limit");
+    if(++e->nodes>VALUE_MAX_NODES)luaL_error(L,"%s exceeds node limit",e->what);
 }
-static Key key_at(lua_State *L,int index)
+static Key key_at(lua_State *L,int index,const char *what)
 {
     Key key={0};
     switch(lua_type(L,index)){
     case LUA_TBOOLEAN:key.type=lua_toboolean(L,index)?V_TRUE:V_FALSE;break;
     case LUA_TNUMBER:{
         double n=lua_tonumber(L,index);
-        if(isnan(n))luaL_error(L,"save snapshot has a NaN table key");
+        if(isnan(n))luaL_error(L,"%s has a NaN table key",what);
         key.type=V_NUMBER;key.bits=number_bits(n,1);break;
     }
     case LUA_TSTRING:key.type=V_STRING;key.string=lua_tolstring(L,index,&key.length);break;
-    default:luaL_error(L,"save snapshot table keys must be booleans, numbers or strings");
+    default:luaL_error(L,"%s table keys must be booleans, numbers or strings",what);
     }
     return key;
 }
@@ -129,21 +131,21 @@ static void measure(lua_State *L,Encode *e,int index,unsigned depth)
     switch(lua_type(L,index)){
     case LUA_TNIL:case LUA_TBOOLEAN:need(L,e,1);return;
     case LUA_TNUMBER:need(L,e,9);return;
-    case LUA_TSTRING:{size_t length;lua_tolstring(L,index,&length);if(length>UINT32_MAX)luaL_error(L,"save string is too long");need(L,e,5);need(L,e,length);return;}
+    case LUA_TSTRING:{size_t length;lua_tolstring(L,index,&length);if(length>UINT32_MAX)luaL_error(L,"%s string is too long",e->what);need(L,e,5);need(L,e,length);return;}
     case LUA_TTABLE:break;
-    default:luaL_error(L,"save snapshot contains a non-serializable value");
+    default:luaL_error(L,"%s contains a non-serializable value",e->what);
     }
-    if(depth>=VALUE_MAX_DEPTH)luaL_error(L,"save snapshot exceeds nesting limit");
-    if(lua_getmetatable(L,index)){lua_pop(L,1);luaL_error(L,"save snapshot tables must not have metatables");}
+    if(depth>=VALUE_MAX_DEPTH)luaL_error(L,"%s exceeds nesting limit",e->what);
+    if(lua_getmetatable(L,index)){lua_pop(L,1);luaL_error(L,"%s tables must not have metatables",e->what);}
     const void *identity=lua_topointer(L,index);
-    for(unsigned i=0;i<depth;i++)if(e->ancestors[i]==identity)luaL_error(L,"save snapshot contains a cycle");
+    for(unsigned i=0;i<depth;i++)if(e->ancestors[i]==identity)luaL_error(L,"%s contains a cycle",e->what);
     e->ancestors[depth]=identity;need(L,e,5);
-    if(!lua_checkstack(L,3))luaL_error(L,"save snapshot cannot grow interpreter stack");
+    if(!lua_checkstack(L,3))luaL_error(L,"%s cannot grow interpreter stack",e->what);
     lua_pushnil(L);
     while(lua_next(L,index)){
-        Key key=key_at(L,-2);node(L,e);++e->keys_count;
+        Key key=key_at(L,-2,e->what);node(L,e);++e->keys_count;
         need(L,e,key.type==V_STRING?5:key.type==V_NUMBER?9:1);
-        if(key.type==V_STRING){if(key.length>UINT32_MAX)luaL_error(L,"save key is too long");need(L,e,key.length);}
+        if(key.type==V_STRING){if(key.length>UINT32_MAX)luaL_error(L,"%s key is too long",e->what);need(L,e,key.length);}
         measure(L,e,-1,depth+1);lua_pop(L,1);
     }
 }
@@ -173,7 +175,7 @@ static void emit(lua_State *L,Encode *e,int index,unsigned depth)
     size_t base=e->keys_used,count=0;
     lua_pushnil(L);
     while(lua_next(L,index)){
-        e->keys[base+count++]=key_at(L,-2);lua_pop(L,1);
+        e->keys[base+count++]=key_at(L,-2,e->what);lua_pop(L,1);
     }
     e->keys_used=base+count;
     if(count>1)qsort(e->keys+base,count,sizeof *e->keys,key_compare);
@@ -184,21 +186,28 @@ static void emit(lua_State *L,Encode *e,int index,unsigned depth)
     }
     e->keys_used=base;
 }
+/* Serializes the value on top of the stack into e->result (raises Lua errors;
+ * the caller frees e->keys and, on failure, e->result). */
+static void encode_top(lua_State *L,Encode *e)
+{
+    e->bytes=VALUE_HEADER;measure(L,e,-1,0);
+    if(e->keys_count>SIZE_MAX/sizeof *e->keys)luaL_error(L,"%s key budget overflow",e->what);
+    e->result=malloc(sizeof *e->result+e->bytes);
+    if(!e->result)luaL_error(L,"cannot allocate %s",e->what);
+    *e->result=(Snapshot){.size=e->bytes,.reference=LUA_NOREF};
+    if(e->keys_count){e->keys=malloc(e->keys_count*sizeof *e->keys);if(!e->keys)luaL_error(L,"cannot allocate %s key index",e->what);}
+    memcpy(e->result->bytes,"P4LV",4);put32(e->result->bytes+4,1);e->position=VALUE_HEADER;
+    emit(L,e,-1,0);
+    if(e->position!=e->bytes)luaL_error(L,"%s changed while serializing",e->what);
+}
 static int snapshot_invoke(lua_State *L)
 {
     Encode *e=lua_touserdata(L,1);
     lua_getref(L,e->save->callbacks_ref);
     lua_rawgeti(L,-1,1);lua_remove(L,-2);lua_call(L,0,1);
     if(lua_isnil(L,-1))return 0;
-    e->bytes=VALUE_HEADER;measure(L,e,-1,0);
-    if(e->keys_count>SIZE_MAX/sizeof *e->keys)luaL_error(L,"save snapshot key budget overflow");
-    e->result=malloc(sizeof *e->result+e->bytes);
-    if(!e->result)luaL_error(L,"cannot allocate save snapshot");
-    *e->result=(Snapshot){.size=e->bytes,.reference=LUA_NOREF,.captured=1};
-    if(e->keys_count){e->keys=malloc(e->keys_count*sizeof *e->keys);if(!e->keys)luaL_error(L,"cannot allocate save key index");}
-    memcpy(e->result->bytes,"P4LV",4);put32(e->result->bytes+4,1);e->position=VALUE_HEADER;
-    emit(L,e,-1,0);
-    if(e->position!=e->bytes)luaL_error(L,"save snapshot changed while serializing");
+    encode_top(L,e);
+    e->result->captured=1; /* a save's own snapshot, not a decoded load */
     return 0;
 }
 static int idle(P4LuaMod *mod)
@@ -227,7 +236,7 @@ static int encode_snapshot(const P4ModSaveContext *context,P4ModSaveWriter *writ
     if(!idle(mod)||mod->budget_failed){snprintf(context->error,context->error_capacity,"save snapshot requires a healthy idle interpreter");return -1;}
     reclaim(save);
     int gc=lua_gc(mod->state,LUA_GCISRUNNING,0);if(gc)lua_gc(mod->state,LUA_GCSTOP,0);
-    Encode e={.save=save};
+    Encode e={.save=save,.what="save snapshot",.maximum=save->maximum};
     int result=p4_lua_invoke(mod,snapshot_invoke,&e,0,P4_LUA_STARTUP|P4_LUA_SNAPSHOT);
     if(gc)lua_gc(mod->state,LUA_GCRESTART,0);
     free(e.keys);
@@ -346,6 +355,7 @@ static void push_value(lua_State *L,Decode *d,unsigned depth)
     for(uint32_t i=0;i<count;i++){
         Key key;(void)parse_key(d,&key);push_key(L,&key);push_value(L,d,depth+1);lua_rawset(L,-3);
     }
+    if(d->readonly)lua_setreadonly(L,-1,1);
 }
 static int decode_invoke(lua_State *L)
 {
@@ -505,3 +515,35 @@ void p4_lua_save_destroy(P4LuaMod *mod)
     lua_unref(mod->state,save->callbacks_ref);
     free(save);mod->save=NULL;
 }
+
+typedef struct ValueCopy { Encode e; int reference; } ValueCopy;
+static int copy_invoke(lua_State *L)
+{
+    ValueCopy *c=lua_touserdata(L,1);
+    lua_getref(L,c->reference);
+    encode_top(L,&c->e);
+    return 0;
+}
+void *p4_lua_value_copy(lua_State *L,int index,size_t maximum,const char *what,char *error,size_t capacity)
+{
+    lua_pushvalue(L,index);
+    int reference=lua_ref(L,-1);
+    lua_pop(L,1);
+    ValueCopy c={.e={.what=what,.maximum=maximum},.reference=reference};
+    /* Nested protected call: an encoding error must not leak the C buffers. */
+    int status=lua_cpcall(L,copy_invoke,&c);
+    lua_unref(L,reference);
+    free(c.e.keys);
+    if(status==LUA_OK)return c.e.result;
+    snprintf(error,capacity,"%s",lua_type(L,-1)==LUA_TSTRING?lua_tostring(L,-1):"interpreter allocation failure");
+    lua_pop(L,1);
+    free(c.e.result);
+    return NULL;
+}
+void p4_lua_value_push(lua_State *L,const void *value,int readonly)
+{
+    const Snapshot *snapshot=value;
+    Decode d={.bytes=snapshot->bytes,.size=snapshot->size,.position=VALUE_HEADER,.reference=LUA_NOREF,.readonly=readonly};
+    push_value(L,&d,0);
+}
+void p4_lua_value_free(void *value){free(value);}

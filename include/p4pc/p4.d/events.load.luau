@@ -1,0 +1,3 @@
+--!capability events.load@1
+--!covers event:load
+-- p4.events.on("load") (API 1.0).

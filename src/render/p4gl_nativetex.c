@@ -151,6 +151,28 @@ static int unswizzle4(const uint8_t *src, uint32_t srcBytes, int32_t w, int32_t 
     return 1;
 }
 
+int p4gl_nativetex_decode_raw(const uint8_t *data, uint32_t size, int32_t w, int32_t h,
+                              int32_t depth, int swizzled, uint8_t *indices)
+{
+    if (data == NULL || indices == NULL || w <= 0 || h <= 0 || (depth != 4 && depth != 8) ||
+        (uint64_t)w * (uint64_t)h > UINT32_MAX) {
+        return 0;
+    }
+    if (swizzled) {
+        return depth == 8 ? unswizzle8(data, size, w, h, indices)
+                          : unswizzle4(data, size, w, h, indices);
+    }
+    const uint64_t stride = depth == 8 ? (uint64_t)w : ((uint64_t)w + 1u) / 2u;
+    if (stride * (uint64_t)h > size) return 0;
+    for (int32_t y = 0; y < h; y++) {
+        for (int32_t x = 0; x < w; x++) {
+            const uint8_t byte = data[(size_t)y * (size_t)stride + (depth == 8 ? (size_t)x : (size_t)x / 2u)];
+            indices[(size_t)y * (size_t)w + (size_t)x] = depth == 8 ? byte : (uint8_t)((byte >> (4 * (x & 1))) & 15u);
+        }
+    }
+    return 1;
+}
+
 
 int p4gl_nativetex_decode(const uint8_t *data, uint32_t size, int32_t w, int32_t h, int32_t depth, uint8_t *indices,
                           uint8_t *palette)

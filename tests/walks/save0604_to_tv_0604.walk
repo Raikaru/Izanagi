@@ -65,7 +65,7 @@ wait:300
 # Close the real rainy-sale notice before entering Buy item.
 press:cross
 wait:600
-# Medical Kit is the observed fourth row, at the genuine rainy price of 2720 yen.
+# Select the recovery item from the shop.
 press:down
 wait:20
 press:down

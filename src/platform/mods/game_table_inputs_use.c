@@ -10,7 +10,7 @@
 #define NATIVE_HISTORY_MAX 64u
 #define NATIVE_KEY_MAX 511u
 #define NATIVE_HISTORY_BYTES (4u + NATIVE_HISTORY_MAX * (52u + NATIVE_KEY_MAX))
-enum { NATIVE_DEV_FILE = 1, NATIVE_COMPILED_MODE = 2 };
+enum { NATIVE_DEV_FILE = 1, NATIVE_COMPILED_MODE = 2, NATIVE_GOLDEN_CACHE = 3 };
 typedef struct NativeRecord {
     uint32_t kind, schema, revision;
     uint64_t size;
@@ -73,7 +73,7 @@ static const uint8_t *content_digest(P4GameTableInput *input)
 }
 static NativeRecordView record_view(const NativeRecord *record)
 {
-    return (NativeRecordView){record->key, record->kind == NATIVE_DEV_FILE ? record->digest : NULL,
+    return (NativeRecordView){record->key, record->kind != NATIVE_COMPILED_MODE ? record->digest : NULL,
         record->size, record->kind, record->schema, record->revision};
 }
 static int compare_views(const void *left, const void *right)
@@ -99,9 +99,12 @@ static int encode(const P4ModSaveContext *context, P4ModSaveWriter *writer, void
         P4GameTableInput *input = uses->inputs[i];
         if (!input->native_used) continue;
         const P4VfsSourceInfo *source = p4_game_table_input_native(input);
-        if (!source || source->kind != P4_VFS_DEVELOPER || !input->digest_valid)
-            return failure(context, "Native table use lost its authenticated developer origin.");
-        views[count++] = (NativeRecordView){source->key, input->digest, input->size, NATIVE_DEV_FILE, 1, 0};
+        const char *key = input->golden_origin[0] ? input->golden_origin :
+            source && source->kind == P4_VFS_DEVELOPER ? source->key : NULL;
+        if (!key || !input->digest_valid)
+            return failure(context, "Native table use lost its authenticated source origin.");
+        views[count++] = (NativeRecordView){key, input->digest, input->size,
+            input->golden_origin[0] ? NATIVE_GOLDEN_CACHE : NATIVE_DEV_FILE, 1, 0};
     }
     for (size_t i = 0; i < uses->modes_count; ++i) {
         if (!uses->modes[i].used) continue;
@@ -125,7 +128,7 @@ static int encode(const P4ModSaveContext *context, P4ModSaveWriter *writer, void
             if (p4_mod_save_write_u32(writer, view->revision)) return -1;
         }
         if (p4_mod_save_write_u32(writer, (uint32_t)length)) return -1;
-        if (view->kind == NATIVE_DEV_FILE &&
+        if (view->kind != NATIVE_COMPILED_MODE &&
             (p4_mod_save_write_u64(writer, view->size) || p4_mod_save_write(writer, view->digest, 32))) return -1;
         if (p4_mod_save_write(writer, view->key, length)) return -1;
     }
@@ -145,8 +148,10 @@ static int matches_current(P4GameTableNativeUses *uses, const NativeRecord *reco
     for (size_t i = 0; i < uses->count; ++i) {
         P4GameTableInput *input = uses->inputs[i];
         const P4VfsSourceInfo *source = p4_game_table_input_native(input);
-        if (source && source->kind == P4_VFS_DEVELOPER && !strcmp(source->key, record->key) &&
-            input->size == record->size && !memcmp(content_digest(input), record->digest, 32)) return 1;
+        const char *key = record->kind == NATIVE_GOLDEN_CACHE ? input->golden_origin :
+            source && source->kind == P4_VFS_DEVELOPER ? source->key : NULL;
+        if (key && *key && !strcmp(key, record->key) && input->size == record->size &&
+            !memcmp(content_digest(input), record->digest, 32)) return 1;
     }
     return 0;
 }
@@ -168,7 +173,8 @@ static int decode(const P4ModSaveContext *context, uint32_t schema, P4ModSaveRea
         uint32_t length;
         record->revision = 0; record->size = 0;
         if (p4_mod_save_read_u32(reader, &record->kind) ||
-            (record->kind != NATIVE_DEV_FILE && record->kind != NATIVE_COMPILED_MODE) ||
+            (record->kind != NATIVE_DEV_FILE && record->kind != NATIVE_COMPILED_MODE &&
+             record->kind != NATIVE_GOLDEN_CACHE) ||
             p4_mod_save_read_u32(reader, &record->schema) || !record->schema)
             return failure(context, "Invalid native table source history variant.");
         if (record->kind == NATIVE_COMPILED_MODE &&
@@ -176,7 +182,7 @@ static int decode(const P4ModSaveContext *context, uint32_t schema, P4ModSaveRea
             return failure(context, "Invalid compiled native table mode revision.");
         if (p4_mod_save_read_u32(reader, &length) || !length || length > NATIVE_KEY_MAX)
             return failure(context, "Invalid native table source history key length.");
-        if (record->kind == NATIVE_DEV_FILE && (p4_mod_save_read_u64(reader, &record->size) || !record->size ||
+        if (record->kind != NATIVE_COMPILED_MODE && (p4_mod_save_read_u64(reader, &record->size) || !record->size ||
             p4_mod_save_read(reader, record->digest, 32))) return failure(context, "Invalid native table content identity.");
         if (p4_mod_save_read(reader, record->key, length)) return failure(context, "Truncated native table source key.");
         if (memchr(record->key, 0, length))
@@ -192,6 +198,8 @@ static int decode(const P4ModSaveContext *context, uint32_t schema, P4ModSaveRea
     for (uint32_t i = 0; i < count; ++i) {
         const NativeRecord *record = &history->records[i];
         if (matches_current(uses, record)) continue;
+        if (record->kind == NATIVE_GOLDEN_CACHE)
+            return failure(context, "Golden table cache identity is unavailable or differs; cross-mode or mismatched loads are refused.");
         char message[768];
         if (record->kind == NATIVE_COMPILED_MODE)
             snprintf(message, sizeof message,
@@ -283,7 +291,11 @@ int p4_game_table_input_semantic_use(const void *identity, void *immutable_conte
         p4_package_boot_runtime_failed("Native table use has no matching immutable prepared source span.");
     const P4PackageProvider *provider = p4_game_table_input_provider(input);
     if (provider) package_use(provider);
-    else {
+    else if (input->golden_origin[0]) {
+        if (!input->native_uses)
+            p4_package_boot_runtime_failed("Golden table use has no registered owning native provenance context.");
+        content_digest(input); input->native_used = 1;
+    } else {
         const P4VfsSourceInfo *native = p4_game_table_input_native(input);
         if (!native || (native->kind != P4_VFS_DISC && native->kind != P4_VFS_DEVELOPER) || !native->file.size)
             p4_package_boot_runtime_failed("Native table use has no authenticated disc/developer source origin.");

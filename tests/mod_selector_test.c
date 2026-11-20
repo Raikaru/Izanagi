@@ -66,6 +66,76 @@ int main(void)
     CHECK(installation_adjust(NULL, "enabled", 0) == -1);
     CHECK(!strcmp(p4cfg_get("packs.enabled"), "pack.single"));
     installation_closed(NULL);
+    /* Requirements: enabling a dependent enables its requirement in front of it,
+     * writes the required setting and locks both rows; disabling only unlocks. */
+    CHECK(select_id("mod.dep") == 0);
+    CHECK(installation_adjust(NULL, "enabled", 0) == 0);
+    CHECK(!strcmp(p4cfg_get("mods.enabled"), "mod.low,mod.high,mod.base,mod.dep"));
+    CHECK(!strcmp(p4cfg_get("mods.load_order"), "mod.low,mod.high,mod.base,mod.dep"));
+    char value[32], reason[128];
+    CHECK(p4_mod_setting_stored("mod.base", "split", value, sizeof value, reason, sizeof reason) == 1 &&
+          !strcmp(value, "on"));
+    CHECK(installation_adjust(NULL, "order", -1) == -1 && notice && strstr(notice, "must load first"));
+    CHECK(!strcmp(p4cfg_get("mods.load_order"), "mod.low,mod.high,mod.base,mod.dep"));
+    installation_closed(NULL);
+    CHECK(select_id("mod.base") == 0);
+    CHECK(installation_row(NULL, 2, &row) == 0 && row.checked && (row.flags & P4_SETTINGS_PAGE_DISABLED) &&
+          !strcmp(row.label, "REQUIRED BY DEPENDENT"));
+    CHECK(installation_adjust(NULL, "enabled", 0) == -1 && strstr(notice, "Required by Dependent"));
+    int split = installation_find(NULL, "set:split");
+    CHECK(split == 5 && installation_row(NULL, split, &row) == 0 && row.checked &&
+          (row.flags & P4_SETTINGS_PAGE_DISABLED));
+    CHECK(installation_adjust(NULL, "set:split", 1) == -1);
+    CHECK(installation_adjust(NULL, "order", 1) == -1);
+    CHECK(!strcmp(p4cfg_get("mods.enabled"), "mod.low,mod.high,mod.base,mod.dep"));
+    installation_closed(NULL);
+    CHECK(select_id("mod.dep") == 0);
+    CHECK(installation_adjust(NULL, "enabled", 0) == 0);
+    CHECK(!strcmp(p4cfg_get("mods.enabled"), "mod.low,mod.high,mod.base"));
+    installation_closed(NULL);
+    CHECK(select_id("mod.base") == 0);
+    CHECK(installation_row(NULL, 2, &row) == 0 && row.checked && !(row.flags & P4_SETTINGS_PAGE_DISABLED));
+    CHECK(installation_row(NULL, 5, &row) == 0 && !(row.flags & P4_SETTINGS_PAGE_DISABLED));
+    CHECK(installation_adjust(NULL, "set:split", 1) == 0);
+    installation_closed(NULL);
+    CHECK(select_id("mod.orphan") == 0);
+    CHECK(installation_adjust(NULL, "enabled", 0) == -1 && strstr(notice, "which is not installed"));
+    CHECK(!strcmp(p4cfg_get("mods.enabled"), "mod.low,mod.high,mod.base"));
+    installation_closed(NULL);
+    /* Companions: never enabled or locked by the hub, but a newly enabled one
+     * goes in front of its user and an incompatible one is refused. */
+    CHECK(select_id("mod.user") == 0);
+    CHECK(installation_adjust(NULL, "enabled", 0) == 0);
+    CHECK(!strcmp(p4cfg_get("mods.enabled"), "mod.low,mod.high,mod.base,mod.user"));
+    installation_closed(NULL);
+    CHECK(select_id("mod.comp") == 0);
+    CHECK(installation_adjust(NULL, "enabled", 0) == 0);
+    CHECK(!strcmp(p4cfg_get("mods.enabled"), "mod.low,mod.high,mod.base,mod.user,mod.comp"));
+    CHECK(!strcmp(p4cfg_get("mods.load_order"), "mod.low,mod.high,mod.base,mod.comp,mod.user"));
+    CHECK(installation_row(NULL, 2, &row) == 0 && row.checked && !(row.flags & P4_SETTINGS_PAGE_DISABLED));
+    CHECK(installation_adjust(NULL, "order", 1) == -1 && strstr(notice, "User loads after its companion Comp"));
+    installation_closed(NULL);
+    CHECK(select_id("mod.olduser") == 0);
+    CHECK(installation_adjust(NULL, "enabled", 0) == -1 &&
+          strstr(notice, "Olduser needs companion Comp 3.0+; version 2.0 is installed"));
+    installation_closed(NULL);
+    CHECK(select_id("mod.comp") == 0);
+    CHECK(installation_adjust(NULL, "enabled", 0) == 0);
+    installation_closed(NULL);
+    CHECK(select_id("mod.olduser") == 0);
+    CHECK(installation_adjust(NULL, "enabled", 0) == 0);
+    installation_closed(NULL);
+    CHECK(select_id("mod.comp") == 0);
+    CHECK(installation_adjust(NULL, "enabled", 0) == -1 &&
+          strstr(notice, "Olduser needs companion Comp 3.0+; version 2.0 is installed"));
+    installation_closed(NULL);
+    CHECK(select_id("mod.olduser") == 0);
+    CHECK(installation_adjust(NULL, "enabled", 0) == 0);
+    installation_closed(NULL);
+    CHECK(select_id("mod.user") == 0);
+    CHECK(installation_adjust(NULL, "enabled", 0) == 0);
+    installation_closed(NULL);
+    CHECK(!strcmp(p4cfg_get("mods.enabled"), "mod.low,mod.high,mod.base"));
     hub_closed(NULL);
     puts("mod selector callbacks and atomic INI: PASS");
     return 0;

@@ -1,0 +1,3 @@
+--!capability encounter@1
+--!covers p4.encounter
+-- p4.encounter.count, info and launch (API 1.4).

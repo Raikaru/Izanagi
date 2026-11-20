@@ -1,6 +1,6 @@
 # Independent pristine collection card2-slot15, 06/25 Marukyu 11F: Rise's fight, its cleanup and event, then
 # Shadow Teddie (encounter 517) defeated by a searched battleturn: tape (one line per fresh party command,
-# found by PortBattleSimCoord's fork search on this walk's real state) to the post-battle 11F event.
+# found by a fork search on this walk's real state) to the post-battle 11F event.
 # Keep every line above the final waittask:battle:off unchanged: the tape is bound to its frames.
 timeout:18000
 wait:140

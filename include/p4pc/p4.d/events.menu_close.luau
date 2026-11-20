@@ -1,0 +1,3 @@
+--!capability events.menu_close@1
+--!covers event:menu_close
+-- p4.events.on("menu_close") (API 1.0).

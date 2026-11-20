@@ -195,7 +195,7 @@ body:
             point.lane[1] = zero;
             point.lane[2] = s;
             effectVuLoad11(&point);
-            /* vf10 = ACC - (vf11 x vf10) with ACC = vf10 x vf11 (cross product, twice). */
+            /* OPMULA and reversed OPMSUB together compute vf10 x vf11. */
             p4_vu0_opmula(10, 11);
             p4_vu0_opmsub(10, 11, 10);
             effectVuScale10(width);

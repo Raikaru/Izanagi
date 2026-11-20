@@ -50,7 +50,7 @@ wait:30
 press:cross
 choose:1
 wait:600
-# Goho-M is index 5; Value Medicine is index 1 and restores 50 HP to all allies.
+# Select the escape and recovery items from the shop.
 press:up
 wait:20
 press:up

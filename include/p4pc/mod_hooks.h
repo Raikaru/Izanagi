@@ -44,5 +44,11 @@ void p4_mod_hooks_remove_owner(size_t owner);
 void p4_mod_dispatch(P4ModFunction *function, P4ModValue *args, P4ModValue *result);
 void p4_mod_original(P4ModFunction *function, P4ModValue *args, P4ModValue *result);
 int p4_mod_call_next(P4ModCall *call);
+/* Bracket the two calculator calls at the defeated-enemy aggregation site.
+ * The returned token restores an outer scope, and only the immediately
+ * dispatched calculator belongs to it (not a nested callback's native call). */
+unsigned p4_mod_reward_begin(void);
+void p4_mod_reward_end(unsigned previous);
+int p4_mod_reward_active(void);
 void p4_mod_hooks_clear(void);
 #endif

@@ -35,5 +35,5 @@ set_tests_properties(save_play PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes"
 # Cross-target determinism: the 04/11 save, the fog-dream walk and its tutorial battle (tests/walk_digest_gate.sh): a digest of the player's matrix and the random
 # state every 500 flips and the battle's state changes, equal to the recorded run, which Linux and Windows print alike.
 add_test(NAME walk_digest COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/walk_digest_gate.sh" $<TARGET_FILE:p4pc>)
-set_tests_properties(walk_digest PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600)
+set_tests_properties(walk_digest PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_GATE_NAME=walk_digest")
 

@@ -1,5 +1,6 @@
 #include "game_items_internal.h"
 #include "p4pc/game_items_ui.h"
+#include "p4pc/game_table_overlay.h"
 #include "p4pc/gmem.h"
 #include "p4pc/image.h"
 #include "p4pc/package_boot.h"
@@ -232,6 +233,9 @@ void p4_game_tables_items_native_use_builtin(void)
      * first expansion publishes later, solely in canonical native commit. */
     P4_G32(0x007642a0u) = base ? base : 0x0079bf10u;
     if (item_loaded == 1) item_loaded = 2;
+    /* The retail table was (re)copied and published: a session overlay of it
+     * re-captures that copy as stock and re-applies (p4.tables ITEMTBL, API 1.11). */
+    if (!base) p4_game_tables_overlay_static_published(0x0079bf10u, P4_ITEM_RETAIL_COUNT * P4_ITEM_ROW_SIZE);
 }
 _Noreturn void p4_game_tables_items_native_refuse(int result)
 {
@@ -285,6 +289,14 @@ static const P4GameItemView *view(uint32_t id)
     if (!row) p4_game_tables_items_native_refuse(P4_TABLE_NOT_FOUND);
     use_item(id);
     return row;
+}
+int32_t p4_game_tables_items_native_icon_anchor(uint32_t id)
+{
+    const P4GameItemView *row = view(id);
+    if (!row->icon_anchor_plus_one) return -1;
+    uint32_t anchor = row->icon_anchor_plus_one - 1u;
+    use_item(anchor);
+    return (int32_t)anchor;
 }
 static uint32_t text_binding(uint32_t table, uint32_t id, uint32_t role)
 {

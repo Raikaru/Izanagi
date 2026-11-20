@@ -203,6 +203,51 @@ int main(void)
         CHECK(p4pc_pad_autopress_parse("", ap, 4) == 0);
     }
 
+    /* The Android touch pad's analog stick (PadOverlay -> p4pc_pad_touch_stick): a left stick with its own
+     * dead zone, merged only while the gamepad's stick is idle, through input.deadzone like a gamepad. */
+    {
+        P4PadSnapshot s;
+        const int dead = 24 * 32767 / 100;
+        p4pc_pad_touch_stick(0.0f, 0.0f);
+        startSnapshot(&s);
+        CHECK(!p4pc_pad_touch_stick_apply(&s, 0, 0) && s.lx == 0x80 && s.ly == 0x80);
+        p4pc_pad_touch_stick(0.1f, -0.1f); /* inside the stick's own 15 percent dead zone */
+        CHECK(!p4pc_pad_touch_stick_apply(&s, 0, 0) && s.lx == 0x80 && s.ly == 0x80);
+        p4pc_pad_touch_stick(NAN, 0.0f);
+        CHECK(!p4pc_pad_touch_stick_apply(&s, 0, 0));
+        p4pc_pad_touch_stick(1.0f, 0.0f); /* full travel right: y stays neutral */
+        CHECK(p4pc_pad_touch_stick_apply(&s, 0, 0) && s.lx == 0xFF && s.ly == 0x7F && s.buttons == 0);
+        p4pc_pad_touch_stick(-3.0f, 0.0f); /* beyond the circle clamps to the rim */
+        startSnapshot(&s);
+        CHECK(p4pc_pad_touch_stick_apply(&s, 0, 0) && s.lx == 0x00 && s.ly == 0x7F);
+        p4pc_pad_touch_stick(0.0f, -1.0f); /* up is negative y, as on a gamepad */
+        startSnapshot(&s);
+        CHECK(p4pc_pad_touch_stick_apply(&s, 0, 0) && s.lx == 0x7F && s.ly == 0x00);
+        p4pc_pad_touch_stick(0.0f, 1.0f);
+        startSnapshot(&s);
+        CHECK(p4pc_pad_touch_stick_apply(&s, 0, 0) && s.ly == 0xFF);
+        p4pc_pad_touch_stick(0.5f, 0.0f); /* half travel walks: past the game's 48 dead band, short of the rim */
+        startSnapshot(&s);
+        CHECK(p4pc_pad_touch_stick_apply(&s, 0, 0) && s.lx > 0x80 + 48 && s.lx < 0xF0);
+        p4pc_pad_touch_stick(0.2f, 0.0f); /* above the stick's dead zone, below input.deadzone 24 percent */
+        startSnapshot(&s);
+        CHECK(!p4pc_pad_touch_stick_apply(&s, dead, 0) && s.lx == 0x80);
+        p4pc_pad_touch_stick(1.0f, 0.0f);
+        startSnapshot(&s);
+        CHECK(p4pc_pad_touch_stick_apply(&s, dead, 0) && s.lx == 0xFF);
+        startSnapshot(&s); /* a deflected gamepad stick keeps its axes */
+        s.lx = 0x00;
+        CHECK(!p4pc_pad_touch_stick_apply(&s, 0, 0) && s.lx == 0x00 && s.ly == 0x80);
+        startSnapshot(&s); /* Config's list reads digital directions: only with `menu` */
+        CHECK(p4pc_pad_touch_stick_apply(&s, 0, 1) && (s.buttons & P4PC_PAD_RIGHT) && !(s.buttons & (P4PC_PAD_LEFT | P4PC_PAD_UP | P4PC_PAD_DOWN)));
+        p4pc_pad_touch_stick(0.3f, 0.0f);
+        startSnapshot(&s);
+        CHECK(p4pc_pad_touch_stick_apply(&s, 0, 1) && s.buttons == 0);
+        p4pc_pad_touch_stick(0.0f, 0.0f); /* released */
+        startSnapshot(&s);
+        CHECK(!p4pc_pad_touch_stick_apply(&s, 0, 0) && s.lx == 0x80 && s.ly == 0x80);
+    }
+
     if (failures) {
         fprintf(stderr, "pad_keyboard_test: %d failure(s)\n", failures);
         return 1;

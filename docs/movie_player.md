@@ -29,38 +29,19 @@ while the game keeps up), it must be the same number retail reports, the first f
 number of updates (the fade-in and fade-out counters and the end of the task are counted in received frames),
 and the status must stay 1 or 2 until the movie ends.
 
-## 2. Retail traces
+## 2. Movie task tests
 
-The retail traces come from the private PCSX2 trace tooling (not part of the public repository).
-Its `trace.py movie [--index N]` boots the ISO in PCSX2 (it resumes the emulator if it
-pauses itself), waits for the movie task, and samples its work block over PINE as fast as PINE answers
-(about 1 ms), writing one line per change: task state, movie index, start-up tick, `playerStatus`,
-`iGpffffbaf8`, `frame.buffer`, `frame.time`, fade-in and fade-out counters (`build/traces/movie/movie_*.jsonl`).
-`--index 1` rewrites the movie index in the work block right after the task appears, so the same code plays
-P4CT001. Its `movie_events.py` reduces a trace (retail or the port's, from
-`P4PC_MOVIE_TRACE=<file> movie_task_smoke`) to the events in `tests/movie_retail_events.h`.
+`movie_task_opening` and `movie_task_p4ct001` exercise the game's movie task
+and compare its transitions with expected behavior. They require the player's
+own disc image and executable; without them the tests skip. A test of the task
+does not by itself establish audiovisual equivalence on every platform.
 
-| | P4CTOP1 (index 21) retail | port | P4CT001 (index 1) retail | port |
-|---|---|---|---|---|
-| updates from state 3 to the first frame | 20.2 | 20 | 18.7 | 20 |
-| frame number when state 4 starts (fade-in done) | 19 | 19 | 59 | 59 |
-| frame number when state 5 starts | 2500 | 2500 | 1770 | 1770 |
-| state 6 at frame, fade-out counter | 2519, 20 | 2519, 20 | 1799, 30 | 1799, 30 |
-| last frame number | 2519 | 2519 | 1799 | 1799 |
-| steps that are not +1 | 7 of 2494 (PCSX2 hiccups) | 0 of 2518 | 6 of 1792 | 0 of 1798 |
+In a state-aligned lockstep run with `--disc-online` the port instead answers each poll and status read
+of a movie before the initial anchor with the live retail run's own (`docs/lockstep.md`, retail's own waits).
 
-Divergences found and fixed by this comparison: the port updated at 60 Hz in its tick mode (the task runs at
-29.97 Hz, one frame per update); the first frame arrived at once instead of 20 updates after the start; the
-player skipped frame numbers with a wall clock (now it is paced per update and only catches up when late).
-The retail prep time varies between runs (18.7 to 20.2 updates, disc timing); the port uses 20 and the test
-accepts 18 to 21.
+## 3. Audio clock
 
-ctest: `movie_task_opening` and `movie_task_p4ct001` run the game's own task on the port and compare with the
-table (skipped without `P4PC_ISO` and `P4PC_ELF`).
-
-## 3. Audio clock (interface for the audio lane)
-
-`src/movie/mwply.h`. The audio lane gets the movie's handle from `p4pc_movie_audio_current()`, the format from
+`src/movie/mwply.h`. The audio subsystem gets the movie's handle from `p4pc_movie_audio_current()`, the format from
 `p4pc_movie_audio_format`, PCM from `p4pc_movie_audio_pull` (thread-safe), and reports the sample frames the
 device has played with `p4pc_movie_audio_played(h, total)`. After the first report the movie clock is
 `played / rate`: frame k is shown when its time has come, so the video waits for the audio and never runs
@@ -117,21 +98,9 @@ into a linear image (a detiling copy) for OpenGL; with decoding that was about 5
   was enabled, so this is not an isolated conversion benchmark. Flip500 readback matched byte-for-byte; captures
   at700/900 differed, and their decoded PTS were not logged, so no same-frame equality is claimed for those captures.
 
-Measured on the Windows host (before the ES renderer became the default, desktop OpenGL; RTX 4080, `tools/local_boot.sh`, the New Game script to flip 9000, flips 2000 to 8000 hold the opening movie;
-the machine was shared with other jobs, so these are the best and the median of four runs in rotating order, `P4PC_MOVIE_TILED=1` for
-the old path and `P4PC_MOVIE_GPU=0` for the CPU conversion):
-
-| | `P4PC_TURBO=1` (every frame drawn) | `P4PC_TURBO=2` (draws only in windows) |
-|---|---|---|
-| old path (tiled buffers) | 6.14 s best, 6.65 s median: 980 flips/s | 3.51 s, 4.3 s: 1710 flips/s |
-| stamp, CPU conversion | 4.99 s best: 1200 flips/s | 2.74 s, 3.2 s: 2190 flips/s |
-| stamp, GPU conversion | 4.60 s, 4.93 s: 1300 flips/s | 3.08 s, 3.4 s: 1950 flips/s |
-
-In a sampling profile (`P4PC_PROFILE`) of the `P4PC_TURBO=1` run the movie task is about 30% of the samples, of which libavcodec is 16 to 18%
-(it was about 55% in total). The GPU conversion gains over the CPU one only when frames are drawn, and little (about 8%): the rest of
-what a drawn frame costs is the driver. Captured frames at flips 3500, 5000, 6500 and 8999 and the `P4PC_MOVIE_LOG` of the three paths are byte-identical (24 runs, also on the ES renderer);
-slice threads in libavcodec (tried: `thread_type = FF_THREAD_SLICE`) gave no gain, because a 640 x 448 picture decodes in about 0.5 ms.
-What is left in the path is the game's own `memcpy` of the 1.1 MB image buffer (about 8% of the samples in `ucrtbase`), which only carries the stamp.
+GPU conversion avoids CPU colour conversion for drawn frames; its benefit
+depends on the graphics driver and workload. Diagnostic capture and profiling
+add overhead and should not be treated as uninstrumented player performance.
 
 ## 6. PC movie input
 

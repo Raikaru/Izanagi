@@ -1,6 +1,27 @@
-# Builds, tests and packages the port: Linux and Windows in the p4pc-ci image (ci/Dockerfile), macOS on GitHub's Macs (ci/macos/). No game
-# data is used or available here: the build reads config/retail_fnptr_words.txt, and the tests that need the disc skip.
-# A pushed tag v* also attaches the Windows x64 zip, the Linux x86_64 AppImage and the macOS arm64 and x86_64 zips to its GitHub release.
+# Builds, tests and packages the port: Linux and Windows in the p4pc-ci image (ci/Dockerfile), macOS on GitHub's Apple silicon Macs (ci/macos/),
+# Android in the p4pc-android image (ci/android/). No game data is used or available here: the build reads
+# config/retail_fnptr_words.txt, and the tests that need the disc skip.
+#
+# How the time is spent (the workflow was one serial 30-minute build behind a 10-minute image build, and rebuilt on every tag):
+#  - The images come from ghcr.io (ghcr.io/<owner>/izanagi-ci:<hash of the files ci/Dockerfile builds from>, and izanagi-android-ci for
+#    ci/android): the `image` job builds and pushes one only when the registry has none for the current hash, the other jobs pull it
+#    (.github/actions/ci-image). A pull request from a fork cannot push, so it builds the image from the GitHub Actions layer cache as before.
+#  - The Linux and Windows work is four parallel jobs (tools/ci_build.sh): x64 (Linux x86_64 build and its tests), win64 (Windows x64 build,
+#    its Wine tests and the Windows zip from the same build), host (the 32-bit host build and its tests) and appimage (the Linux AppImage).
+#    Between them they run every test that the single "Build and test" job ran; the `coverage` job fails when a test is registered that no
+#    part selects. The generated-source cache of tools/build_cache.py and ccache are restored per part (saved on main) so a push rebuilds
+#    only what it changed. The repository's cache space is 10 GB: the x64 part's cache and the win64 part's are about
+#    2.6 and 2.7 GB, the host part (no 64-bit mirror) keeps 1 GB, the appimage part only its libraries, and macOS only its dependencies.
+#  - macOS: both packages are built on one kind of runner, Apple silicon (macos-latest). The x86_64 one is cross-built there with the same pinned
+#    clang (ci/macos/ with P4PC_MACOS_ARCH=x86_64) and its tests run under Rosetta: about 12 minutes where the native macos-15-intel job took
+#    30 to 45. docs/platform/macos.md says what that replaces: the Intel CPU itself, and the Mac without Metal whose fallback to desktop OpenGL
+#    the smoke still exercises, by taking the ANGLE EGL library away.
+#  - A release is cut with the sync (tools/public_sync.sh --tag vX.Y.Z), which pushes main and the tag in one atomic push: the build of main sees the
+#    tag, so its packages are labelled vX.Y.Z (file names, VERSION.txt). The tag's own run builds nothing: its release job takes the packages of
+#    the green run of this workflow on main for the same commit (already built and tested) and attaches them, after checking that every
+#    package's label is the tag and its commit is the tag's. A tag pushed on a commit that main built without it is refused with that message.
+# The Android job builds the unsigned arm64-v8a release APK on every push and uploads it as a workflow artifact, so Android breakage
+# shows up publicly; the signed APK (not the AAB) is attached to releases by hand from the local signer.
 name: build
 
 on:
@@ -18,138 +39,192 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
-  IMAGE: p4pc-ci
   # docker/build-push-action would upload a build-record artifact per build; the release job wants only the packages.
   DOCKER_BUILD_RECORD_UPLOAD: false
 
 jobs:
+  # The registry has an image for each hash of what ci/Dockerfile is built from; build and push only when it has not. Edit ci/Dockerfile (even
+  # a comment) to rebuild after a change of the base image or of the packages it installs.
   image:
     name: CI image
+    if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
     runs-on: ubuntu-24.04
     timeout-minutes: 120
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      key: ${{ steps.key.outputs.key }}
     steps:
-      - name: Free disk space
-        run: |
-          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
-          df -h /
-      - uses: actions/checkout@v4
-      - uses: docker/setup-buildx-action@v3
-      # Built once per workflow run; every layer goes to the GitHub Actions cache, so later runs and the jobs
-      # below reuse it instead of downloading and building the toolchain and libraries again.
-      - name: Build and cache the CI image
-        uses: docker/build-push-action@v6
-        with:
-          context: ci
-          tags: ${{ env.IMAGE }}
-          cache-from: type=gha,scope=p4pc-ci
-          cache-to: type=gha,scope=p4pc-ci,mode=max
-
-  test:
-    name: Build and test (Linux, Windows)
-    needs: image
-    runs-on: ubuntu-24.04
-    timeout-minutes: 300
-    steps:
-      - name: Free disk space
-        run: |
-          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
-          df -h /
       - uses: actions/checkout@v4
         with:
-          submodules: true
-      - uses: docker/setup-buildx-action@v3
-      - name: CI image (from the cache the image job filled)
-        uses: docker/build-push-action@v6
-        with:
-          context: ci
-          tags: ${{ env.IMAGE }}
-          load: true
-          cache-from: type=gha,scope=p4pc-ci
-      - uses: actions/cache@v4
-        with:
-          path: .ccache
-          key: ccache-test-${{ github.sha }}
-          restore-keys: ccache-test-
-      - name: Configure, build everything, run the tests that need no game files
+          sparse-checkout: |
+            .github
+            ci
+      - name: Image key
+        id: key
         run: |
-          docker run --rm -v "$PWD:/src" -v "$PWD/.ccache:/ccache" -w /src "$IMAGE" sh -euc '
-            git config --global --add safe.directory "*"
-            cmake -S . -B build -G Ninja \
-              -DCMAKE_C_COMPILER=/opt/llvm-mingw/bin/clang \
-              -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-              -DP4_PORT64=ON -DP4_PORT64_LINK=ON -DP4_PORT64_OPT=O2 -DP4_PORT64W_OPT=O2 -DP4_CENSUS_CHECK=ON
-            cmake --build build -- -k 0
-            sh tools/ci_tests.sh build
-          '
+          # everything the image is built from: the Dockerfile and what it copies in (the other files of ci/ are other images' and the macOS scripts')
+          sources=$(awk '$1 == "COPY" || $1 == "ADD" { print $2 }' ci/Dockerfile | grep -v '^win32/' || true)
+          [ -z "$sources" ] || { echo "::error::ci/Dockerfile copies $sources: add it to the image key in build.yml (hashFiles below)"; exit 1; }
+          echo "key=${{ hashFiles('ci/Dockerfile', 'ci/win32/**') }}" >> "$GITHUB_OUTPUT"
+      - uses: ./.github/actions/ci-image
+        with:
+          name: izanagi-ci
+          key: ${{ steps.key.outputs.key }}
+          context: ci
+          local-tag: p4pc-ci
+          scope: p4pc-ci
+          ensure: 'true'
 
-  package:
-    name: Package ${{ matrix.target }}
+  # Linux and Windows, in parallel parts of tools/ci_build.sh (see there for what each builds and tests).
+  linux:
+    name: ${{ matrix.name }}
     needs: image
+    if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
     runs-on: ubuntu-24.04
-    timeout-minutes: 300
+    timeout-minutes: 180
+    permissions:
+      contents: read
+      packages: read
     strategy:
       fail-fast: false
       matrix:
         include:
-          - target: windows-x64
-            script: tools/package_win.sh
-          - target: linux-x86_64
-            script: tools/package_linux.sh
+          - part: x64
+            name: Linux x86_64 (build, test)
+            cache: x64
+          - part: win64
+            name: Windows x64 (build, Wine tests, package)
+            artifact: windows-x64
+            cache: win64
+          - part: host
+            name: Linux i386 host (build, test)
+            cache: host
+          - part: appimage
+            name: Linux x86_64 (package)
+            artifact: linux-x86_64
+            # (no ccache or rewrite cache: its build directory is another path than the x64 part's, which the cache keys contain, so the x64 part's entries
+            # never hit - measured, 0 of 1825 compilations - and its own would take 2.7 GB of the repository's 10)
+    env:
+      PART: ${{ matrix.part }}
     steps:
-      - name: Free disk space
-        run: |
-          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
-          df -h /
       - uses: actions/checkout@v4
         with:
           submodules: true
-          fetch-depth: 0
-      - uses: docker/setup-buildx-action@v3
-      - name: CI image (from the cache the image job filled)
-        uses: docker/build-push-action@v6
+          fetch-depth: 0   # the packages are named by `git describe`
+      - id: image
+        uses: ./.github/actions/ci-image
         with:
+          name: izanagi-ci
+          key: ${{ needs.image.outputs.key }}
           context: ci
-          tags: ${{ env.IMAGE }}
-          load: true
-          cache-from: type=gha,scope=p4pc-ci
-      - uses: actions/cache@v4
-        with:
-          path: .ccache
-          key: ccache-${{ matrix.target }}-${{ github.sha }}
-          restore-keys: ccache-${{ matrix.target }}-
-      - name: Build and package
-        env:
-          SCRIPT: ${{ matrix.script }}
+          local-tag: p4pc-ci
+          scope: p4pc-ci
+      # The runner's root disk has 13 GB free; the image, the build and the caches need more by the end (a cache that cannot be written is
+      # lost). Its preinstalled toolchains are deleted in the background, while the image is pulled and the build runs: deleting them first
+      # costs minutes that nothing waits on.
+      - name: Work directories
         run: |
-          docker run --rm -v "$PWD:/src" -v "$PWD/.ccache:/ccache" -w /src -e SCRIPT "$IMAGE" sh -euc '
-            git config --global --add safe.directory "*"
-            sh "$SCRIPT" --out dist
-          '
-      - uses: actions/upload-artifact@v4
+          sudo install -d -o "$(id -u)" -g "$(id -g)" /mnt/ci/build /mnt/ci/ccache
+          nohup setsid sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL /usr/local/share/boost >/dev/null 2>&1 &
+      - uses: actions/cache/restore@v4
+        if: matrix.part != 'appimage'
         with:
-          name: p4pc-${{ matrix.target }}
+          path: /mnt/ci/ccache
+          key: ccache-${{ matrix.cache }}-${{ github.sha }}
+          restore-keys: ccache-${{ matrix.cache }}-
+      - uses: actions/cache/restore@v4
+        if: matrix.part == 'appimage'
+        with:
+          path: |
+            /mnt/ci/build/package-linux/deps
+            /mnt/ci/build/package-linux/dl-cache
+          key: linux-deps-${{ hashFiles('ci/win32/build_deps.sh') }}-${{ needs.image.outputs.key }}
+      - name: Build, test and package (tools/ci_build.sh ${{ matrix.part }})
+        env:
+          TOOLCHAIN_ID: ${{ steps.image.outputs.id }}
+        run: |
+          docker run --rm -v "$PWD:/src" -v /mnt/ci/build:/src/build -v /mnt/ci/ccache:/ccache -w /src \
+            -e PART -e "P4PC_BUILD_TOOLCHAIN_ID=$TOOLCHAIN_ID" p4pc-ci sh -euc '
+            git config --global --add safe.directory "*"
+            sh tools/ci_build.sh "$PART" --out dist
+          '
+      - name: Caches
+        if: always()
+        run: |
+          # (the container's files are root's, some of them readable by root only: the cache action runs as the runner user)
+          sudo chmod -R a+rX /mnt/ci/ccache /mnt/ci/build/package-linux/deps /mnt/ci/build/package-linux/dl-cache 2>/dev/null || true
+          # the generated-source cache keeps every entry it ever made: drop those older than two weeks (a unit still in use is made again, newly dated)
+          sudo find /mnt/ci/ccache/p4pc-generated-v1/entries -mindepth 2 -maxdepth 2 -type d -mtime +14 -exec rm -rf {} + 2>/dev/null || true
+          df -h / | cat
+          sudo du -sh /mnt/ci/ccache /mnt/ci/ccache/* /mnt/ci/build 2>/dev/null | cat
+      - uses: actions/cache/save@v4
+        if: always() && github.ref == 'refs/heads/main' && matrix.part != 'appimage'
+        with:
+          path: /mnt/ci/ccache
+          key: ccache-${{ matrix.cache }}-${{ github.sha }}
+      - uses: actions/cache/save@v4
+        if: always() && github.ref == 'refs/heads/main' && matrix.part == 'appimage'
+        with:
+          path: |
+            /mnt/ci/build/package-linux/deps
+            /mnt/ci/build/package-linux/dl-cache
+          key: linux-deps-${{ hashFiles('ci/win32/build_deps.sh') }}-${{ needs.image.outputs.key }}
+      - uses: actions/upload-artifact@v4
+        if: matrix.artifact
+        with:
+          name: p4pc-${{ matrix.artifact }}
           path: dist/*
           if-no-files-found: error
 
-  # macOS (docs/platform/macos.md): built natively on GitHub's hosted Macs, Apple silicon and Intel, with the pinned clang, SDL3, FFmpeg and
-  # ANGLE of ci/macos/build_deps.sh. The tests labelled port64 (the build's own; those that need the disc skip), the GL context smoke (on
-  # Apple silicon an OpenGL ES context on ANGLE's Metal back end is required; the Intel runners have no Metal device, so there the game's
-  # fallback to Apple's desktop OpenGL must draw), then the app bundle in a zip.
+  # Every registered test is run by one of the parts above: the parts select by label, and a test added with a label (or none) that no part
+  # selects would otherwise be dropped silently.
+  coverage:
+    name: Test coverage of the parts
+    needs: image
+    if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - id: image
+        uses: ./.github/actions/ci-image
+        with:
+          name: izanagi-ci
+          key: ${{ needs.image.outputs.key }}
+          context: ci
+          local-tag: p4pc-ci
+          scope: p4pc-ci
+      - name: Configure both ways and compare the selections with the registered tests
+        run: |
+          docker run --rm -v "$PWD:/src" -w /src -e P4PC_CI_BUILD=/tmp/cov p4pc-ci sh -euc '
+            git config --global --add safe.directory "*"
+            sh tools/ci_build.sh coverage
+          '
+
+  # macOS (docs/platform/macos.md): built natively on GitHub's Apple silicon Macs with the pinned clang, SDL3, FFmpeg and ANGLE of
+  # ci/macos/build_deps.sh. The Intel build is cross-compiled on the same kind of runner (P4PC_MACOS_ARCH=x86_64) and its tests run under
+  # Rosetta. The tests labelled port64 (the build's own; those that need the disc skip), the GL context smoke (an OpenGL ES context on
+  # ANGLE's Metal back end is required; then the fallback the game takes on a Mac where ANGLE has no display, which the Intel runners
+  # used to exercise, run by pointing SDL at an EGL library that is not there: the context must be drawn with Apple's desktop OpenGL),
+  # then the app bundle in a zip.
   macos:
     name: macOS ${{ matrix.arch }} (build, test, package)
-    runs-on: ${{ matrix.runner }}
-    timeout-minutes: 360
+    if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+    runs-on: macos-latest
+    timeout-minutes: 180
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - arch: arm64
-            runner: macos-latest
-            smoke: P4PC_REQUIRE_GLES=1 P4PC_REQUIRE_GL_RENDERER=Metal
-          - arch: x86_64
-            runner: macos-15-intel
-            smoke: ""   # ES where ANGLE has a display, else the desktop OpenGL fallback: either must draw
+        arch: [arm64, x86_64]
     env:
+      P4PC_MACOS_ARCH: ${{ matrix.arch }}
       DEPS: ${{ github.workspace }}/build/macos-deps
       P4PC_DL_CACHE: ${{ github.workspace }}/build/dl-cache
       P4PC_BUILD_CACHE_DIR: ${{ github.workspace }}/build/rewrite-cache
@@ -163,20 +238,24 @@ jobs:
           python3 -m venv "$RUNNER_TEMP/venv"
           "$RUNNER_TEMP/venv/bin/pip" install --quiet ninja
           echo "$RUNNER_TEMP/venv/bin" >> "$GITHUB_PATH"
-          sw_vers; xcrun --sdk macosx --show-sdk-path; cmake --version | head -n 1
+          sw_vers; uname -m; xcrun --sdk macosx --show-sdk-path; cmake --version | head -n 1
+          [ "$P4PC_MACOS_ARCH" = arm64 ] || arch -x86_64 /usr/bin/true   # Rosetta must be there for the Intel build's tests
           # the identity of the rewrite cache's toolchain (tools/build_cache.py): the pinned dependencies, the SDK and the architecture
-          echo "P4PC_BUILD_TOOLCHAIN_ID=sha256:$({ cat ci/macos/build_deps.sh; xcrun --sdk macosx --show-sdk-version; uname -m; } | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_ENV"
-      - uses: actions/cache@v4
+          echo "P4PC_BUILD_TOOLCHAIN_ID=sha256:$({ cat ci/macos/build_deps.sh; xcrun --sdk macosx --show-sdk-version; echo "$P4PC_MACOS_ARCH"; } | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_ENV"
+      - uses: actions/cache/restore@v4
+        id: deps-cache
         with:
           path: build/macos-deps
           key: macos-deps-${{ matrix.arch }}-${{ hashFiles('ci/macos/build_deps.sh') }}
       - name: Clang, SDL3, FFmpeg and ANGLE (ci/macos/build_deps.sh)
         run: sh ci/macos/build_deps.sh "$DEPS"
-      - uses: actions/cache@v4
+      - uses: actions/cache/save@v4
+        if: steps.deps-cache.outputs.cache-hit != 'true'
         with:
-          path: build/rewrite-cache
-          key: macos-rewrite-${{ matrix.arch }}-${{ github.sha }}
-          restore-keys: macos-rewrite-${{ matrix.arch }}-
+          path: build/macos-deps
+          key: macos-deps-${{ matrix.arch }}-${{ hashFiles('ci/macos/build_deps.sh') }}
+      # (no cache of the rewritten sources here: 2.3 and 2.6 GB for a build that is not on the critical path, and the repository's cache space
+      # is 10 GB, which the Linux parts' caches need)
       - name: Configure and build the 64-bit targets
         run: |
           sh ci/macos/configure.sh "$DEPS" build/macos -DP4_CENSUS_CHECK=ON
@@ -186,10 +265,17 @@ jobs:
       - name: GL context smoke
         run: |
           set -o pipefail
-          env ${{ matrix.smoke }} ctest --test-dir build/macos -R '^gles_context_smoke64$' -V 2>&1 | tee build/macos/gles-smoke.log
+          mkdir -p smoke
+          # ES on ANGLE's Metal back end
+          env P4PC_REQUIRE_GLES=1 P4PC_REQUIRE_GL_RENDERER=Metal ctest --test-dir build/macos -R '^gles_context_smoke64$' -V 2>&1 | tee build/macos/gles-smoke.log
           grep -q 'gles_context_smoke: OK' build/macos/gles-smoke.log   # drawn, not skipped
-          mkdir -p smoke && cp build/macos/gles-smoke.log build/macos/64_gles_context_smoke.png smoke/
-          # Apple's own OpenGL asked for directly (P4PC_GL_API=gl), beside it
+          cp build/macos/gles-smoke.log smoke/ && cp build/macos/64_gles_context_smoke.png smoke/
+          # no ES display (the Macs without Metal, which the Intel runners were): the game falls back to Apple's desktop OpenGL and must draw
+          SDL_EGL_LIBRARY=/nonexistent/libEGL.dylib ctest --test-dir build/macos -R '^gles_context_smoke64$' -V 2>&1 | tee build/macos/gles-smoke-fallback.log
+          grep -q 'gles_context_smoke: OK' build/macos/gles-smoke-fallback.log
+          grep -q 'trying desktop OpenGL' build/macos/gles-smoke-fallback.log   # by the fallback, not by choice
+          cp build/macos/gles-smoke-fallback.log smoke/ && cp build/macos/64_gles_context_smoke.png smoke/64_gles_context_smoke_fallback.png
+          # Apple's own OpenGL asked for directly (P4PC_GL_API=gl)
           P4PC_GL_API=gl ctest --test-dir build/macos -R '^gles_context_smoke64$' -V 2>&1 | tee build/macos/gles-smoke-desktop.log
           grep -q 'gles_context_smoke: OK' build/macos/gles-smoke-desktop.log
           cp build/macos/gles-smoke-desktop.log smoke/ && cp build/macos/64_gles_context_smoke.png smoke/64_gles_context_smoke_desktop.png
@@ -207,27 +293,154 @@ jobs:
           path: dist/*
           if-no-files-found: error
 
-  release:
-    name: Attach packages to the release
-    if: startsWith(github.ref, 'refs/tags/v')
-    needs: [test, package, macos]
+  # Android (docs/android.md): the unsigned arm64-v8a release APK in the p4pc-android image (ci/android/) with
+  # tools/android_ci_run.sh and P4PC_ANDROID_BUILD=release, on every push and pull request. No signing in CI and no
+  # secrets: the release build type has no signingConfig, so Gradle emits the unsigned APK/AAB. The signed APK/AAB
+  # are built on the packaging PC (tools/package_android.py) and attached to releases by hand, so this artifact is
+  # named without the p4pc- prefix the release job collects.
+  android:
+    name: Android arm64-v8a (build release APK)
+    if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
     runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+      - uses: ./.github/actions/ci-image
+        with:
+          name: izanagi-android-ci
+          key: ${{ hashFiles('ci/android/**') }}
+          context: ci/android
+          local-tag: p4pc-android
+          scope: p4pc-android
+          free-disk: 'true'   # the image holds the Android SDK and NDK: more than the runner has left
+      - name: Work directories
+        run: sudo install -d -o "$(id -u)" -g "$(id -g)" /mnt/ci/ccache /mnt/ci/android-cache
+      - uses: actions/cache/restore@v4
+        with:
+          path: /mnt/ci/ccache
+          key: ccache-android-arm64-v8a-${{ github.sha }}
+          restore-keys: ccache-android-arm64-v8a-
+      - name: Build the unsigned release APK
+        run: |
+          mkdir -p dist
+          docker run --rm -v "$PWD:/lane/src" -v "$PWD/dist:/lane/out" -v /mnt/ci/android-cache:/android-cache -v /mnt/ci/ccache:/ccache -w /lane/src p4pc-android sh -euc '
+            git config --global --add safe.directory "*"
+            export P4PC_ANDROID_ABI=arm64-v8a P4PC_ANDROID_BUILD=release
+            export P4PC_ANDROID_VERSION_NAME="$(git describe --tags --always --long)"
+            export P4PC_ANDROID_VERSION_CODE="$(git rev-list --count HEAD)"
+            sh /lane/src/tools/android_ci_run.sh /lane/build
+          '
+          ls -l dist
+      - name: Cache permissions
+        if: always()
+        run: sudo chmod -R a+rX /mnt/ci/ccache 2>/dev/null || true
+      - uses: actions/cache/save@v4
+        if: always() && github.ref == 'refs/heads/main'
+        with:
+          path: /mnt/ci/ccache
+          key: ccache-android-arm64-v8a-${{ github.sha }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-arm64-v8a-unsigned
+          path: dist/p4pc-arm64-v8a-release.apk
+          if-no-files-found: error
+
+  # A pushed tag v*: no build. tools/public_sync.sh --tag pushed this commit to main together with the tag, so main's run (every job above, tests
+  # included) built the packages with the tag in `git describe` and labelled them with it; this job waits for that run to be green, checks the
+  # labels and the commit, and attaches the packages. Nothing is rebuilt, so what ships is what was tested.
+  release:
+    name: Attach the main build's packages to the release
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
     permissions:
       contents: write
+      actions: read
     steps:
+      - name: Find the green build of this commit on main
+        id: main
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ github.sha }}
+        run: |
+          set -eu
+          # The tag and main arrive in one push, so main's run exists or is about to; it is waited for, up to 90 minutes.
+          run= runs='[]'
+          for attempt in $(seq 1 180); do
+            runs=$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/build.yml/runs?head_sha=$SHA&event=push&branch=main&per_page=50" --jq .workflow_runs)
+            run=$(jq -r --arg sha "$SHA" '[.[] | select(.head_sha == $sha and .head_branch == "main" and .event == "push" and .status == "completed" and .conclusion == "success")] | sort_by(.created_at) | last | .id // empty' <<<"$runs")
+            if [ -z "$run" ]; then
+              # A run whose only failed job is the Android one still holds good packages (the Android APK is not released from CI).
+              for id in $(jq -r --arg sha "$SHA" '[.[] | select(.head_sha == $sha and .head_branch == "main" and .event == "push" and .status == "completed")] | sort_by(.created_at) | reverse | .[].id' <<<"$runs"); do
+                bad=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$id/jobs?per_page=100" --jq '[.jobs[] | select(.conclusion != "success" and .conclusion != "skipped" and (.name | startswith("Android") | not))] | length')
+                if [ "$bad" = 0 ]; then run=$id; break; fi
+              done
+            fi
+            [ -z "$run" ] || break
+            pending=$(jq '[.[] | select(.status != "completed")] | length' <<<"$runs")
+            total=$(jq 'length' <<<"$runs")
+            # nothing yet: main's run may still be queued (give it five minutes); only failed runs: nothing to wait for
+            if [ "$pending" = 0 ] && { [ "$total" != 0 ] || [ "$attempt" -gt 10 ]; }; then break; fi
+            echo "waiting for the build of $SHA on main ($pending running, $total seen)"; sleep 30
+          done
+          if [ -z "$run" ]; then
+            echo "::error::no build run of $SHA on main whose jobs (the Android one aside) all passed: $(jq -r '[.[] | "\(.html_url) \(.status)/\(.conclusion)"] | join(", ")' <<<"$runs")"
+            echo "::error::Cut a release with tools/public_sync.sh --tag $GITHUB_REF_NAME (it pushes main and the tag together and the build of main must pass), or re-run the failed jobs of main's run, then re-run this job."
+            exit 1
+          fi
+          echo "run=$run" >> "$GITHUB_OUTPUT"
+          echo "main's build of $SHA: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$run"
+          # its four packages must still be there (artifacts expire)
+          names=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run/artifacts?per_page=100" --jq '.artifacts[] | select(.expired | not) | .name')
+          for want in p4pc-windows-x64 p4pc-linux-x86_64 p4pc-macos-arm64 p4pc-macos-x86_64; do
+            printf '%s\n' "$names" | grep -qx "$want" || { echo "::error::artifact $want of run $run is missing or expired: re-run that run's jobs on main (they upload it again), then re-run this job"; exit 1; }
+          done
       - uses: actions/download-artifact@v4
         with:
           path: dist
           pattern: p4pc-*
           merge-multiple: true
+          run-id: ${{ steps.main.outputs.run }}
+          github-token: ${{ github.token }}
+      - name: Check the packages are labelled with the tag and are of this commit
+        env:
+          SHA: ${{ github.sha }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -eu
+          ls -l dist
+          [ "$(ls dist | wc -l)" -eq 4 ] || { echo "::error::expected four packages in dist"; exit 1; }
+          hint="main's build was made without the tag: cut releases with tools/public_sync.sh --tag $TAG (main and the tag pushed together)"
+          label_of() { sed -n '1s/, commit .*//p' | tr -d '\r'; }   # VERSION.txt: "<label>, commit <sha>"
+          for f in dist/*; do
+            case $f in *-"$TAG".zip|*-"$TAG".AppImage) ;; *) echo "::error::$f is not named for $TAG: $hint"; exit 1 ;; esac
+          done
+          for z in dist/p4pc-win64-*.zip dist/p4pc-macos-arm64-*.zip dist/p4pc-macos-x86_64-*.zip; do
+            first=$(unzip -p "$z" '*/VERSION.txt' | head -n 1 | tr -d '\r')
+            [ "$(printf '%s\n' "$first" | label_of)" = "$TAG" ] || { echo "::error::$z says '$first', not $TAG: $hint"; exit 1; }
+            case $first in *"commit $SHA"*) ;; *) echo "::error::$z is not a build of $SHA"; exit 1 ;; esac
+          done
+          image=$(ls dist/p4pc-linux64-*.AppImage)
+          chmod +x "$image"
+          (cd "$RUNNER_TEMP" && "$GITHUB_WORKSPACE/$image" --appimage-extract VERSION.txt >/dev/null)
+          first=$(head -n 1 "$RUNNER_TEMP/squashfs-root/VERSION.txt" | tr -d '\r')
+          [ "$(printf '%s\n' "$first" | label_of)" = "$TAG" ] || { echo "::error::$image says '$first', not $TAG: $hint"; exit 1; }
+          case $first in *"commit $SHA"*) ;; *) echo "::error::$image is not a build of $SHA"; exit 1 ;; esac
       - name: Create or update the release
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.ref_name }}
+          RUN: ${{ steps.main.outputs.run }}
         run: |
-          ls -l dist
+          notes="Packages built and tested by $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$RUN (commit $GITHUB_SHA)."
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             gh release upload "$TAG" dist/* --clobber --repo "$GITHUB_REPOSITORY"
           else
-            gh release create "$TAG" dist/* --repo "$GITHUB_REPOSITORY" --title "$TAG" --generate-notes
+            gh release create "$TAG" dist/* --repo "$GITHUB_REPOSITORY" --title "$TAG" --generate-notes --notes "$notes"
           fi

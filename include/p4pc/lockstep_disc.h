@@ -1,7 +1,8 @@
 /* Lockstep-only disc replay (docs/lockstep.md, "Lockstep disc replay"). After the accepted
  * initial LOAD anchor of a state-aligned run (or the qualified anchor of a battle qualification),
  * each disc read stays busy until the game frame at which retail first saw the matching read
- * complete. Nothing changes unless P4PC_LOCKSTEP_DISC_REPLAY is set. */
+ * complete, or, online (P4PC_LOCKSTEP_DISC_ONLINE), until the update in which retail's own poll
+ * saw it complete. Nothing changes unless one of them is set. */
 #ifndef P4PC_LOCKSTEP_DISC_H
 #define P4PC_LOCKSTEP_DISC_H
 
@@ -14,5 +15,20 @@ int p4pc_lockstep_disc_open(const char *directory);
 /* At the replay anchor boundary: from the next update on, every disc read must match a
  * table row and is held until the anchor-relative frame retail observed its completion. */
 void p4pc_lockstep_disc_activate(uint32_t anchor_frame);
+/* A status poll of a disc handle that is still reading (the H_Cdvd path's 0x004c9820 and the
+ * partition loader's 0x004c9858). In an online replay (P4PC_LOCKSTEP_DISC_ONLINE) a held game
+ * read takes retail's next poll of it, which must be in this update, and is released when that
+ * poll saw it complete. Nothing otherwise. */
+void p4pc_lockstep_disc_poll(const void *handle);
+/* The pre-anchor online replay (NG-7j) begins where retail's input is frame-locked to the port's: the title
+ * gate's press or the initial save restore. Before it the port boots on its own (retail plays its movies and
+ * loads while its input cursor waits at the gate), so its reads, loads and movies are only counted and checked
+ * against the table; from it on each is paired with retail's own, in order. */
+void p4pc_lockstep_disc_pre_begin(void);
+/* Before the initial anchor, replay the exact retail event-load completion
+ * duration keyed by request order and the event/file ID triple. */
+extern int p4pc_lockstep_disc_event_enabled;
+void p4pc_lockstep_disc_event_request(const void *work);
+int p4pc_lockstep_disc_event_idle(const void *work, int actual_idle);
 
 #endif

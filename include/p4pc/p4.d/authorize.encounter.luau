@@ -1,0 +1,3 @@
+--!capability authorize.encounter@1
+--!covers operation:encounter
+-- p4.authorize.on("encounter") (API 1.3).

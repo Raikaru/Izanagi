@@ -1,0 +1,3 @@
+--!capability party.record@1
+--!covers p4.party.record p4.party.set
+-- Read and update party Persona records at the frame safe point.

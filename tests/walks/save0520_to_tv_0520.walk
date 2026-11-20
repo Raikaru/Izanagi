@@ -32,11 +32,11 @@ press:cross
 wait:600
 press:cross
 wait:300
-# Close "Please buy a lot." before confirming Buy in the root menu.
+# Close the first-visit greeting before confirming Buy in the root menu.
 press:cross
 wait:300
-# The post-rescue New Items prefix is Ointment, Medical Kit, Royal Jelly, Mouthwash, Sedative.
-# The usual seven-item stock follows; Goho-M is row 10, Value Medicine row 6.
+# The shop lists new items before its regular stock.
+# Select the intended escape and recovery items.
 press:down
 press:down
 press:down
@@ -49,7 +49,7 @@ press:down
 press:down
 press:cross
 wait:300
-# Quantity starts at one: four Up presses buy five escapes for 4750 yen.
+# Increase the quantity and buy the planned escape items.
 press:up
 wait:30
 press:up
@@ -61,7 +61,7 @@ wait:30
 press:cross
 choose:1
 wait:600
-# Return from Goho-M (10) to Value Medicine (6), then buy two for 3800 yen.
+# Return to the recovery items and make the planned purchase.
 press:up
 wait:20
 press:up

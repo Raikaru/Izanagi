@@ -14,7 +14,7 @@ press:cross
 wait:40
 skipfield:8:1
 choose:1
-# Use "Say it's for the investigation", not the repeating "Ask her straight out".
+# Use the investigation response, not the repeating the repeating response.
 choose:2
 skipmsg
 log

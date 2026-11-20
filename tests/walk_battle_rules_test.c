@@ -326,22 +326,27 @@ static void skill_keys(void)
     CHECK(p4walk_battle_rule_parse("dead@4=circle,down,cross,skill:0xC5,cross,cross", &rule));
     CHECK(rule.key_count == 6 && rule.keys[3] == (P4WALK_KEY_SKILL | 0xC5u) && rule.keys[4] == 1u << P4W_CROSS);
     CHECK(!p4walk_battle_rule_parse("dead=skill:0", &rule) && !p4walk_battle_rule_parse("dead=skill:0x1B8", &rule) &&
+          !p4walk_battle_rule_parse("dead=skill:0x23F", &rule) && !p4walk_battle_rule_parse("dead=skill:0x1000", &rule) &&
           !p4walk_battle_rule_parse("dead=skill:abc", &rule) && !p4walk_battle_rule_parse("dead=skill:", &rule));
+    /* An added skill (576..4095) is a listed active skill too. */
+    CHECK(p4walk_battle_rule_parse("dead=circle,down,cross,skill:576,cross", &rule) &&
+          rule.keys[3] == (P4WALK_KEY_SKILL | 576u));
+    CHECK(p4walk_battle_rule_parse("dead=skill:0xFFF", &rule) && rule.keys[0] == (P4WALK_KEY_SKILL | 0xFFFu));
     CHECK(p4walk_battle_rule_parse("dead@1=circle,down,down,down,cross,item:0x30F,cross,cross", &rule));
     CHECK(rule.key_count == 8 && rule.keys[5] == (P4WALK_KEY_ITEM | 0x30Fu));
     CHECK(!p4walk_battle_rule_parse("dead=item:0x300", &rule) && !p4walk_battle_rule_parse("dead=item:0x400", &rule) &&
           !p4walk_battle_rule_parse("dead=item:", &rule) && !p4walk_battle_rule_parse("dead=item:5x", &rule));
-    /* Yukiko on 08/03: Dia, Agi, Me Patra, Maragi, Media, Agilao, Recarm. */
-    const uint16_t list[] = {192, 1, 200, 4, 195, 2, 209};
+    /* A fictional seven-skill list exercises wraparound and tie handling. */
+    const uint16_t list[] = {11, 22, 33, 44, 55, 66, 77};
     int moves = 99;
-    CHECK(p4walk_battle_list_moves(list, 7, 0, 195, &moves) && moves == -3);     /* Dia -> Media: Up three (wraps) beats Down four */
-    CHECK(p4walk_battle_list_moves(list, 7, 4, 195, &moves) && moves == 0);
-    CHECK(p4walk_battle_list_moves(list, 7, 4, 2, &moves) && moves == 1);
-    CHECK(p4walk_battle_list_moves(list, 7, 6, 192, &moves) && moves == 1);      /* Recarm -> Dia: Down wraps */
-    CHECK(p4walk_battle_list_moves(list, 6, 0, 4, &moves) && moves == 3);        /* a tie goes Down */
-    CHECK(!p4walk_battle_list_moves(list, 7, 0, 30, &moves));                    /* not learned */
-    CHECK(!p4walk_battle_list_moves(list, 7, 7, 195, &moves) && !p4walk_battle_list_moves(list, 7, -1, 195, &moves));
-    CHECK(!p4walk_battle_list_moves(list, 0, 0, 192, &moves));
+    CHECK(p4walk_battle_list_moves(list, 7, 0, 55, &moves) && moves == -3);      /* Up three wraps, beating Down four. */
+    CHECK(p4walk_battle_list_moves(list, 7, 4, 55, &moves) && moves == 0);
+    CHECK(p4walk_battle_list_moves(list, 7, 4, 66, &moves) && moves == 1);
+    CHECK(p4walk_battle_list_moves(list, 7, 6, 11, &moves) && moves == 1);       /* Down wraps. */
+    CHECK(p4walk_battle_list_moves(list, 6, 0, 44, &moves) && moves == 3);       /* A tie goes Down. */
+    CHECK(!p4walk_battle_list_moves(list, 7, 0, 30, &moves));                     /* Not learned. */
+    CHECK(!p4walk_battle_list_moves(list, 7, 7, 55, &moves) && !p4walk_battle_list_moves(list, 7, -1, 55, &moves));
+    CHECK(!p4walk_battle_list_moves(list, 0, 0, 11, &moves));
 }
 
 /* Results-screen skill offer: decline through the real list and Yes/No, never forgetting a known skill. */

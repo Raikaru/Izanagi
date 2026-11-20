@@ -1,5 +1,7 @@
 import pathlib
 import sys
+import os
+import subprocess
 import tempfile
 import unittest
 
@@ -27,8 +29,8 @@ class ModCodegen(unittest.TestCase):
     def test_scalar_signedness_and_guest_pointer_marshalling(self):
         text = (ROOT / "tests/mod_hooks_game.c").read_text(encoding="utf-8")
         count, game, bridge = self.generate(text)
-        self.assertEqual(count, 6)
-        for signature in ('"II"', '"hbH"', '"fifpd"', '"pp"', '"ii"', '"vp"'):
+        self.assertEqual(count, 9)
+        for signature in ('"II"', '"hbH"', '"fifpd"', '"pp"', '"ii"', '"vp"', '"vppH"', '"Hp"'):
             self.assertIn(signature, bridge)
         self.assertNotIn("P4ModValue", game)
         self.assertIn("P4_H2G(a2)", bridge)
@@ -38,7 +40,7 @@ class ModCodegen(unittest.TestCase):
         self.assertIn('#include "p4pc/mod_entry.h"', game)
         self.assertNotIn("P4ModFunction", game)
         self.assertNotIn("__attribute__((noinline))", game)
-        self.assertEqual(bridge.count("__attribute__((noinline))"), 6)
+        self.assertEqual(bridge.count("__attribute__((noinline))"), 9)
         self.assertIn("p4_mod_f32_number(a1)", bridge)
         self.assertIn("p4_mod_f32_value(result.d)", bridge)
         self.assertIn("(int64_t)(int32_t)(a0)", bridge)
@@ -67,6 +69,102 @@ class ModCodegen(unittest.TestCase):
         self.assertIn("value + 7", emitted)
         self.assertNotIn("value + 1", emitted)
         self.assertLess(emitted.index("p4_mod_guard_00100100(value)"), emitted.index("value + 7"))
+
+    def test_sfd_condition_guard_precedes_dispatch(self):
+        text = """#include "p4pc/sfd_condition_guard.h"
+typedef int Sint32;
+typedef unsigned int Uint32;
+typedef struct Sfd *SFD;
+#define SFD_COND_NUM 100
+// FUN_00524FF8
+Sint32 SFD_GetCond(SFD sfd, Sint32 id, Sint32 *val)
+{
+    if ((Uint32)id >= SFD_COND_NUM) {
+        p4_sfd_invalid_condition_key(id);
+        *val = 0;
+        return 0;
+    }
+    *val = id;
+    return 7;
+}
+"""
+        count, game, _ = self.generate(text)
+        self.assertEqual(count, 1)
+        self.assertLess(game.index("p4_sfd_invalid_condition_key(id)"),
+                        game.index("p4_mod_guard_00524ff8(sfd, id, val)"))
+        game += """
+P4ModEntry p4_mod_entry_00524ff8 = { P4_MOD_ACTIVE, 0 };
+static int calls;
+static int p4_mod_dispatch(int id, int *out) { ++calls; *out = id + 1000; return 42; }
+int32_t p4_mod_guard_00524ff8(void *sfd, int32_t id, void *val)
+{ (void)sfd; return p4_mod_dispatch(id, val); }
+int main(void) {
+    int out = -1;
+    if (SFD_GetCond(0, -1, &out) != 0 || out != 0 || calls) return 1;
+    out = -1;
+    if (SFD_GetCond(0, 100, &out) != 0 || out != 0 || calls) return 5;
+    out = -1;
+    if (SFD_GetCond(0, 2147483647, &out) != 0 || out != 0 || calls) return 2;
+    if (SFD_GetCond(0, 99, &out) != 42 || out != 1099 || calls != 1) return 3;
+    if (SFD_GetCond(0, 0, &out) != 42 || out != 1000 || calls != 2) return 4;
+    return 0;
+}
+"""
+        source = self.root / "sfd_mod.c"
+        binary = self.root / "sfd_mod"
+        source.write_text(game, encoding="utf-8")
+        subprocess.run([os.environ.get("CC", "cc"), "-std=c11", "-O2", "-I",
+                        str(ROOT / "include"), str(source),
+                        str(ROOT / "src/platform/sfd_condition_guard.c"), "-o", str(binary)], check=True)
+        result = subprocess.run([str(binary)], check=True, text=True, capture_output=True)
+        self.assertEqual(result.stderr.count("refusing out-of-range SFD condition key"), 1)
+
+    def test_sfd_hook_rejects_missing_reviewed_guard(self):
+        text = ("typedef int Sint32;\ntypedef struct Sfd *SFD;\n"
+                "// FUN_00524FF8\n"
+                "Sint32 SFD_GetCond(SFD sfd, Sint32 id, Sint32 *val) { return 0; }\n")
+        with self.assertRaisesRegex(ValueError, "pre-dispatch condition guard"):
+            self.generate(text)
+
+    def test_ai_group_guard_finalizes_the_hooked_result_before_return(self):
+        text = ("typedef unsigned char u8;\n"
+                "// FUN_001DE800\n"
+                "u8 btlAICommandPickTableAction(u8 *action) { (void)action; return 2; }\n")
+        count, game, bridge = self.generate(text)
+        self.assertEqual(count, 1)
+        source = self.root / "ai_group.c"
+        binary = self.root / "ai_group"
+        source.write_text(game + bridge + """
+#include <stdlib.h>
+static unsigned dispatches, finalized;
+void p4_mod_dispatch(P4ModFunction *function, P4ModValue *args, P4ModValue *result)
+{
+    ++dispatches;
+    function->invoke(args, result);
+    if (result->u != 2) abort();
+    result->u = 0; /* The hard-mode after-hook: group 2 -> group 0. */
+}
+int p4_game_elements_ai_native_group_result(void *source, uint32_t group)
+{
+    if (P4_H2G(source) != 0x123400u || group != 0 || dispatches != 1) abort();
+    ++finalized;
+    return 0;
+}
+_Noreturn void p4_game_elements_ai_native_fail(void) { abort(); }
+int main(void)
+{
+#ifdef P4_GUEST64
+    if (p4_guest_init()) return 3;
+#endif
+    if (p4_mod_guard_001de800(P4_G2H(0x123400u)) != 0) return 1;
+    return dispatches != 1 || finalized != 1;
+}
+""", encoding="utf-8")
+        subprocess.run([os.environ.get("CC", "cc"), "-std=c11", "-O2", "-I",
+                        str(ROOT / "include"), str(source),
+                        str(ROOT / "src/platform/guest.c"),
+                        str(ROOT / "src/platform/os/os_posix.c"), "-o", str(binary)], check=True)
+        subprocess.run([str(binary)], check=True)
 
     def splice(self, game_text, overrides):
         game = self.mirror / "src/game.c"

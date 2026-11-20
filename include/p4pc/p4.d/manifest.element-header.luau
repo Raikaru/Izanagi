@@ -1,0 +1,3 @@
+--!capability manifest.element-header@1
+--!covers section:element-header
+-- mod.ini [element-header <leaf>]: a header image for a leaf without a header icon of its own (the retail ailment leaves).

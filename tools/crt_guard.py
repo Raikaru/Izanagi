@@ -7,6 +7,7 @@ names. JSON and TSV reports retain the referencing object and function (includin
 address-taken relocations), so the inventory describes the actual generated code.
 """
 import argparse
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 import csv
 import io
 import json
@@ -20,6 +21,8 @@ import gen_port
 import crt_flow
 
 ROOT = Path(__file__).resolve().parents[1]
+# nm, objdump and the adapters' clang AST dumps run this many at a time; results are always consumed in object order.
+WORKERS = os.cpu_count() or 1
 # ISO C library entry points, including optional C11 Annex K spellings. Target
 # library exports supplement this catalog; unknown non-retail externals also fail.
 C_FUNCTIONS = set("""
@@ -74,13 +77,18 @@ def normalize(raw, coff32=False):
     return name
 
 
+def _nm(nm, chunk):
+    return subprocess.run([nm, "-A", "-P", "-g", *map(str, chunk)], text=True, capture_output=True, check=True).stdout
+
+
 def object_symbols(objects, nm, coff32=False):
     """Use POSIX nm output, with explicit headers to retain each object's identity."""
     defined, references = set(), {str(obj): set() for obj in objects}
-    for start in range(0, len(objects), 100):
-        chunk = objects[start:start + 100]
-        out = subprocess.run([nm, "-A", "-P", "-g", *map(str, chunk)],
-                             text=True, capture_output=True, check=True).stdout
+    chunks = [objects[start:start + 100] for start in range(0, len(objects), 100)]
+    # nm runs concurrently; its outputs are read in chunk order, so the result does not depend on scheduling.
+    with ThreadPoolExecutor(max_workers=WORKERS) as pool:
+        outputs = pool.map(_nm, [nm] * len(chunks), chunks)
+    for out in outputs:
         # -A -P is '<path>: <symbol> <type> ...' on GNU and LLVM nm.
         for line in out.splitlines():
             match = re.match(r"^(.*?):\s+(\S+)\s+([A-Za-z?])(?:\s|$)", line)
@@ -198,10 +206,12 @@ def audit(objects, definitions, nm, objdump, coff32, host, known, renames, allow
     # Generated unresolved-address traps are definitions, but not CRT
     # implementations. Final closure must find a real body, never such a trap.
     trap_definitions = set()
-    for obj, names in definition_references.items():
-        if "p4pc_trap_args" in names:
-            trap_definitions.update(relocation_callers(
-                obj, {"p4pc_trap_args"}, objdump, coff32)["p4pc_trap_args"])
+    trapped = [obj for obj, names in definition_references.items() if "p4pc_trap_args" in names]
+    with ThreadPoolExecutor(max_workers=WORKERS) as pool:
+        found = pool.map(relocation_callers, trapped, [{"p4pc_trap_args"}] * len(trapped),
+                         [objdump] * len(trapped), [coff32] * len(trapped))
+    for callers in found:
+        trap_definitions.update(callers["p4pc_trap_args"])
     generated_definitions = set()
     for obj in dict.fromkeys(map(str, [*objects, *definitions])):
         if (re.search(r"(?:^|/)p4pc_tables(?:64w?)?\.c\.(?:o|obj)$", obj.replace("\\", "/")) or
@@ -248,17 +258,20 @@ def audit(objects, definitions, nm, objdump, coff32, host, known, renames, allow
                 alias_addresses[name] = address
         alias_addresses[target] = address
     rows, failures = [], []
+    plan = []
     for obj, names in sorted(references.items()):
         source = native_source(obj)
         adapter = (adapters or {}).get(source)
+        flow = None
         if adapter:
             entry = (commands or {}).get(os.path.normcase(str(Path(obj).resolve())))
             if entry is None:
-                raise ValueError(f"{obj}: adapter flow check needs its actual compile command")
-            host_names = C_FUNCTIONS.difference(allow) | {
-                name for name in adapter["calls"]
-                if name not in allow and not name.startswith(("SDL_", "av_", "avcodec_", "av_parser_", "sws_", "pthread_"))}
-            failures.extend(crt_flow.check(entry, host_names))
+                flow = ValueError(f"{obj}: adapter flow check needs its actual compile command")
+            else:
+                host_names = C_FUNCTIONS.difference(allow) | {
+                    name for name in adapter["calls"]
+                    if name not in allow and not name.startswith(("SDL_", "av_", "avcodec_", "av_parser_", "sws_", "pthread_"))}
+                flow = (entry, host_names)
         audited = {}
         for name in sorted(names):
             is_crt = (name in C_FUNCTIONS or name in host or name in renames or
@@ -298,19 +311,42 @@ def audit(objects, definitions, nm, objdump, coff32, host, known, renames, allow
                 else:
                     disposition, reason = "FORBIDDEN", "host/unknown external absent from reviewed allowlist"
                 audited[name] = (name, disposition, reason)
-        callers = relocation_callers(obj, audited, objdump, coff32) if audited else {}
-        for target, (name, disposition, reason) in audited.items():
-            for caller in sorted(callers[target]):
-                row_disposition, row_reason = disposition, reason
-                if disposition == "reviewed host" and target in C_FUNCTIONS and adapter and caller not in adapter["calls"].get(target, []):
-                    row_disposition, row_reason = "FORBIDDEN", "new host symbol/caller pair in adapter requires review"
-                if disposition == "FORBIDDEN" and target not in targets and adapter and caller in adapter["calls"].get(target, []):
-                    row_disposition, row_reason = "reviewed host adapter", adapter["reason"]
-                if row_disposition == "FORBIDDEN":
-                    failures.append(f"{obj}: {caller} -> {target}: {row_reason}")
-                rows.append(dict(symbol=name, binding=target, disposition=row_disposition,
-                                 object=obj, source=report_source(obj, commands), caller=caller, reason=row_reason))
+        plan.append((obj, adapter, flow, audited))
+    # The adapters' flow checks (a clang AST dump each) and objdump dominate the audit: they run concurrently, one object per task,
+    # and their results are consumed in object order, so the rows, the failures and the first error raised are a serial run's.
+    with ProcessPoolExecutor(max_workers=WORKERS, initializer=_worker_init, initargs=(MACHO,)) as pool:
+        futures = [None if isinstance(flow, Exception) or not (flow or audited) else
+                   pool.submit(_object_facts, obj, flow, audited, objdump, coff32)
+                   for obj, _, flow, audited in plan]
+        for (obj, adapter, flow, audited), future in zip(plan, futures):
+            if isinstance(flow, Exception):
+                raise flow
+            flow_failures, callers = future.result() if future else ([], {})
+            failures.extend(flow_failures)
+            for target, (name, disposition, reason) in audited.items():
+                for caller in sorted(callers[target]):
+                    row_disposition, row_reason = disposition, reason
+                    if disposition == "reviewed host" and target in C_FUNCTIONS and adapter and caller not in adapter["calls"].get(target, []):
+                        row_disposition, row_reason = "FORBIDDEN", "new host symbol/caller pair in adapter requires review"
+                    if disposition == "FORBIDDEN" and target not in targets and adapter and caller in adapter["calls"].get(target, []):
+                        row_disposition, row_reason = "reviewed host adapter", adapter["reason"]
+                    if row_disposition == "FORBIDDEN":
+                        failures.append(f"{obj}: {caller} -> {target}: {row_reason}")
+                    rows.append(dict(symbol=name, binding=target, disposition=row_disposition,
+                                     object=obj, source=report_source(obj, commands), caller=caller, reason=row_reason))
     return rows, failures
+
+
+def _worker_init(macho):
+    global MACHO
+    MACHO = macho
+
+
+def _object_facts(obj, flow, audited, objdump, coff32):
+    """One object's adapter flow failures and the callers of its audited references."""
+    flow_failures = crt_flow.check(*flow) if flow else []
+    callers = relocation_callers(obj, audited, objdump, coff32) if audited else {}
+    return flow_failures, callers
 
 
 def host_exports(paths, nm, coff32):

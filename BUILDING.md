@@ -84,6 +84,11 @@ your executable as described above.
 The first build compiles the whole decompilation mirror and takes a while. Later
 builds are incremental, and the `p4pc-ccache` volume keeps compiler results across
 containers and fresh build trees.
+The mirror excludes the decoder units explicitly removed by
+`config/inactive_movie_decoder.json` from its declared outputs. Their source and
+the manifest remain dependencies: changing either still regenerates the mirror.
+An unchanged build no longer regenerates it because a deliberately removed
+decoder file is missing.
 
 ### Linking against your own SDL3 / FFmpeg
 
@@ -138,9 +143,9 @@ container uses and builds SDL3, the LGPL-only FFmpeg and ANGLE's libraries into 
 
 ```sh
 sh ci/macos/build_deps.sh build/macos-deps
-sh ci/macos/configure.sh build/macos-deps build/macos
-cmake --build build/macos --target p4pc64        # the player; --target p4_x64 adds every test program
-ctest --test-dir build/macos -L '^port64$'        # the tests; those that need the game skip
+sh ci/macos/configure.sh build/macos-deps build/macos -DP4_CENSUS_CHECK=ON
+cmake --build build/macos --target p4_x64 -- -k 0  # player and test programs
+ctest --test-dir build/macos -j "$(sysctl -n hw.ncpu)" --timeout 900 --output-on-failure -L '^port64$'
 P4PC_ISO=/path/to/your.iso ./build/macos/p4pc64
 ```
 
@@ -155,6 +160,6 @@ into `dist/`. They check the shipped DLL/shared-library set, verify that FFmpeg 
 LGPL-only, and add `THIRD_PARTY_NOTICES.txt`, `licenses/` and the corresponding
 library sources. `sh tools/package_macos.sh` does the same on a Mac for the macOS app
 (`dist/p4pc-macos-<arch>-<version>.zip`, ad-hoc signed). Packages never contain game
-data, saves or captures. The GitHub Actions workflow `.github/workflows/build.yml` runs
-all of them for every pushed tag and attaches the packages to the release. See
+data, saves or captures. The GitHub Actions workflow `.github/workflows/build.yml` builds
+all of them on every push to `main`; a release (`tools/public_sync.sh --tag`) attaches the packages of its `main` run, labelled with the tag. See
 [release packaging](docs/platform/packaging.md).

@@ -32,7 +32,6 @@ payload-4 backpointer. Host buffers remain host-allocated. See the
 a 2 MiB / 8192-block quarantine, verification each flip and every 32 allocations, and
 allocation-site diagnostics before aborting. `=2` additionally fills new blocks with
 `0xCD`; `=3` protects quarantined blocks of at least 4 KiB against stale accesses.
-Resolve reported PCs with `P4PC_GDB_SYM=0xaddr` in the boot runner.
 
 ## Fresh-image restart
 

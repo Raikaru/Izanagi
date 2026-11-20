@@ -110,5 +110,16 @@ class RecordParameterTests(unittest.TestCase):
             self.assertEqual(sigs.record_parameter_class(self.shape(size), None), "?")
 
 
+class NullFrameMemoryTests(unittest.TestCase):
+    def test_interpreter_constructs_zero_page_without_retail_input(self):
+        spec = importlib.util.spec_from_file_location("p4_mipsdiff_run", ROOT / "tools/mipsdiff/run.py")
+        run = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(run)
+        run.RETAIL = str(ROOT / "does-not-exist.elf")
+        for address in (0, 0x50, 0xA0, 0xFFF):
+            self.assertEqual(run.retail_page(address), bytes(4096))
+        self.assertIsNone(run._elf)
+
+
 if __name__ == "__main__":
     unittest.main()

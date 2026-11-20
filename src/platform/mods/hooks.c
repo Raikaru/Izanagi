@@ -14,6 +14,16 @@ struct P4ModHook {
     P4ModHook *next, *previous;
 };
 static unsigned dispatch_depth;
+static unsigned reward_depth;
+
+unsigned p4_mod_reward_begin(void)
+{
+    unsigned previous = reward_depth;
+    reward_depth = dispatch_depth + 1;
+    return previous;
+}
+void p4_mod_reward_end(unsigned previous) { reward_depth = previous; }
+int p4_mod_reward_active(void) { return reward_depth != 0 && reward_depth == dispatch_depth; }
 
 int p4_mod_hooks_quiescent(void) { return dispatch_depth == 0; }
 static void require_quiescent(void)

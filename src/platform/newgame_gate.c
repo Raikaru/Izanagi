@@ -8,7 +8,8 @@
  * P4PC_FACING_GATE=1 adds the walkers' facing check (state words, no frames): every few flips the scene resources of list 3 (the event and field characters, the
  * game's scene manager at the word 0x00762EA0: manager + 8, list heads at +4 * list, next node at +0x138, the model's matrix at +0x164) are sampled; a model that
  * moved in x/z must have its matrix's `at` column along the way it moved (retail: at is the direction of travel, right = (at.z, 0, -at.x)). Any sample against
- * the travel (dot < -0.5 on two samples in a row) fails the gate, as does a model of the Inaba greeting or the 04/12 breakfast (retail poses below) with another facing, as does a run in which fewer than 40 such samples were seen (the events never moved anyone). The event walkers' yaw
+ * the travel (dot < -0.5 on two samples in a row) fails the gate, as does a run with fewer than 40 movement samples.
+ * Private builds additionally check their captured reference poses. The event walkers' yaw
  * comes from MT_Scene_GetDirectionYaw's acos of a soft double: with a 32-bit declaration of it every walker faced +Z. */
 #include <stdint.h>
 #include <stdio.h>
@@ -29,6 +30,23 @@ extern double p4gl_context_capture_mad(void);
 extern const char *p4gl_gate_limit(const char *envName);
 extern int16_t datGetDateIndex(void);
 extern int32_t calDayOfYearFromMonthDay(int32_t month, int32_t day);
+extern int p4pc_title_ready_state, p4pc_title_confirmed; /* title_driver.c */
+extern unsigned p4pc_title_ready_flip, p4pc_title_confirmed_flip;
+
+/* P4PC_GATE_RESULT=<path>: the gate's outcome as a small file the engine writes at the
+ * gate's exit, for a caller (p4mod test) that must not trust the mixed engine and mod
+ * log. One "key value" per line after the "p4pc-gate-result 1" header. 0 written. */
+static int write_gate_result(const char *path, int ok, unsigned frame, int field, int room)
+{
+    FILE *out = fopen(path, "wb");
+    if (out == NULL) return -1;
+    int bad = fprintf(out, "p4pc-gate-result 1\nok %d\nflip %u\nfield %d\nroom %d\ntitle_ready_state %d\n"
+                           "title_ready_flip %u\ntitle_confirmed %d\ntitle_confirmed_flip %u\n",
+                      ok, frame, field, room, p4pc_title_ready_state, p4pc_title_ready_flip, p4pc_title_confirmed,
+                      p4pc_title_confirmed_flip) < 0;
+    bad |= fclose(out) != 0;
+    return bad ? -1 : 0;
+}
 
 
 /* The facing check of P4PC_FACING_GATE (above). */
@@ -36,20 +54,19 @@ typedef struct { uint32_t node; float x, z; int bad; } FacingTrack;
 static FacingTrack sTrack[24];
 static unsigned sFacingSamples, sFacingBad;
 
-/* Poses of the Inaba greeting read from retail (PortTrace3's ng-handsome state, scene list 3, the matrices at node + 0x164): where a model stands and the `at`
- * column it has there. Yu faces -Z, Dojima and Nanako +Z (toward each other). Each must be seen with that `at` at least once in the run. */
-static const struct { const char *who; float x, z, atx, atz; int fromDate; } sPoses[] = {
-    { "Yu", -293.0f, 674.9f, 0.194f, -0.981f, 10 },
-    { "Dojima", -282.8f, 572.1f, -0.105f, 0.995f, 10 },
-    { "Nanako", -328.0f, 535.8f, -0.139f, 0.990f, 10 },
-    /* the 04/12 breakfast (PortTrace3's retail frame f10921, list 3): Yu standing at the table, three of the dishes */
-    { "Yu at breakfast", 214.0f, -95.9f, -0.387f, 0.922f, 12 },
-    { "dish 0c35", 219.1f, 137.1f, 0.940f, 0.342f, 12 },
-    { "dish 0c33", 218.6f, 160.8f, 0.978f, 0.208f, 12 },
-    { "dish 0c32", 160.3f, 168.8f, -0.951f, -0.309f, 12 },
-};
+#if defined(__has_include)
+#  if __has_include("newgame_gate_poses_private.inc")
+#    define P4_FACING_POSES 1
+#  endif
+#endif
+#ifndef P4_FACING_POSES
+#define P4_FACING_POSES 0
+#endif
+#if P4_FACING_POSES
+#include "newgame_gate_poses_private.inc"
 enum { P4_POSES = sizeof sPoses / sizeof sPoses[0] };
 static int sPoseSeen[P4_POSES];
+#endif
 static float sFacingWorst = 1.0f;
 
 static int guest_ok(uint32_t a)
@@ -92,6 +109,7 @@ static void facing_sample(unsigned frame)
                     slot = i;
                 }
             }
+#if P4_FACING_POSES
             for (i = 0; i < P4_POSES; i++) {
                 if (fabsf(m[12] - sPoses[i].x) < 1.5f && fabsf(m[14] - sPoses[i].z) < 1.5f) {
                     if (fabsf(m[8] - sPoses[i].atx) <= 0.02f && fabsf(m[10] - sPoses[i].atz) <= 0.02f) {
@@ -99,6 +117,7 @@ static void facing_sample(unsigned frame)
                     }
                 }
             }
+#endif
             if (slot >= 0) {
                 FacingTrack *tr = &sTrack[slot];
                 const float x = m[12], z = m[14];
@@ -143,6 +162,7 @@ static void facing_sample(unsigned frame)
  * With no component mask, the ordinary whole-game guard is unchanged. */
 int p4pc_facing_gate_check(int date)
 {
+#if P4_FACING_POSES
     const char *component = getenv("P4PC_FACING_COMPONENT_MASK");
     unsigned long mask = 0;
     int k, seen = 0, needed = 0;
@@ -169,6 +189,16 @@ int p4pc_facing_gate_check(int date)
     }
     fprintf(stderr, "p4pc: facing gate: retail poses seen (Inaba greeting, 04/12 breakfast): %d of %d\n", seen, needed);
     return sFacingBad == 0 && (component != NULL || sFacingSamples >= 40) && seen == needed;
+#else
+    (void)date;
+    if (getenv("P4PC_FACING_COMPONENT_MASK") != NULL) {
+        fprintf(stderr, "p4pc: facing gate: reference poses unavailable in this build\n");
+        return 0;
+    }
+    fprintf(stderr, "p4pc: facing gate: reference poses unavailable; checking %u movement samples and %u backwards samples\n",
+            sFacingSamples, sFacingBad);
+    return sFacingBad == 0 && sFacingSamples >= 40;
+#endif
 }
 
 void p4pc_newgame_gate_frame(unsigned frame)
@@ -213,7 +243,10 @@ void p4pc_newgame_gate_frame(unsigned frame)
     if (gate < 0) return;
     {
         const int stateGate = p4pc_capture_state_gate(frame);
-        if (stateGate == 0 || (stateGate < 0 && frame < (unsigned long)gate)) return;
+        const int titleReady = getenv("P4PC_GATE_TITLE_READY") != NULL &&
+            (p4pc_title_ready_state == 7 || p4pc_title_ready_state == 9);
+        if (!titleReady && !(getenv("P4PC_GATE_TITLE_READY") != NULL && frame >= (unsigned long)gate) &&
+            (stateGate == 0 || (stateGate < 0 && frame < (unsigned long)gate))) return;
     }
     {
         const uint8_t *rec = iGpffff9db0;
@@ -234,6 +267,13 @@ void p4pc_newgame_gate_frame(unsigned frame)
         fprintf(stderr, "p4pc: new-game gate %s at flip %u: field %d room %d (want %d:%d), date index %d (want %d/%d = %d), frame MAD %.4f%% (limit %s)\n", ok ? "PASS" : "FAIL",
                 frame, field, room, wantField, wantRoom, date, wantMonth, wantDay, wantMonth < 0 ? -1 : calDayOfYearFromMonthDay(wantMonth, wantDay), mad, max != NULL ? max : "none");
         fflush(stderr);
+        {
+            const char *result = getenv("P4PC_GATE_RESULT");
+            if (result != NULL && *result != '\0' && write_gate_result(result, ok, frame, field, room)) {
+                fprintf(stderr, "p4pc: new-game gate: cannot write its result to %s\n", result);
+                ok = 0;
+            }
+        }
         p4pc_exit(ok ? 0 : 1);
     }
 }

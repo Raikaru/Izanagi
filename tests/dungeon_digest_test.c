@@ -122,6 +122,30 @@ static int same(const char *a, const char *b, const char *key)
     return strncmp(x, y, strcspn(x, " ")) == 0;
 }
 
+static char grid_line[160];
+static unsigned grid_lines;
+static void capture_grid(void *user, const char *message)
+{
+    (void)user;
+    if (strncmp(message, "CHECK grid row ", 15) == 0) {
+        snprintf(grid_line, sizeof grid_line, "%s", message);
+        ++grid_lines;
+    }
+}
+
+static void test_grid_dump(void)
+{
+    const P4WalkHost host = { .read32 = read32, .note = capture_grid };
+    char expected[160] = "CHECK grid row  0: A73123 003124";
+
+    for (unsigned i = 2; i < 16; ++i) strcat(expected, " ......");
+    setup();
+    p4walk_checks_frame(&host, 1000);
+    p4walk_checks_frame(&host, 1060);
+    CHECK(grid_lines == 1);
+    CHECK(strcmp(grid_line, expected) == 0);
+}
+
 int main(void)
 {
     static const char prefix[] = "dungeon digest flip 200 field 42:0 step 41 seed 000010c5 grid ";
@@ -129,6 +153,7 @@ int main(void)
     const P4WalkHost host = { .read32 = read32 };
     uint32_t roll = 2166136261u;
 
+    test_grid_dump();
     setup();
     row(200, base, sizeof base);
     CHECK(strncmp(base, prefix, sizeof prefix - 1) == 0);

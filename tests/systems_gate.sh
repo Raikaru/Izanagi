@@ -4,14 +4,14 @@
 # plays the game's own flows: the camp menu, Goho-M (the escape item) out of the final dungeon to the TV-world Entrance, the Velvet Room door.
 # The gate flip's frame (one flip earlier, as in tests/newgame_gate.sh) is compared with a raw 640x448 RGB reference (refs/systems_<scenario>.rgb beside the
 # retail image, never committed; `systems_gate.sh --make-ref <p4pc> <scenario>` writes it from the current build).
-#   scenario fusion      Velvet Room > Fuse Personas > Normal Spread: "Select the 1st card" (the fusion results are random, so the gate stops at the list)
+#   scenario fusion      Velvet Room > Fuse Personas > Normal Spread; stop at the first selection list
 #   scenario compendium  Velvet Room > Check Compendium > View Compendium
-#   scenario club        Rise's navigator > Go to the club > the Marukyu Striptease stage steps > "Which floor?"
+#   scenario club        Navigator > club > stage steps > floor-selection prompt
 #   scenario minimap     Marukyu 1F, standing in the first room: the minimap (explored cells, player arrow, enemy dots, stairs star) in the corner. The whole frame is compared, so ctest passes a limit of 0.7 percent
 #   scenario game1f      Rise's navigator > Go to the game: Void Quest's entry room, its CHECK, 1F
-#   scenario heaven1f    Rise's navigator > Go to Heaven: the Pearly Gates, Rise's "good luck", 1F
-#   scenario daidara     Teddie > Return to shop > Daidara > Buy weapon > Tajikarao Sword bought (yen 9,941,999, "Do you want to equip")
-#   scenario shiroku     Teddie > Shiroku Store > Buy item > Medicine: "The price for 1 will be 680. Do you want to purchase it?"
+#   scenario heaven1f    Navigator > Heaven: entry room and first floor
+#   scenario daidara     Return to the weapon shop and buy a weapon
+#   scenario shiroku     Return to the item shop and open the purchase confirmation
 #   scenario entrance / seats  Retail-aligned 3D/post-processing frames (GS audit, renderer_port.md 11); defaults remain retail, while distinct port witnesses supply a reference name.
 #   usage: systems_gate.sh <p4pc> <scenario> [limit percent] [reference name] | systems_gate.sh --make-ref <p4pc> <scenario>
 # P4PC_SAVES_DIR overrides <ELF dir>/saves. Skips (77) without ISO, ELF or save; missing, unpinned or changed references fail.

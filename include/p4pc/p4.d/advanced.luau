@@ -1,0 +1,3 @@
+--!capability advanced@1
+--!covers p4.hook p4.call p4.fn p4.describe p4.mem
+-- Build-specific raw access: p4.hook, call, fn, describe and p4.mem (API 1.0). Addresses may break on port updates; prefer a semantic capability.

@@ -1,0 +1,3 @@
+--!capability sha256@1
+--!covers p4.sha256
+-- Compute SHA-256 for a string or buffer.

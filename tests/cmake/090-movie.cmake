@@ -49,17 +49,22 @@ target_include_directories(movie_task_smoke PRIVATE "${CMAKE_SOURCE_DIR}/include
   "${CMAKE_SOURCE_DIR}/src/render" "${CMAKE_SOURCE_DIR}/src/viewer" "${CMAKE_SOURCE_DIR}/src/platform/files")
 target_compile_options(movie_task_smoke PRIVATE -fno-builtin)
 target_compile_definitions(movie_task_smoke PRIVATE ${P4_PORT_DEFINES})
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/movie_retail_events.h")
+  target_compile_definitions(movie_task_smoke PRIVATE P4PC_MOVIE_RETAIL_EVENTS)
+endif()
 target_link_libraries(movie_task_smoke m ${P4_SDL3_LIB} ${P4_FFMPEG_LIBS})
 p4_ps2_exe(movie_task_smoke)
 add_test(NAME movie_task COMMAND movie_task_smoke)
 set_tests_properties(movie_task PROPERTIES SKIP_RETURN_CODE 77 LABELS gl WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
-# The same task on the opening (P4CTOP1, 2520 frames) and P4CT001 (1800 frames): the events the game sees (first frame
-# after 18..21 updates, +1 frame per update, state 4/5/6 at the retail frame numbers) are compared with the
-# PCSX2 traces in tests/movie_retail_events.h.
+# The same task on two additional movie indices. Private builds also compare
+# against the captured event oracle; the public event logic has synthetic tests.
 add_test(NAME movie_task_opening COMMAND movie_task_smoke)
 add_test(NAME movie_task_p4ct001 COMMAND movie_task_smoke)
 set_tests_properties(movie_task_opening PROPERTIES SKIP_RETURN_CODE 77 LABELS gl TIMEOUT 600 WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
   ENVIRONMENT "P4PC_MOVIE_INDEX=21;P4PC_MOVIE_SHOTS=0")
 set_tests_properties(movie_task_p4ct001 PROPERTIES SKIP_RETURN_CODE 77 LABELS gl TIMEOUT 600 WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
   ENVIRONMENT "P4PC_MOVIE_INDEX=1;P4PC_MOVIE_SHOTS=0")
+
+add_executable(movie_events_test movie_events_test.c)
+add_test(NAME movie_events COMMAND movie_events_test)
 

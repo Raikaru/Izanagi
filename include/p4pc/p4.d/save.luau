@@ -1,0 +1,3 @@
+--!capability save@1
+--!covers p4.save
+-- p4.save.register: a mod's own block in each save, with load/save authorizers (API 1.3).

@@ -80,6 +80,15 @@ static const char *const vsyncs[] = {"auto", "on", "off"};
 #if defined(SDL_PLATFORM_ANDROID) || defined(SDL_PLATFORM_IOS)
 static void touchScrollFormat(char *value, size_t capacity, void *unused);
 static void touchScrollAdjust(int direction, void *unused);
+#if defined(SDL_PLATFORM_ANDROID)
+static void editPadLayout(int direction, void *unused)
+{
+    (void)direction;
+    (void)unused;
+    extern void p4_android_edit_pad_layout(void);
+    p4_android_edit_pad_layout();
+}
+#endif
 static void initialiseMobileEntry(void)
 {
     static int registered;
@@ -92,6 +101,14 @@ static void initialiseMobileEntry(void)
         };
         registered = 1;
         extensions[extensionCount++] = entry;
+#if defined(SDL_PLATFORM_ANDROID)
+        static const P4SettingsEntry padLayout = {
+            .label = "Edit touch layout", .adjust = editPadLayout,
+            .flags = P4_SETTINGS_MOBILE | P4_SETTINGS_TOUCH | P4_SETTINGS_ACTION,
+            .description = "Move and resize the on-screen controls."
+        };
+        extensions[extensionCount++] = padLayout;
+#endif
     }
 }
 #endif
@@ -625,7 +642,7 @@ int p4_settings_event(const SDL_Event *event)
             startX = x;
             startY = y;
         }
-        return active || (tracking && x >= 544 && y < 48);
+        return active;
     }
     if (event->type == SDL_EVENT_FINGER_UP) {
         float x, y;

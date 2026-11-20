@@ -19,6 +19,9 @@ if(NOT _p4_package_runner)
 endif()
 add_test(NAME package_registry COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/package_registry_test.py"
   ${_p4_package_runner} "$<TARGET_FILE:package_registry_test>" --driver-end)
-set_tests_properties(package_registry PROPERTIES LABELS "host" TIMEOUT 30
+# Dozens of driver launches; under Wine each costs a process start (the 64w
+# twin, which copies this bound, took 69 s on a loaded check host). Linux runs
+# take well under a second.
+set_tests_properties(package_registry PROPERTIES LABELS "host" TIMEOUT 300
   ENVIRONMENT "P4PC_MODS=0;P4PC_PACKS=0")
 unset(_p4_package_runner)

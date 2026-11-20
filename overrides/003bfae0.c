@@ -26,8 +26,8 @@ u8 *func_003bfae0(u8 *arg0)
         p4c_003bf930_003bfae0(arg0);
     }
     if (frame == (u8 *)0) {
-        /* Retail follows the null frame into PS2 low RAM: func_003e9240 tests the sync bits of the byte at root + 3 (root = the word at 0xA0, 0 -> byte 3 of the vector stub),
-         * func_003e9700 returns the matrix at 0x50 (all zero) after the same test. The image holds those words (include/p4pc/ps2_low_ram.h). */
+        /* The port's null-frame model has a null root, clear sync bits and a
+         * zero world matrix; no executable low-memory image is installed. */
         if ((p4_ps2_low_ram_u8(p4_ps2_low_ram_u32(0xA0) + 3) & 3) == 0 && !(*(u8 *)(arg0 + 3) & 1)) {
             return arg0 + 0x2C;
         }

@@ -8,6 +8,10 @@
 
 #define FILE_LIMIT (256u * 1024u)
 #define PATH_CAP 1300
+_Static_assert(sizeof ((P4PackageRequirement *)0)->settings[0].key == P4_MOD_SETTING_KEY_MAX,
+               "requirement setting keys use the setting key bound");
+_Static_assert(sizeof ((P4PackageRequirement *)0)->settings[0].value == P4_MOD_SETTING_CHOICE_MAX,
+               "requirement setting values are choice names");
 
 typedef struct StoreValue { char key[P4_MOD_SETTING_KEY_MAX], value[P4_MOD_SETTING_VALUE_MAX]; } StoreValue;
 typedef struct StoreFile {
@@ -204,6 +208,9 @@ unsigned p4_mod_setting_choice(const P4ModSettingDecl *decl, const char *value)
     return decl->default_choice;
 }
 
+/* P4_MOD_SETTING_CHECK (p4mod check): the declaration rules above only; the
+ * stored values, admission snapshot and boot handler below need the game. */
+#ifndef P4_MOD_SETTING_CHECK
 static void files_clear(void)
 {
     while (files) {
@@ -342,9 +349,11 @@ static int write_file(const StoreFile *file, const StoreValue *values, size_t co
                       file->id) < 0;
     for (size_t i = 0; i < count && !bad; ++i)
         bad = fprintf(stream, "%s = %s\n", values[i].key, values[i].value) < 0;
-    if (fflush(stream)) bad = 1;
+    /* Durable before it counts: the file's bytes, then the replacing rename
+     * (Ironman's ledger and quota live here). */
+    if (p4_os_sync_file(stream)) bad = 1;
     if (fclose(stream)) bad = 1;
-    if (bad || p4_os_replace_file(temporary, path)) {
+    if (bad || p4_os_replace_file_durable(temporary, path)) {
         remove(temporary);
         return fail(reason, capacity, "Cannot write the settings of %s", file->id);
     }
@@ -423,6 +432,55 @@ static void rollback(void *unused)
     staged = NULL;
     staged_count = 0;
 }
+/* Admission already checked each requirement's presence, version and that it
+ * declares the named settings; the values belong to this snapshot. A required
+ * setting must be one of the declaration's choices and hold it at admission. */
+static int check_requirements(void)
+{
+    for (size_t i = 0; i < p4_packages_count(); ++i) {
+        const P4PackageProvider *provider = p4_packages_provider(i);
+        const P4PackageInfo *info = p4_package_provider_info(provider);
+        size_t field_count = 0, count = 0;
+        const P4PackageField *fields = p4_package_provider_fields(provider, &field_count);
+        P4PackageRequirement requires[P4_PACKAGE_REQUIRES_MAX];
+        char reason[512];
+        if (!info || info->kind != P4_PACKAGE_MOD ||
+            p4_package_requirements(info, fields, field_count, requires, &count, reason, sizeof reason)) continue;
+        for (size_t r = 0; r < count; ++r) {
+            const P4PackageRequirement *need = &requires[r];
+            const BootEntry *entry = NULL;
+            for (size_t e = 0; e < staged_count && !entry; ++e)
+                if (!strcmp(staged[e].id, need->id)) entry = &staged[e];
+            const char *name = need->id;
+            for (size_t j = 0; j < p4_packages_count(); ++j) {
+                const P4PackageInfo *have = p4_packages_info(j);
+                if (have && have->kind == P4_PACKAGE_MOD && !strcmp(have->id, need->id)) name = have->name;
+            }
+            for (size_t s = 0; s < need->setting_count; ++s) {
+                const char *key = need->settings[s].key, *value = need->settings[s].value;
+                size_t d = 0;
+                while (entry && d < entry->count && strcmp(entry->decls[d].key, key)) ++d;
+                if (!entry || d == entry->count) {
+                    snprintf(reason, sizeof reason, "%s needs %s setting %s, which it does not declare",
+                             info->name, name, key);
+                } else {
+                    const P4ModSettingDecl *decl = &entry->decls[d];
+                    unsigned choice = 0;
+                    while (choice < decl->choice_count && strcmp(decl->choices[choice], value)) ++choice;
+                    if (choice == decl->choice_count)
+                        snprintf(reason, sizeof reason, "%s needs %s %s %s, which is not one of its choices",
+                                 info->name, name, decl->label, value);
+                    else if (strcmp(entry->values[d], value))
+                        snprintf(reason, sizeof reason, "%s needs %s with %s %s", info->name, name, decl->label, value);
+                    else continue;
+                }
+                p4_package_provider_refuse(provider, reason);
+                return -1;
+            }
+        }
+    }
+    return 0;
+}
 static int prepare(void *unused)
 {
     (void)unused;
@@ -468,7 +526,7 @@ static int prepare(void *unused)
             strcpy(entry->values[j], decls[j].choices[p4_mod_setting_choice(&decls[j], found > 0 ? stored : NULL)]);
         }
     }
-    return 0;
+    return check_requirements();
 }
 static void publish(void *unused)
 {
@@ -485,3 +543,4 @@ const P4PackageHandler p4_mod_settings_boot_provider = {
     .prepare = prepare, .publish = publish, .rollback = rollback,
     .boot_phase = P4_PACKAGE_BOOT_SCHEMA
 };
+#endif

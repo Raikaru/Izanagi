@@ -477,7 +477,7 @@
 004165a0  # func_004165a0
 003e4030  # func_003e4030
 00396520  # func_00396520
-# Native combat element routes (PortTables): retail-named overrides at their dispatch/call addresses; every valid case of a 400-case sweep matched the retail code exactly
+# Native combat element routes: retail-named overrides at their dispatch/call addresses; every valid case of a 400-case sweep matched the retail code exactly
 00244f60  # datScriptRunCalc
 00245030  # datScriptCalcFloat
 0023e6f0  # datCalcResolveSkillHit

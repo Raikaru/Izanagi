@@ -26,6 +26,7 @@
 #include "p4pc/ps2_libc.h"
 #include "p4pc/content.h"
 #include "p4pc/content_source.h"
+#include "p4pc/mod_models.h"
 #include "../render/p4gl.h"
 #include "../render/p4gl_gl.h"
 #include "../render/p4gl_readback.h"
@@ -180,9 +181,9 @@ static void *bounds_atomic(void *atomic, void *data)
 
 /* Puts the camera (identity orientation, looking down +z) in front of the model so that its
  * bounding sphere fills the view, and sets the clip planes around it. */
-static void frame_camera(void *camera, void *clump)
+static void frame_camera(void *camera, void *clump, const Bounds *b)
 {
-    Bounds b;
+    Bounds clump_bounds = {{0}, {0}, 0};
     float centre[3];
     float radius = 0.0f;
     float window;
@@ -190,16 +191,19 @@ static void frame_camera(void *camera, void *clump)
     float pos[3];
     int i;
 
-    memset(&b, 0, sizeof b);
-    RpClumpForAllAtomics(clump, bounds_atomic, &b);
-    if (b.count == 0) {
-        fprintf(stderr, "p4pc_viewer: clump has no bounding sphere; camera left at the default\n");
+    if (b == NULL) {
+        RpClumpForAllAtomics(clump, bounds_atomic, &clump_bounds);
+        b = &clump_bounds;
+    }
+
+    if (b->count == 0) {
+        fprintf(stderr, "p4pc_viewer: no geometry bounds; camera left at the default\n");
         return;
     }
     for (i = 0; i < 3; i++) {
-        float half = (b.hi[i] - b.lo[i]) * 0.5f;
+        float half = (b->hi[i] - b->lo[i]) * 0.5f;
 
-        centre[i] = (b.lo[i] + b.hi[i]) * 0.5f;
+        centre[i] = (b->lo[i] + b->hi[i]) * 0.5f;
         radius += half * half;
     }
     radius = func_0044a4d0(radius);
@@ -217,6 +221,7 @@ static void frame_camera(void *camera, void *clump)
     fprintf(stderr, "p4pc_viewer: bounds centre %.1f %.1f %.1f radius %.1f, camera at z %.1f\n",
             (double)centre[0], (double)centre[1], (double)centre[2], (double)radius, (double)pos[2]);
 }
+
 
 /* A pack file of RMDs: entries are a 0x100-byte NUL-padded name followed by the RMD file, on 0x80
  * boundaries. The RMD is a 14-byte header (f0f000f0), top-level chunks and a footer chunk (f0f00004),
@@ -418,6 +423,10 @@ static int render_rmd(const char *rmdPath, const char *pngPath) {
             }
             model = mdlCreateModelObjectFromMemory(9, 0xFF01, rmd, rmdSize, 0);
         } else {
+            /* P4PC_VIEWER_MODEL: the RMD gets that glTF as its override (docs/modding/models.md). */
+            if (p4_model_viewer_override(rmdPath) != 0) {
+                return 1;
+            }
             model = mdlCreateModelObjectFromData(4, 0, P4_G2H(p4_gport_str(rmdPath)), 0);
         }
     }
@@ -463,6 +472,9 @@ static int render_rmd(const char *rmdPath, const char *pngPath) {
         fprintf(stderr, "p4pc_viewer: cannot load %s\n", rmdPath);
         return 1;
     }
+    if (clump != NULL && p4_model_viewer_dump(clump) != 0) {   /* P4PC_VIEWER_DUMP */
+        return 1;
+    }
     if (p4gl_context_open() != 0) {
         fprintf(stderr, "p4pc_viewer: GL context\n");
         return 1;
@@ -483,7 +495,7 @@ static int render_rmd(const char *rmdPath, const char *pngPath) {
             return 1;
         }
     } else {
-        frame_camera(camera, clump);
+        frame_camera(camera, clump, NULL);
     }
     p4gl_glClearColor(0.25f, 0.3f, 0.4f, 1.0f);
     p4gl_glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -879,9 +891,8 @@ static int render_field(const char *spec, const char *pngPath) {
                 }
             }
             if (i == frames - 60) {
-                /* The field script opens its tutorial message window ("You can save the game by using the calendar...")
-                 * a few seconds in; the PCSX2 reference frame was captured with it dismissed. The open message windows
-                 * are reset the way evtMessageWindowReset does (state 0, release, clear, state 1). */
+                /* Dismiss tutorial message windows before the reference frame.
+                 * Reset them as evtMessageWindowReset does (state 0, release, clear, state 1). */
                 extern void itfMesWindowSetState(int32_t window, int8_t state);
                 extern void itfMesWindowRelease(int32_t window);
                 extern void itfMesWindowClear(int32_t window, int32_t arg);
@@ -998,8 +1009,8 @@ static int render_world(const char *spec, const char *pngPath) {
     void *clumps[16];
     int nClumps = 0;
     void *camera;
-    float cam[15] = {-317.4375f, 244.9866f, 421.0957f, -0.67193f, 0.0f, -0.74061f, 0.17129f, 0.97289f, -0.15541f,
-                     0.72053f, -0.23129f, -0.65371f, 54.2f, 100.0f, 7000.0f};
+    float cam[15] = {0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 45, 0.1f, 1000};
+    Bounds scene = {{0}, {0}, 0};
     uint32_t type = 0;
     uint32_t length = 0;
     uint32_t version = 0;
@@ -1046,6 +1057,10 @@ static int render_world(const char *spec, const char *pngPath) {
             RpClumpForAllAtomics(clumps[nClumps], bounds_atomic, &b);
             fprintf(stderr, "p4pc_viewer: clump %d bounds (%g %g %g) .. (%g %g %g), %d atomics\n", nClumps, (double)b.lo[0],
                     (double)b.lo[1], (double)b.lo[2], (double)b.hi[0], (double)b.hi[1], (double)b.hi[2], b.count);
+            if (b.count) {
+                bounds_add(&scene, b.lo, 0);
+                bounds_add(&scene, b.hi, 0);
+            }
             nClumps++;
         }
     }
@@ -1058,7 +1073,7 @@ static int render_world(const char *spec, const char *pngPath) {
     if (camera == NULL) {
         return 1;
     }
-    {
+    if (getenv("P4PC_WORLD_CAM") != NULL) {
         float m[16] = {0};
         void *frame = (void *)ptr_at(camera, 4);
 
@@ -1071,6 +1086,13 @@ static int render_world(const char *spec, const char *pngPath) {
         K_View_SetFov(camera, cam[12]);
         func_003e8180(camera, cam[13]);
         func_003e81c0(camera, cam[14]);
+    }
+    else {
+        if (!scene.count) {
+            fprintf(stderr, "p4pc_viewer: world has no geometry bounds\n");
+            return 1;
+        }
+        frame_camera(camera, NULL, &scene);
     }
     p4gl_glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     p4gl_glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

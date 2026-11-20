@@ -98,14 +98,14 @@ press:circle
 wait:100
 waitstate:0x00796e64==4
 waitstate:0x00796f74==3
-# Yu uses Senri's defensive stats and weapons; direct Garu beats Gigas resistance, Chie Guards.
+# Use the prepared weapon, skill and guard actions.
 battle:first1=circle,cross,cross;first2=circle,down,cross,cross,cross;first3=circle,up,cross;plan=cross,cross,cross;skip=0;delay=80
 waittask:battle:off
 skipmsg
 wait:150
 waitmsg:closed
 waitcontrol:on
-# The first win leaves Yukiko at 131 HP; spend one earned Media before the next group.
+# Recover the party before the next group.
 press:triangle
 wait:100
 press:cross

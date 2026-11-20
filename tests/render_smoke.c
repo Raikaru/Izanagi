@@ -63,6 +63,7 @@ int32_t func_0040d0a0(int32_t primType, uint8_t *vertices, int32_t numVertices, 
 int32_t func_003f6a10(void *pOut, void *pInOut, int32_t nI);
 int32_t func_003f73d0(void *pOut, void *pInOut, int32_t nI);
 int32_t RpSkyRenderStateSet(int32_t state, uint32_t value);
+int p4gl_atomic_draw(void *atomic);
 int32_t func_00401b80(void);
 void calendarDrawBackdrop(void *node, void *work);
 
@@ -951,23 +952,29 @@ static void im2d_rect(float x0, float y0, float x1, float y1, float r, float g, 
     }
 }
 
-/* Retail Sky's 12.4 conversion precedes rasterization, not just pixel-edge ownership.
- * The negative case retains the original dreambtl feedback quad's source coordinates:
- * (111.2368927,-92.5898895) becomes (111.1875,-92.625), not truncation to -92.5625.
- * Compare the complete draw against explicit GS-grid inputs on this same device so the
- * witness does not depend on GL line rules or a particular GPU's integer-edge tie rule. */
+/* The 12.4 conversion precedes rasterization, not just pixel-edge ownership.
+ * Compare the full draw with explicit grid inputs and retain an offscreen
+ * fractional edge so floor and truncation produce distinguishable results. */
+#ifdef P4PC_RENDER_FRACTIONAL_RETAIL
+#include "render_fractional_retail.inc"
+#else
+#define P4_TEST_FRACTIONAL_X0 33.24f
+#define P4_TEST_FRACTIONAL_Y0 (-12.59f)
+#define P4_TEST_FRACTIONAL_X1 200.24f
+#define P4_TEST_FRACTIONAL_Y1 160.41f
+#endif
 static void im2d_fractional_frame(void)
 {
     static const float rectangles[][4] = {
         {32.02f, 32.02f, 128.02f, 128.02f},
-        {111.2368927f, -92.5898895f, 391.2368774f, 187.4101105f},
+        {P4_TEST_FRACTIONAL_X0, P4_TEST_FRACTIONAL_Y0, P4_TEST_FRACTIONAL_X1, P4_TEST_FRACTIONAL_Y1},
         {-0.02f, 31.98f, 128.02f, 160.02f},
     };
     static const float triangles[][6] = {
         {-0.02f, 64.02f, 128.02f, 192.02f, 128.02f, 64.02f},
         {64.02f, -0.02f, 192.02f, 128.02f, 64.02f, 128.02f},
-        {111.2368927f, -92.5898895f, 111.2368927f, 187.4101105f,
-         391.2368774f, 187.4101105f},
+        {P4_TEST_FRACTIONAL_X0, P4_TEST_FRACTIONAL_Y0, P4_TEST_FRACTIONAL_X0, P4_TEST_FRACTIONAL_Y1,
+         P4_TEST_FRACTIONAL_X1, P4_TEST_FRACTIONAL_Y1},
     };
     const size_t bytes = (size_t)FRAME * FRAME * 4u;
     uint8_t *actual = malloc(bytes);
@@ -1379,6 +1386,74 @@ static void undrawn_quad(P4Sky2Vertex vertices[4])
     }
 }
 
+/* Atomic DATE uses the current target alpha, including the 254/255 boundary.
+ * The two halves differ only in destination alpha; test both DATM values. */
+static void atomic_date_frame(void)
+{
+    uint8_t *camera = p4t_galloc(256, 16);
+    uint8_t *sector = p4t_galloc(144, 16);
+    uint8_t *mesh = p4t_galloc(28, 16);
+    float *vertices = p4t_galloc(12 * sizeof *vertices, 16);
+    uint16_t *indices = p4t_galloc(6 * sizeof *indices, 16);
+    uint8_t *rgba = malloc((size_t)FRAME * FRAME * 4u);
+    P4Sky2Vertex v[4] = {0};
+    static const float xyz[12] = {-1.8f,-1.8f,2.0f, 1.8f,-1.8f,2.0f,
+                                   1.8f,1.8f,2.0f, -1.8f,1.8f,2.0f};
+    static const uint16_t tri[6] = {0,1,2, 0,2,3};
+    const uint16_t four = 4, two = 2, one = 1;
+    if (!rgba) { fail("atomic DATE readback buffer"); return; }
+    memset(camera, 0, 256);
+    put_f32(camera, 32, 1.0f);
+    put_f32(camera, 52, 1.0f);
+    put_f32(camera, 72, 1.0f);
+    put_f32(camera, 104, 1.0f);
+    put_f32(camera, 108, 1.0f);
+    put_f32(camera, 128, 0.5f);
+    put_f32(camera, 132, 50.0f);
+    memset(sector, 0, 144);
+    memset(mesh, 0, 28);
+    memcpy(vertices, xyz, sizeof xyz);
+    memcpy(indices, tri, sizeof tri);
+    sector[0] = 0xff;
+    put_u32(sector, 8, P4_H2G(vertices));
+    put_u32(sector, 120, P4_H2G(mesh));
+    memcpy(sector + 130, &four, 2);
+    memcpy(sector + 132, &two, 2);
+    memcpy(mesh + 4, &one, 2);
+    put_u32(mesh, 16, P4_H2G(indices));
+    put_u32(mesh, 20, 6);
+    func_003f6a10(NULL, camera, 0);
+    func_003f5070(P4GL_RS_TEXTURERASTER, 0);
+    func_003f5070(P4GL_RS_VERTEXALPHAENABLE, 0);
+    func_003f5070(P4GL_RS_ZTESTENABLE, 0);
+    func_003f5070(P4GL_RS_ZWRITEENABLE, 0);
+    func_003f5070(P4GL_RS_CULLMODE, 1);
+    for (int i = 0; i < 4; i++) {
+        v[i].x = i & 1 ? FRAME : FRAME / 2;
+        v[i].y = i & 2 ? FRAME : 0;
+        v[i].recipZ = 1.0f;
+        v[i].g = v[i].a = 255.0f;
+    }
+    for (int datm = 0; datm < 2; datm++) {
+        RpSkyRenderStateSet(3, 0);
+        p4gl_glClearColor(0, 1, 0, 254.0f / 255.0f);
+        p4gl_glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        expect_int(func_0040c0f0(SMOKE_PRIM_TRISTRIP, (uint8_t *)v, 4), 1, "DATE alpha setup");
+        RpSkyRenderStateSet(3, 0x4000u | (datm ? 0x8000u : 0u));
+        expect_int(p4gl_atomic_draw(sector), 1, "atomic DATE draw");
+        if (p4gl_readback_rgba(FRAME, FRAME, rgba) != 0) {
+            fail("atomic DATE readback");
+        } else {
+            expect_rgb(rgba, 64, 128, datm ? 0 : 255, 255, datm ? 0 : 255, "atomic DATE alpha 254");
+            expect_rgb(rgba, 192, 128, datm ? 255 : 0, 255, datm ? 255 : 0, "atomic DATE alpha 255");
+        }
+    }
+    RpSkyRenderStateSet(3, 0);
+    func_003f73d0(NULL, camera, 0);
+    free(rgba);
+}
+
+
 /* Binds tex as TEXTURERASTER (nearest filter), draws a full-frame white-vertex Im2D quad with
  * UVs 0..1 into the readback FBO, reads it back, checks two texel-matched pixels and writes the
  * PNG. */
@@ -1452,6 +1527,7 @@ static void draw_frame(P4RwRaster *tex, const P4TmxImage *img, const char *png)
     affine_colour_frame();
     im2d_fractional_frame();
     im2d_line_frame();
+    atomic_date_frame();
     free(rgba);
 }
 

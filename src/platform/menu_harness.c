@@ -43,6 +43,8 @@
 #define iGpffffb1ec P4_GPDATA(int32_t, 0xb1ec)       /* the camp task's work (cmpMainTaskCreate), 0x9740 bytes */
 #define D_008C024E P4_GARRAY(uint16_t, 0x008C024Eu)     /* the pad edge word the game polls */
 #define D_005E57A8 P4_GARRAY(char, 0x005E57A8u)         /* the boot logo task's name (logoDraw.c) */
+#define D_00641B10 P4_GARRAY(char, 0x00641B10u)         /* the fusion menu task's name (fclCombineMenuUpdate 0x002E7AC0 owner) */
+extern int32_t cmpConfigCreate(void *parent, int32_t mode);   /* retail 0x0035C690: mode 0 System, 1 title */
 extern void *kwlnTaskGetTaskByName(const void *name);
 extern int32_t kwlnTaskDestroyWithHierarchy(void *task);
 extern void datInitDefaultGameState(void);
@@ -124,11 +126,26 @@ static int sSettingsCursorBefore = -1;
 #define KEEP_MAX 8
 static struct { char name[16]; uint8_t *data; int32_t size; } sKeep[KEEP_MAX];
 static int32_t sMcTask;   /* the memory card screen task made by `save` / `load` */
+/* Test-only stand-in for a Velvet parent's real hosted Config child. */
+static int32_t sHostTask, sHostDone, sHostCancelled;
+/* The menu task's work is FclCombineWork (f0 state, f1 substate). gp 0xb598
+ * is a different facility task on the Apollo save, not this menu. */
+static uint8_t *fusionTask(void)
+{
+    return (uint8_t *)kwlnTaskGetTaskByName(D_00641B10);
+}
+static const uint8_t *fusionWork(void)
+{
+    const uint8_t *task = fusionTask();
+    uint32_t work = task ? *(const uint32_t *)(task + 0x38) : 0;
+    return work ? (const uint8_t *)P4_G2H(work) : NULL;
+}
 
 static unsigned buttonBit(const char *t)
 {
     static const struct { const char *name; unsigned bit; } map[] = {
-        {"select", 0x0001}, {"start", 0x0008}, {"up", 0x0010}, {"right", 0x0020}, {"down", 0x0040}, {"left", 0x0080}, {"l2", 0x0100},
+        {"select", 0x0001}, {"l3", 0x0002}, {"r3", 0x0004}, {"start", 0x0008}, {"up", 0x0010}, {"right", 0x0020}, {"down", 0x0040},
+        {"left", 0x0080}, {"l2", 0x0100},
         {"r2", 0x0200}, {"l1", 0x0400}, {"r1", 0x0800}, {"triangle", 0x1000}, {"circle", 0x2000}, {"cross", 0x4000}, {"square", 0x8000},
     };
     size_t i;
@@ -389,6 +406,19 @@ static int settingsNavigateRow(const char *wanted)
 static void settingsCheck(const char *name)
 {
     int ok = 0;
+    if (!strcmp(name, "velvet-root")) {
+        const uint8_t *w = fusionWork();
+        ok = w && w[0] == 0 && w[1] == 0x18 && !p4_settings_active() && !sHostTask;
+        if (w) fprintf(stderr, "menu harness: fusion state %02x/%02x\n", w[0], w[1]);
+    } else if (!strcmp(name, "velvet-left-root")) {
+        const uint8_t *w = fusionWork();
+        ok = w && (w[0] != 0 || w[1] != 0x18) && !p4_settings_active();
+        if (w) fprintf(stderr, "menu harness: fusion state %02x/%02x\n", w[0], w[1]);
+    } else if (!strcmp(name, "host-returned")) {
+        ok = sHostDone && !sHostCancelled && !sHostTask && !p4_settings_active();
+    } else if (!strcmp(name, "nline-off")) {
+        ok = P4_G32(0x00884684u) == 0; /* nLineSetActive's flag (nLine.c) */
+    } else
     if (!strcmp(name, "cursor-visible")) {
         ok = p4_settings_active() && SDL_CursorVisible();
     } else if (!strcmp(name, "cursor-hidden")) {
@@ -668,6 +698,56 @@ static void scriptStep(unsigned frame)
         }
         return;
     }
+    if (!strcmp(tok, "velvet-root")) {
+        /* The three-row root (0x18, p[0xB3]). Never press here: the fusion
+         * root's own pad edges must stay untouched. */
+        static unsigned since;
+        const uint8_t *w = fusionWork();
+        if (!since) since = frame;
+        if (w && w[0] == 0 && w[1] == 0x18) {
+            fprintf(stderr, "menu harness: frame %u fusion root ready\n", frame);
+            ++sIdx;
+            sWaitUntil = frame + 60;
+            hintShotDraws(frame, 60);
+        } else if (frame - since > 6000) {
+            fprintf(stderr, "menu harness: frame %u fusion root not reached (task %08x state %02x/%02x)\n", frame,
+                fusionTask() ? (unsigned)P4_H2G(fusionTask()) : 0u, w ? w[0] : 0xFF, w ? w[1] : 0xFF);
+            exit(1);
+        } else {
+            if ((frame - since) % 120 == 0)
+                fprintf(stderr, "menu harness: frame %u fusion task %08x state %02x/%02x\n", frame,
+                    fusionTask() ? (unsigned)P4_H2G(fusionTask()) : 0u, w ? w[0] : 0xFF, w ? w[1] : 0xFF);
+            sWaitUntil = frame + 1;
+        }
+        return;
+    }
+    if (!strcmp(tok, "settings-host-done")) {
+        const uint8_t *task = sHostTask ? (const uint8_t *)P4_G2H((uint32_t)sHostTask) : NULL;
+        const uint8_t *work = task ? (const uint8_t *)P4_G2H(*(const uint32_t *)(task + 0x38)) : NULL;
+        if (!work) exit(1);
+        if (work[4] & 1) { /* cmpConfigIsStepDone, then the parent's own destroy */
+            sHostCancelled = (work[4] & 4) != 0;
+            kwlnTaskDestroyWithHierarchy((void *)task);
+            sHostTask = 0;
+            sHostDone = 1;
+            fprintf(stderr, "menu harness: frame %u hosted Config returned%s\n", frame, sHostCancelled ? " cancelled" : "");
+            ++sIdx;
+            sWaitUntil = frame + (unsigned)stepFlips;
+            hintShotDraws(frame, (unsigned)stepFlips);
+        } else {
+            static unsigned since;
+            if (!since) since = frame;
+            if ((frame - since) % 120 == 0)
+                fprintf(stderr, "menu harness: frame %u hosted Config waiting: step flags %02x, page %s\n", frame,
+                    work[4], p4_settings_page_active() ? p4_settings_page_active() : "(none)");
+            if (frame - since > 1200) {
+                fputs("menu harness: hosted Config never finished\n", stderr);
+                exit(1);
+            }
+            sWaitUntil = frame + 1;
+        }
+        return;
+    }
     if (!strcmp(tok, "settings-title-ready")) {
         if (getenv("P4PC_SETTINGS_TEST") == NULL) exit(1);
         if (p4_settings_native_title_ready()) {
@@ -693,6 +773,32 @@ static void scriptStep(unsigned frame)
     sIdx++;
     if (strncmp(tok, "wait", 4) == 0) {
         sWaitUntil = frame + (unsigned)atoi(tok + 4);
+    } else if (!strncmp(tok, "settings-host:", 14)) {
+        /* The fusion task's own child: test-only stand-in for its real override. */
+        char key[P4_SETTINGS_PAGE_KEY_MAX];
+        int mode;
+        if (!getenv("P4PC_SETTINGS_TEST") || sscanf(tok + 14, "%d:%127s", &mode, key) != 2 ||
+            (mode != 0 && mode != 1) || !fusionTask() || sHostTask) exit(1);
+        sHostTask = cmpConfigCreate(fusionTask(), mode);
+        if (!sHostTask || p4_settings_native_host((uint32_t)sHostTask, key)) {
+            fprintf(stderr, "menu harness: cannot host %s in Config mode %d\n", key, mode);
+            exit(1);
+        }
+        fprintf(stderr, "menu harness: frame %u hosted %s in Config mode %d under the fusion task\n", frame, key, mode);
+        sWaitUntil = frame + (unsigned)stepFlips;
+    } else if (!strncmp(tok, "settings-host-refused:", 22)) {
+        /* A Camp-mode child must be refused, then destroyed before any update. */
+        char key[P4_SETTINGS_PAGE_KEY_MAX];
+        int mode;
+        if (!getenv("P4PC_SETTINGS_TEST") || sscanf(tok + 22, "%d:%127s", &mode, key) != 2 ||
+            mode != 0 || !fusionTask() || sHostTask) exit(1);
+        int32_t task = cmpConfigCreate(fusionTask(), mode);
+        if (!task || p4_settings_native_host((uint32_t)task, key) == 0) {
+            fprintf(stderr, "menu harness: Config mode %d hosting was not refused\n", mode);
+            exit(1);
+        }
+        kwlnTaskDestroyWithHierarchy(P4_G2H((uint32_t)task));
+        fprintf(stderr, "menu harness: frame %u refused Config mode %d hosting\n", frame, mode);
     } else if (!strcmp(tok, "settings-hide-cursor")) {
         if (!getenv("P4PC_SETTINGS_TEST") || !SDL_HideCursor()) exit(1);
     } else if (!strcmp(tok, "settings-mark-cursor")) {
@@ -975,6 +1081,8 @@ void p4pc_menu_harness_frame(unsigned frame)
             fprintf(stderr, " state %u +4 %u +8 %u +0xC %u +0x28 %u", (unsigned)*(const uint32_t *)camp, (unsigned)*(const uint32_t *)(camp + 4),
                     (unsigned)*(const uint32_t *)(camp + 8), (unsigned)*(const uint32_t *)(camp + 0xC), (unsigned)*(const uint32_t *)(camp + 0x28));
         }
+        if (fusionWork() != NULL)
+            fprintf(stderr, " fusion %02x/%02x", fusionWork()[0], fusionWork()[1]);
         fprintf(stderr, "\n");
     }
     {

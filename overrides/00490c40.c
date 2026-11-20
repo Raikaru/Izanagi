@@ -1,7 +1,9 @@
 #include "p4pc/vu0.h"
+#include "p4pc/lockstep_align_guest.h"
 
 void mdlEffectUpdateBoundedEmitter(u8 *arg0)
 {
+    if (p4pc_align_rng_calls_enabled) p4pc_align_visual_begin(1, arg0);
     extern void mdlEffectSampleKeyState(u8 *arg0, u8 *arg1, s32 arg2, u_long128 *arg3);
     extern void mdlEffectUpdateParticleTrail(u8 *arg0, u8 *arg1);
     extern void *memcpy(void *dst, const void *src, u32 size);
@@ -103,6 +105,7 @@ void mdlEffectUpdateBoundedEmitter(u8 *arg0)
     swayRange = fGpffff8088;
     swayBase = fGpffff808c;
     for (; i < count; i++, extra += 0x24, node += 0x20) {
+        if (p4pc_align_rng_calls_enabled) p4pc_align_visual_particle(i);
         if (!(*(s32 *)(node + 0x10) < limit)) {
             u8 *cfg;
             s32 nmult;

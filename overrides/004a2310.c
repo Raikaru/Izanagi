@@ -1,7 +1,9 @@
 #include "p4pc/vu0.h"
+#include "p4pc/lockstep_align_guest.h"
 
 void FunnelWindUpdateStrip(u8 *arg0)
 {
+    if (p4pc_align_rng_calls_enabled) p4pc_align_visual_begin(2, arg0);
     EffectVuVector point;
     EffectVuVector normal;
     f32 width;
@@ -86,6 +88,7 @@ void FunnelWindUpdateStrip(u8 *arg0)
     zero = 0.0f;
     quarter = 0.25f;
     for (; index < particleCount; index++, particle += 0x30) {
+        if (p4pc_align_rng_calls_enabled) p4pc_align_visual_particle(index);
         state = *(u32 *)particle;
         if (state == (u32)-2) {
             goto skip;

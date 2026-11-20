@@ -47,7 +47,7 @@ waitstep:22
 log
 timeout:60000
 battleskip:on
-# This floor's groups are Ice-weak Monopolizing Cupids and Wind-weak, physical-resistant Autonomic Basalts.
+# Prepare for both encounter groups on this floor.
 # Give Yosuke Direct Commands for Garu; Chie is already direct and Yukiko remains Act Freely.
 walk:shadow,250
 press:cross

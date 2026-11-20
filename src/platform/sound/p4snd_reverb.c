@@ -1,172 +1,171 @@
-/* The SPU2 reverb (effect) unit, written after PCSX2's SPU2 emulation (Reverb.cpp, ReverbResample.cpp),
- * which follows the SPU's network: two same-side and two cross-side reflection filters, four comb taps and
- * two all-pass filters per side, in a ring buffer of the effect area. The 48 kHz output rate is halved by a
- * 39 tap half-band filter on each side (the left channel is calculated on even cycles, the right on odd
- * ones) and doubled again by the same filter, so the network runs at 24 kHz per channel.
- *
- * The registers are the 32 values libsd loads for a mode, in its order:
- *   0 APF1_SIZE   1 APF2_SIZE   2 IIR_VOL     3 COMB1_VOL   4 COMB2_VOL   5 COMB3_VOL   6 COMB4_VOL
- *   7 WALL_VOL    8 APF1_VOL    9 APF2_VOL   10 SAME_L_DST 11 SAME_R_DST 12 COMB1_L_SRC 13 COMB1_R_SRC
- *  14 COMB2_L_SRC 15 COMB2_R_SRC 16 SAME_L_SRC 17 SAME_R_SRC 18 DIFF_L_DST 19 DIFF_R_DST 20 COMB3_L_SRC
- *  21 COMB3_R_SRC 22 COMB4_L_SRC 23 COMB4_R_SRC 24 DIFF_L_SRC 25 DIFF_R_SRC 26 APF1_L_DST 27 APF1_R_DST
- *  28 APF2_L_DST 29 APF2_R_DST 30 IN_COEF_L 31 IN_COEF_R
- * Addresses and the all-pass sizes are in units of four 16-bit cells and relative to the start of the area. */
+/* Clean-room implementation written from psx-spx hardware documentation:
+ * https://psx-spx.consoledev.net/soundprocessingunitspu/
+ * Sections: SPU Reverb Registers, SPU Reverb Formula, Reverb Buffer Resampling.
+ */
 #include "p4snd_reverb.h"
 
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define NUM_TAPS 39
-
-/* the half-band filter, 1.15 fixed point; the upsampling copy is doubled and the centre tap clamps */
-static const int32_t fir_down[NUM_TAPS] = {
-    -1, 0, 2, 0, -10, 0, 35, 0, -103, 0, 266, 0, -616, 0, 1332, 0, -2960, 0, 10246, 16384,
-    10246, 0, -2960, 0, 1332, 0, -616, 0, 266, 0, -103, 0, 35, 0, -10, 0, 2, 0, -1,
+/* The documented 39-tap half-band filter, in 1.15 fixed point. */
+static const int16_t fir[39] = {
+    -0x0001, 0, 0x0002, 0, -0x000a, 0, 0x0023, 0,
+    -0x0067, 0, 0x010a, 0, -0x0268, 0, 0x0534, 0,
+    -0x0b90, 0, 0x2806, 0x4000, 0x2806, 0, -0x0b90, 0,
+    0x0534, 0, -0x0268, 0, 0x010a, 0, -0x0067, 0,
+    0x0023, 0, -0x000a, 0, 0x0002, 0, -0x0001
 };
 
 static struct {
-    int enabled;
     int16_t reg[32];
-    int32_t evol_l, evol_r; /* 1.15 */
-    int16_t *cell;          /* the effect area, 16-bit cells */
-    int32_t ncell;
-    uint32_t cycles;        /* 48 kHz frames; the address base advances every second one */
-    int pos;                /* 0..63, the slot of the newest sample in the resampling buffers */
-    int32_t down[2][128];   /* input history per side, every slot written twice (slot and slot | 64) */
-    int32_t up[2][128];     /* output history per side: the network's sample on its own cycle, 0 on the other */
-} R;
+    int16_t *ram;
+    uint32_t length, cursor;
+    int enabled;
+    int32_t volume[2];
+    int16_t input[2][39], output[2][39];
+    unsigned history, phase;
+} rev;
 
-static int32_t clamp16(int32_t x)
+static int16_t clamp16(int64_t x)
 {
-    return x > 32767 ? 32767 : (x < -32768 ? -32768 : x);
+    if (x > 32767) return 32767;
+    if (x < -32768) return -32768;
+    return (int16_t)x;
 }
 
-#define MUL(x, y) (((x) * (y)) >> 15)
-
-/* the cell of a register value (units of four cells; `adj` cells before it) under the moving base */
-static int32_t indexer(int32_t offset)
+/* Not specified by psx-spx; chosen arithmetic right shifts for fixed-point
+ * products, and a causal FIR with unity DC gain and 2x interpolation gain. */
+static int32_t mul15(int32_t x, int32_t y)
 {
-    int64_t x = (int64_t)(R.cycles >> 1) + offset;
+    return (int32_t)(((int64_t)x * y) >> 15);
+}
 
-    x %= R.ncell;
-    if (x < 0) {
-        x += R.ncell;
+static int16_t filter(const int16_t samples[39], unsigned pos, int gain)
+{
+    int64_t sum = 0;
+    unsigned i, at = pos;
+    for (i = 0; i < 39; ++i) {
+        sum += (int32_t)fir[i] * samples[at];
+        at = at == 0 ? 38 : at - 1;
     }
-    return (int32_t)x;
+    return clamp16((sum * gain) >> 15);
+}
+
+/* Register addresses are in eight-byte units, while RAM contains halfwords.
+ * The previous-sample reflection tap is one halfword before its destination. */
+static uint32_t address(int reg, int subtract, int previous)
+{
+    int64_t a = (int64_t)rev.cursor + 4 * (uint16_t)rev.reg[reg]
+        - (subtract >= 0 ? 4 * (uint16_t)rev.reg[subtract] : 0) - previous;
+    a %= rev.length;
+    if (a < 0) a += rev.length;
+    return (uint32_t)a;
+}
+
+static int32_t load(int reg, int subtract, int previous)
+{
+    return rev.ram[address(reg, subtract, previous)];
+}
+
+static void store(int reg, int32_t value)
+{
+    rev.ram[address(reg, -1, 0)] = clamp16(value);
+}
+
+/* SPU Reverb Formula: reflection taps feed four combs and two all-pass stages.
+ * The documented -8000h IIR quirk negates the complete reflection result. */
+static void reflect(int dest, int source, int32_t input)
+{
+    int32_t old = load(dest, -1, 1);
+    int32_t result = mul15(input + mul15(load(source, -1, 0), rev.reg[7]) - old, rev.reg[2]) + old;
+    if (rev.reg[2] == -32768) result = -result;
+    store(dest, result);
+}
+
+static int16_t channel(int side, int16_t sample)
+{
+    int32_t x, delayed;
+    int apf;
+
+    /* psx-spx writes reflections before reading combs; aliased addresses may
+     * consequently behave differently from other implementations. */
+    if (rev.enabled) {
+        int32_t input = mul15(sample, rev.reg[30 + side]);
+        reflect(10 + side, 16 + side, input);
+        reflect(18 + side, 24 + (side ^ 1), input);
+    }
+    x = mul15(load(12 + side, -1, 0), rev.reg[3])
+      + mul15(load(14 + side, -1, 0), rev.reg[4])
+      + mul15(load(20 + side, -1, 0), rev.reg[5])
+      + mul15(load(22 + side, -1, 0), rev.reg[6]);
+    for (apf = 0; apf < 2; ++apf) {
+        int dest = 26 + 2 * apf + side;
+        delayed = load(dest, apf, 0);
+        x -= mul15(delayed, rev.reg[8 + apf]);
+        if (rev.enabled) store(dest, x);
+        x = mul15(x, rev.reg[8 + apf]) + delayed;
+    }
+    return clamp16(x);
 }
 
 void p4rev_setup(const int16_t regs[32], uint32_t size_bytes)
 {
-    uint32_t n = size_bytes / 2;
-
-    free(R.cell);
-    R.cell = n ? (int16_t *)calloc(n, sizeof(int16_t)) : NULL;
-    R.ncell = R.cell ? (int32_t)n : 0;
-    memcpy(R.reg, regs, sizeof(R.reg));
-    R.cycles = 0;
-    R.pos = 0;
-    memset(R.down, 0, sizeof(R.down));
-    memset(R.up, 0, sizeof(R.up));
+    int16_t *ram = NULL;
+    uint32_t length = size_bytes / sizeof(*ram);
+    if (length) ram = (int16_t *)calloc(length, sizeof(*ram));
+    free(rev.ram);
+    rev.ram = ram;
+    rev.length = ram ? length : 0;
+    rev.cursor = 0;
+    memcpy(rev.reg, regs, sizeof(rev.reg));
+    memset(rev.input, 0, sizeof(rev.input));
+    memset(rev.output, 0, sizeof(rev.output));
+    rev.history = 0;
+    rev.phase = 1;
 }
 
 void p4rev_enable(int on)
 {
-    R.enabled = on;
+    rev.enabled = on != 0;
 }
 
 void p4rev_volume(int32_t evol_l, int32_t evol_r)
 {
-    R.evol_l = evol_l;
-    R.evol_r = evol_r;
+    rev.volume[0] = evol_l;
+    rev.volume[1] = evol_r;
 }
 
 int p4rev_active(void)
 {
-    return R.enabled && R.cell != NULL;
-}
-
-static int32_t downsample(int right)
-{
-    const int index = (R.pos - NUM_TAPS) & 63;
-    int32_t out = 0;
-    int i;
-
-    for (i = 0; i < NUM_TAPS; i++) {
-        out += R.down[right][index + i] * fir_down[i];
-    }
-    return clamp16(out >> 15);
-}
-
-/* One calculation for one side. in_l / in_r are only stored (the history); the side is picked by the cycle. */
-static void calc_side(int right)
-{
-    const int16_t *r = R.reg;
-    const int32_t a1 = (int32_t)(uint16_t)r[0] * 4, a2 = (int32_t)(uint16_t)r[1] * 4;
-#define A(n) ((int32_t)(uint16_t)r[n] * 4)
-    const int32_t same_src = indexer(A(right ? 17 : 16));
-    const int32_t same_dst = indexer(A(right ? 11 : 10));
-    const int32_t same_prv = indexer(A(right ? 11 : 10) - 1);
-    const int32_t diff_src = indexer(A(right ? 24 : 25));
-    const int32_t diff_dst = indexer(A(right ? 19 : 18));
-    const int32_t diff_prv = indexer(A(right ? 19 : 18) - 1);
-    const int32_t comb1 = indexer(A(right ? 13 : 12));
-    const int32_t comb2 = indexer(A(right ? 15 : 14));
-    const int32_t comb3 = indexer(A(right ? 21 : 20));
-    const int32_t comb4 = indexer(A(right ? 23 : 22));
-    const int32_t apf1_src = indexer(A(right ? 27 : 26) - a1);
-    const int32_t apf1_dst = indexer(A(right ? 27 : 26));
-    const int32_t apf2_src = indexer(A(right ? 29 : 28) - a2);
-    const int32_t apf2_dst = indexer(A(right ? 29 : 28));
-#undef A
-    const int16_t *m = R.cell;
-    int32_t in, same, diff, apf1, apf2, out;
-
-    in = MUL((int32_t)r[right ? 31 : 30], downsample(right));
-    same = MUL(r[2], in + MUL(r[7], m[same_src]) - m[same_prv]) + m[same_prv];
-    diff = MUL(r[2], in + MUL(r[7], m[diff_src]) - m[diff_prv]) + m[diff_prv];
-    out = MUL(r[3], m[comb1]) + MUL(r[4], m[comb2]) + MUL(r[5], m[comb3]) + MUL(r[6], m[comb4]);
-    apf1 = out - MUL(r[8], m[apf1_src]);
-    out = m[apf1_src] + MUL(r[8], apf1);
-    apf2 = out - MUL(r[9], m[apf2_src]);
-    out = m[apf2_src] + MUL(r[9], apf2);
-    R.cell[same_dst] = (int16_t)clamp16(same);
-    R.cell[diff_dst] = (int16_t)clamp16(diff);
-    R.cell[apf1_dst] = (int16_t)clamp16(apf1);
-    R.cell[apf2_dst] = (int16_t)clamp16(apf2);
-    out = clamp16(out);
-    R.up[right][R.pos] = R.up[right][R.pos | 64] = out;
-    R.up[!right][R.pos] = R.up[!right][R.pos | 64] = 0;
+    return rev.enabled && rev.length != 0;
 }
 
 void p4rev_process(const float *in, float *out, int frames)
 {
-    int i;
-
-    if (!p4rev_active()) {
-        return;
-    }
-    for (i = 0; i < frames; i++) {
-        const int32_t il = clamp16((int32_t)(in[i * 2] * 32768.0f));
-        const int32_t ir = clamp16((int32_t)(in[i * 2 + 1] * 32768.0f));
-        int32_t l = 0, r = 0;
-        int index, k;
-
-        R.down[0][R.pos] = R.down[0][R.pos | 64] = il;
-        R.down[1][R.pos] = R.down[1][R.pos | 64] = ir;
-        calc_side((int)(R.cycles & 1));
-        R.pos = (R.pos + 1) & 63;
-        index = (R.pos - NUM_TAPS) & 63;
-        for (k = 0; k < NUM_TAPS; k++) {
-            /* the upsampling filter is the downsampling one doubled, the centre tap clamped to 16 bits */
-            const int32_t c = clamp16(fir_down[k] * 2);
-
-            l += R.up[0][index + k] * c;
-            r += R.up[1][index + k] * c;
+    int frame, side;
+    if (!rev.length) return;
+    for (frame = 0; frame < frames; ++frame) {
+        unsigned pos = rev.history;
+        for (side = 0; side < 2; ++side) {
+            float value = in[2 * frame + side];
+            /* Mixer sends are floats; clamp before converting to SPU samples. */
+            if (value > 1.0f) value = 1.0f;
+            if (value < -1.0f) value = -1.0f;
+            rev.input[side][pos] = clamp16((int32_t)(value * 32768.0f));
+            rev.output[side][pos] = 0;
         }
-        l = clamp16(l >> 15);
-        r = clamp16(r >> 15);
-        out[i * 2] += (float)l * (1.0f / 32768.0f) * ((float)R.evol_l / 32768.0f);
-        out[i * 2 + 1] += (float)r * (1.0f / 32768.0f) * ((float)R.evol_r / 32768.0f);
-        R.cycles++;
+        /* Not specified by psx-spx; chosen right-first causal resampling phase.
+         * The hardware calculates one side per output sample and advances its
+         * work pointer after the right side. */
+        side = (int)rev.phase;
+        rev.output[side][pos] = channel(side, filter(rev.input[side], pos, 1));
+        if (side) rev.cursor = (rev.cursor + 1) % rev.length;
+        for (side = 0; side < 2; ++side) {
+            int32_t value = mul15(filter(rev.output[side], pos, 2), rev.volume[side]);
+            out[2 * frame + side] += (float)value / 32768.0f;
+        }
+        rev.history = (pos + 1) % 39;
+        rev.phase ^= 1;
     }
 }

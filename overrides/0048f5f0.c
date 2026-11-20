@@ -1,7 +1,9 @@
 #include "p4pc/vu0.h"
+#include "p4pc/lockstep_align_guest.h"
 
 void EffBezierEmitterUpdate(u8 *arg0)
 {
+    if (p4pc_align_rng_calls_enabled) p4pc_align_visual_begin(1, arg0);
     typedef struct BezierParticleWork {
         f32 control0[3];
         f32 control1[3];
@@ -152,6 +154,7 @@ void EffBezierEmitterUpdate(u8 *arg0)
     three = 3.0f;
 
     for (idx = 0; idx < count; idx++, out += 1, nodes += 32) {
+        if (p4pc_align_rng_calls_enabled) p4pc_align_visual_particle(idx);
         if (*(s32 *)(nodes + 16) >= limitB8) {
             tmp = (saved20 != 0) ? -2 : -1;
             *(s32 *)(nodes + 16) = tmp;

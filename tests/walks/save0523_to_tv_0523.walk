@@ -80,7 +80,7 @@ press:down
 press:down
 press:cross
 wait:300
-# Five escapes cost 4750 of the earned 7166 yen.
+# Purchase the planned escape items.
 press:up
 wait:30
 press:up

@@ -1,6 +1,10 @@
-/* 002411a0: retain critical/weak ordering with a tagged action frame. */
+/* 002411a0: retain critical/weak ordering with a tagged action frame.
+ * The critical chance passes the hit stage after its
+ * 0..100 clamp; the stage never runs while no modifier is registered. */
 #include "p4pc/game_elements_native.h"
+#include "p4pc/game_hit_stage_native.h"
 #include "p4pc/game_skills_native.h"
+#include "p4pc/game_side_ailment_native.h"
 s32 datCalcHitResult(source, target, skillId, outcome, unusedMode)
 u8 *source;
 u8 *target;
@@ -60,7 +64,9 @@ s32 unusedMode;
     if (hasActionFrame) {
         if (!p4_game_action_element_has_affinity(&actionFrame.element)) return 1;
         res = (s32)p4_game_elements_native_element_affinity(target, &actionFrame);
-        if (!p4_game_action_element_is_physical(&actionFrame.element) &&
+        /* A physical delivery takes the crit roll (hardmode-design 8.1);
+         * Almighty physical keeps its retail test. */
+        if (!p4_game_action_frame_physical(&actionFrame) &&
             (actionFrame.element.family != 5u || iGpffffb3b8[idx * 0x28 + 2] != 1))
             return (res & 0x08000000) ? 4 : 1;
     } else {
@@ -138,11 +144,19 @@ s32 unusedMode;
         if (datCalcGetBuffLevel((DatUnit *)source, 6) > 0) {
             bonus += 15;
         }
+        /* A held side ailment's crit bonus (P3's status crit bonus) on an
+         * unresisted hit, after every native no-crit gate above. */
+        bonus += p4_side_ailment_native_crit_bonus(target, (u32)res);
         total = scaled + bonus;
         if (total > 0x64) {
             total = 0x64;
         } else if (total < 0) {
             total = 0;
+        }
+        if (p4_game_hit_native_active()) {
+            total = p4_game_hit_native_rate(P4_HIT_CRITICAL, (u32)(u16)skillId,
+                (((DatUnit *)source)->flags & 4) != 0, ((DatUnit *)source)->id,
+                (((DatUnit *)target)->flags & 4) != 0, ((DatUnit *)target)->id, total);
         }
         if ((s32)(RpRandom() % 100) < thresh) {
             return 2;

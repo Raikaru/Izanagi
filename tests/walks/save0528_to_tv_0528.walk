@@ -41,7 +41,7 @@ skip:3600
 press:circle
 wait:300
 log
-# The earned sale yields 3446 yen. Preserve all equipment and the existing recovery stock.
+# Sell the earned item and preserve equipment and recovery stock.
 waitstate:0x0079b68c==3446
 press:circle
 wait:300

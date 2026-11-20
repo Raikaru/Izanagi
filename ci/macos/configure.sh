@@ -1,5 +1,6 @@
 #!/bin/sh
-# Configures a macOS build directory (docs/platform/macos.md): the 64-bit build for this Mac's architecture, compiled with the pinned
+# Configures a macOS build directory (docs/platform/macos.md): the 64-bit build for this Mac's architecture (or, with P4PC_MACOS_ARCH=x86_64
+# on Apple silicon, for Intel: its tests run under Rosetta; build the deps prefix with the same variable), compiled with the pinned
 # clang of ci/macos/build_deps.sh <deps> against the SDK of the Xcode command line tools, linked by Apple's ld, with the mirror optimised
 # as shipped. Extra arguments go to cmake (for example -DP4_CENSUS_CHECK=OFF while a census baseline is reviewed).
 #
@@ -13,10 +14,11 @@ shift 2
 root=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 deps=$(CDPATH= cd -- "$deps" && pwd)
 deployment=${MACOSX_DEPLOYMENT_TARGET:-12.0}
-case $(uname -m) in
-  arm64)  triple=arm64-apple-macos$deployment ;;
-  x86_64) triple=x86_64-apple-macos$deployment ;;
-  *) echo "configure: unsupported architecture $(uname -m)" >&2; exit 1 ;;
+arch=${P4PC_MACOS_ARCH:-$(uname -m)}
+case $arch in
+  arm64)  triple=arm64-apple-macos$deployment port64arch=aarch64 ;;
+  x86_64) triple=x86_64-apple-macos$deployment port64arch=x86_64 ;;
+  *) echo "configure: unsupported architecture $arch" >&2; exit 1 ;;
 esac
 [ -f "$root/decomp/config/symbol_addrs.txt" ] || { echo "configure: the decomp submodule is not checked out (git submodule update --init)" >&2; exit 1; }
 [ -x "$deps/llvm/bin/clang" ] || { echo "configure: $deps is not a ci/macos/build_deps.sh prefix" >&2; exit 1; }
@@ -30,4 +32,4 @@ cmake -S "$root" -B "$build" -G Ninja \
   -DCMAKE_OSX_SYSROOT="$(xcrun --sdk macosx --show-sdk-path)" -DCMAKE_OSX_DEPLOYMENT_TARGET="$deployment" \
   -DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=ld -DCMAKE_SHARED_LINKER_FLAGS=-fuse-ld=ld -DCMAKE_MODULE_LINKER_FLAGS=-fuse-ld=ld \
   $launcher -DP4_DECOMP="$root/decomp" -DP4_MACOS_PREFIX="$deps" \
-  -DP4_PORT64=ON -DP4_PORT64_LINK=ON -DP4_PORT64_OPT=O2 -DP4_PORT64_JOBS="$(sysctl -n hw.ncpu)" -DP4_PORT64_WIN=OFF "$@"
+  -DP4_PORT64_ARCH="$port64arch" -DP4_PORT64=ON -DP4_PORT64_LINK=ON -DP4_PORT64_OPT=O2 -DP4_PORT64_JOBS="$(sysctl -n hw.ncpu)" -DP4_PORT64_WIN=OFF "$@"

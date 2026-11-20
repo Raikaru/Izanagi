@@ -221,7 +221,7 @@ static const char kImFragmentSource[] =
     "uniform float uAlphaRef;\n"
     "uniform int uAlphaInvert;\n"
     "bool alphaPasses(float a) {\n"
-    "    float t = a * 128.0;\n"
+    "    float t = p4GsAlpha(a);\n"
     "    if (uAlphaFunc == 8) return false;\n"
     "    if (uAlphaFunc == 2) return t < uAlphaRef;\n"
     "    if (uAlphaFunc == 3) return t <= uAlphaRef;\n"
@@ -310,13 +310,13 @@ static const char kImFragmentSource[] =
     "    if (major < vLineBounds.x || major > vLineBounds.y || coverage <= 0.0) discard;\n"
     "    /* GS AA1 substitutes coverage only for full source alpha when ABE is set.\n"
     "     * The software-GS edge coverage is 16 bits, converted to the GS 7-bit factor. */\n"
-    "    if (uLineABE == 0 || c.a >= 1.0) c.a = floor(min(coverage, 1.0) * 65535.0 / 512.0) / 128.0;\n"
+    "    if (uLineABE == 0 || p4GsAlpha(c.a) >= 128.0) c.a = floor(min(coverage, 1.0) * 65535.0 / 512.0) / 128.0;\n"
     "#endif\n"
     "    if (uAlphaFunc != 0 && alphaPasses(c.a) == (uAlphaInvert != 0)) {\n"
     "        discard;\n"
     "    }\n"
     "#ifdef P4_ROUND_BIAS\n"
-    "    c.rgb = max(c.rgb - 0.5 / 255.0, 0.0);\n"
+    "    c.rgb = p4GsTruncate(c.rgb);\n"
     "#endif\n"
     "    fragColor = c;\n"
     "}\n";
@@ -689,7 +689,7 @@ static char *date_fragment_source(void)
     static const char kUniforms[] = "uniform int uTextured;\nuniform sampler2D uDest;\nuniform int uDate;\n";
     static const char kTest[] =
         "    if (uDate != 0) {\n"
-        "        bool set = texelFetch(uDest, ivec2(gl_FragCoord.xy), 0).a >= 0.99;\n"
+        "        bool set = texelFetch(uDest, ivec2(gl_FragCoord.xy), 0).a >= (254.5 / 255.0);\n"
         "        if (set != (uDate == 2)) {\n"
         "            discard;\n"
         "        }\n"
@@ -1407,7 +1407,7 @@ static int im2d_canvas(const P4Sky2Vertex *vertices, int32_t count, int width, i
 }
 
 /* Prepares a draw with the destination alpha test: the frame buffer as it is, a copy of the current target on texture unit 1. */
-static void im2d_dest_alpha(int width, int height)
+void p4gl_dest_alpha_snapshot(int width, int height)
 {
     p4gl_glActiveTexture(GL_TEXTURE1);
     if (sDestTexture == 0) {
@@ -1602,7 +1602,7 @@ static int32_t im2d_draw(GLenum mode, const P4Sky2Vertex *vertices, int32_t numV
         p4gl_glBufferData(GL_ELEMENT_ARRAY_BUFFER, (GLsizeiptr)numIndices * sizeof(uint16_t), indices, GL_STREAM_DRAW);
     }
     if (!im2d_prepare_texture(&texture)) return 0;
-    if (p4gl_sky_date()) im2d_dest_alpha(pw, ph);
+    if (p4gl_sky_date()) p4gl_dest_alpha_snapshot(pw, ph);
     p4gl_sky_apply_blend();
     fbOnly = p4gl_gs_alpha_color_fail(p4gl_sky_test_raw(), &fbFunc, &fbRef);
     p4gl_depth_apply_values(p4gl_render_state_or(P4GL_RS_ZTESTENABLE, 1u) != 0u,

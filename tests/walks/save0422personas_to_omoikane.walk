@@ -1,5 +1,5 @@
-# From story0422personas: summon registered Izanagi 1, fuse with Apsaras 4 into Omoikane 7.
-# Preserve Orobas; Omoikane supplies Tarunda/Sukunda/Zio and inherits Dia.
+# From story0422personas: summon and fuse the selected Personas.
+# Preserve the prepared roster and skills.
 timeout:6000
 wait:140
 press:cross

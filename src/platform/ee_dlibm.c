@@ -9,6 +9,8 @@
  * All floating arithmetic goes through the already asm-verified fp-bit cores.
  * Constants below are mathematical coefficients represented by their exact bits.
  */
+/* The finite coefficients match Sun fdlibm (https://netlib.org/fdlibm/),
+ * distributed under the permission notice above; the remaining values are IEEE-754 infinities and zeros. */
 #include <stdint.h>
 #include <string.h>
 #include "ps2_fpbit.h"

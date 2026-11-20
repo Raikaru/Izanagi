@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: LicenseRef-reconstructed */
 /* Retail 003fe630: RenderWare driver plugin registration (_rwDeviceRegisterPlugin, called
  * from RwEngineInit in decomp src/renderware/core/badevice.c). Retail allocates the driver
  * pools and registers the driver's plugin table. Each result is kept in a retail gp global

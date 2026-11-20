@@ -33,6 +33,7 @@
 #include <string.h>
 
 #include "p4pc/gmem.h"
+#include "p4pc/lockstep_disc.h"
 #include "p4pc/platform.h"
 #include "vfs.h"
 
@@ -333,6 +334,7 @@ int func_004c9858(void *handle)
         return ADXF_ERR_PRM;
     }
     if (h->stat == ADXF_STAT_READING) {
+        p4pc_lockstep_disc_poll(h); /* an online lockstep replay answers it with retail's poll */
         p4pc_poll_devices();
     }
     return h->stat;

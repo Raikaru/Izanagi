@@ -141,8 +141,11 @@ int p4pc_x87_depth(void)
 #endif
 }
 
+void p4pc_battle_trace_frame(unsigned frame);   /* src/platform/battle_trace.c, P4PC_BATTLE_TRACE */
+
 void p4pc_battle_harness_frame(unsigned frame)
 {
+    p4pc_battle_trace_frame(frame);
     if (sEncounter == -2) {
         const char *e = getenv("P4PC_START_BATTLE");
         const char *d = getenv("P4PC_START_BATTLE_AT");

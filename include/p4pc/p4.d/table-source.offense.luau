@@ -1,0 +1,3 @@
+--!capability table-source.offense@1
+--!covers section:table-source.offense
+-- Table-source offensive-effect rows join native HP Boost/Amp composition.

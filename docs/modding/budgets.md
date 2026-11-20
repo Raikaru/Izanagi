@@ -97,62 +97,13 @@ Unavailable/non-monotonic counters emit an error, never a wall-time CPU fallback
 CPU time excludes sleeping/descheduling but includes the actual game-thread
 work between those boundaries; it does not include work on other OS threads.
 
-The study driver `mod_guard_timing.py` (private tooling, not part of the public repository)
-consumes two actual same-source game builds, OFF/ON
-for BOTH `P4PC_MOD_SUPPORT` and `P4PC_LUAU`. It checks actual ELF/PE machine ABI,
-CMake source/options and binary/cache hashes; other build-option changes are
-refused. Run it separately for i386 and x64. Native Windows launches acquire a
-fresh `Machine(priority="study").case(-1)` per game and release it before the
-next case, respecting higher-priority work at boundaries. POSIX orchestration
-runs on the HOST: `--container-command` is the accepted host `p4pc-run` plus Docker
-arguments ending in the image. One container invocation owns exactly one real
-game case, never the whole study. Source/build/retail/output must be mounted at
-their SAME absolute paths; an in-container callback cannot grant a host slot.
-`SRC`, `BUILD`, `RETAIL` and `OUT` below denote those absolute paths and `R` the
-accepted host root:
-
-```sh
-P4PC_LANE=mod-guard-timing python3 mod_guard_timing.py --source "$SRC" --retail "$RETAIL" \
-  --before "$BUILD/x64-off/p4pc64" --after "$BUILD/x64-on/p4pc64" \
-  --abi x64 --output "$OUT" \
-  --container-command "$R/bin/p4pc-run" --rm \
-  -v "$SRC:$SRC:ro" -v "$BUILD:$BUILD" -v "$RETAIL:$RETAIL:ro" -v "$OUT:$OUT" p4pc-ci
-```
-
-Native Windows omits the container argument and uses its actual PE executables.
-There is no POSIX nullcontext grant, nested process-lifetime study admission or
-invented `P4PC_PRIORITY=land` escape. The launcher must match the accepted source;
-remote children inherit its real flock slot, nice15 and CPU cap. The timed child
-starts its own native elapsed interval only AFTER that container is admitted;
-the separately retained launcher interval includes admission wait. Neither this
-study admission nor its output is land acceptance.
-
-The study runs the actual registered `story_to_0415`, `bathhouse_2f_0520` and
-`scene_shadow_haze` input contracts in fresh private cards from one frozen
-checkpoint cohort. It validates native endpoint success, bathhouse walk/save
-completion and the real haze state snapshot. It is NOT a CTest/visual-comparison
-receipt. The paced variant deliberately removes turbo/virtual time and retains
-normal pacing/audio; the counter's actual mode must confirm that. The turbo
-variant uses the suite's turbo2 policy. Both sides keep identical inputs and
-settings within each mode, force both package selectors off, and refuse
-MOD_WITNESS inputs. Raw source/walk/input hashes, flags, logs, complete counter
-windows and native-child elapsed wall times are retained. Child timing excludes
-admission wait, build and Python validation, but includes native startup/loading.
-
-For each workload/mode it records at least three serial OFF/ON/OFF brackets.
-Acceptance compares median added cost against the measured adjacent OFF/OFF
-variation plus explicit counter quantization: turbo native-child wall time and
-paced game-thread CPU per frame. Frame-window coverage must match across each
-bracket. No fixed percentage or copied historical performance number supplies
-the threshold. This is an empirical noise check, not a statistical-confidence
-claim or the separate no-mod state/RNG/walk identity proof.
+When comparing builds, keep the workload, configuration and measurement mode
+consistent. Report variation and counter resolution alongside timing results;
+microbenchmarks alone do not establish gameplay performance.
 
 `mod_frame_cpu[64|64w]` defines a real cooperative-kernel/OS-counter fixture
 without loaded mods, testing disabled logging and contiguous native counter
-windows. (The study driver's own synthetic contract test lives with that private
-tool.) This fixture is not an observed game
-performance result. Source, registration or a configured target is not a passing
-platform/performance receipt.
+windows. This fixture is not an observed game performance result.
 
 
 

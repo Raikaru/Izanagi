@@ -1,0 +1,3 @@
+--!capability events.exit@1
+--!covers event:exit
+-- p4.events.on("exit") (API 1.0).

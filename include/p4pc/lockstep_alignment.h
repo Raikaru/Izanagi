@@ -20,6 +20,16 @@
 #define P4LA_MAX_CLOCKS 4096u
 #define P4LA_EFFECT_BANK 0x00922de0u
 #define P4LA_QUIET_UPDATES 8u
+/* A dialog gate's upper kind bits encode its exact source wait offset plus
+ * one; zero is reserved for untimed title gates and invalid dialog gates. */
+static inline int p4la_encode_pad_gate(uint8_t row[P4LS_RECORD_SIZE], uint32_t frame,
+                                       const uint32_t gate[8], int dialog, uint32_t offset) {
+    if (dialog && offset>=0x00ffffffu) return 0;
+    p4ls_put(row,P4LA_PAD_GATE|(dialog ? (offset+1u)<<8 : 0));
+    p4ls_put(row+4,frame);
+    for (unsigned i=0;i<8;i++) p4ls_put(row+8+i*4,gate[i]);
+    return 1;
+}
 /* Metadata: epoch, phase, milestone kind/key, packed calendar, sequence,
  * field-root step, load-begin game counter. The record header keeps the real
  * game counter. Neither participant resets that counter to align a timeline.
@@ -68,11 +78,12 @@ static inline int p4la_rng_call(FILE *file, const P4WalkHost *h,
 /* Global effect generator only: kind 0 advances, 1 is its float wrapper,
  * 2 installs an explicit seed. Wrapper entries preserve the ultimate caller. */
 static inline int p4la_effect_header(FILE *file) {
-    return fprintf(file,"call\tgame_frame\tplaytime\tepoch\tphase\tcalendar\tsequence\tfield_step\tfield_requests\tengine_slot\tcaller\tkind\targument\tstate\twords\n")>0;
+    return fprintf(file,"call\tgame_frame\tplaytime\tepoch\tphase\tcalendar\tsequence\tfield_step\tfield_requests\tengine_slot\tcaller\tkind\targument\tstate\twords\tvisual_type\tvisual_instance\tvisual_particle\tvisual_update\n")>0;
 }
 static inline int p4la_effect_call(FILE *file, const P4WalkHost *h,
                                  const P4AlignTracker *tracker, uint32_t call,
-                                 uint64_t caller, uint32_t kind, uint32_t argument) {
+                                 uint64_t caller, uint32_t kind, uint32_t argument,
+                                 uint32_t visual_type, uint32_t visual_instance, uint32_t visual_particle, uint32_t visual_update) {
     const uint32_t sw=p4la_word(h,p4la_word(h,0x00764298u)+0x38u);
     const uint32_t work=p4la_word(h,p4la_word(h,0x007d2510u)+0x38u);
     const uint32_t scene=p4la_word(h,0x00762ea0u);
@@ -84,7 +95,56 @@ static inline int p4la_effect_call(FILE *file, const P4WalkHost *h,
         (unsigned long long)caller,kind,argument)<0) return 0;
     for (unsigned i=0;i<4;i++)
         if (fprintf(file,"%s%08x",i ? "," : "",p4la_word(h,0x00922de0u+i*4u))<0) return 0;
+    return fprintf(file,"\t%u\t%08x\t%u\t%u\n",visual_type,visual_instance,visual_particle,visual_update)>0;
+}
+typedef struct P4AlignVisual {
+    uint32_t type, instance, particle, serial;
+} P4AlignVisual;
+static inline int p4la_visual_header(FILE *file) {
+    return fprintf(file,"game_frame\ttype\tinstance\ttick\tserial\tidentity\n")>0;
+}
+static inline int p4la_visual_creation_header(FILE *file) {
+    return fprintf(file,"game_frame\ttype\tinstance\tcaller\tserial\n")>0;
+}
+static inline int p4la_visual_creation(FILE *file, const P4WalkHost *h,
+                                        uint32_t type, uint32_t instance,
+                                        uint64_t caller, uint32_t serial) {
+    if ((type!=1u && type!=2u) || !p4la_address(instance,0x30u)) return 0;
+    return fprintf(file,"%u\t%u\t%08x\t%016llx\t%u\n",
+        p4la_word(h,P4LS_GAME_FRAME),type,instance,(unsigned long long)caller,serial)>0;
+}
+/* Exact pointer-free identity uses reviewed configuration words, not addresses. */
+static inline int p4la_visual_update(FILE *file, const P4WalkHost *h, uint32_t type, uint32_t instance, uint32_t serial) {
+    static const uint32_t emitter_offsets[]={0,4,8,0x10,0x14,0x18,0x20,0x24,0x28,0x6c,0x98,0x9c,0xb8,0xbc,0xc0,0xc4};
+    static const uint32_t wind_offsets[]={0x34,0x38,0x80,0x84,0x88,0x98,0xb8,0xbc,0xc0,0xc4};
+    const uint32_t *offsets=type==1u ? emitter_offsets : wind_offsets;
+    const size_t count=type==1u ? sizeof emitter_offsets/sizeof emitter_offsets[0] :
+        sizeof wind_offsets/sizeof wind_offsets[0];
+    if ((type!=1u && type!=2u) || !p4la_address(instance,0x44u)) return 0;
+    const uint32_t config=p4la_word(h,instance+(type==1u ? 0x24u : 0x40u));
+    if (!p4la_address(config,0xc8u)) return 0;
+    if (fprintf(file,"%u\t%u\t%08x\t%u\t%u\t",p4la_word(h,P4LS_GAME_FRAME),type,instance,
+                p4la_word(h,instance+(type==1u ? 0x10u : 0x34u)),serial)<0) return 0;
+    if (type==1u && fprintf(file,"%08x,%08x,%08x,%08x,",
+        p4la_word(h,instance),p4la_word(h,instance+4u),p4la_word(h,instance+8u),
+        p4la_word(h,instance+0xcu))<0) return 0;
+    for (size_t i=0;i<count;i++)
+        if (fprintf(file,"%s%08x",i ? "," : "",p4la_word(h,config+offsets[i]))<0) return 0;
     return fputc('\n',file)!=EOF;
+}
+/* A blur instance is identified locally by its configuration and slot-table
+ * base; the controller pairs allocation order and the configured resource ID. */
+static inline int p4la_blur_header(FILE *file) {
+    return fprintf(file,"game_frame\tpath\tparameters\tslot\tindex\tcount\tresource\n")>0 && !fflush(file);
+}
+static inline int p4la_blur_init(FILE *file, const P4WalkHost *h, uint32_t path,
+                                 uint32_t parameters, uint32_t slot, uint32_t index) {
+    if ((path!=1u && path!=2u) || index>=100u || !p4la_address(parameters,4) ||
+        !p4la_address(parameters-0x98u,4) || !p4la_address(slot,0x34u) ||
+        index>=p4la_word(h,parameters)) return 0;
+    return fprintf(file,"%u\t%u\t%08x\t%08x\t%u\t%u\t%08x\n",
+        p4la_word(h,P4LS_GAME_FRAME),path,parameters,slot,index,
+        p4la_word(h,parameters),p4la_word(h,parameters-0x98u))>0 && !fflush(file);
 }
 static inline uint32_t p4la_task(const P4WalkHost *h, const char *name) {
     static const uint32_t heads[]={0x00764adcu,0x00764af4u,0x00764ae8u};
@@ -213,6 +273,95 @@ static inline int p4la_packet_frame(FILE *file, const P4WalkHost *h) {
     }
     return fputc('\n',file)!=EOF;
 }
+/* Per-presentation message-window provenance, read-only evidence never used by a verdict.
+ * itfMesManager's globals are at 0x008817e0 (active entry list at +0xc, entry next +0x4, window
+ * +0xc; decomp/include/itf_mes_objects.h). Each active window is written as
+ * flags:kind:row state:row flags:page index:page count:elapsed:transition:runs:enabled runs:
+ * glyphs:revealed:glyph frames:last command:last duration:last enabled. The text runs are walked
+ * from the row list's root like frFontMeasureList (run next +0x28, glyphs from +0x1c by +0x28):
+ * `revealed` sums each glyph's intensity (its colour's low byte) and `glyph frames` its frame
+ * halfword, the typewriter position. The last run's command and duration are the page wait
+ * (0xf223/0xf226 with duration -1 wait while voice channel 1 plays). Voice channel 1 is sdkSnd's
+ * SndCh slot at 0x008d2b90 + 0x134 (active, fading, state, request mode, whether it has a handle).
+ * The bust-up banks (decomp/include/fcl_bank_internal.h: manager at 0x00764678, its pending
+ * request list at +0x4, record at +0x24 with two 0x14-byte slots from +0x4; displays at 0x00796700,
+ * 0x370 apart) are written as pending;flags:state:descriptor:fade ticks:display state:alpha:
+ * timers 0x364/0x368/0x36c for both slots, or "-" without a manager. A list that is not walkable
+ * is written as "unwalkable". */
+#define P4LA_MES_MANAGER 0x008817e0u
+#define P4LA_SND_VOICE 0x008d2cc4u
+#define P4LA_BUSTUP_MANAGER 0x00764678u
+#define P4LA_BUSTUP_DISPLAYS 0x00796700u
+static inline uint32_t p4la_half(const P4WalkHost *h, uint32_t a) {
+    return (p4la_word(h,a&~3u)>>((a&2u)*8u))&0xffffu;
+}
+static inline uint32_t p4la_byte(const P4WalkHost *h, uint32_t a) {
+    return (p4la_word(h,a&~3u)>>((a&3u)*8u))&0xffu;
+}
+static inline int p4la_message_header(FILE *file) {
+    return fprintf(file,"game_frame\twindow_count\tmanager_flags\tvoice_active\tvoice_fading\tvoice_state\t"
+                   "voice_mode\tvoice_handle\tbustup\twindows\n")>0;
+}
+static inline int p4la_bustup(FILE *file, const P4WalkHost *h) {
+    const uint32_t work=p4la_word(h,P4LA_BUSTUP_MANAGER);
+    const uint32_t record=p4la_address(work,0x28u) ? p4la_word(h,work+0x24u) : 0;
+    if (!p4la_address(work,0x28u) || !p4la_address(record,0x30u)) return fputc('-',file)!=EOF;
+    if (fprintf(file,"%u",(unsigned)(p4la_word(h,work+4u)!=0))<0) return 0;
+    for (unsigned i=0;i<2;i++) {
+        const uint32_t slot=record+4u+i*0x14u, display=P4LA_BUSTUP_DISPLAYS+i*0x370u;
+        if (fprintf(file,";%x:%d:%x:%d:%d:%u:%u:%u:%u",p4la_half(h,slot),(int)(int16_t)p4la_half(h,slot+2u),
+                    p4la_word(h,slot+4u),(int)(int16_t)p4la_half(h,slot+0x10u),
+                    (int)(int16_t)p4la_half(h,display),p4la_byte(h,display+0x1fu),p4la_word(h,display+0x364u),
+                    p4la_word(h,display+0x368u),p4la_word(h,display+0x36cu))<0) return 0;
+    }
+    return 1;
+}
+static inline int p4la_message_window(FILE *file, const P4WalkHost *h, uint32_t window) {
+    uint32_t runs=0, enabled=0, glyphs=0, revealed=0, frames=0, command=0, duration=0, last_enabled=0;
+    const uint32_t list=p4la_word(h,window+0x20u);
+    if (list) {
+        if (!p4la_address(list,0x44u)) return 0;
+        for (uint32_t run=p4la_word(h,list+0x2cu); run; run=p4la_word(h,run+0x28u)) {
+            if (runs==256u || !p4la_address(run,0x44u)) return 0;
+            runs++;
+            last_enabled=p4la_word(h,run+0x40u);
+            enabled+=last_enabled!=0;
+            command=p4la_word(h,run+0x30u);
+            duration=p4la_word(h,run+0x3cu);
+            for (uint32_t glyph=p4la_word(h,run+0x1cu); glyph; glyph=p4la_word(h,glyph+0x28u)) {
+                if (glyphs==4096u || !p4la_address(glyph,0x2cu)) return 0;
+                glyphs++;
+                revealed+=p4la_word(h,glyph+0x10u)&0xffu;
+                frames+=p4la_half(h,glyph+2u);
+            }
+        }
+    }
+    return fprintf(file,"%x:%u:%d:%u:%d:%d:%u:%d:%u:%u:%u:%u:%u:%x:%d:%u",p4la_word(h,window),
+                   p4la_word(h,window+0x10u),(int)(int8_t)p4la_byte(h,window+0x24u),p4la_byte(h,window+0x25u),
+                   (int)(int16_t)p4la_half(h,window+0x2cu),(int)(int16_t)p4la_half(h,window+0x2eu),
+                   p4la_word(h,window+0x30u),(int)(int16_t)p4la_half(h,window+0x34u),runs,enabled,glyphs,
+                   revealed,frames,command,(int)duration,last_enabled)>0;
+}
+static inline int p4la_message_frame(FILE *file, const P4WalkHost *h) {
+    const uint32_t voice=P4LA_SND_VOICE;
+    if (fprintf(file,"%u\t%u\t%u\t%u\t%u\t%d\t%d\t%u\t",p4la_word(h,P4LS_GAME_FRAME),
+                p4la_word(h,P4LA_MES_MANAGER),p4la_half(h,P4LA_MES_MANAGER+8u),p4la_word(h,voice),
+                p4la_word(h,voice+4u),(int)(int16_t)p4la_half(h,voice+0xcu),(int)(int16_t)p4la_half(h,voice+0x14u),
+                (unsigned)(p4la_word(h,voice+0x10u)!=0))<0) return 0;
+    if (!p4la_bustup(file,h) || fputc('\t',file)==EOF) return 0;
+    const char *separator="";
+    uint32_t entry=p4la_word(h,P4LA_MES_MANAGER+0xcu);
+    for (unsigned count=0;entry;count++,entry=p4la_word(h,entry+4u)) {
+        const uint32_t window=p4la_word(h,entry+0xcu);
+        if (count==64 || !p4la_address(entry,0x20u) || (window && !p4la_address(window,0x130u)))
+            return fprintf(file,"%sunwalkable",separator)>0 && fputc('\n',file)!=EOF;
+        if (!window) continue;
+        if (fputs(separator,file)==EOF) return 0;
+        if (!p4la_message_window(file,h,window)) return fprintf(file,"unwalkable")>0 && fputc('\n',file)!=EOF;
+        separator=",";
+    }
+    return fputc('\n',file)!=EOF;
+}
 /* Before-input title/card checkpoints preserve confirmation edges while either
  * participant waits for its own card I/O. They are transport metadata only;
  * the first field-ready boundary still requires the complete state proof. */
@@ -228,6 +377,73 @@ static inline int p4la_title_gate(const P4WalkHost *h, uint32_t out[8]) {
     out[2]=p4la_word(h,work+0x18u);
     out[3]=p4la_word(h,work+0x20u);
     return 1;
+}
+/* A message or choice record starts with its complete 24-byte MSG identifier.
+ * Compare bytes themselves, not pointers or hashes, together with its field or
+ * event script and row page or choice cursor. */
+#define P4LA_DIALOG_GATE 0x80000000u
+#define P4LA_DIALOG_EVENT 0x40000000u
+static inline int p4la_dialog_gate(const P4WalkHost *h, uint32_t out[8]) {
+    const uint32_t sw=p4la_word(h,p4la_word(h,0x00764298u)+0x38u);
+    const uint32_t sequence=p4la_word(h,sw+4u);
+    /* 9 field, 10 event, 11 field-event messages; 6 the battle (its intro and result windows, NG-7n). */
+    if (sequence!=6u && sequence!=9u && sequence!=10u && sequence!=11u) return 0;
+    uint32_t entry=p4la_word(h,P4LA_MES_MANAGER+0xcu);
+    int found=0;
+    for (unsigned count=0;entry;count++,entry=p4la_word(h,entry+4u)) {
+        if (count==64 || !p4la_address(entry,0x20u)) return -1;
+        const uint32_t window=p4la_word(h,entry+0xcu);
+        if (!window) continue;
+        if (!p4la_address(window,0x130u)) return -1;
+        const uint32_t flags=p4la_word(h,window);
+        const uint32_t choice_mode=flags&0xc00u;
+        const int choice=choice_mode==0x800u && (flags&0x38u)==0x20u &&
+            (int16_t)p4la_half(h,window+0x48u)>0;
+        if (!choice && (!(flags&0x300u) || !(flags&7u) ||
+                        p4la_byte(h,window+0x24u)!=1u)) continue;
+        uint32_t context;
+        if (sequence==10u) {
+            const uint32_t task=p4la_task(h,"evtEditLoad");
+            const uint32_t work=task ? p4la_word(h,task+0x38u) : 0;
+            if (!p4la_address(work,0x798u)) return -1;
+            const uint32_t a=p4la_word(h,work+0x78cu), b=p4la_word(h,work+0x790u);
+            const uint32_t c=p4la_word(h,work+0x794u);
+            if (a>0xffffu || b>0xffu || c>0x3fu) return -1;
+            context=P4LA_DIALOG_EVENT|a|(b<<16)|(c<<24);
+        } else {
+            const uint32_t scene=p4la_word(h,0x00762ea0u);
+            if (!p4la_address(scene,8)) return -1;
+            const uint32_t field=p4la_word(h,scene), room=p4la_word(h,scene+4u);
+            if (field>0xffffu || room>0x3fffu) return -1;
+            context=field|(room<<16);
+        }
+        uint32_t record, position;
+        if (choice) {
+            const uint32_t bank=p4la_word(h,window+4u), index=p4la_word(h,window+0x3cu);
+            if (!p4la_address(bank,0x20u) || index>=p4la_word(h,bank+0x18u) ||
+                index>0x100000u || !p4la_address(bank+0x20u+index*8u,8u) ||
+                p4la_word(h,bank+0x20u+index*8u)!=1u) return -1;
+            record=p4la_word(h,bank+0x24u+index*8u);
+            const uint32_t cursor=p4la_half(h,window+0x4au);
+            if (cursor>=p4la_half(h,window+0x4eu)) return -1;
+            position=0x80000000u|cursor;
+        } else {
+            record=p4la_word(h,window+0x1cu);
+            const uint32_t page=p4la_half(h,window+0x2cu), phase=flags&7u;
+            position=page|(phase<<16);
+            if (phase==4u && p4la_word(h,window+0x30u)>=4u) position|=0x80000u;
+        }
+        if (!p4la_address(record,0x1cu)) return -1;
+        uint32_t candidate[8], named=0;
+        candidate[0]=P4LA_DIALOG_GATE|context;
+        for (unsigned i=0;i<6;i++) named|=(candidate[i+1]=p4la_word(h,record+i*4u));
+        candidate[7]=position;
+        if (!named || (!choice && (position&0xffffu)>=p4la_half(h,record+0x18u))) return -1;
+        if (found && memcmp(out,candidate,sizeof candidate)) return -1;
+        memcpy(out,candidate,sizeof candidate);
+        found=1;
+    }
+    return found;
 }
 static inline uint32_t p4la_movie_work(const P4WalkHost *h) {
     const uint32_t task=p4la_task(h,"evtEditLoad"), work=p4la_word(h,task+0x38u);
@@ -369,9 +585,14 @@ static inline int p4la_layer_animation_word(const P4WalkHost *h, uint32_t layer,
 }
 /* Words a battle-qualification response may write on the native participant:
  * the shared effect bank, a battle unit's model-layer time/previous_time and the
- * animation state behind it, or a battle action's state timer (the load-wait clocks). */
+ * animation state behind it, a battle action's state timer (the load-wait clocks), and
+ * CRI's server-pass count with every open ADXT handle's start count (the clock the PS2RNA
+ * model hears IOP blocks on; tools/lockstep_alignment.py cri_pass_clock_patches). */
 static inline int p4la_battle_patch_word(const P4WalkHost *h, uint32_t a) {
     if (a>=P4LA_EFFECT_BANK && a<P4LA_EFFECT_BANK+16u) return !(a&3u);
+    if (a==0x007188b8u) return 1;
+    if (a>=0x007188c0u && a<0x007188c0u+16u*0xc8u && (a-0x007188c0u)%0xc8u==0xa0u)
+        return (p4la_word(h,a-0xa0u)&0xffu)==1u;
     const uint32_t context=p4la_word(h,0x0076449cu);
     if (!p4la_address(context,0x300u)) return 0;
     for (unsigned g=0;g<3;g++) {
@@ -538,6 +759,27 @@ static inline size_t p4la_clocks(const P4WalkHost *h, uint32_t out[P4LA_MAX_CLOC
         }
     }
     return count;
+}
+/* The elapsed playtime field may be omitted from strict-frame hashes only
+ * after a witnessed reset (value 0) or save restore (its loaded value) and while
+ * each actual frame satisfies the invariant. A supporter timer/latch observation
+ * immediately restores raw comparison. */
+typedef struct P4AlignPlaytime {
+    uint32_t reset_frame, origin;
+    int reset_seen, supporter_used;
+} P4AlignPlaytime;
+static inline void p4la_playtime_reset(P4AlignPlaytime *p, uint32_t frame) {
+    p->reset_frame=frame; p->origin=0; p->reset_seen=1; p->supporter_used=0;
+}
+static inline void p4la_playtime_restore(P4AlignPlaytime *p, uint32_t frame, uint32_t value) {
+    p->reset_frame=frame; p->origin=value; p->reset_seen=1; p->supporter_used=0;
+}
+static inline void p4la_playtime_supporter(P4AlignPlaytime *p) {
+    if (p->reset_seen) p->supporter_used=1;
+}
+static inline uint32_t p4la_playtime_profile(const P4AlignPlaytime *p, uint32_t frame, uint32_t value) {
+    return p->reset_seen && !p->supporter_used && value==p->origin+frame-p->reset_frame
+        ? P4LS_FRAME_DERIVED_PLAYTIME : 0;
 }
 typedef struct P4AlignRestore {
     uint32_t count, frame, value;

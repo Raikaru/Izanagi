@@ -6,8 +6,8 @@
 #   sh ci/android/build_deps.sh <prefix> [abi]        abi: x86 (default), x86_64, arm64-v8a, armeabi-v7a
 #
 # <prefix>/<abi> receives include/ and lib/; <prefix>/sdl-java holds SDL's android-project (the Java classes). Needs the NDK
-# (ANDROID_NDK_HOME), curl, tar, xz, cmake, ninja, make, python3 and, for FFmpeg on x86 and x86_64, nothing else (asm is off: it
-# needs text relocations on 32-bit x86, which Android refuses for apps).
+# (ANDROID_NDK_HOME), curl, tar, xz, cmake, ninja, make, python3, flock and, for FFmpeg on x86 and x86_64, nothing else (asm is off:
+# it needs text relocations on 32-bit x86, which Android refuses for apps).
 set -eu
 
 prefix=${1:?usage: build_deps.sh <prefix> [abi]}
@@ -35,9 +35,12 @@ mkdir -p "$prefix/$abi" "$dl"
 prefix=$(cd "$prefix" && pwd)
 dl=$(cd "$dl" && pwd)
 out=$prefix/$abi
-work=$prefix/../deps-build-$abi
-mkdir -p "$work"
-work=$(cd "$work" && pwd)
+work=$(mktemp -d "$prefix/../deps-build-$abi.XXXXXX")
+trap 'rm -rf "$work"' EXIT
+trap 'exit 1' HUP INT TERM
+# Installs and the existing SDL/FFmpeg marker checks must be under the same lock.
+exec 9>"$prefix/../deps-build-$abi.lock"
+flock 9
 
 fetch() { # url sha file
   if [ ! -f "$dl/$3" ]; then curl -fsSL --retry 6 --retry-all-errors --retry-delay 10 -o "$dl/$3.part" "$1" && mv "$dl/$3.part" "$dl/$3"; fi

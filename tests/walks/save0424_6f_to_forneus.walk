@@ -1,5 +1,5 @@
 # From story0424_6f: fuse Sandman 5 + Ukobach 3 into Forneus 6, equip and save.
-# Bufu exploits Burning Beetles' weakness; the saved fourth skill is Balzac after Pulinpa's preview.
+# Prepare the party for the encounter.
 timeout:10000
 wait:140
 press:cross

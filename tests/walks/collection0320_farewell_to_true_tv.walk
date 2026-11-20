@@ -1,8 +1,6 @@
 # Independent pristine collection card5-slot02, March 20 in Shopping District South after every
-# farewell. The true-ending trigger: refuse to go home at the Junes elevator (No, "I'm not finished
-# yet", stop by the food court), the food court discussion ("There is something...", "My uncle,
-# Dojima."), Dojima at the Samegawa riverbed ("I want to talk to you.", "The weird attendant?",
-# "I looked sick?", "It might be important."), the Velvet Room, the gas-station attendant (as in
+# farewell. Refuse to go home at the Junes elevator, then visit the food court,
+# riverbed, Velvet Room and gas-station attendant (as in
 # collection0320_attendant_to_tv.walk), then Junes, the TV and a save at the Entrance.
 timeout:20000
 wait:140
@@ -31,7 +29,7 @@ push:-500,0,12
 press:cross
 timeout:6000
 choose:2                  # do not go home
-choose:1                  # "I'm not finished yet"
+choose:1                  # continue the investigation
 choose:1                  # stop by the food court
 timeout:60000
 choose:1
@@ -112,8 +110,8 @@ choose:3
 choose:2
 choose:2
 choose:3
-choose:1                  # "What do you mean?"
-choose:1                  # "To end everything."
+choose:1                  # first ending choice
+choose:1                  # second ending choice
 timeout:60000
 skipmsg
 waitcontrol:on

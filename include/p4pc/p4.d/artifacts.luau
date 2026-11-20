@@ -1,0 +1,3 @@
+--!capability artifacts@1
+--!covers p4.artifacts
+-- Read and write a mod's own persistent output files.

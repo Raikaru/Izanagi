@@ -7,7 +7,7 @@
 -- PRACTICE session refuses to save, so practice state never reaches a normal
 -- save.
 
-local VERSION = "1.0.0"
+local VERSION = "1.1.0"
 
 -- ---------------------------------------------------------------- helpers
 
@@ -30,6 +30,25 @@ local function log(text: string)
     p4.log(text)
 end
 
+-- P18 owns only the passive grants it made itself (owner == p4.id); another
+-- mod's grant of the same skill is never read as, or taken back as, ours.
+local function practiceHolds(member: number, skill: number): boolean
+    for _, grant in p4.passive.list() do
+        if grant.owner == p4.id and grant.kind == "party" and grant.id == member and grant.skill == skill then
+            return true
+        end
+    end
+    return false
+end
+local function otherHolds(member: number, skill: number): boolean
+    for _, grant in p4.passive.list() do
+        if grant.owner ~= p4.id and grant.kind == "party" and grant.id == member and grant.skill == skill then
+            return true
+        end
+    end
+    return false
+end
+
 -- ---------------------------------------------------------------- features
 
 type Feature = { key: string, code: string, label: string }
@@ -37,6 +56,7 @@ local FEATURES: { [string]: Feature } = {
     warp = { key = "warp", code = "P01", label = "WARP" },
     date = { key = "date", code = "P02", label = "SET DATE" },
     time = { key = "time", code = "P03", label = "SET TIME SLOT" },
+    weather = { key = "weather", code = "P04", label = "SET WEATHER" },
     stats = { key = "stats", code = "P05", label = "PARTY STATS" },
     levels = { key = "levels", code = "P06", label = "LEVEL / EXP" },
     personas = { key = "personas", code = "P09", label = "PERSONAS" },
@@ -48,7 +68,9 @@ local FEATURES: { [string]: Feature } = {
     camera = { key = "camera", code = "P13", label = "FREE CAMERA" },
     hud = { key = "hud", code = "P14", label = "HIDE HUD" },
     frames = { key = "frames", code = "P16", label = "FRAME COUNTER" },
+    pace = { key = "pace", code = "P15", label = "PRACTICE SPEED" },
     timer = { key = "timer", code = "P17", label = "PRACTICE TIMER" },
+    passives = { key = "passives", code = "P18", label = "PASSIVE SKILLS" },
 }
 
 -- Toggle changes made on our pages are written by the frame pump (settings
@@ -115,6 +137,9 @@ p4.save.register({
         session.practice = false
         session.loadedPractice = false
         session.epoch += 1
+        -- P18 grants belong to the session they were made in.
+        local cleared = p4.passive.clear()
+        if cleared > 0 then log("PRACTICE_PASSIVES cleared=" .. tostring(cleared) .. " origin=" .. origin) end
         if type(value) == "table" then
             session.practice = true
             session.loadedPractice = true
@@ -166,6 +191,30 @@ local ROSTER_LEAD = 0x00797F88
 local ROSTER_MODE = 0x0079B40C
 local PERSONA_TABLE = 0x007644C4
 local PERSONA_IDS = 0xC0
+-- P04 (datCalendar_inferred_001228c0.c, unplaced_inferred_00110850.c): the
+-- calendar state pointer (gp-0x4E24) holds the day (+4) and period (+6) it
+-- was synchronized to and that slot's weather (+8, previous value +0xA).
+-- calendarSyncFromDate (0x00123850) stores the disc's weather there (day
+-- table of 6 bytes per day from 0x005E3A02: periods 0-1 at +0, 2-5 at +2);
+-- while the day and period are current, calGetDayEntryByPhase (0x00110960)
+-- returns this value instead of the table. The game itself replaces it for
+-- story fields with calendarPushValue (0x00123AA0) and restores it with
+-- calendarPopValue (0x00123AC0).
+local CALENDAR_STATE = 0x007642CC
+local DAY_WEATHER = 0x005E3A02
+local function weatherOfDay(): number
+    local date, slot = p4.mem.read("i16", 0x00797B7A), p4.mem.read("u8", 0x00797B7C)
+    return p4.mem.read("i8", DAY_WEATHER + date * 6 + (if slot >= 2 then 2 else 0))
+end
+-- The weather the calendar serves now when it differs from the disc's.
+local function weatherOverride(): number?
+    local state = p4.mem.read("u32", CALENDAR_STATE)
+    if state == 0 then return nil end
+    if p4.mem.read("i16", state + 4) ~= p4.mem.read("i16", 0x00797B7A) or
+        p4.mem.read("i16", state + 6) ~= p4.mem.read("u8", 0x00797B7C) then return nil end
+    local value = p4.mem.read("i8", state + 8)
+    return if value == weatherOfDay() then nil else value
+end
 
 local function rosterCapacity(): number
     local mode = p4.mem.read("u32", ROSTER_MODE)
@@ -371,6 +420,26 @@ local function commit(op: Op): string
         local level, exp = p4.mem.read("u8", HERO_UNIT + 6), p4.mem.read("u32", HERO_EXP)
         after = "LV" .. tostring(level) .. " EXP" .. tostring(exp)
         if level ~= op.a or exp ~= op.b then return "FAILED: READ BACK " .. after end
+    elseif kind == "weather" then
+        local state = p4.mem.read("u32", CALENDAR_STATE)
+        if state == 0 then return "REFUSED: NO CALENDAR STATE" end
+        if p4.mem.read("i16", state + 4) ~= readDate() or p4.mem.read("i16", state + 6) ~= readTimeSlot() then
+            -- The game's own resynchronization to the current date and slot.
+            p4.call(0x00123850, "v")
+            if p4.mem.read("i16", state + 4) ~= readDate() or p4.mem.read("i16", state + 6) ~= readTimeSlot() then
+                return "FAILED: THE CALENDAR DID NOT SYNCHRONIZE"
+            end
+        end
+        before = weatherOverride() or weatherOfDay()
+        if op.field == "release" then
+            if weatherOverride() == nil then return "REFUSED: NO OVERRIDE" end
+            p4.call(0x00123AC0, "v")
+            after = weatherOverride() or weatherOfDay()
+        else
+            p4.call(0x00123AA0, "vh", op.a)
+            after = p4.mem.read("i8", state + 8)
+            if after ~= op.a then return "FAILED: READ BACK " .. tostring(after) end
+        end
     elseif kind == "personas" then
         local field = op.field or ""
         if field == "add" then
@@ -434,6 +503,22 @@ local function commit(op: Op): string
             return "REFUSED: UNKNOWN STAT"
         end
         if field ~= "normalize" and after ~= op.b then return "FAILED: READ BACK " .. tostring(after) end
+    elseif kind == "passives" then
+        -- p4.passive (passive.grant@1): the member has the skill in every
+        -- passive check the game makes; the skill list never changes. Only
+        -- P18's own grant is made or taken back; a full grant table refuses.
+        local who: number | P4PassiveCharacter = op.a
+        before = if practiceHolds(op.a, op.b) then "GRANTED" else "NONE"
+        local ok, why = pcall(function()
+            if op.field == "revoke" then p4.passive.revoke({ party = who }, op.b) else p4.passive.grant({ party = who }, op.b) end
+        end)
+        if not ok then
+            local text = string.upper(tostring(why))
+            if string.find(text, "GRANT TABLE IS FULL", 1, true) then return "REFUSED: EVERY MOD'S GRANTS FILL THE TABLE" end
+            return "REFUSED: " .. text
+        end
+        after = if practiceHolds(op.a, op.b) then "GRANTED" else "NONE"
+        if (after == "GRANTED") == (op.field == "revoke") then return "FAILED: READ BACK " .. tostring(after) end
     else
         return "REFUSED: UNKNOWN OPERATION"
     end
@@ -484,12 +569,65 @@ local function counterLine(): string
     return "UPD " .. tostring(updates) .. "  RET " .. tostring(retail) .. "  FLIP " .. tostring(counters.frame - counters.baseFrame)
 end
 
+-- ---------------------------------------------------------------- practice speed (P15)
+
+-- p4.pace changes wall time only: it never marks the session PRACTICE. A
+-- staged rate is set at the next frame (not from a UI callback); L3 restores
+-- 1x from gameplay without opening the Config.
+-- actual: presented game frames per wall second over the last second, as a
+-- multiple of the game's 59.94 Hz, so a host that cannot keep up shows it.
+local paceTool = { staged = 1, pending = nil :: number?, result = "-", shown = "", actual = 0,
+    sampleFrame = 0, sampleWall = 0 }
+local function paceText(rate: number): string
+    if rate == 0.25 then return "0.25X" elseif rate == 0.5 then return "0.5X" end
+    return tostring(math.floor(rate)) .. "X"
+end
+local function paceFrame()
+    local pending = paceTool.pending
+    if pending then
+        paceTool.pending = nil
+        local ok, why = p4.pace.set(pending)
+        paceTool.result = if ok then "SET " .. paceText(pending) else "REFUSED: " .. string.upper(why or "")
+        log("PRACTICE_PACE set " .. tostring(pending) .. " " .. paceTool.result)
+    end
+    local requested, effective, held = p4.pace.state()
+    local wall = p4.clock.wall()
+    if wall - paceTool.sampleWall >= 1 then
+        if paceTool.sampleWall > 0 then
+            paceTool.actual = (counters.frame - paceTool.sampleFrame) / (wall - paceTool.sampleWall) / 59.94
+        end
+        paceTool.sampleWall, paceTool.sampleFrame = wall, counters.frame
+    end
+    local shown = tostring(effective) .. " " .. (held or "")
+    if shown ~= paceTool.shown then
+        paceTool.shown = shown
+        log("PRACTICE_PACE now " .. tostring(effective) .. "x" .. (if held then " held: " .. held else ""))
+    end
+    if requested ~= 1 then
+        local _, restore = p4.input.action("l3")
+        if restore or not enabled("pace") then
+            p4.pace.set(1)
+            paceTool.staged = 1
+            paceTool.result = "RESTORED 1X"
+            log("PRACTICE_PACE restored 1x")
+        end
+    end
+end
+local function paceLine(): string?
+    local requested, effective, held = p4.pace.state()
+    if requested == 1 then return nil end
+    return string.format("SPEED %s ACTUAL %.2fX", paceText(effective), paceTool.actual) ..
+        (if held then " (" .. string.upper(held) .. ")" else "")
+end
+
 local lastHud = ""
 refreshHud = function()
     local lines: { string } = {}
     if session.practice then table.insert(lines, "PRACTICE") end
     if enabled("timer") and (timer.running or timer.wall > 0) then table.insert(lines, timerLine()) end
     if enabled("frames") then table.insert(lines, counterLine()) end
+    local speed = paceLine()
+    if speed then table.insert(lines, speed) end
     local joined = table.concat(lines, "\n")
     if joined == lastHud then return end
     lastHud = joined
@@ -696,7 +834,8 @@ end
 
 local hudTick = 0
 local function displayActive(): boolean
-    return session.practice or enabled("frames") or (enabled("timer") and timer.running)
+    return session.practice or enabled("frames") or (enabled("timer") and timer.running) or
+        paceTool.pending ~= nil or (p4.pace.state()) ~= 1
 end
 
 local function onFrame(event: P4FrameEvent)
@@ -729,6 +868,7 @@ local function onFrame(event: P4FrameEvent)
     if statsOpen then statsFrame() end
     cameraFrame()
     hudFrame()
+    paceFrame()
     if enabled("frames") and session.epoch ~= counters.epoch then
         -- A load starts a new timeline instead of a backwards jump.
         counters.epoch = session.epoch
@@ -1208,6 +1348,54 @@ definePage({
                 return { kind = "levels", a = levels.staged, b = levelExp(levels.staged),
                     field = if levels.normalize then "normalize" else nil,
                     label = "level=" .. tostring(levels.staged) .. " exp=" .. tostring(levelExp(levels.staged)) }
+            end)
+        end
+    end,
+})
+
+-- The disc's day table uses codes 0-2; FldEnvResolveState (0x00154720) gives
+-- each its own field environment set.
+local WEATHER_NAMES: { [number]: string } = { [0] = "CLEAR", [1] = "RAIN", [2] = "CLOUDY" }
+local function weatherText(code: number?): string
+    if code == nil then return "-" end
+    return (WEATHER_NAMES[code] or "CODE") .. " (" .. tostring(code) .. ")"
+end
+local weather = { code = 0 }
+definePage({
+    key = "weather", title = "P04 WEATHER", listed = false,
+    opened = function()
+        weather.code = weatherOverride() or weatherOfDay()
+        if not WEATHER_NAMES[weather.code] then weather.code = 0 end
+        editor("weather").armed = false
+    end,
+    closed = function() editor("weather").armed = false end,
+    rows = function(): RowList
+        local override = weatherOverride()
+        local rows: RowList = {
+            { key = "calendar", label = "CALENDAR", kind = "info", value = weatherText(weatherOfDay()),
+                help = "The disc's weather for today's time of day." },
+            { key = "override", label = "OVERRIDE", kind = "info", value = override ~= nil and weatherText(override) or "NONE" },
+            { key = "code", label = "NEW WEATHER", kind = "value", value = weatherText(weather.code),
+                help = "Used by the calendar and by every field loaded until the next date or time-slot change, then " ..
+                    "the disc's weather returns. The current field keeps its look until you leave it (or use P01)." },
+            { key = "release", label = "RELEASE OVERRIDE", kind = "action", disabled = override == nil,
+                help = "Restore the weather saved by the override now." },
+        }
+        for _, row in applyRows("weather", weatherText(override or weatherOfDay()) .. " -> " .. weatherText(weather.code),
+            "UNTIL NEXT DATE/SLOT", "A one-slot override; the calendar's own table is not changed.") do
+            table.insert(rows, row)
+        end
+        return rows
+    end,
+    adjust = function(key: string, direction: number)
+        if key == "code" then
+            weather.code = (weather.code + direction) % 3
+            editor("weather").armed = false
+        elseif key == "release" and direction == 0 then
+            enqueue({ kind = "weather", a = 0, b = 0, field = "release", label = "release" })
+        else
+            applyAction("weather", key, direction, function(): Op?
+                return { kind = "weather", a = weather.code, b = weather.code, label = "code=" .. tostring(weather.code) }
             end)
         end
     end,
@@ -1768,15 +1956,124 @@ definePage({
     end,
 })
 
+local PACE_RATES = { 0.25, 0.5, 1, 2, 4 }
+definePage({
+    key = "pace", title = "P15 PRACTICE SPEED", listed = false,
+    rows = function(): RowList
+        local requested, effective, held = p4.pace.state()
+        return {
+            { key = "speed", label = "SPEED", kind = "value", value = paceText(paceTool.staged),
+                help = "0.25x to 4x game speed in real-time play. Every frame runs the same updates; only waiting " ..
+                    "between frames changes. Menus, scene changes and movies run at 1x." },
+            { key = "set", label = "SET SPEED", kind = "action", disabled = paceTool.staged == requested,
+                help = "Takes effect when the Config closes and gameplay is ready. L3 restores 1x." },
+            { key = "state", label = "NOW", kind = "info", value = paceText(effective) ..
+                (if requested ~= effective then " (ASKED " .. paceText(requested) .. ")" else "") },
+            { key = "held", label = "HOLD", kind = "info", value = if held then string.upper(held) else "-" },
+            { key = "actual", label = "ACTUAL", kind = "info", value = string.format("%.2fX", paceTool.actual),
+                help = "Game frames per second over the last second, against normal speed. A slow host shows less." },
+            { key = "audio", label = "AUDIO", kind = "info", value = if effective == 1 then "NORMAL" else "MUTED, FOLLOWS FRAMES" },
+            { key = "result", label = "RESULT", kind = "info", value = paceTool.result },
+        }
+    end,
+    adjust = function(key: string, direction: number)
+        if key == "speed" then
+            local index = table.find(PACE_RATES, paceTool.staged) or 3
+            paceTool.staged = PACE_RATES[clamp(index + direction, 1, #PACE_RATES)]
+        elseif key == "set" and direction == 0 then
+            paceTool.pending = paceTool.staged
+            paceTool.result = "WAITING"
+            updatePump()
+        end
+    end,
+})
+
+-- P18: a passive skill granted to a party member through p4.passive
+-- (capability passive.grant@1). The game's passive checks (battle formulas,
+-- the AI, Endure, max HP/SP, costs, the field) see it as one in a slot; the
+-- skill list and the save never change. P18 makes and takes back only its own
+-- grants, which end at a load or New Game (the save load callback above);
+-- other mods' grants are shown and left alone.
+local PASSIVES: { P4Ref } = p4.data.find("skill", { kind = "passive" })
+local passiveRefs: { [number]: P4Ref } = {}
+for _, ref in PASSIVES do passiveRefs[ref.id] = ref end
+local passivePage = { member = 1, index = 1 }
+local function passiveName(ref: P4Ref): string
+    return if ref.name ~= nil then upper(ref.name) else idText(ref.id, 3)
+end
+-- The member's party grants: P18's own, and other mods'.
+local function memberPassives(member: number): (string, string)
+    local own: { string }, others: { string } = {}, {}
+    for _, grant in p4.passive.list() do
+        if grant.kind == "party" and grant.id == member then
+            local ref = passiveRefs[grant.skill]
+            local name = if ref then passiveName(ref) else idText(grant.skill, 3)
+            if grant.owner == p4.id then table.insert(own, name)
+            elseif not table.find(others, name) then table.insert(others, name) end
+        end
+    end
+    return if #own > 0 then table.concat(own, ", ") else "NONE",
+        if #others > 0 then table.concat(others, ", ") else "NONE"
+end
+definePage({
+    key = "passives", title = "P18 PASSIVE SKILLS", listed = false,
+    opened = function() editor("passives").armed = false end,
+    closed = function() editor("passives").armed = false end,
+    rows = function(): RowList
+        local member = MEMBERS[passivePage.member]
+        local rows: RowList = {
+            { key = "member", label = "MEMBER", kind = "value", value = MEMBER_NAMES[member],
+                help = "The member has the skill with every Persona, without using a skill slot." },
+        }
+        local ref = PASSIVES[passivePage.index]
+        if not ref then
+            addRow(rows, { key = "none", label = "PASSIVE SKILLS", kind = "info", value = "NONE IN THE LOADED TABLES" })
+            return rows
+        end
+        addRow(rows, { key = "skill", label = "PASSIVE", kind = "value", value = passiveName(ref),
+            help = "Every passive skill of the loaded tables. Navigator skills are not passives." })
+        local own, others = memberPassives(member)
+        addRow(rows, { key = "held", label = "GRANTED HERE", kind = "info", value = own })
+        addRow(rows, { key = "others", label = "BY OTHER MODS", kind = "info", value = others,
+            help = "Another mod's grants count in the game too; P18 never takes them back." })
+        local held = practiceHolds(member, ref.id)
+        local change = (if held then "TAKE BACK " else "GRANT ") .. passiveName(ref) .. " - " .. MEMBER_NAMES[member]
+        local note = if not held and otherHolds(member, ref.id) then "ANOTHER MOD ALREADY GRANTS IT" else nil
+        for _, row in applyRows("passives", change, note,
+            note and "The member already has it from another mod; P18's own grant would stay after that mod takes its back.") do
+            table.insert(rows, row)
+        end
+        return rows
+    end,
+    adjust = function(key: string, direction: number)
+        if key == "member" then
+            passivePage.member = clamp(passivePage.member + direction, 1, #MEMBERS)
+            editor("passives").armed = false
+        elseif key == "skill" then
+            passivePage.index = clamp(passivePage.index + direction, 1, math.max(#PASSIVES, 1))
+            editor("passives").armed = false
+        else
+            applyAction("passives", key, direction, function(): Op?
+                local member = MEMBERS[passivePage.member]
+                local ref = PASSIVES[passivePage.index]
+                if not ref then return nil end
+                local held = practiceHolds(member, ref.id)
+                return { kind = "passives", a = member, b = ref.id, field = if held then "revoke" else "grant",
+                    label = (if held then "revoke " else "grant ") .. idText(ref.id, 3) .. " member=" .. tostring(member) }
+            end)
+        end
+    end,
+})
+
 -- ---------------------------------------------------------------- sections and root
 
 type Section = { key: string, title: string, features: { string } }
 local SECTIONS: { Section } = {
-    { key = "travel", title = "TRAVEL / CALENDAR", features = { "warp", "date", "time" } },
-    { key = "party", title = "PARTY / INVENTORY", features = { "money", "items", "links", "stats", "levels", "personas" } },
+    { key = "travel", title = "TRAVEL / CALENDAR", features = { "warp", "date", "time", "weather" } },
+    { key = "party", title = "PARTY / INVENTORY", features = { "money", "items", "links", "stats", "levels", "personas", "passives" } },
     { key = "events", title = "EVENTS / BATTLES", features = { "flags", "encounter" } },
     { key = "display", title = "CAMERA / DISPLAY", features = { "camera", "hud" } },
-    { key = "timing", title = "TIMING", features = { "frames", "timer" } },
+    { key = "timing", title = "TIMING", features = { "frames", "timer", "pace" } },
 }
 
 for _, section in SECTIONS do

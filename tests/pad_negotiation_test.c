@@ -1,6 +1,6 @@
 /* Exercise the actual libpad request implementation, without SDL/devices.
- * Retail trace: mode g1 -> stable g10; align g11 -> complete g13;
- * sdkPadUpdateRecord therefore first calls scePadRead at g14. */
+ * Timing is an interoperability observation derived from the retail pad protocol:
+ * mode g1 -> stable g10; align g11 -> complete g13; scePadRead starts at g14. */
 #include <assert.h>
 #include <stdint.h>
 #include <stdio.h>

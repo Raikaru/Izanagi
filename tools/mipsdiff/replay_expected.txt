@@ -112,7 +112,7 @@
 00484b30 returns a 128-bit value: the i386 host ABI returns it through a hidden pointer, retail in $v0/$v1
 # Hardware registers
 001026b0 hardware seam: retail reads GS CSR.FIELD at 0x12001000; the port reads its logical VBLANK field, whose phase is not restored by direct function replay
-# Host kernel model (PortCriC-2's analysis, docs/override_diff.md)
+# Host kernel model (docs/override_diff.md)
 0042ba20 DIntr/EIntr: the port keeps the SR enable bit in a host variable, retail reads COP0 SR; the recorded state differs
 0042ba70 DIntr/EIntr: the port keeps the SR enable bit in a host variable, retail reads COP0 SR; the recorded state differs
 004226a8 GetThreadId: the port's thread table lacks the recorded retail thread ids
@@ -151,14 +151,14 @@
 00418b18 kernel seam: AddIntcHandler returns the host kernel model's handle id (retail 10, the port 2)
 004ef060 SJUNI_GetNumData sums the chunk chain of a line: golden11 call 64 starts at the chain node 0x0073aaa0, whose page (0x0073a000, only 0x0073a7a0+0x80 is recorded) is not in the call's memory, so the native reads a zero node (length 0) where retail read length 0x4000; the code is the retail asm line for line (func_004ef0a8)
 004ef310 SJUNI_PutChunk pops the free node 0x0073aaa0 from the pool at 0x0074203c: golden11 call 256 does not record that node's page, so its next pointer reads 0 natively (pool becomes 0x0073aaa0 + 0 instead of retail's 0x0073aab0, the node's next); the pool page is the same unrecorded one as 004ef060
-00446ed8 vsprintf (PortFiles) takes the va_list of a retail-compiled caller: the recorded list is a PS2 argument area (8 byte slots), the host vsprintf reads it as a 32 bit x86 list (4 byte slots), so the second argument 0xff is read as the high word 0 ('0000' against '00ff'); in the port every caller is x86 code with an x86 va_list, no PS2 list reaches it
+00446ed8 vsprintf takes the va_list of a retail-compiled caller: the recorded list is a PS2 argument area (8 byte slots), the host vsprintf reads it as a 32 bit x86 list (4 byte slots), so the second argument 0xff is read as the high word 0 ('0000' against '00ff'); in the port every caller is x86 code with an x86 va_list, no PS2 list reaches it
 00486400 two words at 0x01295234/0x0129523c of the recorded call differ (cause not identified; the interpreter on retail is exact): see triage.txt
 00486330 same as 00486400
 004861f0 same as 00486400 (the interpreter run of this one has no valid call)
 # PortPromotedA2's analysis of golden11 (the natives are exact against the retail asm in mipsdiff)
 003de110 replay-unmodelable: the default device's open slot (+0x4C) holds a recorder-side value, not a code address, so retail's open callback cannot run natively
 003c8dd0 the call chain reaches RwFrameGetLTM with a null frame: retail reads PS2 low RAM there, the port does not map it (a native crash, not a defect of this override)
-# PortAsmC-2's analysis: RwEngineRegisterPlugin (func_003e8930) returns the running total of a static registry (engineTKList 0x0070B760);
+# Analysis: RwEngineRegisterPlugin (func_003e8930) returns the running total of a static registry (engineTKList 0x0070B760);
 # a real native boot gives retail's offsets (4,0x11d -> 0x58c ...), the replay's page for it holds the initial total 0x12c
 00390520 replay artefact: the plugin registry's running total (0x0070B760) is its initial value in the replay, not retail's at frame 198
 003999a0 replay artefact: the plugin registry's running total (0x0070B760) is its initial value in the replay, not retail's at frame 198

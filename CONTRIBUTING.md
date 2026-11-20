@@ -32,7 +32,7 @@ repository.
   no retail reference are port-owned (`config/port_owned.txt`).
 - **Asm callees are in scope.** When you translate a function, translate its asm-only
   callees too. A function counts as done only when its callees are native, not trap stubs.
-  Machine drafts in `drafts/` are a starting point, not a match: check them against the asm.
+  Check translations against the assembly.
 - **Replace at the game's own seam:** wrapper layers (H_Cdvd_*, sdkPad*, h_memcard), and
   RenderWare device/pipeline nodes for graphics. Use raw SCE calls only when no seam exists.
   GS/DMA/VIF/VU1 code is never transliterated; it is replaced at the sky2/pipeline-node seam.
@@ -46,8 +46,8 @@ repository.
   model. A successful asynchronous disc/ADXF read never completes within its submission
   update: it is published at the next scheduler frame boundary and the game's own
   CRI/filesystem/task steps consume it ([disc contract](docs/platform/disc_cri.md#pc-disc-contract)).
-- **Code that reproduces the retail game is not MIT-licensed.** New files in `overrides/`,
-  `drafts/` or `src/cri/`, and any other translation of retail code, fall under the
+- **Code that reproduces the retail game is not MIT-licensed.** New files in `overrides/`
+  or `src/cri/`, and any other translation of retail code, fall under the
   `LicenseRef-reconstructed` carve-out in [NOTICE](NOTICE). Mark new translations outside
   those paths with `/* SPDX-License-Identifier: LicenseRef-reconstructed */` and list them
   in NOTICE and `REUSE.toml`.
@@ -57,7 +57,7 @@ repository.
 - **Verify the changed path.** "It builds" is not "it works". Run the program or a ctest
   that exercises your change, and look at any image you produce.
 - **Host tests get a 64-bit twin automatically.** A test executable added under `tests/`
-  is also built for x86_64 as `<name>64` ([docs/port64.md](docs/port64.md) 6.8). Write it
+  is also built for x86_64 as `<name>64` ([64-bit tests](docs/port64.md#tests)). Write it
   guest-safe (`tests/guest_test.h`: `p4t_guest_map`, `p4t_galloc`, `P4_G2H`/`P4_H2G`/`P4_FN_H2G`):
   no raw retail address cast to a pointer, no host pointer stored in a guest word.
 - **Tests that need the game skip without it** (exit code 77, `SKIP_RETURN_CODE 77`) when

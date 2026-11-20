@@ -69,7 +69,7 @@
 0x004D5DC8 ADXT_SetLpFlg  # retail wrapper of the inner 0x004d5e08: loop switch (+0x6c); retail also derives the stream window word +0xc4 from the header, a field no compiled code reads (re4's handle has padding there)
 0x004D3FA8 adxt_start_sjd  # retail 0x004d3fa8: reset the output joints, set the decoder input joint, start the decoder, status 1, counters cleared, vsync base, AMP start; the same stores as the re4 static (made external by a mirror fix)
 0x004D6968 ADXT_InsertSilence  # retail adxt_InsertSilence: nch * 18 byte blocks, (nsmpl / 32) of them, written in two chunks around the ring wrap, returns the samples inserted; instruction-for-instruction the re4 body
-0x004C5DC8 ADX_DecodeInfoAinf  # retail 0x004c5dc8 is the AINF block reader that PortAudio's src/cri/adx_hdr.c defines under the decomp name; the retail-address name used by src/cri/adxt_start.c and the ADXT callers resolved to a trap stub
+0x004C5DC8 ADX_DecodeInfoAinf  # retail 0x004c5dc8 is the AINF block reader that src/cri/adx_hdr.c defines under the decomp name; the retail-address name used by src/cri/adxt_start.c and the ADXT callers resolved to a trap stub
 0x003E1FF0 RwResourcesAllocateResEntry  # retail asm takes (owner, ownerRef, size, destroyNotify), allocates size + 0x18 from the res heap at arena + 0xC (func_003e45f0), links the entry into the arena list at +0x24 and counts the size at +4, and on exhaustion purges the oldest entries and reports {1, func_003df590(0xC, size)}: the decomp baresour.c function
 0x004C6D10 ADXF_Init  # SDK initialization used by the PC file path
 0x004C6DE8 ADXF_Finish  # SDK close/reset

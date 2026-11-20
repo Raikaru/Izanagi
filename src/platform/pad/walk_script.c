@@ -160,7 +160,10 @@ static int battle_plan(const char *s, size_t len, unsigned *out, int *n) {
             memcpy(num, s + at, k - at);
             num[k - at] = 0;
             unsigned long id = strtoul(num, &end, 0);
-            if (*end || (item ? id <= 0x300u || id >= 0x400u : !id || id >= 0x1B8u)) return 0;
+            /* Skills: a retail active ID below the 0x1B8 split, or an added one
+             * (576..4095, P4_SKILL_MAX_ID); retail passives are never listed. */
+            if (*end || (item ? id <= 0x300u || id >= 0x400u :
+                !id || (id >= 0x1B8u && id < 0x240u) || id > 0xFFFu)) return 0;
             out[(*n)++] = (item ? P4WALK_KEY_ITEM : P4WALK_KEY_SKILL) | (unsigned)id;
             s += k + (c ? 1 : 0);
             len -= k + (c ? 1 : 0);
@@ -1593,6 +1596,7 @@ static uint32_t read16(const P4WalkHost *h, uint32_t a) { return (h->read32(h->u
 #define ENEMY_TABLE_PTR 0x007644B4u        /* iGpffffb3c4: 0x3C-byte enemy rows by DatUnit id, skills u16[8] at +0xE */
 #define AFFINITY_TABLE_PTR 0x007644B8u     /* iGpffffb3c8: 0x20-byte affinity rows (u16 per element) by DatUnit id2 */
 
+/* Interoperability selector mappings derived from analysis of the retail executable's affinity logic. */
 /* datCalcGetAffinity's inputs per element 0..7 (physical, fire, ice, elec, wind, almighty, light, dark): the passive skill IDs for resist,
  * null, repel and absorb (0: none), and the Break and Wall buff indices (-1: none). */
 static const uint16_t kAffinityPassives[8][4] = {
@@ -1631,6 +1635,11 @@ static int battle_unit(const P4WalkHost *h, uint32_t unit, int want_enemy, P4Wal
                     if (kAffinityPassives[e][p] && skills[s] == kAffinityPassives[e][p]) passives |= 1u << p;
                 if (e != 5 && skills[s] == 0x1DB) passives |= 2u;   /* nulls every element but almighty */
             }
+            if (h->passive_granted) { /* the enemy kind's granted passives count as its own (p4_game_passive_enemy_has) */
+                for (unsigned p = 0; p < 4; p++)
+                    if (kAffinityPassives[e][p] && h->passive_granted(h->user, out->id, kAffinityPassives[e][p])) passives |= 1u << p;
+                if (e != 5 && h->passive_granted(h->user, out->id, 0x1DB)) passives |= 2u;
+            }
             int broken = kAffinityBreak[e] >= 0 && rule_buff_level(out, (unsigned)kAffinityBreak[e]) > 0;
             int walled = kAffinityWall[e] >= 0 && rule_buff_level(out, (unsigned)kAffinityWall[e]) > 0;
             uint32_t a = p4walk_enemy_affinity(read16(h, rows + id2 * 0x20u + e * 2u), passives, guarding, broken, walled);
@@ -1662,7 +1671,8 @@ static void battle_view(const P4WalkHost *h, uint32_t context, P4WalkBattleUnit 
 #define FLAG_WORDS 0x0079B1CCu             /* D_00797560 +0x3C6C: datGetFlag's words */
 
 static int skill_active(const P4WalkHost *h, uint32_t table, unsigned id) {
-    return id && id < 0x1B8u && ((h->read32(h->user, table + id * 0x28u) >> 8) & 2u);
+    const int active = h->skill_active ? h->skill_active(h->user, id) : id < 0x1B8u;
+    return id && active && ((h->read32(h->user, table + id * 0x28u) >> 8) & 2u);
 }
 
 /* The actor's Skill or Item list as btlSelectionRefreshList (00207140) builds it: its count, with the character ID in *pc. */

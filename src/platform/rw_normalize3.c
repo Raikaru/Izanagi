@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: LicenseRef-reconstructed */
 /* func_003e4030 (retail 0x003e4030, 128 bytes): RwV3dNormalize(out arg0, in arg1). recip = 1 / sqrt(y * y + x * x + z * z) (the EE accumulator order y, x, z) when the
  * length is positive, else the (non-positive) length itself; out = in * recip, stored x first with y and z reloaded from the input (the output may be the input);
  * returns recip (a float in $f0).

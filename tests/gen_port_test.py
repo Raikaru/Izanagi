@@ -5,6 +5,7 @@ import os
 import pathlib
 import platform
 import struct
+import re
 import shutil
 import subprocess
 import sys
@@ -88,6 +89,34 @@ class MatchContractsTest(unittest.TestCase):
         markers = list(gen_port.MARKER_RE.finditer(text))
         self.assertIsNone(gen_port.marker_definition_name(text, markers[0].end()))
         self.assertEqual(gen_port.marker_definition_name(text, markers[1].end()), "real_body")
+
+    def test_lockstep_observers_preserve_retail_marker_definitions(self):
+        repo = pathlib.Path(__file__).resolve().parents[1]
+        decomp = pathlib.Path(os.environ.get("P4PC_TEST_DECOMP", repo / "decomp"))
+        with mock.patch.object(gen_port, "ROOT", repo):
+            fixes = [row for row in gen_port.read_mirror_fixes()
+                     if ("extern void p4pc_align_visual_begin" in row[3] or
+                         "extern void p4pc_align_playtime_event" in row[3])]
+        self.assertEqual(len(fixes), 5)
+        for _, unit, old, new, expected in fixes:
+            text = (decomp / unit).read_text(encoding="utf-8")
+            self.assertEqual(text.count(old), expected, unit)
+            start = text.index(old)
+            marker = list(gen_port.MARKER_RE.finditer(text[:start]))[-1]
+            name = re.search(r"\b(\w+)\s*\(", old).group(1)
+            rewritten = text.replace(old, new)
+            self.assertEqual(gen_port.marker_definition_name(rewritten, marker.end()), name, unit)
+
+    def test_lockstep_visual_overrides_keep_update_and_particle_witnesses(self):
+        repo = pathlib.Path(__file__).resolve().parents[1]
+        for address in ("0048c4e0", "0048cdf0", "0048d8c0", "0048e2f0", "0048ec50",
+                        "0048f5f0", "004903c0", "00490c40", "004a2310"):
+            text = (repo / "overrides" / f"{address}.c").read_text(encoding="utf-8")
+            self.assertEqual(text.count("p4pc_align_visual_begin("), 1, address)
+            self.assertEqual(text.count("p4pc_align_visual_particle("), 1, address)
+        for address in ("00492b20", "004a5630"):
+            text = (repo / "overrides" / f"{address}.c").read_text(encoding="utf-8")
+            self.assertEqual(text.count("p4pc_align_visual_created("), 1, address)
 
     def test_override_marker_settles_before_the_body_it_replaced(self):
         (self.root / "overrides").mkdir()
@@ -482,6 +511,8 @@ class MatchContractsTest(unittest.TestCase):
         self.unit.write_text("// FUN_00123456\nint named(void) { return 0; }\n",
                              encoding="utf-8")
         with mock.patch.object(gen_port, "read_symbols", return_value={}):
+            gen_port.check_decomp_targets(self.mirror)
+            claims.write_text(valid.replace(" Lane ", " port "), encoding="utf-8")
             gen_port.check_decomp_targets(self.mirror)
             for text in (valid + valid, "00123457 Lane missing\n",
                          "0012345g Lane malformed\n", "0x00123456 Lane malformed\n"):
@@ -1003,37 +1034,60 @@ class CensusConfigureTest(unittest.TestCase):
         self.assertRegex(result.stdout, r"census_guard_stamp=.+/census\.ok")
 class FunctionPointerWordsTest(unittest.TestCase):
     def setUp(self):
-        # Same alignment as the retail floor label at 0x005f41b9. Its final
-        # aligned word is b" 6F\0", also the retail address of tmxConvertRgb24.
-        self.data = b"\0Yukiko's Castle 6F\0" + struct.pack("<II", 0x00463620, 0x00123450)
+        # The final aligned synthetic string word also resembles a code address.
+        self.data = b"\0SyntheticAreaX  6F\0" + struct.pack("<II", 0x00463620, 0x00123450)
         self.base = 0x1000
         self.starts = {0x00463620, 0x00123450}
 
     def test_32bit_keeps_literal_but_rewrites_real_callbacks(self):
         self.assertEqual(
-            list(gen_port.function_pointer_words(gen_port.pointer_word_rows(self.data, self.base), self.starts, True)),
+            list(gen_port.function_pointer_words(gen_port.pointer_word_rows(self.data, self.base), self.starts)),
             [(0x1014, 0x00463620), (0x1018, 0x00123450)],
         )
 
-    def test_64bit_registration_scan_remains_unchanged(self):
+    def test_64bit_registration_also_excludes_string_words(self):
         self.assertEqual(
-            list(gen_port.function_pointer_words(gen_port.pointer_word_rows(self.data, self.base), self.starts, False)),
-            [(0x1010, 0x00463620), (0x1014, 0x00463620), (0x1018, 0x00123450)],
+            list(gen_port.function_pointer_words(gen_port.pointer_word_rows(self.data, self.base), self.starts)),
+            [(0x1014, 0x00463620), (0x1018, 0x00123450)],
         )
+
+    def test_ptr64_patch_table_never_contains_a_string_location(self):
+        rows = gen_port.pointer_word_rows(self.data, self.base)
+        patches = [(va, f"fn_{value:08x}") for va, value in gen_port.function_pointer_words(rows, self.starts)]
+        lines = []
+        gen_port.append_patch_table(lines, patches, lambda _: "i")
+        table = "\n".join(lines)
+        self.assertIn("0x00001014", table)
+        self.assertIn("0x00001018", table)
+        self.assertNotIn("0x00001010", table)
+        self.assertIn("p4pc_patch_count = 2", table)
 
     def test_short_printable_callback_is_not_a_literal(self):
         data = struct.pack("<III", 0x00463620, 0x00463620, 0x00123450)
         self.assertEqual(
-            list(gen_port.function_pointer_words(gen_port.pointer_word_rows(data, self.base), self.starts, True)),
+            list(gen_port.function_pointer_words(gen_port.pointer_word_rows(data, self.base), self.starts)),
             [(0x1000, 0x00463620), (0x1004, 0x00463620), (0x1008, 0x00123450)],
         )
 
     def test_unterminated_printable_bytes_are_not_classified_as_a_string(self):
         data = b"ABCD" + struct.pack("<I", 0x00123450)
         self.assertEqual(
-            list(gen_port.function_pointer_words(gen_port.pointer_word_rows(data, self.base), self.starts, True)),
+            list(gen_port.function_pointer_words(gen_port.pointer_word_rows(data, self.base), self.starts)),
             [(0x1004, 0x00123450)],
         )
+
+    def test_string_rows_round_trip_without_values_and_reject_old_format(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = pathlib.Path(directory) / "words.txt"
+            scanned = gen_port.pointer_word_rows(self.data, self.base)
+            gen_port.write_fnptr_words(path, "a" * 64, (0x1000, 0x2000), scanned)
+            sha, image, parsed = gen_port.read_fnptr_words(path)
+            self.assertEqual((sha, image, parsed), ("a" * 64, (0x1000, 0x2000), scanned))
+            self.assertIn("00001010 s\n", path.read_text(encoding="ascii"))
+            with path.open("a", encoding="ascii") as out:
+                out.write("00001010 00463620 s\n")
+            with self.assertRaises(SystemExit):
+                gen_port.read_fnptr_words(path)
 
     def test_android_layout_oracle_replaces_only_the_architecture_prefix(self):
         project = pathlib.Path(__file__).resolve().parents[1]
@@ -1056,6 +1110,289 @@ class FunctionPointerWordsTest(unittest.TestCase):
             script.write_text("\n".join(statements) + "\n", encoding="utf-8")
             result = subprocess.run(["cmake", "-P", str(script)], capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+
+class ObjectChunksTest(unittest.TestCase):
+    """nm and objdump get the objects in groups that fit a Windows command line (32,767 characters)."""
+
+    def test_groups_keep_order_and_stay_within_both_bounds(self):
+        objs = [pathlib.PurePosixPath("E:/lanes/x/build/win32/CMakeFiles/p4decomp.dir/gen/decomp/src/cri/unit%04d.c.obj" % i)
+                for i in range(1200)]
+        groups = list(gen_port.object_chunks(objs))
+        self.assertEqual([path for group in groups for path in group], [str(o) for o in objs])
+        for group in groups:
+            self.assertLessEqual(len(group), 400)
+            self.assertLessEqual(sum(len(path) + 1 for path in group), 24000)
+        self.assertGreater(len(groups), 3)      # 400 of these paths alone are over 32,000 characters
+
+    def test_short_paths_still_group_by_count_and_empty_input_makes_no_command(self):
+        self.assertEqual([len(g) for g in gen_port.object_chunks(["a.o"] * 1000)], [400, 400, 200])
+        self.assertEqual(list(gen_port.object_chunks([])), [])
+
+    def test_a_single_overlong_path_is_still_sent_alone(self):
+        self.assertEqual(list(gen_port.object_chunks(["x" * 30000, "b.o"])), [["x" * 30000], ["b.o"]])
+
+
+class GPAddressTest(unittest.TestCase):
+    # Independent retail instruction evidence, not the resolver's alias map.
+    sites = (
+        ("fGpffff84a0", 0x002117A4, -0x7B50, 0x31, 0),
+        ("fGpffff84a0", 0x002118BC, -0x7B50, 0x31, 0),
+        ("gp0xffff9d10", 0x00474EA4, -0x4F30, 9, 5),
+        ("gp0xffff9d10", 0x00475528, -0x4F30, 9, 5),
+    )
+    symbols = {"fGpffff84a0": (0x007615A0, "data"),
+               "gp0xffff9d10": (0x007641C0, "data")}
+
+    def rewriter(self, symbols):
+        return gptr_rewrite.Rewriter({"inner": []}, str(gen_port.ROOT), syms=symbols)
+
+    def test_both_resolvers_select_retail_instead_of_misnamed_offsets(self):
+        rw = self.rewriter(self.symbols)
+        for name, _, offset, _, _ in self.sites:
+            with self.subTest(name=name):
+                expected = 0x007690F0 + offset
+                self.assertEqual(rw.abs_addr({"kind": "VarDecl", "name": name}), expected)
+                self.assertEqual(gen_port.place_undefined(name, set(), self.symbols), ("data", expected))
+        self.assertNotEqual(0x007690F0 - 0x62F0, self.symbols["gp0xffff9d10"][0])
+        self.assertNotEqual(0x007690F0 - 0x7B60, self.symbols["fGpffff84a0"][0])
+
+    def test_symbol_disagreement_and_missing_alias_evidence_fail_closed(self):
+        for name, symbols in (
+                ("gp0xffff9d10", {"gp0xffff9d10": (0x00762E00, "data")}),
+                ("fGpffff84a0", {"fGpffff84a0": (0x00761590, "data")}),
+                ("iGpffff84a4", {"iGpffff84a4": (0x007615A4, "data")}),
+                ("iGpffff84a4", {"iGpffff84a4": (0x00761594, "func")}),
+                ("gp0xffff9d10", {}), ("fGpffff84a0", {}),
+                ("iGp00018000", {})):
+            with self.subTest(name=name, symbols=symbols):
+                with self.assertRaises(SystemExit):
+                    self.rewriter(symbols).abs_addr({"kind": "VarDecl", "name": name})
+                with self.assertRaises(SystemExit):
+                    gen_port.place_undefined(name, set(), symbols)
+
+    def test_literal_displacements_with_and_without_symbols(self):
+        for name, offset in (("iGpffff8000", -32768), ("fGp00007fff", 32767),
+                             ("gp0x00000000", 0)):
+            for symbols in ({}, {name: (0x007690F0 + offset, "data")}):
+                with self.subTest(name=name, symbols=symbols):
+                    expected = 0x007690F0 + offset
+                    self.assertEqual(self.rewriter(symbols).abs_addr({"name": name}), expected)
+                    self.assertEqual(gen_port.place_undefined(name, set(), symbols), ("data", expected))
+
+    def test_asm_labels_use_the_same_checked_address(self):
+        for prefix in ("", "_"):
+            rw = self.rewriter(self.symbols)
+            rw.sym_prefix = prefix
+            rw.decl_by_id["alias"] = {
+                "mangledName": prefix + "gp0xffff9d10", "inner": [{"kind": "AsmLabelAttr"}]}
+            self.assertEqual(rw.abs_addr({"kind": "VarDecl", "id": "alias", "name": "prefix"}), 0x7641C0)
+
+    def test_complete_gp_census_has_no_remaining_disagreements(self):
+        root = pathlib.Path(__file__).resolve().parents[1]
+        if not (root / "decomp/config/symbols_recovered.txt").is_file():
+            self.skipTest("requires the decomp symbol/source corpus")
+        symbols = {}
+        for filename in ("symbol_addrs.txt", "symbol_data_addrs.txt", "symbols_recovered.txt"):
+            for line in (root / "decomp/config" / filename).read_text(encoding="utf-8").splitlines():
+                match = gen_port.SYMBOL_RE.match(line)
+                if match:
+                    symbols.setdefault(match[1], (int(match[2], 16), match[3]))
+        names = {name for name in symbols if gen_port.GP_NAME_RE.fullmatch(name)}
+        for base in ("decomp/src", "decomp/include", "overrides", "src", "include"):
+            for path in (root / base).rglob("*"):
+                if path.suffix in (".c", ".h"):
+                    plain = gen_port._strip_literals(path.read_text(encoding="latin-1"))
+                    names.update(re.findall(r"\b(?:[if]Gp|gp0x)[0-9a-fA-F]{8}\b", plain))
+        retail_offsets = {name: offset for name, _, offset, _, _ in self.sites}
+        rw = self.rewriter(symbols)
+        residual = []
+        for name in sorted(names):
+            value = int(gen_port.GP_NAME_RE.fullmatch(name)[1], 16)
+            offset = retail_offsets.get(name, value - (1 << 32 if value & 0x80000000 else 0))
+            expected = 0x007690F0 + offset
+            rewritten = rw.abs_addr({"kind": "VarDecl", "name": name})
+            placed = gen_port.place_undefined(name, set(), symbols)
+            if rewritten != expected or placed != ("data", expected) or (
+                    name in symbols and symbols[name] != (expected, "data")):
+                residual.append((name, rewritten, placed, expected, symbols.get(name)))
+        self.assertGreater(len(names), 900)
+        self.assertEqual(residual, [])
+        print(f"GP census: {len(names)} names, residual disagreements={len(residual)}")
+
+    def test_retail_instructions_confirm_the_reviewed_offsets(self):
+        retail = os.environ.get("P4_RETAIL") or os.environ.get("P4PC_ELF")
+        if not retail:
+            self.skipTest("requires P4_RETAIL or P4PC_ELF")
+        data = pathlib.Path(retail).read_bytes()
+        segments = gen_port.load_segments(data)
+        for name, address, offset, opcode, target in self.sites:
+            with self.subTest(address=hex(address)):
+                segment = next((va, size, file_offset) for va, size, file_offset in segments
+                               if va <= address and address + 4 <= va + size)
+                word, = struct.unpack_from("<I", data, segment[2] + address - segment[0])
+                self.assertEqual(word >> 26, opcode)
+                self.assertEqual((word >> 21) & 31, 28)
+                self.assertEqual((word >> 16) & 31, target)
+                signed_offset, = struct.unpack("<h", struct.pack("<H", word & 0xFFFF))
+                self.assertEqual(signed_offset, offset)
+                self.assertEqual(gen_port.gp_data_address(name, self.symbols), 0x007690F0 + signed_offset)
+
+    @unittest.skipUnless(shutil.which("clang"), "requires clang's AST reader")
+    def test_model_setup_callback_fixes_preserve_native_identity_and_execution(self):
+        fixes = [row for row in gen_port.read_mirror_fixes()
+                 if row[1] == "src/Graphics/Model/mdlManager.c" and
+                 any(label in row[2] for label in ("LAB_00474a50_abs", "LAB_00474a90_abs"))]
+        self.assertEqual(len(fixes), 2)
+        source = """
+typedef unsigned int u32;
+typedef unsigned char u8;
+extern void *p4_g2h(u32);
+extern void *p4_fn_g2h(u32);
+extern void *p4_fn_g2h_sig(u32, u32);
+extern u32 p4_h2g(const void *);
+extern u32 p4_fn_h2g(const void *);
+extern u32 p4_fn_h2g_sig(const void *, const char *);
+typedef void (*RtAnimKeyFrameBlendCallBack)(void *, void *, void *, float);
+typedef struct RtAnimInterpolator {
+    RtAnimKeyFrameBlendCallBack keyFrameBlendCB;
+    void *keyFrameInterpolateCB;
+} RtAnimInterpolator;
+extern u8 LAB_00474a50_abs[], LAB_00474a90_abs[];
+void mdlKeyFrameBlendCopy(void *destination, void *source) {
+    float *d = destination, *s = source;
+    for (int i = 0; i < 6; ++i) d[i] = s[i];
+}
+void mdlKeyFrameInterpolateCopy(void *destination, void *source) {
+    mdlKeyFrameBlendCopy(destination, source);
+}
+void install(u32 animation) {
+""" + "\n".join(row[2] for row in fixes) + """
+}
+int data_identities(u32 animation) {
+    RtAnimInterpolator *p = (RtAnimInterpolator *)animation;
+    return *(void **)&p->keyFrameBlendCB == (void *)mdlKeyFrameBlendCopy &&
+           p->keyFrameInterpolateCB == (void *)mdlKeyFrameInterpolateCopy;
+}
+int typed_identities(u32 animation) {
+    RtAnimInterpolator *p = (RtAnimInterpolator *)animation;
+    return p->keyFrameBlendCB == (RtAnimKeyFrameBlendCallBack)mdlKeyFrameBlendCopy &&
+           p->keyFrameInterpolateCB == (void *)mdlKeyFrameInterpolateCopy;
+}
+void invoke(u32 animation, float *blend, float *interpolate, float *source) {
+    RtAnimInterpolator *p = (RtAnimInterpolator *)animation;
+    p->keyFrameBlendCB(blend, source, 0, 0.0f);
+    ((void (*)(void *, void *, void *, float, void *))p->keyFrameInterpolateCB)(
+        interpolate, source, 0, 0.0f, 0);
+}
+"""
+        harness = """
+#include <stdlib.h>
+#include <string.h>
+typedef unsigned int u32;
+static u32 slots[2];
+extern void mdlKeyFrameBlendCopy(void *, void *);
+extern void mdlKeyFrameInterpolateCopy(void *, void *);
+void *p4_g2h(u32 address) {
+    if (address == 0x100000) return slots;
+    if (address == 0x4000010) return (void *)mdlKeyFrameBlendCopy;
+    if (address == 0x4000020) return (void *)mdlKeyFrameInterpolateCopy;
+    abort();
+}
+void *p4_fn_g2h(u32 address) {
+    if (address == 0x474a50 || address == 0x4000010) return (void *)mdlKeyFrameBlendCopy;
+    if (address == 0x474a90 || address == 0x4000020) return (void *)mdlKeyFrameInterpolateCopy;
+    abort();
+}
+void *p4_fn_g2h_sig(u32 address, u32 signature) {
+    (void)signature;
+    return p4_fn_g2h(address);
+}
+u32 p4_fn_h2g(const void *function) {
+    if (function == (void *)mdlKeyFrameBlendCopy) return 0x474a50;
+    if (function == (void *)mdlKeyFrameInterpolateCopy) return 0x474a90;
+    abort();
+}
+u32 p4_fn_h2g_sig(const void *function, const char *signature) {
+    if (strcmp(signature, "vpp")) abort();
+    return p4_fn_h2g(function);
+}
+u32 p4_h2g(const void *pointer) {
+    if (pointer == (void *)mdlKeyFrameBlendCopy) return 0x4000010;
+    if (pointer == (void *)mdlKeyFrameInterpolateCopy) return 0x4000020;
+    abort();
+}
+extern void install(u32);
+extern int data_identities(u32);
+extern int typed_identities(u32);
+extern void invoke(u32, float *, float *, float *);
+int main(void) {
+    float source[6] = {1, 2, 3, 4, 5, 6}, blend[6] = {0}, interpolate[6] = {0};
+    install(0x100000);
+    if (slots[0] != 0x4000010 || slots[1] != 0x4000020 ||
+        !data_identities(0x100000) || !typed_identities(0x100000)) return 1;
+    invoke(0x100000, blend, interpolate, source);
+    return memcmp(blend, source, sizeof source) || memcmp(interpolate, source, sizeof source);
+}
+"""
+        with tempfile.TemporaryDirectory() as work:
+            directory = pathlib.Path(work)
+            original = directory / "src/Graphics/Model/mdlManager.c"
+            original.parent.mkdir(parents=True)
+            original.write_text(source, encoding="utf-8")
+            with mock.patch.object(gen_port, "read_mirror_fixes", return_value=fixes):
+                self.assertEqual(gen_port.apply_mirror_fixes(directory), 2)
+            rw, _, text = gptr_rewrite.process(str(original), [], work, work)
+            self.assertEqual(rw.unsupported, [])
+            self.assertEqual(rw.census["store-ptr"], 2)
+            rewritten = directory / "callbacks.i"
+            rewritten.write_text(text, encoding="latin-1")
+            main = directory / "main.c"
+            main.write_text(harness, encoding="utf-8")
+            executable = directory / ("callbacks.exe" if sys.platform == "win32" else "callbacks")
+            subprocess.run(["clang", "-Wno-everything", "-x", "cpp-output", str(rewritten),
+                            "-x", "c", str(main), "-o", str(executable)], check=True)
+            subprocess.run([str(executable)], check=True)
+
+    @unittest.skipUnless(shutil.which("clang"), "requires clang's AST reader")
+    def test_rewritten_prefix_and_gauge_reads_execute_at_retail_addresses(self):
+        source = """
+typedef unsigned int u32;
+extern void *p4_g2h(u32);
+extern char gp0xffff9d10;
+extern float fGpffff84a0;
+int prefix(void) {
+    const char *p = &gp0xffff9d10;
+    return p[0]=='s' && p[1]=='t' && p[2]=='e' && p[3]=='p' && p[4]=='_';
+}
+float gauge_y(float scale) { return fGpffff84a0 + scale * -10.5f; }
+"""
+        harness = """
+#include <stdlib.h>
+static float y = 420.5f;
+void *p4_g2h(unsigned int address) {
+    if (address == 0x7641c0) return "step_";
+    if (address == 0x7615a0) return &y;
+    abort();
+}
+extern int prefix(void);
+extern float gauge_y(float);
+int main(void) { return !prefix() || gauge_y(1.0f) != 410.0f; }
+"""
+        with tempfile.TemporaryDirectory() as work:
+            directory = pathlib.Path(work)
+            original = directory / "gp.c"
+            original.write_text(source, encoding="utf-8")
+            rw, _, text = gptr_rewrite.process(str(original), [], work, work, syms=self.symbols)
+            self.assertEqual(rw.unsupported, [])
+            rewritten = directory / "gp.i"
+            rewritten.write_text(text, encoding="latin-1")
+            main = directory / "main.c"
+            main.write_text(harness, encoding="utf-8")
+            executable = directory / ("gp.exe" if sys.platform == "win32" else "gp")
+            subprocess.run(["clang", "-Wno-everything", "-x", "cpp-output", str(rewritten),
+                            "-x", "c", str(main), "-o", str(executable)], check=True)
+            subprocess.run([str(executable)], check=True)
 
 
 if __name__ == "__main__":

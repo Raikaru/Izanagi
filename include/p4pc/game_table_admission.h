@@ -2,11 +2,15 @@
 #define P4PC_GAME_TABLE_ADMISSION_H
 #include "p4pc/game_table_admission_native.h"
 #include "p4pc/game_table_inputs.h"
+#include "p4pc/game_tables.h"
 #include "p4pc/table_result.h"
 /* One exact CPU-sealed Root tuple, staged before the first raw load. Inputs
  * and their selected plans/providers outlive it. No contribution means no
  * stage, allocation, digest comparison or change to retail loading. */
 int p4_game_table_admission_stage(P4GameTableInput *const *inputs, size_t count);
+/* Install the guest allocator for a staged, exclusively Golden cache tuple.
+ * Must be called before native reads; allocations are released at unstage. */
+int p4_game_table_admission_golden_allocator(const P4GameTableAllocator *allocator);
 /* Exact early owner rollback only; never release another prepare callback. */
 int p4_game_table_admission_unstage(P4GameTableInput *const *inputs, size_t count);
 /* Pure content/descriptor check of actual live readable bytes. On failure,

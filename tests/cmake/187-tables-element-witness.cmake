@@ -1,6 +1,6 @@
 # Real game with privately generated expanded element cohort, explicitly selected
 # only in the separately admitted witness lane. Never a retail gate or reference.
-if(P4PC_MOD_WITNESS_TESTS)
+if(P4PC_MOD_WITNESS_TESTS AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/mod_element_game_test.py")
   foreach(_p4_element_pair "p4pc|" "p4pc64|64" "p4pc64w|64w")
     string(REPLACE "|" ";" _p4_element_parts "${_p4_element_pair}")
     list(GET _p4_element_parts 0 _p4_element_target)

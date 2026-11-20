@@ -44,6 +44,8 @@ typedef struct P4GameItemView {
     P4GameItemRequirement requirements[2];
     uint32_t models_registered, right_model_id, left_model_id;
     char owner[64], key[P4_TABLE_KEY_SIZE];
+    /* Zero for authored art; otherwise the selected ITEM anchor ID plus one. */
+    uint32_t icon_anchor_plus_one;
     P4ResourceRef icon;
     P4ItemRow metadata;
 } P4GameItemView;
@@ -98,6 +100,32 @@ void p4_game_tables_items_destroy(P4GameItems *items);
 /* Copies descriptor, keys and metadata. Explicit IDs must exceed the retail
  * domain and fit the signed native list/equipment consumers. No implicit IDs. */
 int p4_game_tables_items_register(P4GameItems *items, const char *owner, const P4GameItemDesc *row);
+/* A derived row (docs/modding/tables.md "Derived items"): its metadata is the
+ * selected ITEM input's row of retail item anchor, copied when the family
+ * seals, then every field named in mask replaced from overrides. kind and
+ * flags always stay the anchor's. A derived weapon without registered models
+ * binds the anchor's own native keys (right = anchor, left = anchor + 1000 for
+ * unit 2); models of a derived row are validated at seal. */
+#define P4_ITEM_DERIVE_PRIMARY 0x001u   /* +08 primary_value (atk/def) */
+#define P4_ITEM_DERIVE_SECONDARY 0x002u /* +0A secondary_value (hit/eva) */
+#define P4_ITEM_DERIVE_PROPERTY 0x004u  /* +0E property */
+#define P4_ITEM_DERIVE_STATS 0x008u     /* +14 stat_bonus[5] */
+#define P4_ITEM_DERIVE_GRANTED 0x010u   /* +24 granted_skill */
+#define P4_ITEM_DERIVE_VALUE 0x020u     /* +28 value (datItemValue word) */
+#define P4_ITEM_DERIVE_ACCESSORY 0x040u /* +2A accessory_percent */
+#define P4_ITEM_DERIVE_ELEMENT 0x080u   /* +2C element */
+#define P4_ITEM_DERIVE_CATEGORY 0x100u  /* +30 category_mask */
+#define P4_ITEM_DERIVE_PRICE 0x200u     /* +34 price */
+#define P4_ITEM_DERIVE_AVAILABLE 0x400u /* +38 available_month/day */
+#define P4_ITEM_DERIVE_MOON 0x800u      /* +3C/+40 moon gates */
+#define P4_ITEM_DERIVE_FIELDS 0xFFFu
+typedef struct P4GameItemDerive {
+    uint32_t anchor, mask, icon_from_anchor;
+    P4ItemRow overrides;
+} P4GameItemDerive;
+/* Registers row (its metadata ignored) as derived from a retail anchor. */
+int p4_game_tables_items_register_derived(P4GameItems *items, const char *owner,
+    const P4GameItemDesc *row, const P4GameItemDerive *derive);
 /* Optional full-width dependencies for gates0/1 on an owned new row. Quantity
  * remains0..255; legacy metadata bits are never repacked. The row's owner/key
  * and revision own these fields, exposed by the frozen view's mask/array. */

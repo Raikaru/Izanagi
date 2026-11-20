@@ -10,7 +10,7 @@ skipmsg
 press:square
 wait:600
 choose:2
-# The next live question is "Go out until evening?"; confirm it before steering the custom town map.
+# The next live question is the afternoon confirmation; confirm it before steering the custom town map.
 choose:1
 wait:1200
 press:up

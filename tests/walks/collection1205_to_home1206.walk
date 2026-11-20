@@ -47,7 +47,7 @@ timeout:60000
 choose:5
 choose:4
 choose:3
-choose:1                  # "It's him, all right."
+choose:1                  # the confirmation
 # Question Adachi: Saki's interrogation, when Yamano vanished, then the warning letter.
 choose:2
 choose:1

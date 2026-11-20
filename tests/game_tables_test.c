@@ -104,6 +104,12 @@ static void stable_image_references(void)
     assert(p4_game_tables_element(tables, "image-test", &invalid) == P4_TABLE_INVALID);
     invalid = descriptor; memset(invalid.icon.key, 'x', sizeof invalid.icon.key);
     assert(p4_game_tables_element(tables, "image-test", &invalid) == P4_TABLE_INVALID);
+    /* The optional header icon follows the same reference rules. */
+    invalid = descriptor; invalid.header_icon = descriptor.icon; invalid.header_icon.revision = 0;
+    assert(p4_game_tables_element(tables, "image-test", &invalid) == P4_TABLE_INVALID);
+    invalid = descriptor; invalid.header_icon = descriptor.icon; strcpy(invalid.header_icon.key, "other:leaf");
+    assert(p4_game_tables_element(tables, "image-test", &invalid) == P4_TABLE_INVALID);
+    descriptor.header_icon = descriptor.icon; strcpy(descriptor.header_icon.key, "art:leaf-header");
     assert(p4_game_tables_element(tables, "image-test", &descriptor) == P4_TABLE_OK);
     descriptor.icon.owner[0] = descriptor.icon.key[0] = 'x';
     P4ElementDesc absent = leaf(20, "image-test:no-image", 20); absent.icon = (P4ResourceRef){0};
@@ -111,8 +117,11 @@ static void stable_image_references(void)
     assert(p4_game_tables_freeze(tables, 1) == P4_TABLE_OK);
     const P4ResourceRef *reference = &p4_game_tables_find_element(tables, 19)->icon;
     assert(!strcmp(reference->owner, "art") && !strcmp(reference->key, "art:leaf") && reference->revision == 123);
+    reference = &p4_game_tables_find_element(tables, 19)->header_icon;
+    assert(!strcmp(reference->owner, "art") && !strcmp(reference->key, "art:leaf-header") && reference->revision == 123);
     reference = &p4_game_tables_find_element(tables, 20)->icon;
     assert(!reference->owner[0] && !reference->key[0] && !reference->revision);
+    assert(!p4_game_tables_find_element(tables, 20)->header_icon.owner[0]);
     p4_game_tables_destroy(tables);
 }
 static uint32_t retail_decode(uint16_t raw)
@@ -342,6 +351,67 @@ static void action_profiles(void)
     assert(p4_game_tables_affinity_alias(tables, "test", &alias) == P4_TABLE_FROZEN);
     p4_game_tables_destroy(tables);
 }
+/* Damage cover rows: one-leaf final-damage reduction by an owned source. */
+static void damage_covers(void)
+{
+    P4GameTables *tables = p4_game_tables_create(); assert(tables);
+    P4ElementDesc slash = leaf(19, "test:slash", 19);
+    assert(p4_game_tables_element(tables, "test", &slash) == P4_TABLE_OK);
+    P4DamageCoverBinding cover = {P4_AFFINITY_EFFECT_EQUIPPED_ITEM, 400, 19, P4_CHANNEL_DAMAGE, 20, 1, 1,
+        "test:lining", "test:lining-slash"};
+    assert(p4_game_tables_damage_cover(tables, "test", &cover) == P4_TABLE_OK);
+    assert(p4_game_tables_damage_cover(tables, "test", &cover) == P4_TABLE_CONFLICT);
+    strcpy(cover.key, "test:lining-slash-again");
+    assert(p4_game_tables_damage_cover(tables, "test", &cover) == P4_TABLE_CONFLICT); /* A source covers a leaf once. */
+    cover.element_id = 6; strcpy(cover.family, "other:lining"); strcpy(cover.key, "other:lining-light");
+    assert(p4_game_tables_damage_cover(tables, "other", &cover) == P4_TABLE_CONFLICT); /* One owner per source. */
+    strcpy(cover.family, "test:lining"); strcpy(cover.key, "test:lining-light");
+    assert(p4_game_tables_damage_cover(tables, "test", &cover) == P4_TABLE_OK);
+    P4DamageCoverBinding bad = cover; bad.source_id = 401; strcpy(bad.key, "test:bad");
+    bad.percent = 0; assert(p4_game_tables_damage_cover(tables, "test", &bad) == P4_TABLE_INVALID);
+    bad.percent = 100; assert(p4_game_tables_damage_cover(tables, "test", &bad) == P4_TABLE_INVALID);
+    bad.percent = 10; bad.channel_id = P4_CHANNEL_INSTANT_KO;
+    assert(p4_game_tables_damage_cover(tables, "test", &bad) == P4_TABLE_INVALID); /* Damage channel only. */
+    bad.channel_id = P4_CHANNEL_DAMAGE; bad.source_kind = 2;
+    assert(p4_game_tables_damage_cover(tables, "test", &bad) == P4_TABLE_INVALID);
+    bad.source_kind = P4_AFFINITY_EFFECT_SKILL; strcpy(bad.family, "other:guard");
+    assert(p4_game_tables_damage_cover(tables, "test", &bad) == P4_TABLE_INVALID); /* Families are the owner's. */
+    strcpy(bad.family, "test:guard"); strcpy(bad.key, "other:guard-light");
+    assert(p4_game_tables_damage_cover(tables, "test", &bad) == P4_TABLE_INVALID);
+    strcpy(bad.key, "test:guard-light"); bad.revision = 0;
+    assert(p4_game_tables_damage_cover(tables, "test", &bad) == P4_TABLE_INVALID);
+    bad.revision = 1;
+    assert(p4_game_tables_damage_cover(tables, "p4", &bad) == P4_TABLE_INVALID);
+    assert(p4_game_tables_damage_cover(tables, "test", &bad) == P4_TABLE_OK);
+    assert(p4_game_tables_damage_cover_count(tables) == 3);
+    assert(!p4_game_tables_find_damage_cover(tables, P4_AFFINITY_EFFECT_EQUIPPED_ITEM, 400, 19, P4_CHANNEL_DAMAGE)); /* Frozen only. */
+    assert(p4_game_elements_requested(tables));
+    assert(p4_game_tables_freeze(tables, 2) == P4_TABLE_OK);
+    for (size_t i = 0; i < 3; ++i) {
+        const P4DamageCoverBinding *row = p4_game_tables_damage_cover_at(tables, i); assert(row);
+        assert(row == p4_game_tables_find_damage_cover(tables, row->source_kind, row->source_id, row->element_id, row->channel_id));
+        assert(!strcmp(p4_game_tables_damage_cover_owner(tables, i), "test"));
+        assert(!strcmp(p4_game_tables_damage_cover_row_owner(tables, row), "test"));
+    }
+    const P4DamageCoverBinding *row = p4_game_tables_find_damage_cover(tables, P4_AFFINITY_EFFECT_EQUIPPED_ITEM, 400, 19, P4_CHANNEL_DAMAGE);
+    assert(row && row->percent == 20 && !strcmp(row->family, "test:lining") && !strcmp(row->key, "test:lining-slash"));
+    assert(!p4_game_tables_find_damage_cover(tables, P4_AFFINITY_EFFECT_SKILL, 400, 19, P4_CHANNEL_DAMAGE));
+    assert(!p4_game_tables_damage_cover_row_owner(tables, &cover));
+    assert(!p4_game_tables_damage_cover_at(tables, 3) && !p4_game_tables_damage_cover_owner(tables, 3));
+    assert(p4_game_tables_damage_cover(tables, "test", &cover) == P4_TABLE_FROZEN);
+    p4_game_tables_destroy(tables);
+    /* Every covered leaf exists and carries affinity at freeze. */
+    tables = p4_game_tables_create(); assert(tables);
+    cover.element_id = 30; strcpy(cover.key, "test:lining-missing");
+    assert(p4_game_tables_damage_cover(tables, "test", &cover) == P4_TABLE_OK);
+    assert(p4_game_tables_freeze(tables, 1) == P4_TABLE_NOT_FOUND);
+    p4_game_tables_destroy(tables);
+    tables = p4_game_tables_create(); assert(tables);
+    cover.element_id = 16; strcpy(cover.key, "test:lining-special");
+    assert(p4_game_tables_damage_cover(tables, "test", &cover) == P4_TABLE_OK);
+    assert(p4_game_tables_freeze(tables, 1) == P4_TABLE_INVALID); /* Retail leaf 16 has no affinity. */
+    p4_game_tables_destroy(tables);
+}
 static void affinity_effects(void)
 {
     P4GameTables *tables = p4_game_tables_create(); assert(tables);
@@ -520,9 +590,141 @@ static void retail_derived(void)
     assert(p4_game_tables_affinity_retail(t, "split", &bad_column, 2, 0) == P4_TABLE_FROZEN);
     p4_game_tables_destroy(t);
 }
+static P4GameTables *side_tables(const char *leaf_owner, uint32_t leaf_flags)
+{
+    P4GameTables *tables = p4_game_tables_create(); assert(tables);
+    char key[32];
+    snprintf(key, sizeof key, "%s:freeze", leaf_owner);
+    P4ElementDesc status = leaf(22, key, 22);
+    status.flags = leaf_flags;
+    assert(p4_game_tables_element(tables, leaf_owner, &status) == P4_TABLE_OK);
+    return tables;
+}
+static void side_ailments(void)
+{
+    const uint32_t status_flags = P4_ELEMENT_AFFINITY | P4_ELEMENT_VISIBLE;
+    P4GameTables *tables = side_tables("test", status_flags);
+    const P4SideAilmentDef side = {22, P4_SIDE_FLAGS, 0x16, 2, 100, 0, 0, 1, 1, "test:freeze-ailment"};
+    assert(p4_game_tables_side_ailment(tables, "test", &side) == P4_TABLE_OK);
+    assert(p4_game_tables_side_ailment(tables, "test", &side) == P4_TABLE_CONFLICT);
+    P4SideAilmentDef bad = side;
+    strcpy(bad.key, "test:freeze-again");
+    assert(p4_game_tables_side_ailment(tables, "test", &bad) == P4_TABLE_CONFLICT); /* One row per leaf. */
+    bad.leaf = 23; bad.flags = 16; assert(p4_game_tables_side_ailment(tables, "test", &bad) == P4_TABLE_INVALID);
+    bad.flags = P4_SIDE_LOSE_TURN; bad.transfer = 101; assert(p4_game_tables_side_ailment(tables, "test", &bad) == P4_TABLE_INVALID);
+    bad.transfer = 0;
+    bad.flags = P4_SIDE_LOSE_TURN; bad.enemy_scale = 101; assert(p4_game_tables_side_ailment(tables, "test", &bad) == P4_TABLE_INVALID);
+    bad.enemy_scale = 0;
+    bad.flags = P4_SIDE_LOSE_TURN; bad.cure_mask = 0;
+    assert(p4_game_tables_side_ailment(tables, "test", &bad) == P4_TABLE_INVALID);
+    bad.cure_mask = 0xFF; bad.crit_bonus = 101; assert(p4_game_tables_side_ailment(tables, "test", &bad) == P4_TABLE_INVALID);
+    bad.crit_bonus = 0; bad.revision = 0; assert(p4_game_tables_side_ailment(tables, "test", &bad) == P4_TABLE_INVALID);
+    bad.revision = 1; strcpy(bad.key, "other:shock"); assert(p4_game_tables_side_ailment(tables, "test", &bad) == P4_TABLE_INVALID);
+    strcpy(bad.key, "p4:shock"); assert(p4_game_tables_side_ailment(tables, "p4", &bad) == P4_TABLE_INVALID);
+    assert(p4_game_tables_side_ailment_count(tables) == 1 && p4_game_elements_requested(tables));
+    assert(!p4_game_tables_find_side_ailment(tables, 22)); /* Frozen only. */
+    row_probe = (struct RuntimeRowProbe){.view = tables, .domain = P4_TABLE_SOURCE_SIDE_AILMENT, .ids = {22}};
+    assert(!p4_game_tables_bind_runtime_use(tables, runtime_row_probe, &row_probe));
+    assert(p4_game_tables_freeze(tables, 1) == P4_TABLE_OK);
+    const P4SideAilmentDef *row = p4_game_tables_find_side_ailment(tables, 22);
+    assert(row && row == p4_game_tables_side_ailment_at(tables, 0) && !p4_game_tables_side_ailment_at(tables, 1));
+    assert(row->flags == P4_SIDE_FLAGS && row->cure_mask == 0x16 && row->default_from == 2 && row->crit_bonus == 100 &&
+        !row->transfer);
+    assert(!strcmp(p4_game_tables_side_ailment_owner(tables, 0), "test") && !p4_game_tables_side_ailment_owner(tables, 1));
+    assert(!p4_game_tables_find_side_ailment(tables, 23));
+    assert(!p4_game_tables_runtime_use_row(tables, P4_TABLE_SOURCE_SIDE_AILMENT, row) && row_probe.calls == 1);
+    assert(p4_game_tables_runtime_use_row(tables, P4_TABLE_SOURCE_SIDE_AILMENT, &side) == P4_TABLE_INVALID);
+    assert(p4_game_tables_side_ailment(tables, "test", &side) == P4_TABLE_FROZEN);
+    p4_game_tables_destroy(tables);
+    /* Freeze: the owner's own non-offensive status leaf, a damage default. */
+    static const struct { const char *leaf_owner; uint32_t leaf_flags, leaf, default_from; int result; } cases[] = {
+        {"test", P4_ELEMENT_AFFINITY | P4_ELEMENT_VISIBLE, 30, 2, P4_TABLE_NOT_FOUND},
+        {"test", P4_ELEMENT_AFFINITY | P4_ELEMENT_VISIBLE, 12, 2, P4_TABLE_INVALID}, /* A retail leaf. */
+        {"other", P4_ELEMENT_AFFINITY | P4_ELEMENT_VISIBLE, 22, 2, P4_TABLE_INVALID}, /* Not its owner's. */
+        {"test", P4_ELEMENT_AFFINITY | P4_ELEMENT_OFFENSIVE, 22, 2, P4_TABLE_INVALID},
+        {"test", P4_ELEMENT_VISIBLE, 22, 2, P4_TABLE_INVALID},
+        {"test", P4_ELEMENT_AFFINITY | P4_ELEMENT_VISIBLE, 22, 40, P4_TABLE_NOT_FOUND},
+        {"test", P4_ELEMENT_AFFINITY | P4_ELEMENT_VISIBLE, 22, 8, P4_TABLE_INVALID}, /* Panic is no damage leaf. */
+        {"test", P4_ELEMENT_AFFINITY | P4_ELEMENT_VISIBLE, 22, P4_SIDE_DEFAULT_NONE, P4_TABLE_OK},
+    };
+    for (size_t i = 0; i < sizeof cases / sizeof cases[0]; ++i) {
+        tables = side_tables(cases[i].leaf_owner, cases[i].leaf_flags);
+        P4SideAilmentDef value = side;
+        value.leaf = cases[i].leaf; value.default_from = cases[i].default_from;
+        assert(p4_game_tables_side_ailment(tables, "test", &value) == P4_TABLE_OK);
+        assert(p4_game_tables_freeze(tables, 1) == cases[i].result);
+        p4_game_tables_destroy(tables);
+    }
+    tables = p4_game_tables_create(); assert(tables);
+    for (uint32_t i = 0; i <= P4_SIDE_AILMENT_LIMIT; ++i) {
+        P4SideAilmentDef value = side;
+        value.leaf = 100 + i;
+        snprintf(value.key, sizeof value.key, "test:side-%u", (unsigned)i);
+        assert(p4_game_tables_side_ailment(tables, "test", &value) ==
+            (i < P4_SIDE_AILMENT_LIMIT ? P4_TABLE_OK : P4_TABLE_INVALID));
+    }
+    p4_game_tables_destroy(tables);
+}
+static void side_riders(void)
+{
+    const uint32_t status_flags = P4_ELEMENT_AFFINITY | P4_ELEMENT_VISIBLE;
+    const P4SideAilmentDef side = {22, P4_SIDE_FLAGS, 0x16, 2, 100, 0, 0, 1, 1, "test:freeze-ailment"};
+    P4GameTables *tables = side_tables("test", status_flags);
+    assert(p4_game_tables_side_ailment(tables, "test", &side) == P4_TABLE_OK);
+    const P4SideRiderDesc rider_b = {0x37, 22, 6, 1, 1, "test:rider-b-freeze"};
+    const P4SideRiderDesc rider_a = {0x34, 22, 10, 1, 1, "test:rider-a-freeze"};
+    assert(p4_game_tables_side_rider(tables, "test", &rider_b) == P4_TABLE_OK);
+    assert(p4_game_tables_side_rider(tables, "test", &rider_a) == P4_TABLE_OK);
+    P4SideRiderDesc bad = rider_a;
+    assert(p4_game_tables_side_rider(tables, "test", &bad) == P4_TABLE_CONFLICT);
+    strcpy(bad.key, "test:rider-a-again");
+    assert(p4_game_tables_side_rider(tables, "test", &bad) == P4_TABLE_CONFLICT); /* One row per (skill, leaf). */
+    bad.skill_id = 0x35; bad.rate = 0; assert(p4_game_tables_side_rider(tables, "test", &bad) == P4_TABLE_INVALID);
+    bad.rate = 101; assert(p4_game_tables_side_rider(tables, "test", &bad) == P4_TABLE_INVALID);
+    bad.rate = 12; bad.revision = 0; assert(p4_game_tables_side_rider(tables, "test", &bad) == P4_TABLE_INVALID);
+    bad.revision = 1; strcpy(bad.key, "other:rider-c"); assert(p4_game_tables_side_rider(tables, "test", &bad) == P4_TABLE_INVALID);
+    strcpy(bad.key, "p4:rider-c"); assert(p4_game_tables_side_rider(tables, "p4", &bad) == P4_TABLE_INVALID);
+    size_t first = 9, count = 9;
+    assert(p4_game_tables_side_rider_count(tables) == 2 && p4_game_elements_requested(tables));
+    assert(!p4_game_tables_find_side_riders(tables, 0x34, &first, &count) && !first && !count); /* Frozen only. */
+    row_probe = (struct RuntimeRowProbe){.view = tables, .domain = P4_TABLE_SOURCE_SIDE_RIDER, .ids = {0x34, 22}};
+    assert(!p4_game_tables_bind_runtime_use(tables, runtime_row_probe, &row_probe));
+    assert(p4_game_tables_freeze(tables, 1) == P4_TABLE_OK);
+    assert(p4_game_tables_find_side_riders(tables, 0x34, &first, &count) && first == 0 && count == 1);
+    const P4SideRiderDesc *row = p4_game_tables_side_rider_at(tables, 0);
+    assert(row && row->skill_id == 0x34 && row->rate == 10);
+    assert(p4_game_tables_find_side_riders(tables, 0x37, &first, &count) && first == 1 && count == 1);
+    assert(!p4_game_tables_find_side_riders(tables, 0x35, &first, &count) && !count && !p4_game_tables_side_rider_at(tables, 2));
+    assert(!strcmp(p4_game_tables_side_rider_owner(tables, 1), "test") && !p4_game_tables_side_rider_owner(tables, 2));
+    assert(!p4_game_tables_runtime_use_row(tables, P4_TABLE_SOURCE_SIDE_RIDER, row) && row_probe.calls == 1);
+    assert(p4_game_tables_runtime_use_row(tables, P4_TABLE_SOURCE_SIDE_RIDER, &rider_a) == P4_TABLE_INVALID);
+    assert(p4_game_tables_side_rider(tables, "test", &rider_a) == P4_TABLE_FROZEN);
+    p4_game_tables_destroy(tables);
+    /* Freeze: a rider carries its own owner's side ailment. */
+    tables = side_tables("test", status_flags);
+    P4SideRiderDesc orphan = rider_a; orphan.leaf = 23;
+    assert(p4_game_tables_side_ailment(tables, "test", &side) == P4_TABLE_OK);
+    assert(p4_game_tables_side_rider(tables, "test", &orphan) == P4_TABLE_OK);
+    assert(p4_game_tables_freeze(tables, 1) == P4_TABLE_NOT_FOUND);
+    p4_game_tables_destroy(tables);
+    tables = side_tables("test", status_flags);
+    const P4SideRiderDesc foreign = {0x34, 22, 10, 1, 1, "other:rider-a-freeze"};
+    assert(p4_game_tables_side_ailment(tables, "test", &side) == P4_TABLE_OK);
+    assert(p4_game_tables_side_rider(tables, "other", &foreign) == P4_TABLE_OK);
+    assert(p4_game_tables_freeze(tables, 1) == P4_TABLE_INVALID);
+    p4_game_tables_destroy(tables);
+    tables = p4_game_tables_create(); assert(tables);
+    for (uint32_t i = 0; i <= P4_SIDE_RIDER_LIMIT; ++i) {
+        P4SideRiderDesc value = rider_a;
+        value.skill_id = i;
+        snprintf(value.key, sizeof value.key, "test:rider-%u", (unsigned)i);
+        assert(p4_game_tables_side_rider(tables, "test", &value) == (i < P4_SIDE_RIDER_LIMIT ? P4_TABLE_OK : P4_TABLE_INVALID));
+    }
+    p4_game_tables_destroy(tables);
+}
 int main(void)
 {
-    retail(); expansion(); refusal(); action_profiles(); affinity_effects(); stable_image_references(); semantic_id_width(); runtime_row_transport();
+    retail(); expansion(); refusal(); action_profiles(); affinity_effects(); stable_image_references(); semantic_id_width(); runtime_row_transport(); damage_covers(); side_ailments(); side_riders();
     retail_derived();
     puts("game_tables: retail decode, owned expansion, profile/channel isolation and atomic freeze passed");
     return 0;

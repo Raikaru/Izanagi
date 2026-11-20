@@ -447,10 +447,42 @@ int p4_os_resolved_path(const char *path,char *out,size_t capacity) {
 }
 
 int p4_os_mkdir(const char *path) { return mkdir(path, 0777); }
+FILE *p4_os_fopen_utf8(const char *path, const char *mode)
+{
+    if (!path || !mode || (strcmp(mode,"rb") && strcmp(mode,"wb"))) { errno = EINVAL; return NULL; }
+    return fopen(path,mode);
+}
+int p4_os_mkdir_utf8(const char *path)
+{ if (!path) { errno = EINVAL; return -1; } return p4_os_mkdir(path); }
+int p4_os_remove_utf8(const char *path)
+{ if (!path) { errno = EINVAL; return -1; } return remove(path); }
+int p4_os_list_dir_utf8(const char *path, void (*visit)(const char *name, void *user), void *user)
+{
+    if (!path || !visit) { errno = EINVAL; return -1; }
+    return p4_os_list_dir(path,visit,user);
+}
 int p4_os_rmdir(const char *path) { return rmdir(path); }
 int p4_os_rename(const char *from, const char *to) { return rename(from, to); }
 int p4_os_replace_file(const char *from, const char *to) { return rename(from, to); }
 int p4_os_sync_file(FILE *stream) { return fflush(stream) || fsync(fileno(stream)) ? -1 : 0; }
+int p4_os_replace_file_durable(const char *from, const char *to)
+{
+    char directory[4096];
+    const char *slash = strrchr(to, '/');
+    size_t length = slash ? (slash == to ? 1 : (size_t)(slash - to)) : 1;
+    if (length >= sizeof directory) {
+        errno = ENAMETOOLONG;
+        return -1;
+    }
+    memcpy(directory, slash ? to : ".", length);
+    directory[length] = 0;
+    if (rename(from, to)) return -1;
+    int fd = open(directory, O_RDONLY | O_DIRECTORY | O_CLOEXEC);
+    if (fd < 0) return -1;
+    int bad = fsync(fd);
+    close(fd);
+    return bad ? -1 : 0;
+}
 
 int p4_os_directory_lock(const char *path, uintptr_t token[2]) {
     if (!path || !token || token[0] || token[1]) { errno = EINVAL; return -1; }

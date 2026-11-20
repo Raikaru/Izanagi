@@ -1,0 +1,3 @@
+--!capability table-source.item-derive@1
+--!covers section:table-source.item-derive
+-- Table-source item rows can derive from a retail item and override named fields.

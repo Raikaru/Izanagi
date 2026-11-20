@@ -64,23 +64,9 @@ names in that address range must not inherit this pointer ABI by association.
 identifies its writer. Compare hexadecimal matrices, not rounded position text:
 `P4PC_WALK_LOG=1 P4PC_WALK_LOG_EVERY=1 P4PC_WALK_LOG_M=1` exposes the actual bits.
 
-`P4PC_WALK_DIGEST=1` rolls the player's matrix and random state into the walk digest.
-`walk_digest` (`tests/walk_digest_gate.sh`) and `tools/win_digest.sh <lane>` use the same
-22-row golden through flip 6500 and stop at 6600. The floor RNG witness retains goal
-flip 7000, seed `0x19c3` and grid checksum `4034924771 2512`. Inputs, limits and these
-oracles are not retimed or replaced to accommodate another disc model.
-The golden was last re-recorded when RenderWare's vector-multiply slots began running the
-sky driver's VU0 routines (`src/platform/rw_skytran.c`). Those routines are bit-exact
-with PCSX2 recordings, and they round differently from the generic C providers they
-replaced. The 45-degree rotation words around 0x009419AC already differ by one or two
-ulps (-0.5 is exact instead of -0.50000006). At flip 3629, the post-concatenated step that
-`FldFrameTask_Update` passes to `RwMatrixTranslate` moves the player's x and z by one
-ulp. From the 4000 row on, the digests differ. The MT array and every battle-state row
-are unchanged.
-
-Arithmetic checks and independent same-walk gameplay are not whole-machine equality.
-Use save-anchored lockstep (the private retail-comparison tooling) with exact retained input and
-full state for fidelity comparisons. An expected first divergence does not qualify its unverified suffix.
+`P4PC_WALK_DIGEST=1` rolls the player's matrix and random state into the walk
+digest. Arithmetic checks and same-walk gameplay comparisons do not establish
+whole-machine equality. A first divergence does not validate the untested suffix.
 
 ## Dungeon floors across targets
 
@@ -100,27 +86,8 @@ the stack, sets rows, position and flags as retail does (`swc1`/`sw` to sp+0x60.
 0x7c/0x8c/0x9c) and copies all 64 bytes, so the pads hold each host's stack garbage (the hero's
 battle matrix at 0x01153AF0 holds `0 / 3 / 0x00007FF7` in them on Windows, `3 / 0 / 0` on Linux,
 with equal rows); other matrices' pads hold host garbage too (0x00940CDC at flip 6000:
-0x00007FF6 on Windows, 0x00007F6E on Linux). The Marukyu
-(`collection_marukyu_entry_0625`, 1F and 2F to the fixed 3F) and Void Quest
-(`collection_voidquest_entry_0803`, Chapter 1's floor
-to Chapter 2) gates are registered as pairs: the `P4PC_GATE_TARGET=windows` twin runs on the
-PC and the `_linux` twin on the laptop (`tools/land_game_split.py`). After a deliberate
-arithmetic change, re-record on both targets and commit only an equal recording.
-
-The Marukyu split reported on 2026-11-02 (Windows won one 1F battle and reached 3F, Linux met
-three encounters and lost) was a source difference, not a target one. The Windows run was
-built from 3f30e0ad (base 9c78ff3b), the Linux runs from land batch a92cdb38 (base e7d9bdf1).
-Built from the same source, the targets are bit-identical through 30000 flips: the player's
-matrix every flip, every game frame's pad packet and the walk digest, at 3f30e0ad and at
-80927fb5 alike, and three Windows runs equal each other. 3f30e0ad on Linux reproduces the
-Windows log line for line, 80927fb5 on Windows the Linux one. The route change bisects to
-06c24b38, the sky driver's VU0 multiplies above: 0dd3a503 reaches 3F, 06c24b38 does not. Its
-first player-state difference is flip 1375 at the TV-world Entrance, where the step that
-`FldFrameTask_Update` applies through `mdlTranslateMatrix`/`RwMatrixTranslate` leaves the
-player's x at 0x42D344C9 instead of 0x42D344C8 (matrix 0x00FDEF40 + 0x30). The engine's
-vector-multiply slots differ from the first flip (0x0088741C: 0x00402410.. instead of
-0x003E3DC0..), transformed field coordinates around 0x00CED800 by one ulp after flip 500, the
-player only from 1375. That arithmetic is the PCSX2-exact one, so the walk had to change.
+0x00007FF6 on Windows, 0x00007F6E on Linux). Compare equivalent builds and inputs
+when investigating cross-target differences.
 
 Host code that turns a script into input must not depend on the C library's rounding. In the
 EE mode (MXCSR round toward zero, x87 nearest) the Windows CRT's `strtof`/`strtod` truncate

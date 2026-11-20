@@ -3,6 +3,7 @@
 #include "p4pc/game_items_native.h"
 #include "p4pc/game_tables.h"
 #include "p4pc/game_table_use.h"
+#include "game_table_inputs_internal.h"
 #include "vfs.h"
 #include "iso9660.h"
 #include <assert.h>
@@ -17,6 +18,10 @@ static const char *mode;
 static unsigned walks, prepares, publishes, rollbacks;
 static jmp_buf expected_refusal;
 static int expect_refusal, source_refusal;
+static unsigned golden_item_loads;
+int p4_game_tables_items_native_load(const char *path, const uint8_t *bytes, uint32_t size)
+{ assert(path && bytes && size == 16); ++golden_item_loads; return 0; }
+_Noreturn void p4_game_tables_items_native_refuse(int result) { (void)result; abort(); }
 /* Fail-stop adapters isolate this CPU fixture from the native recovery UI. */
 _Noreturn void p4_package_boot_runtime_failed(const char *reason)
 { if (expect_refusal) { source_refusal = 0; longjmp(expected_refusal, 1); } fprintf(stderr, "Unexpected packed admission failure: %s\n", reason); abort(); }
@@ -36,6 +41,58 @@ static void observe_receipt(const uint8_t *descriptor, const char *path,
     assert(p4_game_table_admission_consume(receipt, descriptor, path, bytes, size - 1) == P4_TABLE_INVALID);
     assert(!p4_game_table_admission_consume(receipt, descriptor, path, bytes, size));
     assert(p4_game_table_admission_consume(receipt, descriptor, path, bytes, size) == P4_TABLE_INVALID);
+}
+static unsigned golden_slots, golden_releases;
+void p4_game_table_slot_publish(uint32_t slot, uint32_t base, uint32_t size)
+{
+    assert((slot == 0x7644a4 || slot == 0x7644a8) && base >= 0x100000 && size == 4);
+    ++golden_slots;
+}
+static void *golden_allocate(void *user, uint32_t size, uint32_t *guest)
+{ (void)user; *guest = 0x100000; return malloc(size); }
+static void golden_release(void *user, uint32_t guest, void *host, uint32_t size)
+{ (void)user; assert(guest == 0x100000 && size == 32); ++golden_releases; free(host); }
+static void golden_admission(void)
+{
+    uint8_t packed[32] = {0}, descriptor[24] = {0}, *copy = NULL;
+    uint32_t size = 0;
+    word(packed,4); memcpy(packed+4,"ABCD",4);
+    word(packed+16,4); memcpy(packed+20,"EFGH",4);
+    word(descriptor+4,0x7644a4); word(descriptor+12,0x7644a8);
+    const char *key = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+    P4GameTableInput *input = p4_game_table_input_from_golden_cache(P4_TABLE_INPUT_SKILL,packed,sizeof packed,key);
+    assert(input && !p4_game_table_admission_stage(&input,1));
+    P4GameTableAllocator allocator = {NULL,golden_allocate,golden_release};
+    assert(!p4_game_table_admission_golden_allocator(&allocator));
+    assert(p4_game_table_admission_golden_copy("battle/WRONG.TBL",&copy,&size) == -1);
+    assert(!copy && !size);
+    const char *path = p4_game_table_input_label(P4_TABLE_INPUT_SKILL);
+    assert(p4_game_table_admission_golden_copy(path,&copy,&size) == 1 && size == sizeof packed);
+    descriptor[4] ^= 1;
+    assert(p4_game_table_admission_golden_packed(descriptor,path,copy,size,observe_receipt) == P4_TABLE_INVALID);
+    assert(!golden_slots);
+    descriptor[4] ^= 1;
+    copy[4] ^= 1;
+    assert(p4_game_table_admission_golden_packed(descriptor,path,copy,size,observe_receipt) == P4_TABLE_INVALID);
+    assert(!golden_slots);
+    copy[4] ^= 1;
+    assert(!p4_game_table_admission_golden_packed(descriptor,path,copy,size,observe_receipt));
+    assert(golden_slots == 2);
+    assert(!p4_game_table_admission_golden_load_packed(descriptor,path,observe_receipt));
+    assert(golden_slots == 4);
+    free(copy);
+    assert(!p4_game_table_admission_unstage(&input,1) && golden_releases == 1);
+    p4_game_table_input_destroy(input);
+    uint8_t item[16] = {1}, destination[16] = {0};
+    input = p4_game_table_input_from_golden_cache(P4_TABLE_INPUT_ITEM,item,sizeof item,key);
+    assert(input && !p4_game_table_admission_stage(&input,1));
+    const char *item_path = p4_game_table_input_label(P4_TABLE_INPUT_ITEM);
+    assert(p4_game_table_admission_golden_load_item(item_path,destination,sizeof destination - 1) == -1);
+    assert(!golden_item_loads && !destination[0]);
+    assert(p4_game_table_admission_golden_load_item(item_path,destination,sizeof destination) == 1);
+    assert(golden_item_loads == 1 && !memcmp(item,destination,sizeof item));
+    assert(!p4_game_table_admission_unstage(&input,1));
+    p4_game_table_input_destroy(input);
 }
 static void admission(void)
 {
@@ -122,8 +179,9 @@ static void admission(void)
     }
     memset(descriptor, 0, sizeof descriptor);
     word(descriptor + 4, 0x765ff0);
-    assert(!p4_game_table_admission_check_packed(descriptor, "battle/OTHER.TBL", (const uint8_t *)"x", 1, &failed));
-    p4_game_table_admission_packed(descriptor, "battle/OTHER.TBL", (const uint8_t *)"x", 1, observe_receipt);
+    uint8_t other[] = {'x'};
+    assert(!p4_game_table_admission_check_packed(descriptor, "battle/OTHER.TBL", other, 1, &failed));
+    p4_game_table_admission_packed(descriptor, "battle/OTHER.TBL", other, 1, observe_receipt);
     assert(unchecked_calls == 2);
     assert(!p4_game_table_admission_unstage(inputs, P4_TABLE_INPUT_COUNT));
     assert(!p4_game_table_admission_unstage(inputs, P4_TABLE_INPUT_COUNT));
@@ -262,6 +320,7 @@ int main(int argc, char **argv)
         const P4PackageProvider *provider = p4_game_table_input_provider(inputs[kind]);
         if (provider) assert(!p4_package_provider_selected(provider) && !strcmp(p4_package_provider_info(provider)->version, "2.0.0"));
     }
+    golden_admission();
     release_inputs();
     assert(!p4_packages_memory_usage().resident && !p4_packages_memory_usage().reserved);
     puts("game_table_admission: selected buffers, retail descriptor vectors, wrong paths and one-use receipts passed; no native image or gameplay claim");

@@ -1,4 +1,4 @@
-# From story0424dekaja: train on 7F with Agi, heal, then use Fire Null and weapons.
+# From story0424dekaja: train on 7F and recover between encounters.
 timeout:10000
 wait:140
 press:cross
@@ -33,7 +33,7 @@ press:cross
 battle:off
 waitbtl:menu
 log
-# The three first shadows absorb Ice and are weak to Fire. Attack -> Persona.
+# Use the planned attack sequence.
 press:down
 wait:20
 press:down
@@ -107,7 +107,7 @@ press:circle
 wait:70
 walk:shadow,250
 press:cross
-# Both second shadows null all four elements. Use Senri's Fire Null and weapons.
+# Use the prepared defensive and weapon actions for the second encounter.
 waitbtl:menu
 wait:100
 press:down

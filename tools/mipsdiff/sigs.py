@@ -321,6 +321,22 @@ def main():
                 m = pat.match(name)
                 if m and m.group(1) not in rows:
                     rows[m.group(1)] = (name, ret, args)
+    # The RenderWare clean layer (src/rwclean, docs/rw_clean.md): each `// FUN_<ADDR>` marker binds the definition after it to
+    # that address when its subsystem is compiled (P4_RW_CLEAN); the signature is the API's, the same in either build.
+    clean_marker = re.compile(r"//[ \t]*FUN_([0-9A-Fa-f]{8})")
+    clean_dir = os.path.join(ROOT, "src", "rwclean")
+    for f in sorted(os.listdir(clean_dir)) if os.path.isdir(clean_dir) else []:
+        if not f.endswith(".c"):
+            continue
+        text = open(os.path.join(clean_dir, f), encoding="utf-8").read()
+        marks = [(m.group(1).lower(), m.end()) for m in clean_marker.finditer(text)]
+        for k, (addr, end) in enumerate(marks):
+            nxt = marks[k + 1][1] - 20 if k + 1 < len(marks) else len(text)
+            for m in DEF.finditer(strip_comments(text[end:nxt])):
+                r = parse_def(m)
+                if r:
+                    rows.setdefault(addr, r)
+                    break
     # Functions src/cri defines under their decomp symbol name (ACSSVR_Init, ACSSND_Stop, ...): the address
     # comes from the decomp's symbol table or config/port_symbols.txt.
     named = {}

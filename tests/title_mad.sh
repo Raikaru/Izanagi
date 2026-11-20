@@ -2,7 +2,7 @@
 # Renderer regression gate: the title frame (p4pc_viewer title, frame 400 of the intro, the settled "press any
 # button" screen) against the PCSX2 frame timeline/title.png, as mean absolute difference over RGB. The reference
 # is a raw 640x448 RGB file (refs/title.rgb beside the retail image: tools/png_to_rgb.py makes it from the
-# PortTrace PNG); it is never committed. Exits 77 without P4PC_ISO or P4PC_ELF; missing or changed pinned references fail.
+# reference PNG); it is never committed. Exits 77 without P4PC_ISO or P4PC_ELF; missing or changed pinned references fail.
 # usage: title_mad.sh <p4pc_viewer> <out.png>
 . "$(dirname "$0")/input_guard.sh"
 

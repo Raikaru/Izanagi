@@ -26,16 +26,11 @@ Repository-relative source paths in the pages identify the implementation owners
 - [macOS](platform/macos.md): the arm64 and x86_64 builds, ANGLE on Metal, the app bundle,
   Gatekeeper and what only real Macs can verify.
 - [Testing and harnesses](platform/testing.md): headless tools, capture/debug controls and gates.
-- [Playthrough coverage](platform/playthrough_coverage.md): story, dungeon and boss gates from
-  June to the endings, and the segments still uncovered.
 
 Related contracts: [audio](audio.md), [renderer](renderer_port.md), [port compilation](porting.md),
 [64-bit guest memory](port64.md), and [contribution rules](../CONTRIBUTING.md).
 
-Measurements and receipts in these documents were often produced with the project's private
-tooling: its land queue and remote/local runners, the nightly jobs, lockstep and the PCSX2
-trace tooling. Those scripts, hosts and the evidence paths they name (`<scratch>`, `<host>`,
-`<private data>`) are not part of the public repository. Build and test with [BUILDING.md](../BUILDING.md).
+Build and test the project with [BUILDING.md](../BUILDING.md).
 
 ## Shared native digests
 

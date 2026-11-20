@@ -51,8 +51,12 @@ static const P4PackageClient client = {
 };
 int p4_mods_stage(const char *root, const char *enabled)
 {
+    return p4_mods_stage_bundled(root, NULL, enabled);
+}
+int p4_mods_stage_bundled(const char *root, const char *bundled_root, const char *enabled)
+{
     if (loaded) return -1;
-    int status = p4_package_registry_load(&registry, &client, root, enabled);
+    int status = p4_package_registry_load_bundled(&registry, &client, root, bundled_root, enabled);
     if (status == 0) loaded = 1;
     return status;
 }
@@ -64,6 +68,11 @@ int p4_mods_set_load_order(const char *ids)
 int p4_mods_installations_scan(const char *root, P4PackageInstallationVisitor visitor, void *user)
 {
     return p4_package_installations_scan(&client, root, visitor, user);
+}
+int p4_mods_installations_scan_bundled(const char *root, const char *bundled_root,
+                                       P4PackageInstallationVisitor visitor, void *user)
+{
+    return p4_package_installations_scan_bundled(&client, root, bundled_root, visitor, user);
 }
 size_t p4_mods_count(void) { return p4_package_registry_count(registry); }
 const P4PackageInfo *p4_mods_info(size_t index) { return p4_package_registry_info(registry, index); }

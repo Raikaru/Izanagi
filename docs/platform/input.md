@@ -33,6 +33,12 @@ before its sharp 125/128 run threshold. SDL already converts XInput Y; do not in
 `input.deadzone` / `P4PC_STICK_DEADZONE` optionally adds a circular inner dead zone
 (0..50 percent, default 0), without rescaling the remaining travel.
 
+On Android the touch pad's stick (see [Android](../android.md)) is a second source for the
+left stick: `p4pc_pad_touch_stick(x, y)` takes the thumb offset in units of the stick's travel
+(y down), clamps it to the unit circle and rescales away its own 15 percent dead zone;
+`p4pc_pad_sdl_read` then converts it like a gamepad axis, through `input.deadzone` and the
+PCSX2 quantization above, only while the gamepad's left stick is idle (it then outranks the D-pad's synthesized stick).
+
 ## Libpad packet and request lifetime
 
 Port 0 slot 0 is the controller; port 1 reports disconnected (0). Packets are 32-byte
@@ -47,11 +53,11 @@ Disconnection and counter wrapping are covered by `boot_seams` without physical 
 
 ## Automation isolation
 
-All ordinary unattended runs must set `P4PC_INPUT=script`. SDL video initializes, but the
-joystick/gamepad subsystem is not opened or polled; keyboard/gamepad hotplug, keyboard
-state and key actions are ignored. Only synthetic title/menu/battle/walk input reaches
-the guest. Window-close and device-reset events still work. Runners force this after
-caller overrides; a virtual clock alone does not isolate player input.
+For unattended runs set `P4PC_INPUT=script`. SDL video initializes, but the
+joystick/gamepad subsystem is not opened or polled; keyboard/gamepad hotplug,
+keyboard state and key actions are ignored. Only scripted input reaches the
+guest. Window-close and device-reset events still work. A virtual clock alone
+does not isolate player input.
 
 The controller regression alone uses `P4PC_INPUT=virtual` plus `P4PC_PAD_VIRTUAL`.
 Only its explicitly created fixture ID may open; no physical/foreign pad or keyboard
@@ -83,8 +89,6 @@ window pump's wall-clock throttle; repeated reads of one flip retain one state.
 There is no separately scheduled producer thread or activation grace period.
 HZ=0 leaves the owned SDL device under the adapter unit test's manual control.
 This is a real SDL fixture, not packet injection.
-Retail `p4hook --pad-trace FILE --script l_up@300:800` observes the same movement words;
-`l_down`, `l_left`, `l_right` and digital `up` are also supported.
 
 `pad_keyboard_test` covers all 65,536 signed axes in both float rounding modes, signed
 endpoints, PCSX2 vectors and rim headings. `pad_gamepad_test` uses SDL virtual devices;

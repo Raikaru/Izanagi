@@ -102,6 +102,15 @@ int main(void)
         assert(p4ls_equal(a,b)); /* party +82/+83 are not serialized */
         memory.save_value=0xbeef0001u; p4ls_sample(&host,b,flags,NULL);
         assert(!p4ls_equal(a,b)); /* the neighboring serialized bytes are never masked */
+        memory.save_address=0x0076428cu; memory.save_value=3;
+        p4ls_sample(&host,a,flags,NULL);
+        memory.save_value=5; p4ls_sample(&host,b,flags,NULL);
+        assert(!p4ls_equal(a,b)); /* ordinary aligned comparisons still compare actual playtime */
+        p4ls_sample(&host,a,flags|P4LS_FRAME_DERIVED_PLAYTIME,NULL);
+        memory.save_value=3; p4ls_sample(&host,b,flags|P4LS_FRAME_DERIVED_PLAYTIME,NULL);
+        assert(p4ls_equal(a,b)); /* only independently checked frame-derived values are omitted */
+        p4ls_sample(&host,b,flags,NULL);
+        assert(!p4ls_equal(a,b)); /* an unmatched invariant profile never silently compares equal */
     }
     puts("lockstep format: endian, RNG relocation/cursors, matrix semantics and state equality PASS");
     return 0;

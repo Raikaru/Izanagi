@@ -40,7 +40,7 @@ typedef struct __attribute__((aligned(16))) P4Q128 {
 /* MMI builtins (`_pcpyld`) on P4_Q128. */
 #include "p4pc/mmi.h"
 
-/* VU0 macro-mode bridge for the PS2 `__asm__` VU0/COP2 sites (PortVu0). */
+/* VU0 macro-mode bridge for the PS2 `__asm__` VU0/COP2 sites. */
 #include "p4pc/vu0.h"
 
 /* 64-bit host: the decomp's type.h typedefs size_t, intptr_t and uintptr_t as 32-bit integers, which clash with

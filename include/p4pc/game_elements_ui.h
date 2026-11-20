@@ -9,6 +9,12 @@
 #include "p4pc/game_elements_ui_native.h"
 
 #define P4_ELEMENT_UI_MAX_COLUMNS 9u
+/* Leaves that may take a manifest [element-header] image. */
+#define P4_ELEMENT_UI_MAX_HEADERS 32u
+/* Manifest [element-prompt NAME] images: the Analyze page-flip prompts. */
+#define P4_ELEMENT_UI_PROMPT_ANALYZE_AILMENTS 0u   /* analyze-ailments */
+#define P4_ELEMENT_UI_PROMPT_ANALYZE_AFFINITIES 1u /* analyze-affinities */
+#define P4_ELEMENT_UI_PROMPTS 2u
 /* Presentation-only marker after the four P4KoAffinity values. */
 #define P4_ELEMENT_UI_KO_UNKNOWN 4u
 
@@ -35,6 +41,9 @@ typedef struct P4GameElementUiPreparedColumn {
     uint32_t icon_token, image_width, image_height;
     /* The layout authorized the persona snapshot word for this pair. */
     uint32_t primary_legacy, marker_legacy;
+    /* Authored column-header art: the descriptor's header_icon, else its skill
+     * icon (then equal to icon_token); zero with RETAIL art. */
+    uint32_t header_token, header_width, header_height;
 } P4GameElementUiPreparedColumn;
 /* The retail seven-column affinity row as an explicit layout, used when an
  * expanded cohort authors no layout of its own. */
@@ -48,6 +57,20 @@ P4GameElementUi *p4_game_elements_ui_create(const P4GameTableAllocator *allocato
  * owner or layout conflicts rather than merging. Staging only. */
 int p4_game_elements_ui_layout(P4GameElementUi *ui, const char *owner,
     const P4GameElementUiColumn *columns, uint32_t count, uint32_t revision);
+/* A header image for a leaf whose descriptor declares no header_icon (a
+ * retail leaf such as p4:status8), from a manifest [element-header KEY]
+ * section. Staging only, before prepare: CONFLICT for a second image of the
+ * leaf, NOMEM past P4_ELEMENT_UI_MAX_HEADERS, INVALID for a malformed
+ * reference. prepare refuses a leaf that is unregistered (NOT_FOUND) or has a
+ * header_icon (INVALID), then plans, checks and pins the image as the leaf's
+ * header art. Only header_art_find (and the native header_icon) returns it;
+ * affinity columns keep their own art. */
+int p4_game_elements_ui_element_header(P4GameElementUi *ui, uint32_t leaf, const P4ResourceRef *image);
+/* A prompt image (P4_ELEMENT_UI_PROMPT_*) from a manifest [element-prompt
+ * NAME] section: staging only, CONFLICT for a second image of the prompt,
+ * INVALID for a malformed reference. Planned, checked and pinned with the
+ * other arts; prompt_find returns it. */
+int p4_game_elements_ui_prompt(P4GameElementUi *ui, uint32_t prompt, const P4ResourceRef *image);
 /* Early CPU plan over the exact frozen registry: descriptors, pairs, every
  * declared alias's coverage of every displayed pair, and the art set (each
  * visible descriptor with an icon reference; a visible new leaf must have
@@ -63,12 +86,19 @@ int p4_game_elements_ui_freeze(P4GameElementUi *ui, const P4Resources *resources
 uint32_t p4_game_elements_ui_revision(const P4GameElementUi *ui);
 uint32_t p4_game_elements_ui_count(const P4GameElementUi *ui);
 const P4GameElementUiPreparedColumn *p4_game_elements_ui_column(const P4GameElementUi *ui, uint32_t index);
-/* Authored art for a leaf: index into the art set, or NOT_FOUND when the leaf
- * keeps native (retail) art or has none. art_draw authorizes the descriptor
- * row, then draws the pinned image at the given on-screen size. */
+/* Authored skill art for a leaf: index into the art set, or NOT_FOUND when the
+ * leaf keeps native (retail) art or has none. art_draw authorizes the
+ * descriptor row, then draws the pinned image at its own pixel size times the
+ * given scale, as a native sprite draws (1.0 = 1:1). */
 int p4_game_elements_ui_art_find(const P4GameElementUi *ui, uint32_t leaf, uint32_t *index);
+/* The leaf's header art (its descriptor's header_icon; every VISIBLE leaf with
+ * one has it planned and pinned, column or not), or NOT_FOUND when it declares
+ * none: no fallback to the skill art. Same index space as art_find/art_draw. */
+int p4_game_elements_ui_header_art_find(const P4GameElementUi *ui, uint32_t leaf, uint32_t *index);
+/* A declared prompt image, in the art_draw index space; NOT_FOUND if none. */
+int p4_game_elements_ui_prompt_find(const P4GameElementUi *ui, uint32_t prompt, uint32_t *index);
 int p4_game_elements_ui_art_draw(const P4GameElementUi *ui, uint32_t index,
-    float x, float y, float depth, uint32_t rgba, float width, float height);
+    float x, float y, float depth, uint32_t rgba, float scale_x, float scale_y);
 const P4GameTables *p4_game_elements_ui_tables(const P4GameElementUi *ui);
 /* Actual visible consumption only: authorize the exact issued element (and
  * channel) rows through the Root source transport before using them. Plan,

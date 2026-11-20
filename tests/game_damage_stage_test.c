@@ -153,23 +153,39 @@ static void native_bracket(void)
     const P4GameDamageModifierDesc desc = {"test.capture", 0, 0, P4_DAMAGE_MULTIPLY, capture, NULL};
     uint32_t handle;
     assert(p4_game_damage_register(&desc, &handle) == P4_DAMAGE_OK);
-    /* An estimate: no bracket, origin is the target; ailment words pass as given. */
-    assert(p4_game_damage_native_amount(10, 0, 3, 0x22u, 1, 40, 0x100040u, P4_DAMAGE_HIT_WEAK, 1, 19, 55) == 55);
+    /* An estimate: no bracket, origin is the target; ailment words pass as given.
+     * Its command is unknown and a party source still reports its persona. */
+    assert(p4_game_damage_native_amount(10, 0, 3, 0x22u, 1, 40, 0x100040u, P4_DAMAGE_HIT_WEAK, 1, 19, 55, 0x2a, 31) == 55);
     assert(!seen.resolved && !seen.reflected && seen.origin_side == P4_DAMAGE_SIDE_ENEMY && seen.origin_id == 40 &&
         seen.source_id == 3 && seen.source_status == 0x22u && seen.target_side == P4_DAMAGE_SIDE_ENEMY &&
         seen.target_status == 0x100040u && seen.hit_kind == P4_DAMAGE_HIT_WEAK &&
-        seen.element_valid && seen.element_id == 19 && seen.stock == 55);
-    /* A repelled resolved hit: delivered to its party source, aimed at enemy 40. */
-    p4_game_damage_native_hit_begin(10, 1, 40, 1);
-    assert(p4_game_damage_native_amount(10, 0, 3, 0, 0, 3, 0, P4_DAMAGE_HIT_NORMAL, 0, 0, 12) == 12);
+        seen.element_valid && seen.element_id == 19 && seen.stock == 55 &&
+        seen.origin == P4_DAMAGE_ORIGIN_UNKNOWN && seen.source_persona == 0x2a && seen.source_persona_level == 31);
+    /* An enemy source never reports a persona. */
+    (void)p4_game_damage_native_amount(10, 1, 40, 0, 0, 3, 0, P4_DAMAGE_HIT_NORMAL, 0, 0, 12, 0x2a, 31);
+    assert(seen.source_side == P4_DAMAGE_SIDE_ENEMY && !seen.source_persona && !seen.source_persona_level);
+    /* A repelled resolved skill hit: delivered to its party source, aimed at enemy 40. */
+    p4_game_damage_native_hit_begin(10, 1, 40, 1, 0, 0);
+    assert(p4_game_damage_native_amount(10, 0, 3, 0, 0, 3, 0, P4_DAMAGE_HIT_NORMAL, 0, 0, 12, 0x2a, 31) == 12);
     p4_game_damage_native_hit_end();
     assert(seen.resolved && seen.reflected && seen.origin_side == P4_DAMAGE_SIDE_ENEMY && seen.origin_id == 40 &&
-        seen.target_side == P4_DAMAGE_SIDE_PARTY && seen.target_id == 3 && !seen.element_valid);
-    /* A bracket for another skill never marks this call resolved. */
-    p4_game_damage_native_hit_begin(11, 1, 40, 1);
-    (void)p4_game_damage_native_amount(10, 0, 3, 0, 0, 3, 0, P4_DAMAGE_HIT_NORMAL, 0, 0, 12);
+        seen.target_side == P4_DAMAGE_SIDE_PARTY && seen.target_id == 3 && !seen.element_valid &&
+        seen.origin == P4_DAMAGE_ORIGIN_SKILL && seen.source_persona == 0x2a && seen.source_persona_level == 31);
+    /* An item action and a weapon-property attack report their command and no persona. */
+    p4_game_damage_native_hit_begin(10, 1, 40, 0, 1, 0);
+    (void)p4_game_damage_native_amount(10, 0, 3, 0, 1, 40, 0, P4_DAMAGE_HIT_NORMAL, 0, 0, 12, 0x2a, 31);
     p4_game_damage_native_hit_end();
-    assert(!seen.resolved && !seen.reflected && seen.origin_side == P4_DAMAGE_SIDE_PARTY);
+    assert(seen.resolved && seen.origin == P4_DAMAGE_ORIGIN_ITEM && !seen.source_persona && !seen.source_persona_level);
+    p4_game_damage_native_hit_begin(10, 1, 40, 0, 0, 1);
+    (void)p4_game_damage_native_amount(10, 0, 3, 0, 1, 40, 0, P4_DAMAGE_HIT_NORMAL, 0, 0, 12, 0x2a, 31);
+    p4_game_damage_native_hit_end();
+    assert(seen.resolved && seen.origin == P4_DAMAGE_ORIGIN_ATTACK && !seen.source_persona);
+    /* A bracket for another skill never marks this call resolved. */
+    p4_game_damage_native_hit_begin(11, 1, 40, 1, 1, 0);
+    (void)p4_game_damage_native_amount(10, 0, 3, 0, 0, 3, 0, P4_DAMAGE_HIT_NORMAL, 0, 0, 12, 0x2a, 31);
+    p4_game_damage_native_hit_end();
+    assert(!seen.resolved && !seen.reflected && seen.origin_side == P4_DAMAGE_SIDE_PARTY &&
+        seen.origin == P4_DAMAGE_ORIGIN_UNKNOWN && seen.source_persona == 0x2a);
     clear(&handle, 1);
 }
 

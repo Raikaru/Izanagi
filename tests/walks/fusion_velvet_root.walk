@@ -1,0 +1,32 @@
+# Mod-witness only (tests/mod_fusion_arts_game_test.py "velvet"): from
+# story0422personas, load through the title, enter the Velvet Room and stop once
+# the root menu has slid in. The menu script (walkdone) then presses Square for
+# the Velvet command and Circle to close its page. Same route as
+# challenge_velvet_roster.walk up to the root menu.
+timeout:6000
+wait:140
+press:cross
+wait:140
+press:cross
+wait:140
+press:cross
+skipmsg
+walk:400,500,50
+face:90
+wait:20
+press:cross
+timeout:20000
+skip:900
+log
+wait:600
+press:circle
+wait:100
+press:circle
+wait:100
+press:circle
+wait:600
+log
+wait:600
+# The root menu slides in, then waits for input.
+wait:300
+log

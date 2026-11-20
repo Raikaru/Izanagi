@@ -1,5 +1,5 @@
 # From the input-produced support-111 card. Native fusion and real TV saving only.
-# Require actual Eligor 74 with inherited Tarunda/Media; never substitute the preview for the born result.
+# Require the fused result, not its preview.
 timeout:15000
 wait:140
 press:cross

@@ -16,7 +16,8 @@ typedef enum P4TableSourceViewKind {
 /* Stable identity, not an address/ordinal/generation. ids are domain-specific:
  * element/channel/skill/item/category/enemy/persona: id; affinity: kind,entity,profile,leaf,ch;
  * action: source-kind,id,component; alias: kind,entity,native-profile;
- * effect: source-kind,id,leaf,ch; string: table,id,role. Unused ids are zero.
+ * effect: source-kind,id,leaf,ch; offense: source-kind,id,leaf;
+ * string: table,id,role. Unused ids are zero.
  * Affinity/string have no separate key. Their canonical numeric key is exact.
  * Affinity revision is its frozen semantic-registry revision; other revisions
  * and schemas are the actual owned descriptor's, or schema1 where fixed. */

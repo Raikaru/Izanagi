@@ -24,9 +24,19 @@ OUTCOMES = {"win", "defeat", "escape", "scripted_conclusion", "action_limit",
             "update_limit", "engine_error", "policy_error"}
 CENSORED = {"action_limit", "update_limit"}
 ERRORS = {"engine_error", "policy_error"}
-POLICIES = {"tape": 0, "greedy": 1, "cautious": 2, "typical": 3, "walk": 4, "attentive": 5}
+POLICIES = {"tape": 0, "greedy": 1, "cautious": 2, "typical": 3, "walk": 4, "attentive": 5, "attentive-affinity": 6, "technical": 7,
+            "strategic": 8}
+# The strategic candidate's native identity (session.c): a separately named hypothesis policy, never a validated expert.
+STRATEGIC_IDENTITY = {"name": "strategic-player-candidate-v1",
+                      "knowledge": "observed_damage_weakness_public_charge_guard_ailment_landings_buff_state_fixed_heal_amounts_"
+                                   "owned_persona_skills"}
 WALK_PLAN_MAX = 16384
+# attentive-affinity's Persona ratings, one per retail element in native order (datCalcSkillElement 0..7).
+RATING_ELEMENTS = ("phys", "fire", "ice", "elec", "wind", "almighty", "light", "dark")
+RATINGS_MAX = 512
 LOCAL_GATES = Path(__file__).with_name("local_gates.py")   # machine-wide admission (admitted_case)
+# Windows workers must not create a console window; retain below-normal priority.
+WINDOWS_WORKER_FLAGS = 0x08004000 if os.name == "nt" else 0
 # p4_game_table_catalog_identity's retail value; expanded catalogs hash their content.
 RETAIL_TABLE_CATALOG = hashlib.sha256(b"p4pc-table-catalog-v1:retail").hexdigest()
 # A declared mod cohort: manifest-syntax package ids, declared setting keys and printable values.
@@ -34,6 +44,8 @@ MOD_ID = re.compile(r"[a-z0-9_-](?:[a-z0-9._-]{0,61}[a-z0-9_-])?")
 SETTING_KEY = re.compile(r"[a-z0-9_][a-z0-9_.-]{0,47}")
 SETTING_VALUE = re.compile(r"[!-~](?:[ -~]{0,198}[!-~])?")
 MAX_MOD_PACKAGES = 16
+MAX_MOD_EQUIPMENT = 30
+ITEM_RETAIL_COUNT = 1536  # P4_ITEM_RETAIL_COUNT: added item IDs start here
 MOD_WITNESS_ENVIRONMENT = {"P4PC_MOD_WITNESS": "1", "P4PC_INPUT": "script"}
 
 
@@ -346,9 +358,75 @@ def validate_walk_plan(plan):
     return plan
 
 
+def validate_ratings_reference(ratings):
+    """attentive-affinity's table: a private file pinned by SHA-256 (it is derived from the user's disc)."""
+    object_fields(ratings, "policy.ratings", ("path", "sha256"))
+    text(ratings["path"], "policy.ratings.path")
+    if re.fullmatch(r"[0-9a-f]{64}", str(ratings["sha256"])) is None:
+        raise ScenarioError("policy.ratings.sha256: expected lowercase SHA-256")
+    return ratings
+
+
+def compile_ratings(table):
+    """The native ratings payload: "P4AFFRT1", u32 count, then per Persona (ascending id) u16 id and one s8 rating per
+    RATING_ELEMENTS entry. A split table's phys is the best of its slash/strike/pierce ratings, because the policy's
+    weakness knowledge is the retail element of a hit. Returns (payload, table digest)."""
+    if not isinstance(table, dict) or not isinstance(table.get("personas"), dict) or not table["personas"]:
+        raise ScenarioError("policy.ratings: table has no personas")
+    table_digest = table.get("digest")
+    if not isinstance(table_digest, str) or not re.fullmatch(r"[0-9a-f]{1,64}", table_digest):
+        raise ScenarioError("policy.ratings: table digest must be lowercase hex")
+    rows = []
+    for key, values in table["personas"].items():
+        where = "policy.ratings.personas[%s]" % key
+        if not re.fullmatch(r"0x[0-9a-f]{1,4}", key) or not isinstance(values, dict) or not int(key, 16):
+            raise ScenarioError(where + ": expected a nonzero lowercase 0x Persona id and its ratings")
+        ratings = []
+        for element in RATING_ELEMENTS:
+            if element == "phys" and "phys" not in values:
+                leaves = [values.get(leaf) for leaf in ("slash", "strike", "pierce")]
+                if any(type(leaf) is not int for leaf in leaves):
+                    raise ScenarioError(where + ": phys or slash/strike/pierce ratings required")
+                value = max(leaves)
+            else:
+                value = values.get(element)
+            if type(value) is not int or not -128 <= value <= 127:
+                raise ScenarioError("%s.%s: expected an integer rating -128..127" % (where, element))
+            ratings.append(value)
+        rows.append((int(key, 16), ratings))
+    rows.sort()
+    if len(rows) > RATINGS_MAX or len({identity for identity, _ in rows}) != len(rows):
+        raise ScenarioError("policy.ratings: expected at most %d distinct Personas" % RATINGS_MAX)
+    payload = b"P4AFFRT1" + struct.pack("<I", len(rows)) + b"".join(
+        struct.pack("<H8b", identity, *ratings) for identity, ratings in rows)
+    return payload, table_digest
+
+
+def load_ratings(policy, base):
+    """Read, verify and compile the scenario's pinned ratings table; None for every other policy."""
+    if policy["kind"] != "attentive-affinity":
+        return None
+    path = Path(policy["ratings"]["path"])
+    if not path.is_absolute():
+        path = Path(base) / path
+    try:
+        data = path.read_bytes()
+    except OSError as error:
+        raise ScenarioError("policy.ratings.path: cannot read the ratings table (%s)" % error) from None
+    if digest(data) != policy["ratings"]["sha256"]:
+        raise ScenarioError("policy.ratings.sha256: ratings table hash mismatch")
+    try:
+        table = json.loads(data.decode("utf-8"))
+    except (UnicodeDecodeError, ValueError):
+        raise ScenarioError("policy.ratings: table is not JSON") from None
+    payload, table_digest = compile_ratings(table)
+    return {"payload": payload, "payload_sha256": digest(payload), "table_digest": table_digest}
+
+
 def validate_mods(mods):
-    """A declared mod cohort: package ids and directories, and per-package settings. Never retail evidence."""
-    object_fields(mods, "mods", ("packages", "settings"))
+    """A declared mod cohort: package ids and directories, per-package settings and, optionally, the equipment of added
+    items (`equipment: [{actor, slot, item}]`). Never retail evidence."""
+    object_fields(mods, "mods", ("packages", "settings"), ("equipment",))
     packages = mods["packages"]
     if not isinstance(packages, list) or not 1 <= len(packages) <= MAX_MOD_PACKAGES:
         raise ScenarioError("mods.packages: expected 1..%d packages" % MAX_MOD_PACKAGES)
@@ -376,6 +454,20 @@ def validate_mods(mods):
                 raise ScenarioError(where + ": invalid setting key %r" % (key,))
             if not isinstance(value, str) or SETTING_VALUE.fullmatch(value) is None or "#" in value or ";" in value:
                 raise ScenarioError("%s.%s: expected a printable setting value" % (where, key))
+    equipment = mods.get("equipment", [])
+    if not isinstance(equipment, list) or ("equipment" in mods and not 1 <= len(equipment) <= MAX_MOD_EQUIPMENT):
+        raise ScenarioError("mods.equipment: expected 1..%d entries" % MAX_MOD_EQUIPMENT)
+    slots = set()
+    for index, row in enumerate(equipment):
+        where = "mods.equipment[%d]" % index
+        object_fields(row, where, ("actor", "slot", "item"))
+        actor = integer(row["actor"], where + ".actor", 1, 10)
+        slot = integer(row["slot"], where + ".slot", 0, 2)
+        # Retail IDs stay in the save's own fields, through preparation; only added items are side state.
+        integer(row["item"], where + ".item", ITEM_RETAIL_COUNT, 0xFFFF)
+        if (actor, slot) in slots:
+            raise ScenarioError(where + ": duplicate actor slot")
+        slots.add((actor, slot))
     return mods
 
 
@@ -403,14 +495,19 @@ def mod_cohort(mods, base):
         manifest = directory / "mod.ini"
         if not manifest.is_file():
             raise ScenarioError(where + ": no mod.ini")
-        fields = dict(re.findall(r"(?m)^\s*(id|version)\s*=\s*(\S(?:.*\S)?)\s*$", manifest.read_text(encoding="utf-8")))
+        # Only the [mod] section names the package: a [require] section has its own `version`.
+        head = re.search(r"(?ms)^\s*\[mod\]\s*$(.*?)(?=^\s*\[|\Z)", manifest.read_text(encoding="utf-8"))
+        fields = dict(re.findall(r"(?m)^\s*(id|version)\s*=\s*(\S(?:.*\S)?)\s*$", head.group(1) if head else ""))
         if fields.get("id") != package["id"] or not fields.get("version"):
             raise ScenarioError(where + ": mod.ini id/version do not declare " + package["id"])
         packages.append({"id": package["id"], "version": fields["version"], "directory": os.path.abspath(directory),
                          "files": package_files(directory, where)})
     content = {"packages": [{key: package[key] for key in ("id", "version", "files")} for package in packages],
                "settings": mods["settings"]}
-    return {"identity": digest(canonical(content)), "packages": packages, "settings": mods["settings"]}
+    if "equipment" in mods:
+        content["equipment"] = mods["equipment"]
+    return {"identity": digest(canonical(content)), "packages": packages, "settings": mods["settings"],
+            "equipment": mods.get("equipment", [])}
 
 
 def stage_mod_packages(cohort, output):
@@ -439,6 +536,10 @@ def validate_scenario(value):
     object_fields(value, "scenario", ("schema", "entry", "encounter_id", "policy", "master_seed", "seed_start", "n", "options"), ("label", "runtime", "mods"))
     if "mods" in value:
         validate_mods(value["mods"])
+        source = value["entry"]["source"] if isinstance(value.get("entry"), dict) and isinstance(value["entry"].get("source"), dict) else {}
+        if "equipment" in value["mods"] and not (source.get("kind") == "declarative" and isinstance(source.get("definition"), dict)
+                                                and source["definition"].get("classification") == "synthetic_lab"):
+            raise ScenarioError("mods.equipment: equipping added items from nothing requires a synthetic_lab declarative entry")
     if type(value["schema"]) is not int or value["schema"] != SCHEMA:
         raise ScenarioError("scenario.schema: expected 1")
     master = value["master_seed"]
@@ -467,9 +568,10 @@ def validate_scenario(value):
         if key in entry and not isinstance(entry[key], dict):
             raise ScenarioError("entry.%s: expected object" % key)
     policy = value["policy"]
-    object_fields(policy, "policy", ("kind", "version"), ("tape", "plan"))
+    object_fields(policy, "policy", ("kind", "version"), ("tape", "plan", "ratings"))
     if not isinstance(policy["kind"], str) or policy["kind"] not in POLICIES:
-        raise ScenarioError("policy.kind: expected tape, greedy, cautious, typical or walk")
+        raise ScenarioError("policy.kind: expected tape, greedy, cautious, typical, walk, attentive, attentive-affinity, "
+                            "technical or strategic")
     if policy["version"] != 1 or type(policy["version"]) is not int:
         raise ScenarioError("policy.version: expected 1")
     if policy["kind"] == "tape" and "tape" not in policy:
@@ -480,6 +582,10 @@ def validate_scenario(value):
         raise ScenarioError("policy.plan: required for, and only valid with, the walk policy")
     if policy["kind"] == "walk":
         validate_walk_plan(policy["plan"])
+    if (policy["kind"] == "attentive-affinity") != ("ratings" in policy):
+        raise ScenarioError("policy.ratings: required for, and only valid with, the attentive-affinity policy")
+    if "ratings" in policy:
+        validate_ratings_reference(policy["ratings"])
     options = value["options"]
     object_fields(options, "options", ("update_limit", "bootstrap_limit", "action_limit", "latency_updates", "fill_resources"), ("timeout_seconds",))
     for key in ("update_limit", "bootstrap_limit", "action_limit"):
@@ -603,19 +709,23 @@ def compile_preparation(definition, source_image):
     return request
 
 
-def compile_entry(scenario, save_image, seeds, *, rendered=False):
-    """Compile the native schema-1 envelope. Native owns save legality/checksums."""
+def compile_entry(scenario, save_image, seeds, *, rendered=False, ratings=None):
+    """Compile the native schema-1 envelope. Native owns save legality/checksums. `ratings` is load_ratings()'s result,
+    required exactly for the attentive-affinity policy."""
     options, policy = scenario["options"], scenario["policy"]
     tape = policy.get("tape", [])
-    plan = policy["plan"].encode("ascii") if policy["kind"] == "walk" else b""
+    if (policy["kind"] == "attentive-affinity") != (ratings is not None):
+        raise ScenarioError("policy.ratings: the attentive-affinity policy, and only it, compiles a ratings payload")
+    # The walk and attentive-affinity policies' +32 is their payload's byte count (plan text, ratings); it follows the
+    # (empty) RNG block in place of a tape.
+    payload = policy["plan"].encode("ascii") if policy["kind"] == "walk" else ratings["payload"] if ratings else b""
     flags = (0 if rendered else 1) | (4 if options["fill_resources"] else 0)
-    # The walk policy's +32 is the plan's byte count; its text follows the (empty) RNG block.
     header = struct.pack("<8s14I", b"P4BSIM01", 64, flags, scenario["encounter_id"],
-                         seeds["additive"], seeds["mt"], options["update_limit"], len(plan) if plan else len(tape),
+                         seeds["additive"], seeds["mt"], options["update_limit"], len(payload) if payload else len(tape),
                          len(save_image), 0, options["bootstrap_limit"], POLICIES[policy["kind"]],
                          options["latency_updates"], options["action_limit"], seeds["effect"])
-    if plan:
-        return header + save_image + plan
+    if payload:
+        return header + save_image + payload
     return header + save_image + b"".join(struct.pack("<III", row["update"], row["buttons"], row["hold"]) for row in tape)
 
 
@@ -680,7 +790,7 @@ def validate_result(value):
     if "mods" in value and value["mods"] is not None:
         reported = value["mods"]
         where = "worker result.mods"
-        object_fields(reported, where, ("identity", "witness", "active"))
+        object_fields(reported, where, ("identity", "witness", "active"), ("equipment",))
         if not isinstance(reported["identity"], str) or re.fullmatch(r"[0-9a-f]{64}", reported["identity"]) is None:
             raise ScenarioError(where + ".identity: expected lowercase SHA-256")
         if reported["witness"] is not True:
@@ -693,16 +803,27 @@ def validate_result(value):
             text(package["version"], "%s.active[%d].version" % (where, index))
         if not reported["active"] and value["outcome"] not in ERRORS:
             raise ScenarioError(where + ": no active package is only valid on a native error result")
+        if "equipment" in reported:
+            if not isinstance(reported["equipment"], list) or not reported["equipment"]:
+                raise ScenarioError(where + ".equipment: expected the applied equipment array")
+            for index, row in enumerate(reported["equipment"]):
+                object_fields(row, "%s.equipment[%d]" % (where, index), ("actor", "slot", "item"))
+                for key in ("actor", "slot", "item"):
+                    integer(row[key], "%s.equipment[%d].%s" % (where, index, key), 0, 0xFFFF)
     if "party_policy" in value:
         policy = value["party_policy"]
-        object_fields(policy, "worker result.party_policy", ("id", "name", "latency_updates", "party_control", "knowledge"), ("plan_sha256",))
+        object_fields(policy, "worker result.party_policy", ("id", "name", "latency_updates", "party_control", "knowledge"),
+                      ("plan_sha256", "ratings_sha256"))
         integer(policy["id"], "worker result.party_policy.id", maximum=max(POLICIES.values()))
         integer(policy["latency_updates"], "worker result.party_policy.latency_updates")
         for key in ("name", "party_control", "knowledge"):
             text(policy[key], "worker result.party_policy." + key)
-        if (policy["id"] == POLICIES["walk"]) != ("plan_sha256" in policy) or (
-                "plan_sha256" in policy and re.fullmatch(r"[0-9a-f]{64}", str(policy["plan_sha256"])) is None):
-            raise ScenarioError("worker result.party_policy.plan_sha256: required lowercase SHA-256 for the walk policy only")
+        for key, kind in (("plan_sha256", "walk"), ("ratings_sha256", "attentive-affinity")):
+            if (policy["id"] == POLICIES[kind]) != (key in policy) or (
+                    key in policy and re.fullmatch(r"[0-9a-f]{64}", str(policy[key])) is None):
+                raise ScenarioError("worker result.party_policy.%s: required lowercase SHA-256 for the %s policy only" % (key, kind))
+        if policy["id"] == POLICIES["strategic"] and any(policy[key] != value for key, value in STRATEGIC_IDENTITY.items()):
+            raise ScenarioError("worker result.party_policy: the strategic policy reports only its candidate identity")
     if "entry_observations" in value:
         observations = value["entry_observations"]
         object_fields(observations, "worker result.entry_observations", ("first_protagonist_command",))
@@ -917,17 +1038,41 @@ def markdown(report):
 
 def admitted_case(wait, rendered=False):
     # Machine-wide admission belongs to local_gates.py beside this file, where a repository has it; never bypass it on
-    # platforms it does not support. Without it a case starts as soon as a batch worker is free.
+    # platforms it does not support. Without it a case starts as soon as a batch worker is free. Off Windows the
+    # admission is the host's: a container that tools/p4pc_run.sh started at P4PC_PRIORITY=study (P4PC_ADMISSION_DIR).
     if not LOCAL_GATES.is_file():
         return contextlib.nullcontext()
+    host = os.environ.get("P4PC_ADMISSION_DIR")
+    if os.name != "nt" and host:
+        return host_admitted_case(Path(host), rendered)
     from local_gates import Machine
     try:
         machine = Machine(priority="study")
     except AttributeError as exc:
         if os.name != "nt":
-            raise ScenarioError("local CPU admission is unavailable on this host; use the accepted PC remote broker") from exc
+            raise ScenarioError("local CPU admission is unavailable on this host; launch through p4pc-run with "
+                                "P4PC_PRIORITY=study (it sets P4PC_ADMISSION_DIR)") from exc
         raise
     return machine.case(wait, cpu=not rendered)
+
+
+@contextlib.contextmanager
+def host_admitted_case(admission, rendered, *, poll=5.0, sleep=time.sleep):
+    # p4pc-run admitted this container at study priority: it holds one of the host's lane-check slots, runs at nice 15
+    # under the slot's CPU cap, and started only while no land check held a lane on the host. Each case also starts
+    # only while <admission>/land-busy is absent (p4pc-run writes it exactly while a land check holds a lane); a case
+    # in progress finishes. Land pauses never count toward --wait, and nothing else here competes for the slot.
+    if rendered:
+        raise ScenarioError("rendered replay needs the PC's GPU admission; a p4pc-run host admits CPU cases only")
+    if not admission.is_dir():
+        raise ScenarioError("P4PC_ADMISSION_DIR %s is not a p4pc-run admission directory" % admission)
+    busy, announced = admission / "land-busy", False
+    while busy.exists():
+        if not announced:
+            print("battle_sim: a land check holds this host; the next case waits for it", file=sys.stderr, flush=True)
+            announced = True
+        sleep(poll)
+    yield None
 
 
 def worker_environment(runtime_environment, profile, cohort=None):
@@ -947,6 +1092,9 @@ def worker_environment(runtime_environment, profile, cohort=None):
         # verifies against the named identity; ambient presence was refused above.
         env.update(P4PC_CONFIG=str(Path(profile) / "p4pc.ini"), P4PC_MODS="1", P4PC_MOD_DIR=cohort["root"],
                    P4PC_BATTLE_SIM_MODS=cohort["identity"], **MOD_WITNESS_ENVIRONMENT)
+        if cohort["equipment"]:
+            env["P4PC_BATTLE_SIM_EQUIPMENT"] = ",".join("%d:%d:%d" % (row["actor"], row["slot"], row["item"])
+                                                         for row in cohort["equipment"])
     return env
 
 
@@ -963,6 +1111,8 @@ def check_reported_mods(candidate, cohort):
     active = sorted((package["id"], package["version"]) for package in reported["active"])
     if active != declared and candidate["outcome"] not in ERRORS:
         raise ScenarioError("worker result active packages differ from the declared mod set")
+    if reported.get("equipment", []) != cohort["equipment"]:
+        raise ScenarioError("worker result applied equipment differs from the declared mod equipment")
 
 
 def native_preparation_error(receipt):
@@ -1094,7 +1244,7 @@ def prepare_entry(definition, source_image, worker, output, identity, *, resume=
                     process = subprocess.run(command, cwd=profile, env=worker_environment(runtime_environment, profile),
                                              stdout=stdout, stderr=stderr,
                                              timeout=definition["preparation"].get("timeout_seconds", 120),
-                                             creationflags=0x4000 if os.name == "nt" else 0)
+                                             creationflags=WINDOWS_WORKER_FLAGS)
                 record["exit_code"] = process.returncode
                 if process.returncode < 0 or process.returncode >= 0x80000000:
                     raise ScenarioError("native preparation terminated abnormally (exit %d)" % process.returncode)
@@ -1120,7 +1270,7 @@ def prepare_entry(definition, source_image, worker, output, identity, *, resume=
 
 
 def run_case(scenario, save_image, worker, output, run_index, identity, *, admission=admitted_case,
-             wait=-1, rendered=False, replay=False, runtime_environment=None, cohort=None):
+             wait=-1, rendered=False, replay=False, runtime_environment=None, cohort=None, ratings=None):
     seeds = derive_seeds(scenario["master_seed"], run_index)
     case_dir = output / ("run-%020d" % run_index)
     case_dir.mkdir()
@@ -1130,7 +1280,7 @@ def run_case(scenario, save_image, worker, output, run_index, identity, *, admis
         directory = case_dir / ("attempt-%d" % attempt)
         directory.mkdir()
         entry = directory / "entry.bin"
-        entry.write_bytes(compile_entry(scenario, save_image, seeds, rendered=rendered))
+        entry.write_bytes(compile_entry(scenario, save_image, seeds, rendered=rendered, ratings=ratings))
         request = {"schema": 1, "identity": identity, "run_index": run_index, "seeds": seeds,
                    "entry_sha256": digest(entry.read_bytes()), "trace": "full" if replay else "compact"}
         atomic_json(directory / "request.json", request)
@@ -1149,7 +1299,7 @@ def run_case(scenario, save_image, worker, output, run_index, identity, *, admis
                 with (directory / "stdout.log").open("wb") as stdout, (directory / "stderr.log").open("wb") as stderr:
                     process = subprocess.run(command, cwd=profile, env=env, stdout=stdout, stderr=stderr,
                                              timeout=scenario["options"].get("timeout_seconds", 120),
-                                             creationflags=0x4000 if os.name == "nt" else 0)
+                                             creationflags=WINDOWS_WORKER_FLAGS)
                 receipt["exit_code"] = process.returncode
                 if process.returncode < 0 or process.returncode >= 0x80000000:
                     raise ScenarioError("worker terminated abnormally (exit %d)" % process.returncode)
@@ -1162,8 +1312,9 @@ def run_case(scenario, save_image, worker, output, run_index, identity, *, admis
                     if policy is not None and (policy["id"] != POLICIES[scenario["policy"]["kind"]] or
                                                policy["latency_updates"] != scenario["options"]["latency_updates"] or
                                                policy.get("plan_sha256") != (digest(scenario["policy"]["plan"].encode("ascii"))
-                                                                             if scenario["policy"]["kind"] == "walk" else None)):
-                        raise ScenarioError("worker result party policy identity/latency/plan mismatch")
+                                                                             if scenario["policy"]["kind"] == "walk" else None) or
+                                               policy.get("ratings_sha256") != (ratings["payload_sha256"] if ratings else None)):
+                        raise ScenarioError("worker result party policy identity/latency/plan/ratings mismatch")
                     check_reported_mods(candidate, cohort)
                     native_rng = candidate.get("rng")
                     if isinstance(native_rng, dict):
@@ -1289,8 +1440,14 @@ def run_batch(scenario, base, worker, output, jobs=1, *, resume=False, admission
                                     for key in ("definition_sha256", "request_sha256", "classification")}}
     else:
         identity = {**identity, "entry_sha256": digest(save_image)}
-    plan_bytes = len(scenario["policy"]["plan"]) if scenario["policy"]["kind"] == "walk" else 0
-    if 64 + len(save_image) + 12 * len(scenario["policy"].get("tape", [])) + plan_bytes > 8 * 1024 * 1024:
+    ratings = load_ratings(scenario["policy"], base)
+    if ratings is not None:
+        identity = {**identity, "ratings": {"table_sha256": scenario["policy"]["ratings"]["sha256"],
+                                            "payload_sha256": ratings["payload_sha256"],
+                                            "table_digest": ratings["table_digest"]}}
+    payload_bytes = (len(scenario["policy"]["plan"]) if scenario["policy"]["kind"] == "walk" else
+                     len(ratings["payload"]) if ratings else 0)
+    if 64 + len(save_image) + 12 * len(scenario["policy"].get("tape", [])) + payload_bytes > 8 * 1024 * 1024:
         raise ScenarioError("battle ENTRY exceeds native 8 MiB request limit; no seed workers launched")
     indices = [run_index] if run_index is not None else range(scenario["seed_start"], scenario["seed_start"] + scenario["n"])
     rows, pending = [], []
@@ -1315,7 +1472,7 @@ def run_batch(scenario, base, worker, output, jobs=1, *, resume=False, admission
     with ThreadPoolExecutor(max_workers=jobs) as pool:
         futures = [pool.submit(run_case, scenario, save_image, worker, output, index, identity,
                                admission=admission, wait=wait, rendered=rendered, replay=run_index is not None,
-                               runtime_environment=runtime_environment, cohort=cohort) for index in pending]
+                               runtime_environment=runtime_environment, cohort=cohort, ratings=ratings) for index in pending]
         rows.extend(future.result() for future in futures)
     report = aggregate(rows)
     report["identity"] = identity

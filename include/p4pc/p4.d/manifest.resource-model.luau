@@ -1,0 +1,3 @@
+--!capability manifest.resource-model@3
+--!covers section:resource-model
+-- Model replacements support static meshes, skinned meshes and slot animations.

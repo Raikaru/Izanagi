@@ -47,7 +47,6 @@ s32 cmpSystemMenuUpdate(u32 *phase, s32 *active, u8 *work)
         }
         goto finish;
     case 4:
-        p4_settings_native_corner();
         shortcut = p4_settings_native_system_route((u32)work,
             (D_008C024E[0] & 0x20) == 0);
         if (D_008C024E[0] & 0x20) {

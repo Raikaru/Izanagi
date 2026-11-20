@@ -22,7 +22,7 @@ skipmsg
 wait:30
 press:down:200            # to the wall by the futon
 wait:30
-press:cross               # CHECK the futon, "Go to sleep?" Yes
+press:cross               # CHECK the futon, the sleep confirmation Yes
 wait:40
 skipmsg                   # the night, 04/16 (school, Junes, the rain) up to the evening in the living room
 # 04/16 evening: the front door (area 3400, `door_entrance`) is still shut; upstairs, and the story takes the player on
@@ -86,13 +86,13 @@ plan:off
 timeout:3000
 walk:0,2500,80
 push:0,1000,60
-# Both wheels remember Skill: select Yu's second skill (Cleave) and Yosuke's first (Garu, the boss's wind weakness), then repeat them.
+# Select the intended skills and repeat them.
 battle:first=cross,down,cross,cross;first2=cross,cross,cross;plan=cross,cross,cross
 timeout:20000
 skipfield:7:2
 skipmsg
 wait:60
-# The calendar (the living room's save_point area): Save, slot 1 (the loaded 04/15 file: "Overwrite?" Yes is one Left from the default No).
+# The calendar (the living room's save_point area): Save, slot 1 (the loaded 04/15 file: the overwrite confirmation Yes is one Left from the default No).
 autoskip:off
 push:103,-217,150
 wait:900

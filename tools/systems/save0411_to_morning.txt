@@ -1,4 +1,4 @@
-# The 04/11 GameFAQs save (Hiro Blaze, Dojima living room, saves/card slot 1) -> the futon -> the fog dream -> its door -> the tutorial battle -> 04/12 morning (calendar day change) -> breakfast -> school. PortTrace3's save0411_to_dream.walk + dream_to_morning.walk.
+# The 04/11 GameFAQs save (Hiro Blaze, Dojima living room, saves/card slot 1) -> the futon -> the fog dream -> its door -> the tutorial battle -> 04/12 morning (calendar day change) -> breakfast -> school. The save0411_to_dream.walk + dream_to_morning.walk.
 # The GameFAQs 18664 save (04/11, Dojima living room) loaded through the title (P4PC_AUTOPRESS_LOAD=0, frame 0 = the load confirm): the slot browser,
 # Yes, "Load successful", then the stairs -> Your Room -> futon -> the fog dream.
 timeout:90000

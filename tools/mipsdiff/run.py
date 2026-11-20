@@ -47,6 +47,10 @@ _elf = None
 def retail_page(addr):
     """Initial bytes of a retail page (code and data of the ELF image), for the interpreter only."""
     global _elf
+    if addr < 0x1000:
+        # Port-defined null-frame model: clean root/flags and a zero matrix.
+        # No exception-vector instructions are executed or imported here.
+        return bytes(4096)
     if _elf is None:
         data = open(RETAIL, "rb").read()
         phoff, = struct.unpack_from("<I", data, 0x1C)
@@ -58,10 +62,6 @@ def retail_page(addr):
                 segs.append((off, va, fsz, msz))
         _elf = (data, segs)
     data, segs = _elf
-    if addr < 0x1000:
-        # PS2 low RAM, which retail code reads through null pointers: the image of include/p4pc/ps2_low_ram.h (interpreter only; the C side uses the same words from that header)
-        words = [int(w, 16) for w in re.findall(r"0x[0-9a-f]{8}", open(os.path.join(ROOT, "include", "p4pc", "ps2_low_ram.h")).read().split("p4_ps2_low_ram_words[64]")[1].split("};")[0])]
-        return struct.pack("<64I", *words).ljust(4096, b"\0")
     out = bytearray(4096)
     hit = False
     for off, va, fsz, msz in segs:

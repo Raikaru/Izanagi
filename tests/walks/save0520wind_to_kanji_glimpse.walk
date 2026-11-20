@@ -26,7 +26,7 @@ skipmsg
 waitstep:23
 log
 timeout:60000
-# Daring Gigas is Wind weak and physically resistant: both Wind casters attack, Chie Guards.
+# Use the planned attacks and guard actions.
 battle:first1=circle,down,cross,cross,cross;first3=circle,circle,circle,up,cross;plan=cross,cross,cross;skip=0;delay=80
 battleskip:on
 walk:goal,40

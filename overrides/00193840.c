@@ -13,8 +13,17 @@ s32 btlUnitLoadBlocksFromFile(u8 *loadTable, s32 synchronous)
     u8 **destination;
 
     if (iGpffffb434 == 0) {
+        if (p4_game_table_admission_golden_active()) {
+            const char *path = (const char *)P4_G2H(*(u32 *)loadTable);
+            int result = p4_game_table_admission_golden_load_packed(loadTable, path,
+                p4_game_tables_observe_packed);
+            if (result) p4_game_table_admission_golden_fail("packed admission refused", result);
+            return 1;
+        }
         func_00440b68(&iGpffffa0a0, D_005F6BE0, 0x4B1);
         iGpffffb434 = H_Cdvd_AcquireDirectory(*(s32 *)loadTable, 0);
+    } else if (p4_game_table_admission_golden_active()) {
+        p4_game_table_admission_golden_fail("packed load refused a stale disc request", 0);
     }
     if (synchronous != 0) {
         H_Cdvd_ReadSync(iGpffffb434);

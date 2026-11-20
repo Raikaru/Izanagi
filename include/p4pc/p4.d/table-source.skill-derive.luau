@@ -1,0 +1,3 @@
+--!capability table-source.skill-derive@1
+--!covers section:table-source.skill-derive
+-- Table-source skill rows can derive from a retail active skill and override power, cost, accuracy and critical.

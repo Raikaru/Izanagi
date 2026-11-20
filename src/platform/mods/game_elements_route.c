@@ -17,3 +17,10 @@ void p4_game_elements_native_learn(void *defender, void *attacker, uint32_t skil
     }
     if (result) p4_game_elements_native_calculation_refuse(result);
 }
+void p4_game_elements_native_learn_leaf(void *defender, uint32_t leaf)
+{
+    P4GameActionFrame frame;
+    p4_game_elements_native_leaf_frame(leaf, P4_CHANNEL_STATUS, P4_ACTION_COMPONENT_STATUS, &frame);
+    const int result = p4_game_knowledge_native_observe(defender, &frame);
+    if (result) p4_game_elements_native_calculation_refuse(result);
+}

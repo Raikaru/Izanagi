@@ -2,6 +2,7 @@
 import argparse
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
 
 
@@ -11,6 +12,7 @@ def main():
     parser.add_argument("--cc", default="clang")
     parser.add_argument("--coff", action="store_true",
                         help="Also compile/link a real native-consumer COFF probe; requires llvm-mingw")
+    parser.add_argument("--coff-cc", help="Run the COFF probe separately with this compiler")
     args = parser.parse_args()
     helper = Path(__file__).resolve().parents[1] / "cmake/host-cxx.cmake"
     with tempfile.TemporaryDirectory(prefix="p4-host-adapter-graph-") as temporary:
@@ -202,14 +204,19 @@ foreach(suffix 64 64w)
   add_custom_target(p4_x${suffix})
   add_custom_target(p4_luau${suffix})
   add_custom_target(p4_luau_check${suffix})
+  add_custom_target(p4mod${suffix})
   add_custom_target(luau_sandbox_test${suffix})
   add_custom_target(mod_luau_test${suffix})
   add_custom_target(mod_luau_save_test${suffix})
+  add_custom_target(p4mod_game_fixture${suffix})
+  add_custom_target(p4mod_zip32_test${suffix})
+  add_custom_target(lua_semantic_subscription_test${suffix})
+  add_custom_target(fusion_arts_safety_test${suffix})
 endforeach()
 include("${P4_CLOSURE}")
 foreach(suffix 64 64w)
   get_target_property(deps p4_x${suffix} MANUALLY_ADDED_DEPENDENCIES)
-  foreach(required p4_luau_check${suffix} luau_sandbox_test${suffix} mod_luau_test${suffix} mod_luau_save_test${suffix})
+  foreach(required p4_luau_check${suffix} p4mod${suffix} p4mod_game_fixture${suffix} p4mod_zip32_test${suffix} lua_semantic_subscription_test${suffix} luau_sandbox_test${suffix} mod_luau_test${suffix} mod_luau_save_test${suffix} fusion_arts_safety_test${suffix})
     if(NOT required IN_LIST deps)
       message(FATAL_ERROR "p4_x${suffix} is missing ${required}: ${deps}")
     endif()
@@ -245,6 +252,9 @@ include("${P4_ABI_FRAGMENT}")
         assert any(path.endswith("/abi/generated/package_boot_providers.c.abi.json") for path in paths), paths
         assert any(path.endswith("/abi/port/native.c.abi.json") for path in paths), paths
         assert all("/../" not in path for path in paths), paths
+    if args.coff_cc:
+        subprocess.run([sys.executable, __file__, "--cmake", args.cmake,
+                        "--cc", args.coff_cc, "--coff"], check=True)
     print("host adapter graph: deferred links, C/C++ discovery, native-prefix selection and optional emulation passed")
 
 

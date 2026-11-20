@@ -10,11 +10,11 @@
  * (movie index, "not skipped" flag), and calls the update once per tick between RwCameraBeginUpdate and
  * End, with the player on the tick clock (1/60 s per GetCurFrm call).
  *
- * Environment: P4PC_MOVIE_INDEX (default 19, sfd/P4CT019.sfd, 16 s; the opening is 21, P4CTOP1),
- * P4PC_MOVIE_SHOTS (comma list of ticks to write as PNG, default 120,300,600), P4PC_MOVIE_PNG (output
+ * Environment: P4PC_MOVIE_INDEX (default 19), P4PC_MOVIE_SHOTS (comma list
+ * of ticks to write as PNG, default 120,300,600), P4PC_MOVIE_PNG (output
  * prefix, default movie_task). Checks: the task leaves state 0, draws frames that are not black
- * (readback), frame numbers reported through mwPlayerGetCurrent (iGpffffbaf8) increase, and the task
- * ends in state 6 after about the movie's length (16 s +- 2 s for index 19). Needs P4PC_ISO and P4PC_ELF;
+ * (readback), frame numbers reported through mwPlayerGetCurrent (iGpffffbaf8) increase,
+ * and the task ends in state 6. Needs P4PC_ISO and P4PC_ELF;
  * exits 77 without them. */
 #define _FILE_OFFSET_BITS 64
 #define _POSIX_C_SOURCE 200809L
@@ -28,7 +28,10 @@
 #include "p4gl_gl.h"
 #include "p4gl_readback.h"
 #include "p4pc/image.h"
+#include "movie_events.h"
+#ifdef P4PC_MOVIE_RETAIL_EVENTS
 #include "movie_retail_events.h"
+#endif
 #include "p4pc/os.h"
 #include "p4png.h"
 #include "vfs.h"
@@ -101,8 +104,7 @@ static int test_main(int argc, char **argv) {
     int end_tick = -1;
     int32_t last_frame = -1, backward = 0;
     int16_t state = -1;
-    int t_s3 = -1, t_first = -1, s4_frame = -1, s5_frame = -1, s6_frame = -1, s6_fade_out = -1, non_unit_steps = 0;
-    int32_t prev_step_frame = -1;
+    MovieEvents events = MOVIE_EVENTS_INIT;
     const int max_ticks = index == 19 || index == 20 ? 800 : 3200;
     /* P4PC_MOVIE_DRAW_ON=a-b[,c-d...]: draw calls only in those update ranges (like P4PC_TURBO=2 outside its windows), so a run
      * with part of the movie undrawn can be compared with one that draws all of it: the trace must not change. */
@@ -145,18 +147,8 @@ static int test_main(int argc, char **argv) {
                         ticks * (1001.0 / 30000.0));
             }
         }
-        {   /* the events the game can see (tests/movie_retail_events.h) */
-            const int fade_in = *(int32_t *)(work + 0x208), fade_out = *(int32_t *)(work + 0x204);
-            if (state >= 3 && t_s3 < 0) t_s3 = ticks;
-            if (fade_in >= 1 && t_first < 0) t_first = ticks;
-            if (state == 4 && s4_frame < 0) s4_frame = cur;
-            if (state == 5 && s5_frame < 0) s5_frame = cur;
-            if (state == 6 && s6_frame < 0) { s6_frame = cur; s6_fade_out = fade_out; }
-            if (*(int32_t *)(work + 0x40) && state >= 3 && state <= 5) {
-                if (prev_step_frame >= 0 && cur != prev_step_frame && cur != prev_step_frame + 1) non_unit_steps++;
-                prev_step_frame = cur;
-            }
-        }
+        movie_events_step(&events, ticks, state, cur, *(int32_t *)(work + 0x208), *(int32_t *)(work + 0x204),
+                          *(int32_t *)(work + 0x40));
         int want_shot = 0;
         for (const char *p = shots; *p;) {
             if (atoi(p) == ticks) want_shot = 1;
@@ -183,27 +175,34 @@ static int test_main(int argc, char **argv) {
     }
     printf("movie_task_smoke: movie %d ended in state %d at tick %d (%.1f s of updates), last frame %d\n", index, state, end_tick,
            end_tick * (1001.0 / 30000.0), last_frame);
+#ifdef P4PC_MOVIE_RETAIL_EVENTS
     for (size_t i = 0; i < sizeof kMovieRetail / sizeof kMovieRetail[0]; i++) {
         const MovieRetailRow *r = &kMovieRetail[i];
         if (r->index != index) continue;
-        const int prep = t_first - t_s3;
+        const MovieExpected expected = {MOVIE_RETAIL_PREP_MIN, MOVIE_RETAIL_PREP_MAX, r->s4_frame, r->s5_frame,
+                                        r->s6_frame, r->s6_fade_out, r->last_frame};
+        const unsigned bad = movie_events_compare(&events, last_frame, &expected);
         printf("movie_task_smoke: retail events: prep %d updates (retail %.1f), state 4 at frame %d (%d), state 5 at %d (%d), "
                "state 6 at %d (%d) fade-out %d (%d), last %d (%d), %d irregular steps\n",
-               prep, r->prep, s4_frame, r->s4_frame, s5_frame, r->s5_frame, s6_frame, r->s6_frame, s6_fade_out,
-               r->s6_fade_out, last_frame, r->last_frame, non_unit_steps);
-        if (prep < 18 || prep > 21) fail("updates from state 3 to the first frame differ from retail (18..21)");
-        if (s4_frame != r->s4_frame) fail("state 4 starts at another frame number than retail");
-        if (s5_frame != r->s5_frame) fail("the fade-out starts at another frame number than retail");
-        if (s6_frame != r->s6_frame || s6_fade_out != r->s6_fade_out) fail("the task ends at another frame than retail");
-        if (last_frame != r->last_frame) fail("the last frame number differs from retail");
-        if (non_unit_steps) fail("a frame number was skipped (retail steps by +1 per update)");
+               events.t_first - events.t_s3, r->prep, events.s4_frame, r->s4_frame, events.s5_frame, r->s5_frame,
+               events.s6_frame, r->s6_frame, events.s6_fade_out, r->s6_fade_out, last_frame, r->last_frame, events.non_unit_steps);
+        if (bad & MOVIE_BAD_PREP) fail("updates from state 3 to the first frame differ from retail");
+        if (bad & MOVIE_BAD_S4) fail("state 4 starts at another frame number than retail");
+        if (bad & MOVIE_BAD_S5) fail("the fade-out starts at another frame number than retail");
+        if (bad & MOVIE_BAD_S6) fail("the task ends at another frame than retail");
+        if (bad & MOVIE_BAD_LAST) fail("the last frame number differs from retail");
+        if (bad & MOVIE_BAD_STEP) fail("a frame number was skipped (retail steps by +1 per update)");
     }
+#endif
     if (end_tick < 0) fail("the task never reached its end state");
     if (state == 0xB) fail("the task failed to create the player or raster (state 0xB)");
     if (last_frame < 100) fail("frame numbers advanced");
     if (backward) fail("frame numbers went backwards");
     if (shot_count && black == drawn) fail("every captured frame is black");
-    if (index == 19 && (end_tick < 480 || end_tick > 540)) fail("movie 19 ends after its 480 frames plus the start-up");
+#ifdef P4PC_MOVIE_RETAIL_EVENTS
+    if (index == 19 && (end_tick < MOVIE_RETAIL_INDEX19_END_MIN || end_tick > MOVIE_RETAIL_INDEX19_END_MAX))
+        fail("movie ends outside its expected interval");
+#endif
     if (trace) fclose(trace);
     free(rgba);
     p4gl_context_close();

@@ -9,6 +9,11 @@
 int p4gl_nativetex_decode(const uint8_t *data, uint32_t size, int32_t w, int32_t h, int32_t depth, uint8_t *indices,
                           uint8_t *palette);
 
+/* Decode the pixel part of a kind-0/1 paletted raster to one index per pixel.
+ * Kind 1 stores the pre-swizzled GS upload; kind 0 stores packed linear pixels. */
+int p4gl_nativetex_decode_raw(const uint8_t *data, uint32_t size, int32_t w, int32_t h,
+                              int32_t depth, int swizzled, uint8_t *indices);
+
 /* A true-colour native texture of kind 2 (depth 32, PSMCT32): the first IMAGE of the GIF stream is the pixels in raster order,
  * 4 bytes each (PS2 alpha). Copies w * h * 4 bytes to rgba. Returns 1, or 0 for a malformed stream. */
 int p4gl_nativetex_decode_ct32(const uint8_t *data, uint32_t size, int32_t w, int32_t h, uint8_t *rgba);

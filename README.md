@@ -35,8 +35,8 @@ Keep the ISO where it is; the port reads game files from it on every run.
 ## Playing
 
 - **Settings:** the game's own **Config** screen is extended with display, audio, controls
-  and mod options. Open it with **Esc**, **F1**, a **Select + Start** hold, or the corner
-  button on touch screens. Choices are saved to `p4pc.ini`
+  and mod options. Open it with **Esc**, **F1**, a **Select + Start** hold, or the
+  **CONFIG** button of the Android touch pad. Choices are saved to `p4pc.ini`
   ([where it lives](docs/platform/settings.md#file-and-precedence)).
 - **Widescreen:** `[video] aspect = 16:9` (or `auto` to follow the window, including
   ultrawide); `4:3` is the default. Movies use `movie_fit = bars`, `zoom` or `stretch`.
@@ -89,13 +89,15 @@ files.
 
 ## Documentation
 
-- [docs/bring_your_own_iso.md](docs/bring_your_own_iso.md): dumping and checking your disc, first launch
-- [docs/porting.md](docs/porting.md): how decomp code is compiled, configured and linked
-- [docs/platform.md](docs/platform.md): runtime subsystems and settings
-- [docs/renderer_port.md](docs/renderer_port.md): the OpenGL renderer
-- [docs/pc_port.md](docs/pc_port.md) and [docs/port64.md](docs/port64.md): platforms and the 64-bit model
-- [docs/modding/](docs/modding/): mods
-- [CONTRIBUTING.md](CONTRIBUTING.md): rules for changes
+- **Players:** [disc setup](docs/bring_your_own_iso.md),
+  [settings](docs/platform/settings.md) and [controls](docs/platform/input.md).
+- **Builders:** [BUILDING.md](BUILDING.md) for dependencies, builds and tests.
+- **Modders:** [the modding guide](docs/modding/README.md), starting with
+  [installation](docs/modding/start/install.md) and
+  [your first mod](docs/modding/start/first-mod.md).
+- **Contributors:** [CONTRIBUTING.md](CONTRIBUTING.md),
+  [port compilation](docs/porting.md), [platform contracts](docs/platform.md),
+  [the renderer](docs/renderer_port.md), and [the 64-bit model](docs/port64.md).
 
 ## License
 

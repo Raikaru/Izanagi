@@ -121,11 +121,10 @@ static void *rasterFail(void *raster, int32_t errorCode)
 /* Retail 003fd940 (readTEXFromStream): the raster of a native texture. Two type-1 chunks follow in the
  * stream: a 64-byte header and the data. Header words: [0] width, [1] height, [2] depth, [3] raster
  * flags (low 16: the RwRasterCreate flags, for example 0x2504 = PAL8 | 8888 | texture) and the data
- * kind (high 16: 0 or 1 = raster pixels, 2 = the GS upload packets of a paletted texture, decoded by
- * p4gl_nativetex_decode); [4..15] the GS registers and sizes that the retail code copies into the sky
- * raster extension, which the port does not keep. Kind 0 and 1: the data chunk is the raster's pixel
- * bytes; 32-bit pixels carry the PS2 alpha (0x80 opaque), doubled here so the shadow holds what the GL
- * upload samples. */
+ * kind (high 16: 0 or 1 = raw pixels and palette, 2 = GS upload packets); [12] is the
+ * raw pixel byte count and palette offset, [13] the palette byte count. Kind 1's indexed
+ * pixels are pre-swizzled; kind 0's are linear. True-colour 32-bit pixels carry PS2 alpha
+ * (0x80 opaque), doubled here so the shadow holds what the GL upload samples. */
 void *func_003fd940(void *stream)
 {
     int32_t size = 0;
@@ -187,7 +186,7 @@ void *func_003fd940(void *stream)
     const int32_t stride = ((const P4RwRaster *)raster)->stride;
     int ok = 1;
 
-    if (kind < 2) {
+    if (kind < 2 && (flags & 0x6000u) == 0) {
         const int32_t room = stride * h;
         const int32_t n = size < room ? size : room;
         memcpy(pixels, data, (size_t)n);
@@ -211,7 +210,15 @@ void *func_003fd940(void *stream)
         uint8_t *idx = malloc((size_t)w * (size_t)h);
         uint8_t palette[256 * 4];
 
-        ok = idx != NULL && p4gl_nativetex_decode(data, (uint32_t)size, w, h, depth, idx, palette);
+        if (kind < 2) {
+            const uint32_t bytes = entries * 4u;
+            ok = idx != NULL && size >= 0 && hdr[12] <= (uint32_t)size &&
+                 hdr[13] >= bytes && bytes <= (uint32_t)size - hdr[12] &&
+                 p4gl_nativetex_decode_raw(data, hdr[12], w, h, depth, kind == 1, idx);
+            if (ok) memcpy(palette, data + hdr[12], bytes);
+        } else {
+            ok = idx != NULL && p4gl_nativetex_decode(data, (uint32_t)size, w, h, depth, idx, palette);
+        }
         if (ok) {
             if (depth == 8) {
                 memcpy(pixels, idx, (size_t)w * (size_t)h);
@@ -231,7 +238,8 @@ void *func_003fd940(void *stream)
                 /* A raster palette is in GS CLUT memory order (what the game's TMX loader stores too): the
                  * 8-bit CSM1 read swaps index bits 3 and 4, so entry j holds logical entry csm1(j). */
                 for (uint32_t j = 0; j < entries; j++) {
-                    const uint32_t src = depth == 8 ? ((j & ~0x18u) | ((j & 8u) << 1) | ((j & 16u) >> 1)) : j;
+                    const uint32_t src = kind >= 2 && depth == 8
+                        ? ((j & ~0x18u) | ((j & 8u) << 1) | ((j & 16u) >> 1)) : j;
 
                     memcpy(pal + 4u * j, palette + 4u * src, 4u);
                 }

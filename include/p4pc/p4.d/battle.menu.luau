@@ -1,0 +1,3 @@
+--!capability battle.menu@1
+--!covers p4.battle.menu p4.battle.choose p4.battle.point p4.battle.aim p4.battle.units
+-- Read and control the active actor's battle command panel.

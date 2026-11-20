@@ -3,24 +3,31 @@
 #include "p4pc/lockstep_align_runtime.h"
 #include "p4pc/battle_live.h"
 #include "p4pc/lockstep_disc.h"
+#include "p4pc/lockstep_filer_replay.h"
+#include "p4pc/lockstep_uninit.h"
 #include "p4pc/lockstep_align_input.h"
 #include "p4pc/crt.h"
 #include "p4pc/guest.h"
 #include <SDL3/SDL.h>
 #include <stdlib.h>
 #include <string.h>
+#include "p4pc/lockstep_pages.h"
 
 typedef struct AlignRuntime {
     P4AlignTracker tracker;
     P4AlignTrace trace_buffer;
     P4AlignRestore restore;
+    P4AlignPlaytime playtime;
+    P4AlignVisual visual;
     P4AlignInput input;
-    FILE *trace, *events, *rng_calls, *effect_calls, *event_frames, *packet_frames;
+    FILE *trace, *events, *rng_calls, *effect_calls, *event_frames, *packet_frames, *message_frames, *playtime_events, *dialog_ready, *pages, *blur_events, *visual_updates, *visual_creations;
     char directory[1024], replay_directory[1024];
     uint32_t rng[P4LA_RNG_WORDS];
     uint32_t *patch;
     size_t patch_capacity;
     uint64_t pads, frames, gates;
+    uint32_t page_window, page_index;
+    uint32_t visual_serial;
     uint32_t effect_call;
     P4AlignEmitters emitters, presented;
     int began, dumped_boot, restore_pending, patched;
@@ -29,6 +36,8 @@ static AlignRuntime *sAlign;
 int p4pc_align_rng_calls_enabled;
 int p4pc_align_battle_guard;
 int p4pc_align_emitters_enabled;
+int p4pc_align_playtime_enabled;
+static int sTapeBuild;
 static void align_fail(const char *why) {
     fprintf(stderr,"p4pc: state-aligned lockstep: %s\n",why);
     exit(4);
@@ -45,10 +54,18 @@ static void align_close(void) {
     p4pc_align_rng_calls_enabled=0;
     p4pc_align_battle_guard=0;
     p4pc_align_emitters_enabled=0;
+    p4pc_align_playtime_enabled=0;
     if (sAlign->rng_calls) fclose(sAlign->rng_calls);
     if (sAlign->effect_calls) fclose(sAlign->effect_calls);
     if (sAlign->event_frames) fclose(sAlign->event_frames);
     if (sAlign->packet_frames) fclose(sAlign->packet_frames);
+    if (sAlign->message_frames) fclose(sAlign->message_frames);
+    if (sAlign->playtime_events) fclose(sAlign->playtime_events);
+    if (sAlign->dialog_ready) fclose(sAlign->dialog_ready);
+    if (sAlign->pages) fclose(sAlign->pages);
+    if (sAlign->blur_events) fclose(sAlign->blur_events);
+    if (sAlign->visual_updates) fclose(sAlign->visual_updates);
+    if (sAlign->visual_creations) fclose(sAlign->visual_creations);
     free(sAlign->input.batch); free(sAlign->patch); free(sAlign); sAlign=NULL;
 }
 int p4pc_align_init(const char *directory, FILE *replay) {
@@ -77,6 +94,8 @@ int p4pc_align_init(const char *directory, FILE *replay) {
     const char *source=getenv("P4PC_LOCKSTEP_ALIGNMENT_REPLAY");
     if (source) snprintf(sAlign->replay_directory,sizeof sAlign->replay_directory,"%s",source);
     p4pc_lockstep_disc_open(sAlign->directory);
+    p4pc_lockstep_filer_open(sAlign->directory);
+    p4pc_lockstep_uninit_open(sAlign->directory);
     snprintf(path,sizeof path,"%s/port-trace.bin",sAlign->directory);
     sAlign->trace=align_open(path,"wb");
     if (fwrite("P4ALTR2\n",1,8,sAlign->trace)!=8) align_fail("writing trace header");
@@ -84,6 +103,27 @@ int p4pc_align_init(const char *directory, FILE *replay) {
     sAlign->events=align_open(path,"wb");
     fprintf(sAlign->events,"event\tepoch\tframe\tsource_frame\tkind\tkey\tcalendar\tbegin\trecords\tpad_reads\theld_reads\tskipped_records\tsequence\tfield_step\n");
     fflush(sAlign->events);
+    snprintf(path,sizeof path,"%s/port-playtime-events.tsv",sAlign->directory);
+    sAlign->playtime_events=align_open(path,"w");
+    if (fprintf(sAlign->playtime_events,"event\tframe\tplaytime\tsite\n")<0 ||
+        fflush(sAlign->playtime_events)) align_fail("writing playtime witness header");
+    p4pc_align_playtime_enabled=1;
+    {   /* The port's own message-window readiness per dialog gate, the retail-ahead readiness-delta evidence. */
+        snprintf(path,sizeof path,"%s/port-dialog-ready.tsv",sAlign->directory);
+        sAlign->dialog_ready=align_open(path,"w");
+        if (fprintf(sAlign->dialog_ready,"ordinal\tframe\texpected_id\trecorded_offset\tready_offset\tdelivered_offset\n")<0 ||
+            fflush(sAlign->dialog_ready)) align_fail("writing dialog readiness header");
+        const char *pages=getenv("P4PC_LOCKSTEP_PAGE_WITNESS");
+        if (pages && *pages) {
+            sAlign->page_window=(uint32_t)strtoul(pages,NULL,10);
+            snprintf(path,sizeof path,"%s/port-pages.bin",sAlign->directory);
+            if (!p4lp_open(&sAlign->pages,path)) align_fail("opening the page witness");
+        }
+        const char *tape=getenv("P4PC_LOCKSTEP_TAPE_BUILD");
+        sTapeBuild=tape && !strcmp(tape,"1");
+        const char *build=getenv("P4PC_LOCKSTEP_GATE_BUILD");
+        sAlign->input.late_ok=build && !strcmp(build,"1");   /* tape-building pass only */
+    }
     const char *rng_calls=getenv("P4PC_LOCKSTEP_RNG_CALLS");
     if (rng_calls && !strcmp(rng_calls,"1")) {
         snprintf(path,sizeof path,"%s/port-rng-calls.tsv",sAlign->directory);
@@ -94,12 +134,26 @@ int p4pc_align_init(const char *directory, FILE *replay) {
         sAlign->effect_calls=align_open(path,"w");
         if (fprintf(sAlign->effect_calls,"# native_anchor\tp4pc_align_effect_call\t%p\n",(void *)p4pc_align_effect_call)<0 ||
             !p4la_effect_header(sAlign->effect_calls)) align_fail("writing effect RNG caller trace header");
+        snprintf(path,sizeof path,"%s/port-blur-init.tsv",sAlign->directory);
+        sAlign->blur_events=align_open(path,"w");
+        if (!p4la_blur_header(sAlign->blur_events)) align_fail("writing blur provenance header");
+        snprintf(path,sizeof path,"%s/port-visual-updates.tsv",sAlign->directory);
+        sAlign->visual_updates=align_open(path,"w");
+        if (!p4la_visual_header(sAlign->visual_updates)) align_fail("writing visual update header");
+        snprintf(path,sizeof path,"%s/port-visual-creations.tsv",sAlign->directory);
+        sAlign->visual_creations=align_open(path,"w");
+        if (fprintf(sAlign->visual_creations,"# native_anchor\tp4pc_align_visual_created\t%p\n",
+                    (void *)p4pc_align_visual_created)<0 ||
+            !p4la_visual_creation_header(sAlign->visual_creations)) align_fail("writing visual creation header");
         snprintf(path,sizeof path,"%s/port-event-player.tsv",sAlign->directory);
         sAlign->event_frames=align_open(path,"w");
         if (!p4la_event_header(sAlign->event_frames)) align_fail("writing event-player trace header");
         snprintf(path,sizeof path,"%s/port-battle-packets.tsv",sAlign->directory);
         sAlign->packet_frames=align_open(path,"w");
         if (!p4la_packet_header(sAlign->packet_frames)) align_fail("writing battle packet trace header");
+        snprintf(path,sizeof path,"%s/port-message-window.tsv",sAlign->directory);
+        sAlign->message_frames=align_open(path,"w");
+        if (!p4la_message_header(sAlign->message_frames)) align_fail("writing message-window trace header");
         p4pc_align_rng_calls_enabled=1;
     }
     sAlign->input.file=replay;
@@ -108,7 +162,10 @@ int p4pc_align_init(const char *directory, FILE *replay) {
 }
 uint32_t *p4pc_align_rng(void) { return sAlign ? sAlign->rng : NULL; }
 uint32_t p4pc_align_profile(void) {
-    return sAlign && sAlign->tracker.battle_qualification_locked ? P4LS_BATTLE_QUALIFICATION : 0;
+    if (!sAlign) return 0;
+    return (sAlign->tracker.battle_qualification_locked ? P4LS_BATTLE_QUALIFICATION : 0) |
+        p4la_playtime_profile(&sAlign->playtime,p4ls_get(P4_G2H(P4LS_GAME_FRAME)),
+                              p4ls_get(P4_G2H(0x0076428cu)));
 }
 static uint32_t align_rng_word(void *user, uint32_t address) {
     (void)user;
@@ -141,16 +198,53 @@ void p4pc_align_effect_call(uint32_t kind, const void *state, uint32_t argument,
     if (state && state!=P4_G2H(0x00922de0u)) return;
     const P4WalkHost host={.read32=align_rng_word};
     if (!sAlign || !sAlign->effect_calls || !p4la_effect_call(sAlign->effect_calls,&host,
-        &sAlign->tracker,++sAlign->effect_call,(uint64_t)(uintptr_t)caller,kind,argument))
+        &sAlign->tracker,++sAlign->effect_call,(uint64_t)(uintptr_t)caller,kind,argument,
+        sAlign->visual.type,sAlign->visual.instance,sAlign->visual.particle,sAlign->visual.serial))
         align_fail("writing actual effect RNG call entry");
+}
+void p4pc_align_visual_created(uint32_t type, const void *instance, const void *caller) {
+    const P4WalkHost host={.read32=align_rng_word};
+    if (!sAlign || !sAlign->visual_creations ||
+        !p4la_visual_creation(sAlign->visual_creations,&host,type,P4_H2G(instance),
+                               (uint64_t)(uintptr_t)caller,++sAlign->visual_serial))
+        align_fail("writing visual creation provenance");
+}
+void p4pc_align_visual_begin(uint32_t type, const void *instance) {
+    const P4WalkHost host={.read32=align_rng_word};
+    if (!sAlign || !sAlign->visual_updates) align_fail("missing visual update provenance");
+    sAlign->visual=(P4AlignVisual){type,P4_H2G(instance),0xffffffffu,++sAlign->visual_serial};
+    if (!p4la_visual_update(sAlign->visual_updates,&host,type,sAlign->visual.instance,sAlign->visual.serial))
+        align_fail("writing visual update provenance");
+}
+void p4pc_align_visual_particle(uint32_t particle) {
+    if (!sAlign || !sAlign->visual.type) align_fail("visual particle lacks its update");
+    sAlign->visual.particle=particle;
+}
+void p4pc_align_blur_init(uint32_t path, const void *parameters, const void *slot, uint32_t index) {
+    const P4WalkHost host={.read32=align_rng_word};
+    if (!sAlign || !sAlign->blur_events ||
+        !p4la_blur_init(sAlign->blur_events,&host,path,P4_H2G(parameters),P4_H2G(slot),index))
+        align_fail("writing blur per-slot provenance");
+}
+void p4pc_align_playtime_event(const char *event, const char *site) {
+    if (!sAlign || !sAlign->playtime_events ||
+        fprintf(sAlign->playtime_events,"%s\t%u\t%u\t%s\n",event,
+                p4ls_get(P4_G2H(P4LS_GAME_FRAME)),p4ls_get(P4_G2H(0x0076428cu)),site)<0 ||
+        fflush(sAlign->playtime_events)) align_fail("writing playtime witness");
+    if (!strcmp(event,"reset"))
+        p4la_playtime_reset(&sAlign->playtime,p4ls_get(P4_G2H(P4LS_GAME_FRAME)));
+    else
+        p4la_playtime_supporter(&sAlign->playtime);
 }
 void p4pc_align_restore_applied(void) {
     if (!sAlign) return;
     if (sAlign->tracker.battle_qualification_locked)
         align_fail("unexpected save restore during battle qualification");
     sAlign->restore.count++;
+    p4pc_lockstep_disc_pre_begin();
     sAlign->restore.frame=p4ls_get(P4_G2H(P4LS_GAME_FRAME));
     sAlign->restore.value=p4ls_get(P4_G2H(0x0076428cu));
+    p4la_playtime_restore(&sAlign->playtime,sAlign->restore.frame,sAlign->restore.value);
     if (!sAlign->tracker.anchored || !sAlign->tracker.loading) {
         if (sAlign->tracker.anchored) {
             sAlign->tracker.loading=1; sAlign->tracker.epoch++;
@@ -168,9 +262,26 @@ void p4pc_align_prepare(const P4WalkHost *host, uint32_t marker[8]) {
     }
 }
 int p4pc_align_pad_gate(const P4WalkHost *host, uint32_t gate[8]) {
-    if (!sAlign || sAlign->tracker.anchored || !p4la_title_gate(host,gate)) return 0;
+    if (!sAlign || (sAlign->tracker.anchored && !sAlign->tracker.loading) || !p4la_title_gate(host,gate)) return 0;
     sAlign->gates++;
     return 1;
+}
+int p4pc_align_dialog_gate(const P4WalkHost *host, uint32_t gate[8]) {
+    /* Before the anchor and in every load interval after it: those spans are paced by the environment (disc, event,
+     * movie, message-window readiness), not frame-locked, so a press is delivered at its wait-relative offset (NG-7n). */
+    if (!sAlign || (sAlign->tracker.anchored && !sAlign->tracker.loading)) return 0;
+    const int status=p4la_dialog_gate(host,gate);
+    if (status<0) align_fail("cannot identify the active dialog input");
+    if (status) sAlign->gates++;
+    return status;
+}
+uint32_t p4pc_align_dialog_wait_offset(const P4WalkHost *host, const uint32_t gate[8]) {
+    const uint32_t frame=p4la_word(host,P4LS_GAME_FRAME);
+    p4la_wait_observe(&sAlign->input,host,frame);
+    if (!p4la_wait_matches(&sAlign->input,gate) || frame<sAlign->input.wait_start ||
+        frame-sAlign->input.wait_start>=0x00ffffffu)
+        align_fail("dialog press has no bounded witnessed wait start");
+    return frame-sAlign->input.wait_start;
 }
 void p4pc_align_pad_read(void) { if (sAlign) sAlign->pads++; }
 const uint8_t *p4pc_align_replay_pad(const P4WalkHost *host) {
@@ -180,6 +291,44 @@ const uint8_t *p4pc_align_replay_pad(const P4WalkHost *host) {
         align_fail(sAlign->input.error);
     }
     return row;
+}
+/* Tape-following (NG-7k): the port receives the retail-ahead tape exactly as retail does, its pads delivered at the
+ * recorded wait-relative offsets (readiness-only), its frames consumed against its own milestones. Its environment
+ * (disc, events, movies) is retail's live trace, so its waits are retail's; the frame a press lands on is not the
+ * recording's. */
+const uint8_t *p4pc_align_follow_pad(const P4WalkHost *host) {
+    const uint8_t *row=p4la_pad(&sAlign->input,p4la_word(host,P4LS_GAME_FRAME),
+                                p4la_loading_now(&sAlign->tracker,host),host);
+    if (!row) {
+        if (sAlign->input.eof) { if (p4_battle_live_lockstep_eof()) exit(4); p4pc_exit(0); }
+        align_fail(sAlign->input.error ? sAlign->input.error : "the tape has no pad for this read");
+    }
+    if (sAlign->input.dialog_status==2) {
+        static uint32_t ordinal;
+        fprintf(sAlign->dialog_ready,"%u\t%u\t",ordinal++,p4la_word(host,P4LS_GAME_FRAME));
+        for (unsigned i=0;i<8;i++) {
+            const uint32_t w=sAlign->input.dialog_expected[i];
+            fprintf(sAlign->dialog_ready,"%08x",w);   /* the retail events' identity format */
+        }
+        if (fprintf(sAlign->dialog_ready,"\t%d\t%d\t%d\n",(int)sAlign->input.dialog_recorded_offset,
+                    (int)sAlign->input.dialog_ready_offset,(int)sAlign->input.dialog_delivered_offset)<0 ||
+            fflush(sAlign->dialog_ready)) align_fail("writing dialog readiness");
+    }
+    return row;
+}
+const uint8_t *p4pc_align_follow_frame(const P4WalkHost *host, const uint32_t marker[8]) {
+    uint32_t actual[8];
+    memcpy(actual,marker,sizeof actual);
+    if (!p4la_fill(&sAlign->input)) {
+        if (sAlign->input.eof) { if (p4_battle_live_lockstep_eof()) exit(4); p4pc_exit(0); }
+        align_fail(sAlign->input.error);
+    }
+    actual[0]=sAlign->input.marker[0];
+    const int outcome=p4la_frame(&sAlign->input,p4la_word(host,P4LS_GAME_FRAME),actual,
+                                 !sAlign->tracker.anchored || sAlign->tracker.loading);
+    if (outcome<0) align_fail(sAlign->input.error);
+    if (outcome==3) { if (p4_battle_live_lockstep_eof()) exit(4); p4pc_exit(0); }
+    return sAlign->input.presented;
 }
 const uint8_t *p4pc_align_replay_frame(const P4WalkHost *host) {
     const int outcome=p4la_source_frame(&sAlign->input,p4la_word(host,P4LS_GAME_FRAME));
@@ -256,15 +405,23 @@ static uint32_t align_reply(const P4WalkHost *host, const uint32_t marker[8]) {
     return status;
 }
 void p4pc_align_boundary(const P4WalkHost *host, const uint32_t marker[8]) {
+    if (sAlign->pages && sAlign->tracker.anchored && sAlign->page_index<sAlign->page_window &&
+        !p4lp_update(sAlign->pages,++sAlign->page_index,p4la_word(host,P4LS_GAME_FRAME),
+                     (const uint8_t *)P4_G2H(P4LP_BASE))) align_fail("writing the page witness");
     /* Emitters advanced by the update that produced this presentation. */
     sAlign->presented=sAlign->emitters;
     sAlign->emitters.count=sAlign->emitters.overflow=0;
     if (sAlign->rng_calls && fflush(sAlign->rng_calls)) align_fail("flushing RNG call trace");
+    p4la_wait_observe(&sAlign->input,host,p4la_word(host,P4LS_GAME_FRAME));
     if (sAlign->effect_calls && fflush(sAlign->effect_calls)) align_fail("flushing effect RNG call trace");
+    if (sAlign->visual_updates && fflush(sAlign->visual_updates)) align_fail("flushing visual update provenance");
+    if (sAlign->visual_creations && fflush(sAlign->visual_creations)) align_fail("flushing visual creation provenance");
     if (sAlign->event_frames && (!p4la_event_frame(sAlign->event_frames,host) ||
         fflush(sAlign->event_frames))) align_fail("writing actual event-player state");
     if (sAlign->packet_frames && (!p4la_packet_frame(sAlign->packet_frames,host) ||
         fflush(sAlign->packet_frames))) align_fail("writing actual battle packet state");
+    if (sAlign->message_frames && (!p4la_message_frame(sAlign->message_frames,host) ||
+        fflush(sAlign->message_frames))) align_fail("writing actual message-window state");
     if (!p4la_trace(&sAlign->trace_buffer,sAlign->trace,host,marker,sAlign->rng,&sAlign->restore)) align_fail("writing full RNG/clock trace");
     char folder[1100],path[1200];
     snprintf(folder,sizeof folder,"%s/%u",sAlign->directory,marker[0]);
@@ -281,17 +438,23 @@ void p4pc_align_boundary(const P4WalkHost *host, const uint32_t marker[8]) {
     if (!p4la_emitters_write(path,&sAlign->presented,p4la_word(host,P4LS_GAME_FRAME)))
         align_fail("writing the boundary update's advanced emitters");
     align_event("ready",host,marker);
-    const uint32_t status=align_reply(host,marker);
+    /* Tape-building pass (NG-7k): the port alone has no retail to answer a boundary; it accepts its own ready
+     * candidate unpatched and runs on, so the tape holds the whole recorded input. The proof pass never does. */
+    const uint32_t status=sTapeBuild ? 1u : align_reply(host,marker);
     if (!status) align_fail("boundary equality/proof failed; no state was resynchronized");
     snprintf(path,sizeof path,"%s/port-after.ram",folder); align_dump(path);
     p4la_accept(&sAlign->tracker,marker);
     if (status==6u) {
         p4pc_align_battle_guard=1;
         p4pc_lockstep_disc_activate(p4la_word(host,P4LS_GAME_FRAME));
+        p4pc_lockstep_filer_activate(p4la_word(host,P4LS_GAME_FRAME));
     }
     /* Outside battle qualification the disc replay starts at the accepted initial LOAD anchor. */
-    if (status==1u && marker[0]==0u && !sAlign->tracker.battle_qualification_id)
+    if (status==1u && marker[0]==0u && !sAlign->tracker.battle_qualification_id) {
         p4pc_lockstep_disc_activate(p4la_word(host,P4LS_GAME_FRAME));
+        p4pc_lockstep_filer_activate(p4la_word(host,P4LS_GAME_FRAME));
+        p4pc_lockstep_uninit_activate(p4la_word(host,P4LS_GAME_FRAME));
+    }
     if (status==4u) { if (p4_battle_live_lockstep_boundary()) exit(4); p4pc_exit(0); }
     if (status==5u) exit(4);
     if (status!=1u && status!=2u && status!=6u) align_fail("unknown boundary response");

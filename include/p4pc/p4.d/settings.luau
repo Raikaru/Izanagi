@@ -1,0 +1,3 @@
+--!capability settings@1
+--!covers p4.settings
+-- p4.settings.get and set over manifest-declared [setting] rows (API 1.2).

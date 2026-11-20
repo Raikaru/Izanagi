@@ -1,4 +1,5 @@
 #include "p4pc/mod_save_native.h"
+#include "p4pc/lockstep_align_guest.h"
 void datInitDefaultGameState(void)
 {
     s32 j;
@@ -40,6 +41,8 @@ void datInitDefaultGameState(void)
     extern u16 D_005E4630[];
     extern s16 D_005E4650[];
 
+    if (p4pc_align_playtime_enabled)
+        p4pc_align_playtime_event("reset", "datInitDefaultGameState");
     if (p4_mod_save_new_game_begin())
         p4_mod_save_restore_failed();
     calSetStateImagePending(0);

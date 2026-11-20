@@ -4,7 +4,7 @@
 
 ## Optimized builds
 
-Land/player builds use `-O2 -g1 -fno-strict-aliasing -fwrapv -fno-omit-frame-pointer`.
+Optimized player builds use `-O2 -g1 -fno-strict-aliasing -fwrapv -fno-omit-frame-pointer`.
 `P4_OPT` changes the level (`O0` only for investigating a suspect); `P4_DEBUG_INFO`
 selects debug data. Decomp RenderWare `-O4` flags are followed by `-O3`. Line tables
 and frame pointers retain profiler/debugger/crash-stack usefulness.
@@ -66,8 +66,6 @@ and broadcasts on both host ABI variants.
   must not be guessed to belong to one file. Physical read spans exclude the
   existing provenance observer, which still sees the same bytes in the same order.
   Absolute `P4PC_PROFILE_SPANS_FROM_NS`/`P4PC_PROFILE_SPANS_UNTIL_NS` bound logging.
-  The capture runner converts case-relative `P4PC_PROFILE_SPANS_DELAY_MS` and
-  `P4PC_PROFILE_SPANS_DURATION_MS` to those bounds immediately before launch.
   `P4PC_PROFILE_SPANS_SLOW_US=<microseconds>` suppresses shorter heap, audio/mixer
   and sleep output records (1000 is a useful low-volume diagnostic setting).
   Calls are still timed; physical reads and async submit/completion/wait records
@@ -113,114 +111,6 @@ and broadcasts on both host ABI variants.
   application program-binary cache or startup prewarm. The cold-NVIDIA study
   found compile stalls only before the first ready field, during startup/title
   and loading, not in the measured town/dungeon/battle/event/Velvet gameplay.
-- `tools/polish_capture.py --binary <exe> --cases <private JSON> --out <managed run>`
-  runs serial full-render, paced, hidden/offscreen studies at 1x, 1080p and 4K.
-  It records executable identity, effective diagnostic environment, process CPU
-  time, working set/private commit, per-frame wall/CPU/GPU distributions and >40 ms
-  hitches. Read-only working-set snapshots distinguish resident private, shareable
-  and currently shared pages by observed guest range and mapped-image owner.
-  Unprivileged WDDM `GPU Process Memory` counters also record dedicated, shared
-  and committed GPU-process totals, with exact PID/adapter instances and explicit
-  unavailable statuses rather than invented zeroes. These totals do not identify
-  individual textures or render targets. Image ownership does not attribute a
-  library's private heap: audio/decoder/GL heap ownership still needs native counters.
-  Owner schema2 includes the observed NVIDIA `nvgpucomp` compiler image in the GL
-  driver bucket; older receipts put it in other libraries and cannot be silently
-  reclassified from virtual-region sizes. Executable-resident bytes are already
-  retained per owner as a subset of resident bytes.
-  Each external memory-observer interval records its own wall duration so sampling
-  work can be considered when correlating frame outliers.
-  **Presentation measurements must run at normal priority with observers off.**
-  Visible captures default to normal OS priority, `--no-memory` and `--no-gl`;
-  they retain normal rendering/presentation and the minimal frame-clock log.
-  `--gl` explicitly opts into GL statistics, GPU queries and API/hitch observers;
-  `--memory` explicitly opts into intrusive owner snapshots. Such diagnostic
-  runs are not default player-path presentation measurements. Hidden diagnostic
-  defaults remain below-normal with GL/memory observers enabled; use
-  `--priority normal --no-gl --no-memory` for a hidden observer-off control.
-  `--cold-nvidia-cache` moves the Windows NVIDIA OpenGL `GLCache` directory into
-  each admitted run's `nvidia-driver-cache-before` before launch, preserving its
-  contents rather than deleting them; `driver-cache.json` records the boundary.
-  It does not clear DX/application caches, and a locked/unmovable cache fails the
-  attempt rather than silently labelling a warm run cold. Use only for an
-  explicitly authorized cold-driver study, with lazy compilation selected.
-  `--host-context --land-state <central .git/p4pc-land directory>` records
-  one-second and immediate post-`PROF-HITCH` contention receipts, using read-only
-  Windows PDH counters: system CPU, other-process CPU (one-core and machine
-  shares), available RAM, and hard-fault page-read operations/pages per second.
-  Defender instances are also retained separately even below the top12 CPU users.
-  Competing game processes are retained without that top12 cutoff. Windows PDH
-  repeats bare executable names, so collection identity includes the occurrence
-  ordinal before invalid-value filtering; never collapse instances by name.
-  These are CPU-process identities, not proof of active GPU-context ownership.
-  `--priority normal` selects real player OS process priority (already the
-  visible default). The receipt records the requested priority and actual
-  `GetPriorityClass` value. Below-normal runs are explicitly diagnostic, not
-  evidence of player presentation stalls under shared-host load.
-  `--hard-faults` adds50ms-target, timestamp-bracketed native process snapshots.
-  On64-bit Windows7+ these read `SystemProcessInformation.HardFaultCount`,
-  separate from total soft+hard page faults, plus working-set counts and the
-  oldest surviving thread's CPU/state/wait-reason counters. Corroborate that
-  thread's ID with the game PROF/span thread; it is a candidate, not a guessed
-  main-thread guarantee. No privilege elevation or resident-page walk is used.
-  Actual sample/query times and failures remain explicit. Fault deltas bracket
-  intervals rather than claiming exact per-fault ETW timestamps; a missing
-  historical process counter cannot be reconstructed from global PageReads.
-  Missing/warm-up counters remain unavailable, never zero substitutes. Each
-  sample records its actual QPC interval and observer cost. Land stage/active
-  receipts are included with their provenance/liveness limitation. These
-  observations distinguish host-correlated stalls from reproducible port work;
-  missing historical context is not retrospective proof of a port or host bug.
-  `--admission-priority live` uses the existing public live admission class only
-  for an owner-coordinated comparison; the default remains study. It neither
-  bypasses admission nor changes the production pool. `--cohort-seconds` can
-  additionally bound active capture and admission across all selected cases,
-  including eligibility/setup waits. Game cleanup and result finalization
-  follow that deadline; use the caller's command deadline when bounding the
-  entire diagnostic process, not just its visible windows.
-  Launch is bracketed with the same Windows performance-counter clock as the
-  native traces. Under `P4PC_PACE_TRACE`, the first retail title state7/9 emits an
-  interactive-ready timestamp; this means input is accepted, not first painted
-  pixel or OS-cache-cold startup. Save-load durations run from LOAD confirmation
-  to the first completed field using exact flip timestamps, not raw-disc I/O time.
-  Field/room witnesses, failed/incomplete walks and truncated entry tails remain
-  explicit in the result instead of silently qualifying the requested scene.
-  A process-cold launch is not an OS-cache-cold launch; private commit is not
-  resident private memory. Diagnostic trace I/O and sampling overhead must be
-  held identical on both sides of comparisons.
-  An operator's explicit visible-study approval can be selected with
-  `--visible --authorized-visible`. It bypasses the automatic idle/fullscreen,
-  daily and user-input-abort policy, and the automatic whole-cohort wall cap.
-  Use it only for that authorized study, not an unattended recurring launch.
-  PAUSE cancellation, muted audio, the selected process priority (normal
-  by default), bounded per-case durations and public land-priority admission
-  remain active. Each receipt records
-  this explicit authorization. Run one resolution per invocation to preserve
-  scene ordering for a six-scene1x, then1080p, then4K comparison.
-  `--visible` enables conditional presentation studies only after 30 minutes of
-  Windows input inactivity and observed XInput inactivity, with neutral connected
-  controllers, no foreground fullscreen app and no `<scratch>/PAUSE`.
-  `GetLastInputInfo` does not include XInput: a connected pad therefore needs an
-  actually observed 30-minute quiet interval. `--wait-idle` observes eligibility
-  without opening windows until all conditions hold; ordinary refusal exits3.
-  Runs are muted, normal priority with GL/memory observers off by default,
-  capped at 15 minutes wall time and at one started attempt per local calendar day.
-  The hard wall cap includes waits between cases: admission checks cancellation
-  while waiting for queue/slot mutexes and higher-priority lands, without changing
-  their priority or ordinary study wait budgets. Input/PAUSE cancellation also
-  remains active there, before another window can open. A private case's optional
-  `seconds` value overrides `--seconds`; budget enough time to reach the actual
-  battle/effects or Velvet Room witness, rather than qualifying a scene by its name.
-  `collection0803_voidquest_effects.walk` extends the pristine collection opening
-  through the existing controller-only ordinary-attack plan for40s at the first
-  battle menu, then disables it. The original opening checkpoint is unchanged;
-  neither route asserts victory or writes HP/RNG/event/camera state.
-  Any observed keyboard/mouse/controller input aborts the run and hides/closes only
-  its own windows. Eligibility/start/abort/finish records live in the managed work
-  root's `polish-visible-attempts.jsonl`; do not delete its daily admission markers
-  to bypass the operator policy.
-  New ledger rows include QPC and monotonic nanoseconds as well as calendar time;
-  calendar differences alone do not establish an elapsed-time guard violation.
 
 Do not use an intrusive Windows sampled run as the unprofiled speed measurement.
 The same profiler works with `p4pc_viewer`.

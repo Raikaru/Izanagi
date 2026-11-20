@@ -45,9 +45,8 @@ p4_ps2_exe(cri_adxt_start_test)
 add_test(NAME cri_adxt_start COMMAND cri_adxt_start_test)
 set_tests_properties(cri_adxt_start PROPERTIES SKIP_RETURN_CODE 77)
 
-# How a CRI file name ("VOL:EVE_056.ADX", "ENV:ENV_346.ADX", "VOL:V162001.AFS" with a directory list) finds its file:
-# every distinct open of a retail run through the ROFS volume devices and the selected directory lists
-# (tests/rofs_open_test.c, tests/data/rofs_retail_opens.txt). Skipped (exit 77) unless P4PC_ISO and P4PC_ELF are set.
+# ROFS lookup and transfer semantics over a synthetic disc and directory list.
+# The private build also registers the real-disc trace variant below.
 add_executable(rofs_open_test rofs_open_test.c "${P4_TABLES}" $<TARGET_OBJECTS:p4decomp> $<TARGET_OBJECTS:p4port> $<TARGET_OBJECTS:p4portee>)
 target_include_directories(rofs_open_test PRIVATE "${CMAKE_SOURCE_DIR}/include"
   "${CMAKE_SOURCE_DIR}/src/platform/sound" "${CMAKE_SOURCE_DIR}/src/platform/files")
@@ -55,8 +54,11 @@ target_compile_options(rofs_open_test PRIVATE -fno-builtin)
 target_compile_definitions(rofs_open_test PRIVATE ${P4_PORT_DEFINES})
 target_link_libraries(rofs_open_test m ${P4_SDL3_LIB} ${P4_FFMPEG_LIBS})
 p4_ps2_exe(rofs_open_test)
-add_test(NAME rofs_open COMMAND rofs_open_test "${CMAKE_SOURCE_DIR}/tests/data/rofs_retail_opens.txt")
+p4_target_command(_rofs_open_command rofs_open_test)
+add_test(NAME rofs_open COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/rofs_open_synthetic.py"
+  ${_rofs_open_command} "${CMAKE_CURRENT_SOURCE_DIR}/fixtures/rofs_synthetic_opens.txt")
 set_tests_properties(rofs_open PROPERTIES SKIP_RETURN_CODE 77)
+include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/private/170-cri-state-private.cmake" OPTIONAL)
 
 # The real ISO through CRI's 64-bit file-size/seek chain and mirrored word wrappers.
 add_executable(cri_file_size_test cri_file_size_test.c "${P4_TABLES}"

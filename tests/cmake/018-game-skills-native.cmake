@@ -8,6 +8,7 @@ add_executable(game_skills_native_test game_skills_native_test.c ${_p4_skill_nat
   "${CMAKE_SOURCE_DIR}/src/platform/mods/game_personas_native.c"
   "${CMAKE_SOURCE_DIR}/src/platform/mods/game_tables_packed.c"
   "${CMAKE_SOURCE_DIR}/src/platform/mods/game_table_admission.c"
+  "${CMAKE_SOURCE_DIR}/src/platform/mods/game_table_derived.c"
   "${CMAKE_SOURCE_DIR}/src/platform/mods/game_table_extents.c")
 target_include_directories(game_skills_native_test PRIVATE "${CMAKE_SOURCE_DIR}/src/platform/files"
   "${CMAKE_SOURCE_DIR}/src/platform/memcard" "${CMAKE_SOURCE_DIR}/src/platform/mods")

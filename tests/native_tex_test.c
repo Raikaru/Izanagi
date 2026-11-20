@@ -60,6 +60,68 @@ static void check(const char *what, uint32_t got, uint32_t want)
     }
 }
 
+static void raw_vectors(void)
+{
+    static const uint8_t first_row[16] = {0, 4, 8, 12, 16, 20, 24, 28, 2, 6, 10, 14, 18, 22, 26, 30};
+    uint8_t data[256], indices[256];
+    for (unsigned i = 0; i < sizeof data; i++) data[i] = (uint8_t)i;
+    check("raw PAL8 decode", p4gl_nativetex_decode_raw(data, sizeof data, 16, 16, 8, 1, indices), 1);
+    for (unsigned i = 0; i < sizeof first_row; i++) check("raw PAL8 first row", indices[i], first_row[i]);
+    check("truncated PAL8", p4gl_nativetex_decode_raw(data, 255, 16, 16, 8, 1, indices), 0);
+    check("linear PAL4 decode", p4gl_nativetex_decode_raw(data, sizeof data, 3, 1, 4, 0, indices), 1);
+    check("linear PAL4 first", indices[0], 0);
+    check("linear PAL4 second", indices[1], 0);
+    check("linear PAL4 third", indices[2], 1);
+}
+
+/* The town's raw PAL8 texture uses kind 1, a separate CLUT, and a 1024x1024
+ * pre-swizzled upload. Check the real disc without copying its pixels. */
+static void town_map_texture(void)
+{
+    long long size = 0;
+    int isDir = 0;
+    if (vfs_stat("/FIELD/PACK/F001_001.P01", &isDir, &size) != 0 || size <= 0) {
+        fprintf(stderr, "native_tex_test: cannot find town map pack\n");
+        failures++;
+        return;
+    }
+    uint8_t *file = malloc((size_t)size);
+    int fd = vfs_open("/FIELD/PACK/F001_001.P01", 0);
+    if (file == NULL || fd < 0 || vfs_read(fd, file, (int)size) != (int)size) {
+        fprintf(stderr, "native_tex_test: cannot read town map pack\n");
+        if (fd >= 0) vfs_close(fd);
+        free(file);
+        failures++;
+        return;
+    }
+    vfs_close(fd);
+    int found = 0;
+    for (size_t i = 12; i + 76 + 1049600u <= (size_t)size; i++) {
+        if (rd32(file + i - 12) != 1 || rd32(file + i - 8) != 64 ||
+            rd32(file + i) != 1024 || rd32(file + i + 4) != 1024 ||
+            rd32(file + i + 8) != 8 || rd32(file + i + 12) != 0x12504 ||
+            rd32(file + i + 48) != 1048576 || rd32(file + i + 52) != 1024 ||
+            rd32(file + i + 64) != 1 || rd32(file + i + 68) < 1049600) continue;
+        uint8_t *indices = malloc(1048576u);
+        if (indices == NULL || !p4gl_nativetex_decode_raw(file + i + 76, 1048576u, 1024, 1024, 8, 1, indices)) {
+            fprintf(stderr, "native_tex_test: cannot decode town map\n");
+            failures++;
+        } else {
+            check("town map indices", crc32(indices, 1048576u), 0xd280f18bu);
+            check("town map raw palette", crc32(file + i + 76 + 1048576u, 1024), 0x8004c50bu);
+        }
+        free(indices);
+        found++;
+        break;
+    }
+    if (!found) {
+        fprintf(stderr, "native_tex_test: town map texture header missing\n");
+        failures++;
+    }
+    free(file);
+}
+
+
 int main(void)
 {
     const char *iso = getenv("P4PC_ISO");
@@ -71,6 +133,9 @@ int main(void)
     int fd;
     int found = 0;
 
+    raw_vectors();
+    if (failures) return 1;
+
     if (iso == NULL || iso[0] == '\0') {
         fprintf(stderr, "native_tex_test: P4PC_ISO unset, skipping\n");
         return SKIP_RETURN;
@@ -79,6 +144,7 @@ int main(void)
         fprintf(stderr, "native_tex_test: cannot find DOBJ044.RMD\n");
         return 1;
     }
+    town_map_texture();
     file = malloc((size_t)size);
     fd = vfs_open("/FIELD/GRMD/DOBJ044.RMD", 0);
     if (file == NULL || fd < 0 || vfs_read(fd, file, (int)size) != (int)size) {

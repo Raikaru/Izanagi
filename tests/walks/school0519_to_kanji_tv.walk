@@ -31,7 +31,7 @@ push:-500,0,12
 press:cross
 choose:1
 # The first Food Court selection is the Fox introduction, not the meeting menu.
-# 1: "Let's let it help." Then the ordinary meeting menu's 3 is "Enter the TV."
+# 1: the initial response Then the ordinary meeting menu's 3 is the TV entrance
 choose:1
 choose:3
 skipfield:20:1

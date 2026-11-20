@@ -85,6 +85,7 @@ typedef struct MwPly {
     int64_t delivered_idx;  /* last frame handed out (-1 none) */
     int started_clock;
     int64_t calls;          /* GetCurFrm calls since the start */
+    int replay;             /* lockstep online replay id (mwply.h): retail's answers, not a clock, drive this movie */
     double base;            /* raw clock at movie time 0 (the first delivered frame) */
     int src;                /* clock source `base` belongs to: 0 fallback, 1 audio, 2 audio after its end */
     double last_mt;         /* movie time at the last call */
@@ -128,6 +129,7 @@ static int tiled_buffers(void) {
 }
 static const P4Mpeg2Frame *stamp_resolve(const void *image);
 static int g_tick_clock = -1;
+const P4MovieReplay *p4pc_movie_replay;
 static MwPly *g_audio_ply;
 
 static MwPly *ply_from(void *h) {
@@ -247,6 +249,7 @@ void p4pc_movie_start(void *h, const char *path, int32_t loop) {
     p->started_clock = 0;
     p->delivered_idx = -1;
     p->calls = 0;
+    p->replay = p4pc_movie_replay ? p4pc_movie_replay->start(p->path) : 0;
     p->audio_clock = 0;
     p->audio_played = 0;
     p->audio_done = 0;
@@ -353,15 +356,18 @@ static double movie_time(MwPly *p, int starting) {
 
 static void put32(uint8_t *base, int off, int32_t v) { memcpy(base + off, &v, 4); }
 
-/* mwPlyGetCurFrm(handle, MWS_FRM *): the frame due now, if any. */
-static void get_cur_frm(void *h, void *frmp) {
+/* mwPlyGetCurFrm(handle, MWS_FRM *): the frame due now, if any. `retail` is the live retail run's answer to this
+ * poll for a replayed movie (its frame number, or -1 for none) and -2 otherwise. */
+/* Inlined into p4pc_mwply_get_cur_frm: the reviewed CRT adapter list (config/crt_host_adapters.json) names that caller. */
+static inline __attribute__((always_inline)) void get_cur_frm(void *h, void *frmp, int64_t retail) {
     MwPly *p = ply_from(h);
     uint8_t *frm = frmp;
     if (!frm) return;
     put32(frm, 0, 0);   /* bufadr NULL: nothing to show */
     if (!p || (p->stat != STAT_PREP && p->stat != STAT_PLAYING)) return;
     p->calls++;
-    if (!p->started_clock && p->calls < PREP_CALLS) return;
+    if (p->replay && retail < 0) return;
+    if (!p->replay && !p->started_clock && p->calls < PREP_CALLS) return;
 
     /* With an audio clock, keep the audio queue filled whatever the video does. */
     if (p->audio_clock && !p->eof && p->adx && p4adx_sample_rate(p->adx) > 0) {
@@ -372,7 +378,9 @@ static void get_cur_frm(void *h, void *frmp) {
 
     const double mt = movie_time(p, !p->started_clock);
     int64_t want_idx;   /* the frame to show, -1: none yet */
-    if (!p->started_clock) {
+    if (p->replay) {
+        want_idx = retail;   /* the frame retail delivered in this very poll */
+    } else if (!p->started_clock) {
         want_idx = 0;
     } else {
         const int64_t target = (int64_t)(mt * p->fps);
@@ -401,7 +409,7 @@ static void get_cur_frm(void *h, void *frmp) {
                 continue;
             }
             /* stream over: the movie ends once the last frame has had its time */
-            if (!have_frame && p->started_clock && (int64_t)(mt * p->fps) >= p->next_idx) p->stat = STAT_PLAYEND;
+            if (!have_frame && p->started_clock && !p->replay && (int64_t)(mt * p->fps) >= p->next_idx) p->stat = STAT_PLAYEND;
             break;
         }
         if (p->pending_idx < want_idx && !p->noskip) {   /* before the wanted frame: dropped */
@@ -482,7 +490,17 @@ void p4pc_mwply_get_cur_frm(void *h, void *frmp) {
     static FILE *log;
     static int log_open;
 
-    get_cur_frm(h, frmp);
+    {
+        const MwPly *q = ply_from(h);
+        const int32_t retail = q && q->replay ? p4pc_movie_replay->poll(q->replay) : -2;
+        get_cur_frm(h, frmp, retail);
+        if (q && q->replay && frmp) {
+            int32_t buffer, number;
+            memcpy(&buffer, (const uint8_t *)frmp + 0x00, 4);
+            memcpy(&number, (const uint8_t *)frmp + 0x24, 4);
+            p4pc_movie_replay->observe_poll((uint32_t)q->calls, q->stat, retail, buffer != 0 ? number : -1);
+        }
+    }
     if (!log_open) {
         const char *e = getenv("P4PC_MOVIE_LOG");
         log_open = 1;
@@ -534,12 +552,25 @@ int p4pc_mwply_fill_tiled(void *h) {
 /* func_0050d4d0: MWSFD_STAT_*. */
 int32_t func_0050d4d0(void *h) {
     MwPly *p = ply_from(h);
+    if (p && p->replay) {
+        const int32_t retail = p4pc_movie_replay->status(p->replay);
+        if (retail >= STAT_STOP && retail <= STAT_PLAYEND && p->stat != STAT_ERROR) p->stat = retail;
+        p4pc_movie_replay->observe_status((uint32_t)p->calls, retail);
+        return retail;
+    }
     return p ? p->stat : STAT_ERROR;
 }
 
 /* ---- Audio for the audio lane (mwply.h) -------------------------------------------------------- */
 
 void *p4pc_movie_audio_current(void) { return g_audio_ply && g_audio_ply->used && g_audio_ply->adx ? g_audio_ply : NULL; }
+
+/* Whether a movie is being prepared or played (practice speed holds 1x for it, include/p4pc/pace.h). */
+int p4pc_mwply_active(void) {
+    for (int i = 0; i < MAX_PLAYERS; i++)
+        if (g_ply[i].used && (g_ply[i].stat == STAT_PREP || g_ply[i].stat == STAT_PLAYING)) return 1;
+    return 0;
+}
 
 int32_t p4pc_movie_audio_format(void *h, int32_t *rate, int32_t *channels) {
     MwPly *p = ply_from(h);

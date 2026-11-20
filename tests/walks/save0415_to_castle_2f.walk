@@ -22,7 +22,7 @@ skipmsg
 wait:30
 press:down:200            # to the wall by the futon
 wait:30
-press:cross               # CHECK the futon, "Go to sleep?" Yes
+press:cross               # CHECK the futon, the sleep confirmation Yes
 wait:40
 skipmsg                   # the night, 04/16 (school, Junes, the rain) up to the evening in the living room
 # 04/16 evening: the front door (area 3400, `door_entrance`) is still shut; upstairs, and the story takes the player on

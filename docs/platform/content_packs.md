@@ -1,8 +1,7 @@
 # Built-in content packs
 
-Content replacement is a port feature, not a script mod. The approved design is
-`local://content-packs-design.md`; implementation shares package discovery,
-precedence and source provenance with the file-package loader.
+Content replacement is a port feature, not a script mod. It shares package
+discovery, precedence and source provenance with the file-package loader.
 
 ## Stable texture keys
 
@@ -44,9 +43,8 @@ Set `P4PC_TEXTURE_DUMP=<private-output-directory>` before starting the player or
 viewer to capture original textures encountered after startup. Leave it unset
 for the normal path: no source-index allocation, observers, hashing, workers or
 dump-directory access occurs. This does not install/enable any Luau mod. Use the
-player's ISO/ELF through the normal VFS; local automated runs remain headless and
-go through the admission helper. A viewer can traverse a model, title or field
-using its existing arguments. Unvisited assets are not claimed to be dumped.
+player's ISO/ELF through the normal VFS. A viewer can traverse a model, title
+or field using its existing arguments. Unvisited assets are not claimed to be dumped.
 Normal viewer completion drains the writer and fails on incomplete output.
 The native `p4_content_finish` API provides the same result to other tools.
 

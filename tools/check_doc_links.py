@@ -60,9 +60,12 @@ def anchors(text):
     return found
 
 
-def check(root):
-    sources = sorted((root / "docs").rglob("*.md"))
-    sources += [root / "README.md", root / "CONTRIBUTING.md"]
+def check(root, sources=None):
+    if sources is None:
+        sources = sorted((root / "docs").rglob("*.md"))
+        sources += [root / "README.md", root / "CONTRIBUTING.md"]
+    else:
+        sources = [root / source for source in sources]
     cache, failures, checked = {}, [], 0
     for source in sources:
         text = prose(source.read_text(encoding="utf-8"))
@@ -95,8 +98,9 @@ def check(root):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[1])
+    parser.add_argument("--source", action="append", help="check only this source path (repeatable)")
     args = parser.parse_args()
-    return check(args.root.resolve())
+    return check(args.root.resolve(), args.source)
 
 
 if __name__ == "__main__":

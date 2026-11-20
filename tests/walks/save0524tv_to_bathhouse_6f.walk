@@ -75,7 +75,7 @@ wait:100
 waitstate:0x00796e64==4
 waitstate:0x00796eec==4
 waitstate:0x00796f74==3
-# Two Wind-weak Gigas plus an Ice-weak, Wind-resistant Monopolizing Cupid. Use both real elemental casters.
+# Prepare the party for the next encounter.
 battle:first1=circle,up,cross;first2=circle,down,cross,cross,cross;first3=circle,down,cross,down,down,cross,cross;plan=cross,cross,right,cross;skip=0;delay=80
 waittask:battle:off
 skipmsg

@@ -1,6 +1,6 @@
 # Independent pristine collection card2-slot08, May 20 at Steamy Bathhouse Hall 11.
 # Walk through the boss door and defeat Shadow Kanji (encounter 515: Kanji 259, Nice Guy 272, Tough Guy 273)
-# with a searched battleturn: tape (one line per fresh party command, found by PortBattleSimCoord's fork search
+# with a searched battleturn: tape (one line per fresh party command, found by a fork search
 # on this walk's real state), to the post-battle event on Hall 11. Keep every line above the final
 # waittask:battle:off unchanged: the tape is bound to its frames.
 timeout:30000

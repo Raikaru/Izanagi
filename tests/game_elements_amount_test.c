@@ -21,6 +21,7 @@
 #include "p4pc/game_skills_native.h"
 #include "p4pc/game_tables.h"
 #include "p4pc/game_damage_stage.h"
+#include "p4pc/game_recovery_stage.h"
 #include "datScript_internal.h"
 #include "dat_skill_entry_internal.h"
 #include "dat_enemy_internal.h"
@@ -57,7 +58,20 @@ static u8 D_00635938[1], D_00635980[1];
 static unsigned enabled, rng_calls, primary_calls, rider_calls, skill_uses, actual_affinities, provided_affinities;
 static u32 rng_state, legacy_leaf, actual_leaf, actual_family, actual_flags, source_word, target_word;
 static unsigned traits, source_reads, target_reads;
+static uint32_t max_heal_skill;
+static u16 synthetic_max_hp;
+static int synthetic_max_hp_enabled;
+int p4_game_skill_max_heal(uint32_t skill) { return max_heal_skill && skill == max_heal_skill; }
+static u32 offense_flags, offense_leaf, requested_skill;
+static unsigned offense_calls;
+static f32 source_accessory_fraction = 0.1f;
 static DatUnit *source_unit, *target_unit;
+uint32_t p4_game_elements_native_offensive_effects(void *unit, uint32_t leaf)
+{
+    assert(unit == source_unit);
+    ++offense_calls;
+    return leaf == offense_leaf ? offense_flags : 0;
+}
 static jmp_buf failure;
 static int expecting_failure;
 static u32 failed_line;
@@ -107,7 +121,10 @@ static u32 RpRandom(void) { ++rng_calls; rng_state = rng_state * 1664525u + 1013
 static DatUnit *as_unit(const void *unit) { assert(unit == source_unit || unit == target_unit); return (DatUnit *)unit; }
 static s32 datCalcGetLevel(const void *unit) { return as_unit(unit)->level; }
 static s32 datCalcGetHp(const void *unit) { return as_unit(unit)->hp; }
-static u16 datCalcMaxHp(const void *unit) { return (u16)(500 + as_unit(unit)->level); }
+static u16 datCalcMaxHp(const void *unit) {
+    as_unit(unit);
+    return synthetic_max_hp_enabled ? synthetic_max_hp : (u16)(500 + as_unit(unit)->level);
+}
 static u16 datCalcMaxSp(const void *unit) { return (u16)(200 + as_unit(unit)->level); }
 static s32 datCalcGetBattleStat(const void *unit, u32 index) { return (s32)(30 + as_unit(unit)->level + index * 3); }
 static s32 datCalcGetWeaponProperty(const void *unit, s32 kind) { return (s32)(40 + as_unit(unit)->level + kind * 5); }
@@ -124,8 +141,8 @@ static s32 datCalcGetAffinity(u8 *unit, s32 leaf)
 static s32 datCalcElementBit(s16 leaf) { assert(leaf >= -1 && leaf < 19); return leaf == 0 ? 2 : 0; }
 static f32 datCalcBuffMultiplier(u8 *unit, s32 kind, u16 skill) { (void)skill; as_unit(unit); return traits & 2u ? 1.0f + kind * 0.1f : 1.0f; }
 static s32 datCalcAccessoryProperty(DatUnit *unit) { return traits & 4u ? (unit == source_unit ? 0xbd : 0xc1) : 0; }
-static f32 datCalcAccessoryFraction(DatUnit *unit) { as_unit(unit); return 0.1f; }
-static s32 datCalcHasRequestedSkill(DatUnit *unit, s32 skill) { as_unit(unit); return (traits & 8u) && !(skill & 1); }
+static f32 datCalcAccessoryFraction(DatUnit *unit) { as_unit(unit); return unit == source_unit ? source_accessory_fraction : 0.1f; }
+static s32 datCalcHasRequestedSkill(DatUnit *unit, s32 skill) { as_unit(unit); return ((traits & 8u) && !(skill & 1)) || (u32)skill == requested_skill; }
 static s32 datCalcCountEquipmentProperty(u8 *unit, s32 property) { as_unit(unit); return (traits & 16u) && !(property & 1); }
 static s32 datCalcHasEquipmentProperty(u8 *unit, s32 property) { as_unit(unit); return (traits & 32u) && (property & 1); }
 static s32 datGetFlag(s32 flag) { return (traits & 64u) && (flag & 1); }
@@ -149,6 +166,11 @@ void (*D_00635950[11])(void) = {datCalcFormulaNoop, datScriptCalcPhysicalDamage,
     datCalcFormulaTerms13And1A, datScriptCalcHitRate, datCalcFormulaScaledRatio, datCalcFormulaPassCalc15,
     datCalcFormulaWeightedRatio, datCalcFormulaInverseRatio, datScriptCalcPhysicalDamageScaled, datCalcFormulaRatioOfProducts};
 #include "../overrides/00244f60.c"
+/* The stages ask for a party source's active persona record only while a
+ * modifier is registered. */
+static unsigned persona_reads;
+static u16 datPersonaGetRecordId(u16 party) { assert(party == source_unit->id); ++persona_reads; return 0x2a; }
+static u8 datPersonaGetLevelByPcId(u16 party) { assert(party == source_unit->id); ++persona_reads; return 31; }
 #include "../overrides/00235520.c"
 
 typedef struct Receipt {
@@ -192,6 +214,29 @@ static void amount_case(u32 skill, u32 channel, u32 outcome, u32 options)
     const Receipt direct = receipt(datCalcSkillAmount((u16)skill, (u8 *)source_unit, (u8 *)target_unit, 3, (u16)outcome, 2, options, (u8)channel));
     same(&original, &direct);
     assert(primary_calls <= 1 && !rider_calls);
+}
+/* With the same formula inputs and RNG, kind 14 divides the unmodified
+ * damage by the rolled hit count; ordinary kind 1 must not divide it. */
+static void split_damage(DatSkillEntry *row)
+{
+    const DatSkillEntry saved = *row;
+    row->damageClass = 1;
+    row->effectKind = 1;
+    reset(10, 0);
+    const s32 whole = datCalcSkillAmount(10, (u8 *)source_unit, (u8 *)target_unit, 1, 1, 1, 1, 1);
+    assert(whole < -1);
+    static const u16 counts[] = {1, 2, 3, 8};
+    for (unsigned i = 0; i < sizeof counts / sizeof counts[0]; ++i) {
+        reset(10, 0);
+        assert(datCalcSkillAmount(10, (u8 *)source_unit, (u8 *)target_unit, counts[i], 1, 1, 1, 1) == whole);
+        row->effectKind = 14;
+        reset(10, 0);
+        s32 expected = -whole / counts[i];
+        if (expected < 1) expected = 1;
+        assert(datCalcSkillAmount(10, (u8 *)source_unit, (u8 *)target_unit, counts[i], 1, 1, 1, 1) == -expected);
+        row->effectKind = 1;
+    }
+    *row = saved;
 }
 /* Final-damage stage over the real equation (game_damage_stage.c linked as
  * built): no registered modifier is retail; a consulted modifier that leaves
@@ -256,11 +301,137 @@ static void stage_parity(DatSkillEntry *row)
                             assert(stage_seen.stock == -plain.amount && stage_seen.hit_kind == kinds[k] &&
                                 stage_seen.skill_id == 10 && !stage_seen.resolved && !stage_seen.reflected &&
                                 stage_seen.element_valid && stage_seen.element_id == legacy_leaf &&
-                                stage_seen.source_status == initial_source.bad && stage_seen.target_status == initial_target.bad);
+                                stage_seen.source_status == initial_source.bad && stage_seen.target_status == initial_target.bad &&
+                                stage_seen.origin == P4_DAMAGE_ORIGIN_UNKNOWN &&
+                                stage_seen.source_persona == ((initial_source.flags & 4) ? 0u : 0x2au) &&
+                                stage_seen.source_persona_level == ((initial_source.flags & 4) ? 0u : 31u));
                         eligible_total += eligible;
                     }
     }
     assert(eligible_total == 15 && !p4_game_damage_native_active());
+}
+/* Recovery stage over the real equation: only the formula heal (effect 2) on
+ * the HP channel that the outcome delivers, never an item or another effect;
+ * a consulted modifier that declines changes nothing, and a factor composes
+ * after Divine Grace and the variance, converted once. */
+static unsigned recovery_consulted;
+static P4GameRecoveryHit recovery_seen;
+static double recovery_factor;
+static int recovery_decline(void *user, const P4GameRecoveryHit *hit, double *value)
+{
+    (void)user; (void)value; ++recovery_consulted; recovery_seen = *hit; return 0;
+}
+static int recovery_scale(void *user, const P4GameRecoveryHit *hit, double *value)
+{
+    (void)user; recovery_seen = *hit; *value = recovery_factor; return 1;
+}
+static void recovery_parity(DatSkillEntry *row)
+{
+    static const u8 effects[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+    static const u32 outcomes[] = {1, 0x400, 2}, kinds[] = {1, 2, 4, 16};
+    const P4GameRecoveryModifierDesc decline = {"test.decline", 0, 0, P4_RECOVERY_MULTIPLY, recovery_decline, NULL};
+    unsigned eligible_total = 0;
+    assert(!p4_game_recovery_native_active());
+    initial_source.flags = initial_target.flags = 0;
+    for (unsigned i = 0; i < sizeof effects; ++i) {
+        row->effectKind = row->spEffectKind = effects[i];
+        row->damageClass = (i & 1) ? 1 : 2;
+        for (u32 channel = 1; channel <= 2; ++channel)
+            for (unsigned o = 0; o < 3; ++o)
+                for (unsigned k = 0; k < 4; ++k)
+                    for (u32 options = 0; options < 2; ++options) {
+                        const Receipt plain = stage_run((u8 *)target_unit, channel, outcomes[o], kinds[k], options);
+                        uint32_t handle = 0;
+                        assert(p4_game_recovery_register(&decline, &handle) == P4_DAMAGE_OK);
+                        recovery_consulted = 0; persona_reads = 0;
+                        const Receipt observed = stage_run((u8 *)target_unit, channel, outcomes[o], kinds[k], options);
+                        assert(p4_game_recovery_unregister(handle) == P4_DAMAGE_OK);
+                        same(&plain, &observed);
+                        const unsigned eligible = channel == 1 && effects[i] == 2 && outcomes[o] != 2 && !options;
+                        assert(recovery_consulted == eligible && persona_reads == 2u * eligible);
+                        if (eligible)
+                            assert(recovery_seen.stock == plain.amount && plain.amount > 0 && recovery_seen.skill_id == 10 &&
+                                !recovery_seen.resolved && recovery_seen.origin == P4_DAMAGE_ORIGIN_UNKNOWN &&
+                                recovery_seen.source_side == P4_DAMAGE_SIDE_PARTY && recovery_seen.source_persona == 0x2a &&
+                                recovery_seen.source_persona_level == 31 && recovery_seen.target_id == initial_target.id);
+                        eligible_total += eligible;
+                    }
+    }
+    assert(eligible_total == 8 && !p4_game_recovery_native_active());
+    /* A registered factor composes once over the delivered heal; nothing else moves. */
+    row->effectKind = row->spEffectKind = 2; row->damageClass = 2;
+    const Receipt plain = stage_run((u8 *)target_unit, 1, 1, P4_DAMAGE_HIT_NORMAL, 0);
+    const P4GameRecoveryModifierDesc scale = {"test.scale", 0, 0, P4_RECOVERY_MULTIPLY, recovery_scale, NULL};
+    uint32_t handle = 0;
+    assert(p4_game_recovery_register(&scale, &handle) == P4_DAMAGE_OK);
+    recovery_factor = 1.15;
+    p4_game_damage_native_hit_begin(10, 0, initial_target.id, 0, 0, 0);
+    const Receipt healed = stage_run((u8 *)target_unit, 1, 1, P4_DAMAGE_HIT_NORMAL, 0);
+    p4_game_damage_native_hit_end();
+    assert(recovery_seen.resolved && recovery_seen.origin == P4_DAMAGE_ORIGIN_SKILL);
+    assert(healed.amount == (s32)((double)plain.amount * 1.15));
+    Receipt rest = healed; rest.amount = plain.amount; same(&plain, &rest); /* no RNG or unit change */
+    assert(p4_game_recovery_unregister(handle) == P4_DAMAGE_OK);
+}
+/* Production kind 11 with the authored per-skill semantic bit. It rounds the
+ * max-HP fraction first, then truncates Divine Grace; unlike kind 2 it draws
+ * no variance and does not enter the formula-only recovery stage. */
+static void max_heal_behavior(DatSkillEntry *row)
+{
+    const DatSkillEntry saved = *row;
+    static const u16 maxima[] = {0, 1, 5, 99, 100, 101, 999, 65535};
+    static const s16 percentages[] = {25, 50, 22, 42, 1, 100};
+    const P4GameRecoveryModifierDesc decline = {"test.percent", 0, 0, P4_RECOVERY_MULTIPLY, recovery_decline, NULL};
+    uint32_t handle = 0;
+    assert(p4_game_recovery_register(&decline, &handle) == P4_DAMAGE_OK);
+    synthetic_max_hp_enabled = 1;
+    row->effectKind = 11;
+    for (unsigned p = 0; p < sizeof percentages / sizeof percentages[0]; ++p) {
+        row->power = percentages[p];
+        for (unsigned i = 0; i < sizeof maxima / sizeof maxima[0]; ++i) {
+            synthetic_max_hp = maxima[i];
+            s32 base = (s32)maxima[i] * percentages[p] / 100;
+            if (base < 1) base = 1;
+            for (unsigned grace = 0; grace < 2; ++grace) {
+                traits = grace ? 8u : 0u;
+                for (unsigned on = 0; on < 2; ++on) {
+                    max_heal_skill = on ? 10u : 0u;
+                    reset(10, 0); recovery_consulted = 0;
+                    const s32 actual = datCalcSkillAmount(10, (u8 *)source_unit, (u8 *)target_unit, 1, 1, 1, 0, 1);
+                    assert(actual == (on && grace ? base * 3 / 2 : base));
+                    assert(!rng_calls && !recovery_consulted);
+                    reset(10, 0); target_unit->hp = 1;
+                    assert(datCalcSkillAmount(10, (u8 *)source_unit, (u8 *)target_unit, 1, 1, 1, 0, 1) == actual);
+                    reset(10, 0); target_unit->hp = maxima[i];
+                    assert(datCalcSkillAmount(10, (u8 *)source_unit, (u8 *)target_unit, 1, 1, 1, 0, 1) == actual);
+                    reset(10, 0);
+                    assert(datCalcSkillAmount(10, (u8 *)source_unit, (u8 *)target_unit, 1, 1, 1, 1, 1) == base);
+                    reset(10, 0);
+                    assert(!datCalcSkillAmount(10, (u8 *)source_unit, (u8 *)target_unit, 1, 2, 1, 0, 1));
+                }
+            }
+        }
+    }
+    /* The actual amount consumer must also preserve the expanded ID. Its
+     * marker provider is stubbed here; native provenance is tested separately. */
+    DatSkillEntry *added = (DatSkillEntry *)(iGpffffb3b8 + 1024u * 40u);
+    *added = *row; added->effectKind = 11; added->power = 25;
+    synthetic_max_hp = 101; traits = 8;
+    for (unsigned marked = 0; marked < 2; ++marked) {
+        max_heal_skill = marked ? 1024u : 0u;
+        reset(1024, 0); recovery_consulted = 0;
+        assert(datCalcSkillAmount(1024, (u8 *)source_unit, (u8 *)target_unit, 1, 1, 1, 0, 1) ==
+            (marked ? 37 : 25));
+        assert(!rng_calls && !recovery_consulted);
+    }
+    /* The SP channel and an unmarked full heal retain native kind 11. */
+    row->spEffectKind = 11; row->spPower = 50; max_heal_skill = 10; traits = 8;
+    reset(10, 0);
+    assert(datCalcSkillAmount(10, (u8 *)source_unit, (u8 *)target_unit, 1, 1, 1, 0, 2) ==
+        datCalcMaxSp(target_unit) / 2);
+    assert(p4_game_recovery_unregister(handle) == P4_DAMAGE_OK);
+    max_heal_skill = 0; synthetic_max_hp_enabled = 0; traits = 0;
+    *row = saved;
 }
 static void stage_expect(const Receipt *plain, const Receipt *observed, double hard, double severe)
 {
@@ -279,7 +450,7 @@ static void stage_composition(DatSkillEntry *row)
     initial_source.flags = 0; initial_target.flags = 4;
     const Receipt critical = stage_run((u8 *)target_unit, 1, 1, P4_DAMAGE_HIT_CRITICAL, 0);
     const Receipt normal = stage_run((u8 *)target_unit, 1, 1, P4_DAMAGE_HIT_NORMAL, 0);
-    p4_game_damage_native_hit_begin(10, 1, 2, 1); /* repelled by enemy 2 back to its party source */
+    p4_game_damage_native_hit_begin(10, 1, 2, 1, 0, 0); /* repelled by enemy 2 back to its party source */
     const Receipt reflected = stage_run((u8 *)source_unit, 1, 1, P4_DAMAGE_HIT_NORMAL, 0);
     p4_game_damage_native_hit_end();
     /* The ailment words are the ones this equation read for the hit. */
@@ -306,7 +477,7 @@ static void stage_composition(DatSkillEntry *row)
     stage_expect(&critical, &observed, 0.0, 0.9375);
     observed = stage_run((u8 *)target_unit, 1, 1, P4_DAMAGE_HIT_NORMAL, 0);
     stage_expect(&normal, &observed, 0.0, 0.75);
-    p4_game_damage_native_hit_begin(10, 1, 2, 1);
+    p4_game_damage_native_hit_begin(10, 1, 2, 1, 0, 0);
     observed = stage_run((u8 *)source_unit, 1, 1, P4_DAMAGE_HIT_NORMAL, 0);
     p4_game_damage_native_hit_end();
     stage_expect(&reflected, &observed, 1.2, 0.75); /* scaled once, by the side it was aimed at */
@@ -315,6 +486,141 @@ static void stage_composition(DatSkillEntry *row)
     stage_expect(&reflected, &observed, 1.2, 0.0);
     for (unsigned i = 0; i < 4; ++i) assert(p4_game_damage_unregister(handles[i]) == P4_DAMAGE_OK);
     initial_source.flags = initial_target.flags = 0;
+}
+static void offense_composition(DatSkillEntry *row)
+{
+    row->effectKind = row->spEffectKind = 1; row->damageClass = 2;
+    legacy_leaf = actual_leaf = actual_family = 1;
+    actual_flags = P4_ELEMENT_OFFENSIVE | P4_ELEMENT_AFFINITY;
+    initial_source.flags = 0; initial_target.flags = 4;
+    initial_source.bad = initial_target.bad = 0;
+    offense_leaf = 1; source_accessory_fraction = 0.1f;
+    /* Retail Boost + Amp and accessory cap; custom tiers join the same cap. */
+    traits = 4u | 8u | 16u; offense_flags = 0;
+    Receipt retail = stage_run((u8 *)target_unit, 1, 1, P4_DAMAGE_HIT_NORMAL, 0);
+    traits = 4u; offense_flags = P4_OFFENSE_BOOST | P4_OFFENSE_AMP;
+    Receipt custom = stage_run((u8 *)target_unit, 1, 1, P4_DAMAGE_HIT_NORMAL, 0);
+    same(&retail, &custom);
+    source_accessory_fraction = 0.0f;
+    Receipt capped = stage_run((u8 *)target_unit, 1, 1, P4_DAMAGE_HIT_NORMAL, 0);
+    same(&custom, &capped);
+    /* A repeated Boost tier is not multiplied twice. */
+    traits = 16u; offense_flags = 0;
+    retail = stage_run((u8 *)target_unit, 1, 1, P4_DAMAGE_HIT_NORMAL, 0);
+    offense_flags = P4_OFFENSE_BOOST;
+    custom = stage_run((u8 *)target_unit, 1, 1, P4_DAMAGE_HIT_NORMAL, 0);
+    same(&retail, &custom);
+    /* AI estimation and the native resolution bracket calculate identically,
+     * but the latter is a resolved calculation, not packet commit. */
+    const P4GameDamageModifierDesc observe = {"test.observe", 0, 0, P4_DAMAGE_MULTIPLY, stage_decline, NULL};
+    uint32_t handle;
+    assert(p4_game_damage_register(&observe, &handle) == P4_DAMAGE_OK);
+    stage_consulted = offense_calls = 0;
+    retail = stage_run((u8 *)target_unit, 1, 1, P4_DAMAGE_HIT_NORMAL, 0);
+    assert(stage_consulted == 1 && offense_calls == 1 && !stage_seen.resolved);
+    p4_game_damage_native_hit_begin(10, 0, initial_source.id, 0, 0, 0);
+    custom = stage_run((u8 *)target_unit, 1, 1, P4_DAMAGE_HIT_NORMAL, 0);
+    p4_game_damage_native_hit_end();
+    assert(stage_seen.resolved && offense_calls == 2);
+    same(&retail, &custom);
+    assert(p4_game_damage_unregister(handle) == P4_DAMAGE_OK);
+    /* SP, items, fixed and scripted-500 amounts never consume the new tier. */
+    offense_calls = 0;
+    (void)stage_run((u8 *)target_unit, 2, 1, 1, 0);
+    (void)stage_run((u8 *)target_unit, 1, 1, 1, 1);
+    (void)stage_run((u8 *)target_unit, 1, 1, 16, 0);
+    row->effectKind = 5;
+    (void)stage_run((u8 *)target_unit, 1, 1, 1, 0);
+    assert(!offense_calls);
+    /* Legacy Hama/Mudo checks cannot add HP damage for either leaf. */
+    traits = offense_flags = 0; row->effectKind = 6;
+    for (u32 leaf = 6; leaf <= 7; ++leaf) {
+        legacy_leaf = leaf;
+        requested_skill = 0;
+        retail = stage_run((u8 *)target_unit, 1, 1, 1, 0);
+        requested_skill = leaf == 6 ? 0x21fu : 0x220u;
+        custom = stage_run((u8 *)target_unit, 1, 1, 1, 0);
+        same(&retail, &custom);
+    }
+    requested_skill = 0; legacy_leaf = offense_leaf = 6;
+    offense_flags = P4_OFFENSE_BOOST | P4_OFFENSE_AMP;
+    custom = stage_run((u8 *)target_unit, 1, 1, 1, 0);
+    const u32 roll = (0x12345678u * 1664525u + 1013904223u) % 11u + 95u;
+    assert(custom.amount == -(s32)(93u * roll / 100u));
+    /* Full-width leaf on a custom percent damage channel still composes. */
+    actual_leaf = offense_leaf = 65536u; actual_family = 1;
+    reset(10, 1); offense_calls = 0;
+    P4GameActionFrame wide = action_frame(10, P4_ACTION_COMPONENT_DAMAGE, 0);
+    wide.element.channel_id = 29;
+    assert(p4_game_elements_native_amount(10, source_unit, target_unit, 1, 1, 1, 0, 1, &wide, NULL) ==
+        -(s32)(93u * roll / 100u));
+    assert(offense_calls == 1);
+    offense_flags = traits = 0; source_accessory_fraction = 0.1f;
+}
+static void offense_policy(DatSkillEntry *row)
+{
+    static int owner, competitor;
+    const P4GameOffensePolicy hard = {1.20f, 1.30f, 1.55f};
+    const P4GameOffensePolicy other = {1.1f, 1.4f, 1.8f};
+    const P4GameOffensePolicy invalid = {NAN, 1.3f, 1.55f};
+    float boost, amp, cap;
+    p4_game_offense_policy_values(&boost, &amp, &cap);
+    assert(boost == 1.25f && amp == 1.5f && cap == 1.875f);
+    assert(p4_game_offense_policy_enable(&owner, &invalid) == P4_DAMAGE_INVALID);
+    assert(p4_game_offense_policy_enable(&owner, &hard) == P4_DAMAGE_OK);
+    assert(p4_game_offense_policy_enable(&competitor, &other) == P4_DAMAGE_BUSY);
+    p4_game_offense_policy_disable(&competitor);
+    p4_game_offense_policy_values(&boost, &amp, &cap);
+    assert(boost == hard.boost && amp == hard.amp && cap == hard.cap);
+
+    row->effectKind = row->spEffectKind = 6; row->damageClass = 2;
+    legacy_leaf = actual_leaf = actual_family = offense_leaf = 1;
+    initial_source.flags = 0; initial_target.flags = 4;
+    initial_source.bad = initial_target.bad = 0;
+    traits = 0; requested_skill = 0;
+    const u32 roll = (0x12345678u * 1664525u + 1013904223u) % 11u + 95u;
+    offense_flags = P4_OFFENSE_BOOST;
+    Receipt estimate = stage_run((u8 *)target_unit, 1, 1, 1, 0);
+    assert(estimate.amount == -(s32)(60u * roll / 100u));
+    offense_flags = P4_OFFENSE_AMP;
+    assert(stage_run((u8 *)target_unit, 1, 1, 1, 0).amount == -(s32)(65u * roll / 100u));
+    offense_flags = P4_OFFENSE_BOOST | P4_OFFENSE_AMP;
+    estimate = stage_run((u8 *)target_unit, 1, 1, 1, 0);
+    assert(estimate.amount == -(s32)(77u * roll / 100u));
+    p4_game_damage_native_hit_begin(10, 0, initial_source.id, 0, 0, 0);
+    Receipt resolved = stage_run((u8 *)target_unit, 1, 1, 1, 0);
+    p4_game_damage_native_hit_end();
+    same(&estimate, &resolved);
+    traits = 4u; source_accessory_fraction = 0.1f;
+    assert(stage_run((u8 *)target_unit, 1, 1, 1, 0).amount == estimate.amount);
+    offense_flags = P4_OFFENSE_BOOST;
+    assert(stage_run((u8 *)target_unit, 1, 1, 1, 0).amount == -(s32)(66u * roll / 100u));
+    /* Equipment Boost and registry Boost are one tier. */
+    traits = 16u; offense_flags = 0;
+    Receipt equip = stage_run((u8 *)target_unit, 1, 1, 1, 0);
+    offense_flags = P4_OFFENSE_BOOST;
+    Receipt equip_and_registry = stage_run((u8 *)target_unit, 1, 1, 1, 0);
+    same(&equip, &equip_and_registry);
+    Receipt sp_hard = stage_run((u8 *)target_unit, 2, 1, 1, 0);
+    traits = offense_flags = 0;
+    for (u32 leaf = 6; leaf <= 7; ++leaf) {
+        legacy_leaf = leaf;
+        requested_skill = 0;
+        Receipt no_legacy = stage_run((u8 *)target_unit, 1, 1, 1, 0);
+        requested_skill = leaf == 6 ? 0x21fu : 0x220u;
+        Receipt with_legacy = stage_run((u8 *)target_unit, 1, 1, 1, 0);
+        same(&no_legacy, &with_legacy);
+    }
+    legacy_leaf = 1; requested_skill = 0;
+    traits = 16u; offense_flags = P4_OFFENSE_BOOST;
+    p4_game_offense_policy_disable(&owner);
+    Receipt sp_retail = stage_run((u8 *)target_unit, 2, 1, 1, 0);
+    same(&sp_hard, &sp_retail);
+    p4_game_offense_policy_values(&boost, &amp, &cap);
+    assert(boost == 1.25f && amp == 1.5f && cap == 1.875f);
+    assert(p4_game_offense_policy_enable(&competitor, &other) == P4_DAMAGE_OK);
+    p4_game_offense_policy_disable(&competitor);
+    traits = offense_flags = 0; source_accessory_fraction = 0.1f;
 }
 static void formulas(void)
 {
@@ -357,9 +663,38 @@ static int initialize(void)
     source_word = 100; target_word = 125; actual_flags = P4_ELEMENT_OFFENSIVE | P4_ELEMENT_AFFINITY;
     return 0;
 }
-int main(void)
+/* Consume a row exported by the real derived-table boot fixture. */
+static void composed_drain(const char *path, const char *choice)
+{
+    DatSkillEntry *drain = (DatSkillEntry *)(iGpffffb3b8 + 0x65 * 40);
+    FILE *input = fopen(path, "rb");
+    assert(input && fread(drain, 1, sizeof *drain, input) == sizeof *drain);
+    assert(fgetc(input) == EOF && !fclose(input));
+    assert(!strcmp(choice, "on") || !strcmp(choice, "off"));
+    const s32 power = !strcmp(choice, "on") ? 35 : 30;
+    assert(drain->effectKind == 13 && drain->power == power && drain->costPercent == 3);
+    static const u16 target_hp[] = {0, 20, 30, 35, 240};
+    for (unsigned enemy_source = 0; enemy_source < 2; ++enemy_source) {
+        for (unsigned i = 0; i < sizeof target_hp / sizeof target_hp[0]; ++i) {
+            reset(0x65, 1);
+            source_unit->flags = enemy_source ? 4 : 0;
+            target_unit->flags = enemy_source ? 0 : 4;
+            target_unit->hp = target_hp[i];
+            const s32 expected = target_hp[i] < power ? target_hp[i] : power;
+            assert(datCalcSkillAmount(0x65, (u8 *)source_unit, (u8 *)target_unit, 1, 1, 1, 0, 1) == -expected);
+            assert(!rng_calls && !primary_calls && !rider_calls && !actual_affinities);
+        }
+    }
+    printf("game_elements_amount: composed Life Drain %s passed\n", choice);
+}
+int main(int argc, char **argv)
 {
     int result = initialize(); if (result) return result;
+    if (argc == 4 && !strcmp(argv[1], "--drain-row")) {
+        composed_drain(argv[2], argv[3]);
+        return 0;
+    }
+    if (argc != 1) return 2;
     DatSkillEntry *row = (DatSkillEntry *)(iGpffffb3b8 + 10 * 40);
     row->power = 43; row->spPower = 17; row->accuracy = 90; row->field19 = 60; row->critRate = 25; row->damageClass = 1;
     static const u8 effects[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
@@ -382,6 +717,7 @@ int main(void)
     legacy_leaf = 0; actual_leaf = UINT32_MAX; actual_family = 0;
     actual_flags = P4_ELEMENT_PHYSICAL | P4_ELEMENT_OFFENSIVE | P4_ELEMENT_AFFINITY;
     row->damageClass = 1; row->effectKind = row->spEffectKind = 1;
+    split_damage(row);
     amount_case(10, 1, 1, 0); /* SemanticMAX never becomes a packed legacy element. */
     legacy_leaf = 1; actual_leaf = 65536; actual_family = 1; actual_flags = P4_ELEMENT_OFFENSIVE | P4_ELEMENT_AFFINITY;
     row->damageClass = 2; amount_case(10, 1, 1, 0);
@@ -401,12 +737,36 @@ int main(void)
     row->effectKind = 5; reset(10, 1);
     assert(datCalcSkillAmount(10, (u8 *)source_unit, (u8 *)target_unit, 1, 1, 1, 0, 1) == row->power);
     assert(!primary_calls && !rider_calls && !actual_affinities && skill_uses == 1); /* Fixed amount never consumes a leaf. */
+    /* Life Drain's approved 35 HP is a fixed kind-13 amount, not formula
+     * damage. A nearly empty target must not supply more HP than it has,
+     * regardless of which side uses the skill. The row and units are synthetic. */
+    {
+        DatSkillEntry *drain = (DatSkillEntry *)(iGpffffb3b8 + 0x65 * 40);
+        static const u16 target_hp[] = {0, 20, 35, 240};
+        drain->effectKind = 13;
+        drain->power = 35;
+        for (unsigned enemy_source = 0; enemy_source < 2; ++enemy_source) {
+            for (unsigned i = 0; i < sizeof target_hp / sizeof target_hp[0]; ++i) {
+                reset(0x65, 1);
+                source_unit->flags = enemy_source ? 4 : 0;
+                target_unit->flags = enemy_source ? 0 : 4;
+                target_unit->hp = target_hp[i];
+                const s32 expected = target_hp[i] < 35 ? target_hp[i] : 35;
+                assert(datCalcSkillAmount(0x65, (u8 *)source_unit, (u8 *)target_unit, 1, 1, 1, 0, 1) == -expected);
+                assert(!rng_calls && !primary_calls && !rider_calls && !actual_affinities);
+            }
+        }
+    }
     memcpy(iGpffffb3b8 + 1024 * 40, row, 40); ((DatSkillEntry *)(iGpffffb3b8 + 1024 * 40))->effectKind = 1;
     amount_case(1024, 1, 1, 0);
     {
         const DatSkillEntry saved = *row;
         stage_parity(row);
         stage_composition(row);
+        recovery_parity(row);
+        max_heal_behavior(row);
+        offense_composition(row);
+        offense_policy(row);
         *row = saved;
     }
     expecting_failure = 1; failed_line = 0;
@@ -415,6 +775,6 @@ int main(void)
     reset(10, 0); failed_line = 0;
     if (!setjmp(failure)) { datScriptRunCalc(0, (u16 *)source_unit, (u16 *)target_unit, 10, 1); assert(0); }
     assert(failed_line == 0x82 && !(D_00881474[0] & 1) && D_0088146C[0] == 10);
-    puts("game_elements_amount: actual canonical HP/SP equations, ten formulas, state/RNG parity, full-width frames, exact target policy and the final-damage stage passed (engine/source probes; not native admission)");
+    puts("game_elements_amount: actual canonical HP/SP equations, ten formulas, state/RNG parity, full-width frames, exact target policy and the final-damage and recovery stages passed (engine/source probes; not native admission)");
     return 0;
 }

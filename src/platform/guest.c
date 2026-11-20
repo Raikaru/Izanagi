@@ -394,8 +394,20 @@ uint32_t p4_fn_h2g(const void *f)
     if (behind) return p4_fn_h2g(behind);
     if ((uintptr_t)f - (uintptr_t)p4_guest_image < p4_guest_image_size && p4_guest_image)
         return P4_GUEST_IMAGE + (uint32_t)((const uint8_t *)f - p4_guest_image);
+    /* The image and mapped hardware windows are not handle space. Do not
+     * wrap into retail/forwarder addresses or overwrite an existing entry. */
     uint32_t h = next_handle;
-    next_handle += 4;
+    int reserved = h < HANDLE_BASE || h >= P4_GUEST_EEREGS || fwd_find(h) != NULL;
+    for (int i = 0; !reserved && i < n_windows; i++) {
+        uint32_t start = windows[i].guest;
+        reserved = (h >= start && (uint64_t)h - start < windows[i].size) ||
+                   (h < start && start - h < 4u);
+    }
+    if (reserved) {
+        fprintf(stderr, "p4: function handle allocation refused at 0x%08x\n", (unsigned)h);
+        return 0;
+    }
+    next_handle = h + 4u;
     p4_fn_register(h, (void *)f);
     return h;
 }

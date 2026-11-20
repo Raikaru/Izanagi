@@ -1,4 +1,13 @@
 add_test(NAME battle_sim_coordinator COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/test_battle_sim.py")
 set_tests_properties(battle_sim_coordinator PROPERTIES LABELS port64 TIMEOUT 300)
+if(TARGET p4pc64 AND P4_PORT64_OPT STREQUAL "O0")
+  _add_test(NAME battle_sim_o0_seed4 COMMAND "${P4_PYTHON}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/battle_sim_o0_seed4_test.py" "$<TARGET_FILE:p4pc64>")
+  set_tests_properties(battle_sim_o0_seed4 PROPERTIES LABELS port64 TIMEOUT 900 SKIP_RETURN_CODE 77)
+endif()
+add_test(NAME battle_ratings COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/battle_ratings_test.py")
+set_tests_properties(battle_ratings PROPERTIES LABELS port64 TIMEOUT 60)
 add_test(NAME battle_tas COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/battle_tas_test.py")
 set_tests_properties(battle_tas PROPERTIES LABELS port64 TIMEOUT 60)
+add_test(NAME hardmode_attrition COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/test_hardmode_attrition.py")
+set_tests_properties(hardmode_attrition PROPERTIES LABELS port64 TIMEOUT 60)

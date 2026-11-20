@@ -1,6 +1,7 @@
 /* Actual package/input/save-use services. ONLY the nonreturning recovery
  * frontend is intercepted; this is not native UI/VM/battle qualification. */
 #include "p4pc/game_table_inputs_use.h"
+#include "game_table_inputs_internal.h"
 #include "p4pc/game_table_sources.h"
 #include "p4pc/mod_save.h"
 #include "p4pc/package_boot.h"
@@ -220,6 +221,33 @@ static void native_mode_history(const P4ModSaveImage *image, int developer)
     }
     p4_mod_save_capture_free(saved);
 }
+static void golden_history(const P4ModSaveImage *image)
+{
+    uint8_t bytes[32] = {0};
+    const char *key = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+    const char *other = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
+    char error[256] = {0};
+    word(bytes,4); word(bytes+16,4);
+    P4GameTableInput *golden = p4_game_table_input_from_golden_cache(P4_TABLE_INPUT_SKILL,bytes,sizeof bytes,key);
+    assert(golden && !p4_game_table_native_uses_prepare(&golden,1,NULL,&uses));
+    assert(!p4_game_table_input_semantic_use(p4_game_table_input_span(golden,0),golden));
+    P4ModSaveCapture *saved = capture(image); assert(saved);
+    size_t payload = P4_MOD_SAVE_HEADER_BYTES + 32u + strlen("p4pc") + strlen("native-table-use");
+    assert(read_word(saved->sidecar + payload) == 1 && read_word(saved->sidecar + payload + 4) == 3);
+    P4ModSaveLoad *load = NULL;
+    assert(!p4_mod_save_stage_image(image,copy_sidecar(saved),saved->sidecar_size,&load,error,sizeof error) && load);
+    p4_mod_save_load_abort(load); load = NULL;
+    assert(!p4_game_table_native_uses_destroy(uses)); uses = NULL;
+    assert(!p4_mod_save_reset_session(error,sizeof error));
+    P4GameTableInput *different = p4_game_table_input_from_golden_cache(P4_TABLE_INPUT_SKILL,bytes,sizeof bytes,other);
+    assert(different && !p4_game_table_native_uses_prepare(&different,1,NULL,&uses));
+    assert(p4_mod_save_stage_image(image,copy_sidecar(saved),saved->sidecar_size,&load,error,sizeof error));
+    assert(strstr(error,"Golden table cache identity"));
+    assert(!p4_game_table_native_uses_destroy(uses)); uses = NULL;
+    p4_game_table_input_destroy(different); p4_game_table_input_destroy(golden);
+    p4_mod_save_capture_free(saved);
+    assert(!p4_mod_save_reset_session(error,sizeof error));
+}
 
 int main(int argc, char **argv)
 {
@@ -279,6 +307,7 @@ int main(int argc, char **argv)
     p4_game_table_input_destroy(alternate); alternate = NULL;
     p4_game_table_input_destroy(input); input = NULL;
     char error[256] = {0}; assert(!p4_mod_save_reset_session(error, sizeof error));
+    golden_history(&image);
     assert(!memcmp(retail, original, sizeof retail));
     assert(!registry && !p4_packages_memory_usage().resident && !p4_packages_memory_usage().reserved);
     puts("game_table_input_use: actual package/DEV/compiled-mode use, no-tag omission, warning round trips, exact span/refusal, retail bytes and sticky New Game passed; recovery frontend intercepted, not native VM qualification");

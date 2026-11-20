@@ -6,6 +6,9 @@
 #include "../src/platform/pad/pad_sdl.h"
 #include "p4pc/os.h"
 #include "p4pc/lockstep.h"
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 static uint32_t clockFrame(void) { return 1; }
 static unsigned markKeys;
@@ -27,10 +30,29 @@ int main(int argc, char **argv)
     p4_os_setenv("P4PC_PAD_VIRTUAL", "10000,0,0,0,0,1000", 1);
     p4_os_setenv("P4PC_HIDDEN_WINDOW", "1", 1);
     p4_os_setenv("P4PC_RESOLUTION", "scale:2", 1); /* fullscreen hotkey would be enabled in player mode */
+#ifdef _WIN32
+    p4_os_setenv("SDL_VIDEODRIVER", "windows", 0);
+#else
     p4_os_setenv("SDL_VIDEODRIVER", "offscreen", 0);
+#endif
     SDL_SetHint(SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS, "1");
     p4pc_pad_autopress_set_clock(clockFrame);
     if (p4pc_pad_sdl_init() != 0) return 77;
+#ifdef _WIN32
+    {
+        SDL_Window *window = p4pc_pad_sdl_window();
+        SDL_WindowFlags flags = SDL_GetWindowFlags(window);
+        HWND hwnd = (HWND)SDL_GetPointerProperty(SDL_GetWindowProperties(window),
+                                                 SDL_PROP_WINDOW_WIN32_HWND_POINTER, NULL);
+        RECT rect;
+        if (!(flags & SDL_WINDOW_HIDDEN) || !(flags & SDL_WINDOW_UTILITY) ||
+            !hwnd || IsWindowVisible(hwnd) || !(GetWindowLongPtr(hwnd, GWL_EXSTYLE) & WS_EX_TOOLWINDOW) ||
+            !GetWindowRect(hwnd, &rect) || rect.left > -30000 || rect.top > -30000) {
+            fprintf(stderr, "hidden Windows game window is visible, on-screen, or has a taskbar button\n");
+            return 1;
+        }
+    }
+#endif
     if (!virtualMode && (SDL_WasInit(SDL_INIT_GAMEPAD) & SDL_INIT_GAMEPAD)) {
         fprintf(stderr, "script mode initialized the gamepad subsystem\n");
         return 1;

@@ -55,7 +55,7 @@ wait:20
 press:cross
 wait:600
 log
-# Lion Happi is the measured second male stock row, 14400 yen. Buy, equip and sell Yosuke's replaced Chain Mail through the real confirmations.
+# Purchase and equip the selected armor, then sell the replaced item.
 press:down
 wait:20
 press:cross
@@ -102,7 +102,7 @@ press:down
 press:down
 press:cross
 wait:300
-# Two escapes cost 1900 yen; retain the three already owned.
+# Purchase escape items and retain existing stock.
 press:up
 wait:30
 press:cross
@@ -110,7 +110,7 @@ choose:1
 wait:600
 waitstate:0x00797890==5
 waitstate:0x0079b68c==1326
-# Retail prices are Medicine 850 and Value Medicine 1900. Reopen the shop's initial Medicine row rather than moving through unaffordable entries.
+# Reopen the shop and select the intended recovery items.
 press:circle
 wait:300
 press:circle

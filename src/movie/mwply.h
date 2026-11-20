@@ -26,4 +26,23 @@ void *p4pc_movie_audio_current(void);
  * buffers otherwise; see mwply.c). For tests and tools that read the buffer. Returns 0 or -1. */
 int p4pc_mwply_fill_tiled(void *h);
 
+/* Lockstep-only online replay of retail's movie (src/platform/lockstep_disc.c, NG-7j). Retail's preparation time and
+ * frame schedule depend on its own frame history (docs/movie_player.md), so before the initial anchor a
+ * state-aligned run answers each mwPlyGetCurFrm poll and status read of a movie with the live retail run's answer
+ * to the same poll. NULL in every other run: the player paces itself.
+ * start returns the movie's replay id (non-zero) when it is replayed; poll returns retail's GetCurFrm answer for
+ * the movie (its frame number, or -1: no frame); status its status read. observe_* get the port's own result
+ * (the replay layer fails the run when a delivered frame is not retail's) and the status read. */
+typedef struct P4MovieReplay {
+    int (*start)(const char *path);
+    int32_t (*poll)(int id);
+    int32_t (*status)(int id);
+    void (*observe_poll)(uint32_t calls, int32_t stat, int32_t retail, int32_t delivered);
+    void (*observe_status)(uint32_t calls, int32_t stat);
+} P4MovieReplay;
+extern const P4MovieReplay *p4pc_movie_replay;
+
+/* 1 while a movie is being prepared or played. */
+int p4pc_mwply_active(void);
+
 #endif

@@ -12,9 +12,9 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 FILES = ROOT / "src/platform/files"
 ACCEPTED = {
-    "sce_adxf.c": "5126d18c5edb0be1ddd2b8aeca5a0a92b44eb5f981a2aab944d3d02732d503f1",
+    "sce_adxf.c": "9f9239bbb11d68ae4301c121515e497c2eabed1144576a0eaac0ff9316d76a8d",
     "rofs_host.c": "2bbb6b5dc172ba82d7b10c7296c03b13ac15a93fb7c324204cd49436dc69b5e0",
-    "adxf_partition.c": "e4bb8f3797fe84171a37649a8071cf57c713df4bb7c772fecd628ff89f3f6dea",
+    "adxf_partition.c": "789ebbee761d6a4422f99e6d1ff093c319880a563b957d4f432b65223ac1e2eb",
     "adxf_fsvr.c": "22dca4f75fa51226c408327fff112ff7618f245410bf8e6d11a22f2542e3f69d",
 }
 API_INCLUDE = '#include "adxf_host.h"\n'

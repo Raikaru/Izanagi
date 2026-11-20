@@ -1,4 +1,4 @@
-# From canonical story0523tv: defeat the nearest Wind-weak Gigas group, recover with real field Media, then use native Full Assault / Heal-Support and repeated Senri Media to reach Hall 5, escape and save.
+# From the saved checkpoint: defeat the nearest group, recover, reach Hall 5, escape and save.
 timeout:10000
 wait:140
 press:cross

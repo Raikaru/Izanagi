@@ -200,7 +200,7 @@ wait:100
 waitstate:0x00796e64==4
 waitstate:0x00796eec==4
 waitstate:0x00796f74==4
-# Teddie needs turns to find an exit. If Escape reports "Be patient", cancel back to the wheel and Guard; retry Escape on the next turn.
+# Teddie needs turns to find an exit. If Escape reports the waiting message, cancel back to the wheel and Guard; retry Escape on the next turn.
 battle:first1=circle,down,down,down,down,cross,circle,circle,circle,up,cross;first2=circle,up,cross;first3=circle,up,cross;first4=circle,up,cross;plan=circle,down,down,down,down,cross,circle,circle,circle,up,cross;skip=0;delay=80
 waittask:battle:off
 skipmsg

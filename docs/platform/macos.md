@@ -10,19 +10,12 @@ and test machines, and the list at the end says what that leaves unverified.
 ## What is built
 
 Only the [64-bit model](../port64.md). A Mac runs no 32-bit processes, and a 64-bit Mach-O process cannot map below 4 GB
-(`__PAGEZERO`), so the i386 placement of PS2 memory at its retail addresses is impossible; the guest block is reserved anywhere
-(`p4_os_reserve_aligned`, [port64.md 2.1](../port64.md)). A macOS build directory is therefore like an AArch64 Linux one:
+(the Mach-O `__PAGEZERO` mapping), so the i386 placement of PS2 memory at its retail addresses is impossible; the guest block is reserved anywhere
+(`p4_os_reserve_aligned`, [64-bit model](../port64.md)). A macOS build directory is therefore like an AArch64 Linux one:
 CMake configures the i386 targets but nothing builds them, and the target `p4_x64` builds the player (`p4pc64`), the viewer
 and every test labelled `port64`. `P4_PORT64_ARCH` comes from the host (`aarch64` on Apple silicon, `x86_64` on Intel).
 
-```sh
-git clone --recurse-submodules https://github.com/Raikaru/Izanagi.git && cd Izanagi
-sh ci/macos/build_deps.sh build/macos-deps            # clang, SDL3, FFmpeg, ANGLE (pinned, checksummed)
-sh ci/macos/configure.sh build/macos-deps build/macos # cmake -G Ninja (needs cmake and ninja)
-cmake --build build/macos --target p4_x64             # or --target p4pc64: the player only
-ctest --test-dir build/macos -L '^port64$'            # the tests that need no disc pass; game tests skip
-sh tools/package_macos.sh --deps build/macos-deps --build build/macos   # dist/p4pc-macos-<arch>-<version>.zip
-```
+For build, test and packaging commands, see [BUILDING.md](../../BUILDING.md#macos).
 
 Requirements: the Xcode command line tools (SDK, `ld`, `codesign`), CMake 3.20 or newer, Ninja and Python 3.
 
@@ -30,8 +23,8 @@ Requirements: the Xcode command line tools (SDK, `ld`, `codesign`), CMake 3.20 o
 
 - **Compiler:** clang 23.1.3 from the macOS universal build of the pinned llvm-mingw release (`20261006`, SHA-256 checked),
   the same LLVM the Linux and Windows builds use. The 64-bit mirror's rewriter census and its layout oracle are per compiler
-  major ([port64.md 2.17](../port64.md)), so one compiler for every platform keeps one set of facts. Only `clang`, `llvm-nm`,
-  `llvm-objdump`, their two LLVM dylibs and the builtin headers are extracted. Linking uses Apple's `ld` (`-fuse-ld=ld`, set by
+  major. Only `clang`, `llvm-nm`, `llvm-objdump`, their two LLVM dylibs and the builtin headers are extracted.
+  Linking uses Apple's `ld` (`-fuse-ld=ld`, set by
   `ci/macos/configure.sh`), the SDK is the command line tools' (`xcrun --show-sdk-path`).
 - **SDL3 3.2.10** and the **LGPL-only FFmpeg 7.1.1 subset**: the same tarballs, checksums and configure options as
   `ci/win32/build_deps.sh`, built as dylibs whose install names are `@rpath/...`, with the architecture's assembly like the other
@@ -145,21 +138,32 @@ download's quarantine flag with `xattr -dr com.apple.quarantine "Persona 4 PC.ap
 
 ## CI
 
-The `macos` job of `.github/workflows/build.yml` runs on `macos-latest` (Apple silicon) and `macos-15-intel`: the dependencies
-(cached by the hash of `build_deps.sh`), configure with the census check on, `cmake --build --target p4_x64`, `ctest -L '^port64$'`
-(game tests skip without a disc), the GL context smoke (`tests/gles_context_smoke.c`: the port's own attributes, window and
-context fallbacks, window-system calls, GL loader and shader header, a triangle read back from an RGBA8 framebuffer), then the
-package (artifact `p4pc-macos-<arch>`, attached to `v*` releases). On Apple silicon the smoke must get OpenGL ES on ANGLE's Metal
-back end (`P4PC_REQUIRE_GLES=1`, `P4PC_REQUIRE_GL_RENDERER=Metal`); the Intel runners have no Metal device, ANGLE gets no EGL
-display there, and the smoke must draw through the game's fallback to Apple's desktop OpenGL instead. Both also draw with
+The `macos` job of `.github/workflows/build.yml` runs both packages on one kind of runner, `macos-latest` (Apple silicon): the
+dependencies (cached by the hash of `build_deps.sh`), configure with the census check on, `cmake --build --target p4_x64`,
+`ctest -L '^port64$'` (game tests skip without a disc), the GL context smoke (`tests/gles_context_smoke.c`: the port's own attributes,
+window and context fallbacks, window-system calls, GL loader and shader header, a triangle read back from an RGBA8 framebuffer), then
+the package (artifact `p4pc-macos-<arch>`, attached to `v*` releases). The smoke runs three ways: OpenGL ES on ANGLE's Metal back end
+(`P4PC_REQUIRE_GLES=1`, `P4PC_REQUIRE_GL_RENDERER=Metal`), then with `SDL_EGL_LIBRARY` naming a library that is not there, so that ANGLE has
+no display and the game must take its fallback to Apple's desktop OpenGL and draw (the log has to say it fell back), and with
 `P4PC_GL_API=gl`. The logs and PNGs are the artifact `macos-<arch>-gl-smoke`.
+
+**The Intel build is cross-built on Apple silicon.** `P4PC_MACOS_ARCH=x86_64` makes `ci/macos/build_deps.sh` (SDL3 and FFmpeg compiled
+with `-arch x86_64`, FFmpeg with `--enable-cross-compile`, nasm built for the host, the x64 ANGLE from Electron's x64 zip),
+`ci/macos/configure.sh` (target `x86_64-apple-macos12`, `P4_PORT64_ARCH=x86_64`, so the census baseline is
+`config/port64macos_x86_64_census.txt`) and `tools/package_macos.sh` work for Intel. The pinned clang is a universal binary, the build's
+own programs and the tests are x86_64 Mach-O files that Rosetta 2 runs, and the package is the same zip as before. This replaces the
+`macos-15-intel` job, which took 30 to 45 minutes for the same work (the Intel runners are slow and scarce); the cross build takes about 12
+minutes (dependencies 1.5, build 9, tests 2; only the dependencies are cached: the rewritten sources would take 2.5 GB of the repository's 10 GB cache space per architecture). What the Intel runner covered and this does not: the real Intel CPU (the tests ran there without
+translation), and Apple's desktop OpenGL on a Mac without Metal (the Software Renderer of a virtual machine; the fallback code path is
+the same one, taken here by removing ANGLE's EGL library, but the renderer underneath is the Apple silicon runner's). Neither was a
+statement about real Macs ("Not verified without a real Mac" below). To check the Intel binary on its own hardware run `tools/package_macos.sh`
+on an Intel Mac or add a `macos-15-intel` leg that only downloads the `p4pc-macos-x86_64` package and starts its smoke.
 
 ## Not verified without a real Mac
 
 GitHub's runners are virtual machines without a display, a GPU of their own, controllers or audio devices. Not covered:
 
-1. **A real GPU.** The arm64 runners' Metal device is Apple's paravirtual GPU, the Intel runners have none (ANGLE's Metal back end
-   never ran on Intel), and their desktop OpenGL is the Apple Software Renderer; frames were never compared on M-series or AMD/Intel
+1. **A real GPU.** The runners' Metal device is Apple's paravirtual GPU (ANGLE's Metal back end has never run on an Intel Mac's GPU); frames were never compared on M-series or AMD/Intel
    Mac GPUs ([renderer_port.md 10.6](../renderer_port.md)). The scene and game gates need the disc and are not run on the runners.
 2. **Retina scaling and the window**: a `backingScaleFactor` of 2, the present blit into a high-density window, fullscreen
    (separate Space), window resizing and multiple displays.

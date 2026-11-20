@@ -2,8 +2,7 @@
 # 06/24 follows collection0623_to_home0624; sleep into 06/25 and, after school, gather the
 # information on Rise that Teddie needs before Marukyu Striptease opens:
 #   Rise's grandmother at Marukyu Tofu, Chie in the shopping district, the photographer at
-#   Samegawa ("Trade information"), the Risette fan on Practice Building 2F, and the
-#   photographer again ("I think she's stressed.").
+#   Samegawa, the fan on Practice Building 2F, and the photographer again.
 # Then enter the TV from the Junes food court and save at the Entrance butterfly.
 timeout:20000
 wait:140
@@ -141,7 +140,7 @@ timeout:4000
 skipmsg
 waitfield:6:5
 waitcontrol:on
-# The Risette fan: "It seems like Rise has a lot on her mind..."
+# Speak to the fan.
 timeout:1500
 walk:-1800,1167,50
 walk:-924,1167,60
@@ -150,7 +149,7 @@ press:cross
 wait:60
 timeout:6000
 skipmsg
-# Go into town -> Samegawa; the photographer now offers "I think she's stressed."
+# Go into town -> Samegawa; speak to the photographer again.
 press:square
 waitchoice
 choose:4
@@ -177,7 +176,7 @@ choose:2
 timeout:8000
 skipmsg
 log
-# Junes food court: "Enter the TV" is accepted now.
+# The TV entrance at the Junes food court is now available.
 wait:300
 press:square
 waitchoice

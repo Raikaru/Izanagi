@@ -1,8 +1,8 @@
 # Compiled functions that a marker or a symbol places at a retail address but that are not the retail
 # function there. Lines: 0xADDR name  # evidence. gen_port stops resolving the address to `name`: a
 # port translation named func_<addr8> takes it, otherwise the address is a trap (loud if reached).
-# The name still links by name for the decomp's own C callers. Found by the marker audit
-# (tools/asm_worklist.py --marker-audit); reachability from the retail call graph (jal/j, lui+addiu
+# The name still links by name for the decomp's own C callers. Found by a marker audit;
+# reachability from the retail call graph (jal/j, lui+addiu
 # address pairs and data words over the whole image) joined with the pcsx2-hook block coverage.
 0x0050D840 mwPlyGetNumTotalDec  # RE4 body differs from retail. No callers, pairs or data words in retail (library API nothing calls).
 0x0050DCD0 mwPlyGetNumSkipEmptyB  # RE4 body differs from retail. Only caller mwPlyGetPlyInf (0x0050ddf8), which nothing calls.

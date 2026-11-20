@@ -13,8 +13,7 @@ target_include_directories(rtanim_test PRIVATE "${CMAKE_SOURCE_DIR}/include")
 target_link_libraries(rtanim_test m)
 add_test(NAME rtanim COMMAND rtanim_test)
 
-# The battle opening camera's curve keys from the production mirror and overrides in the EE float mode (slerp blend 001ba790, slerp setup
-# 003dcc70, three-pose curve 001baff0), bit for bit against the retail keys of the collision 900 first-action anchor (tests/battle_camera_curve_test.c).
+# Exercise the production camera-curve functions against synthetic keys.
 add_executable(battle_camera_curve_test battle_camera_curve_test.c "${P4_TABLES}"
   $<TARGET_OBJECTS:p4decomp> $<TARGET_OBJECTS:p4port> $<TARGET_OBJECTS:p4portee>)
 target_include_directories(battle_camera_curve_test PRIVATE "${CMAKE_SOURCE_DIR}/include")
@@ -24,6 +23,17 @@ target_link_libraries(battle_camera_curve_test m ${P4_SDL3_LIB} ${P4_FFMPEG_LIBS
 p4_ps2_exe(battle_camera_curve_test)
 add_test(NAME battle_camera_curve COMMAND battle_camera_curve_test)
 set_tests_properties(battle_camera_curve PROPERTIES SKIP_RETURN_CODE 77 TIMEOUT 60)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/battle_camera_curve_retail_test.c")
+  add_executable(battle_camera_curve_retail_test battle_camera_curve_retail_test.c "${P4_TABLES}"
+    $<TARGET_OBJECTS:p4decomp> $<TARGET_OBJECTS:p4port> $<TARGET_OBJECTS:p4portee>)
+  target_include_directories(battle_camera_curve_retail_test PRIVATE "${CMAKE_SOURCE_DIR}/include")
+  target_compile_options(battle_camera_curve_retail_test PRIVATE -fno-builtin)
+  target_compile_definitions(battle_camera_curve_retail_test PRIVATE ${P4_PORT_DEFINES})
+  target_link_libraries(battle_camera_curve_retail_test m ${P4_SDL3_LIB} ${P4_FFMPEG_LIBS})
+  p4_ps2_exe(battle_camera_curve_retail_test)
+  add_test(NAME battle_camera_curve_retail COMMAND battle_camera_curve_retail_test)
+  set_tests_properties(battle_camera_curve_retail PROPERTIES SKIP_RETURN_CODE 77 TIMEOUT 60)
+endif()
 
 # The quaternion overrides that sum retail accumulator chains (003dcc70 00415bc0 004165a0 00416e10 00417310), production objects against the
 # unchanged retail instructions in the R5900 interpreter on 4096 deterministic cases each, every guest byte equal (tests/anim_accumulator_order_test.c).
@@ -37,6 +47,18 @@ target_link_libraries(anim_accumulator_order_test m ${P4_SDL3_LIB} ${P4_FFMPEG_L
 p4_ps2_exe(anim_accumulator_order_test)
 add_test(NAME anim_accumulator_order COMMAND anim_accumulator_order_test)
 set_tests_properties(anim_accumulator_order PROPERTIES SKIP_RETURN_CODE 77 TIMEOUT 120)
+
+# Port-defined null-frame storage and every production path that reads it.
+# This fixture needs no retail files and is cloned for Linux/Windows x64.
+add_executable(ps2_low_ram_test ps2_low_ram_test.c "${P4_TABLES}"
+  $<TARGET_OBJECTS:p4decomp> $<TARGET_OBJECTS:p4port> $<TARGET_OBJECTS:p4portee>)
+target_include_directories(ps2_low_ram_test PRIVATE "${CMAKE_SOURCE_DIR}/include")
+target_compile_options(ps2_low_ram_test PRIVATE -fno-builtin)
+target_compile_definitions(ps2_low_ram_test PRIVATE ${P4_PORT_DEFINES})
+target_link_libraries(ps2_low_ram_test m ${P4_SDL3_LIB} ${P4_FFMPEG_LIBS})
+p4_ps2_exe(ps2_low_ram_test)
+add_test(NAME ps2_low_ram COMMAND ps2_low_ram_test)
+set_tests_properties(ps2_low_ram PROPERTIES TIMEOUT 30)
 
 # The BMP reader (override 003d8c00) against a memory-backed file layer and stub image callees.
 add_executable(bmp_test bmp_test.c "${CMAKE_SOURCE_DIR}/overrides/003d8c00.c" ${P4_GUEST_TEST_SRC})

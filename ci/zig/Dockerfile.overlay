@@ -1,0 +1,16 @@
+# Strictly additive toolchain bootstrap, official nightly published 2026-11-07.
+# Context: a directory containing the SHA-pinned x86_64 Linux archive below.
+# Pass an accepted immutable sha256:<id> as P4PC_BASE_IMAGE; use a NEW target tag.
+# Never rebuild dependencies, install packages, or retag the accepted base image.
+# With Podman, pass --no-cache --identity-label=false: cached images can retain an added Buildah label.
+ARG P4PC_BASE_IMAGE
+FROM ${P4PC_BASE_IMAGE}
+ARG ZIG_VERSION=0.18.0-dev.935+ead8f5a7a
+ARG ZIG_SHA256=76258449f1088b6f80359944f9735a4c96e94246e553111155f0af6457ff8de4
+COPY zig-x86_64-linux-0.18.0-dev.935+ead8f5a7a.tar.xz /tmp/p4pc-z1-zig.tar.xz
+RUN echo "${ZIG_SHA256}  /tmp/p4pc-z1-zig.tar.xz" | sha256sum -c - \
+ && mkdir -p /opt/zig-${ZIG_VERSION} \
+ && tar -xJf /tmp/p4pc-z1-zig.tar.xz -C /opt/zig-${ZIG_VERSION} --strip-components=1 \
+ && rm /tmp/p4pc-z1-zig.tar.xz \
+ && test "$(/opt/zig-${ZIG_VERSION}/zig version)" = "${ZIG_VERSION}"
+ENV P4_ZIG=/opt/zig-${ZIG_VERSION}/zig

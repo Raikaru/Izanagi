@@ -1,5 +1,5 @@
-# From story0422tv: fuse Izanagi 5 + Angel 4 into Orobas 8 (Magician).
-# The fixed preview timing inherits Zio and Patra; Orobas supplies Agi and fire resistance.
+# From story0422tv: fuse the selected Personas.
+# Confirm the fusion and prepare the resulting Persona.
 timeout:6000
 wait:140
 press:cross

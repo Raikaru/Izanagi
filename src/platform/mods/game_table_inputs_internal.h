@@ -17,10 +17,16 @@ struct P4GameTableInput {
     uint32_t sealed;
     P4ContentFingerprint fingerprint;
     uint8_t *bytes;
+    /* Nonempty only for an input issued from a verified Golden cache entry. */
+    char golden_origin[128];
     /* Only actual native semantic use mutates this owner's use ledger. */
     struct P4GameTableNativeUses *native_uses;
     uint32_t native_used, digest_valid;
     uint8_t digest[32];
     P4GameTableInputSpan spans[];
 };
+P4GameTableInput *p4_game_table_input_from_golden_cache(P4GameTableInputKind kind,
+    const uint8_t *bytes, size_t size, const char *cache_key);
+/* Host only: the returned allocation must never enter a guest pointer slot. */
+int p4_game_table_admission_golden_copy(const char *path, uint8_t **bytes, uint32_t *size);
 #endif

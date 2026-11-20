@@ -7,15 +7,10 @@ import math
 import struct
 import sys
 
-PROCEDURES = {
-    "rain": "sdl04_12_AM_A",
-    "riverbank-vignette": "sdl04_16_AM_A",
-    "arcana-rankup-sparkles": "155_commu_open",
-    "shadow-haze": "sdl04_15_PM_C",
-    "velvet-windows-blurry": "upstair_myroom",
-    "tv-world-enter": "sdl04_14_PM_C",
-    "near-fog": None,
-}
+PROCEDURES = (
+    "rain", "riverbank-vignette", "arcana-rankup-sparkles", "shadow-haze",
+    "velvet-windows-blurry", "tv-world-enter", "near-fog",
+)
 RAM_START = 0x00100000
 RAM_END = 0x02000000
 CAPTURE_SLACK = 600
@@ -124,7 +119,7 @@ def check(snapshot, scene, metadata, nearby_camera=False, *, state_only=False):
     # A timing-only witness compares captured game-state words separately, not image/camera fidelity.
     if scene == "tv-world-enter":
         # cldDungeonIn's opaque fill and 2D ring compositor occlude the background camera.
-        # The canonical retail state has compositor state 1, frame 104.
+        compositor = expected["compositor"]
         tunnel = None
         for head in (0x00764ADC, 0x00764AF4, 0x00764AE8):
             node, seen = word(head), set()
@@ -138,8 +133,8 @@ def check(snapshot, scene, metadata, nearby_camera=False, *, state_only=False):
                     tunnel = unpack("<2i", work)
                     break
                 node = word(node + 0x3C)
-        if tunnel is None or tunnel[0] != 1 or abs(tunnel[1] - 104) > 5:
-            errors.append(f"TV tunnel compositor {tunnel} != retail phase (1,104)")
+        if tunnel is None or tunnel[0] != compositor["state"] or abs(tunnel[1] - compositor["frame"]) > 5:
+            errors.append(f"TV tunnel compositor {tunnel} does not match {compositor}")
     elif nearby_camera and not state_only:
         if scene != "near-fog":
             raise ValueError("nearby camera is allowed only for the fog-region comparison")
@@ -179,12 +174,12 @@ def check(snapshot, scene, metadata, nearby_camera=False, *, state_only=False):
         procedures.append(label)
         procedure_states.append((label, word(node + 0x12c), word(node + 0x18), word(node + 0x138)))
         node = word(node + 0x150)
-    wanted = PROCEDURES[scene]
+    registration = capture_registration(expected)
+    wanted = registration.get("procedure")
     if wanted is None and procedures:
         errors.append(f"unexpected active procedures: {procedures}")
     elif wanted is not None and wanted not in procedures:
         errors.append(f"active procedures {procedures} do not include retail {wanted}")
-    registration = capture_registration(expected)
     if "procedure" in registration:
         target = (registration["procedure"], registration["index"], registration["pc"])
         if "event" in registration:

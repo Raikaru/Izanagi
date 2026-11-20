@@ -183,7 +183,20 @@ def instrument(mirror, units, build, gp, enabled=True):
             lines += ([f"            {guarded_call};", "            return;"] if ret == "v"
                       else [f"            return {guarded_call};"])
             lines += ["        }", "    }\n"]
-            edits.append((opening + 1, "\n".join(lines)))
+            # The mirrored SFD getter must reject invalid indices before an
+            # enabled mod can observe them. Fail closed if its reviewed guard
+            # or signature changes rather than silently moving the hook.
+            insert = opening + 1
+            if address == 0x00524ff8:
+                expected = ("\n    if ((Uint32)id >= SFD_COND_NUM) {\n"
+                            "        p4_sfd_invalid_condition_key(id);\n"
+                            "        *val = 0;\n"
+                            "        return 0;\n"
+                            "    }")
+                if name != "SFD_GetCond" or names != ["sfd", "id", "val"] or not text.startswith(expected, insert):
+                    raise ValueError("SFD_GetCond pre-dispatch condition guard is missing or changed")
+                insert += len(expected)
+            edits.append((insert, "\n".join(lines)))
             # Keep marshalling out of the inactive arm even under future LTO;
             # do not inhibit the retail body's normal inlining decisions.
             source += [f"extern P4ModFunction {descriptor};", "__attribute__((noinline))",
@@ -192,6 +205,13 @@ def instrument(mirror, units, build, gp, enabled=True):
             for i, kind in enumerate(args):
                 source.append(f"    values[{i}].{slot(kind)} = {pack(kind, f'a{i}')};")
             source.append(f"    p4_mod_dispatch(&{descriptor}, values, &result);")
+            if address == 0x001de800:
+                if name != "btlAICommandPickTableAction" or sig != "Bp":
+                    raise ValueError("AI table-group hook signature changed")
+                source.insert(1, '#include "p4pc/game_elements_ai_native.h"')
+                source += [
+                    "    if (p4_game_elements_ai_native_group_result(P4_G2H((uint32_t)values[0].u),",
+                    "        (uint8_t)result.u)) p4_game_elements_ai_native_fail();"]
             source.append("    return;" if ret == "v" else f"    return {unpack(ret, 'result.' + slot(ret))};")
             source.append("}")
             # Decomp's force-included CRT aliases change the compiled symbol;

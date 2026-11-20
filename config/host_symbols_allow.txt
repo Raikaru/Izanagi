@@ -32,3 +32,5 @@ _alloca Compiler ABI native-stack allocation; native stack pointer is not stored
 _GLOBAL_OFFSET_TABLE_ ELF position-independent linkage anchor, not a CRT computation or a guest address.
 bzero    Darwin zeroing entry point: LLVM lowers memset(p, 0, n) to it on Apple arm64; stores exactly n zero bytes and returns nothing, the byte result memset gives.
 __bzero  The same Darwin zeroing entry point under the name LLVM calls on Apple x86_64; stores exactly n zero bytes, no result.
+p4_mod_reward_begin  Defeated-enemy reward scope (mod hook state only): records that the next dispatched EXP/yen calculator belongs to the aggregation site; takes and returns an unsigned scope token, no guest memory, pointer, string or ordering effect.
+p4_mod_reward_end  Restores the token p4_mod_reward_begin returned; mod hook state only, no guest memory, pointer, string or ordering effect and no result.

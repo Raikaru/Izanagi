@@ -23,6 +23,7 @@
 #include "p4pc/platform.h"
 #include "p4snd.h"
 #include "sdr.h"
+#include "p4snd_reverb.h"
 #include "vfs.h"
 
 #define STEP 240 /* frames: 5 ms */
@@ -520,31 +521,25 @@ static void test_ramp(void)
     stop_events(h);
 }
 
-/* The reverb unit with the room preset's registers (the PS1 / libsd values; the work area is 0x26c0 bytes): a
- * note whose tone routes to the reverb leaves a tail after it ends, the same note without the wet switches
- * does not, and the tail dies away. */
-static void test_reverb(void)
+/* A routed note must leave a decaying tail, while dry-only routing must not.
+ * The private ISO witness reuses these same audio assertions with the actual
+ * room registers; the public fixture supplies its own synthetic network. */
+static void test_reverb_preset(const char *name, const int16_t regs[32], uint32_t work_bytes)
 {
-    static const int16_t room[32] = {
-        0x007d, 0x005b, 0x6d80, 0x54b8, (int16_t)0xbed0, 0x0000, 0x0000, (int16_t)0xba80, 0x5800, 0x5300,
-        0x04d6, 0x0333, 0x03f0, 0x0227, 0x0374, 0x01ef, 0x0336, 0x01b7, 0x0335, 0x01b6,
-        0x0334, 0x01b5, 0x0334, 0x01b5, 0x0334, 0x01b5, 0x01b4, 0x0136, 0x00b8, 0x005c,
-        (int16_t)0x8000, (int16_t)0x8000,
-    };
     static const uint8_t ev[] = { 0x00, 0x90, 0x00, 0x00, 0x7f, 0x14, 0xa0, 0x00, 0x00, 0x00, 0x00, 0xff };
     uint8_t bd[64];
     int32_t h[4];
     int pass;
     double tail[2], late[2];
 
-    fprintf(stderr, "sdr_test: reverb\n");
+    fprintf(stderr, "sdr_test: reverb (%s)\n", name);
     make_bd_square(bd); /* the effect unit works at 24 kHz: a tone it can pass */
     for (pass = 0; pass < 2; pass++) {
         tone_mix = pass ? 0x0f : 0x03; /* pass 1: dry and reverb, both sides */
         if (start_events(bd, 64, ev, sizeof ev, h) < 0) {
             return;
         }
-        p4snd_reverb_setup(room, 0x26c0);
+        p4snd_reverb_setup(regs, work_bytes);
         p4snd_reverb_enable(1);
         p4snd_reverb_volume(0x3fff, 0x3fff);
         render_rms(30);          /* the note (20 ms) and its release */
@@ -567,6 +562,63 @@ static void test_reverb(void)
     p4snd_reverb_enable(0);
 }
 
+static void test_reverb(void)
+{
+    int16_t regs[32] = {0};
+
+    /* One comb tap and a half-gain 40 ms feedback loop. Each all-pass has
+     * zero gain, so it is just a 4/8-sample delay. Gains are our own 1/2
+     * in signed 1.15; addresses are in four-cell units. Separate writes by
+     * 16384 samples so they cannot alias during this 590 ms observation. */
+    regs[0] = 1;
+    regs[1] = 2;
+    regs[2] = regs[3] = regs[7] = regs[30] = regs[31] = 1 << 14;
+    regs[10] = 0x0400;
+    regs[11] = 0x1400;
+    regs[12] = regs[16] = regs[10] - 240; /* 960 cells / 24 kHz = 40 ms */
+    regs[13] = regs[17] = regs[11] - 240;
+    regs[18] = 0x2400;
+    regs[19] = 0x3400;
+    regs[26] = 0x4400;
+    regs[27] = 0x5400;
+    regs[28] = 0x6400;
+    regs[29] = 0x7400;
+    test_reverb_preset("synthetic delay network", regs, 0x40000);
+}
+
+/* A separate process mounts only the Python fixture's synthetic IRX. Failed
+ * authentication must not install any reverb, even after effect enable. */
+static int test_bad_preset_hash(void)
+{
+    static const uint8_t ev[] = { 0x00, 0x90, 0x00, 0x00, 0x7f, 0x14, 0xa0, 0x00, 0x00, 0x00, 0x00, 0xff };
+    uint8_t bd[64];
+    int32_t h[4];
+    double tail;
+
+    if (vfs_mount(NULL, ".") != 0) {
+        fail("synthetic IRX mount");
+        return 1;
+    }
+    make_bd_square(bd);
+    tone_mix = 0x0f;
+    if (start_events(bd, sizeof bd, ev, sizeof ev, h) < 0) {
+        return 1;
+    }
+    check_eq("unverified reverb mode", func_0043c0c0(3, 0x83, 0x105, 0x3c, 0), 0);
+    check_eq("unverified reverb depth", func_0043c0c0(3, 0x84, 0x3c, 0x3c, 0), 0);
+    check_eq("unverified reverb enable", func_0043c0c0(3, 0x82, 1, 0, 0), 0);
+    check_eq("unverified presets stay inactive", p4rev_active(), 0);
+    render_rms(30);
+    tail = render_rms(150);
+    if (tail > 0.0002) {
+        fail("unverified presets left an audible tail");
+    }
+    stop_events(h);
+    p4snd_shutdown();
+    fprintf(stderr, "sdr_test: rejected synthetic IRX; dry-only tail rms %.5f\n", tail);
+    return failures ? 1 : 0;
+}
+
 /* The game's own reverb setup (mdlRenderInitializeBuffers): mode 5 (hall) with the work area cleared, effect volume 60 of
  * 127, effect on; the presets come from LIBSD.IRX on the disc. A routed tone then leaves a tail. */
 static void test_reverb_game(void)
@@ -583,9 +635,13 @@ static void test_reverb_game(void)
         tone_mix = 0x03;
         return;
     }
+    /* Discard the previous direct mixer fixture, so a failed disc load cannot
+     * pass by accidentally re-enabling its old room/synthetic preset. */
+    check_eq("reverb off before preset load", func_0043c0c0(3, 0x83, 0, 0, 0), 0);
     check_eq("reverb mode", func_0043c0c0(3, 0x83, 0x105, 0x3c, 0), 0);
     check_eq("reverb depth", func_0043c0c0(3, 0x84, 0x3c, 0x3c, 0), 0);
     check_eq("reverb on", func_0043c0c0(3, 0x82, 1, 0, 0), 0);
+    check_eq("authenticated hall reverb active", p4rev_active(), 1);
     render_rms(30);
     tail = render_rms(150);
     render_rms(800);
@@ -665,7 +721,7 @@ static uint8_t *read_disc(const char *path, uint32_t *size)
     return buf;
 }
 
-int main(void)
+int main(int argc, char **argv)
 {
     const char *iso = getenv("P4PC_ISO");
     uint8_t hd[0x100], sq[0x100], bd[64];
@@ -673,6 +729,9 @@ int main(void)
     int skipped = 0;
 
     p4snd_use_offline();
+    if (argc == 2 && strcmp(argv[1], "--bad-preset-hash") == 0) {
+        return test_bad_preset_hash();
+    }
 
     hd_size = make_hd(hd, 64);
     sq_size = make_sq(sq);

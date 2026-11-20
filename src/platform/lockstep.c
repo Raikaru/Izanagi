@@ -7,6 +7,7 @@
 #include "lockstep_draw.h"
 #include "p4pc/lockstep_format.h"
 #include "p4pc/lockstep_align_runtime.h"
+#include "p4pc/lockstep_disc.h"
 #include "p4pc/crt.h"
 #include "p4pc/guest.h"
 #include "p4pc/os.h"
@@ -41,6 +42,9 @@ static uint32_t sAnchor;
 static int sAnchorSet;
 static int sAligned;
 static int sReplayAligned;
+static int sFlushPads;
+static int sFollow;   /* the aligned input log is a retail-ahead tape the port follows wait-relatively (NG-7k) */
+static int sCrossDown;
 static char sCompletePath[1100];
 static P4LockstepDrawBuffer sDraw;
 
@@ -82,24 +86,32 @@ static void pad(uint8_t *packet, size_t size) {
     if (sReplay) {
         if (sReplayAligned) {
             const P4WalkHost host={.read32=word};
-            memcpy(record,p4pc_align_replay_pad(&host),sizeof record);
+            memcpy(record,sFollow ? p4pc_align_follow_pad(&host) : p4pc_align_replay_pad(&host),sizeof record);
         } else read_record(record,P4LS_PAD);
         memcpy(packet,record+8,32);
     }
     if (sAligned) {
         const P4WalkHost host={.read32=word};
         uint32_t gate[8];
-        if (p4pc_align_pad_gate(&host,gate)) {
-            p4ls_put(record,P4LA_PAD_GATE);
-            p4ls_put(record+4,word(NULL,P4LS_GAME_FRAME));
-            for (unsigned i=0;i<8;i++) p4ls_put(record+8+i*4,gate[i]);
+        const int cross_down=!(packet[3]&0x40u);
+        const int title_gate=p4pc_align_pad_gate(&host,gate);
+        if (title_gate && cross_down) p4pc_lockstep_disc_pre_begin();   /* the press: retail's input is frame-locked from here */
+        const int dialog_gate=!title_gate && cross_down && !sCrossDown && p4pc_align_dialog_gate(&host,gate);
+        if (title_gate || dialog_gate) {
+            const uint32_t offset=dialog_gate ? p4pc_align_dialog_wait_offset(&host,gate) : 0;
+            if (!p4la_encode_pad_gate(record,word(NULL,P4LS_GAME_FRAME),gate,dialog_gate,offset))
+                fail("dialog wait offset exceeds the aligned gate format");
             record_bytes(record);
         }
+        sCrossDown=cross_down;
     }
     p4ls_put(record,P4LS_PAD);
     p4ls_put(record+4,word(NULL,P4LS_GAME_FRAME));
     memcpy(record+8,packet,32);
     record_bytes(record);
+    /* An online disc replay waits inside the update for retail's polls: retail must have this
+     * update's pad reads before the frame is presented. */
+    if (sFlushPads && sRecord && fflush(sRecord)) fail("writing input log");
     if (sAligned) p4pc_align_pad_read();
 }
 static FILE *open_file(const char *path, const char *mode) {
@@ -129,6 +141,12 @@ void p4pc_lockstep_init(void) {
         sAligned=aligned && !strcmp(aligned,"1");
     }
     if (sAligned && sLive) fail("state-aligned barriers are offline-only; live recording remains nonblocking");
+    {
+        const char *follow=getenv("P4PC_LOCKSTEP_TAPE_FOLLOW");
+        sFollow=follow && !strcmp(follow,"1");
+        if (sFollow && (!sAligned || !replay)) fail("tape-following requires a state-aligned replay of the tape");
+    }
+    sFlushPads=sAligned && getenv("P4PC_LOCKSTEP_DISC_ONLINE") && *getenv("P4PC_LOCKSTEP_DISC_ONLINE");
     if (sScenarioReplay && (!replay || !sDir || sLive || sAligned))
         fail("scenario replay requires a strict offline replay and diagnostic directory");
     sMarks=getenv("P4PC_LOCKSTEP_MARKS");
@@ -256,7 +274,7 @@ void p4pc_lockstep_frame(void (*capture)(const char *)) {
     flags=sAligned ? (P4LS_EFFECT_RNG|P4LA_FLAG|p4pc_align_profile()) : (sAnchorSet && frame>=sAnchor ? P4LS_EFFECT_RNG : 0);
     if (sAligned) p4pc_align_prepare(&host,marker);
     if (sReplay) {
-        if (sReplayAligned) memcpy(expected,p4pc_align_replay_frame(&host),sizeof expected);
+        if (sReplayAligned) memcpy(expected,sFollow ? p4pc_align_follow_frame(&host,marker) : p4pc_align_replay_frame(&host),sizeof expected);
         else read_record(expected,P4LS_FRAME);
         if (!sAligned) flags=p4ls_get(expected)&P4LS_EFFECT_RNG;
     }

@@ -41,7 +41,7 @@ def main():
     lock.parent.mkdir(parents=True, exist_ok=True)
     fd = os.open(lock, os.O_WRONLY | os.O_CREAT | os.O_EXCL)
     try:
-        os.write(fd, f"PortARM restart witness pid={os.getpid()}\n".encode())
+        os.write(fd, f"Android restart test pid={os.getpid()}\n".encode())
     except BaseException:
         lock.unlink()
         raise

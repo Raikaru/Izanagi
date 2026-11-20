@@ -19,5 +19,11 @@ if(NOT P4_WIN32)
     ENVIRONMENT "P4_MIPSDIFF_DIR=${CMAKE_SOURCE_DIR}/tools/mipsdiff")
   set_tests_properties(ovdiff_subset PROPERTIES SKIP_RETURN_CODE 77 TIMEOUT 600 WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
     ENVIRONMENT "P4_MIPSDIFF_DIR=${CMAKE_SOURCE_DIR}/tools/mipsdiff")
+  # A selected RenderWare clean subsystem (docs/rw_clean.md): every clean function with a retail address against the retail code.
+  foreach(sub IN LISTS P4_RW_CLEAN_SUBSYSTEMS)
+    add_test(NAME rwclean_ovdiff_${sub} COMMAND ovdiff -n 200 env "@${CMAKE_SOURCE_DIR}/tests/rwclean_ovdiff_${sub}.txt")
+    set_tests_properties(rwclean_ovdiff_${sub} PROPERTIES SKIP_RETURN_CODE 77 TIMEOUT 900 WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
+      ENVIRONMENT "P4_MIPSDIFF_DIR=${CMAKE_SOURCE_DIR}/tools/mipsdiff")
+  endforeach()
 endif()
 

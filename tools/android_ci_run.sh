@@ -89,7 +89,7 @@ assets="$src/build/android/package-assets"
 mkdir -p "$assets/licenses" "$assets/source"
 cp "$src/third_party/licenses/FFmpeg-LGPL-2.1.txt" "$src/third_party/licenses/SDL3-zlib.txt" "$assets/licenses/"
 cp "$src/third_party/miniz/LICENSE" "$assets/licenses/miniz-MIT.txt"
-cp "$src/third_party/licenses/LodePNG-zlib.txt" "$src/third_party/licenses/yxml-MIT.txt" "$src/third_party/licenses/fdlibm-Sun.txt" \
+cp "$src/third_party/licenses/LodePNG-zlib.txt" "$src/third_party/licenses/cgltf-MIT.txt" "$src/third_party/licenses/yxml-MIT.txt" "$src/third_party/licenses/fdlibm-Sun.txt" "$src/third_party/licenses/newlib-BSD.txt" \
   "$src/third_party/licenses/recvx-decomp-MIT.txt" "$src/third_party/licenses/sky2hook-permission.txt" "$assets/licenses/"
 cp "$src/LICENSE" "$assets/licenses/p4pc-MIT.txt"
 cp "$src/NOTICE" "$assets/licenses/NOTICE.txt"
@@ -146,7 +146,7 @@ if [ "$variant" = release ]; then
 fi
 
 # iOS EGL-on-CAMetalLayer plumbing (src/render/p4gl_egl.c, P4PC_GL_VIA_EGL): no iOS SDK is available in CI (Apple's licence forbids shipping it and osxcross needs
-# one), so tools/ios_check.sh compiles it for arm64-apple-ios with clang's own headers, SDL3's public headers and stub libc declarations. Not a link or a run.
-sh "$src/tools/ios_check.sh" "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/clang" "$cache/deps/x86/include" "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include" "$src" > "$build/ios-check.log" 2>&1 \
+# one), so tools/ios_check.sh (given the SDL3 headers of the ABI built here: they are the same on every ABI, and only this ABI is in a fresh cache) compiles it for arm64-apple-ios with clang's own headers, SDL3's public headers and stub libc declarations. Not a link or a run.
+sh "$src/tools/ios_check.sh" "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/clang" "$cache/deps/$abi/include" "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include" "$src" > "$build/ios-check.log" 2>&1 \
   && echo "P4PC ios-plumbing compile check rc=0 (arm64-apple-ios13.0, no SDK, syntax only)" \
   || { echo "P4PC ios-plumbing compile check FAILED"; head -n 30 "$build/ios-check.log"; exit 1; }

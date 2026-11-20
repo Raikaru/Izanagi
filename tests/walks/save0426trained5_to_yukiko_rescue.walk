@@ -1,4 +1,4 @@
-# From story0426trained5: earned Media, Omoikane Tarunda, Senri Fire Null, battle rules for Ice on Yukiko and the Prince, Chie's charge Guard.
+# From story0426trained5: use the prepared skills and battle rules.
 timeout:10000
 wait:140
 press:cross
@@ -108,9 +108,9 @@ press:cross
 wait:100
 press:circle
 wait:100
-# Rules from here: Yu (Senri, Fire Null) casts Bufu, Media for anyone under 90 HP, and falls back to his weapon without SP;
+# Use the planned offensive and recovery actions;
 # Chie (Direct Commands) casts Bufu, falls back to her weapon, and Guards while Shadow Yukiko (258) is charged for
-# Burn to Ashes; Yosuke stays Heal/Support. Both strike Yukiko until she summons the Ice-weak, healing Charming Prince
+# then switch targets after the reinforcement appears
 # (269) on her second turn, then the Prince until it falls, then Yukiko again.
 battle:first1=circle,down,cross,skill:26,cross,cross,circle,circle,circle,cross,cross;plan1=circle,down,cross,skill:26,cross,cross,circle,circle,circle,cross,cross;plan=circle,down,cross,skill:26,cross,cross,circle,circle,circle,cross,cross;skip=0;delay=80;target1=258;target3=258;guard=258:3
 battlerule:hp<90@1=circle,down,cross,skill:195,cross,cross,circle,circle,circle,cross,cross

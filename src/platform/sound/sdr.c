@@ -28,6 +28,7 @@
 #include "sdr_mem.h"
 #include "vag.h"
 #include "vfs.h"
+#include "p4pc/content_digest.h"
 
 #define MAX_BANKS 8
 #define MAX_INST 8
@@ -718,14 +719,23 @@ static void apply_master(void)
  * pipe). */
 static const uint32_t rev_size[10] = { 0, 0x26C0, 0x1F40, 0x4840, 0x6FE0, 0xADE0, 0xF6C0, 0x18040, 0x18040, 0x3C00 };
 
-/* The effect presets are data of libsd (LIB31/LIBSD.IRX on the disc): nine records of 0x44 bytes, a zero word
- * and the 32 registers, in mode order, the first one the room preset (found by its first registers). */
+/* SLUS-217.82's LIB31/LIBSD.IRX: nine 0x44-byte records at file offset 0x4ED4,
+ * each a zero word followed by 32 little-endian registers. Only identities and
+ * offsets are retained here; both hashes were measured from the user's disc.
+ * Authenticate the entire file, then the independently read record block,
+ * before publishing any registers to the mixer. */
 static int load_presets(void)
 {
-    static const uint8_t room[16] = { 0x7d, 0x00, 0x5b, 0x00, 0x80, 0x6d, 0xb8, 0x54,
-                                      0xd0, 0xbe, 0x00, 0x00, 0x00, 0x00, 0x80, 0xba };
-    uint8_t *buf;
-    long long end, got = 0, i;
+    static const char file_sha256[] =
+        "7f22ebd0a7f36458ba1f82b1d26f36266e63372173f8cd72bfc32e5b8a465dd8";
+    static const char presets_sha256[] =
+        "46e7b1c689d22ed40ef9c96f682de608972cc4da3fcd5fdcb973bc7f20353375";
+    enum { PRESET_OFFSET = 0x4ED4, PRESET_STRIDE = 0x44, PRESET_COUNT = 9 };
+    uint8_t block[PRESET_COUNT * PRESET_STRIDE];
+    P4ContentDigest digest;
+    char actual[P4_CONTENT_DIGEST_HEX + 1];
+    const char *why;
+    long long end, got;
     int fd, m, k;
 
     if (S.presets_tried) {
@@ -734,39 +744,66 @@ static int load_presets(void)
     S.presets_tried = 1;
     fd = vfs_open("LIB31/LIBSD.IRX", 0);
     if (fd < 0) {
-        return 0;
+        why = "cannot be opened";
+        goto fail;
     }
     end = vfs_seek(fd, 0, 2);
-    vfs_seek(fd, 0, 0);
-    buf = end > 0 && end < (1 << 24) ? (uint8_t *)malloc((size_t)end) : NULL;
-    while (buf != NULL && got < end) {
-        int n = vfs_read(fd, buf + got, (int)(end - got > (1 << 20) ? (1 << 20) : end - got));
+    if (end < PRESET_OFFSET + (long long)sizeof block || end >= (1 << 24) ||
+        vfs_seek(fd, 0, 0) != 0) {
+        why = "has an invalid size or cannot be rewound";
+        goto fail;
+    }
+    p4_content_digest_begin(&digest);
+    for (got = 0; got < end;) {
+        int n = vfs_read(fd, block, (int)(end - got < (long long)sizeof block ? end - got : sizeof block));
 
         if (n <= 0) {
-            break;
+            why = "could not be read completely";
+            goto fail;
+        }
+        p4_content_digest_update(&digest, block, (size_t)n);
+        got += n;
+    }
+    p4_content_digest_end(&digest, actual);
+    if (strcmp(actual, file_sha256) != 0) {
+        why = "file SHA-256 mismatch";
+        goto fail;
+    }
+    if (vfs_seek(fd, PRESET_OFFSET, 0) != PRESET_OFFSET) {
+        why = "preset seek failed";
+        goto fail;
+    }
+    for (got = 0; got < (long long)sizeof block;) {
+        int n = vfs_read(fd, block + got, (int)(sizeof block - (size_t)got));
+
+        if (n <= 0) {
+            why = "preset block could not be read completely";
+            goto fail;
         }
         got += n;
     }
-    vfs_close(fd);
-    if (buf == NULL || got != end) {
-        free(buf);
-        return 0;
+    p4_content_digest(block, sizeof block, actual);
+    if (strcmp(actual, presets_sha256) != 0) {
+        why = "preset block SHA-256 mismatch";
+        goto fail;
     }
-    for (i = 0; i + 16 + 8 * 0x44 <= end; i++) {
-        if (memcmp(buf + i, room, sizeof room) == 0) {
-            for (m = 1; m <= 9; m++) {
-                const uint8_t *r = buf + i + (m - 1) * 0x44;
+    vfs_close(fd);
+    for (m = 1; m <= PRESET_COUNT; m++) {
+        const uint8_t *r = block + (m - 1) * PRESET_STRIDE + 4;
 
-                for (k = 0; k < 32; k++) {
-                    S.presets[m][k] = (int16_t)(r[k * 2] | r[k * 2 + 1] << 8);
-                }
-            }
-            S.presets_ok = 1;
-            break;
+        for (k = 0; k < 32; k++) {
+            S.presets[m][k] = (int16_t)(r[k * 2] | r[k * 2 + 1] << 8);
         }
     }
-    free(buf);
-    return S.presets_ok;
+    S.presets_ok = 1;
+    return 1;
+
+fail:
+    if (fd >= 0) {
+        vfs_close(fd);
+    }
+    fprintf(stderr, "[sound] LIB31/LIBSD.IRX %s: no reverb\n", why);
+    return 0;
 }
 
 /* sceSdSetEffectAttr: the mode selects the preset (0: off) and the work area; mode | 0x100 clears the area, which
@@ -786,7 +823,7 @@ static void reverb_mode(int32_t mode, int32_t delay, int32_t feedback)
         return;
     }
     if (!load_presets()) {
-        log_once(P4SDR_ID_SKSOUND, 3, m, "the effect presets (LIB31/LIBSD.IRX) are not on the disc: no reverb");
+        log_once(P4SDR_ID_SKSOUND, 3, m, "the effect presets (LIB31/LIBSD.IRX) are unavailable or unverified: no reverb");
         return;
     }
     if (m == 7 || m == 8) {

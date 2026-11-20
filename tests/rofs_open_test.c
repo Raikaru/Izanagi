@@ -1,18 +1,9 @@
-/* rofs_open_test: how a CRI file name finds its file, against the opens of a retail run.
+/* ROFS lookup and transfer behavior against a hand-written synthetic disc.
  *
- * Retail opens every stream and archive of the CRI layer as "VOL:NAME", "BGM:NAME", "ENV:NAME" or "BTL:NAME" through
- * cvFsOpen. The prefix names a ROFS device (one per mounted CVM volume, registered when kwlnInitSubsystems attaches
- * it), and the ROFS driver looks the bare name up in a directory list: the one the caller passes as the open's `dir`
- * (the partition loads of the voice archives pass the list of \SOUND\) or else the one H_Cdvd_SelectDirectory last
- * installed on that volume (ROFS_SetDir). BGM and ENV hold their files at the root. There is no search by base name.
- *
- * tests/data/rofs_retail_opens.txt holds the distinct opens of 30000 vsync frames of retail P4 under PCSX2 (PortTrace3's
- * call trace of 0x004e1cd8 cvFsOpen and 0x004f2798 ROFS_SetDir, the directory lists mapped to their directories with the
- * game's own tables): `<volume> <cur|blob> <directory> <name>`. All 358 opens of that run are on the disc where this
- * rule puts them; the test checks that each of the 131 distinct ones resolves to an existing disc file through
- * H_Cdvd_SelectDirectory / the directory list and p4pc_adxf_resolve_name, and through cvFsOpen on the ROFS devices
- * that the attach registers. It also checks what the rule refuses: a name in another directory, in another volume, and a
- * volume that is not attached. Skipped (exit 77) without P4PC_ISO and P4PC_ELF. */
+ * The fixture covers current-directory and explicit-blob lookup, all four
+ * attached volumes, wrong-directory and wrong-volume rejection, and deferred
+ * transfers. The executable under test still needs the user's ELF for boot.
+ * The Python wrapper supplies the synthetic ISO; no game files are in it. */
 #define _FILE_OFFSET_BITS 64
 #define _POSIX_C_SOURCE 200809L
 
@@ -115,6 +106,27 @@ static void attach_volumes(void)
     }
 }
 
+/* Install synthetic directory names and blob identities into the guest tables
+ * that both H_Cdvd_SelectDirectory and the host ROFS resolver consult. */
+static int synthetic_directories(void)
+{
+    static const char *const names[] = {"\\ALPHA\\", "\\BETA\\", ""};
+    int i;
+
+    for (i = 0; ; i++) {
+        const char *value = names[i];
+        size_t size = strlen(value) + 1;
+        char *name = p4pc_heap_malloc(size);
+        void *blob = p4pc_heap_calloc(1, 16);
+        if (name == NULL || blob == NULL) return -1;
+        memcpy(name, value, size);
+        P4_G32(0x00711190u + 4u * (uint32_t)i) = P4_H2G(name);
+        P4_G32(0x007113e0u + 4u * (uint32_t)i) = P4_H2G(blob);
+        if (*value == '\0') break;
+    }
+    return 0;
+}
+
 /* Host reads remain busy throughout their submission update; neither polling
  * nor a CRI server pass can bypass the next-frame completion fence. */
 static void test_transfers(void *h, const char *name, void *dir)
@@ -166,7 +178,7 @@ static int test_main(int argc, char **argv)
 {
     const char *iso = getenv("P4PC_ISO");
     const char *elf = getenv("P4PC_ELF");
-    const char *data = argc > 1 ? argv[1] : "rofs_retail_opens.txt";
+    const char *data = argc > 1 ? argv[1] : "rofs_synthetic_opens.txt";
     FILE *f;
     char line[512];
     int rows = 0;
@@ -188,6 +200,10 @@ static int test_main(int argc, char **argv)
         return 1;
     }
     attach_volumes();
+    if (synthetic_directories() != 0) {
+        fprintf(stderr, "rofs_open_test: cannot allocate synthetic directories\n");
+        return 1;
+    }
 
     f = fopen(data, "r");
     if (f == NULL) {
@@ -208,9 +224,14 @@ static int test_main(int argc, char **argv)
         if (strcmp(how, "blob") == 0) {
             blob = blob_of(0x00711190u, 0x007113e0u, dir);
             CHECK(blob != NULL);
-        } else if (strcmp(vol, "VOL") == 0 || strcmp(vol, "BTL") == 0) {
+        } else if (strcmp(vol, "VOL") == 0) {
             select_dir(vol, dir);
-            CHECK(strcmp(p4pc_cdvd_dir(strcmp(vol, "BTL") == 0), dir) == 0);
+            CHECK(strcmp(p4pc_cdvd_dir(0), dir) == 0);
+        } else if (strcmp(vol, "BTL") == 0) {
+            /* The battle directory table is native storage, unlike VOL's
+             * guest table; select an authored directory through the host API. */
+            p4pc_cdvd_set_dir(dir, 1);
+            CHECK(strcmp(p4pc_cdvd_dir(1), dir) == 0);
         }
         CHECK(p4pc_adxf_resolve_name(cvname, blob, path, sizeof path) == 0);
         CHECK(exists(path));
@@ -224,29 +245,29 @@ static int test_main(int argc, char **argv)
         }
     }
     fclose(f);
-    CHECK(rows == 131);
+    CHECK(rows == 5);
 
     /* what the rule refuses */
-    select_dir("VOL", "\\SOUND\\EVENT\\");
-    CHECK(p4pc_adxf_resolve_name("VOL:EVE_056.ADX", NULL, path, sizeof path) == 0);
-    CHECK(strcmp(path, "DATA\\SOUND\\EVENT\\EVE_056.ADX") == 0);
-    CHECK(p4pc_adxf_resolve_name("VOL:V162001.AFS", NULL, path, sizeof path) != 0);    /* in \SOUND\, not \SOUND\EVENT\ */
-    CHECK(p4pc_adxf_resolve_name("VOL:V162001.AFS", blob_of(0x00711190u, 0x007113e0u, "\\SOUND\\"), path, sizeof path) == 0);
-    CHECK(strcmp(path, "DATA\\SOUND\\V162001.AFS") == 0);
-    CHECK(p4pc_adxf_resolve_name("VOL:EVE_056.ADX", blob_of(0x00711190u, 0x007113e0u, "\\SOUND\\"), path, sizeof path) != 0);
-    CHECK(p4pc_adxf_resolve_name("BTL:EVE_056.ADX", NULL, path, sizeof path) != 0);     /* another volume */
-    CHECK(p4pc_adxf_resolve_name("ENV:EVE_056.ADX", NULL, path, sizeof path) != 0);
-    CHECK(p4pc_adxf_resolve_name("ENV:ENV_346.ADX", NULL, path, sizeof path) == 0);
-    CHECK(p4pc_adxf_resolve_name("BGM:ENV_346.ADX", NULL, path, sizeof path) != 0);
-    select_dir("VOL", "\\FIELD\\");
-    CHECK(p4pc_adxf_resolve_name("VOL:EVE_056.ADX", NULL, path, sizeof path) != 0);     /* another directory is selected */
-    CHECK(cvFsOpen("VOL:EVE_056.ADX", NULL, 0) == NULL);
+    select_dir("VOL", "\\ALPHA\\");
+    CHECK(p4pc_adxf_resolve_name("VOL:SAMPLE.DAT", NULL, path, sizeof path) == 0);
+    CHECK(strcmp(path, "DATA\\ALPHA\\SAMPLE.DAT") == 0);
+    CHECK(p4pc_adxf_resolve_name("VOL:SECOND.DAT", NULL, path, sizeof path) != 0);
+    CHECK(p4pc_adxf_resolve_name("VOL:SECOND.DAT", blob_of(0x00711190u, 0x007113e0u, "\\BETA\\"), path, sizeof path) == 0);
+    CHECK(strcmp(path, "DATA\\BETA\\SECOND.DAT") == 0);
+    CHECK(p4pc_adxf_resolve_name("VOL:SAMPLE.DAT", blob_of(0x00711190u, 0x007113e0u, "\\BETA\\"), path, sizeof path) != 0);
+    CHECK(p4pc_adxf_resolve_name("BTL:SAMPLE.DAT", NULL, path, sizeof path) != 0);
+    CHECK(p4pc_adxf_resolve_name("ENV:SAMPLE.DAT", NULL, path, sizeof path) != 0);
+    CHECK(p4pc_adxf_resolve_name("ENV:AMBIENT.DAT", NULL, path, sizeof path) == 0);
+    CHECK(p4pc_adxf_resolve_name("BGM:AMBIENT.DAT", NULL, path, sizeof path) != 0);
+    select_dir("VOL", "\\BETA\\");
+    CHECK(p4pc_adxf_resolve_name("VOL:SAMPLE.DAT", NULL, path, sizeof path) != 0);
+    CHECK(cvFsOpen("VOL:SAMPLE.DAT", NULL, 0) == NULL);
 
     if (failures != 0) {
         fprintf(stderr, "rofs_open_test: %d of %d checks failed\n", failures, checks);
         return 1;
     }
-    printf("rofs_open_test: ok, %d retail opens, %d checks\n", rows, checks);
+    printf("rofs_open_test: ok, %d synthetic opens, %d checks\n", rows, checks);
     return 0;
 }
 

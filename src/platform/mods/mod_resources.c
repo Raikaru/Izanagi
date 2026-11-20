@@ -55,7 +55,7 @@ static void dispose(P4Resources *r)
 {
     generations[r->generation] = NULL;
     for (size_t i = 0; i < r->count; ++i)
-        p4_resources_raster_destroy(r->images[i].image.raster);
+        if (r->images[i].image.raster) p4_resources_raster_destroy(r->images[i].image.raster);
     free(r->images); free(r);
 }
 P4Resources *p4_resources_create(uint32_t budget)
@@ -67,11 +67,11 @@ P4Resources *p4_resources_create(uint32_t budget)
     generations[r->generation] = r;
     return r;
 }
-int p4_resources_image(P4Resources *r, const char *owner, const char *key,
+static int image_add(P4Resources *r, const char *owner, const char *key,
     const struct P4ContentSource *source, const uint8_t *rgba, size_t size,
-    uint32_t width, uint32_t height, uint32_t revision, uint32_t *token)
+    uint32_t width, uint32_t height, uint32_t revision, uint32_t *token, int metadata_only)
 {
-    if (!r || !owner_valid(owner, 64) || !key_valid(owner, key) || !source || !rgba || !token || !revision ||
+    if (!r || !owner_valid(owner, 64) || !key_valid(owner, key) || !source || (!rgba && !metadata_only) || !token || !revision ||
         !width || !height || width > INT32_MAX || height > INT32_MAX) return P4_RESOURCE_INVALID;
     if (source->origin != P4_TEXTURE_OVERRIDE || !source->rank || !memchr(source->provider, 0, sizeof source->provider) ||
         !memchr(source->key, 0, sizeof source->key) || !source->provider[0] || !source->key[0]) return P4_RESOURCE_INVALID;
@@ -92,13 +92,18 @@ int p4_resources_image(P4Resources *r, const char *owner, const char *key,
         r->images = images; r->capacity = capacity;
     }
     uint32_t raster = 0, pixels = 0, stride = 0, padded_rows = 0;
-    int result = p4_resources_raster_create(source, rgba, width, height, &raster, &pixels, &stride, &padded_rows);
-    if (result) return result;
-    /* Charge and expose the immutable real allocation, never mutable RW fields. */
-    charge = (uint64_t)stride * padded_rows * 2u;
-    if (charge > r->budget - r->used) {
-        p4_resources_raster_destroy(raster);
-        return P4_RESOURCE_NOMEM;
+    if (!metadata_only) {
+        int result = p4_resources_raster_create(source, rgba, width, height, &raster, &pixels, &stride, &padded_rows);
+        if (result) return result;
+        /* Charge and expose the immutable real allocation, never mutable RW fields. */
+        charge = (uint64_t)stride * padded_rows * 2u;
+        if (charge > r->budget - r->used) {
+            p4_resources_raster_destroy(raster);
+            return P4_RESOURCE_NOMEM;
+        }
+    } else {
+        stride = texture_width * 4u;
+        padded_rows = texture_height;
     }
     ImageSlot *image = &r->images[r->count]; memset(image, 0, sizeof *image);
     uint32_t assigned = r->generation << 16 | (uint32_t)(r->count + 1);
@@ -112,6 +117,20 @@ int p4_resources_image(P4Resources *r, const char *owner, const char *key,
     strcpy(image->image.key, key); strcpy(image->image.owner, owner);
     ++r->count; r->used += (uint32_t)charge; *token = assigned;
     return P4_RESOURCE_OK;
+}
+int p4_resources_image(P4Resources *r, const char *owner, const char *key,
+    const struct P4ContentSource *source, const uint8_t *rgba, size_t size,
+    uint32_t width, uint32_t height, uint32_t revision, uint32_t *token)
+{
+    return image_add(r, owner, key, source, rgba, size, width, height, revision, token, 0);
+}
+int p4_resources_image_metadata(P4Resources *r, const char *owner, const char *key,
+    const struct P4ContentSource *source, uint32_t width, uint32_t height,
+    uint32_t revision, uint32_t *token)
+{
+    uint64_t bytes = (uint64_t)width * height * 4u;
+    if (bytes > SIZE_MAX) return P4_RESOURCE_INVALID;
+    return image_add(r, owner, key, source, NULL, (size_t)bytes, width, height, revision, token, 1);
 }
 int p4_resources_freeze(P4Resources *r, uint32_t revision)
 {

@@ -1,11 +1,16 @@
+#include "game_table_derived_internal.h"
 #include "game_table_inputs_internal.h"
 #include "p4pc/game_table_admission.h"
 #include "p4pc/game_items_native.h"
+#include "p4pc/game_table_extents.h"
 #include "p4pc/game_tables.h"
 #include "p4pc/package_boot.h"
 #include "p4pc/packages.h"
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
+/* Interoperability descriptors derived from analysis of the retail executable's dispatch. */
 /* Actual SLUS_217.82 005f66c0 descriptors; these are pointer SLOT addresses,
  * not the dynamic payload addresses stored in them. Source files are the
  * exact labels in that descriptor array, not a guessed basename/owner. */
@@ -28,6 +33,14 @@ static const Descriptor descriptors[] = {
 static P4GameTableInput *const *staged_inputs;
 static size_t staged_count;
 static int staged_packed;
+static P4GameTableAllocator golden_allocator;
+static struct GoldenArena { void *host; uint32_t guest, size; } golden_arenas[P4_TABLE_INPUT_COUNT];
+static int staged_golden;
+_Noreturn void p4_game_table_admission_golden_fail(const char *reason, int result)
+{
+    fprintf(stderr, "p4pc: Golden %s (%d)\n", reason, result);
+    abort();
+}
 static uint32_t word(const uint8_t *p)
 {
     return (uint32_t)p[0] | (uint32_t)p[1] << 8 | (uint32_t)p[2] << 16 | (uint32_t)p[3] << 24;
@@ -44,7 +57,10 @@ static int verify(const P4GameTableInput *input, const void *bytes, size_t size,
     const P4PackageProvider *provider = p4_game_table_input_provider(input);
     if (failed) *failed = provider;
     if (provider && !p4_package_provider_selected(provider)) return P4_TABLE_NOT_READY;
-    if (!p4_game_table_input_matches(input, bytes, size)) return P4_TABLE_INVALID;
+    /* A loader buffer already rewritten to the derived composition (the item
+     * path verifies its full buffer twice) is the same authenticated input. */
+    if (!p4_game_table_input_matches(input, bytes, size) && !p4_game_tables_derived_matches(input, bytes, size))
+        return P4_TABLE_INVALID;
     if (failed) *failed = NULL;
     return P4_TABLE_OK;
 }
@@ -60,7 +76,7 @@ int p4_game_table_admission_check_item(const char *path, const uint8_t *bytes,
     }
     return verify(input, bytes, size, failed);
 }
-void p4_game_table_admission_item(const char *path, const uint8_t *bytes, uint32_t size)
+void p4_game_table_admission_item(const char *path, uint8_t *bytes, uint32_t size)
 {
     const P4GameTableInput *item = input_for(P4_TABLE_INPUT_ITEM);
     if (!item) return;
@@ -71,6 +87,7 @@ void p4_game_table_admission_item(const char *path, const uint8_t *bytes, uint32
         if (failed) p4_package_boot_source_failed(failed, "Selected item input differs before copy");
         p4_package_boot_runtime_failed("Native item input differs before copy");
     }
+    p4_game_tables_derived_rewrite(item, bytes, size);
 }
 static int prepare(void *user, const char *table, const char *path, uint32_t rows,
     const uint8_t *bytes, size_t size)
@@ -105,13 +122,16 @@ int p4_game_table_admission_stage(P4GameTableInput *const *inputs, size_t count)
     if (!inputs || !count || count > P4_TABLE_INPUT_COUNT) return P4_TABLE_INVALID;
     if (staged_inputs) return staged_inputs == inputs && staged_count == count ? P4_TABLE_OK : P4_TABLE_CONFLICT;
     unsigned seen = 0;
+    if (!inputs[0]) return P4_TABLE_INVALID;
+    int golden = !!inputs[0]->golden_origin[0];
     for (size_t i = 0; i < count; ++i) {
         P4GameTableInputKind kind = p4_game_table_input_kind(inputs[i]);
+        if (!inputs[i] || !!inputs[i]->golden_origin[0] != golden) return P4_TABLE_INVALID;
         if ((unsigned)kind >= P4_TABLE_INPUT_COUNT || !p4_game_table_input_span_count(inputs[i]) ||
             (seen & (1u << (unsigned)kind))) return P4_TABLE_INVALID;
         if (kind == P4_TABLE_INPUT_ITEM) {
             if (inputs[i]->size > P4_ITEM_RETAIL_FILE_SIZE) return P4_TABLE_INVALID;
-        } else {
+        } else if (!golden) {
             /* Bound both physical file and aligned arena contribution against
              * that same key's actual disc plan, not a guessed arena end. */
             if (!inputs[i]->retail_bounds_valid || inputs[i]->size > inputs[i]->retail_size)
@@ -128,7 +148,15 @@ int p4_game_table_admission_stage(P4GameTableInput *const *inputs, size_t count)
     int result = p4_game_tables_prepare_register(prepare, NULL);
     if (result) return result;
     staged_inputs = inputs; staged_count = count;
+    staged_golden = golden;
     staged_packed = (seen & ~(1u << P4_TABLE_INPUT_ITEM)) != 0;
+    return P4_TABLE_OK;
+}
+int p4_game_table_admission_golden_allocator(const P4GameTableAllocator *allocator)
+{
+    if (!staged_inputs || !staged_golden || !allocator || !allocator->allocate || !allocator->release ||
+        golden_allocator.allocate) return P4_TABLE_INVALID;
+    golden_allocator = *allocator;
     return P4_TABLE_OK;
 }
 int p4_game_table_admission_unstage(P4GameTableInput *const *inputs, size_t count)
@@ -137,6 +165,13 @@ int p4_game_table_admission_unstage(P4GameTableInput *const *inputs, size_t coun
     if (staged_inputs != inputs || staged_count != count) return P4_TABLE_CONFLICT;
     int result = p4_game_tables_prepare_unregister(prepare, NULL);
     if (result) return result;
+    for (size_t i = 0; i < P4_TABLE_INPUT_COUNT; ++i) {
+        struct GoldenArena *arena = &golden_arenas[i];
+        if (arena->host) golden_allocator.release(golden_allocator.user,arena->guest,arena->host,arena->size);
+        memset(arena,0,sizeof *arena);
+    }
+    memset(&golden_allocator,0,sizeof golden_allocator);
+    staged_golden = 0;
     staged_inputs = NULL; staged_count = 0; staged_packed = 0;
     return P4_TABLE_OK;
 }
@@ -211,7 +246,7 @@ int p4_game_table_admission_consume(P4GameTableAdmissionReceipt *receipt,
     return P4_TABLE_OK;
 }
 void p4_game_table_admission_packed(const uint8_t *descriptor, const char *path,
-    const uint8_t *bytes, uint32_t size, P4GameTablePackedObserver observer)
+    uint8_t *bytes, uint32_t size, P4GameTablePackedObserver observer)
 {
     const P4PackageProvider *failed = NULL;
     const P4GameTableInput *accepted = NULL;
@@ -221,7 +256,81 @@ void p4_game_table_admission_packed(const uint8_t *descriptor, const char *path,
         if (failed) p4_package_boot_source_failed(failed, "Selected packed table input or descriptor differs before copy");
         p4_package_boot_runtime_failed("Native packed table input or descriptor differs before copy");
     }
+    if (accepted) p4_game_tables_derived_rewrite(accepted, bytes, size);
     P4GameTableAdmissionReceipt receipt = {&receipt, accepted, descriptor, bytes, path, size, 0};
     observer(descriptor, path, bytes, size, accepted ? &receipt : NULL);
     receipt.self = NULL;
+}
+int p4_game_table_admission_golden_active(void) { return staged_golden; }
+
+int p4_game_table_admission_golden_copy(const char *path, uint8_t **bytes, uint32_t *size)
+{
+    if (!bytes || !size) return -1;
+    *bytes = NULL; *size = 0;
+    if (!staged_golden) return 0;
+    if (!path) return -1;
+    for (size_t i = 0; i < staged_count; ++i) {
+        P4GameTableInput *input = staged_inputs[i];
+        if (strcmp(path,p4_game_table_input_label(input->kind))) continue;
+        if (!input->sealed || !input->golden_origin[0] || input->size > UINT32_MAX) return -1;
+        uint8_t *copy = malloc(input->size);
+        if (!copy) return -1;
+        memcpy(copy,input->bytes,input->size);
+        *bytes = copy; *size = (uint32_t)input->size;
+        return 1;
+    }
+    return -1; /* Never fall back to disc for an unrecognised table descriptor. */
+}
+
+int p4_game_table_admission_golden_packed(const uint8_t *descriptor, const char *path,
+    uint8_t *bytes, uint32_t size, P4GameTablePackedObserver observer)
+{
+    const P4GameTableInput *input = NULL;
+    const P4PackageProvider *failed = NULL;
+    if (!staged_golden || !golden_allocator.allocate || !observer ||
+        check_packed(descriptor,path,bytes,size,&failed,&input) || !input || !input->golden_origin[0])
+        return P4_TABLE_INVALID;
+    size_t total = 0, count = p4_game_table_input_span_count(input);
+    for (size_t i = 0; i < count; ++i) {
+        size_t n = p4_game_table_input_span_size(p4_game_table_input_span(input,i));
+        if (n > UINT32_MAX - 15u || total > UINT32_MAX - ((n + 15u) & ~(size_t)15u))
+            return P4_TABLE_INVALID;
+        total += (n + 15u) & ~(size_t)15u;
+    }
+    if (!total) return P4_TABLE_INVALID;
+    struct GoldenArena *arena = &golden_arenas[input->kind];
+    if (!arena->host) {
+        uint32_t guest = 0;
+        void *host = golden_allocator.allocate(golden_allocator.user,(uint32_t)total,&guest);
+        if (!host) return P4_TABLE_NOMEM;
+        if (!guest || guest > UINT32_MAX - total) {
+            golden_allocator.release(golden_allocator.user,guest,host,(uint32_t)total);
+            return P4_TABLE_INVALID;
+        }
+        *arena = (struct GoldenArena){host,guest,(uint32_t)total};
+    } else if (arena->size != total) return P4_TABLE_CONFLICT;
+    p4_game_table_admission_packed(descriptor,path,bytes,size,observer);
+    memset(arena->host,0,arena->size);
+    size_t offset = 0;
+    for (size_t i = 0; i < count; ++i) {
+        const P4GameTableInputSpan *span = p4_game_table_input_span(input,i);
+        size_t n = p4_game_table_input_span_size(span);
+        size_t source = (size_t)p4_game_table_input_span_offset(span);
+        memcpy((uint8_t *)arena->host + offset,bytes + source,n);
+        p4_game_table_slot_publish(word(descriptor + 8u*i + 4u),arena->guest + (uint32_t)offset,(uint32_t)n);
+        offset += (n + 15u) & ~(size_t)15u;
+    }
+    return P4_TABLE_OK;
+}
+
+
+int p4_game_table_admission_golden_load_packed(const uint8_t *descriptor, const char *path,
+    P4GameTablePackedObserver observer)
+{
+    uint8_t *bytes = NULL;
+    uint32_t size = 0;
+    if (p4_game_table_admission_golden_copy(path, &bytes, &size) != 1) return P4_TABLE_INVALID;
+    int result = p4_game_table_admission_golden_packed(descriptor, path, bytes, size, observer);
+    free(bytes);
+    return result;
 }

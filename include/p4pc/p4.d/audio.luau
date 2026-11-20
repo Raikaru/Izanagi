@@ -1,0 +1,3 @@
+--!capability audio@1
+--!covers p4.audio
+-- p4.audio.volume, set_volume and tag_adxt (API 1.5).

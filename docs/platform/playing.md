@@ -28,15 +28,7 @@ change their evidence.
 
 ## Release contents
 
-Run the package tools in the `p4pc-ci` container from a clean checkout
-([BUILDING.md](../../BUILDING.md)); the macOS packager runs on a Mac:
-
-```sh
-sh tools/package_win.sh             # x64 player zip
-sh tools/package_linux.sh           # Linux x86_64 AppImage
-sh tools/package_macos.sh           # macOS app zip, on a Mac (arm64 or x86_64: the Mac's own)
-P4PC_ISO=<your disc image> sh tools/package_smoke.sh dist/p4pc-win64-<version>.zip   # on Windows, Git Bash
-```
+Build and packaging commands are in [BUILDING.md](../../BUILDING.md).
 
 Windows packages are `p4pc-win64-<version>.zip` with `p4pc64w.exe`, its non-system DLLs,
 `README.txt`, `THIRD_PARTY_NOTICES.txt`, `licenses/` and `VERSION.txt`. Packaging verifies

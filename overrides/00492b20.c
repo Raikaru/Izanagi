@@ -1,4 +1,5 @@
 #include "p4pc/vu0.h"
+#include "p4pc/lockstep_align_guest.h"
 
 u8 *mdlEffectAllocateTrackPath(u16 arg0, s32 arg1, u8 *arg2)
 {
@@ -47,5 +48,7 @@ u8 *mdlEffectAllocateTrackPath(u16 arg0, s32 arg1, u8 *arg2)
     if (*(u8 *)(cursor + 0xBC) != 0) {
         *(s32 *)(block + 0x0C) |= 1;
     }
+    if (p4pc_align_rng_calls_enabled)
+        p4pc_align_visual_created(1, block, __builtin_return_address(0));
     return block;
 }

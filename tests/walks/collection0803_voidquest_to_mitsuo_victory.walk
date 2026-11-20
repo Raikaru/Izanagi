@@ -1,6 +1,6 @@
 # Independent pristine collection card3-slot07, Void Quest Endgame.
 # Shadow Mitsuo (encounter 518) defeated by a searched battleturn: tape (one line per fresh party command,
-# found by PortBattleSimCoord's fork search on this walk's real state), to the post-battle Endgame event.
+# found by a fork search on this walk's real state), to the post-battle Endgame event.
 # Keep every line above the final waittask:battle:off unchanged: the tape is bound to its frames.
 timeout:20000
 wait:140

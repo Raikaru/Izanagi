@@ -17,7 +17,7 @@ target_link_libraries(palquant_test m)
 p4_ps2_exe(palquant_test)
 add_test(NAME palquant COMMAND palquant_test)
 
-# Promoted leaf overrides (PortPromotedA): each override is its own translation unit, run
+# Promoted leaf overrides: each override is its own translation unit, run
 # against memory mapped at the retail globals it reads (p4_os_map_fixed).
 set(PROMOTED_LEAF_OVERRIDES 001f5680 00396e80 003cc250 003d5710 003b5fb0 003b6390 003b6420 003b64c0
   003b4230 003b65d0 003b6540 003d0790 003cbf30 003ce840 0039a910 003a2770 003a5180

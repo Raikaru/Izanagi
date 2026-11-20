@@ -1,0 +1,3 @@
+--!capability clock@1
+--!covers p4.clock
+-- p4.clock.wall, updates and retail (API 1.4).

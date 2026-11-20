@@ -1,0 +1,144 @@
+# The CI image of the build workflow, from GitHub's container registry (ghcr.io/<owner>/<name>:<key>, the key a hash of the files the
+# image is built from) instead of rebuilt in every job.
+#   ensure: 'true'  the image job: build and push the image only when the registry has no image for the key.
+#   otherwise       a job that runs in the image: pull it and tag it <local-tag>; when it cannot be pulled (nothing pushed yet, or a pull
+#                   request from a fork, whose token cannot read a private package) build it from the GitHub Actions layer cache, as the
+#                   workflow did before the registry, and push it when the token may.
+# Also makes room for the image (several GB; the root disk of a hosted runner is mostly full): Docker's storage goes to the temporary disk
+# (/mnt) when the runner has a separate one; without one, free-disk deletes the preinstalled toolchains, in parallel (one after the other it
+# took minutes). The Linux and Windows images fit in what a runner has left (about 13 GB), the Android one does not.
+name: CI image
+description: Pull the CI image for a key from ghcr.io, or build it and push it.
+inputs:
+  name:
+    description: Repository name under the owner on ghcr.io
+    required: true
+  key:
+    description: Image tag, a hash of everything the image is built from
+    required: true
+  context:
+    description: Docker build context
+    required: true
+  local-tag:
+    description: Tag the jobs run (docker run <local-tag> ...)
+    required: true
+  scope:
+    description: GitHub Actions layer cache scope
+    required: true
+  ensure:
+    description: "'true' to only make sure the registry has the image"
+    default: 'false'
+  free-disk:
+    description: "'true' to delete the preinstalled toolchains first (for an image of ten GB or more, on a runner without a separate temporary disk)"
+    default: 'false'
+  token:
+    description: Token for ghcr.io (needs packages:write to push)
+    default: ${{ github.token }}
+outputs:
+  ref:
+    description: The registry reference of the image
+    value: ${{ steps.ref.outputs.ref }}
+  id:
+    description: The image ID (sha256:...), the identity of the toolchain the build caches are keyed by
+    value: ${{ steps.id.outputs.id }}
+runs:
+  using: composite
+  steps:
+    - name: Disk space for Docker
+      shell: bash
+      run: |
+        df -h / /mnt | cat
+        free_gb() { df --output=avail -BG "$1" | tail -n 1 | tr -dc '0-9'; }
+        if mountpoint -q /mnt && [ "$(free_gb /mnt)" -ge 40 ]; then
+          sudo systemctl stop docker docker.socket
+          sudo mkdir -p /mnt/docker
+          if [ -s /etc/docker/daemon.json ]; then sudo jq '. + {"data-root": "/mnt/docker"}' /etc/docker/daemon.json | sudo tee /etc/docker/daemon.json.new >/dev/null
+          else echo '{"data-root": "/mnt/docker"}' | sudo tee /etc/docker/daemon.json.new >/dev/null; fi
+          sudo mv /etc/docker/daemon.json.new /etc/docker/daemon.json
+          sudo systemctl start docker
+        elif [ "${{ inputs.free-disk }}" = true ]; then
+          # no separate temporary disk: make room on the root disk by deleting the preinstalled toolchains nothing here uses, in parallel
+          for d in /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL /usr/local/share/boost /usr/lib/jvm; do
+            sudo rm -rf "$d" &
+          done
+          wait
+        fi
+        docker info --format 'docker root: {{.DockerRootDir}}'
+        df -h / /mnt | cat
+    - name: Image reference
+      id: ref
+      shell: bash
+      env:
+        NAME: ${{ inputs.name }}
+        KEY: ${{ inputs.key }}
+        FORK_PR: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
+      run: |
+        owner=$(printf '%s' "$GITHUB_REPOSITORY_OWNER" | tr 'A-Z' 'a-z')
+        echo "ref=ghcr.io/$owner/$NAME:$KEY" >> "$GITHUB_OUTPUT"
+        # a pull request from a fork gets a read-only token: it can pull a public image, never push
+        echo "push=$([ "$FORK_PR" = true ] && echo false || echo true)" >> "$GITHUB_OUTPUT"
+    - uses: docker/login-action@v3
+      continue-on-error: true
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ inputs.token }}
+    - name: Look for the image in the registry
+      id: have
+      shell: bash
+      env:
+        REF: ${{ steps.ref.outputs.ref }}
+        LOCAL: ${{ inputs.local-tag }}
+        ENSURE: ${{ inputs.ensure }}
+      run: |
+        hit=false
+        if [ "$ENSURE" = true ]; then
+          docker buildx imagetools inspect "$REF" >/dev/null 2>&1 && hit=true
+        else
+          # (a pull that fails for a moment, as when many jobs pull at once, is tried again; the reason is in the log)
+          for attempt in 1 2 3; do
+            if docker pull --quiet "$REF" >/dev/null; then docker tag "$REF" "$LOCAL"; hit=true; break; fi
+            sleep $((attempt * 10))
+          done
+        fi
+        echo "hit=$hit" >> "$GITHUB_OUTPUT"
+        echo "registry image $REF: $([ $hit = true ] && echo found || echo missing)"
+    - uses: docker/setup-buildx-action@v3
+      if: steps.have.outputs.hit != 'true'
+    - name: Build the image and push it
+      if: steps.have.outputs.hit != 'true' && steps.ref.outputs.push == 'true'
+      uses: docker/build-push-action@v6
+      with:
+        context: ${{ inputs.context }}
+        tags: ${{ steps.ref.outputs.ref }}
+        push: true
+        labels: org.opencontainers.image.source=https://github.com/${{ github.repository }}
+        cache-from: type=gha,scope=${{ inputs.scope }}
+        cache-to: type=gha,scope=${{ inputs.scope }},mode=max
+    - name: Build the image (the token cannot push)
+      if: steps.have.outputs.hit != 'true' && steps.ref.outputs.push != 'true'
+      uses: docker/build-push-action@v6
+      with:
+        context: ${{ inputs.context }}
+        tags: ${{ inputs.local-tag }}
+        load: ${{ inputs.ensure != 'true' }}
+        cache-from: type=gha,scope=${{ inputs.scope }}
+        cache-to: type=gha,scope=${{ inputs.scope }},mode=max
+    - name: Take the pushed image
+      if: steps.have.outputs.hit != 'true' && steps.ref.outputs.push == 'true' && inputs.ensure != 'true'
+      shell: bash
+      env:
+        REF: ${{ steps.ref.outputs.ref }}
+        LOCAL: ${{ inputs.local-tag }}
+      run: |
+        docker pull --quiet "$REF" >/dev/null
+        docker tag "$REF" "$LOCAL"
+    - name: Image identity
+      id: id
+      if: inputs.ensure != 'true'
+      shell: bash
+      env:
+        LOCAL: ${{ inputs.local-tag }}
+      run: |
+        echo "id=$(docker image inspect --format '{{.Id}}' "$LOCAL")" >> "$GITHUB_OUTPUT"
+        docker image ls "$LOCAL"

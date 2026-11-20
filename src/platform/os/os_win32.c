@@ -481,6 +481,57 @@ static int object_identity(HANDLE handle, const BY_HANDLE_FILE_INFORMATION *fact
 }
 
 int p4_os_mkdir(const char *path) { return _mkdir(path); }
+static int utf8_file_path(const char *path, WCHAR out[4096])
+{
+    if (!path || !MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, path, -1, out, 4096)) {
+        errno = EINVAL; return -1;
+    }
+    return 0;
+}
+FILE *p4_os_fopen_utf8(const char *path, const char *mode)
+{
+    WCHAR wide[4096];
+    const wchar_t *wmode = mode && !strcmp(mode,"rb") ? L"rb" :
+                           mode && !strcmp(mode,"wb") ? L"wb" : NULL;
+    if (!wmode) { errno = EINVAL; return NULL; }
+    return utf8_file_path(path,wide) ? NULL : _wfopen(wide,wmode);
+}
+int p4_os_mkdir_utf8(const char *path)
+{
+    WCHAR wide[4096];
+    return utf8_file_path(path,wide) ? -1 : _wmkdir(wide);
+}
+int p4_os_remove_utf8(const char *path)
+{
+    WCHAR wide[4096];
+    return utf8_file_path(path,wide) ? -1 : _wremove(wide);
+}
+int p4_os_list_dir_utf8(const char *path, void (*visit)(const char *name, void *user), void *user)
+{
+    WCHAR pattern[4096]; WIN32_FIND_DATAW entry;
+    if (!visit || utf8_file_path(path,pattern)) { errno = EINVAL; return -1; }
+    size_t length = wcslen(pattern);
+    if (!length || length + 3 >= 4096) { errno = ENAMETOOLONG; return -1; }
+    if (pattern[length-1] != L'\\' && pattern[length-1] != L'/') pattern[length++] = L'\\';
+    pattern[length++] = L'*'; pattern[length] = 0;
+    HANDLE handle = FindFirstFileW(pattern,&entry);
+    if (handle == INVALID_HANDLE_VALUE) {
+        DWORD error = GetLastError();
+        errno = error == ERROR_FILE_NOT_FOUND || error == ERROR_PATH_NOT_FOUND ? ENOENT : EIO;
+        return -1;
+    }
+    int result = 0;
+    do {
+        char name[4096];
+        if (!WideCharToMultiByte(CP_UTF8,WC_ERR_INVALID_CHARS,entry.cFileName,-1,name,sizeof name,NULL,NULL)) {
+            errno = EINVAL; result = -1; break;
+        }
+        visit(name,user);
+    } while (FindNextFileW(handle,&entry));
+    if (!result && GetLastError() != ERROR_NO_MORE_FILES) { errno = EIO; result = -1; }
+    FindClose(handle);
+    return result;
+}
 
 int p4_os_directory_lock(const char *path, uintptr_t token[2]) {
     if (!path || !token || token[0] || token[1]) { errno = EINVAL; return -1; }
@@ -568,7 +619,7 @@ int p4_os_rename(const char *from, const char *to) {
 }
 
 int p4_os_sync_file(FILE *stream) { return fflush(stream) || _commit(_fileno(stream)) ? -1 : 0; }
-int p4_os_replace_file(const char *from, const char *to) {
+static int replace_file(const char *from, const char *to, DWORD flags) {
     WCHAR wide_from[4096], wide_to[4096];
     if (!MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, from, -1, wide_from, sizeof wide_from / sizeof wide_from[0]) ||
         !MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, to, -1, wide_to, sizeof wide_to / sizeof wide_to[0])) {
@@ -577,7 +628,7 @@ int p4_os_replace_file(const char *from, const char *to) {
     }
     unsigned delay = 8;
     for (;;) {
-        if (MoveFileExW(wide_from, wide_to, MOVEFILE_REPLACE_EXISTING)) return 0;
+        if (MoveFileExW(wide_from, wide_to, flags)) return 0;
         DWORD error = GetLastError();
         if ((error != ERROR_ACCESS_DENIED && error != ERROR_SHARING_VIOLATION) || delay > 1024) {
             errno = error == ERROR_FILE_NOT_FOUND || error == ERROR_PATH_NOT_FOUND ? ENOENT :
@@ -587,6 +638,10 @@ int p4_os_replace_file(const char *from, const char *to) {
         Sleep(delay);
         delay *= 2;
     }
+}
+int p4_os_replace_file(const char *from, const char *to) { return replace_file(from, to, MOVEFILE_REPLACE_EXISTING); }
+int p4_os_replace_file_durable(const char *from, const char *to) {
+    return replace_file(from, to, MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH);
 }
 
 int p4_os_rmdir(const char *path) {

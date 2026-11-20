@@ -27,4 +27,26 @@ void p4_mod_events_set_published(int (*notify)(void));
  * checks at the same safe point, before frame_start subscribers, while
  * P4_MOD_SAFE_SERVICES is set; the pump returns nonzero while work remains. */
 void p4_mod_events_set_services(int (*pump)(uint32_t frame));
+/* Queued party-record writes (p4.party.set) apply at the frame safe point; the
+ * callback returns nonzero while writes remain (one waiting out a battle). */
+void p4_mod_events_set_party(int (*apply)(void));
+/* Semantic battle events (battle_semantic.h) drain at the same safe point,
+ * after services, while P4_MOD_SAFE_SEMANTIC is set; nonzero while work remains. */
+void p4_mod_events_set_semantic(int (*pump)(void));
+/* Held battle banners (battle_present.h) are re-raised at the same safe point while
+ * P4_MOD_SAFE_PRESENT is set; the pump returns nonzero while one is held. */
+void p4_mod_events_set_present(int (*pump)(uint32_t frame));
+/* A queued weapon fusion (p4.forge.commit) applies at the same safe point,
+ * after party writes; nonzero while it waits out a battle. */
+void p4_mod_events_set_forge(int (*apply)(void));
+/* A queued equipment exchange (p4.equipment.equip) applies at the same safe
+ * point, after a weapon fusion; nonzero while it waits out a battle. */
+void p4_mod_events_set_equipment(int (*apply)(void));
+/* The "status" event (unit, leaf, kind, reason: game_side_ailment.h's observer
+ * scalars). The game installs its source once; it is called with 1 when the
+ * first enabled status subscription appears and 0 when the last goes, and
+ * forwards each observation to p4_mod_event_status. Without a source, a status
+ * subscription is refused. */
+void p4_mod_events_set_status_source(void (*source)(int on));
+void p4_mod_event_status(uint32_t unit, uint32_t leaf, uint32_t kind, uint32_t reason);
 #endif

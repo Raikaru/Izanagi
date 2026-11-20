@@ -1,4 +1,5 @@
 #include "p4pc/vu0.h"
+#include "p4pc/lockstep_align_guest.h"
 
 void *WindAllocKindEntry(s32 arg0, void *arg1)
 {
@@ -26,5 +27,7 @@ void *WindAllocKindEntry(s32 arg0, void *arg1)
     p4_vu0_sqc2(p18, 0);
     p4_vu0_sqc2(p18 + 16, 0);
     memcpy(*(void **)(p18 + 0x40), arg1, (u32)temp_17);
+    if (p4pc_align_rng_calls_enabled)
+        p4pc_align_visual_created(2, p18, __builtin_return_address(0));
     return p18;
 }

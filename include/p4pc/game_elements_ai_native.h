@@ -2,6 +2,7 @@
 #define P4PC_GAME_ELEMENTS_AI_NATIVE_H
 #include "p4pc/game_elements_native.h"
 #include "p4pc/table_result.h"
+#include <stddef.h>
 #include <stdint.h>
 
 /* Malformed expanded carrier state is an unattributable native runtime failure,
@@ -22,6 +23,10 @@ _Noreturn void p4_game_elements_ai_native_fail(void);
     P4_GAME_AI_WEIGHT_GROUPS * P4_GAME_AI_WEIGHT_ENTRIES)
 #define P4_GAME_AI_CANDIDATE_EQUIPPED 1u
 #define P4_GAME_AI_CANDIDATE_TABLE 2u
+/* A mod's authored substitution (p4_game_elements_ai_native_substitute): the
+ * selection names that command; script permits and argument tags do not
+ * apply to it. Never a source candidate's eligibility. */
+#define P4_GAME_AI_CANDIDATE_AUTHORED 4u
 #define P4_GAME_AI_VM_STACK_SLOTS 48u
 #define P4_GAME_AI_VM_RETURN_SLOT 47u
 #define P4_GAME_AI_VM_WORK_BYTES 0x158u
@@ -109,6 +114,15 @@ int p4_game_elements_ai_native_available_set(void *source_action,
     const P4GameAiCandidate *candidates, uint32_t count);
 int p4_game_elements_ai_native_available(void *source_action,
     const P4GameAiCandidate **candidates, uint32_t *count);
+/* This wrapper is compiled as native header code: the output slot must hold
+ * a host pointer, not an address-taken translated guest-pointer local. */
+static inline const P4GameAiCandidate *p4_game_elements_ai_native_available_view(
+    void *source_action, uint32_t *count)
+{
+    const P4GameAiCandidate *candidates;
+    return p4_game_elements_ai_native_available(source_action, &candidates, count)
+        ? NULL : candidates;
+}
 /* 001DA230..001DA2F0 use BASE affinity. 001DB360/001DB9F0 use the wrapper
  * with their distinct original unknown/buff/physical policies. */
 int p4_game_elements_ai_native_test(void *target_unit, const P4GameActionFrame *frame,
@@ -176,12 +190,45 @@ int p4_game_elements_ai_native_condition_end(void *source_action, uint32_t scala
 int p4_game_elements_ai_native_decision_group(void *source_action,
     uint32_t row, uint32_t condition_mask, uint32_t group, uint32_t *eligible);
 int p4_game_elements_ai_native_decision_end(void *source_action);
+/* Finalize the hookable 001DE800 return before its caller consumes a group.
+ * An authored group change rebuilds that group's weights/candidate mapping
+ * under the original condition intersection and explicit VM permissions.
+ * No conditions, command constructors or RNG draws are replayed. */
+int p4_game_elements_ai_native_group_result(void *source_action, uint32_t group);
 int p4_game_elements_ai_native_root_end(void *source_action);
-int p4_game_elements_ai_native_decision_work(void *source_action, void **script_work);
+/* These output slots are guest addresses, not host-width pointers: translated
+ * callers keep pointer-valued locals in four-byte guest storage. */
+int p4_game_elements_ai_native_decision_work(void *source_action, uint32_t *script_work_guest);
 int p4_game_elements_ai_native_weight(void *source_action, uint32_t group,
     uint32_t entry, uint32_t original_weight, uint32_t *weight);
 int p4_game_elements_ai_native_weight_pick(void *source_action, uint32_t group, uint32_t entry);
 int p4_game_elements_ai_native_decoded(void *source_action, uint32_t kind, uint32_t command);
+/* A mod's authored substitution of the command that 001DE640 is about to
+ * decode for this action. Its only caller is the Luau binding, which accepts
+ * it solely inside that function's before-hook for the same action and then
+ * writes the new code. The skill must be active and name no individual
+ * target: self (row +0x0A bit 0) or every collected target (row +0x08
+ * nonzero), so the game's own collector supplies the targets. With the
+ * expanded carrier it authorizes exactly the next decode of that command for
+ * this action, keeping the original draw's decision; the decode, a new
+ * decision or the end of the routed call discards an unused authorization.
+ * Returns NOT_FOUND for an inactive skill and CONFLICT for another scope. */
+int p4_game_elements_ai_native_substitute(void *source_action, uint32_t skill);
+/* p4.battle.decide (include/p4pc/battle_decide.h): after the AI released this
+ * action's command record, which now names the authored command, rebind the
+ * selected frame to it: kind 2 = that skill with any target scope (the decide
+ * stage took its targets from the game's own collector), keeping the original
+ * draw's decision; kind 7 = a pass, which selects no frame. Without the
+ * expanded carrier there is nothing to bind. NOT_FOUND for an inactive skill. */
+int p4_game_elements_ai_native_decide(void *source_action, uint32_t kind, uint32_t skill);
+/* Script decodes pass through the hookable 001DE640 entry like retail BF
+ * setters; their explicit caller work and argument rides on the carrier for
+ * that one synchronous call. Outside it the entry has no script work. */
+int p4_game_elements_ai_native_decode_begin(void *source_action, void *script_work,
+    uint32_t command_parameter);
+int p4_game_elements_ai_native_decode_work(void *source_action, uint32_t *script_work_guest,
+    uint32_t *command_parameter);
+int p4_game_elements_ai_native_decode_end(void *source_action);
 int p4_game_elements_ai_native_condition_query(void *source_action, int32_t selector,
     uint32_t policy, uint32_t *value);
 int32_t p4_game_elements_ai_pick_table_script(void *script_work, void *source_action);

@@ -7,7 +7,9 @@
 #include <fstream>
 #include <iostream>
 #include <iterator>
+#include <map>
 #include <stdexcept>
+#include <vector>
 
 static std::string read_file(const char *path)
 {
@@ -29,38 +31,47 @@ static void json_string(const std::string &text)
     std::cout << '"';
 }
 struct Resolver : Luau::FileResolver {
-    std::string name, source;
+    std::map<std::string, std::string> sources;
     std::optional<Luau::SourceCode> readSource(const Luau::ModuleName &module) override
     {
-        if (module != name) return std::nullopt;
-        return Luau::SourceCode{source, Luau::SourceCode::Script};
+        auto found = sources.find(module);
+        if (found == sources.end()) return std::nullopt;
+        return Luau::SourceCode{found->second, Luau::SourceCode::Script};
     }
 };
-static void diagnostic(const std::string &file, const Luau::Location &location,
-                       const std::string &message, bool &comma)
+struct Diagnostic {
+    std::string file, message;
+    Luau::Location location;
+};
+static void report(const std::vector<Diagnostic> &diagnostics)
 {
-    if (comma) std::cout << ',';
-    comma = true;
-    std::cout << "{\"file\":"; json_string(file);
-    std::cout << ",\"line\":" << location.begin.line + 1
-              << ",\"column\":" << location.begin.column + 1
-              << ",\"endLine\":" << location.end.line + 1
-              << ",\"endColumn\":" << location.end.column + 1
-              << ",\"severity\":\"error\",\"message\":";
-    json_string(message);
-    std::cout << '}';
+    std::cout << "{\"diagnostics\":[";
+    for (size_t i = 0; i < diagnostics.size(); ++i) {
+        const Diagnostic &d = diagnostics[i];
+        if (i) std::cout << ',';
+        std::cout << "{\"file\":"; json_string(d.file);
+        std::cout << ",\"line\":" << d.location.begin.line + 1
+                  << ",\"column\":" << d.location.begin.column + 1
+                  << ",\"endLine\":" << d.location.end.line + 1
+                  << ",\"endColumn\":" << d.location.end.column + 1
+                  << ",\"severity\":\"error\",\"message\":";
+        json_string(d.message);
+        std::cout << '}';
+    }
+    std::cout << "],\"ok\":" << (diagnostics.empty() ? "true" : "false") << "}\n";
 }
+/* usage: p4_luau_check definitions.d.luau mod.luau [more.luau ...]
+ * Prints one JSON object per source, one per line in argument order, against
+ * one loaded definition file: many checks cost one process (under Wine every
+ * process start counts). A usage or I/O error is exactly one object, exit 2;
+ * otherwise exit 1 when any source has diagnostics. */
 int main(int argc, char **argv)
 {
-    bool comma = false;
-    /* Every outcome, including I/O and usage errors, is exactly one JSON object. */
-    std::cout << "{\"diagnostics\":[";
     try {
-        if (argc != 3) throw std::runtime_error("usage: p4_luau_check definitions.d.luau mod.luau");
+        if (argc < 3) throw std::runtime_error("usage: p4_luau_check definitions.d.luau mod.luau [more.luau ...]");
         std::string definitions = read_file(argv[1]);
         Resolver resolver;
-        resolver.name = argv[2];
-        resolver.source = read_file(argv[2]);
+        for (int i = 2; i < argc; ++i) resolver.sources[argv[i]] = read_file(argv[i]);
         Luau::NullConfigResolver config;
         config.defaultConfig.mode = Luau::Mode::Strict;
         Luau::FrontendOptions options;
@@ -70,24 +81,28 @@ int main(int argc, char **argv)
         auto loaded = frontend.loadDefinitionFile(frontend.globals, frontend.globals.globalScope,
                                                    definitions, argv[1], false);
         Luau::freeze(frontend.globals.globalTypes);
+        std::vector<Diagnostic> rejected;
         for (const auto &error : loaded.parseResult.errors)
-            diagnostic(argv[1], error.getLocation(), error.getMessage(), comma);
+            rejected.push_back({argv[1], error.getMessage(), error.getLocation()});
         if (loaded.module) for (const auto &error : loaded.module->errors)
-            diagnostic(argv[1], error.location, Luau::toString(error), comma);
-        if (!loaded.success && !comma)
-            diagnostic(argv[1], {}, "definition file rejected", comma);
-        if (loaded.success) {
-            auto result = frontend.check(resolver.name);
-            for (const auto &error : result.errors)
-                diagnostic(error.moduleName, error.location, Luau::toString(error), comma);
-            for (const auto &name : result.timeoutHits)
-                diagnostic(name, {}, "typecheck time limit exceeded", comma);
+            rejected.push_back({argv[1], Luau::toString(error), error.location});
+        if (!loaded.success && rejected.empty()) rejected.push_back({argv[1], "definition file rejected", {}});
+        int status = 0;
+        for (int i = 2; i < argc; ++i) {
+            std::vector<Diagnostic> diagnostics = rejected;
+            if (loaded.success) {
+                auto result = frontend.check(argv[i]);
+                for (const auto &error : result.errors)
+                    diagnostics.push_back({error.moduleName, Luau::toString(error), error.location});
+                for (const auto &name : result.timeoutHits)
+                    diagnostics.push_back({name, "typecheck time limit exceeded", {}});
+            }
+            report(diagnostics);
+            if (!diagnostics.empty()) status = 1;
         }
-        std::cout << "],\"ok\":" << (comma ? "false" : "true") << "}\n";
-        return comma ? 1 : 0;
+        return status;
     } catch (const std::exception &error) {
-        diagnostic(argc > 2 ? argv[2] : "", {}, error.what(), comma);
-        std::cout << "],\"ok\":false}\n";
+        report({{argc > 2 ? argv[2] : "", error.what(), {}}});
         return 2;
     }
 }

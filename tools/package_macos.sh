@@ -1,5 +1,6 @@
 #!/bin/sh
-# Packages the macOS player build for this Mac's architecture (arm64 or x86_64) as an app bundle in a zip: "Persona 4 PC.app" (p4pc64 as
+# Packages the macOS player build for this Mac's architecture (arm64 or x86_64; P4PC_MACOS_ARCH=x86_64 on Apple silicon for the Intel build
+# that ci/macos/configure.sh made under the same variable) as an app bundle in a zip: "Persona 4 PC.app" (p4pc64 as
 # Contents/MacOS/p4pc; SDL3, the LGPL-only FFmpeg and ANGLE in Contents/Frameworks), a README, the licence notices and the Luau source.
 #
 #   sh tools/package_macos.sh [--deps DIR] [--build DIR] [--out DIR] [--version NAME]
@@ -30,10 +31,10 @@ done
 [ -f "$root/decomp/config/symbol_addrs.txt" ] || { echo "package_macos: the decomp submodule is not checked out (git submodule update --init)" >&2; exit 1; }
 sha=$(git -C "$root" rev-parse HEAD)
 [ -n "$version" ] || version=$(git -C "$root" describe --tags --always --dirty)
-case $(uname -m) in
+case ${P4PC_MACOS_ARCH:-$(uname -m)} in
   arm64)  arch=arm64;  machine="Macs with Apple silicon (M1 and later)"; electron_arch=arm64 ;;
   x86_64) arch=x86_64; machine="Macs with an Intel processor"; electron_arch=x64 ;;
-  *) echo "package_macos: unsupported architecture $(uname -m)" >&2; exit 1 ;;
+  *) echo "package_macos: unsupported architecture ${P4PC_MACOS_ARCH:-$(uname -m)}" >&2; exit 1 ;;
 esac
 macos_min=${MACOSX_DEPLOYMENT_TARGET:-12.0}
 name=p4pc-macos-$arch-$version
@@ -97,7 +98,7 @@ otool -l "$contents/MacOS/p4pc" | grep -A2 LC_RPATH | sed -n 's/^ *path \(.*\) (
 [ "$(cat "$stage/check/rpaths.txt")" = "@executable_path/../Frameworks" ] || {
   echo "package_macos: the executable's run paths are not just the bundle's Frameworks:" >&2; cat "$stage/check/rpaths.txt" >&2; exit 1; }
 # (linked against the prefix, which has the unversioned library names; run against the bundle's copies)
-xcrun clang -I"$deps/include" "$root/tests/ffmpeg_license_test.c" -L"$deps/lib" -lavcodec -lavutil -lswscale \
+xcrun clang -arch "$arch" -I"$deps/include" "$root/tests/ffmpeg_license_test.c" -L"$deps/lib" -lavcodec -lavutil -lswscale \
   -Wl,-rpath,"$contents/Frameworks" -o "$stage/check/ffmpeg_license_test"
 P4PC_REQUIRE_LGPL=1 DYLD_LIBRARY_PATH="$contents/Frameworks" "$stage/check/ffmpeg_license_test" > "$stage/check/license.txt" 2>&1 || {
   cat "$stage/check/license.txt"; echo "package_macos: FFmpeg licence check failed" >&2; exit 1; }
@@ -117,14 +118,23 @@ if grep -n '@[A-Z_]*@' "$stage/$name/README.txt" "$stage/$name/THIRD_PARTY_NOTIC
 fi
 cp "$root/LICENSE" "$stage/$name/licenses/p4pc-MIT.txt"
 cp "$root/NOTICE" "$stage/$name/licenses/NOTICE.txt"
-for f in FFmpeg-LGPL-2.1.txt SDL3-zlib.txt LodePNG-zlib.txt Luau-MIT.txt Lua-MIT.txt yxml-MIT.txt fdlibm-Sun.txt recvx-decomp-MIT.txt \
+for f in FFmpeg-LGPL-2.1.txt SDL3-zlib.txt LodePNG-zlib.txt cgltf-MIT.txt Luau-MIT.txt Lua-MIT.txt yxml-MIT.txt fdlibm-Sun.txt newlib-BSD.txt recvx-decomp-MIT.txt \
          sky2hook-permission.txt; do
   cp "$root/third_party/licenses/$f" "$stage/$name/licenses/"
 done
 cp "$root/third_party/miniz/LICENSE" "$stage/$name/licenses/miniz-MIT.txt"
+[ -f "$deps/share/angle/LICENSES.chromium.html" ] && [ -f "$deps/share/angle/Electron-LICENSE.txt" ] || {
+  echo "package_macos: ANGLE/Electron licence files are missing from the Electron zip (ci/macos/build_deps.sh must extract LICENSE and LICENSES.chromium.html)" >&2; exit 1; }
 cp "$deps/share/angle/LICENSES.chromium.html" "$deps/share/angle/Electron-LICENSE.txt" "$stage/$name/licenses/"
 cp -R "$root/examples/mods/p4pc.example" "$stage/$name/examples/mods/"
+# Bundled mods in Contents/Resources (SDL_GetBasePath()/mods), disabled until chosen in MODS.
+! git -C "$root" cat-file -e HEAD:mods 2>/dev/null || git -C "$root" archive HEAD mods | tar -xf - -C "$contents/Resources"
 tar -C "$root" -czf "$stage/$name/source/luau-source.tar.gz" third_party/luau third_party/luau_patches
+# The FFmpeg source tarball and build recipe ship with the package, as on Linux/Android:
+# the exact tarball ci/macos/build_deps.sh pins, fetched and sha256-checked again here.
+curl -fsSL --retry 6 --retry-all-errors --retry-delay 10 "https://ffmpeg.org/releases/ffmpeg-$ffver.tar.xz" -o "$stage/$name/source/ffmpeg-$ffver.tar.xz"
+echo "$ffsha  $stage/$name/source/ffmpeg-$ffver.tar.xz" | shasum -a 256 -c -
+cp "$root/ci/macos/build_deps.sh" "$stage/$name/source/"
 {
   printf 'Toolchain provenance for macOS %s\n\nCompiler (llvm-mingw %s, macOS host build):\n' "$arch" "$(cat "$deps/llvm/release")"
   "$deps/llvm/bin/clang" --version
@@ -138,6 +148,7 @@ tar -C "$root" -czf "$stage/$name/source/luau-source.tar.gz" third_party/luau th
 printf '%s, commit %s\nbuilt %s (macOS %s, macOS %s or newer)\n' "$version" "$sha" "$(date -u +%Y-%m-%dT%H:%MZ)" "$arch" "$macos_min" \
   > "$stage/$name/VERSION.txt"
 
+python3 "$here/check_package_golden_cache.py" "$stage/$name"
 # 5. Ad-hoc signatures, innermost first (the libraries keep no foreign signature), then the zip (ditto keeps the bundle's links and modes).
 for f in "$contents"/Frameworks/*.dylib; do
   codesign --force --sign - --timestamp=none "$f"

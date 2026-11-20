@@ -4,7 +4,7 @@
  * has bit 4, child world = RwMatrixMultiply(child local, parent world) and the
  * child's bit 4 is cleared. Then func_003ed850 recurses into the child's children
  * with the combined flags. Finally this frame's flags are set to flags & ~5 (retail: `li v1,-6; and`:
- * bits 0 and 2, rwFRAMEPRIVATEHIERARCHYSYNCLTM and ...SYNCOBJ). A child with no parent reads the world matrix of the parent from PS2 low RAM (retail: parent = 0, world matrix at 0x50, all zero). */
+ * bits 0 and 2, rwFRAMEPRIVATEHIERARCHYSYNCLTM and ...SYNCOBJ). A child with no parent uses the port-defined zero world matrix (guest address 0x50). */
 
 #include "p4pc/ps2_low_ram.h"
 
@@ -32,7 +32,7 @@ void func_003ed960(u8 *arg0)
             {
                 u8 *parent = *(u8 **)(child + 4);
 
-                /* a null parent: retail multiplies by the zero matrix at PS2 address 0x50 (include/p4pc/ps2_low_ram.h) */
+                /* Null parent: use the port-defined zero world matrix. */
                 func_003e05f0(child + 80, child + 16, parent != NULL ? parent + 80 : p4_ps2_low_ram_ptr(0x50));
             }
             child[3] = child[3] & ~4;

@@ -5,7 +5,7 @@
  * frame's own dirty bit. */
 #include "p4pc/ps2_low_ram.h"
 
-/* The world matrix of a parent; a frame without a parent multiplies by the zero matrix at PS2 address 0x50, as retail does (include/p4pc/ps2_low_ram.h). */
+/* A null parent uses the port-defined zero world matrix, not a kernel image. */
 #define P4_PARENT_WORLD(f) (*(unsigned char **)((f) + 4) != 0 ? *(unsigned char **)((f) + 4) + 0x50 : p4_ps2_low_ram_ptr(0x50))
 
 extern void p4_matrix_mul(void *dst, const void *a, const void *b) __asm__("func_003e05f0");

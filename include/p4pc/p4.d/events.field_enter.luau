@@ -1,0 +1,3 @@
+--!capability events.field_enter@1
+--!covers event:field_enter
+-- p4.events.on("field_enter") (API 1.0).

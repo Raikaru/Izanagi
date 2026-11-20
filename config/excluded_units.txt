@@ -10,7 +10,7 @@ src/rw/rwplcore.c duplicate definition of RwFreeListCreate; src/renderware/plcor
 src/renderware/plcore/baplcore.c duplicate definitions of RwEngine*, ourGlobals, _rwMsbBit; src/renderware/core/badevice.c kept as the owner (its RwEngineInit is the retail 0x003e8c60 body and calls _rwFreeListEnable)
 # Re-excluded after the VU0-only un-exclusion (build11): still fail to compile.
 src/cri/libadxe/adx_fsvr.c header ../../../cri/mwlib/ee/lib/libadxe/adx_fsvr.h is not in the tree
-# PortAsmC batch 2 (enable candidates that fail or duplicate an owner).
+# Assembly conversion batch 2 (enable candidates that fail or duplicate an owner).
 src/cri/libadxe/dvci.c header ../../../cri/mwlib/ee/lib/libadxe/dvci.h is not in the tree
 src/cri/libadxe/htci.c header ../../../cri/mwlib/ee/lib/libadxe/htci.h is not in the tree
 src/cri/libadxe/sj_mem.c header ../../../cri/mwlib/ee/lib/libadxe/sj_mem.h is not in the tree

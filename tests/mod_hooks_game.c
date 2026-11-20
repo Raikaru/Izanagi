@@ -39,3 +39,24 @@ void mod_test_void(u32 *value)
 {
     *value += 1;
 }
+
+// FUN_001DE640
+void mod_test_set_action_code(unsigned char *action, unsigned char *slot, u16 code)
+{
+    (void)action;
+    *(u16 *)slot = code;
+}
+
+// FUN_00243950
+u16 mod_test_enemy_exp(unsigned char *unit)
+{
+    (void)unit;
+    return 5;
+}
+
+// FUN_002439C0
+u16 mod_test_enemy_yen(unsigned char *unit)
+{
+    (void)unit;
+    return 7;
+}

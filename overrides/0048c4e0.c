@@ -1,7 +1,9 @@
 #include "p4pc/vu0.h"
+#include "p4pc/lockstep_align_guest.h"
 
 void EffMotionEmitterUpdate(u8 *arg0)
 {
+    if (p4pc_align_rng_calls_enabled) p4pc_align_visual_begin(1, arg0);
     extern void mdlEffectSampleKeyState(u8 *arg0, u8 *arg1, s32 arg2, u_long128 *arg3);
     extern void *memcpy(void *dst, const void *src, u32 size);
     extern void mdlEffectUpdateParticleTrail(u8 *arg0, u8 *arg1);
@@ -110,6 +112,7 @@ void EffMotionEmitterUpdate(u8 *arg0)
     negone = -1.0f;
 
     for (idx = 0; idx < count; idx++, out += 7, nodes += 32) {
+        if (p4pc_align_rng_calls_enabled) p4pc_align_visual_particle(idx);
         if (*(s32 *)(nodes + 16) >= limitB8) {
             tmp = (saved20 != 0) ? -2 : -1;
             *(s32 *)(nodes + 16) = tmp;

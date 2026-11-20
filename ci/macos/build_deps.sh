@@ -1,6 +1,7 @@
 #!/bin/sh
 # Builds and fetches everything the macOS build compiles with, links and ships, for the host architecture (arm64 on Apple
-# silicon, x86_64 on Intel), on macOS with the Xcode command line tools:
+# silicon, x86_64 on Intel) or, with P4PC_MACOS_ARCH=x86_64 on Apple silicon, cross-built for Intel (the compiler is a universal binary; SDL3
+# and FFmpeg are compiled with -arch x86_64, the Intel dylibs run under Rosetta), on macOS with the Xcode command line tools:
 #   - the compiler: clang 23 of the pinned llvm-mingw release the Linux and Windows builds use (ci/Dockerfile), its macOS
 #     universal host build. The 64-bit mirror's rewriter census is per compiler major (tools/port64/unit64.py), so every
 #     platform compiles the game with the same clang;
@@ -22,11 +23,15 @@ set -eu
 prefix=${1:?usage: build_deps.sh <prefix>}
 dl=${P4PC_DL_CACHE:-$prefix/../dl-cache}
 [ "$(uname -s)" = Darwin ] || { echo "build_deps: macOS only" >&2; exit 1; }
-case $(uname -m) in
+host=$(uname -m)
+case ${P4PC_MACOS_ARCH:-$host} in
   arm64)  arch=arm64;  ffarch=aarch64; electron_arch=arm64 ;;
   x86_64) arch=x86_64; ffarch=x86_64;  electron_arch=x64 ;;
-  *) echo "build_deps: unsupported architecture $(uname -m)" >&2; exit 1 ;;
+  *) echo "build_deps: unsupported architecture ${P4PC_MACOS_ARCH:-$host}" >&2; exit 1 ;;
 esac
+# (a build for the other architecture than the host's: FFmpeg's configure must not run what it compiles)
+archflag= cross=
+if [ "$arch" != "$host" ]; then archflag="-arch $arch "; cross=--enable-cross-compile; fi
 # ANGLE's dylibs below are built for macOS 12; nothing the port ships may need a newer system.
 deployment=${MACOSX_DEPLOYMENT_TARGET:-12.0}
 export MACOSX_DEPLOYMENT_TARGET=$deployment
@@ -111,12 +116,12 @@ if [ ! -f "$prefix/lib/libavcodec.dylib" ] || [ "$(cat "$prefix/ffmpeg.opts" 2>/
   rm -rf "$work/ffmpeg" && mkdir -p "$work/ffmpeg" && tar -xJf "$dl/ffmpeg-$FFMPEG_VER.tar.xz" -C "$work/ffmpeg" --strip-components=1
   # shellcheck disable=SC2086
   (cd "$work/ffmpeg" && ./configure \
-    --prefix="$prefix" --arch=$ffarch --target-os=darwin --cc=clang --install-name-dir=@rpath ${asm:+"$asm"} \
+    --prefix="$prefix" --arch=$ffarch --target-os=darwin --cc=clang --install-name-dir=@rpath ${asm:+"$asm"} ${cross:+"$cross"} \
     --disable-everything --disable-programs --disable-doc --disable-network --disable-autodetect \
     --disable-avdevice --disable-avformat --disable-avfilter --disable-swresample \
     --enable-avcodec --enable-swscale $FFMPEG_OPTS \
     --enable-shared --disable-static --disable-debug \
-    --extra-cflags="-O2 -mmacosx-version-min=$deployment" --extra-ldflags="-mmacosx-version-min=$deployment" \
+    --extra-cflags="${archflag}-O2 -mmacosx-version-min=$deployment" --extra-ldflags="${archflag}-mmacosx-version-min=$deployment" \
     && make -j"$jobs" && make install) && printf '%s' "$FFMPEG_OPTS $asm" > "$prefix/ffmpeg.opts"
 fi
 

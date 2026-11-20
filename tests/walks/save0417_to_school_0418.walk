@@ -1,6 +1,6 @@
 # From the 04/17 evening checkpoint (story0417), loaded with P4PC_AUTOPRESS_LOAD=0.
 # 04/18 early morning: asking Chie straight out repeats the question without enough Courage.
-# Pick "Say it's for the investigation" instead; after school, save at the classroom butterfly.
+# Pick the investigation response instead; after school, save at the classroom butterfly.
 timeout:6000
 wait:140
 press:cross

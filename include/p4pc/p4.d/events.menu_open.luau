@@ -1,0 +1,3 @@
+--!capability events.menu_open@1
+--!covers event:menu_open
+-- p4.events.on("menu_open") (API 1.0).

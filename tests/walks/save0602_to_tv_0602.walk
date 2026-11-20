@@ -65,7 +65,7 @@ wait:300
 # Close the real rainy-sale notice before entering Buy item.
 press:cross
 wait:600
-# Vanish Ball is eleven rows below Medicine. The observed rainy price is 760 yen; preserve both existing balls.
+# Select the escape item and retain existing stock.
 press:down
 press:down
 press:down

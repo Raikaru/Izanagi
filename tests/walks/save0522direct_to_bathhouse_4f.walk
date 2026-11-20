@@ -89,7 +89,7 @@ press:cross
 wait:100
 press:cross
 wait:100
-# Value Medicine restored 50 to everyone; the third 50-HP Medicine brings Yosuke from 1 to 201.
+# Restore the party before continuing.
 press:cross
 wait:100
 press:circle
@@ -99,7 +99,7 @@ wait:70
 press:circle
 wait:70
 log
-# The single Beast guarding the remaining leg needs real healing SP. Two owned Soul Drops restore 20 to Yu.
+# Restore SP before the remaining encounter.
 # Changing the selected item initializes its recipient to Yu, as the actual Soul Drop menu shows.
 press:triangle
 wait:100

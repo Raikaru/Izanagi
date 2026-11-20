@@ -2,7 +2,7 @@
 # Enter Marukyu Striptease at the navigator spot, cross the seats to the stage, choose
 # Enter, and climb 1F (step 41) and 2F (step 42) to the fixed 3F (62:2, step 43).
 # Yu is alone. Every encounter is escaped: Escape is four Down presses below Attack;
-# while Teddie searches ("Be patient") cancel back to the wheel and Guard, then request
+# while Teddie searches (the waiting message) cancel back to the wheel and Guard, then request
 # Escape again on the next turn. The floors are generated: tests/dungeon_digest_gate.sh
 # holds the walk to the dungeon digest the Windows x64 and Linux x64 builds recorded.
 timeout:20000

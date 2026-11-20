@@ -1,6 +1,8 @@
 #include "lua_runtime.h"
 #include "p4pc/mod_hooks.h"
 #include "p4pc/mod_numbers.h"
+#include "p4pc/guest.h"
+#include "p4pc/mod_memory.h"
 #include "p4pc/platform.h"
 #include <string.h>
 
@@ -20,6 +22,21 @@ typedef struct HookInvocation {
     P4ModCall *call;
     P4LuaContext *context;
 } HookInvocation;
+
+/* The hook invocation this frame is running on this thread, or NULL outside
+ * one and once it has returned. Bindings that act only inside one particular
+ * hook check its function, phase and arguments here instead of trusting
+ * values a script passes in; *table is the context table whose `args` the
+ * invocation copies back after a before-hook. */
+const P4ModCall *p4_lua_hook_call(lua_State *L, int *table)
+{
+    P4LuaContext *context = p4_lua_frame(L)->context;
+    if (context == NULL || context->key != p4pc_thread_context_key() || context->call == NULL ||
+        context->table == LUA_NOREF)
+        return NULL;
+    if (table != NULL) *table = context->table;
+    return context->call;
+}
 
 static void push_value(lua_State *L, char kind, const P4ModValue *value)
 {
@@ -200,6 +217,74 @@ static int add_hook(lua_State *L)
     ++mod->subscriptions;
     return 1;
 }
+/* A per-enemy reward is a transformation of the current u16 result, not an
+ * aggregate battle award. Register in the ordinary hook chain under the
+ * owning mod so legacy after-hooks and semantic consumers retain their exact
+ * reverse-load/registration order, including their individual rounding. */
+typedef struct EnemyRewardCall {
+    LuaHook *hook;
+    P4ModCall *call;
+} EnemyRewardCall;
+
+static int invoke_enemy_reward(lua_State *L)
+{
+    EnemyRewardCall *invocation = lua_touserdata(L, 1);
+    P4ModCall *call = invocation->call;
+    uint32_t unit = (uint32_t)call->args[0].u;
+    if (unit > UINT32_MAX - 2u || p4_mod_memory_check(unit + 2u, 2u, 0, 0, NULL))
+        luaL_error(L, "enemy reward: invalid unit");
+    uint16_t id;
+    memcpy(&id, P4_G2H(unit + 2u), sizeof id);
+    lua_getref(L, invocation->hook->callback);
+    lua_createtable(L, 0, 3);
+    lua_pushunsigned(L, unit); lua_setfield(L, -2, "unit");
+    lua_pushunsigned(L, id); lua_setfield(L, -2, "enemy");
+    lua_pushunsigned(L, (uint32_t)call->result->u); lua_setfield(L, -2, "amount");
+    lua_setreadonly(L, -1, 1);
+    lua_call(L, 1, 1);
+    if (!lua_isnil(L, -1))
+        call->result->u = (uint64_t)p4_lua_integer(L, -1, 0, UINT16_MAX);
+    return 0;
+}
+
+static int enemy_reward_callback(P4ModCall *call, void *user)
+{
+    if (!p4_mod_reward_active()) return 0;
+    LuaHook *hook = user;
+    EnemyRewardCall invocation = {hook, call};
+    int status = p4_lua_invoke(hook->mod, invoke_enemy_reward, &invocation, 0, P4_LUA_SEMANTIC);
+    if (status) p4_mod_failure(hook->mod->owner, p4_lua_error(hook->mod));
+    return status;
+}
+
+static int add_enemy_reward(lua_State *L)
+{
+    p4_lua_require_mutation(L);
+    P4LuaMod *mod = p4_luau_user(L);
+    const char *kind = luaL_checkstring(L, 1);
+    uint32_t address;
+    if (!strcmp(kind, "exp")) address = 0x00243950u;
+    else if (!strcmp(kind, "yen")) address = 0x002439c0u;
+    else { luaL_error(L, "enemy reward kind must be exp or yen"); }
+    luaL_checktype(L, 2, LUA_TFUNCTION);
+    P4ModFunction *function = p4_mod_function_find(address, "Hp");
+    if (!function) luaL_error(L, "enemy reward calculator unavailable");
+    if (mod->subscriptions >= 128) luaL_error(L, "mod lifetime subscription limit (128) exceeded");
+    LuaHook *hook = lua_newuserdatataggedwithmetatable(L, sizeof *hook, P4_LUA_TAG_HOOK);
+    *hook = (LuaHook){.mod = mod, .callback = LUA_NOREF, .self = LUA_NOREF};
+    hook->callback = lua_ref(L, 2);
+    hook->self = lua_ref(L, -1);
+    hook->hook = p4_mod_hook_add(mod->owner, function, P4_MOD_AFTER, enemy_reward_callback, hook);
+    if (!hook->hook) {
+        lua_unref(L, hook->callback);
+        lua_unref(L, hook->self);
+        hook->callback = hook->self = LUA_NOREF;
+        luaL_error(L, "enemy reward registration refused during active dispatch");
+    }
+    ++mod->subscriptions;
+    return 1;
+}
+
 
 static int call_original(lua_State *L)
 {
@@ -248,6 +333,10 @@ void p4_lua_hooks(P4LuaMod *mod)
     lua_getglobal(L, "p4");
     lua_pushcfunction(L, add_hook, "p4.hook"); lua_setfield(L, -2, "hook");
     lua_pushcfunction(L, call_original, "p4.call"); lua_setfield(L, -2, "call");
+    lua_newtable(L);
+    lua_pushcfunction(L, add_enemy_reward, "p4.enemy_reward.on"); lua_setfield(L, -2, "on");
+    lua_setreadonly(L, -1, 1);
+    lua_setfield(L, -2, "enemy_reward");
     lua_pushcfunction(L, describe_function, "p4.describe"); lua_setfield(L, -2, "describe");
     lua_pushcfunction(L, p4_lua_function_reference, "p4.fn"); lua_setfield(L, -2, "fn");
     lua_setreadonly(L, -1, 1);

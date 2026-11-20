@@ -33,7 +33,7 @@ class ResourceBoot(unittest.TestCase):
             for ident in ("boot.a", "boot.b"):
                 package = root / ident
                 package.mkdir()
-                revision = "0" if mode == "bad-revision" and ident == "boot.a" else "7"
+                revision = "0" if mode in ("bad-revision", "headless-revision") and ident == "boot.a" else "7"
                 manifest = (f"[mod]\nid={ident}\nname=Image fixture\nversion=1.0\napi=1.1\npriority=0\norder=0\n")
                 if mode != "unrelated":
                     manifest += f"[resource-image boot.a:icon]\nfile=icon.png\nformat=png\nschema=1\nrevision={revision}\n"
@@ -56,9 +56,14 @@ class ResourceBoot(unittest.TestCase):
                 encoded = bytearray(png(pixels, mode == "bad-zlib" and ident == "boot.a"))
                 if mode == "bad-crc" and ident == "boot.a":
                     encoded[29] ^= 1
+                if mode == "headless-invalid" and ident == "boot.a":
+                    encoded[0] ^= 1
+                if mode == "headless-dimensions" and ident == "boot.a":
+                    encoded[16:20] = b"\0\0\0\0"
+                    encoded[29:33] = struct.pack(">I", binascii.crc32(encoded[12:29]) & 0xffffffff)
                 if mode != "missing" or ident != "boot.a":
                     (package / "icon.png").write_bytes(encoded)
-            enabled = "" if mode == "empty" else "boot.a,boot.b" if mode in ("override", "override-early") else "boot.a"
+            enabled = "" if mode == "empty" else "boot.a,boot.b" if mode in ("override", "override-early", "headless-override") else "boot.a"
             env = dict(os.environ, P4PC_MODS="0", P4PC_PACKS="0", P4PC_INPUT="script",
                        P4PC_CONFIG="none", SDL_AUDIODRIVER="dummy")
             if mode.startswith("item-ui"):
@@ -77,7 +82,7 @@ class ResourceBoot(unittest.TestCase):
             if result.returncode == 77:
                 self.skipTest("P4PC_ELF unavailable")
             self.assertEqual(result.returncode, 0, out + err)
-            if mode in ("override", "override-early"):
+            if mode in ("override", "override-early", "headless-override"):
                 self.assertIn("provider boot.b overrides provider boot.a", err)
             return out
 
@@ -86,6 +91,12 @@ class ResourceBoot(unittest.TestCase):
 
     def test_early_decode_without_graphics_context(self):
         self.assertIn("early decode required no graphics context", self.run_mode("early-only"))
+
+    def test_no_device_metadata_and_invalid_header(self):
+        for mode in ("headless", "headless-override"):
+            self.assertIn("pinned drain passed", self.run_mode(mode))
+        for mode in ("headless-invalid", "headless-dimensions", "headless-revision", "headless-changed"):
+            self.assertIn("refused before publication", self.run_mode(mode))
 
     def test_early_ownership_conflict_without_graphics_context(self):
         self.assertIn("early decode required no graphics context", self.run_mode("override-early"))

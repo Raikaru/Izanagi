@@ -95,10 +95,10 @@ static inline uint32_t p4_h2g(const void *p)
 }
 
 /* Function table. Retail code addresses map to the native function (or trap stub) that stands for
- * them; a function the port defines that has no retail address gets a handle in 0x08000000.. when it is
- * first stored (p4_fn_h2g). A value that is not an address in the table (-1, 1, a retail address
- * with no native) comes back as a tagged non-pointer that never compares equal to a function and
- * round-trips through p4_fn_h2g. */
+ * them; a function the port defines that has no retail address gets a handle in
+ * [0x08000000,0x10000000) when first stored. An exhausted or reserved handle
+ * returns zero with a diagnostic; it is never registered or wrapped. A value
+ * not in the table comes back as a tagged non-pointer and round-trips. */
 void p4_fn_register(uint32_t addr, void *fn);
 void *p4_fn_g2h(uint32_t a);
 uint32_t p4_fn_h2g(const void *f);

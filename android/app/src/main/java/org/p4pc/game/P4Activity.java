@@ -28,9 +28,26 @@ public class P4Activity extends SDLActivity implements InputManager.InputDeviceL
 
     private static native void nativeSetEnv(String name, String value);
     private static native void nativeHardwareKeyboardChanged(boolean connected);
+    /** The touch pad's analog stick (PadOverlay): the thumb's offset in units of the stick's travel, y down; (0, 0) releases. */
+    static native void nativeTouchStick(float x, float y);
+    static native void nativeSavePadLayout(String value);
 
     private PadOverlay pad;
     private InputManager keyboardDevices;
+    private String initialPadLayout;
+
+    public void loadPadLayout(String value) {
+        runOnUiThread(() -> {
+            initialPadLayout = value;
+            if (pad != null) pad.loadCustomization(value);
+        });
+    }
+
+    public void editPadLayout() {
+        runOnUiThread(() -> {
+            if (pad != null) pad.startEditing();
+        });
+    }
 
     @Override
     public void loadLibraries() {
@@ -48,6 +65,7 @@ public class P4Activity extends SDLActivity implements InputManager.InputDeviceL
         if (!"0".equals(getIntent().getStringExtra("pad"))) {
             pad = new PadOverlay(this);
             SDLActivity.mLayout.addView(pad);
+            if (initialPadLayout != null) pad.loadCustomization(initialPadLayout);
         }
     }
 

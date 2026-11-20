@@ -25,9 +25,11 @@ typedef struct ElementStage {
 } ElementStage;
 static ElementStage staged;
 static const P4GameTables *active_tables;
+static const P4GameTables *offensive_tables;
 static const P4GameSkills *active_skills;
 static const P4GameItems *active_items;
 static int route_active;
+static uint32_t active_generation;
 static int prepare_complete(void *user);
 static void commit_complete(void *user);
 /* The element-route participant is this build's complete native battle
@@ -64,11 +66,18 @@ int p4_game_elements_boot_stage(const P4GameTables *tables,
 {
     if (!tables) return P4_TABLE_INVALID;
     if (!p4_game_tables_revision(tables)) return P4_TABLE_NOT_READY;
-    if (active_tables) return P4_TABLE_FROZEN;
+    if (active_tables || offensive_tables) return P4_TABLE_FROZEN;
     if (staged.tables) return staged.tables == tables && staged.skills == skills && staged.items == items ?
         P4_TABLE_OK : P4_TABLE_CONFLICT;
     int result = p4_game_tables_battle_complete_register("element", prepare_complete, commit_complete, NULL);
     if (result) return result;
+    if (p4_game_tables_offensive_effect_count(tables)) {
+        result = p4_game_tables_battle_complete_require("element", "table-source");
+        if (result) {
+            int rollback = p4_game_tables_battle_complete_unregister("element", prepare_complete, commit_complete, NULL);
+            return rollback ? rollback : result;
+        }
+    }
     const int requested = p4_game_elements_requested(tables);
     if (requested) {
         result = p4_game_tables_battle_complete_register("element-route", route_prepare, route_commit, NULL);
@@ -88,6 +97,9 @@ int p4_game_elements_boot_stage(const P4GameTables *tables,
     return P4_TABLE_OK;
 }
 const P4GameTables *p4_game_elements_active(void) { return active_tables; }
+const P4GameSkills *p4_game_elements_active_skills(void) { return active_tables ? active_skills : NULL; }
+const P4GameItems *p4_game_elements_active_items(void) { return active_tables ? active_items : NULL; }
+uint32_t p4_game_elements_active_generation(void) { return active_tables ? active_generation : 0; }
 const P4GameTables *p4_game_elements_prepared_snapshot(void) { return staged.prepared && staged.expanded ? staged.tables : NULL; }
 const P4GameSkills *p4_game_elements_prepared_skills(void) { return staged.prepared && staged.expanded ? staged.skills : NULL; }
 int p4_game_elements_prepared_required_pair(uint32_t leaf, uint32_t channel)
@@ -168,7 +180,12 @@ static int pair_compare(const void *left, const void *right)
 static void require_pair(RequiredPair *pairs, size_t *count, uint32_t leaf, uint32_t channel)
 {
     const P4ElementDesc *element = p4_game_tables_find_element(staged.tables, leaf);
-    if (element->flags & P4_ELEMENT_AFFINITY) pairs[(*count)++] = (RequiredPair){leaf, channel};
+    if (!(element->flags & P4_ELEMENT_AFFINITY)) return;
+    /* A side ailment's default answers every unit without its status row. */
+    const P4SideAilmentDef *side = channel == P4_CHANNEL_STATUS ?
+        p4_game_tables_find_side_ailment(staged.tables, leaf) : NULL;
+    if (side && side->default_from != P4_SIDE_DEFAULT_NONE) return;
+    pairs[(*count)++] = (RequiredPair){leaf, channel};
 }
 static int validate_graph(RequiredPair *pairs, size_t *count)
 {
@@ -223,9 +240,17 @@ static int prepare_complete(void *user)
 {
     (void)user;
     if (staged.prepared) return P4_TABLE_OK; /* Same immutable graph on every loader rebind. */
+    if (staged.expanded || p4_game_tables_offensive_effect_count(staged.tables)) {
+        int source_result = p4_game_tables_validate_runtime_sources(staged.tables);
+        if (source_result) return source_result;
+        for (size_t i = 0; i < p4_game_tables_offensive_effect_count(staged.tables); ++i) {
+            const P4OffensiveEffectBinding *effect = p4_game_tables_offensive_effect_at(staged.tables, i);
+            int result = effect->source_kind == P4_AFFINITY_EFFECT_SKILL ?
+                skill_source(effect->source_id, 0) : item_source(effect->source_id, 0);
+            if (result) return result;
+        }
+    }
     if (!staged.expanded) { staged.prepared = 1; return P4_TABLE_OK; }
-    int source_result = p4_game_tables_validate_runtime_sources(staged.tables);
-    if (source_result) return source_result;
     size_t capacity = p4_game_tables_action_element_count(staged.tables);
     const size_t effects = p4_game_tables_affinity_effect_count(staged.tables);
     const size_t skills = staged.skills ? p4_game_skills_count(staged.skills) : 0;
@@ -293,19 +318,29 @@ static int prepare_complete(void *user)
 static void commit_complete(void *user)
 {
     (void)user;
+    if (p4_game_tables_offensive_effect_count(staged.tables)) offensive_tables = staged.tables;
     if (!staged.expanded) return;
     active_skills = staged.skills;
     active_items = staged.items;
     active_tables = staged.tables;
+    if (++active_generation == 0) active_generation = 1;
 }
 int p4_game_elements_session_end(void)
 {
     /* The core owns task/queue quiescence and the shared coordinator clear.
      * No guest array/base/count belongs to this borrowed semantic tuple. */
-    active_tables = NULL; active_skills = NULL; active_items = NULL; route_active = 0;
+    active_tables = NULL; active_skills = NULL; active_items = NULL; offensive_tables = NULL; route_active = 0;
     free(staged.required);
     memset(&staged, 0, sizeof staged);
     return P4_TABLE_OK;
+}
+uint32_t p4_game_elements_native_offensive_effects(void *unit, uint32_t leaf)
+{
+    if (!offensive_tables) return 0;
+    uint32_t flags;
+    int result = p4_game_elements_offensive_effects(offensive_tables, unit, leaf, 1, &flags);
+    if (result) refuse(result);
+    return flags;
 }
 int p4_game_elements_native_preview_primary_frame(void *unit, uint32_t skill_id,
     uint32_t native_options, P4GameActionFrame *frame)
@@ -397,15 +432,21 @@ uint32_t p4_game_elements_native_affinity_query(void *unit,
     if (query && query->mode != P4_AFFINITY_QUERY_ACTUAL) refuse(P4_TABLE_INVALID);
     return native_affinity(unit, frame, 0);
 }
-uint32_t p4_game_elements_native_affinity_leaf(void *unit, uint32_t leaf, uint32_t channel, uint32_t component)
+void p4_game_elements_native_leaf_frame(uint32_t leaf, uint32_t channel, uint32_t component, P4GameActionFrame *frame)
 {
     if (!active_tables) refuse(P4_TABLE_NOT_READY);
-    P4GameActionElement declared = {.valid = 1, .element_id = leaf, .channel_id = channel, .component = component}, element;
-    int result = p4_game_tables_classify_runtime_action_element(active_tables, &declared, &element);
+    const P4GameActionElement declared = {.valid = 1, .element_id = leaf, .channel_id = channel, .component = component};
+    memset(frame, 0, sizeof *frame);
+    const int result = p4_game_tables_classify_runtime_action_element(active_tables, &declared, &frame->element);
     if (result) refuse(result);
-    if (!p4_game_action_element_has_affinity(&element)) return 100;
+}
+uint32_t p4_game_elements_native_affinity_leaf(void *unit, uint32_t leaf, uint32_t channel, uint32_t component)
+{
+    P4GameActionFrame frame;
+    p4_game_elements_native_leaf_frame(leaf, channel, component, &frame);
+    if (!p4_game_action_element_has_affinity(&frame.element)) return 100;
     uint32_t value;
-    result = p4_game_elements_runtime_affinity_effective(active_tables, unit, &element, &value);
+    const int result = p4_game_elements_runtime_affinity_effective(active_tables, unit, &frame.element, &value);
     if (result) refuse(result);
     return value;
 }

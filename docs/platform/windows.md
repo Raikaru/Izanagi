@@ -2,7 +2,7 @@
 
 [Platform index](../platform.md) · [64-bit default and Windows x64](../port64.md)
 
-This page covers the **i386 nightly reference** (`p4pc.exe`), not the x64 player package.
+This page covers the **i386 reference build** (`p4pc.exe`), not the x64 player package.
 The shared host API is `include/p4pc/os.h`, implemented by `os_posix.c` and `os_win32.c`.
 Port code/tests use that seam rather than direct platform calls.
 
@@ -56,10 +56,17 @@ cmake --build build-win32
 Ship/run the executable beside `SDL3.dll`, `avcodec-61.dll`, `avutil-59.dll` and
 `swscale-8.dll`. They also copy into `build-win32/tests/`. Host CTests run under Wine
 with `-DCMAKE_CROSSCOMPILING_EMULATOR=wine`; GL-labeled tests require a real context
-and are not qualified by container Wine. Land builds x64; nightlies retain this ABI.
+and are not qualified by container Wine.
 
-For automated native Windows runs use the local lease/scene/boot runner with
-`P4PC_HIDDEN_WINDOW=1`, `SDL_AUDIODRIVER=dummy` and `P4PC_INPUT=script`.
+Wine host tests require `LANG=C.UTF-8` and `LC_ALL=C.UTF-8` before Wine starts.
+This selects Wine's Unix filename encoding, not the Windows ANSI codepage or
+the program's C locale. With the host locale unset, Wine
+can reject even `CreateDirectoryW` and `_wfopen` Unicode paths; changing the
+product's explicit UTF-8-to-wide conversions or weakening the Unicode tests is
+not a substitute for that host requirement.
+
+For unattended native Windows runs use `P4PC_HIDDEN_WINDOW=1`,
+`SDL_AUDIODRIVER=dummy` and `P4PC_INPUT=script`.
 A hidden WGL window provides a context without desktop UI. SDL's offscreen EGL driver
 is not the Windows headless solution, and its dummy video driver has no GL.
 See [testing](testing.md#headless-execution) and [contribution rules](../../CONTRIBUTING.md).

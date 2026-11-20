@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: LicenseRef-reconstructed */
 /* func_003e41e0 (retail 0x003e41e0, 192 bytes): the 2D normalize (out arg0, in arg1 = {x, y}). length = sqrt(y * y + x * x) (the EE accumulator order); recip = 1 / length
  * when it is positive, else the length; out = {x * recip, y * recip} (y reloaded from the input after x was stored, the output may be the input). A length that is
  * not positive reports {1, func_003df590(0x19)} through func_003df4d0. Returns the length (a float in $f0).

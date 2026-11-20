@@ -4,13 +4,25 @@
 static struct TableExtent { uint32_t slot, base, bytes; } extents[160];
 static unsigned extent_count;
 static int extent_overflow;
+static P4GameTableExtentObserver extent_observer;
+static void *extent_observer_user;
 
+void p4_game_table_extent_observe(P4GameTableExtentObserver observer, void *user)
+{
+    extent_observer = observer;
+    extent_observer_user = observer ? user : NULL;
+}
+static void notify(uint32_t slot, uint32_t base, uint32_t bytes)
+{
+    if (extent_observer) extent_observer(extent_observer_user, slot, base, bytes);
+}
 void p4_game_table_extent_note(uint32_t slot, uint32_t base, uint32_t bytes)
 {
     for (unsigned i = 0; i < extent_count; i++) {
         if (extents[i].slot == slot) {
             extents[i].base = base;
             extents[i].bytes = bytes;
+            notify(slot, base, bytes);
             return;
         }
     }
@@ -19,6 +31,7 @@ void p4_game_table_extent_note(uint32_t slot, uint32_t base, uint32_t bytes)
         return;
     }
     extents[extent_count++] = (struct TableExtent){slot, base, bytes};
+    notify(slot, base, bytes);
 }
 void p4_game_table_slot_publish(uint32_t slot, uint32_t base, uint32_t bytes)
 {

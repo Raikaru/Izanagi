@@ -1,6 +1,15 @@
 #include "game_elements_ai_state.h"
+#include "p4pc/game_skills_native.h"
 #include "p4pc/gmem.h"
 #include <string.h>
+#include <stdio.h>
+
+/* gp-0x4c48 (iGpffffb3b8): the 0x28-byte skill rows the game itself reads
+ * when it collects a command's targets (001D7F10). */
+#define SKILL_TABLE_POINTER 0x007644a8u
+#define SKILL_TARGET_CLASS 0x08u
+#define SKILL_TARGET_FILTER 0x0au
+#define SKILL_FILTER_SELF 0x01u
 
 static uint32_t all_candidates(const P4AiCarrier *carrier)
 {
@@ -24,6 +33,7 @@ int p4_game_elements_ai_native_root_begin(void *source, void *work)
     carrier->condition_active = carrier->condition_seen = 0u;
     carrier->condition_epoch = carrier->candidate_epoch;
     carrier->selected.valid = carrier->decision.valid = carrier->weighted_valid = 0u;
+    carrier->substitute_valid = 0u;
     carrier->selected_permission = all_candidates(carrier);
     memset(carrier->condition_masks, 0, sizeof carrier->condition_masks);
     return P4_TABLE_OK;
@@ -78,11 +88,11 @@ int p4_game_elements_ai_native_condition_end(void *source, uint32_t scalar)
     carrier->condition_active = carrier->condition_seen = 0u;
     return P4_TABLE_OK;
 }
-int p4_game_elements_ai_native_decision_group(void *source, uint32_t row,
-    uint32_t condition_mask, uint32_t group, uint32_t *eligible)
+static int decision_group(void *source, uint32_t row, uint32_t condition_mask,
+    uint32_t group, uint32_t *eligible, uint32_t table_active)
 {
     P4AiCarrier *carrier = p4_ai_native_carrier(source);
-    if (!eligible || !carrier || !carrier->table_active || carrier->condition_active ||
+    if (!eligible || !carrier || carrier->table_active != table_active || carrier->condition_active ||
         carrier->condition_epoch != carrier->candidate_epoch || row > 2u || condition_mask > 7u ||
         group >= P4_GAME_AI_WEIGHT_GROUPS) return P4_TABLE_CONFLICT;
     uint32_t permission = all_candidates(carrier);
@@ -139,6 +149,24 @@ int p4_game_elements_ai_native_decision_group(void *source, uint32_t row,
     carrier->decision.condition_mask = condition_mask;
     return P4_TABLE_OK;
 }
+int p4_game_elements_ai_native_decision_group(void *source, uint32_t row,
+    uint32_t condition_mask, uint32_t group, uint32_t *eligible)
+{
+    return decision_group(source, row, condition_mask, group, eligible, 1u);
+}
+int p4_game_elements_ai_native_group_result(void *source, uint32_t group)
+{
+    if (!p4_game_elements_ai_native_enabled()) return P4_TABLE_OK;
+    P4AiCarrier *carrier = p4_ai_native_carrier(source);
+    if (!carrier || !carrier->weighted_valid || carrier->table_active || carrier->condition_active ||
+        carrier->condition_epoch != carrier->candidate_epoch) return P4_TABLE_CONFLICT;
+    if (group == carrier->weighted_group) return P4_TABLE_OK;
+    uint32_t eligible;
+    int result = decision_group(source, carrier->decision.row, carrier->decision.condition_mask,
+        group, &eligible, 0u);
+    if (result) return result;
+    return eligible ? P4_TABLE_OK : P4_TABLE_CONFLICT;
+}
 int p4_game_elements_ai_native_decision_end(void *source)
 {
     P4AiCarrier *carrier = p4_ai_native_carrier(source);
@@ -147,16 +175,16 @@ int p4_game_elements_ai_native_decision_end(void *source)
     carrier->table_active = 0u;
     return P4_TABLE_OK;
 }
-int p4_game_elements_ai_native_decision_work(void *source, void **work)
+int p4_game_elements_ai_native_decision_work(void *source, uint32_t *work)
 {
     P4AiCarrier *carrier = p4_ai_native_carrier(source);
     if (!carrier || !work) return P4_TABLE_INVALID;
-    *work = NULL;
+    *work = 0u;
     if (!carrier->table_work_guest) return P4_TABLE_OK;
     uint32_t role;
     int result = p4_game_elements_ai_vm_query_role(P4_G2H(carrier->table_work_guest), source, &role);
     if (result) return result;
-    *work = P4_G2H(carrier->table_work_guest);
+    *work = carrier->table_work_guest;
     return P4_TABLE_OK;
 }
 int p4_game_elements_ai_native_root_end(void *source)
@@ -164,7 +192,7 @@ int p4_game_elements_ai_native_root_end(void *source)
     P4AiCarrier *carrier = p4_ai_native_carrier(source);
     if (!carrier || carrier->table_active || carrier->condition_active) return P4_TABLE_CONFLICT;
     carrier->table_work_guest = carrier->weighted_valid = carrier->decision.valid = 0u;
-    carrier->selected_permission = 0u;
+    carrier->selected_permission = carrier->substitute_valid = 0u;
     return P4_TABLE_OK;
 }
 int p4_game_elements_ai_native_weight(void *source, uint32_t group, uint32_t entry,
@@ -173,7 +201,12 @@ int p4_game_elements_ai_native_weight(void *source, uint32_t group, uint32_t ent
     P4AiCarrier *carrier = p4_ai_native_carrier(source);
     if (!carrier || !weight || entry >= P4_GAME_AI_WEIGHT_ENTRIES || group >= P4_GAME_AI_WEIGHT_GROUPS ||
         original_weight > 255u) return P4_TABLE_INVALID;
-    if (carrier->weighted_valid && carrier->weighted_group != group) return P4_TABLE_CONFLICT;
+    if (carrier->weighted_valid && carrier->weighted_group != group) {
+        fprintf(stderr, "P4_AI_WEIGHT_CONFLICT source=%p stored_group=%u requested_group=%u entry=%u epoch=%u condition_epoch=%u table_active=%u permission=%08x weighted_mask=%08x\n",
+            source, carrier->weighted_group, group, entry, carrier->candidate_epoch,
+            carrier->condition_epoch, carrier->table_active, carrier->selected_permission, carrier->weighted_mask);
+        return P4_TABLE_CONFLICT;
+    }
     *weight = !carrier->weighted_valid || (carrier->weighted_mask & (1u << entry)) ? original_weight : 0u;
     return P4_TABLE_OK;
 }
@@ -194,7 +227,23 @@ int p4_game_elements_ai_native_decoded(void *source, uint32_t kind, uint32_t com
     P4AiCarrier *carrier = p4_ai_native_carrier(source);
     if (!carrier) return P4_TABLE_NOT_READY;
     if (++carrier->choice_generation == 0u) return P4_TABLE_CONFLICT;
+    /* An authorization is consumed or discarded by this decode, never kept for
+     * a later one; it covers only the exact command it named. */
+    uint32_t authored = carrier->substitute_valid && carrier->substitute_command == command;
+    carrier->substitute_valid = 0u;
     if (kind != 1u && kind != 2u && kind != 3u) { carrier->selected.valid = 0u; return P4_TABLE_OK; }
+    P4GameAiSelection selection;
+    int result;
+    if (authored) {
+        /* A mod's substitution replaces the command, not the draw: it keeps the
+         * decision the original weighted pick made and is not one of the
+         * group's permitted candidates. */
+        result = p4_game_elements_ai_native_command(source, command, &selection);
+        if (result) return result;
+        selection.candidate.eligibility |= P4_GAME_AI_CANDIDATE_AUTHORED;
+        return p4_game_elements_ai_native_select(source, NULL, &selection.candidate,
+            carrier->weighted_valid ? &carrier->decision : NULL);
+    }
     uint32_t index;
     for (index = 0; index < carrier->candidate_count; ++index)
         if (carrier->available[index].command == command) break;
@@ -203,15 +252,81 @@ int p4_game_elements_ai_native_decoded(void *source, uint32_t kind, uint32_t com
         return P4_TABLE_CONFLICT;
     /* Preserve the actual collector's target-local prediction when decoding
      * its returned command. An existence-only collector must not publish here. */
-    if (carrier->selected.valid && carrier->selected.candidate.command == command) {
+    if (carrier->selected.valid && carrier->selected.candidate.command == command &&
+        !(carrier->selected.candidate.eligibility & P4_GAME_AI_CANDIDATE_AUTHORED)) {
         if (carrier->weighted_valid) carrier->selected.decision = carrier->decision;
         return P4_TABLE_OK;
     }
-    P4GameAiSelection selection;
-    int result = p4_game_elements_ai_native_command(source, command, &selection);
+    result = p4_game_elements_ai_native_command(source, command, &selection);
     if (result) return result;
     return p4_game_elements_ai_native_select(source, NULL, &selection.candidate,
         carrier->weighted_valid ? &carrier->decision : NULL);
+}
+int p4_game_elements_ai_native_substitute(void *source, uint32_t command)
+{
+    if (!source) return P4_TABLE_INVALID;
+    if (command > P4_SKILL_MAX_ID || !p4_game_skill_active(command)) return P4_TABLE_NOT_FOUND;
+    /* The row the collector itself reads for this active skill. Its address may
+     * lie outside the 64 MB block (identity-mapped i386 storage, address
+     * windows), so only its own wrap is refused. */
+    uint32_t table = P4_G32(SKILL_TABLE_POINTER), row = table + command * P4_SKILL_ROW_SIZE;
+    if (!table || row < table || row + P4_SKILL_ROW_SIZE < row) return P4_TABLE_INVALID;
+    /* No individual target: the actor itself, or every unit the skill's sides
+     * collect (001DBBA0 copies them all without a draw). Any other scope would
+     * need a target the game's own choice did not provide. */
+    if (!(P4_G8(row + SKILL_TARGET_FILTER) & SKILL_FILTER_SELF) && !P4_G8(row + SKILL_TARGET_CLASS))
+        return P4_TABLE_CONFLICT;
+    if (!p4_game_elements_ai_native_enabled()) return P4_TABLE_OK;
+    P4AiCarrier *carrier = p4_ai_native_carrier(source);
+    if (!carrier) return P4_TABLE_NOT_READY;
+    carrier->substitute_valid = 1u;
+    carrier->substitute_command = command;
+    return P4_TABLE_OK;
+}
+int p4_game_elements_ai_native_decide(void *source, uint32_t kind, uint32_t command)
+{
+    if (!source || (kind != 2u && kind != 7u)) return P4_TABLE_INVALID;
+    if (kind == 2u && (command > P4_SKILL_MAX_ID || !p4_game_skill_active(command))) return P4_TABLE_NOT_FOUND;
+    if (!p4_game_elements_ai_native_enabled()) return P4_TABLE_OK;
+    P4AiCarrier *carrier = p4_ai_native_carrier(source);
+    if (!carrier) return P4_TABLE_NOT_READY;
+    /* The released command record now names the authored command: bind the
+     * selected frame to it exactly as a decode of an authorized substitution
+     * would (any target scope: the decide stage already took the targets from
+     * the game's own collector), keeping the original draw's decision. A pass
+     * decodes kind 7, which selects no frame. */
+    if (kind == 2u) {
+        carrier->substitute_valid = 1u;
+        carrier->substitute_command = command;
+    }
+    return p4_game_elements_ai_native_decoded(source, kind, command);
+}
+int p4_game_elements_ai_native_decode_begin(void *source, void *work, uint32_t parameter)
+{
+    P4AiCarrier *carrier = p4_ai_native_carrier(source);
+    if (!carrier || !work) return P4_TABLE_INVALID;
+    if (carrier->decode_active) return P4_TABLE_CONFLICT;
+    carrier->decode_active = 1u;
+    carrier->decode_work_guest = P4_H2G(work);
+    carrier->decode_parameter = parameter;
+    carrier->substitute_valid = 0u;
+    return P4_TABLE_OK;
+}
+int p4_game_elements_ai_native_decode_work(void *source, uint32_t *work, uint32_t *parameter)
+{
+    P4AiCarrier *carrier = p4_ai_native_carrier(source);
+    if (!carrier || !work || !parameter) return P4_TABLE_INVALID;
+    *work = carrier->decode_active ? carrier->decode_work_guest : 0u;
+    *parameter = carrier->decode_active ? carrier->decode_parameter : UINT32_MAX;
+    return P4_TABLE_OK;
+}
+int p4_game_elements_ai_native_decode_end(void *source)
+{
+    P4AiCarrier *carrier = p4_ai_native_carrier(source);
+    if (!carrier || !carrier->decode_active) return P4_TABLE_CONFLICT;
+    carrier->decode_active = carrier->decode_work_guest = carrier->decode_parameter = 0u;
+    carrier->substitute_valid = 0u;
+    return P4_TABLE_OK;
 }
 int p4_game_elements_ai_native_condition_query(void *source, int32_t selector, uint32_t policy, uint32_t *value)
 {

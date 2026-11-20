@@ -1,3 +1,22 @@
+# Exercise the real mirror-fix pass on the actual SFD unit, before mod-entry
+# instrumentation. External handle/error/driver seams belong to the fixture.
+set(P4_SFD_CONDITIONS_BUILD "${P4_GEN}/sfd-condition-bounds")
+set(P4_SFD_CONDITIONS_UNIT "${P4_SFD_CONDITIONS_BUILD}/src/cri/re4/sfd_set.c")
+add_custom_command(OUTPUT "${P4_SFD_CONDITIONS_UNIT}"
+  COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/cri_sfd_condition_unit.py"
+    "${P4_DECOMP}" "${P4_SFD_CONDITIONS_BUILD}"
+  DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/cri_sfd_condition_unit.py"
+    "${CMAKE_SOURCE_DIR}/tools/gen_port.py" "${CMAKE_SOURCE_DIR}/config/mirror_fixes.txt"
+    "${P4_DECOMP}/src/cri/re4/sfd_set.c"
+  VERBATIM)
+set_source_files_properties(cri_sfd_condition_bounds_test.c PROPERTIES
+  OBJECT_DEPENDS "${P4_SFD_CONDITIONS_UNIT}")
+add_executable(cri_sfd_condition_bounds_test cri_sfd_condition_bounds_test.c
+  "${P4_SFD_CONDITIONS_UNIT}" "${CMAKE_SOURCE_DIR}/src/platform/sfd_condition_guard.c")
+target_include_directories(cri_sfd_condition_bounds_test PRIVATE
+  "${P4_DECOMP}/src/cri/re4" "${CMAKE_SOURCE_DIR}/include")
+add_test(NAME cri_sfd_condition_bounds COMMAND cri_sfd_condition_bounds_test)
+
 # Real generated CRI entries against retail instructions, including alias and
 # return-ABI contracts. Only the named external seam calls are wrapped.
 add_executable(cri_cpu_adapter_test cri_cpu_adapter_test.c

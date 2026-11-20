@@ -16,6 +16,8 @@
 #define P4LS_EFFECT_RNG 0x200u /* anchored profile: effect RNG and meaningful matrix lanes */
 #define P4LS_SAVED_STATE 0x400u /* aligned profile: serialized state + real playtime */
 #define P4LS_BATTLE_QUALIFICATION 0x800u /* battle-only profile excludes elapsed playtime */
+/* Interoperability field addresses derived from analysis of the retail executable. */
+#define P4LS_FRAME_DERIVED_PLAYTIME 0x1000u /* independently witnessed reset and accepted-frame invariant */
 #define P4LS_GAME_FRAME 0x00764290u
 #define P4LS_STATE_WORDS 6
 static const uint32_t p4ls_state_addresses[P4LS_STATE_WORDS] = {
@@ -53,7 +55,7 @@ static inline uint32_t p4ls_hash_saved(const P4WalkHost *h, uint32_t hash, uint3
         hash=p4ls_hash_word(hash,sections[i].tag);
         hash=p4ls_hash_range(h,hash,sections[i].address,sections[i].size);
     }
-    if (!(flags&P4LS_BATTLE_QUALIFICATION))
+    if (!(flags&(P4LS_BATTLE_QUALIFICATION|P4LS_FRAME_DERIVED_PLAYTIME)))
         hash=p4ls_hash_word(hash,h->read32(h->user,0x0076428cu));
     hash=p4ls_hash_word(hash,h->read32(h->user,0x0079b67cu));
     hash=p4ls_hash_word(hash,h->read32(h->user,0x00764638u));

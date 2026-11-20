@@ -1,0 +1,3 @@
+--!capability manifest.table-derived@2
+--!covers section:table-derived
+-- Table-derived producers compose and relocate table inputs and record raw source files.

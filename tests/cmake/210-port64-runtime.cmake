@@ -40,6 +40,7 @@ if(NOT P4_WIN32 AND CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_HOST_SYSTEM_PRO
               ${P4_TASK_BRIDGE64_ARGS}
               --src src/platform/guest.c --src src/platform/os/os_posix.c --exe "${P4_TASK64}" --python "${P4_PYTHON}" --clang "${CMAKE_C_COMPILER}"
       DEPENDS p4_mirror ${P4_TASK_BRIDGE64_DEP} "${CMAKE_SOURCE_DIR}/tools/port64/build64.py" "${CMAKE_SOURCE_DIR}/tools/port64/gptr_rewrite.py"
+              "${CMAKE_SOURCE_DIR}/tools/gen_port.py"
               "${CMAKE_CURRENT_SOURCE_DIR}/port64_task_test.c" "${CMAKE_SOURCE_DIR}/src/platform/guest.c"
               "${CMAKE_SOURCE_DIR}/src/platform/ee_bytes.c"
               "${CMAKE_SOURCE_DIR}/include/p4pc/guest.h" "${CMAKE_SOURCE_DIR}/include/p4pc/compat.h"
@@ -109,7 +110,10 @@ endif()
 # The 64-bit executable (-DP4_PORT64_LINK=ON) boots against the retail image and disc as far as the marker (tests/boot64_gate.sh).
 if(TARGET p4pc64)
   add_test(NAME boot64 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/boot64_gate.sh" $<TARGET_FILE:p4pc64>)
-  set_tests_properties(boot64 PROPERTIES SKIP_RETURN_CODE 77 TIMEOUT 300)
+  set_tests_properties(boot64 PROPERTIES SKIP_RETURN_CODE 77 LABELS gl TIMEOUT 300)
+  # Without a GL context (SDL's dummy video driver) the run exits 1 with the reason instead of crashing (tests/gl_open_failure.sh).
+  add_test(NAME gl_open_failure64 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/gl_open_failure.sh" $<TARGET_FILE:p4pc64>)
+  set_tests_properties(gl_open_failure64 PROPERTIES SKIP_RETURN_CODE 77 TIMEOUT 120)
   # The game-level gates of the 64-bit build are clones of the i386 ones (add_test wrapper in the registration prelude); this one has its own limit.
   add_test(NAME scene_battle_floor_a64 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/battle_mad.sh" $<TARGET_FILE:p4pc64> 512 p4-battle-floor-a 1400 14.4 "cross@360:6,cross@420:6,cross@480:6,cross@540:6,cross@600:6,cross@660:6,cross@720:6,cross@780:6,cross@840:6,cross@900:6,cross@960:6,cross@1020:6,cross@1080:6,cross@1140:6,cross@1200:6" P4PC_VIRTUAL_CLOCK=1)
   set_tests_properties(scene_battle_floor_a64 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;port64" TIMEOUT 300)
@@ -126,7 +130,8 @@ if(P4_PORT64_OBJS)
   # One baseline per target (another target rewrites some constructs differently): the build of the mirror enforces it too (CMakeLists.txt, P4_CENSUS_BASELINE).
   if(P4_CENSUS_BASELINE)
     add_test(NAME port64_census COMMAND "${P4_PYTHON}" "${CMAKE_SOURCE_DIR}/tools/port64/unit64.py" report --dir "${P4_G64}/units"
-             --census-baseline "${P4_CENSUS_BASELINE}" --clang "${CMAKE_C_COMPILER}" --active-units "${P4_G64}/active_units.txt")
+             --census-baseline "${P4_CENSUS_BASELINE}" --clang "${CMAKE_C_COMPILER}" --active-units "${P4_G64}/active_units.txt"
+             --rw-clean-units "${P4_GEN}/rw_clean_units.txt" --rw-clean-stripped "${P4_GEN}/decomp/src/rwclean/stripped_units.txt")
   endif()
   add_test(NAME seam_abi_mirror COMMAND "${P4_PYTHON}" "${CMAKE_SOURCE_DIR}/tools/port64/seam_abi.py" --check --mirror "${P4_G64}/abi.json")
 endif()

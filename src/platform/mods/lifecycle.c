@@ -84,7 +84,7 @@ static int write_replace(const char *path, const char *bytes, size_t length)
     int bad = fwrite(bytes, 1, length, stream) != length;
     if (p4_os_sync_file(stream)) bad = 1;
     if (fclose(stream)) bad = 1;
-    if (bad || p4_os_replace_file(temporary, path)) {
+    if (bad || p4_os_replace_file_durable(temporary, path)) {
         remove(temporary);
         return -1;
     }

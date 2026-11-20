@@ -11,7 +11,7 @@ from unittest import mock
 
 import event_scene_state as gate
 
-METADATA = Path(__file__).resolve().parents[1] / "docs/skygl_scenes.json"
+METADATA = Path(__file__).resolve().parent / "fixtures/event_scene_synthetic.json"
 
 
 class EventSceneStateTest(unittest.TestCase):
@@ -38,7 +38,7 @@ class EventSceneStateTest(unittest.TestCase):
         self.put(0x1000250, "<16f", *expected["ltm"])
         self.put(0x1000168, "<2f", *expected["vw"])
         self.put(0x1000180, "<2f", expected["near"], expected["far"])
-        procedure = gate.PROCEDURES[name]
+        procedure = expected["port_capture"].get("procedure")
         if procedure:
             self.put(0x764608, "<I", 0x1000800)
             self.put(0x1000800, "<24s", procedure.encode())
@@ -107,10 +107,10 @@ class EventSceneStateTest(unittest.TestCase):
         self.check("velvet-windows-blurry")
 
     def test_inner_event_text_and_settled_portrait_are_required(self):
-        for address, value in ((0x1001A8C, 146), (0x1001314, 627),
-                               (0x1001988, 24), (0x100212C, 0),
-                               (0x1002130, 6), (0x1002100, 0x00200102),
-                               (0x1002404, 0x00000203), (0x1002408, 0x00210100)):
+        for address, value in ((0x1001A8C, 99), (0x1001314, 99),
+                               (0x1001988, 99), (0x100212C, 99),
+                               (0x1002130, 99), (0x1002100, 0x00200102),
+                               (0x1002404, 0x00000203), (0x1002408, 99)):
             with self.subTest(address=hex(address)):
                 self.scene("shadow-haze")
                 self.put(address, "<I", value)
@@ -120,8 +120,8 @@ class EventSceneStateTest(unittest.TestCase):
 
     def test_nearby_fog_heading_remains_bounded(self):
         self.scene("near-fog")
-        self.put(0x1000250, "<16f", 1, 0, 0, 0, 0, .97562134, .21946083, 0,
-                 0, -.21946083, .97562134, 0, 8640, 353.9617, 3221.10718, 0)
+        self.put(0x1000250, "<16f", 1, 0, 0, 0, 0, 1, 0, 0,
+                 0, 0, 1, 0, 20, 20, 30, 0)
         self.check("near-fog", True)
         self.put(0x1000250, "<f", -1)
         with self.assertRaisesRegex(ValueError, "camera axis"):
@@ -141,10 +141,10 @@ class EventSceneStateTest(unittest.TestCase):
         self.put(0x764ADC, "<I", 0x1000500)
         self.put(0x1000500, "<24s", b"cldDungeonIn")
         self.put(0x1000538, "<I", 0x1000600)
-        self.put(0x1000600, "<2i", 1, 104)
+        self.put(0x1000600, "<2i", 1, 11)
         for state_only in (False, True):
             self.check("tv-world-enter", state_only=state_only)
-        self.put(0x1000604, "<i", 150)
+        self.put(0x1000604, "<i", 30)
         for state_only in (False, True):
             with self.assertRaisesRegex(ValueError, "compositor"):
                 self.check("tv-world-enter", state_only=state_only)

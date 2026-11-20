@@ -1,0 +1,7912 @@
+{
+ "schema": 1,
+ "enemies": [
+  {
+   "id": 0,
+   "status": "unused",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 1,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 117",
+    "counterpart": "Cowardly Maya",
+    "match": "exact shadow name",
+    "arcana": "Magician",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 2,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 3,
+   "status": "reviewed",
+   "method": "locked",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "phys_immunity_lock"
+   ]
+  },
+  {
+   "id": 4,
+   "status": "unused",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 5,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 199",
+    "counterpart": "Magic Hand",
+    "match": "exact shadow name",
+    "arcana": "Magician",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 6,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 205",
+    "counterpart": "Dancing Hand",
+    "match": "exact shadow name",
+    "arcana": "Magician",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 7,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 217",
+    "counterpart": "Killing Hand",
+    "match": "exact shadow name",
+    "arcana": "Magician",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 8,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "p4_phys_resist_budget"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 223",
+    "counterpart": "Almighty Hand",
+    "match": "exact shadow name",
+    "arcana": "Magician",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 9,
+   "status": "reviewed",
+   "method": "locked",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "phys_immunity_lock"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 233",
+    "counterpart": "Laughing Table",
+    "match": "exact shadow name",
+    "arcana": "Magician",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "resist"
+    }
+   }
+  },
+  {
+   "id": 10,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "p4_phys_resist_budget"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 239",
+    "counterpart": "Crying Table",
+    "match": "exact shadow name",
+    "arcana": "Magician",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 11,
+   "status": "reviewed",
+   "method": "locked",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "phys_immunity_lock"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 260",
+    "counterpart": "Angry Table",
+    "match": "exact shadow name",
+    "arcana": "Magician",
+    "affinities": {
+     "slash": "weak",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 12,
+   "status": "reviewed",
+   "method": "locked",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "phys_immunity_lock"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 253",
+    "counterpart": "Sleeping Table",
+    "match": "exact shadow name",
+    "arcana": "Magician",
+    "affinities": {
+     "slash": "resist",
+     "strike": "null",
+     "pierce": "resist"
+    }
+   }
+  },
+  {
+   "id": 13,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 270",
+    "counterpart": "Magical Magus",
+    "match": "exact shadow name",
+    "arcana": "Magician",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 14,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 282",
+    "counterpart": "Wondrous Magus",
+    "match": "exact shadow name",
+    "arcana": "Magician",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 15,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 289",
+    "counterpart": "Prime Magus",
+    "match": "exact shadow name",
+    "arcana": "Magician",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 16,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": "retail",
+    "strike": {
+     "kind": "null",
+     "percent": 100
+    },
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "p4_phys_resist_budget"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 295",
+    "counterpart": "Grand Magus",
+    "match": "exact shadow name",
+    "arcana": "Magician",
+    "affinities": {
+     "slash": "normal",
+     "strike": "null",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 17,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 18,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 19,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 20,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 21,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 123",
+    "counterpart": "Merciless Maya",
+    "match": "exact shadow name",
+    "arcana": "Priestess",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 22,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 23,
+   "status": "reviewed",
+   "method": "locked",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "phys_immunity_lock"
+   ]
+  },
+  {
+   "id": 24,
+   "status": "unused",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 25,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 26,
+   "status": "reviewed",
+   "method": "locked",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "phys_immunity_lock"
+   ]
+  },
+  {
+   "id": 27,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 28,
+   "status": "reviewed",
+   "method": "locked",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "phys_immunity_lock"
+   ]
+  },
+  {
+   "id": 29,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "pierce",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 346",
+    "counterpart": "Spurious Book",
+    "match": "exact shadow name",
+    "arcana": "Priestess",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 30,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "pierce",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "nonstandard_percent_retained"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 352",
+    "counterpart": "Maniacal Book",
+    "match": "exact shadow name",
+    "arcana": "Priestess",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 31,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "pierce",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 358",
+    "counterpart": "Silent Book",
+    "match": "exact shadow name",
+    "arcana": "Priestess",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 32,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "pierce",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 364",
+    "counterpart": "Wrathful Book",
+    "match": "exact shadow name",
+    "arcana": "Priestess",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 33,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "pierce",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 374",
+    "counterpart": "Tranquil Idol",
+    "match": "exact shadow name",
+    "arcana": "Priestess",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 34,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "pierce",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 380",
+    "counterpart": "Liberating Idol",
+    "match": "exact shadow name",
+    "arcana": "Priestess",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 35,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 36,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": "retail",
+    "strike": {
+     "kind": "weak",
+     "percent": 125
+    },
+    "pierce": {
+     "kind": "resist",
+     "percent": 50
+    }
+   },
+   "basic": "pierce",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "compensating_weak_pairing_v1",
+    "no_new_phys_immunity"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 393",
+    "counterpart": "Vehement Idol",
+    "match": "exact shadow name",
+    "arcana": "Priestess",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "repel"
+    }
+   }
+  },
+  {
+   "id": 37,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 38,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 39,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 40,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 41,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 42,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 129",
+    "counterpart": "Frivolous Maya",
+    "match": "exact shadow name",
+    "arcana": "Empress",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 43,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 44,
+   "status": "reviewed",
+   "method": "locked",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "phys_immunity_lock"
+   ]
+  },
+  {
+   "id": 45,
+   "status": "unused",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 46,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 403",
+    "counterpart": "Venus Eagle",
+    "match": "exact shadow name",
+    "arcana": "Empress",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 47,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 415",
+    "counterpart": "Dark Eagle",
+    "match": "exact shadow name",
+    "arcana": "Empress",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 48,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 421",
+    "counterpart": "Jupiter Eagle",
+    "match": "exact shadow name",
+    "arcana": "Empress",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 49,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "nonstandard_percent_retained"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 427",
+    "counterpart": "Eternal Eagle",
+    "match": "exact shadow name",
+    "arcana": "Empress",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 50,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 51,
+   "status": "reviewed",
+   "method": "locked",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "pierce",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "phys_immunity_lock"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 443",
+    "counterpart": "Constancy Relic",
+    "match": "exact shadow name",
+    "arcana": "Empress",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 52,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "pierce",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "p4_phys_resist_budget"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 455",
+    "counterpart": "Growth Relic",
+    "match": "exact shadow name",
+    "arcana": "Empress",
+    "affinities": {
+     "slash": "normal",
+     "strike": "weak",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 53,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 437",
+    "counterpart": "Change Relic",
+    "match": "exact shadow name",
+    "arcana": "Empress",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 54,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 465",
+    "counterpart": "Elegant Mother",
+    "match": "exact shadow name",
+    "arcana": "Empress",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 55,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 471",
+    "counterpart": "Regal Mother",
+    "match": "exact shadow name",
+    "arcana": "Empress",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 56,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 477",
+    "counterpart": "Pistil Mother",
+    "match": "exact shadow name",
+    "arcana": "Empress",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 57,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 483",
+    "counterpart": "Divine Mother",
+    "match": "exact shadow name",
+    "arcana": "Empress",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 58,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 59,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 60,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 61,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 62,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 135",
+    "counterpart": "Haughty Maya",
+    "match": "exact shadow name",
+    "arcana": "Emperor",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 63,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 64,
+   "status": "reviewed",
+   "method": "locked",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "phys_immunity_lock"
+   ]
+  },
+  {
+   "id": 65,
+   "status": "unused",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 66,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "pierce",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 493",
+    "counterpart": "Grave Beetle",
+    "match": "exact shadow name",
+    "arcana": "Emperor",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 67,
+   "status": "reviewed",
+   "method": "locked",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "pierce",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "phys_immunity_lock"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 499",
+    "counterpart": "Adamant Beetle",
+    "match": "exact shadow name",
+    "arcana": "Emperor",
+    "affinities": {
+     "slash": "resist",
+     "strike": "normal",
+     "pierce": "null"
+    }
+   }
+  },
+  {
+   "id": 68,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 69,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": {
+     "kind": "null",
+     "percent": 100
+    },
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "pierce",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "p4_phys_resist_two_resists",
+    "p4_phys_resist_budget"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 511",
+    "counterpart": "Emperor Beetle",
+    "match": "exact shadow name",
+    "arcana": "Emperor",
+    "affinities": {
+     "slash": "null",
+     "strike": "weak",
+     "pierce": "null"
+    }
+   }
+  },
+  {
+   "id": 70,
+   "status": "reviewed",
+   "method": "locked",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "phys_immunity_lock"
+   ]
+  },
+  {
+   "id": 71,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": {
+     "kind": "null",
+     "percent": 100
+    },
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "pierce",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "p4_phys_resist_budget"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 528",
+    "counterpart": "Avenger Knight",
+    "match": "exact shadow name",
+    "arcana": "Emperor",
+    "affinities": {
+     "slash": "null",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 72,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "pierce",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 534",
+    "counterpart": "Champion Knight",
+    "match": "exact shadow name",
+    "arcana": "Emperor",
+    "affinities": {
+     "slash": "resist",
+     "strike": "resist",
+     "pierce": "resist"
+    }
+   }
+  },
+  {
+   "id": 73,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": {
+     "kind": "resist",
+     "percent": 50
+    },
+    "strike": {
+     "kind": "weak",
+     "percent": 125
+    },
+    "pierce": "retail"
+   },
+   "basic": "pierce",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "compensating_weak_pairing_v1",
+    "no_new_phys_immunity",
+    "p4_phys_normal_budget"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 540",
+    "counterpart": "Hell Knight",
+    "match": "exact shadow name",
+    "arcana": "Emperor",
+    "affinities": {
+     "slash": "null",
+     "strike": "normal",
+     "pierce": "null"
+    }
+   }
+  },
+  {
+   "id": 74,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "pierce",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 521",
+    "counterpart": "(Sub-boss) Intrepid Knight",
+    "match": "exact shadow; FES lists only its sub-boss entry",
+    "arcana": "Emperor",
+    "affinities": {
+     "slash": "resist",
+     "strike": "resist",
+     "pierce": "resist"
+    }
+   }
+  },
+  {
+   "id": 75,
+   "status": "reviewed",
+   "method": "locked",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "phys_immunity_lock"
+   ]
+  },
+  {
+   "id": 76,
+   "status": "reviewed",
+   "method": "locked",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "phys_immunity_lock"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 570",
+    "counterpart": "Power Castle",
+    "match": "exact shadow name",
+    "arcana": "Emperor",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 77,
+   "status": "reviewed",
+   "method": "locked",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "phys_immunity_lock"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 558",
+    "counterpart": "Raindrop Castle",
+    "match": "exact shadow name",
+    "arcana": "Emperor",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 78,
+   "status": "reviewed",
+   "method": "locked",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "phys_immunity_lock"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 576",
+    "counterpart": "King Castle",
+    "match": "exact shadow name",
+    "arcana": "Emperor",
+    "affinities": {
+     "slash": "normal",
+     "strike": "repel",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 79,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 80,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 81,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 82,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 83,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": {
+     "kind": "resist",
+     "percent": 50
+    },
+    "strike": "retail",
+    "pierce": {
+     "kind": "weak",
+     "percent": 125
+    }
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "compensating_resist_pairing_v1"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 141",
+    "counterpart": "Indolent Maya",
+    "match": "exact shadow name",
+    "arcana": "Hierophant",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "weak"
+    }
+   }
+  },
+  {
+   "id": 84,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 85,
+   "status": "reviewed",
+   "method": "locked",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "phys_immunity_lock"
+   ]
+  },
+  {
+   "id": 86,
+   "status": "unused",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 87,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "p4_phys_resist_budget"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 587",
+    "counterpart": "Trance Twins",
+    "match": "exact shadow name",
+    "arcana": "Hierophant",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 88,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "p4_phys_resist_budget"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 593",
+    "counterpart": "Killer Twins",
+    "match": "exact shadow name",
+    "arcana": "Hierophant",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 89,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 90,
+   "status": "reviewed",
+   "method": "locked",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "phys_immunity_lock"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 605",
+    "counterpart": "Crazy Twins",
+    "match": "exact shadow name",
+    "arcana": "Hierophant",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 91,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 92,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "pierce",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 615",
+    "counterpart": "Dogmatic Tower",
+    "match": "exact shadow name",
+    "arcana": "Hierophant",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 93,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "pierce",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 629",
+    "counterpart": "Apostate Tower",
+    "match": "exact shadow name",
+    "arcana": "Hierophant",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 94,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "pierce",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "p4_phys_resist_budget"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 621",
+    "counterpart": "Fanatic Tower",
+    "match": "exact shadow name",
+    "arcana": "Hierophant",
+    "affinities": {
+     "slash": "resist",
+     "strike": "normal",
+     "pierce": "resist"
+    }
+   }
+  },
+  {
+   "id": 95,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 96,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 639",
+    "counterpart": "Blue Sigil",
+    "match": "exact shadow name",
+    "arcana": "Hierophant",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 97,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "p4_phys_resist_budget"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 645",
+    "counterpart": "Red Sigil",
+    "match": "exact shadow name",
+    "arcana": "Hierophant",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 98,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 651",
+    "counterpart": "Green Sigil",
+    "match": "exact shadow name",
+    "arcana": "Hierophant",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 99,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 100,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 101,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 102,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 103,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 104,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 147",
+    "counterpart": "Insidious Maya",
+    "match": "exact shadow name",
+    "arcana": "Lovers",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 105,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 106,
+   "status": "reviewed",
+   "method": "locked",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "phys_immunity_lock"
+   ]
+  },
+  {
+   "id": 107,
+   "status": "unused",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 108,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 109,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 110,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "pierce",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 681",
+    "counterpart": "Devoted Cupid",
+    "match": "exact shadow name",
+    "arcana": "Lovers",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 111,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": "retail",
+    "strike": {
+     "kind": "weak",
+     "percent": 125
+    },
+    "pierce": {
+     "kind": "resist",
+     "percent": 50
+    }
+   },
+   "basic": "pierce",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "compensating_resist_pairing_v1"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 687",
+    "counterpart": "Gracious Cupid",
+    "match": "exact shadow name",
+    "arcana": "Lovers",
+    "affinities": {
+     "slash": "normal",
+     "strike": "weak",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 112,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "pierce",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 697",
+    "counterpart": "Soul Dancer",
+    "match": "exact shadow name",
+    "arcana": "Lovers",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 113,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": {
+     "kind": "weak",
+     "percent": 125
+    },
+    "strike": {
+     "kind": "resist",
+     "percent": 50
+    },
+    "pierce": "retail"
+   },
+   "basic": "pierce",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "compensating_weak_pairing_v1"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 703",
+    "counterpart": "Ardent Dancer",
+    "match": "exact shadow name",
+    "arcana": "Lovers",
+    "affinities": {
+     "slash": "normal",
+     "strike": "resist",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 114,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "pierce",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 715",
+    "counterpart": "Royal Dancer",
+    "match": "exact shadow name",
+    "arcana": "Lovers",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 115,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "pierce",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 709",
+    "counterpart": "Natural Dancer",
+    "match": "exact shadow name",
+    "arcana": "Lovers",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 116,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 117,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "pierce",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 732",
+    "counterpart": "Lustful Snake",
+    "match": "exact shadow name",
+    "arcana": "Lovers",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 118,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": {
+     "kind": "resist",
+     "percent": 50
+    },
+    "strike": "retail",
+    "pierce": {
+     "kind": "weak",
+     "percent": 125
+    }
+   },
+   "basic": "pierce",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "compensating_resist_pairing_v1"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 738",
+    "counterpart": "Immoral Snake",
+    "match": "exact shadow name",
+    "arcana": "Lovers",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "weak"
+    }
+   }
+  },
+  {
+   "id": 119,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "pierce",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 744",
+    "counterpart": "Carnal Snake",
+    "match": "exact shadow name",
+    "arcana": "Lovers",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 120,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "pierce",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "fes_uniform_resist_exceeds_normal_budget"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 758",
+    "counterpart": "Amorous Snake",
+    "match": "exact shadow name",
+    "arcana": "Lovers",
+    "affinities": {
+     "slash": "resist",
+     "strike": "resist",
+     "pierce": "resist"
+    }
+   }
+  },
+  {
+   "id": 121,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 122,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 123,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 124,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 125,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 126,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": {
+     "kind": "weak",
+     "percent": 125
+    },
+    "strike": {
+     "kind": "resist",
+     "percent": 50
+    },
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "compensating_weak_pairing_v1"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 153",
+    "counterpart": "Ill-fated Maya",
+    "match": "exact shadow name",
+    "arcana": "Chariot",
+    "affinities": {
+     "slash": "normal",
+     "strike": "resist",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 127,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 128,
+   "status": "reviewed",
+   "method": "locked",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "phys_immunity_lock"
+   ]
+  },
+  {
+   "id": 129,
+   "status": "unused",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 130,
+   "status": "reviewed",
+   "method": "locked",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "phys_immunity_lock"
+   ]
+  },
+  {
+   "id": 131,
+   "status": "reviewed",
+   "method": "locked",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "phys_immunity_lock"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 775",
+    "counterpart": "Mach Wheel",
+    "match": "exact shadow name",
+    "arcana": "Chariot",
+    "affinities": {
+     "slash": "null",
+     "strike": "normal",
+     "pierce": "null"
+    }
+   }
+  },
+  {
+   "id": 132,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "nonstandard_percent_retained"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 781",
+    "counterpart": "Brave Wheel",
+    "match": "exact shadow name",
+    "arcana": "Chariot",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 133,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "p4_phys_resist_budget"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 787",
+    "counterpart": "Battle Wheel",
+    "match": "exact shadow name",
+    "arcana": "Chariot",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 134,
+   "status": "reviewed",
+   "method": "locked",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "phys_immunity_lock"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 804",
+    "counterpart": "Wild Drive",
+    "match": "exact shadow name",
+    "arcana": "Chariot",
+    "affinities": {
+     "slash": "resist",
+     "strike": "resist",
+     "pierce": "resist"
+    }
+   }
+  },
+  {
+   "id": 135,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": {
+     "kind": "weak",
+     "percent": 125
+    },
+    "strike": {
+     "kind": "resist",
+     "percent": 50
+    },
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "compensating_weak_pairing_v1",
+    "no_new_phys_immunity"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 810",
+    "counterpart": "Killer Drive",
+    "match": "exact shadow name",
+    "arcana": "Chariot",
+    "affinities": {
+     "slash": "normal",
+     "strike": "repel",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 136,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 816",
+    "counterpart": "Slaughter Drive",
+    "match": "exact shadow name",
+    "arcana": "Chariot",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 137,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "nonstandard_percent_retained"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 797",
+    "counterpart": "Rampage Drive",
+    "match": "exact shadow name",
+    "arcana": "Chariot",
+    "affinities": {
+     "slash": "null",
+     "strike": "normal",
+     "pierce": "null"
+    }
+   }
+  },
+  {
+   "id": 138,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": {
+     "kind": "weak",
+     "percent": 125
+    },
+    "strike": {
+     "kind": "resist",
+     "percent": 50
+    },
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "compensating_weak_pairing_v1",
+    "no_new_phys_immunity",
+    "p4_phys_normal_budget"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 826",
+    "counterpart": "Arcane Turret",
+    "match": "exact shadow name",
+    "arcana": "Chariot",
+    "affinities": {
+     "slash": "normal",
+     "strike": "null",
+     "pierce": "null"
+    }
+   }
+  },
+  {
+   "id": 139,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": {
+     "kind": "null",
+     "percent": 100
+    },
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_new_reflect_drain",
+    "p4_phys_resist_two_resists",
+    "p4_phys_resist_budget"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 840",
+    "counterpart": "Scarlet Turret",
+    "match": "exact shadow name",
+    "arcana": "Chariot",
+    "affinities": {
+     "slash": "repel",
+     "strike": "null",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 140,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": {
+     "kind": "null",
+     "percent": 100
+    },
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_new_reflect_drain",
+    "p4_phys_resist_two_resists"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 846",
+    "counterpart": "Wicked Turret",
+    "match": "exact shadow name",
+    "arcana": "Chariot",
+    "affinities": {
+     "slash": "repel",
+     "strike": "repel",
+     "pierce": "repel"
+    }
+   }
+  },
+  {
+   "id": 141,
+   "status": "reviewed",
+   "method": "locked",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "phys_immunity_lock"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 853",
+    "counterpart": "Hallowed Turret",
+    "match": "exact shadow name",
+    "arcana": "Chariot",
+    "affinities": {
+     "slash": "repel",
+     "strike": "repel",
+     "pierce": "repel"
+    }
+   }
+  },
+  {
+   "id": 142,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 143,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 144,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 145,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 146,
+   "status": "reviewed",
+   "method": "locked",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "phys_immunity_lock"
+   ]
+  },
+  {
+   "id": 147,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 148,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "fes_uniform_resist_exceeds_normal_budget"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 177",
+    "counterpart": "Visceral Maya",
+    "match": "exact shadow name",
+    "arcana": "Strength",
+    "affinities": {
+     "slash": "null",
+     "strike": "null",
+     "pierce": "null"
+    }
+   }
+  },
+  {
+   "id": 149,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 150,
+   "status": "reviewed",
+   "method": "locked",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "phys_immunity_lock"
+   ]
+  },
+  {
+   "id": 151,
+   "status": "unused",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 152,
+   "status": "reviewed",
+   "method": "locked",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "phys_immunity_lock"
+   ]
+  },
+  {
+   "id": 153,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "nonstandard_percent_retained"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1216",
+    "counterpart": "Rain End Musha",
+    "match": "exact shadow name",
+    "arcana": "Strength",
+    "affinities": {
+     "slash": "resist",
+     "strike": "resist",
+     "pierce": "resist"
+    }
+   }
+  },
+  {
+   "id": 154,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1223",
+    "counterpart": "Raindrop Musha",
+    "match": "exact shadow name",
+    "arcana": "Strength",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 155,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "nonstandard_percent_retained"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1230",
+    "counterpart": "Rain Wind Musha",
+    "match": "exact shadow name",
+    "arcana": "Strength",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 156,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1199",
+    "counterpart": "Daring Gigas",
+    "match": "exact shadow name",
+    "arcana": "Strength",
+    "affinities": {
+     "slash": "resist",
+     "strike": "resist",
+     "pierce": "resist"
+    }
+   }
+  },
+  {
+   "id": 157,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 158,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": {
+     "kind": "weak",
+     "percent": 125
+    },
+    "strike": {
+     "kind": "resist",
+     "percent": 50
+    },
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "compensating_weak_pairing_v1"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1178",
+    "counterpart": "Furious Gigas",
+    "match": "exact shadow name",
+    "arcana": "Strength",
+    "affinities": {
+     "slash": "normal",
+     "strike": "resist",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 159,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "fes_uniform_resist_exceeds_normal_budget"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1191",
+    "counterpart": "Mythical Gigas",
+    "match": "exact shadow name",
+    "arcana": "Strength",
+    "affinities": {
+     "slash": "resist",
+     "strike": "repel",
+     "pierce": "null"
+    }
+   }
+  },
+  {
+   "id": 160,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 161,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 162,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1150",
+    "counterpart": "Enslaved Beast",
+    "match": "exact shadow name",
+    "arcana": "Strength",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 163,
+   "status": "reviewed",
+   "method": "locked",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "phys_immunity_lock"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1156",
+    "counterpart": "Mighty Beast",
+    "match": "exact shadow name",
+    "arcana": "Strength",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 164,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1162",
+    "counterpart": "Nemean Beast",
+    "match": "exact shadow name",
+    "arcana": "Strength",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 165,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 166,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 167,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 168,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 169,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 170,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 165",
+    "counterpart": "Desirous Maya",
+    "match": "exact shadow name",
+    "arcana": "Hermit",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 171,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 172,
+   "status": "reviewed",
+   "method": "locked",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "phys_immunity_lock"
+   ]
+  },
+  {
+   "id": 173,
+   "status": "unused",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 174,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "pierce",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 968",
+    "counterpart": "Black Raven",
+    "match": "exact shadow name",
+    "arcana": "Hermit",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 175,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "pierce",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 974",
+    "counterpart": "Vicious Raven",
+    "match": "exact shadow name",
+    "arcana": "Hermit",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 176,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "pierce",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 980",
+    "counterpart": "Amenti Raven, Black Raven, Ice Raven, Vicious Raven",
+    "match": "same family and arcana, every such FES shadow agrees (tier not compared)",
+    "arcana": "Hermit",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 177,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "pierce",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 980",
+    "counterpart": "Amenti Raven",
+    "match": "exact shadow name",
+    "arcana": "Hermit",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 178,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 996",
+    "counterpart": "Phantom Mage",
+    "match": "exact shadow name",
+    "arcana": "Hermit",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 179,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1002",
+    "counterpart": "Phantom Master",
+    "match": "exact shadow name",
+    "arcana": "Hermit",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 180,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1008",
+    "counterpart": "Phantom Lord",
+    "match": "exact shadow name",
+    "arcana": "Hermit",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 181,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1014",
+    "counterpart": "Phantom King",
+    "match": "exact shadow name",
+    "arcana": "Hermit",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 182,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 183,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1025",
+    "counterpart": "Death Seeker",
+    "match": "exact shadow name",
+    "arcana": "Hermit",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 184,
+   "status": "reviewed",
+   "method": "locked",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "phys_immunity_lock"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1031",
+    "counterpart": "Fate Seeker",
+    "match": "exact shadow name",
+    "arcana": "Hermit",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "weak"
+    }
+   }
+  },
+  {
+   "id": 185,
+   "status": "reviewed",
+   "method": "locked",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "phys_immunity_lock"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1037",
+    "counterpart": "Noble Seeker",
+    "match": "exact shadow name",
+    "arcana": "Hermit",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 186,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1050",
+    "counterpart": "Acheron Seeker",
+    "match": "exact shadow name",
+    "arcana": "Hermit",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 187,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 188,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 189,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 190,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 191,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 171",
+    "counterpart": "Imprudent Maya",
+    "match": "exact shadow name",
+    "arcana": "Fortune",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 192,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 193,
+   "status": "reviewed",
+   "method": "locked",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "phys_immunity_lock"
+   ]
+  },
+  {
+   "id": 194,
+   "status": "unused",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 195,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": "retail",
+    "strike": {
+     "kind": "null",
+     "percent": 100
+    },
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "p4_phys_resist_budget"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1061",
+    "counterpart": "Bronze Dice",
+    "match": "exact shadow name",
+    "arcana": "Fortune",
+    "affinities": {
+     "slash": "normal",
+     "strike": "null",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 196,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "fes_uniform_resist_exceeds_normal_budget"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1086",
+    "counterpart": "Iron Dice",
+    "match": "exact shadow name",
+    "arcana": "Fortune",
+    "affinities": {
+     "slash": "resist",
+     "strike": "resist",
+     "pierce": "resist"
+    }
+   }
+  },
+  {
+   "id": 197,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": {
+     "kind": "null",
+     "percent": 100
+    },
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "p4_phys_resist_two_resists"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1098",
+    "counterpart": "Silver Dice",
+    "match": "exact shadow name",
+    "arcana": "Fortune",
+    "affinities": {
+     "slash": "null",
+     "strike": "null",
+     "pierce": "null"
+    }
+   }
+  },
+  {
+   "id": 198,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "fes_uniform_resist_exceeds_normal_budget"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1104",
+    "counterpart": "Platinum Dice",
+    "match": "exact shadow name",
+    "arcana": "Fortune",
+    "affinities": {
+     "slash": "resist",
+     "strike": "resist",
+     "pierce": "resist"
+    }
+   }
+  },
+  {
+   "id": 199,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1067",
+    "counterpart": "Mind Dice",
+    "match": "exact shadow name",
+    "arcana": "Fortune",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 200,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1073",
+    "counterpart": "Curse Dice",
+    "match": "exact shadow name",
+    "arcana": "Fortune",
+    "affinities": {
+     "slash": "resist",
+     "strike": "resist",
+     "pierce": "resist"
+    }
+   }
+  },
+  {
+   "id": 201,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "p4_phys_resist_budget"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1092",
+    "counterpart": "Death Dice",
+    "match": "exact shadow name",
+    "arcana": "Fortune",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 202,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "nonstandard_percent_retained"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1079",
+    "counterpart": "Reckoning Dice",
+    "match": "exact shadow name",
+    "arcana": "Fortune",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 203,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "fes_no_balanced_pair"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1114",
+    "counterpart": "Flowing Sand",
+    "match": "exact shadow name",
+    "arcana": "Fortune",
+    "affinities": {
+     "slash": "weak",
+     "strike": "weak",
+     "pierce": "weak"
+    }
+   }
+  },
+  {
+   "id": 204,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "p4_phys_resist_budget"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1120",
+    "counterpart": "Perpetual Sand",
+    "match": "exact shadow name",
+    "arcana": "Fortune",
+    "affinities": {
+     "slash": "weak",
+     "strike": "normal",
+     "pierce": "weak"
+    }
+   }
+  },
+  {
+   "id": 205,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1126",
+    "counterpart": "Infinite Sand",
+    "match": "exact shadow name",
+    "arcana": "Fortune",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 206,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": {
+     "kind": "weak",
+     "percent": 125
+    },
+    "strike": "retail",
+    "pierce": {
+     "kind": "resist",
+     "percent": 50
+    }
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "compensating_resist_pairing_v1",
+    "p4_phys_normal_budget"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1133",
+    "counterpart": "Eternal Sand",
+    "match": "exact shadow name",
+    "arcana": "Fortune",
+    "affinities": {
+     "slash": "weak",
+     "strike": "weak",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 207,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 208,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 209,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 210,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 211,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 159",
+    "counterpart": "Bigoted Maya",
+    "match": "exact shadow name",
+    "arcana": "Justice",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 212,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 213,
+   "status": "reviewed",
+   "method": "locked",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "phys_immunity_lock"
+   ]
+  },
+  {
+   "id": 214,
+   "status": "unused",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 215,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 894",
+    "counterpart": "Justice Sword",
+    "match": "exact shadow name",
+    "arcana": "Justice",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 216,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": {
+     "kind": "resist",
+     "percent": 50
+    },
+    "strike": {
+     "kind": "weak",
+     "percent": 125
+    },
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "compensating_weak_pairing_v1",
+    "p4_phys_normal_budget"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 900",
+    "counterpart": "Conviction Sword",
+    "match": "exact shadow name",
+    "arcana": "Justice",
+    "affinities": {
+     "slash": "resist",
+     "strike": "normal",
+     "pierce": "resist"
+    }
+   }
+  },
+  {
+   "id": 217,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "p4_phys_resist_budget"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 906",
+    "counterpart": "Judgement Sword",
+    "match": "exact shadow, FES spelling",
+    "arcana": "Justice",
+    "affinities": {
+     "slash": "resist",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 218,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": {
+     "kind": "resist",
+     "percent": 50
+    },
+    "strike": "retail",
+    "pierce": {
+     "kind": "weak",
+     "percent": 125
+    }
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "compensating_weak_pairing_v1"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 920",
+    "counterpart": "Doom Sword",
+    "match": "exact shadow name",
+    "arcana": "Justice",
+    "affinities": {
+     "slash": "resist",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 219,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "pierce",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 863",
+    "counterpart": "Heat Balance",
+    "match": "exact shadow name",
+    "arcana": "Justice",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 220,
+   "status": "reviewed",
+   "method": "locked",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "pierce",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "phys_immunity_lock"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 869",
+    "counterpart": "Sky Balance",
+    "match": "exact shadow name",
+    "arcana": "Justice",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 221,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "pierce",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "p4_phys_resist_budget"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 881",
+    "counterpart": "World Balance",
+    "match": "exact shadow name",
+    "arcana": "Justice",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 222,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": {
+     "kind": "resist",
+     "percent": 50
+    },
+    "strike": "retail",
+    "pierce": {
+     "kind": "weak",
+     "percent": 125
+    }
+   },
+   "basic": "pierce",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "compensating_weak_pairing_v1"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 875",
+    "counterpart": "Light Balance",
+    "match": "exact shadow name",
+    "arcana": "Justice",
+    "affinities": {
+     "slash": "resist",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 223,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 930",
+    "counterpart": "Order Giant",
+    "match": "exact shadow name",
+    "arcana": "Justice",
+    "affinities": {
+     "slash": "resist",
+     "strike": "resist",
+     "pierce": "resist"
+    }
+   }
+  },
+  {
+   "id": 224,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "p4_phys_resist_budget"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 936",
+    "counterpart": "Stasis Giant",
+    "match": "exact shadow name",
+    "arcana": "Justice",
+    "affinities": {
+     "slash": "resist",
+     "strike": "resist",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 225,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": {
+     "kind": "weak",
+     "percent": 125
+    },
+    "strike": {
+     "kind": "resist",
+     "percent": 50
+    },
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "compensating_weak_pairing_v1",
+    "no_new_phys_immunity",
+    "p4_phys_normal_budget"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 951",
+    "counterpart": "Harmony Giant",
+    "match": "exact shadow name",
+    "arcana": "Justice",
+    "affinities": {
+     "slash": "normal",
+     "strike": "null",
+     "pierce": "repel"
+    }
+   }
+  },
+  {
+   "id": 226,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "fes_uniform_resist_exceeds_normal_budget"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 957",
+    "counterpart": "Void Giant",
+    "match": "exact shadow name",
+    "arcana": "Justice",
+    "affinities": {
+     "slash": "drain",
+     "strike": "drain",
+     "pierce": "drain"
+    }
+   }
+  },
+  {
+   "id": 227,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 228,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 229,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 230,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 231,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 183",
+    "counterpart": "Devious Maya",
+    "match": "exact shadow name",
+    "arcana": "Hanged Man",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 232,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 233,
+   "status": "reviewed",
+   "method": "locked",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "phys_immunity_lock"
+   ]
+  },
+  {
+   "id": 234,
+   "status": "unused",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 235,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "pierce",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "nonstandard_percent_retained"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1241",
+    "counterpart": "Minotaur IV",
+    "match": "exact shadow name",
+    "arcana": "Hanged Man",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 236,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": {
+     "kind": "weak",
+     "percent": 125
+    },
+    "strike": {
+     "kind": "resist",
+     "percent": 50
+    },
+    "pierce": "retail"
+   },
+   "basic": "pierce",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "compensating_weak_pairing_v1",
+    "no_new_phys_immunity"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1247",
+    "counterpart": "Minotaur III",
+    "match": "exact shadow name",
+    "arcana": "Hanged Man",
+    "affinities": {
+     "slash": "normal",
+     "strike": "null",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 237,
+   "status": "reviewed",
+   "method": "locked",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "pierce",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "phys_immunity_lock"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1253",
+    "counterpart": "Minotaur II",
+    "match": "exact shadow name",
+    "arcana": "Hanged Man",
+    "affinities": {
+     "slash": "resist",
+     "strike": "resist",
+     "pierce": "resist"
+    }
+   }
+  },
+  {
+   "id": 238,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "pierce",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "fes_uniform_resist_exceeds_normal_budget"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1260",
+    "counterpart": "Minotaur I",
+    "match": "exact shadow name",
+    "arcana": "Hanged Man",
+    "affinities": {
+     "slash": "resist",
+     "strike": "resist",
+     "pierce": "resist"
+    }
+   }
+  },
+  {
+   "id": 239,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 240,
+   "status": "reviewed",
+   "method": "locked",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "phys_immunity_lock"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1308",
+    "counterpart": "Jotun of Power",
+    "match": "exact shadow name",
+    "arcana": "Hanged Man",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 241,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1314",
+    "counterpart": "Jotun of Blood",
+    "match": "exact shadow name",
+    "arcana": "Hanged Man",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 242,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "nonstandard_percent_retained"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1328",
+    "counterpart": "Jotun of Evil",
+    "match": "exact shadow name",
+    "arcana": "Hanged Man",
+    "affinities": {
+     "slash": "weak",
+     "strike": "weak",
+     "pierce": "weak"
+    }
+   }
+  },
+  {
+   "id": 243,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": {
+     "kind": "null",
+     "percent": 100
+    },
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_new_reflect_drain",
+    "p4_phys_resist_two_resists",
+    "p4_phys_resist_budget"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1320",
+    "counterpart": "Jotun of Grief",
+    "match": "exact shadow name",
+    "arcana": "Hanged Man",
+    "affinities": {
+     "slash": "drain",
+     "strike": "drain",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 244,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1270",
+    "counterpart": "Mighty Cyclops",
+    "match": "exact shadow name",
+    "arcana": "Hanged Man",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 245,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1277",
+    "counterpart": "Mad Cyclops",
+    "match": "exact shadow name",
+    "arcana": "Hanged Man",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 246,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": {
+     "kind": "resist",
+     "percent": 50
+    },
+    "strike": "retail",
+    "pierce": {
+     "kind": "weak",
+     "percent": 125
+    }
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "compensating_weak_pairing_v1",
+    "no_new_phys_immunity"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1283",
+    "counterpart": "Fierce Cyclops",
+    "match": "exact shadow name",
+    "arcana": "Hanged Man",
+    "affinities": {
+     "slash": "drain",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 247,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1297",
+    "counterpart": "Chaos Cyclops",
+    "match": "exact shadow name",
+    "arcana": "Hanged Man",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 248,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 249,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 250,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 251,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 252,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 253,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 254,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 255,
+   "status": "unused",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 256,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 257,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 258,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 259,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 260,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 261,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 262,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 263,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 264,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 265,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 266,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 267,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 268,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 269,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 270,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 271,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 272,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 273,
+   "status": "reviewed",
+   "method": "locked",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "phys_immunity_lock"
+   ]
+  },
+  {
+   "id": 274,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ],
+   "phases": [
+    {
+     "native_profile": 320,
+     "final": "retail",
+     "lock_reason": "scripted_affinity_phase"
+    },
+    {
+     "native_profile": 321,
+     "final": "retail",
+     "lock_reason": "scripted_affinity_phase"
+    },
+    {
+     "native_profile": 322,
+     "final": "retail",
+     "lock_reason": "scripted_affinity_phase"
+    },
+    {
+     "native_profile": 323,
+     "final": "retail",
+     "lock_reason": "scripted_affinity_phase"
+    },
+    {
+     "native_profile": 324,
+     "final": "retail",
+     "lock_reason": "scripted_affinity_phase"
+    },
+    {
+     "native_profile": 325,
+     "final": "retail",
+     "lock_reason": "scripted_affinity_phase"
+    },
+    {
+     "native_profile": 326,
+     "final": "retail",
+     "lock_reason": "scripted_affinity_phase"
+    },
+    {
+     "native_profile": 327,
+     "final": "retail",
+     "lock_reason": "scripted_affinity_phase"
+    }
+   ]
+  },
+  {
+   "id": 275,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 276,
+   "status": "unused",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 277,
+   "status": "unused",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 278,
+   "status": "unused",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 279,
+   "status": "unused",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 280,
+   "status": "unused",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 281,
+   "status": "unused",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 282,
+   "status": "unused",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 283,
+   "status": "unused",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 284,
+   "status": "unused",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 285,
+   "status": "unused",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 286,
+   "status": "unused",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 287,
+   "status": "unused",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 288,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 289,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 290,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 291,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 292,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 293,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 294,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 295,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 296,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 297,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 298,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "p4_phys_resist_budget"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1340",
+    "counterpart": "Wealth Hand",
+    "match": "exact shadow name",
+    "arcana": "Magician",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 299,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1346",
+    "counterpart": "Treasure Hand",
+    "match": "exact shadow name",
+    "arcana": "Magician",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 300,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "p4_phys_resist_budget"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1352",
+    "counterpart": "Supreme Hand",
+    "match": "exact shadow name",
+    "arcana": "Magician :",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 301,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1358",
+    "counterpart": "Opulent Hand",
+    "match": "exact shadow name",
+    "arcana": "Magician",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 302,
+   "status": "reviewed",
+   "method": "locked",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "phys_immunity_lock"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1364",
+    "counterpart": "Luxury Hand",
+    "match": "exact shadow name",
+    "arcana": "Magician",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 303,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "slash",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "p4_phys_resist_budget"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1370",
+    "counterpart": "Glorious Hand",
+    "match": "exact shadow name",
+    "arcana": "Magician Hand",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 304,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 305,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 306,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 307,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 308,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 309,
+   "status": "reviewed",
+   "method": "locked",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "phys_immunity_lock"
+   ]
+  },
+  {
+   "id": 310,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "pierce",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "p4_phys_resist_budget",
+    "mandatory_boss_party_coverage"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 528",
+    "counterpart": "Avenger Knight",
+    "match": "exact shadow name",
+    "arcana": "Emperor",
+    "affinities": {
+     "slash": "null",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 311,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "fes_uniform_resist_exceeds_normal_budget"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 1199",
+    "counterpart": "Daring Gigas",
+    "match": "exact shadow name",
+    "arcana": "Strength",
+    "affinities": {
+     "slash": "resist",
+     "strike": "resist",
+     "pierce": "resist"
+    }
+   }
+  },
+  {
+   "id": 312,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "pierce",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "fes_uniform_resist_exceeds_normal_budget"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 758",
+    "counterpart": "Amorous Snake",
+    "match": "exact shadow name",
+    "arcana": "Lovers",
+    "affinities": {
+     "slash": "resist",
+     "strike": "resist",
+     "pierce": "resist"
+    }
+   }
+  },
+  {
+   "id": 313,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 217",
+    "counterpart": "Killing Hand",
+    "match": "exact shadow name",
+    "arcana": "Magician",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 314,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 315,
+   "status": "reviewed",
+   "method": "fes_exact",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "pierce",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 881",
+    "counterpart": "World Balance",
+    "match": "exact shadow name",
+    "arcana": "Justice",
+    "affinities": {
+     "slash": "normal",
+     "strike": "normal",
+     "pierce": "normal"
+    }
+   }
+  },
+  {
+   "id": 316,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 317,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 318,
+   "status": "pending",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 319,
+   "status": "reviewed",
+   "method": "fes_adapted",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "fes_uniform_resist_exceeds_normal_budget"
+   ],
+   "fes_source": {
+    "edition": "Persona 3 FES",
+    "locator": "PennyEve shadow guide line 253",
+    "counterpart": "Sleeping Table",
+    "match": "exact shadow name",
+    "arcana": "Magician",
+    "affinities": {
+     "slash": "resist",
+     "strike": "null",
+     "pierce": "resist"
+    }
+   }
+  },
+  {
+   "id": 320,
+   "status": "unused",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 321,
+   "status": "unused",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 322,
+   "status": "unused",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 323,
+   "status": "unused",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 324,
+   "status": "unused",
+   "method": "locked",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "phys_immunity_lock"
+   ]
+  },
+  {
+   "id": 325,
+   "status": "unused",
+   "method": "locked",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "phys_immunity_lock"
+   ]
+  },
+  {
+   "id": 326,
+   "status": "unused",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 327,
+   "status": "unused",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 328,
+   "status": "unused",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 329,
+   "status": "unused",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 330,
+   "status": "unused",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 331,
+   "status": "unused",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 332,
+   "status": "unused",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 333,
+   "status": "unused",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 334,
+   "status": "unused",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  },
+  {
+   "id": 335,
+   "status": "unused",
+   "method": "retail_equal",
+   "final": {
+    "slash": "retail",
+    "strike": "retail",
+    "pierce": "retail"
+   },
+   "basic": "strike",
+   "rule": {
+    "id": "physsplit-balance",
+    "revision": 1
+   },
+   "adaptation_reasons": [
+    "no_fes_counterpart"
+   ]
+  }
+ ]
+}

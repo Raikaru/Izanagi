@@ -1,0 +1,3 @@
+--!capability tables.overlay@2
+--!covers p4.tables.banks p4.tables.bank p4.tables.stock p4.tables.overlay p4.tables.clear p4.tables.active
+-- Overlay session table banks, including retail item unlock gates.

@@ -84,8 +84,9 @@ int32_t func_004010c0(int32_t requestID, void *pOut, void *pInOut, int32_t numIn
     (void)pInOut;
 
     switch (requestID) {
-    case 0: /* OPEN: GL 3.3 core context on the shared window. */
-        return p4gl_context_open() == 0 ? 1 : 0;
+    case 0: /* OPEN: GL 3.3 core context on the shared window, or the end of the run (p4gl_context_open_device). */
+        p4gl_context_open_device();
+        return 1;
     case 1: /* CLOSE */
         p4gl_context_close();
         return 1;

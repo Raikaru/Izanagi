@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: LicenseRef-reconstructed */
 /* RenderWare skin helpers at retail 0x003b7510 (SkinFindMaxWeights), 0x003b7590
  * (SkinFindNumUsedBones) and 0x003b7680 (func_003b7680).
  *

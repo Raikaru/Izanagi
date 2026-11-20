@@ -34,9 +34,15 @@ void p4_game_elements_native_action_frame(void *unit, uint32_t skill, uint32_t c
         6, P4_ACTION_COMPONENT_INSTANT_KO};
     frame->skill_id = skill;
 }
+void p4_game_elements_native_leaf_frame(uint32_t leaf, uint32_t channel, uint32_t component, P4GameActionFrame *frame)
+{
+    assert(leaf == 24 && channel == P4_CHANNEL_STATUS && component == P4_ACTION_COMPONENT_STATUS);
+    memset(frame, 0, sizeof *frame);
+    frame->element = (P4GameActionElement){1, 24, P4_CHANNEL_STATUS, P4_ELEMENT_AFFINITY, 24, P4_ACTION_COMPONENT_STATUS};
+}
 int p4_game_knowledge_native_observe(void *unit, const P4GameActionFrame *frame)
 {
-    assert(unit == &defender && frame->skill_id == 120 && observed < 4);
+    assert(unit == &defender && (frame->skill_id == 120 || frame->element.element_id == 24) && observed < 4);
     observed_leaves[observed++] = frame->element.element_id;
     return observed == observe_fail_at ? (int)observe_result : P4_TABLE_OK;
 }
@@ -67,6 +73,13 @@ int main(void)
     observe_fail_at = 2; observe_result = P4_TABLE_INVALID;
     if (!setjmp(refused)) { p4_game_elements_native_learn(&defender, &attacker, 120, 0x80000u); assert(!"refusal expected"); }
     assert(refusal == P4_TABLE_INVALID && observed == 2 && ko_calls == 1);
-    puts("game_elements_route: knowledge gate observes resolved primary/KO frames and refuses failures (scripted; not battle qualification)");
+    reset(); /* A side-ailment landing observes its (leaf, status) frame alone. */
+    p4_game_elements_native_learn_leaf(&defender, 24);
+    assert(!primary_calls && !ko_calls && observed == 1 && observed_leaves[0] == 24);
+    reset();
+    observe_fail_at = 1; observe_result = P4_TABLE_NOT_FOUND;
+    if (!setjmp(refused)) { p4_game_elements_native_learn_leaf(&defender, 24); assert(!"refusal expected"); }
+    assert(refusal == P4_TABLE_NOT_FOUND && observed == 1);
+    puts("game_elements_route: knowledge gate observes resolved primary/KO and side-ailment frames and refuses failures (scripted; not battle qualification)");
     return 0;
 }

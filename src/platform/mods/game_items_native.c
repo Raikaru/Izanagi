@@ -1,4 +1,7 @@
 #include "game_items_internal.h"
+#include "p4pc/game_mode.h"
+#include "p4pc/golden_items.h"
+#include "p4pc/golden_items_native.h"
 #include "p4pc/game_items_ui.h"
 #include "p4pc/game_table_overlay.h"
 #include "p4pc/gmem.h"
@@ -118,12 +121,22 @@ int p4_game_tables_items_native_action_ready(uint32_t category)
 }
 int p4_game_tables_items_native_action(uint32_t id)
 {
+    if (p4_game_mode() == P4_GAME_MODE_GOLDEN) {
+        /* Persona/task admission is explicitly M11/U1, not a PS2 UI alias. */
+        if (p4_golden_item_native_route(id) == P4_GOLDEN_ITEM_TEACH)
+            p4_package_boot_runtime_failed("R7a-dep:M11-skill-card-UI-U1-U4");
+        return P4_ITEM_ACTION_ERROR;
+    }
     const P4ItemRow *row = (const P4ItemRow *)p4_game_tables_items_native_metadata(id);
     if (row->kind >= 6) use_category(row->kind);
     return p4_game_tables_items_action_dispatch(active, id);
 }
 int p4_game_tables_items_native_new_consumable(uint32_t id)
 {
+    if (p4_game_mode() == P4_GAME_MODE_GOLDEN) {
+        int route = p4_golden_item_native_route(id);
+        return route == P4_GOLDEN_ITEM_FIELD || route == P4_GOLDEN_ITEM_RETURN;
+    }
     if (id < P4_ITEM_RETAIL_COUNT) return 0;
     const P4ItemRow *row = p4_game_tables_items_metadata(active, id);
     if (!row) return 0;
@@ -133,6 +146,13 @@ int p4_game_tables_items_native_new_consumable(uint32_t id)
 uint32_t p4_game_tables_items_native_stock_policy(uint32_t id)
 {
     const P4ItemRow *row = (const P4ItemRow *)p4_game_tables_items_native_metadata(id);
+    if (p4_game_mode() == P4_GAME_MODE_GOLDEN) {
+        if (row->kind == 3 || row->kind == 4 || row->kind == 6 || row->kind == 8)
+            return P4_ITEM_STOCK_CALENDAR;
+        if (row->kind == 0 || row->kind == 1 || row->kind == 2 || row->kind == 9)
+            return P4_ITEM_STOCK_REQUIREMENTS;
+        return P4_ITEM_STOCK_NONE;
+    }
     if (row->kind < 3) return P4_ITEM_STOCK_REQUIREMENTS;
     if (row->kind == 3) return P4_ITEM_STOCK_CALENDAR;
     if (row->kind < 6) return P4_ITEM_STOCK_NONE;
@@ -154,6 +174,7 @@ int p4_game_tables_items_session_end(int image_live)
     uint32_t base = active ? p4_game_tables_items_base(active) : 0;
     if (image_live && base && P4_G32(0x007642a0u) == base) P4_G32(0x007642a0u) = 0x0079bf10u;
     active = NULL; active_ui = NULL; source_items = NULL;
+    if (p4_game_mode() == P4_GAME_MODE_GOLDEN) p4_golden_items_reset();
     staged = (ItemBootStage){0}; item_loaded = 0;
     return P4_TABLE_OK;
 }
@@ -245,6 +266,26 @@ _Noreturn void p4_game_tables_items_native_refuse(int result)
 }
 int p4_game_tables_items_native_expanded(void)
 { return active && p4_game_tables_items_count(active) != 0; }
+int p4_game_tables_items_battle_capture(P4GameItemsCapture **out)
+{
+    if (!out) return P4_TABLE_INVALID;
+    *out = NULL;
+    return p4_game_tables_items_native_expanded() ? p4_game_tables_items_capture(active, out) : P4_TABLE_OK;
+}
+uint64_t p4_game_tables_items_battle_digest(void)
+{
+    return p4_game_tables_items_native_expanded() ? p4_game_tables_items_state_digest(active) : 0;
+}
+int p4_game_tables_items_battle_matches(const P4GameItemsCapture *capture)
+{
+    if (!p4_game_tables_items_native_expanded()) return capture ? P4_TABLE_CONFLICT : P4_TABLE_OK;
+    return p4_game_tables_items_capture_matches(active, capture);
+}
+int p4_game_tables_items_battle_restore(const P4GameItemsCapture *capture)
+{
+    if (!p4_game_tables_items_native_expanded()) return capture ? P4_TABLE_CONFLICT : P4_TABLE_OK;
+    return p4_game_tables_items_restore(active, capture);
+}
 uint32_t p4_game_tables_items_native_list_capacity(void)
 {
     /* List positions are not sparse item IDs. Reserve the kind-4 heading and
@@ -330,6 +371,18 @@ const uint8_t *p4_game_tables_items_native_metadata(uint32_t id)
     if (!row) p4_game_tables_items_native_refuse(P4_TABLE_NOT_FOUND);
     use_item(id);
     return (const uint8_t *)row;
+}
+uint32_t p4_game_tables_items_native_peek_effect(uint32_t id)
+{
+    const P4ItemRow *row = p4_game_tables_items_metadata(active, id);
+    if (!row) p4_game_tables_items_native_refuse(P4_TABLE_NOT_FOUND);
+    return (uint16_t)row->granted_skill;
+}
+uint32_t p4_game_tables_items_native_peek_kind(uint32_t id)
+{
+    const P4ItemRow *row = p4_game_tables_items_metadata(active, id);
+    if (!row) p4_game_tables_items_native_refuse(P4_TABLE_NOT_FOUND);
+    return row->kind;
 }
 static void draw_resource_icon(uint32_t token, float x, float y, float depth, uint32_t rgba, float scale_y)
 {

@@ -1,0 +1,179 @@
+{
+  "schema": 1,
+  "proof_id": "L1-c12-boss-scheduler-strings",
+  "decision": "PROVEN",
+  "runtime_status": "pending-seam",
+  "boundary": "Structural consumer roles from PS2 source and ordinary Steam .shared plus independent Switch NSO. Not an equal-text vote.",
+  "sources": [
+    {
+      "address": "0x00635560",
+      "ps2_size": 32,
+      "steam_section": ".sdata",
+      "steam_rva": "0x90a418",
+      "steam_raw_offset": 9474072,
+      "live_size": 23,
+      "sha256": "66e0f28051aa72fdf38fe2c3b9b67fe72cbe3d6f7af11d56142d01696f1fdc78",
+      "nso_address": "0x71005dae16",
+      "golden_value": "BTL_BOSS_20B_TRANSFORM",
+      "consumer": "0x0022b120",
+      "evidence": "PS2 22b120 formation opening packet; Steam3dd85..3ddea copies formation slots12/13 then passes source in r8 to78930; Switch1354 passes source in x2 with scriptkind3 to2cc30.",
+      "ps2_tail_policy": "retain bytes after installed Golden NUL through selected partition end; no copy of adjacent Steam strings"
+    },
+    {
+      "address": "0x00635580",
+      "ps2_size": 32,
+      "steam_section": ".sdata",
+      "steam_rva": "0x90a430",
+      "steam_raw_offset": 9474096,
+      "live_size": 24,
+      "sha256": "494b1df55ef9b36b19897ddbecaa95260a2ecfff6da1fada49072842cd11b71c",
+      "nso_address": "0x71005f9255",
+      "golden_value": "BTL_BOSS_20B_TRANSAFTER",
+      "consumer": "0x0022b120",
+      "evidence": "Same transformation sequence closing packet: Steam3e1b6 passes exact name; Switch1648 passes name in x2 and kind3 in w1.",
+      "ps2_tail_policy": "retain bytes after installed Golden NUL through selected partition end; no copy of adjacent Steam strings"
+    },
+    {
+      "address": "0x006355c0",
+      "ps2_size": 32,
+      "steam_section": ".sdata",
+      "steam_rva": "0x90a448",
+      "steam_raw_offset": 9474120,
+      "live_size": 23,
+      "sha256": "10f4c3204973c69ef72d1b5fff7af11719bf005b87cdd674a23ae3fec2257058",
+      "nso_address": "0x71005d899f",
+      "golden_value": "petal:petal_a_Material",
+      "consumer": "0x0022d600",
+      "evidence": "ROLE mapping, not equal-name mapping: PS2 petal_c_Material in HP<max branch corresponds to Golden petal:petal_a_Material. Steam402ae..402f4;Switch2a24..2a74.",
+      "ps2_tail_policy": "retain bytes after installed Golden NUL through selected partition end; no copy of adjacent Steam strings"
+    },
+    {
+      "address": "0x006355e0",
+      "ps2_size": 32,
+      "steam_section": ".sdata",
+      "steam_rva": "0x90a460",
+      "steam_raw_offset": 9474144,
+      "live_size": 23,
+      "sha256": "96dc2b9d7bdc2cc95fbe2a84d9d1c6dd1a3b0b17ddffc1f174a2a0e43cab944c",
+      "nso_address": "0x71005ebacb",
+      "golden_value": "petal:petal_b_Material",
+      "consumer": "0x0022d600",
+      "evidence": "PS2 petal_b_Material in HP*100<=maxHP*50 branch corresponds to Golden qualified parent:material path. Steam402f9..40345;Switch2a78..2ac0.",
+      "ps2_tail_policy": "retain bytes after installed Golden NUL through selected partition end; no copy of adjacent Steam strings"
+    },
+    {
+      "address": "0x00635600",
+      "ps2_size": 32,
+      "steam_section": ".sdata",
+      "steam_rva": "0x90a478",
+      "steam_raw_offset": 9474168,
+      "live_size": 23,
+      "sha256": "2931bafa5c4d7c9d215f7cff9f6ba735f57b5b6164ca953ca3e935d3618e7515",
+      "nso_address": "0x710060e52d",
+      "golden_value": "petal:petal_c_Material",
+      "consumer": "0x0022d600",
+      "evidence": "ROLE mapping: PS2 petal_a_Material in HP*100<=maxHP*75 branch corresponds to Golden petal:petal_c_Material. Steam4034a..40393;Switch2ac4..2b04.",
+      "ps2_tail_policy": "retain bytes after installed Golden NUL through selected partition end; no copy of adjacent Steam strings"
+    },
+    {
+      "address": "0x006372c0",
+      "ps2_size": 32,
+      "steam_section": ".sdata",
+      "steam_rva": "0x91b4e0",
+      "steam_raw_offset": 9543904,
+      "live_size": 28,
+      "sha256": "deebff944c0a14f45038f09d9024aa28e1f72d560b6c1e4d5bb37daf10596d2b",
+      "nso_address": "0x7100619018",
+      "golden_value": "scheduler/scheduler_%02d.bf",
+      "consumer": "0x00260020",
+      "evidence": "PS2 260020 formats current loaded month then starts scheduler BF load; Steam scheduler formatting at14619f and direct scheduler loader wrappers145c1e/145cd2/145d4d;Switchd10dc/d1458, format helper530a20 and resource acquire398470.",
+      "ps2_tail_policy": "retain bytes after installed Golden NUL through selected partition end; no copy of adjacent Steam strings"
+    },
+    {
+      "address": "0x00637348",
+      "ps2_size": 24,
+      "steam_section": ".sdata",
+      "steam_rva": "0x91b548",
+      "steam_raw_offset": 9544008,
+      "live_size": 13,
+      "sha256": "15522959abf612e97199d30064bc99f2fa5ebd8d06e5d00cf6ebee9c29f3ceee",
+      "nso_address": "0x71006013e5",
+      "golden_value": "sdlScheduler",
+      "consumer": "0x00260450",
+      "evidence": "PS2 start260450 and task queries260510/260560; Steam14687b create and146900/146930 queries;Switchd0fb0 task create with update d0fe0/destroy d1500, d151c/d154c query identity.",
+      "ps2_tail_policy": "retain bytes after installed Golden NUL through selected partition end; no copy of adjacent Steam strings"
+    }
+  ],
+  "material_contract": {
+    "reader": "PS2 btlUnitUpdateHpGauge0022d600; Golden Steam40257..40398 and Switch29e4..2b08",
+    "inputs": "existing active boss state; action.unit genus1/character103; resource manager list2/resource2804 and non-null loaded model; live u16 unit HP and computed maxHP; current model scale",
+    "actions": "independent gates in order HP<max,100*HP<=50*max,100*HP<=75*max; reapply model transform then alpha255 material update at each satisfied gate. Do not map by suffix letters or retain bare PS2 material names.",
+    "namespace": "Golden uses parent:material paths. Binder/native model route must resolve petal parent plus the specified material on the loaded2804 model. No implicit bare-name alias or different resource is authorized.",
+    "vectors": [
+      {
+        "HP": 100,
+        "maxHP": 100,
+        "material_calls": []
+      },
+      {
+        "HP": 80,
+        "maxHP": 100,
+        "material_calls": [
+          "petal:petal_a_Material"
+        ]
+      },
+      {
+        "HP": 60,
+        "maxHP": 100,
+        "material_calls": [
+          "petal:petal_a_Material",
+          "petal:petal_c_Material"
+        ]
+      },
+      {
+        "HP": 40,
+        "maxHP": 100,
+        "material_calls": [
+          "petal:petal_a_Material",
+          "petal:petal_b_Material",
+          "petal:petal_c_Material"
+        ]
+      }
+    ]
+  },
+  "scheduler_contract": {
+    "date_producer": "current calendar state signed16 day via c9d40; month/day splitter c9fb0 uses366; path formats resulting month, not raw day index or retained PS2 loaded-month default",
+    "phase_producer": "current state phase byte c9d50 selects8-byte labels; NSOd1374..d13ac copies56 bytes =7 labels, including PM_E. Not a proof that original six-phase program behavior is unchanged.",
+    "script_namespace": "scheduler month BF container; procedure format sdl%02d_%02d_%s followed by named-procedure lookup2e0ad0 and start2e06e0(priority15); loaded script state remains a live dependency.",
+    "task_identity": "same sdlScheduler name must be used for creation and lookup/termination; native/static copies and inline task-name paths must use the qualified string"
+  },
+  "required_seams": [
+    {
+      "ps2_addresses": [
+        "0x0022b120"
+      ],
+      "action": "Bind both transformation procedure-name arguments, including native/inlined packet creation; resolve in boss script namespace kind3. No rename by generic string coincidence."
+    },
+    {
+      "ps2_addresses": [
+        "0x0022d600"
+      ],
+      "action": "Bind all three material arguments by HP-threshold ROLE, using the complete23-byte Golden qualified paths (including NUL). Cover native/inlined model update paths and real resource2804 model namespace. Retain nine partition-tail bytes per row."
+    },
+    {
+      "ps2_addresses": [
+        "0x00260020"
+      ],
+      "action": "Bind scheduler path formatting argument; preserve produced month and live loader state, no hardcoded month/default path. Prefix includes NUL, retain remaining PS2 bytes."
+    },
+    {
+      "ps2_addresses": [
+        "0x00260450",
+        "0x00260510",
+        "0x00260560"
+      ],
+      "action": "Bind scheduler task creation and both identity/query routes, including static copies. Preserve task instance ownership/lifecycle; a guest string write alone is insufficient."
+    }
+  ],
+  "qualification": "Static source proof; producer/namespace seams pending runtime implementation and qualification. No build, runtime test, BBV or game execution."
+}

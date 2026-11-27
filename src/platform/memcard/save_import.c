@@ -1,4 +1,5 @@
 #include "p4pc/save_import.h"
+#include "p4pc/hostpath.h"
 #include "p4pc/os.h"
 #include "save_image.h"
 #include "mod_save_format.h"
@@ -111,10 +112,10 @@ static int index_token(const unsigned char **cursor,const unsigned char *end,cha
     out[n]=0; *cursor=p; return 1;
 }
 static int folder_index(const char *dir,P4SaveArchive *s) {
-    char pathbuf[2048]; struct stat st;
+    char pathbuf[2048]; P4HostStat st;
     if(path(pathbuf,sizeof pathbuf,dir,"_pcsx2_index")) return -1;
-    if(stat(pathbuf,&st)) return errno==ENOENT?0:-1;
-    if(st.st_size<0 || st.st_size>16384) return -1;
+    if(p4_host_stat(pathbuf,&st)) return errno==ENOENT?0:-1;
+    if(st.size>16384) return -1;
     size_t length; unsigned char *bytes=readfile(pathbuf,&length,16384);
     if(!bytes || length>16384 || memchr(bytes,0,length)) { free(bytes); return -1; }
     int legacy=0,current=0;
@@ -158,7 +159,7 @@ static int folder_index(const char *dir,P4SaveArchive *s) {
  * eight-byte timestamps losslessly beside the files as P4SM v1 records. */
 static int metadata(const char *dir,P4SaveArchive *s,const char *renamed) {
     char p[2048]; if(path(p,sizeof p,dir,".p4save-meta")) return -1;
-    FILE *f=fopen(p,renamed?"wb":"rb");
+    FILE *f=p4_host_fopen(p,renamed?"wb":"rb");
     if(!f) return renamed?-1:0;
     unsigned char header[24]={ 'P','4','S','M',1,0,0,0 };
     int ok=1;
@@ -189,8 +190,8 @@ static int metadata(const char *dir,P4SaveArchive *s,const char *renamed) {
 typedef struct { P4SaveArchive *s; const char *dir; char *error; size_t cap; int failed; size_t total; } Folder;
 static void folder_file(const char *name,void *user) {
     Folder *c=user; if(c->failed || !strcmp(name,".") || !strcmp(name,"..") || !strncmp(name,"_pcsx2_",7) || !strcmp(name,".p4save-meta")) return;
-    char p[2048]; struct stat st;
-    if(path(p,sizeof p,c->dir,name)||!p4_os_is_file_nofollow(p)||stat(p,&st)||!S_ISREG(st.st_mode)) { c->failed=fail(c->error,c->cap,"Invalid or linked folder memory-card file"); return; }
+    char p[2048]; P4HostStat st;
+    if(path(p,sizeof p,c->dir,name)||!p4_os_is_file_nofollow(p)||p4_host_stat(p,&st)||!st.is_file) { c->failed=fail(c->error,c->cap,"Invalid or linked folder memory-card file"); return; }
     if(p4_save_witness_name(name)){c->s->witness=1;return;}
     P4SaveFile *f;
     size_t limit;
@@ -198,20 +199,20 @@ static void folder_file(const char *name,void *user) {
     else if(!strcmp(name,P4_MOD_SAVE_COMMIT)){f=&c->s->mod_commit;limit=P4_MOD_SAVE_MARKER_BYTES;}
     else{
         if(!safe(name)||c->s->count==P4SAVE_MAX_FILES){c->failed=fail(c->error,c->cap,"Invalid folder memory-card filename or count");return;}
-        if(st.st_size<0||(uint64_t)st.st_size>P4SAVE_MAX_BYTES-c->total){c->failed=fail(c->error,c->cap,"Folder save exceeds 8 MiB");return;}
-        c->total+=(size_t)st.st_size;f=&c->s->files[c->s->count++];limit=P4SAVE_MAX_BYTES;
+        if(st.size>P4SAVE_MAX_BYTES-c->total){c->failed=fail(c->error,c->cap,"Folder save exceeds 8 MiB");return;}
+        c->total+=(size_t)st.size;f=&c->s->files[c->s->count++];limit=P4SAVE_MAX_BYTES;
     }
     if(f->data){c->failed=fail(c->error,c->cap,"Duplicate native save metadata");return;}
     strcpy(f->name,name);f->data=readfile(p,&f->size,limit);
     if(!f->data) { c->failed=fail(c->error,c->cap,"Cannot read bounded folder memory-card file"); return; }
-    encode_time(f->created,st.st_ctime); encode_time(f->modified,st.st_mtime);
+    encode_time(f->created,st.ctime); encode_time(f->modified,st.mtime);
 }
 static int folder(const char *p,const char *name,P4SaveArchive *s,char *e,size_t cap) {
     if(!safe(name)) return fail(e,cap,"Invalid save directory name");
-    strcpy(s->name,name); struct stat st; if(stat(p,&st)) return fail(e,cap,"Cannot read save folder metadata");
+    strcpy(s->name,name); P4HostStat st; if(p4_host_stat(p,&st)) return fail(e,cap,"Cannot read save folder metadata");
     int witness=p4_save_witness_input(p,1,e,cap);if(witness<0)return -1;
     if(witness)s->witness=1;
-    encode_time(s->created,st.st_ctime); encode_time(s->modified,st.st_mtime);
+    encode_time(s->created,st.ctime); encode_time(s->modified,st.mtime);
     Folder ctx={s,p,e,cap,0,0};
     if(p4_os_list_dir(p,folder_file,&ctx) || folder_index(p,s) || metadata(p,s,NULL)) return fail(e,cap,"Cannot enumerate save folder or read timestamps");
     return ctx.failed;
@@ -232,11 +233,11 @@ static void folder_dir(const char *name,void *user) {
     if(path(p,sizeof p,c->dir,name) || !p4_os_is_dir_nofollow(p) || folder(p,name,&s,c->c->error,c->c->cap) || collect(&s,c->c)) c->failed=-1;
     p4save_archive_free(&s);
 }
-static int exists(const char *p) { struct stat st; return stat(p,&st)==0; }
+static int exists(const char *p) { P4HostStat st; return p4_host_stat(p,&st)==0; }
 static int write_import_file(const P4SaveTransaction *transaction,const P4SaveFile *file,const char *name) {
     char p[P4_SAVE_PATH_CAP];
     if(p4_save_transaction_path(transaction,name,p,sizeof p))return -1;
-    FILE *out=fopen(p,"wbx");if(!out)return -1;
+    FILE *out=p4_host_fopen(p,"wbx");if(!out)return -1;
     int bad=fwrite(file->data,1,file->size,out)!=file->size;
     if(fclose(out))bad=1;
     if(!bad)stamp(p,file->modified);

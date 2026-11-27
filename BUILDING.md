@@ -1,8 +1,8 @@
 # Building Izanagi
 
 The supported build runs inside the project's Debian container (`ci/Dockerfile`).
-It has the pinned clang (llvm-mingw), SDL3, FFmpeg, Wine and everything else the
-build needs. The Windows player is cross-compiled from Linux in the same tree;
+It has the pinned clang (llvm-mingw), Zig nightly `0.18.0-dev.935+ead8f5a7a`, SDL3, FFmpeg, Wine and everything
+else the build needs. The Windows player is cross-compiled from Linux in the same tree;
 there is no MSVC build.
 
 ## What you need
@@ -44,8 +44,117 @@ cd Izanagi
 docker build -t p4pc-ci ci/
 ```
 
-The build context is `ci/`. The image downloads the pinned llvm-mingw release
+The build context is `ci/`. The image downloads the pinned llvm-mingw and Zig releases
 (checked by SHA-256) and builds SDL3 and an LGPL-only FFmpeg for the Windows targets.
+The Zig modules implement the battle simulator and party policies against the existing
+C game ABI. To use an already installed pinned compiler, pass `-DP4_ZIG=/path/to/zig`;
+outside the container, `sh ci/zig/fetch_zig.sh /unused/install/path` installs it.
+The nightly download may disappear upstream; set `P4PC_DL_CACHE` to retain the
+checksum-verified archive for reproducible installs.
+
+The pinned nightly was published **2026-11-07**. Its x86_64 Linux archive SHA-256 is
+`76258449f1088b6f80359944f9735a4c96e94246e553111155f0af6457ff8de4`;
+`cmake/zig/pin.cmake` records the other host archives, including native GitHub ARM.
+`ci/Dockerfile.arm64`, the desktop image and the Android image install that same nightly.
+Provision candidate images under distinct tags; accepted host image pins change only with
+the milestone, never by retagging an image under running checks.
+
+An experimental `zig build` graph is under development; it does not replace
+the CMake build or its release checks. `zig build zig-graph-sources` checks its
+generated compilation database for duplicate object outputs and compares the
+port source lists with the CMake fragments for the configured profile.
+The export overlay supplies an explicit public-tree mode marker. Without it,
+all private tooling fragments are required; with it, only explicitly private
+fragment registrations may be omitted. A missing script for an enabled test
+remains a failure. The marker identifies the source-tree mode, not a security
+or authenticity boundary.
+`P4_ZIG=/path/to/zig python tests/zig_tool_graph_test.py` exercises that
+registration behavior in synthetic directories; it is not a release check.
+The Persona-rating fixture links a test-only adapter to the real Zig policy;
+the production policy objects are checked for accidental `p4pc_test_` exports.
+Android Zig binding translation disables Bionic fortify overloads only for
+`translate-c`; ordinary C compilation retains the NDK's original flags.
+The mirror defaults `-Dport64-opt=O2` and `-Dport64w-opt=O2` match the qualified
+CMake recipes, rather than CMake's compile-only mirror defaults.
+`zig build zig-graph-profiles` compares the effective optimization levels in
+the graph manifest against those recipes and is included in the normal graph
+checks. For an intentional diagnostic profile, pass
+`-Dgraph-cmake-cache=/path/to/CMakeCache.txt` to compare with the actual
+corresponding CMake configuration instead. A different optimization level is
+still an assertion failure; this option does not waive parity or game tests.
+For COFF links, the pinned Zig driver drops the caller's `--gc-sections` even
+at O2. The graph's link helper records the raw compiler discovery separately,
+then translates that explicit caller policy through the closed one-row mapping
+`--gc-sections` → `/OPT:REF` and executes a corrected discovery. It adds no ICF
+policy or implicit garbage collection; an unrecognized GC/ICF/OPT policy fails
+closed. The final replay still differs from corrected discovery only by its
+map arguments, and both final EXE/PDB/map sets must remain byte-identical.
+ELF discovery and link arguments are unchanged.
+For Linux 64-bit player and viewer executables, the Zig graph links its own
+hidden, zero-valued `__dso_handle` storage, matching executable crtbegin
+semantics rather than the ELF header address synthesized by the linker.
+The graph's Zig compiler shim replays the compiler frontend for LLVM IR output
+so the EE float launcher receives the requested IR file, including when a
+dependency file is requested; it does not replace the CMake compiler.
+For Windows targets only, the shim omits `-fno-pic`: llvm-mingw 23.1.3 ignores
+it (identical frontend relocation jobs, symbols, relocations and object bytes
+for i686/x86-64 O0/O2 probes and production x64 objects), while Zig rejects it.
+ELF targets retain the flag; the real-driver regression checks both paths.
+The shim also preserves standalone Clang's default stack-protector policy and
+assertion macros: no implicit stack guards or Release-mode `NDEBUG` are added.
+Explicit caller stack-protector and `-D`/`-U` policies remain effective.
+When MinGW runtime libraries are selected, the C driver uses their matching sibling
+`include` directory before Zig's bundled libc headers (but after caller `-I`
+paths). This preserves the Windows rule census without changing its baseline:
+Zig's bundled `stdio.h` otherwise adds twelve foreign process parameters in
+`src/sce/rofs_mai.c`. Caller `-isystem` paths alone do not precede Zig's defaults.
+The C++ driver retains Zig's paired libc++ and CRT headers: putting the standalone
+C headers first would shadow libc++'s wrappers and break standard C++ headers.
+Both build systems store translated Zig C bindings under
+`<local-cache>/c-bindings/<SHA256-of-translated-bytes>/`. Their debug source path
+does not depend on the caller's temporary object-output directory. A real-Zig
+ReleaseSafe regression compares complete objects from two cold caches and distinct
+output directories; this does not waive whole-product or raw-map determinism checks.
+
+Binding checkpoint evidence (not a full-branch qualification): the retained
+private qualification record `binding-safe-regression.json`
+(SHA-256 `24b8fac3a10eb34a7be1eb3a49ffa96ae659d0f8312d48e4a611a60c7a2fd51a`)
+records the pinned-Zig ReleaseSafe regression failing with the original helper
+and passing with the candidate. The helper SHA-256 was
+`350d2db24d66009176d3cc1e10879b2daa948c891b345e0fe68eba17858ae97b`;
+the test SHA-256 was `8a81744c6bf756404c5f9c2516e05e29f96f20fdfe2e3d2add3a67d2473dc005`.
+The two isolated cold native controls are recorded in
+`/home/vxmdm9fntu/p4pc/lanes/zigz1-gc-89dfddaeb-r7/binding-cold-control/control.json`
+(SHA-256 `490a1d4924aed118b5e81573d676983b3e4acf8fce69671e5ca6b7c850c73bfb`).
+They used original source `33263d83c10180c3f5383fa73dbaa411ba746503` with
+only the explicitly hashed helper override, not the full current branch.
+Both complete ELFs were byte-identical, SHA-256
+`66aabce42cfc39481dd9a13dfdcc7ebca29e093cc6bb8f8a2a5fcd828aba7ef8`;
+the raw maps were unequal, SHA-256
+`276c23035f163842de3a986543aba92bc494164dfc4c67b8e14b12e3709b3963` and
+`bbd8d32541eb14cbb399326b6a5c92040f83a9ad43c32b0aeed28a1e22e97a6a`.
+No map normalization or waiver is claimed. The separate Debug fixture failed
+whole-object reproducibility; no Debug reproducibility claim is made.
+
+For Android only, Zig's C-declaration translation disables Bionic's fortified
+stdio overloads, which translate-c cannot represent; ordinary C compilation
+retains its original fortify settings and the imported libc ABI is unchanged.
+The POSIX signal boundary admits unaligned function-pointer sentinels such as
+`SIG_IGN` without changing their C ABI; production-object tests cover both
+AArch64 and x86-64, including architectures that align callable addresses.
+ABI-export fixtures use Clang's reported host triple and retain the explicit
+x86-64 case. The native GitHub ARM image installs real amd64 libc headers for
+that cross-target case; its lane also provisions the pinned NDK's Bionic sysroot
+for native Zig declaration translation, without executing x86-64 NDK tools.
+The graph-mode fixture consumes the lane's own public-export marker, or runs
+the real exporter on an isolated synthetic repository in private checkouts.
+
+The reusable `luau-zig` module also exposes a Zig `State` interface for protected
+source execution. The caller owns its allocator and must deinitialize each state
+once. Result strings are views anchored in the VM and expire on the next run,
+reset, or state destruction. The interface does not make arbitrary native
+callbacks safe across Luau's non-local error unwinding; see
+[`State.zig`](luau-zig/src/State.zig) for the complete ownership and error contract.
 
 ## 3. Configure and build
 
@@ -77,7 +186,9 @@ cmake --build build
 ```
 
 `P4_DECOMP` defaults to the `decomp/` submodule; configuration fails early if the
-submodule is missing. Add `-v /path/to/folder/with/SLUS_217.82:/opt/p4:ro` to the
+submodule is missing. An explicit checkout also supplies the mirror generator's
+retail symbol configuration, including when it is outside the source tree.
+Add `-v /path/to/folder/with/SLUS_217.82:/opt/p4:ro` to the
 `docker run` line and `-DP4_RETAIL=/opt/p4/SLUS_217.82` to the configure line to check
 your executable as described above.
 

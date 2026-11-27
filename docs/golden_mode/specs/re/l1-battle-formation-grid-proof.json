@@ -1,0 +1,186 @@
+{
+  "schema": 1,
+  "proof_id": "L1-c12-battle-living-party-grid-vectors",
+  "decision": "PROVEN",
+  "runtime_status": "pending-seam",
+  "scope": "Two selected image-literal partitions,64PS2B total. Actual B06 packet/living-party grid consumers prove complete3xXYZ and3-scale values; retained16B are nonlogical PS2 alignment, not a cosmetic exception.",
+  "sources": [
+    {
+      "address": "0x00609430",
+      "ps2_size": 40,
+      "role": "three nonactor initial XYZ positions",
+      "live_size": 36,
+      "rows": 3,
+      "stride": 12,
+      "element_width": 4,
+      "values": [
+        -150,
+        0,
+        -100,
+        -1,
+        0,
+        -175,
+        150,
+        0,
+        -100
+      ],
+      "retained_tail": {
+        "offset": 36,
+        "size": 4,
+        "observed_hex": "00000000"
+      },
+      "steam": {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x90aac8",
+        "raw_offset": 9475784,
+        "offset": 539336,
+        "size": 36,
+        "sha256": "cb439f888bc6fa6e8369a916e53fefea3d78e548dcb6b93fb98c4a992bf15521",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "mapping_proven": true
+      },
+      "nso": {
+        "address": "0x710062d584",
+        "size": 36,
+        "sha256": "cb439f888bc6fa6e8369a916e53fefea3d78e548dcb6b93fb98c4a992bf15521"
+      },
+      "required_seams": [
+        {
+          "owner": "B06 living-party grid table suppliers",
+          "ps2_addresses": [
+            "0x001d3950",
+            "0x001d3b50"
+          ],
+          "requirement": "Pin Steam10836033 image and each full live span/hash; refuse mismatch. Supply the actual three XYZf32 positions and three f32 radial scales to every direct/translated/native/inline table alias. Copy36B to609430 and12B to609458, preserving old4B/12B alignment tails. Do not copy40/24B M2 windows into subsequent Golden flags/pointers, or infer sources from zeros or float resemblance."
+        },
+        {
+          "owner": "Actual action/party roster and nonactor index producer",
+          "requirement": "B06 must carry the actual selected action (Golden8B work pointer vsPS24B), real action.unit and actual battle unit list atNSObattle+1d0. Preserve list traversal/cf8 links, flags9c bit8 and live datUnit/dead predicate7a7d0(0); index starts0, low16 indexes36B XYZ and12B scale sources, increments only for each eligible nonactor, and actor consumes no table slot. Bind real party roster/eligibility/action producers and demonstrate the actual0..2 nonactor-index precondition from supported game state; no synthetic actor, empty roster, forced-live units, guessed count or clamp/drop when data are absent."
+        },
+        {
+          "owner": "Real default pose, grid/normalization and unit-state writes",
+          "requirement": "Actor position comes from actual live globalposeNSO9857e0 throughGOT880620, NOT these three table positions. Bind its actual initialization/writers/reset and every native alias; do not assume immutable zero because backing storage isBSS. Preserve actual grid conversion54730, signed cells94/96, binary32 position cells*25-1750, Golden normalization33da80 and its actual degenerate/rounding behavior, then per-index scale and componentwise add for nonactors only. Apply real unit setPos67230 and actual qualified rotation source71eb0c throughGOT880660/setRot67250, with real model/position/grid-cache producers and lifetime. Do not replace with PS2 normalize, constant pose/rotation, direct array positions or integer-only grid results."
+        },
+        {
+          "owner": "Packet graph and runtime qualification",
+          "requirement": "Preserve actual B06 creation/update callback53d10, work/action ownership and queue/dependency/completion behavior; actual update returns1 only after real eligible-unit writes. Native/inlined implementations must use the same qualified Golden values and live inputs, while PS2mode stays unchanged. Exercise actor/nonactor, skipped flag/dead unit, list order, all three nonactor slots, pose/default lifecycle, grid boundaries and actual normalize/model-update paths. This table correspondence is not a whole renderer or all-coordinate-helper match claim."
+        }
+      ]
+    },
+    {
+      "address": "0x00609458",
+      "ps2_size": 24,
+      "role": "three normalized-radial displacement scales",
+      "live_size": 12,
+      "rows": 3,
+      "stride": 4,
+      "element_width": 4,
+      "values": [
+        225,
+        175,
+        200
+      ],
+      "retained_tail": {
+        "offset": 12,
+        "size": 12,
+        "observed_hex": "000000000000000000000000"
+      },
+      "steam": {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x90ac98",
+        "raw_offset": 9476248,
+        "offset": 539800,
+        "size": 12,
+        "sha256": "089adff3702050ad749bf53ff9513e565c9c47ef4f4410737944031ec3a6a7e1",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "mapping_proven": true
+      },
+      "nso": {
+        "address": "0x710062d5a8",
+        "size": 12,
+        "sha256": "089adff3702050ad749bf53ff9513e565c9c47ef4f4410737944031ec3a6a7e1"
+      },
+      "required_seams": [
+        {
+          "owner": "B06 living-party grid table suppliers",
+          "ps2_addresses": [
+            "0x001d3950",
+            "0x001d3b50"
+          ],
+          "requirement": "Pin Steam10836033 image and each full live span/hash; refuse mismatch. Supply the actual three XYZf32 positions and three f32 radial scales to every direct/translated/native/inline table alias. Copy36B to609430 and12B to609458, preserving old4B/12B alignment tails. Do not copy40/24B M2 windows into subsequent Golden flags/pointers, or infer sources from zeros or float resemblance."
+        },
+        {
+          "owner": "Actual action/party roster and nonactor index producer",
+          "requirement": "B06 must carry the actual selected action (Golden8B work pointer vsPS24B), real action.unit and actual battle unit list atNSObattle+1d0. Preserve list traversal/cf8 links, flags9c bit8 and live datUnit/dead predicate7a7d0(0); index starts0, low16 indexes36B XYZ and12B scale sources, increments only for each eligible nonactor, and actor consumes no table slot. Bind real party roster/eligibility/action producers and demonstrate the actual0..2 nonactor-index precondition from supported game state; no synthetic actor, empty roster, forced-live units, guessed count or clamp/drop when data are absent."
+        },
+        {
+          "owner": "Real default pose, grid/normalization and unit-state writes",
+          "requirement": "Actor position comes from actual live globalposeNSO9857e0 throughGOT880620, NOT these three table positions. Bind its actual initialization/writers/reset and every native alias; do not assume immutable zero because backing storage isBSS. Preserve actual grid conversion54730, signed cells94/96, binary32 position cells*25-1750, Golden normalization33da80 and its actual degenerate/rounding behavior, then per-index scale and componentwise add for nonactors only. Apply real unit setPos67230 and actual qualified rotation source71eb0c throughGOT880660/setRot67250, with real model/position/grid-cache producers and lifetime. Do not replace with PS2 normalize, constant pose/rotation, direct array positions or integer-only grid results."
+        },
+        {
+          "owner": "Packet graph and runtime qualification",
+          "requirement": "Preserve actual B06 creation/update callback53d10, work/action ownership and queue/dependency/completion behavior; actual update returns1 only after real eligible-unit writes. Native/inlined implementations must use the same qualified Golden values and live inputs, while PS2mode stays unchanged. Exercise actor/nonactor, skipped flag/dead unit, list order, all three nonactor slots, pose/default lifecycle, grid boundaries and actual normalize/model-update paths. This table correspondence is not a whole renderer or all-coordinate-helper match claim."
+        }
+      ]
+    }
+  ],
+  "reader_correspondence": {
+    "original": "Original1d3950 B06 update:1d39d4..1d39f8 forms low16index*12, reads609430 f32+0/+4/+8; actor uses separate global881430/881438.1d3a14 converts to signed unit cells94/96;1d3a1c..1d3a68 computes cells*25-1750; nonactor callsnormalize3e40b0,1d3a8c..1d3aa0 reads609458+index*4, scales/adds XYZ and only then increments index.1d3afc writes real position,1d3b10 real rotation, nextunit+a68 continues. Actual1d3b50 constructor allocatesB06/work4, publishes actual callback1d3950 and action pointer.",
+    "nso": "Complete53d10..53e94 update independently follows actual listbattle+1d0 throughcf8; flags9c/8 and actual datUnitCF0/dead predicate7a7d0 gate eligibility. Low16counter*12 plus direct62d584 supplies three-position source; actor comparison selects separate GOT880620 globalpose.8B+4B load53dd0/53dd4 provesXYZ12.53de4 calls actual grid54730; signed cells94/96 become25*cell-1750. Nonactor53e28 invokes actual Golden normalize33da80,53e3c loads f32 from62d5a8+index*4, scales/adds each XYZ, and increments nonactor-only counter.53d80/53d8c apply real position/rotation67230/67250. Return1 occurs only after list traversal. Actual preceding B06 constructor allocates work8 and stores callback53d10 and real action pointer.",
+    "extent": "Original/Steam/NSO complete36B positions and12B scale spans independently agree, with unique full span occurrences in both Golden images. NSO scale source begins exactly after36B position source, and its next bytes are a different small-byte table, not more scales. The independently paired typed source/three-role schema and real producer precondition, not padding zeros, establish the live spans. Original selected partitions contain4/12 nonlogical zero tail bytes. Steam immediately following the36B position source contains unrelated word5; following the12B scale source contains unrelated byteflags/other data and a later locale pointer table. Never40/24B copy these candidates.",
+    "steam_reader_status": "No corresponding ordinary Steam exact-base RIP-LEA site was found by the bounded scan; no claim of a recovered Steam body or absence follows. Actual complete ordinary NSO packet/typed consumer plus pinned unique complete Steam spans qualify source under the admitted rule; full image/payload hashes and mismatch refusal remain mandatory. No.arch decoding."
+  },
+  "live_default_pose": {
+    "nso_address": "0x71009857e0",
+    "got": "0x7100880620",
+    "status": "Actual live/BSS backing pose; high-level producer lifecycle still requires native qualification.",
+    "observed_got_sites": [
+      "0x71000674e0",
+      "0x7100069880",
+      "0x7100053d4c",
+      "0x7100036278",
+      "0x7100068d70",
+      "0x71000663d8",
+      "0x710006e478"
+    ]
+  },
+  "rotation_source": {
+    "nso_address": "0x710071eb0c",
+    "got": "0x7100880660",
+    "scope": "Actual setter source for rotation, not a newly counted canonical admission."
+  },
+  "required_seams": [
+    {
+      "owner": "B06 living-party grid table suppliers",
+      "ps2_addresses": [
+        "0x001d3950",
+        "0x001d3b50"
+      ],
+      "requirement": "Pin Steam10836033 image and each full live span/hash; refuse mismatch. Supply the actual three XYZf32 positions and three f32 radial scales to every direct/translated/native/inline table alias. Copy36B to609430 and12B to609458, preserving old4B/12B alignment tails. Do not copy40/24B M2 windows into subsequent Golden flags/pointers, or infer sources from zeros or float resemblance."
+    },
+    {
+      "owner": "Actual action/party roster and nonactor index producer",
+      "requirement": "B06 must carry the actual selected action (Golden8B work pointer vsPS24B), real action.unit and actual battle unit list atNSObattle+1d0. Preserve list traversal/cf8 links, flags9c bit8 and live datUnit/dead predicate7a7d0(0); index starts0, low16 indexes36B XYZ and12B scale sources, increments only for each eligible nonactor, and actor consumes no table slot. Bind real party roster/eligibility/action producers and demonstrate the actual0..2 nonactor-index precondition from supported game state; no synthetic actor, empty roster, forced-live units, guessed count or clamp/drop when data are absent."
+    },
+    {
+      "owner": "Real default pose, grid/normalization and unit-state writes",
+      "requirement": "Actor position comes from actual live globalposeNSO9857e0 throughGOT880620, NOT these three table positions. Bind its actual initialization/writers/reset and every native alias; do not assume immutable zero because backing storage isBSS. Preserve actual grid conversion54730, signed cells94/96, binary32 position cells*25-1750, Golden normalization33da80 and its actual degenerate/rounding behavior, then per-index scale and componentwise add for nonactors only. Apply real unit setPos67230 and actual qualified rotation source71eb0c throughGOT880660/setRot67250, with real model/position/grid-cache producers and lifetime. Do not replace with PS2 normalize, constant pose/rotation, direct array positions or integer-only grid results."
+    },
+    {
+      "owner": "Packet graph and runtime qualification",
+      "requirement": "Preserve actual B06 creation/update callback53d10, work/action ownership and queue/dependency/completion behavior; actual update returns1 only after real eligible-unit writes. Native/inlined implementations must use the same qualified Golden values and live inputs, while PS2mode stays unchanged. Exercise actor/nonactor, skipped flag/dead unit, list order, all three nonactor slots, pose/default lifecycle, grid boundaries and actual normalize/model-update paths. This table correspondence is not a whole renderer or all-coordinate-helper match claim."
+    }
+  ],
+  "source_verification": {
+    "script": "<scratch>/GoldenRE-notes/l1/l1c12_formation_grid_proof.py",
+    "observed_result": "exit0; GRID_SOURCE_PASS609430/36/retain4,609458/12/retain12 and GRID_TYPED_READER_PASS",
+    "checks": "Pinned Steam image hash, unique complete36B/12B payload occurrences and hashes in both Golden images, complete old live-span equality, every f32 value, exact section/RVA/raw coordinates, old zero tails, actual NSO XYZ12/scale4/grid1750 instruction witnesses.",
+    "scope": "Static source/data assertions only; live actor/roster/default pose/math/model/packet seams remain unqualified."
+  },
+  "source_boundary": "Static original ELF/common MIPS instructions and pinned typed source, ordinary NSO complete B06/consumer code and relocations, Steam ordinary data. Source value/layout correspondence, not function semantic match, runtime/BBV/build/verify/objdiff/unittest/CI claim.",
+  "reproduction": "Private l1c12_formation_vectors.py and l1c12_formation_vector_facts.py. Observed complete payload uniqueness/equality/hashes, exact coordinates, originalXYZ/scale instructions and independent full Golden packet/update graph. Original generic R5900 save-opcode misdecodes are not evidence. Separate source verifier receipt records final assertions."
+}

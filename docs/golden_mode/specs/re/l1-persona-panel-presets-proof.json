@@ -1,0 +1,1389 @@
+{
+  "proof_id": "L1-c6A-persona-channel-presets-20261113",
+  "class": "PROVEN",
+  "runtime_status": "pending-seam",
+  "scope": "Complete persona-panel animated-channel preset bank: six old presets plus the positively selected seventh Golden preset. Four selected L1 objects upgraded; nonselected old banks described as context, not owned-row edits. Resource file paths and renderer/model behavior outside this bank remain unqualified.",
+  "source_pins": {
+    "ps2_decomp_commit": "18016afe6",
+    "steam_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+    "switch_nso_sha256": "854c7a1e33de1619abf009fa7f32b8c012960d685c8bf1bf99a92a6a4d0bda1c",
+    "switch_mapped_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+    "method": "Static ELF/data, ordinary Steam .shared/.sdata/.xpdata and decompressed NSO code/data only. No .arch decode, game execution or runtime binding."
+  },
+  "source_proof": {
+    "ps2": "src/shdPersona.c shdPersonaSetupChannels0x0011aaa0, lines2194..2253: ten start/current snapshots; selector0/1 uses work open/close duration;2/3 fixed4;4/5 alternate open/close duration; each20-byte row supplies x/y,alpha, two float timing factors to36-byte channel state. Six table addresses fixed by actual switch arms.",
+    "steam": "ordinary .shared0x41f0d0..0x41f598: same ten current->start snapshots,36-byte channel stride, selected table and same five row fields/duration scaling. Seven-way jump table0x41f57c has ordered destinations41f276,41f28a,41f29e,41f2a7,41f2b0,41f2c4,41f2d8. Branch targets/materialized bases establish semantic selector identity, not candidate byte similarity.",
+    "switch": "0x71002a93b0..0x71002a9710: same snapshots and seven-arm selector, exact table bases/duration rules independently recovered from instructions.0x71002a9550 LDP s1,s2,[x8,#12];0x71002a9554 FMUL and0x71002a9568 FMUL establish raw float timing loads, not integer numeric conversion implied by the untyped decompiler display. Only work duration uses SCVTF.",
+    "work_destination": "Golden first channel at0x460, stride36: start x/y+0/+4, target x/y+8/+12, current x/y+16/+20, startAlpha+24,targetAlpha+25,currentAlpha+26, duration+28,delay+32. Do not overwrite a PS2 parent-work allocation with this Golden parent layout.",
+    "other_ps2_consumers": [
+      "shdPersonaTaskInit0x001175e0 initializes current x/y/alpha from old selector1 close bank",
+      "shdPersonaTweenComparison0x0011c3e0 resets current/start/target x/y/alpha from old selector0 open bank after comparison; also zeroes channel duration/delay"
+    ],
+    "other_steam_consumers": [
+      "ordinary .shared0x41bc20..0x41c164 includes initialization reads within actual close bank0xb168a0 (not candidate0xb16a80)",
+      "ordinary .shared0x420740..0x420e14 includes reset reads from open bank0xb16ca0"
+    ],
+    "golden_direct_selector_callers": [
+      "0x71002a8a70",
+      "0x71002a8b30",
+      "0x71002a9720",
+      "0x71002a9870"
+    ],
+    "independent_extent": "Ten indexed20-byte records in PS2 and ten unrolled equivalent loads in both Golden architectures. All200 live bytes of every source preset have one exact NSO match. Extra8 PS2 bytes are zero outside ten-record extent, not source data to stitch into a next bank.",
+    "rejected_candidates": "M2 guessed0xb16a80 for005e4880 and0xb16a70 for005e4a20 are interior/wrong-role windows.005e4af0 candidate0x9667f4 is not admitted. Only positive selector arms authorize the corrected bases."
+  },
+  "record_layout": {
+    "count": 10,
+    "stride": 20,
+    "fields": [
+      {
+        "name": "x",
+        "offset": 0,
+        "type": "f32"
+      },
+      {
+        "name": "y",
+        "offset": 4,
+        "type": "f32"
+      },
+      {
+        "name": "alpha",
+        "offset": 8,
+        "type": "u8"
+      },
+      {
+        "name": "reserved",
+        "offset": 9,
+        "type": "u8[3]"
+      },
+      {
+        "name": "start_factor",
+        "offset": 12,
+        "type": "f32"
+      },
+      {
+        "name": "end_factor",
+        "offset": 16,
+        "type": "f32"
+      }
+    ]
+  },
+  "presets": [
+    {
+      "selector": 0,
+      "ps2_base": "0x5e4950",
+      "duration_source": "signed openDuration converted to float",
+      "steam": {
+        "section": ".xpdata",
+        "rva": "0xb16ca0",
+        "raw_offset": 11621536,
+        "size": 200,
+        "sha256": "117dbcb876b57d9905402500708165ca70b08016927fd0c5f3fb6e7e462a0b09"
+      },
+      "switch": {
+        "address": "0x710063a198",
+        "mapped_offset": 6529432,
+        "size": 200,
+        "sha256": "117dbcb876b57d9905402500708165ca70b08016927fd0c5f3fb6e7e462a0b09",
+        "unique_exact_steam_copy": true
+      },
+      "golden_records": [
+        {
+          "channel": 0,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x3f200000"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 0.625
+        },
+        {
+          "channel": 1,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0xff",
+            "0x3e800000",
+            "0x3f800000"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.25,
+          "end_factor": 1.0
+        },
+        {
+          "channel": 2,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x3f400000"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 0.75
+        },
+        {
+          "channel": 3,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x3f400000"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 0.75
+        },
+        {
+          "channel": 4,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0xff",
+            "0x3e800000",
+            "0x3f4ccccd"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.25,
+          "end_factor": 0.800000011920929
+        },
+        {
+          "channel": 5,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x3f800000"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 1.0
+        },
+        {
+          "channel": 6,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x3f800000"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 1.0
+        },
+        {
+          "channel": 7,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x3f000000"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 0.5
+        },
+        {
+          "channel": 8,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x3f000000"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 0.5
+        },
+        {
+          "channel": 9,
+          "words_le_hex": [
+            "0x44480000",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x3f000000"
+          ],
+          "x": 800.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 0.5
+        }
+      ],
+      "ps2_size": 208,
+      "ps2_live_bytes": 200,
+      "retained_ps2_tail_bytes": 8,
+      "ps2_tail_hex": "0000000000000000",
+      "ps2_live_sha256": "117dbcb876b57d9905402500708165ca70b08016927fd0c5f3fb6e7e462a0b09",
+      "changed_live_bytes": 0
+    },
+    {
+      "selector": 1,
+      "ps2_base": "0x5e4880",
+      "duration_source": "signed closeDuration converted to float",
+      "steam": {
+        "section": ".xpdata",
+        "rva": "0xb168a0",
+        "raw_offset": 11620512,
+        "size": 200,
+        "sha256": "deea659c7a5c23845b6f9e3f133b965ee37efb39196c692a4805398fbfebff0d"
+      },
+      "switch": {
+        "address": "0x710063a0d0",
+        "mapped_offset": 6529232,
+        "size": 200,
+        "sha256": "deea659c7a5c23845b6f9e3f133b965ee37efb39196c692a4805398fbfebff0d",
+        "unique_exact_steam_copy": true
+      },
+      "golden_records": [
+        {
+          "channel": 0,
+          "words_le_hex": [
+            "0xc3aa0000",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x3f000000"
+          ],
+          "x": -340.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 0.5
+        },
+        {
+          "channel": 1,
+          "words_le_hex": [
+            "0xc3aa0000",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x3f000000"
+          ],
+          "x": -340.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 0.5
+        },
+        {
+          "channel": 2,
+          "words_le_hex": [
+            "0xc3aa0000",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x3f000000"
+          ],
+          "x": -340.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 0.5
+        },
+        {
+          "channel": 3,
+          "words_le_hex": [
+            "0xc3aa0000",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x3f000000"
+          ],
+          "x": -340.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 0.5
+        },
+        {
+          "channel": 4,
+          "words_le_hex": [
+            "0xc3aa0000",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x3f000000"
+          ],
+          "x": -340.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 0.5
+        },
+        {
+          "channel": 5,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0x0",
+            "0x0",
+            "0x3f000000"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 0,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 0.5
+        },
+        {
+          "channel": 6,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0x0",
+            "0x0",
+            "0x3f000000"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 0,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 0.5
+        },
+        {
+          "channel": 7,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x3f000000"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 0.5
+        },
+        {
+          "channel": 8,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x3f000000"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 0.5
+        },
+        {
+          "channel": 9,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x3f000000"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 0.5
+        }
+      ],
+      "ps2_size": 208,
+      "ps2_live_bytes": 200,
+      "retained_ps2_tail_bytes": 8,
+      "ps2_tail_hex": "0000000000000000",
+      "ps2_live_sha256": "deea659c7a5c23845b6f9e3f133b965ee37efb39196c692a4805398fbfebff0d",
+      "changed_live_bytes": 0
+    },
+    {
+      "selector": 2,
+      "ps2_base": "0x5e4a20",
+      "duration_source": "float4.0",
+      "steam": {
+        "section": ".xpdata",
+        "rva": "0xb167a0",
+        "raw_offset": 11620256,
+        "size": 200,
+        "sha256": "be878e766fbec59699219337a79ba8e05c61b7af2d31f1e250088eff64838566"
+      },
+      "switch": {
+        "address": "0x710063a260",
+        "mapped_offset": 6529632,
+        "size": 200,
+        "sha256": "be878e766fbec59699219337a79ba8e05c61b7af2d31f1e250088eff64838566",
+        "unique_exact_steam_copy": true
+      },
+      "golden_records": [
+        {
+          "channel": 0,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x0"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 0.0
+        },
+        {
+          "channel": 1,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x3f800000"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 1.0
+        },
+        {
+          "channel": 2,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0xff",
+            "0x3f400000",
+            "0x3f800000"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.75,
+          "end_factor": 1.0
+        },
+        {
+          "channel": 3,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x3f800000"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 1.0
+        },
+        {
+          "channel": 4,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x0"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 0.0
+        },
+        {
+          "channel": 5,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x0"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 0.0
+        },
+        {
+          "channel": 6,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x0"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 0.0
+        },
+        {
+          "channel": 7,
+          "words_le_hex": [
+            "0xc2c80000",
+            "0x0",
+            "0x0",
+            "0x0",
+            "0x3f800000"
+          ],
+          "x": -100.0,
+          "y": 0.0,
+          "alpha": 0,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 1.0
+        },
+        {
+          "channel": 8,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0x0",
+            "0x0",
+            "0x3e800000"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 0,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 0.25
+        },
+        {
+          "channel": 9,
+          "words_le_hex": [
+            "0xc3480000",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x3f800000"
+          ],
+          "x": -200.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 1.0
+        }
+      ],
+      "ps2_size": 208,
+      "ps2_live_bytes": 200,
+      "retained_ps2_tail_bytes": 8,
+      "ps2_tail_hex": "0000000000000000",
+      "ps2_live_sha256": "ff1e54e16138d8340137c1b9ca9551dca5f4e32c4b3b4f3294f38a0e3457b450",
+      "changed_live_bytes": 7
+    },
+    {
+      "selector": 3,
+      "ps2_base": "0x5e4af0",
+      "duration_source": "float4.0",
+      "steam": {
+        "section": ".xpdata",
+        "rva": "0xb16ba0",
+        "raw_offset": 11621280,
+        "size": 200,
+        "sha256": "befa26887bd6b96126301c4b9578c54acf994e468b23b5ac0a29219a39be9ab4"
+      },
+      "switch": {
+        "address": "0x710063a328",
+        "mapped_offset": 6529832,
+        "size": 200,
+        "sha256": "befa26887bd6b96126301c4b9578c54acf994e468b23b5ac0a29219a39be9ab4",
+        "unique_exact_steam_copy": true
+      },
+      "golden_records": [
+        {
+          "channel": 0,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x0"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 0.0
+        },
+        {
+          "channel": 1,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x3f800000"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 1.0
+        },
+        {
+          "channel": 2,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0xff",
+            "0x3f400000",
+            "0x3f800000"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.75,
+          "end_factor": 1.0
+        },
+        {
+          "channel": 3,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x3f800000"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 1.0
+        },
+        {
+          "channel": 4,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x0"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 0.0
+        },
+        {
+          "channel": 5,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x0"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 0.0
+        },
+        {
+          "channel": 6,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x0"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 0.0
+        },
+        {
+          "channel": 7,
+          "words_le_hex": [
+            "0x42c80000",
+            "0x0",
+            "0x0",
+            "0x0",
+            "0x3f800000"
+          ],
+          "x": 100.0,
+          "y": 0.0,
+          "alpha": 0,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 1.0
+        },
+        {
+          "channel": 8,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0x0",
+            "0x0",
+            "0x3e800000"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 0,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 0.25
+        },
+        {
+          "channel": 9,
+          "words_le_hex": [
+            "0x440e8000",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x3f800000"
+          ],
+          "x": 570.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 1.0
+        }
+      ],
+      "ps2_size": 208,
+      "ps2_live_bytes": 200,
+      "retained_ps2_tail_bytes": 8,
+      "ps2_tail_hex": "0000000000000000",
+      "ps2_live_sha256": "fd4c94cfb2e4b3e90b494528cf556e5e31452532c0c8dea5e91e9a6db7e96c04",
+      "changed_live_bytes": 8
+    },
+    {
+      "selector": 4,
+      "ps2_base": "0x5e4bc0",
+      "duration_source": "signed openDuration converted to float",
+      "steam": {
+        "section": ".xpdata",
+        "rva": "0xb16aa0",
+        "raw_offset": 11621024,
+        "size": 200,
+        "sha256": "2cbd3980c0bfd9b827e0c6b88a57e91d08e10417a96d02c7a23b5f580235dfd8"
+      },
+      "switch": {
+        "address": "0x710063a3f0",
+        "mapped_offset": 6530032,
+        "size": 200,
+        "sha256": "2cbd3980c0bfd9b827e0c6b88a57e91d08e10417a96d02c7a23b5f580235dfd8",
+        "unique_exact_steam_copy": true
+      },
+      "golden_records": [
+        {
+          "channel": 0,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x3f800000"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 1.0
+        },
+        {
+          "channel": 1,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x3f800000"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 1.0
+        },
+        {
+          "channel": 2,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x3f800000"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 1.0
+        },
+        {
+          "channel": 3,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x3f800000"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 1.0
+        },
+        {
+          "channel": 4,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x3f800000"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 1.0
+        },
+        {
+          "channel": 5,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x3f800000"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 1.0
+        },
+        {
+          "channel": 6,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x3f800000"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 1.0
+        },
+        {
+          "channel": 7,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0x0",
+            "0x0",
+            "0x3f800000"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 0,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 1.0
+        },
+        {
+          "channel": 8,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x3f800000"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 1.0
+        },
+        {
+          "channel": 9,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x3f800000"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 1.0
+        }
+      ],
+      "ps2_size": 208,
+      "ps2_live_bytes": 200,
+      "retained_ps2_tail_bytes": 8,
+      "ps2_tail_hex": "0000000000000000",
+      "ps2_live_sha256": "2cbd3980c0bfd9b827e0c6b88a57e91d08e10417a96d02c7a23b5f580235dfd8",
+      "changed_live_bytes": 0
+    },
+    {
+      "selector": 5,
+      "ps2_base": "0x5e4c90",
+      "duration_source": "signed closeDuration converted to float",
+      "steam": {
+        "section": ".xpdata",
+        "rva": "0xb169a0",
+        "raw_offset": 11620768,
+        "size": 200,
+        "sha256": "1b31b4d9ab9e179122300d5c8cd43cd378b23ee371b40e87be5df15195d0dff4"
+      },
+      "switch": {
+        "address": "0x710063a4b8",
+        "mapped_offset": 6530232,
+        "size": 200,
+        "sha256": "1b31b4d9ab9e179122300d5c8cd43cd378b23ee371b40e87be5df15195d0dff4",
+        "unique_exact_steam_copy": true
+      },
+      "golden_records": [
+        {
+          "channel": 0,
+          "words_le_hex": [
+            "0xc3aa0000",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x3f800000"
+          ],
+          "x": -340.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 1.0
+        },
+        {
+          "channel": 1,
+          "words_le_hex": [
+            "0xc3aa0000",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x3f800000"
+          ],
+          "x": -340.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 1.0
+        },
+        {
+          "channel": 2,
+          "words_le_hex": [
+            "0xc3aa0000",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x3f800000"
+          ],
+          "x": -340.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 1.0
+        },
+        {
+          "channel": 3,
+          "words_le_hex": [
+            "0xc3aa0000",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x3f800000"
+          ],
+          "x": -340.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 1.0
+        },
+        {
+          "channel": 4,
+          "words_le_hex": [
+            "0xc3aa0000",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x3f800000"
+          ],
+          "x": -340.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 1.0
+        },
+        {
+          "channel": 5,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0x0",
+            "0x0",
+            "0x3f800000"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 0,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 1.0
+        },
+        {
+          "channel": 6,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0x0",
+            "0x0",
+            "0x3f800000"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 0,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 1.0
+        },
+        {
+          "channel": 7,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0x0",
+            "0x0",
+            "0x3f800000"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 0,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 1.0
+        },
+        {
+          "channel": 8,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0x0",
+            "0x0",
+            "0x3f800000"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 0,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 1.0
+        },
+        {
+          "channel": 9,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0x0",
+            "0x0",
+            "0x3f800000"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 0,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 1.0
+        }
+      ],
+      "ps2_size": 208,
+      "ps2_live_bytes": 200,
+      "retained_ps2_tail_bytes": 8,
+      "ps2_tail_hex": "0a001e0023005a00",
+      "ps2_live_sha256": "1b31b4d9ab9e179122300d5c8cd43cd378b23ee371b40e87be5df15195d0dff4",
+      "changed_live_bytes": 0
+    },
+    {
+      "selector": 6,
+      "ps2_base": null,
+      "duration_source": "float4.0",
+      "steam": {
+        "section": ".xpdata",
+        "rva": "0xb166a0",
+        "raw_offset": 11620000,
+        "size": 200,
+        "sha256": "1322aa8733d5d245caa50edefe3a8367c3fa869b2e2ba1f8a01497df7e4785c3"
+      },
+      "switch": {
+        "address": "0x710063a580",
+        "mapped_offset": 6530432,
+        "size": 200,
+        "sha256": "1322aa8733d5d245caa50edefe3a8367c3fa869b2e2ba1f8a01497df7e4785c3",
+        "unique_exact_steam_copy": true
+      },
+      "golden_records": [
+        {
+          "channel": 0,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x0"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 0.0
+        },
+        {
+          "channel": 1,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x3f000000"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 0.5
+        },
+        {
+          "channel": 2,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x3f000000"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 0.5
+        },
+        {
+          "channel": 3,
+          "words_le_hex": [
+            "0x0",
+            "0x43000000",
+            "0xff",
+            "0x0",
+            "0x3f800000"
+          ],
+          "x": 0.0,
+          "y": 128.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 1.0
+        },
+        {
+          "channel": 4,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x3f000000"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 0.5
+        },
+        {
+          "channel": 5,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x3f000000"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 0.5
+        },
+        {
+          "channel": 6,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x3f000000"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 0.5
+        },
+        {
+          "channel": 7,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0x0",
+            "0x0",
+            "0x3f000000"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 0,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 0.5
+        },
+        {
+          "channel": 8,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0x0",
+            "0x0",
+            "0x3f000000"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 0,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 0.5
+        },
+        {
+          "channel": 9,
+          "words_le_hex": [
+            "0x0",
+            "0x0",
+            "0xff",
+            "0x0",
+            "0x3f800000"
+          ],
+          "x": 0.0,
+          "y": 0.0,
+          "alpha": 255,
+          "reserved_hex": "000000",
+          "start_factor": 0.0,
+          "end_factor": 1.0
+        }
+      ]
+    }
+  ],
+  "admitted_addresses": [
+    "0x005e4880",
+    "0x005e4950",
+    "0x005e4a20",
+    "0x005e4af0"
+  ],
+  "required_seams": [
+    "Route all selected Golden persona-channel presets with the proved semantic selector mapping; supply all seven Golden presets as one named resource bank. Preserve PS2 six-preset behavior outside Golden mode.",
+    "Apply exactly200 live bytes per selected old208-byte object; preserve8 PS2 trailing zero bytes, no adjacent-bank stitching. Normalize raw IEEE754 words and u8 alpha; do not numerically cast stored float words from the untyped decompiler.",
+    "Route setup, initializer close-bank reads, comparison-reset open-bank reads, and all native copies/inlines/constant-folded equivalents. A single pointer swap in the setup helper does not qualify this bank.",
+    "Bind equivalent36-byte channel state fields via the actual ported parent layout; Golden first-channel offset0x460 is not an authorized guest-struct overwrite. Preserve duration-dependent timing factors and Golden selector6 semantics.",
+    "GoldenM6b must witness Golden values reaching every reader, PS2 unchanged, bounds/tail preservation, and native/inlined routes; this source proof is not runtime/render qualification."
+  ]
+}

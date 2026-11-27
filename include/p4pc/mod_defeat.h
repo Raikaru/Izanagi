@@ -21,8 +21,11 @@
 
 enum { P4_MOD_DEFEAT_GAME_OVER = 0, P4_MOD_DEFEAT_HOLD = 1, P4_MOD_DEFEAT_RETRY = 2 };
 /* collision: a shadow touched on the field (FldEventWork returnMode 0);
- * field: a field script's encounter request (00174680, returnMode 1). */
-enum { P4_MOD_DEFEAT_COLLISION = 0, P4_MOD_DEFEAT_FIELD = 1 };
+ * field: a field script's encounter request (00174680, returnMode 1);
+ * script: a story boss a script starts through btlScriptStartEncounter
+ * (001932f0, sequence 6), lost when the protagonist has fallen as the
+ * poll (btlScriptResolvePartyDeath, 00193450) finds the battle gone. */
+enum { P4_MOD_DEFEAT_COLLISION = 0, P4_MOD_DEFEAT_FIELD = 1, P4_MOD_DEFEAT_SCRIPT = 2 };
 /* A hold longer than this many polls lets the Game Over run. */
 #define P4_MOD_DEFEAT_HOLD_LIMIT 18000u
 
@@ -57,4 +60,9 @@ void p4_mod_defeat_remove_owner(size_t owner);
  * answer it applied, or -1 when the call was not a defeat. */
 void p4_mod_defeat_battle_begin(uint32_t setup);
 int p4_mod_defeat_field(uint32_t task);
+/* btlScriptResolvePartyDeath (00193450) before its body: with the battle
+ * context gone and the protagonist dead, the handler answers; a hold or a
+ * retried battle's start shows the script a placeholder battle context for
+ * that call (the AFTER seam removes it). */
+void p4_mod_defeat_script(void);
 #endif

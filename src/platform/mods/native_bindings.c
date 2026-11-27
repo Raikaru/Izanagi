@@ -18,6 +18,7 @@ static void initialize(lua_State *L)
     p4_lua_party_initialize(L);
     p4_lua_semantic_events_initialize(L);
     p4_lua_battle_decide_initialize(L);
+    p4_lua_battle_execution_initialize(L);
     p4_lua_inventory_initialize(L);
     p4_lua_persona_initialize(L);
     p4_lua_story_initialize(L);
@@ -27,6 +28,7 @@ static void initialize(lua_State *L)
 }
 static void before_destroy(P4LuaMod *mod)
 {
+    p4_lua_battle_execution_close(mod);
     p4_lua_battle_decide_close(mod);
     p4_lua_semantic_events_close(mod);
     p4_lua_tables_close(mod);

@@ -12,6 +12,7 @@
  * exhausted budget never applies a value: the mod enters native recovery for
  * that hit. One binding serves every stage; only the hit table differs. */
 #include "native_bindings.h"
+#include "p4pc/mod_numbers.h"
 #include "p4pc/game_buff_stage.h"
 #include "p4pc/game_chance_stage.h"
 #include "p4pc/game_cost_stage.h"
@@ -85,6 +86,7 @@ static void push_damage(lua_State *L, const P4GameDamageHit *hit)
     set_string(L, "target_side", side_name(hit->target_side));
     set_unsigned(L, "target_id", hit->target_id);
     set_unsigned(L, "target_status", hit->target_status);
+    if (hit->target_side_leaf) set_unsigned(L, "target_side_ailment", hit->target_side_leaf - 1u);
     set_string(L, "origin_side", side_name(hit->origin_side));
     set_unsigned(L, "origin_id", hit->origin_id);
     set_string(L, "hit_kind", hit_name(hit->hit_kind));
@@ -217,7 +219,7 @@ static int invoke_stage(lua_State *L)
     if (lua_isnil(L, -1)) return 0;
     if (lua_type(L, -1) != LUA_TNUMBER)
         luaL_error(L, "p4.%s callback must return a number or nil", stage_names[call->handler->stage]);
-    call->value = lua_tonumber(L, -1);
+    call->value = p4_mod_f64_canonical(lua_tonumber(L, -1));
     call->apply = 1;
     return 0;
 }

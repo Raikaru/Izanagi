@@ -8,6 +8,10 @@ typedef int (*P4SaveConfirmFn)(const char *warning);
 typedef void (*P4SaveErrorFn)(const char *operation,const char *reason);
 void p4_mod_save_transport_ui(P4SaveConfirmFn,P4SaveErrorFn);
 void p4_mod_save_transport_error(const char *operation,const char *reason);
+/* Install before the first save. A nonzero result refuses publication and
+ * requires every live save to use a stage, never the direct TX_LOCKED route. */
+int p4_mod_save_transport_fence(int (*tainted)(void));
+int p4_mod_save_transport_requires_stage(const char *card,const char *slot);
 /* Capture at the actual full-image write submission, before the task yields.
  * The complete retail image is borrowed for this call only. */
 int p4_mod_save_transport_begin(const char *card,unsigned slot,const void *image,size_t size,char *error,size_t cap);

@@ -1,0 +1,621 @@
+{
+  "proof_id": "L1-C3B-ADXRNA-status-trap-20261113",
+  "objects": [
+    {
+      "address": "0x007589b8",
+      "size": 40,
+      "decision": "D10c",
+      "basis": "diagnostic-only: removed classic ADXRNA-to-PS2RNA unsupported-status trap",
+      "ps2_reader": "0x4cd780",
+      "literal": "ADXRNA_GetStat: not implemented\n",
+      "literal_live_bytes": 33,
+      "alignment_tail_bytes": 7,
+      "partition_sha256": "7d3ab8878c8be5043649c1c5871c0e7c223ba788a1a0751b3b3c6e015a8b73e7",
+      "runtime_status": "pending-seam"
+    }
+  ],
+  "scope": {
+    "objects": 1,
+    "ps2_bytes": 40
+  },
+  "authority": {
+    "rule": "Main general diagnostic-only positive-replacement rule",
+    "individual_approval": "not claimed",
+    "limit": "The unsupported classic PS2 output-adapter diagnostic only; no generic ADXdecoder/error/data removal."
+  },
+  "images": {
+    "steam_build": 10836033,
+    "steam_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+    "nso_sha256": "854c7a1e33de1619abf009fa7f32b8c012960d685c8bf1bf99a92a6a4d0bda1c",
+    "mapped_nso_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+    "ps2_source_commit": "18016afe60c6c73bdc5d0c72177a29c6f25878c6"
+  },
+  "dependencies": [
+    {
+      "proof": "l1-cohort-3B-ps2rna-native-output-proof.json",
+      "sha256": "87f56c6c5f162f74903baadb3573615cc92075d6a2ff015cba16bacb00c2235d",
+      "role": "Actual Golden native audio binding and independently qualified complete Steam WASAPI/NSO CriNcvSwitch output programs."
+    },
+    {
+      "proof": "l1-cohort-3B-dtr-audio-completion-proof.json",
+      "sha256": "e28fe3394ff849b68d4e08fa806b6373ec574565de8f0c81f43e22d1d2da8026",
+      "role": "Complete old PS2RNA server proves its physical SIF output transport and positive native replacement."
+    }
+  ],
+  "old_structural_reader": {
+    "source_file": "src/cri/libadxe/adx_rnap.c",
+    "source_include": "Explicit ps2_rna.h owning interface; actual methods Create/Start/Stop/ExecServer/SetStmHdInfo forward to console PS2RNA. This is not classification from ADX in a module label.",
+    "status_body": "Complete4cd780..4cd7b8 emits literal7589b8 via formatter4cd3f0, then unconditionally spins at4cd7ac->4cd798. It does NOT return zero or a status. The source body says printf(\"ADXRNA_GetStat: not implemented\\n\"); while(TRUE);.",
+    "server_link": "Complete4cd7b8..4cd7d0 forwards to4ecdc8, whose actual physical SIF transfer/server chain is sealed in dependency.",
+    "stream_header_link": "Complete4cd958..4cd978 calls4ed2d0 PS2RNA_SetStmHdInfo then returns0, independently linking this classic adapter to the already source-decided obsolete PS2 driver warnings.",
+    "liveness_caveat": "No indexed direct caller for4cd780 was found, but that result is NOT an absence proof and is not used to decide the object."
+  },
+  "positive_native_replacement": {
+    "binding": "Actual Golden game Atom init selects native voice interface872ee8; Steam independently uses real WASAPI IAudioClient. Device lifecycle, real channel rendering, native status/ownership and errors use those native providers, not the classic console RNA adapter/server. Complete bodies and exact native identities are hash-sealed dependencies.",
+    "status_domain_limit": "Do NOT rename ADXRNA_GetStat to nn::audio::GetAudioOutState: per-player/stream status and whole-device state are distinct domains. This proof removes only the obsolete unsupported-status trap supplier with its console adapter, not a new status enum or fake status value. Real Golden player/voice/device status must be bound in its proper native namespace.",
+    "scope": "This does not assert all ADX/AHX decoding removed. Actual Golden retains an ADX codec plugin; codec tables, format errors and every other unpaired object remain independent."
+  },
+  "steam_scan": {
+    "source_build": 10836033,
+    "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+    "sections": [
+      {
+        "section": ".shared",
+        "rva": 4096,
+        "virtual_size": 8934912,
+        "raw_offset": 1536,
+        "raw_size": 8934912,
+        "characteristics": "0x60000020",
+        "readable": true,
+        "sha256": "c4a56941449dab7acf2aff2cd37a7df4e3d18c523007e90008149faff9909175",
+        "objects": {
+          "0x007589b8": {
+            "needle_hex": "414458524e415f476574537461743a206e6f7420696d706c656d656e7465640a00",
+            "literal_occurrences": 0,
+            "text_without_nul_occurrences": 0
+          }
+        }
+      },
+      {
+        "section": ".sdata",
+        "rva": 8941568,
+        "virtual_size": 1675264,
+        "raw_offset": 8936448,
+        "raw_size": 1674240,
+        "characteristics": "0x40000040",
+        "readable": true,
+        "sha256": "aad0bdc1f37e48e0f980ef9ee0e79a96a7381ec6a6fa1c7df537f2a5edce2050",
+        "objects": {
+          "0x007589b8": {
+            "needle_hex": "414458524e415f476574537461743a206e6f7420696d706c656d656e7465640a00",
+            "literal_occurrences": 0,
+            "text_without_nul_occurrences": 0
+          }
+        }
+      },
+      {
+        "section": ".xpdata",
+        "rva": 10616832,
+        "virtual_size": 497131520,
+        "raw_offset": 10610688,
+        "raw_size": 1810944,
+        "characteristics": "0xc0000040",
+        "readable": true,
+        "sha256": "53ce0c9100aa919f973dfb4dc367cf922fbc7df08694dd6ea1fbdde88250ace5",
+        "objects": {
+          "0x007589b8": {
+            "needle_hex": "414458524e415f476574537461743a206e6f7420696d706c656d656e7465640a00",
+            "literal_occurrences": 0,
+            "text_without_nul_occurrences": 0
+          }
+        }
+      },
+      {
+        "section": ".edata",
+        "rva": 507748352,
+        "virtual_size": 450560,
+        "raw_offset": 12421632,
+        "raw_size": 512,
+        "characteristics": "0x40000040",
+        "readable": true,
+        "sha256": "076a27c79e5ace2a3d47f9dd2e83e4ff6ea8872b3c2218f66c92b89b55f36560",
+        "objects": {
+          "0x007589b8": {
+            "needle_hex": "414458524e415f476574537461743a206e6f7420696d706c656d656e7465640a00",
+            "literal_occurrences": 0,
+            "text_without_nul_occurrences": 0
+          }
+        }
+      },
+      {
+        "section": ".ecode",
+        "rva": 508198912,
+        "virtual_size": 4096,
+        "raw_offset": 12422144,
+        "raw_size": 1024,
+        "characteristics": "0x40000040",
+        "readable": true,
+        "sha256": "d3f1319745290d431b59f450ce5766019fba8f6c50e2ce739edbec9278df00c0",
+        "objects": {
+          "0x007589b8": {
+            "needle_hex": "414458524e415f476574537461743a206e6f7420696d706c656d656e7465640a00",
+            "literal_occurrences": 0,
+            "text_without_nul_occurrences": 0
+          }
+        }
+      },
+      {
+        "section": ".sbss",
+        "rva": 508203008,
+        "virtual_size": 28672,
+        "raw_offset": 12423168,
+        "raw_size": 28160,
+        "characteristics": "0xc0000040",
+        "readable": true,
+        "sha256": "14bd080038e447442cc1f9f78eefe954bd7d06f21b82ad4e8bd63f21b1733848",
+        "objects": {
+          "0x007589b8": {
+            "needle_hex": "414458524e415f476574537461743a206e6f7420696d706c656d656e7465640a00",
+            "literal_occurrences": 0,
+            "text_without_nul_occurrences": 0
+          }
+        }
+      },
+      {
+        "section": ".link",
+        "rva": 508231680,
+        "virtual_size": 4096,
+        "raw_offset": 12451328,
+        "raw_size": 3584,
+        "characteristics": "0x40000040",
+        "readable": true,
+        "sha256": "d41beef529e64e240bd62ad09dd0a7368999c686f22ffcd32b62e2b1299163a8",
+        "objects": {
+          "0x007589b8": {
+            "needle_hex": "414458524e415f476574537461743a206e6f7420696d706c656d656e7465640a00",
+            "literal_occurrences": 0,
+            "text_without_nul_occurrences": 0
+          }
+        }
+      },
+      {
+        "section": ".debug",
+        "rva": 508235776,
+        "virtual_size": 274432,
+        "raw_offset": 12454912,
+        "raw_size": 271360,
+        "characteristics": "0x40000040",
+        "readable": true,
+        "sha256": "0f2043e11d7baf3a79a2a604d2da21e688d240389ea548825bb3ea8a4a063586",
+        "objects": {
+          "0x007589b8": {
+            "needle_hex": "414458524e415f476574537461743a206e6f7420696d706c656d656e7465640a00",
+            "literal_occurrences": 0,
+            "text_without_nul_occurrences": 0
+          }
+        }
+      },
+      {
+        "section": ".xcode",
+        "rva": 508510208,
+        "virtual_size": 49152,
+        "raw_offset": 12726272,
+        "raw_size": 512,
+        "characteristics": "0x42000040",
+        "readable": true,
+        "sha256": "076a27c79e5ace2a3d47f9dd2e83e4ff6ea8872b3c2218f66c92b89b55f36560",
+        "objects": {
+          "0x007589b8": {
+            "needle_hex": "414458524e415f476574537461743a206e6f7420696d706c656d656e7465640a00",
+            "literal_occurrences": 0,
+            "text_without_nul_occurrences": 0
+          }
+        }
+      },
+      {
+        "section": ".didata",
+        "rva": 931352576,
+        "virtual_size": 7607,
+        "raw_offset": 435519488,
+        "raw_size": 7680,
+        "characteristics": "0x60000020",
+        "readable": true,
+        "sha256": "3b9eb6a0b99afb710dc77c0c912c98ca06d4652398502b3fd115339b9c386883",
+        "objects": {
+          "0x007589b8": {
+            "needle_hex": "414458524e415f476574537461743a206e6f7420696d706c656d656e7465640a00",
+            "literal_occurrences": 0,
+            "text_without_nul_occurrences": 0
+          }
+        }
+      },
+      {
+        "section": ".reloc",
+        "rva": 931360768,
+        "virtual_size": 9,
+        "raw_offset": 435527168,
+        "raw_size": 512,
+        "characteristics": "0x60000020",
+        "readable": true,
+        "sha256": "ed3b609bea8804bb9d8c4642e3b6bd609336a85a6e10ab31964fe024bd91beb8",
+        "objects": {
+          "0x007589b8": {
+            "needle_hex": "414458524e415f476574537461743a206e6f7420696d706c656d656e7465640a00",
+            "literal_occurrences": 0,
+            "text_without_nul_occurrences": 0
+          }
+        }
+      },
+      {
+        "section": ".rsrc",
+        "rva": 931364864,
+        "virtual_size": 5,
+        "raw_offset": 435527680,
+        "raw_size": 512,
+        "characteristics": "0x60000020",
+        "readable": true,
+        "sha256": "4d8090c5e9101a21a24e782bec8c28d77e7ba4fbeb6e3b29104a905ebb75ee12",
+        "objects": {
+          "0x007589b8": {
+            "needle_hex": "414458524e415f476574537461743a206e6f7420696d706c656d656e7465640a00",
+            "literal_occurrences": 0,
+            "text_without_nul_occurrences": 0
+          }
+        }
+      },
+      {
+        "section": ".text1",
+        "rva": 931368960,
+        "virtual_size": 97,
+        "raw_offset": 435528192,
+        "raw_size": 512,
+        "characteristics": "0xe0000020",
+        "readable": true,
+        "sha256": "90134ce7612976ec7cb8ddf19d422e556b8ddee29a48dd16c6bdc67f6884e5ee",
+        "objects": {
+          "0x007589b8": {
+            "needle_hex": "414458524e415f476574537461743a206e6f7420696d706c656d656e7465640a00",
+            "literal_occurrences": 0,
+            "text_without_nul_occurrences": 0
+          }
+        }
+      },
+      {
+        "section": ".udata",
+        "rva": 931373056,
+        "virtual_size": 11592,
+        "raw_offset": 435528704,
+        "raw_size": 11776,
+        "characteristics": "0xc0000020",
+        "readable": true,
+        "sha256": "1674a7cb0e88f5d174dd57eeef5ccd326ae44b48a436d4289d211bb10de64dd3",
+        "objects": {
+          "0x007589b8": {
+            "needle_hex": "414458524e415f476574537461743a206e6f7420696d706c656d656e7465640a00",
+            "literal_occurrences": 0,
+            "text_without_nul_occurrences": 0
+          }
+        }
+      },
+      {
+        "section": ".text",
+        "rva": 931385344,
+        "virtual_size": 25550,
+        "raw_offset": 435540480,
+        "raw_size": 25600,
+        "characteristics": "0x40000040",
+        "readable": true,
+        "sha256": "3f20b28890c81dc9fb1b04e010a1e0573766a1a9cb930a924984bbb96f2ccd96",
+        "objects": {
+          "0x007589b8": {
+            "needle_hex": "414458524e415f476574537461743a206e6f7420696d706c656d656e7465640a00",
+            "literal_occurrences": 0,
+            "text_without_nul_occurrences": 0
+          }
+        }
+      },
+      {
+        "section": ".rdata",
+        "rva": 931414016,
+        "virtual_size": 450288,
+        "raw_offset": 435566080,
+        "raw_size": 450560,
+        "characteristics": "0x40000040",
+        "readable": true,
+        "sha256": "ce0f8574639db858e1cfa7b7a8f5fcede940947130e1d6b2bef0b318e4cdaac5",
+        "objects": {
+          "0x007589b8": {
+            "needle_hex": "414458524e415f476574537461743a206e6f7420696d706c656d656e7465640a00",
+            "literal_occurrences": 0,
+            "text_without_nul_occurrences": 0
+          }
+        }
+      }
+    ],
+    "excluded_sections": [
+      ".arch"
+    ],
+    "scope": "All16 readable file-backed non-.arch sections, exact literal and text without NUL; no protector code decoded.",
+    "reopen_rule": "Reopen if a later qualified Steam counterpart shows any old diagnostic live."
+  },
+  "nso_literal_absence": {
+    "exact": 0,
+    "text": 0
+  },
+  "witnesses": {
+    "ps2": [
+      {
+        "start": "0x4cd780",
+        "end_exclusive": "0x4cd7b8",
+        "sha256": "389aa1938b5b080bb1f0f95e8f71a094edacfd6ffefdcb14b6417f46613b9cb0",
+        "instructions": [
+          {
+            "address": "0x4cd780",
+            "mnemonic": "lui",
+            "operands": "$a0, 0x76"
+          },
+          {
+            "address": "0x4cd784",
+            "mnemonic": "addiu",
+            "operands": "$sp, $sp, -0x10"
+          },
+          {
+            "address": "0x4cd788",
+            "mnemonic": ".byte",
+            "operands": "0x00, 0x00, 0xbf, 0xff"
+          },
+          {
+            "address": "0x4cd78c",
+            "mnemonic": "jal",
+            "operands": "0x4cd3f0"
+          },
+          {
+            "address": "0x4cd790",
+            "mnemonic": "addiu",
+            "operands": "$a0, $a0, -0x7648"
+          },
+          {
+            "address": "0x4cd794",
+            "mnemonic": "nop",
+            "operands": ""
+          },
+          {
+            "address": "0x4cd798",
+            "mnemonic": "nop",
+            "operands": ""
+          },
+          {
+            "address": "0x4cd79c",
+            "mnemonic": "nop",
+            "operands": ""
+          },
+          {
+            "address": "0x4cd7a0",
+            "mnemonic": "nop",
+            "operands": ""
+          },
+          {
+            "address": "0x4cd7a4",
+            "mnemonic": "nop",
+            "operands": ""
+          },
+          {
+            "address": "0x4cd7a8",
+            "mnemonic": "nop",
+            "operands": ""
+          },
+          {
+            "address": "0x4cd7ac",
+            "mnemonic": "b",
+            "operands": "0x4cd798"
+          },
+          {
+            "address": "0x4cd7b0",
+            "mnemonic": "nop",
+            "operands": ""
+          },
+          {
+            "address": "0x4cd7b4",
+            "mnemonic": "nop",
+            "operands": ""
+          }
+        ],
+        "unsupported_instruction_policy": "Capstone unsupported R5900 words remain verbatim .byte entries; only decoded scalar operations are interpreted."
+      },
+      {
+        "start": "0x4cd7b8",
+        "end_exclusive": "0x4cd7d0",
+        "sha256": "dd06b7c7092c2f9892c86817c9af7e0a3761b50a0e97de589cda4c7b25681087",
+        "instructions": [
+          {
+            "address": "0x4cd7b8",
+            "mnemonic": "addiu",
+            "operands": "$sp, $sp, -0x10"
+          },
+          {
+            "address": "0x4cd7bc",
+            "mnemonic": ".byte",
+            "operands": "0x00, 0x00, 0xbf, 0xff"
+          },
+          {
+            "address": "0x4cd7c0",
+            "mnemonic": ".byte",
+            "operands": "0x00, 0x00, 0xbf, 0xdf"
+          },
+          {
+            "address": "0x4cd7c4",
+            "mnemonic": "j",
+            "operands": "0x4ecdc8"
+          },
+          {
+            "address": "0x4cd7c8",
+            "mnemonic": "addiu",
+            "operands": "$sp, $sp, 0x10"
+          },
+          {
+            "address": "0x4cd7cc",
+            "mnemonic": "nop",
+            "operands": ""
+          }
+        ],
+        "unsupported_instruction_policy": "Capstone unsupported R5900 words remain verbatim .byte entries; only decoded scalar operations are interpreted."
+      },
+      {
+        "start": "0x4cd958",
+        "end_exclusive": "0x4cd978",
+        "sha256": "5639a2766641a170acf5a9db93980598ff8e302f7812ba23a9601469c2c1748b",
+        "instructions": [
+          {
+            "address": "0x4cd958",
+            "mnemonic": "addiu",
+            "operands": "$sp, $sp, -0x10"
+          },
+          {
+            "address": "0x4cd95c",
+            "mnemonic": ".byte",
+            "operands": "0x00, 0x00, 0xbf, 0xff"
+          },
+          {
+            "address": "0x4cd960",
+            "mnemonic": "jal",
+            "operands": "0x4ed2d0"
+          },
+          {
+            "address": "0x4cd964",
+            "mnemonic": "nop",
+            "operands": ""
+          },
+          {
+            "address": "0x4cd968",
+            "mnemonic": ".byte",
+            "operands": "0x00, 0x00, 0xbf, 0xdf"
+          },
+          {
+            "address": "0x4cd96c",
+            "mnemonic": ".byte",
+            "operands": "0x2d, 0x10, 0x00, 0x00"
+          },
+          {
+            "address": "0x4cd970",
+            "mnemonic": "jr",
+            "operands": "$ra"
+          },
+          {
+            "address": "0x4cd974",
+            "mnemonic": "addiu",
+            "operands": "$sp, $sp, 0x10"
+          }
+        ],
+        "unsupported_instruction_policy": "Capstone unsupported R5900 words remain verbatim .byte entries; only decoded scalar operations are interpreted."
+      },
+      {
+        "start": "0x4ed2d0",
+        "end_exclusive": "0x4ed318",
+        "sha256": "fc79f5557a270424e92448261b3c047af14f8dfa458c9685902e7c2729b1d536",
+        "instructions": [
+          {
+            "address": "0x4ed2d0",
+            "mnemonic": "lui",
+            "operands": "$v0, 0x74"
+          },
+          {
+            "address": "0x4ed2d4",
+            "mnemonic": "addiu",
+            "operands": "$sp, $sp, -0x10"
+          },
+          {
+            "address": "0x4ed2d8",
+            "mnemonic": "lw",
+            "operands": "$v1, -0x58b8($v0)"
+          },
+          {
+            "address": "0x4ed2dc",
+            "mnemonic": "addiu",
+            "operands": "$a0, $zero, 1"
+          },
+          {
+            "address": "0x4ed2e0",
+            "mnemonic": "bne",
+            "operands": "$v1, $a0, 0x4ed2f8"
+          },
+          {
+            "address": "0x4ed2e4",
+            "mnemonic": ".byte",
+            "operands": "0x00, 0x00, 0xbf, 0xff"
+          },
+          {
+            "address": "0x4ed2e8",
+            "mnemonic": "lui",
+            "operands": "$a0, 0x74"
+          },
+          {
+            "address": "0x4ed2ec",
+            "mnemonic": "lw",
+            "operands": "$v1, -0x58c0($a0)"
+          },
+          {
+            "address": "0x4ed2f0",
+            "mnemonic": "blez",
+            "operands": "$v1, 0x4ed308"
+          },
+          {
+            "address": "0x4ed2f4",
+            "mnemonic": ".byte",
+            "operands": "0x2d, 0x10, 0x00, 0x00"
+          },
+          {
+            "address": "0x4ed2f8",
+            "mnemonic": "lui",
+            "operands": "$a0, 0x76"
+          },
+          {
+            "address": "0x4ed2fc",
+            "mnemonic": "jal",
+            "operands": "0x4cd3f0"
+          },
+          {
+            "address": "0x4ed300",
+            "mnemonic": "addiu",
+            "operands": "$a0, $a0, -0x3418"
+          },
+          {
+            "address": "0x4ed304",
+            "mnemonic": ".byte",
+            "operands": "0x2d, 0x10, 0x00, 0x00"
+          },
+          {
+            "address": "0x4ed308",
+            "mnemonic": ".byte",
+            "operands": "0x00, 0x00, 0xbf, 0xdf"
+          },
+          {
+            "address": "0x4ed30c",
+            "mnemonic": "jr",
+            "operands": "$ra"
+          },
+          {
+            "address": "0x4ed310",
+            "mnemonic": "addiu",
+            "operands": "$sp, $sp, 0x10"
+          },
+          {
+            "address": "0x4ed314",
+            "mnemonic": "nop",
+            "operands": ""
+          }
+        ],
+        "unsupported_instruction_policy": "Capstone unsupported R5900 words remain verbatim .byte entries; only decoded scalar operations are interpreted."
+      }
+    ],
+    "native": "Complete native output/create/setup/start/render/buffer/error code and installed driver evidence in pinned dependencies, not merely source-path labels."
+  },
+  "required_seams": [
+    {
+      "action": "In Golden mode do not consult7589b8 or route status through the old ADXRNA unsupported logger/spin or a fake constant-return replacement. Bind real Golden native player/voice/device status in the correct separate namespace and actual native output/error lifecycle. Original PS2 mode retains exact diagnostic/spin. This is not permission to suppress native errors or remove ADX decoding."
+    },
+    {
+      "action": "GoldenM6b runtime qualification of every translated/native/inlined path remains required; NSO/private notes are static-only evidence, never runtime dependencies."
+    }
+  ],
+  "runtime_status": "pending-seam"
+}

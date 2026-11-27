@@ -3,9 +3,11 @@
 #include "p4pc/golden_cache.h"
 #include "p4pc/golden_extra_source.h"
 #include "p4pc/golden_fusion_source.h"
+#include "golden_mode_literal_identity.h"
 #include <stddef.h>
+#include "p4pc/golden_levels.h"
 #include <stdint.h>
-#define P4_GOLDEN_MODE_SOURCE_MAX 32u
+#define P4_GOLDEN_MODE_SOURCE_MAX 64u
 #define P4_GOLDEN_MODE_CHAIN_MAX 256u
 
 typedef struct P4GoldenModeIdentitySource {
@@ -20,9 +22,11 @@ typedef struct P4GoldenModeIdentity {
 } P4GoldenModeIdentity;
 typedef struct P4GoldenModeIdentityArtifacts {
     uint8_t experience[396];
+    uint8_t levels[P4_GOLDEN_LEVEL_BYTES];
     uint8_t inheritance[P4_SKILL_MAX_ID + 1u];
     size_t inheritance_size;
     uint8_t rankup[480];
+    uint8_t literal_bytes[P4_GOLDEN_LITERAL_BYTES];
     P4GoldenFusionTables fusion;
 } P4GoldenModeIdentityArtifacts;
 /* Canonicalizes full inventory chains and verified source digests. The pinned

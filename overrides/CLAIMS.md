@@ -1553,7 +1553,7 @@ Some source files are shared by multiple overrides:
 002266b0  port  battle skill voice classification; explicit active predicate in mirror_fixes
 0010f8c0  port  skill target property byte; explicit active guard in mirror_fixes
 00232a40  port  skill availability; explicit active predicate in mirror_fixes
-00238940  port  native status/KO affinity route and the landed-ailment knowledge observe (TablesEnemyKnowledge3's store); port coordinates existing skill registered predicate facet; port facet: the rolled chance passes the status/KO chance stage before the 0..99 clamp and RpRandom; port facet: the stage reports the target's afflictions this battle
+00238940  port  native status/KO affinity route and the landed-ailment knowledge observe (TablesEnemyKnowledge3's store); port coordinates existing skill registered predicate facet; port facet: the rolled chance passes the status/KO chance stage before the 0..99 clamp and RpRandom; port facet: the stage reports the target's afflictions this battle; GoldenM7a facet: Golden-only full SKILL1 flags[12:9] calculation-source selector
 001f6930  port  native per-turn ailment recovery decision (btlSoundSelectCureableStatuses); each eligible roll's chance passes the ailment wear-off stage before datCalcRandomBelow(100)
 00233bc0  port  native per-stat buff multiplier (datCalcBuffMultiplier); attack, magic, evasion, defense and accuracy pass the buff stage after the rank table, Charge/Concentrate and Lead boost
 00232680  port  ailment landing (datCalcSetBadStatus); a landing rage, fear, silence, confusion, poison, exhaustion or enervation counts toward the unit's afflictions this battle while a chance or wear-off modifier is registered
@@ -1569,7 +1569,7 @@ Some source files are shared by multiple overrides:
 0023d9b0  port  skill cost domain; explicit active predicate in mirror_fixes; port enemy-ID bank bound facet; port facet: a nonzero cost passes the skill cost stage after the halving and minimum; port facet: HP/SP cost halving (0x20B/0x20A) also sees the unit's passive grants (mirror_fixes)
 0023ddc0  port  skill threshold domain; explicit registered predicate in mirror_fixes
 0023df70  port  skill flags domain; explicit active predicate in mirror_fixes
-0023e6f0  port  native effective element/hit route; port coordinates existing skill active predicate facet; port facet: a rolled hit's chance passes the hit stage after the 50..99 clamp; side-ailment facet (port): a lost-turn side ailment cannot evade, as Dizzy
+0023e6f0  port  native effective element/hit route; port coordinates existing skill active predicate facet; port facet: a rolled hit's chance passes the hit stage after the 50..99 clamp; side-ailment facet (port): a lost-turn side ailment cannot evade, as Dizzy; GoldenM7a facet: Golden-only SKILL1 flag400 target-bit0/enemy-row-bit2 gate after original type/cross-side branches
 002411a0  port  native effective element/hit result route; port coordinates existing skill active predicate facet; port facet: the critical chance passes the hit stage after its 0..100 clamp; side-ailment facet (port): held ailment's crit bonus on an unresisted physical roll
 00241bc0  port  native effective element/applicability route; port coordinates existing skill active predicate facet
 00241de0  port  native effective element/mode route; port coordinates existing skill active predicate facet
@@ -1587,7 +1587,7 @@ Some source files are shared by multiple overrides:
 001f14f0  port  native action/element resolution and expanded enemy-knowledge gate through the knowledge owner's observe API; brackets each resolved hit's HP amount for the final-damage stage (aimed-at unit, repel); passes the target's rolled hit count to that HP amount so effect kind 14 (table-delta split) divides by the hits actually rolled; port coordinates endurance sentinel4096 when expanded, original576 otherwise; port facet: the bracket also carries the command (item, weapon attack, skill) for the damage and recovery stages; side-ailment facet (port): rolls riders after each hit's retail statuses (mirror_fixes)
 00313690  port  expanded skill inheritance/mutation grade; unchanged signed retail selector byte
 00304410  port  fusion mutation catalog enumeration without 576-row scratch bound; original retail RNG path retained
-00312c60  port  inherited skill weights use explicit expanded rate and bounded inheritance group, never full-width element as19-column index
+00312c60  port  expanded inheritance rates and Golden twelve-source pool (override)
 00193a80  port  actual packed-table load start resets only staged skill preparation state, including reloads
 00104c50  port  original ITEMTBL builtin publication; retain an already-active immutable base on reload; first expansion only at canonical completion
 00105dc0  port  expanded equipment reference side table; preserve retail signed-halfword stores
@@ -1662,7 +1662,7 @@ Some source files are shared by multiple overrides:
 002df020  port  scoped quantity-popup item icons retain stable IDs before retail atlas classification
 00109e30  port  scoped overlay-first accessory-ID read only; preserve original hero/party physical reads without an overlay; all persona arithmetic remains the future persona owner's scope
 002d5040  port  scoped selected/equipped stats-header icons use authored new-ID resources; retail getter/sprite paths and stat arithmetic stay untouched
-00235520  port  native element/action amount route, enemy-ID bank bound and the final-damage stage (ordered registered modifiers; Hardmode and Challenge register, never hook); port coordinates existing registered/active skill predicate facet; port facet: party-source persona fields and the recovery stage for formula heals
+00235520  port  native element/action amount route, enemy-ID bank bound and the final-damage stage (ordered registered modifiers; Hardmode and Challenge register, never hook); port coordinates existing registered/active skill predicate facet; port facet: party-source persona fields and the recovery stage for formula heals; GoldenM7a facet: Golden-only full SKILL1 flags[12:9] calculation-source selector
 00244110  port  canonical physical formula shared by original ABI and explicit owning frame/target-query calculation; preserve every term/order/conversion
 00244540  port  canonical magic formula shared by original ABI and explicit owning frame/target-query calculation
 002447c0  port  canonical power-plus-magic-tier formula with explicit calculation frame transport
@@ -1714,10 +1714,15 @@ Some source files are shared by multiple overrides:
 0010fde0  port  compendium resolve/seed uses the persona's own row (mirror_fixes)
 0010ffa0  port  register-all covers every persona the published banks hold (mirror_fixes)
 00110140  port  compendium completion counts added personas (mirror_fixes)
-002e4090  port  compendium list scans every persona the published banks hold (mirror_fixes)
+002e4090  port  compendium list scans the Golden persona domain (override)
 002e4610  port  persona-list work sized for every persona the published banks hold (mirror_fixes)
 002e5960  port  persona-list clear covers the sized work (mirror_fixes)
 002e68b0  port  persona-list sort scratch covers IDs up to 511 (mirror_fixes)
+002e5ae0  port  Golden compendium category filter (override)
+002e6280  port  Golden compendium list initialization (override)
+00311d60  port  Golden community gate lookup (override)
+00311e40  port  Golden alternate pair chart lookup (override)
+00311ea0  port  Golden triangle chart lookup (override)
 002e6c90  port  persona-list sort scratch covers IDs up to 511 (mirror_fixes)
 00310700  port  compendium snapshot appends added personas' rows (mirror_fixes)
 00310850  port  compendium snapshot restore covers added personas' rows (mirror_fixes)
@@ -1759,3 +1764,11 @@ Some source files are shared by multiple overrides:
 001e1530  port  battle AI side-id HP query: with no protagonist action on the player side, his character-1 request asks about the leader-role action's character through the same retail lookup and condition; exact retail lookup and answer otherwise
 001e1800  port  battle AI side-id bad-status query: with no protagonist action on the player side, his character-1 request asks about the leader-role action's character through the same retail lookup, status filter and condition; exact retail lookup and answer otherwise
 001a06d0  port  turn start: count the selected leader's eligible ordinary turns for Shuffle Time when Yu is absent; retain the retail protagonist count when present; port side-ailment facet (port): btlActionStartInit starts a turn with no earlier side-ailment landing mark (mirror_fixes)
+002f9c30  port  twelve-persona preview source records (override)
+00303a20  port  twelve-persona recipe rule checks (override)
+00312220  port  Golden recipe search and community gates (override)
+00313800  port  Golden recipe material listing (override)
+003139d0  port  Golden recipe held-material check (override)
+00313a80  port  Golden recipe result ownership (override)
+00313ae0  port  Golden recipe result slot (override)
+002b32d0  port  fclExpandNameTags (Fusion Forecast <P1> <P2> <R1> <R2> text tags): the four replacement strings live in one array, because retail indexes four separate locals as one (`first + tag * 0x80`) and a host compiler lays them out as it likes, which blanked the arcana name; same expansion otherwise; Golden mode keeps its bounded expansion (p4_golden_expand_name_tags), repeated in this override because the override replaces the definition that the GoldenNames mirror_fixes row edits (that row is superseded; keep the two in step)

@@ -1,4 +1,5 @@
 #include "../src/platform/golden/golden_mode_identity.h"
+#include "../src/platform/golden/golden_mode_literal_identity.h"
 #include <stdio.h>
 #include <string.h>
 #define CHECK(x) do { if (!(x)) { fprintf(stderr, "FAIL %d: %s\n", __LINE__, #x); return 1; } } while (0)
@@ -15,20 +16,26 @@ int main(void)
     CHECK(!strcmp(out.identity.sources[2].name, "data_e.cpk::z"));
     for (size_t i = 1; i < out.identity.version_count; ++i)
         CHECK(strcmp(out.identity.versions[i-1].name, out.identity.versions[i].name) < 0);
-    const char *specs[] = {"spec:battle-tables", "spec:cmm-tables", "spec:cmp-tables",
-                           "spec:containers", "spec:exp-pe", "spec:fcl-tables", "spec:golden-domains"};
+    const struct { const char *name, *version; } specs[] = {
+        {"spec:battle-tables", "2"}, {"spec:cmm-tables", "1"}, {"spec:cmp-tables", "1"},
+        {"spec:containers", "1"}, {"spec:exp-pe", "1"}, {"spec:fcl-tables", "2"},
+        {"spec:golden-domains", "1"},
+        {"spec:l1-image-literals", P4_GOLDEN_LITERAL_MANIFEST_SHA256}};
     for (size_t j = 0; j < sizeof specs / sizeof specs[0]; ++j) {
         int found = 0;
         for (size_t i = 0; i < out.identity.version_count; ++i)
-            if (!strcmp(out.identity.versions[i].name, specs[j]) &&
-                !strcmp(out.identity.versions[i].value, "1")) found = 1;
+            if (!strcmp(out.identity.versions[i].name, specs[j].name) &&
+                !strcmp(out.identity.versions[i].value, specs[j].version)) found = 1;
         CHECK(found);
     }
-    int declarations_v2 = 0;
-    for (size_t i = 0; i < out.identity.version_count; ++i)
+    int declarations_v2 = 0, skill_v2 = 0;
+    for (size_t i = 0; i < out.identity.version_count; ++i) {
         if (!strcmp(out.identity.versions[i].name, "converter:declarations") &&
             !strcmp(out.identity.versions[i].value, "2")) declarations_v2 = 1;
-    CHECK(declarations_v2);
+        if (!strcmp(out.identity.versions[i].name, "converter:battle-skill") &&
+            !strcmp(out.identity.versions[i].value, "3")) skill_v2 = 1;
+    }
+    CHECK(declarations_v2 && skill_v2);
     sources[1].chain = sources[0].chain;
     CHECK(p4_golden_mode_identity_build(&out, a, sources, 2, reason, sizeof reason) == -1);
     CHECK(strstr(reason, "duplicate"));

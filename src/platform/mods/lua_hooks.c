@@ -62,7 +62,7 @@ static void get_value(lua_State *L, int index, char kind, P4ModValue *value)
     case 'q': case 'Q': value->u = p4_lua_wide(L, index); break;
     case 'f': case 'd':
         luaL_checktype(L, index, LUA_TNUMBER);
-        value->d = p4_mod_f64_quiet(lua_tonumber(L, index));
+        value->d = p4_mod_f64_canonical(lua_tonumber(L, index));
         break;
     default: luaL_error(L, "unsupported native scalar kind");
     }

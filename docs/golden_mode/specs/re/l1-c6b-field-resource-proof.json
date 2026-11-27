@@ -1,0 +1,3303 @@
+{
+  "proof_id": "L1-c6B-field-resource-source-20261113",
+  "author": "GoldenRE-L1-c6b",
+  "scope": "Exact assigned setB rows only. Source proof, not runtime qualification.",
+  "sources": {
+    "ps2_decomp_commit": "18016afe6",
+    "steam_build": 10836033,
+    "steam_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+    "switch_nso_sha256": "854c7a1e33de1619abf009fa7f32b8c012960d685c8bf1bf99a92a6a4d0bda1c",
+    "switch_mapped_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+  },
+  "method": "Static ordinary Steam.shared code and data, ELF and decompressed NSO. Never .arch decode, game execution or byte-vote admission. Exact sources selected only after typed consumer roles and full bank bounds.",
+  "admissions": [
+    {
+      "address": "0x005f0b10",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "startup field rain/television texture or icon resource",
+      "ps2_consumers": [
+        {
+          "function": "0x15d730",
+          "name": "func_0015d730",
+          "file": "src/Kosaka/Field/k_fldData.c"
+        }
+      ],
+      "ps2_live_bytes": 23,
+      "retained_ps2_tail_bytes": 9,
+      "golden": {
+        "kind": "cstring",
+        "value": "field/fldEff_rainA.tmx",
+        "switch_address": "0x71005f9b49",
+        "mapped_offset": 6265673,
+        "size": 23,
+        "sha256": "65db2571575a04c63026ed7b86d8a9ec12cb5bd6c5d5f9813d201768ff744cf3",
+        "steam_spans": [
+          {
+            "section": ".sdata",
+            "rva": "0x9305e0",
+            "raw_offset": 9630176,
+            "size": 23,
+            "sha256": "65db2571575a04c63026ed7b86d8a9ec12cb5bd6c5d5f9813d201768ff744cf3",
+            "readers": []
+          }
+        ]
+      },
+      "structural_proof": "PS2 FldStartupDataUpdate15d730 queues rainA/rainB, televisionA/televisionB and three icon assets in distinct work slots. NSO1c9160 cases0..2 independently establish the corresponding field startup lifetime: base model, script, dungeon table with0xc00 guard, NPC/unit tables, named rain/TV texture adoption39ae30/33b240 and ordered icon pointers through880b08. This paired loader/state graph, not filename equality, identifies the resources. Golden adds rainC,tvC,snow and extra icons; do not truncate to the PS2 set.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f0b30",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "startup field rain/television texture or icon resource",
+      "ps2_consumers": [
+        {
+          "function": "0x15d730",
+          "name": "func_0015d730",
+          "file": "src/Kosaka/Field/k_fldData.c"
+        }
+      ],
+      "ps2_live_bytes": 23,
+      "retained_ps2_tail_bytes": 9,
+      "golden": {
+        "kind": "cstring",
+        "value": "field/fldEff_rainB.tmx",
+        "switch_address": "0x71005f6f70",
+        "mapped_offset": 6254448,
+        "size": 23,
+        "sha256": "80975e09833809980ab5c7ff993a58321c8d25583546f5dbc7a479302f7db051",
+        "steam_spans": [
+          {
+            "section": ".sdata",
+            "rva": "0x9305c8",
+            "raw_offset": 9630152,
+            "size": 23,
+            "sha256": "80975e09833809980ab5c7ff993a58321c8d25583546f5dbc7a479302f7db051",
+            "readers": []
+          }
+        ]
+      },
+      "structural_proof": "PS2 FldStartupDataUpdate15d730 queues rainA/rainB, televisionA/televisionB and three icon assets in distinct work slots. NSO1c9160 cases0..2 independently establish the corresponding field startup lifetime: base model, script, dungeon table with0xc00 guard, NPC/unit tables, named rain/TV texture adoption39ae30/33b240 and ordered icon pointers through880b08. This paired loader/state graph, not filename equality, identifies the resources. Golden adds rainC,tvC,snow and extra icons; do not truncate to the PS2 set.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f0b50",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "startup field rain/television texture or icon resource",
+      "ps2_consumers": [
+        {
+          "function": "0x15d730",
+          "name": "func_0015d730",
+          "file": "src/Kosaka/Field/k_fldData.c"
+        }
+      ],
+      "ps2_live_bytes": 21,
+      "retained_ps2_tail_bytes": 11,
+      "golden": {
+        "kind": "cstring",
+        "value": "field/fldEff_tvA.tmx",
+        "switch_address": "0x710061c30d",
+        "mapped_offset": 6406925,
+        "size": 21,
+        "sha256": "3528c85a1053bbe710aca30c31ea5fd1d5f765912fb26d2ed1d71351b6852c7f",
+        "steam_spans": [
+          {
+            "section": ".sdata",
+            "rva": "0x9305f8",
+            "raw_offset": 9630200,
+            "size": 21,
+            "sha256": "3528c85a1053bbe710aca30c31ea5fd1d5f765912fb26d2ed1d71351b6852c7f",
+            "readers": []
+          }
+        ]
+      },
+      "structural_proof": "PS2 FldStartupDataUpdate15d730 queues rainA/rainB, televisionA/televisionB and three icon assets in distinct work slots. NSO1c9160 cases0..2 independently establish the corresponding field startup lifetime: base model, script, dungeon table with0xc00 guard, NPC/unit tables, named rain/TV texture adoption39ae30/33b240 and ordered icon pointers through880b08. This paired loader/state graph, not filename equality, identifies the resources. Golden adds rainC,tvC,snow and extra icons; do not truncate to the PS2 set.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f0b70",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "startup field rain/television texture or icon resource",
+      "ps2_consumers": [
+        {
+          "function": "0x15d730",
+          "name": "func_0015d730",
+          "file": "src/Kosaka/Field/k_fldData.c"
+        }
+      ],
+      "ps2_live_bytes": 21,
+      "retained_ps2_tail_bytes": 11,
+      "golden": {
+        "kind": "cstring",
+        "value": "field/fldEff_tvB.tmx",
+        "switch_address": "0x71005de7d4",
+        "mapped_offset": 6154196,
+        "size": 21,
+        "sha256": "bb3a3f92be181fadb27b26fc755151861fe7d1554343738ae8806175fd3283c2",
+        "steam_spans": [
+          {
+            "section": ".sdata",
+            "rva": "0x930628",
+            "raw_offset": 9630248,
+            "size": 21,
+            "sha256": "bb3a3f92be181fadb27b26fc755151861fe7d1554343738ae8806175fd3283c2",
+            "readers": []
+          }
+        ]
+      },
+      "structural_proof": "PS2 FldStartupDataUpdate15d730 queues rainA/rainB, televisionA/televisionB and three icon assets in distinct work slots. NSO1c9160 cases0..2 independently establish the corresponding field startup lifetime: base model, script, dungeon table with0xc00 guard, NPC/unit tables, named rain/TV texture adoption39ae30/33b240 and ordered icon pointers through880b08. This paired loader/state graph, not filename equality, identifies the resources. Golden adds rainC,tvC,snow and extra icons; do not truncate to the PS2 set.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f0bb0",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "startup field rain/television texture or icon resource",
+      "ps2_consumers": [
+        {
+          "function": "0x15d730",
+          "name": "func_0015d730",
+          "file": "src/Kosaka/Field/k_fldData.c"
+        }
+      ],
+      "ps2_live_bytes": 19,
+      "retained_ps2_tail_bytes": 13,
+      "golden": {
+        "kind": "cstring",
+        "value": "field/F_ICON01.EPL",
+        "switch_address": "0x71005d672b",
+        "mapped_offset": 6121259,
+        "size": 19,
+        "sha256": "fb4dfc3ab95b6b3de051a1f3bdd97e5cc16d1b06c1939d4280330c602c4c0d1b",
+        "steam_spans": [
+          {
+            "section": ".sdata",
+            "rva": "0x930278",
+            "raw_offset": 9629304,
+            "size": 19,
+            "sha256": "fb4dfc3ab95b6b3de051a1f3bdd97e5cc16d1b06c1939d4280330c602c4c0d1b",
+            "readers": [
+              {
+                "function": "0x2cd590",
+                "end": "0x2cde1c",
+                "pc": "0x2cd89e",
+                "argument": 1
+              }
+            ]
+          }
+        ]
+      },
+      "structural_proof": "PS2 FldStartupDataUpdate15d730 queues rainA/rainB, televisionA/televisionB and three icon assets in distinct work slots. NSO1c9160 cases0..2 independently establish the corresponding field startup lifetime: base model, script, dungeon table with0xc00 guard, NPC/unit tables, named rain/TV texture adoption39ae30/33b240 and ordered icon pointers through880b08. This paired loader/state graph, not filename equality, identifies the resources. Golden adds rainC,tvC,snow and extra icons; do not truncate to the PS2 set.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f0bd0",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "startup field rain/television texture or icon resource",
+      "ps2_consumers": [
+        {
+          "function": "0x15d730",
+          "name": "func_0015d730",
+          "file": "src/Kosaka/Field/k_fldData.c"
+        }
+      ],
+      "ps2_live_bytes": 19,
+      "retained_ps2_tail_bytes": 13,
+      "golden": {
+        "kind": "cstring",
+        "value": "field/F_ICON02.EPL",
+        "switch_address": "0x71005fc693",
+        "mapped_offset": 6276755,
+        "size": 19,
+        "sha256": "fc9175a87058745e851d37c66db2a2dcb2ef69ec0bc9f1a1219ffbceb589c305",
+        "steam_spans": [
+          {
+            "section": ".sdata",
+            "rva": "0x9302b8",
+            "raw_offset": 9629368,
+            "size": 19,
+            "sha256": "fc9175a87058745e851d37c66db2a2dcb2ef69ec0bc9f1a1219ffbceb589c305",
+            "readers": [
+              {
+                "function": "0x2cd590",
+                "end": "0x2cde1c",
+                "pc": "0x2cd8b3",
+                "argument": 1
+              }
+            ]
+          }
+        ]
+      },
+      "structural_proof": "PS2 FldStartupDataUpdate15d730 queues rainA/rainB, televisionA/televisionB and three icon assets in distinct work slots. NSO1c9160 cases0..2 independently establish the corresponding field startup lifetime: base model, script, dungeon table with0xc00 guard, NPC/unit tables, named rain/TV texture adoption39ae30/33b240 and ordered icon pointers through880b08. This paired loader/state graph, not filename equality, identifies the resources. Golden adds rainC,tvC,snow and extra icons; do not truncate to the PS2 set.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f0bf0",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "startup field rain/television texture or icon resource",
+      "ps2_consumers": [
+        {
+          "function": "0x15d730",
+          "name": "func_0015d730",
+          "file": "src/Kosaka/Field/k_fldData.c"
+        }
+      ],
+      "ps2_live_bytes": 19,
+      "retained_ps2_tail_bytes": 13,
+      "golden": {
+        "kind": "cstring",
+        "value": "field/F_ICON03.EPL",
+        "switch_address": "0x71005e6b66",
+        "mapped_offset": 6187878,
+        "size": 19,
+        "sha256": "0ecc4e57be52c08d547b61f8413d198e3aee37c3f790acaf851c3aaa5a4f4513",
+        "steam_spans": [
+          {
+            "section": ".sdata",
+            "rva": "0x9302a0",
+            "raw_offset": 9629344,
+            "size": 19,
+            "sha256": "0ecc4e57be52c08d547b61f8413d198e3aee37c3f790acaf851c3aaa5a4f4513",
+            "readers": [
+              {
+                "function": "0x2cd590",
+                "end": "0x2cde1c",
+                "pc": "0x2cd8d5",
+                "argument": 1
+              }
+            ]
+          }
+        ]
+      },
+      "structural_proof": "PS2 FldStartupDataUpdate15d730 queues rainA/rainB, televisionA/televisionB and three icon assets in distinct work slots. NSO1c9160 cases0..2 independently establish the corresponding field startup lifetime: base model, script, dungeon table with0xc00 guard, NPC/unit tables, named rain/TV texture adoption39ae30/33b240 and ordered icon pointers through880b08. This paired loader/state graph, not filename equality, identifies the resources. Golden adds rainC,tvC,snow and extra icons; do not truncate to the PS2 set.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f0c30",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "minimap texture member in complete30-entry registry",
+      "ps2_consumers": [
+        {
+          "function": "0x15d730",
+          "name": "func_0015d730",
+          "file": "src/Kosaka/Field/k_fldData.c"
+        }
+      ],
+      "ps2_live_bytes": 17,
+      "retained_ps2_tail_bytes": 15,
+      "golden": {
+        "kind": "packed-member-name",
+        "value": "smap02.tmx",
+        "switch_address": "0x71005d3e28",
+        "size": 11,
+        "sha256": "15b3e07294989eebb4bea5549d77dee494f0f934959885b10edfaa776b89b9f2",
+        "steam_span": {
+          "container": "P4G.exe",
+          "section": ".sdata",
+          "rva": "0x942978",
+          "raw_offset": 9704824,
+          "size": 11,
+          "sha256": "15b3e07294989eebb4bea5549d77dee494f0f934959885b10edfaa776b89b9f2",
+          "source_build": 10836033,
+          "mapping_proven": true
+        },
+        "logical_registry": {
+          "count": 30,
+          "index": 1,
+          "steam_rva": "0x914980",
+          "switch_address": "0x71007a0508",
+          "pointer_stride": 8,
+          "archive": "field/fld_smap.bin"
+        }
+      },
+      "structural_proof": "PS2 startup15d730 queues30 map texture slots. Golden relocated startup is NSO2b8d80 cases5..9: requests field/fld_smap.bin, waits, looks up each of30 names at7a0508+i*8 via397040, decodes3a41a0, publishes textures at4a70c88+i*8 and releases pack. Steam42f790/42f8a9..42f8e8 repeats archive request and exact30-pointer loop ending914a70. Ordered registry names independently agree across both Golden images. NSO2be4b0 compares full field/smap/... paths into the same30 indices and renders loaded slot; old flat path must become archive-qualified member lookup.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder.",
+        "golden-minimap-registry: bind the complete30-entry registry and all startup, draw, symbol and native routes together; use Golden indices and pack member names, not guest-copy basename into a PS2 flat-path call."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f0c50",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "minimap texture member in complete30-entry registry",
+      "ps2_consumers": [
+        {
+          "function": "0x15d730",
+          "name": "func_0015d730",
+          "file": "src/Kosaka/Field/k_fldData.c"
+        }
+      ],
+      "ps2_live_bytes": 20,
+      "retained_ps2_tail_bytes": 12,
+      "golden": {
+        "kind": "packed-member-name",
+        "value": "smap02_01.tmx",
+        "switch_address": "0x71005f777c",
+        "size": 14,
+        "sha256": "bed4acd3c300a340f5f6bc6bb06913a137f88c7b1dfca354d276bb6797e4094d",
+        "steam_span": {
+          "container": "P4G.exe",
+          "section": ".sdata",
+          "rva": "0x9429f8",
+          "raw_offset": 9704952,
+          "size": 14,
+          "sha256": "bed4acd3c300a340f5f6bc6bb06913a137f88c7b1dfca354d276bb6797e4094d",
+          "source_build": 10836033,
+          "mapping_proven": true
+        },
+        "logical_registry": {
+          "count": 30,
+          "index": 2,
+          "steam_rva": "0x914980",
+          "switch_address": "0x71007a0508",
+          "pointer_stride": 8,
+          "archive": "field/fld_smap.bin"
+        }
+      },
+      "structural_proof": "PS2 startup15d730 queues30 map texture slots. Golden relocated startup is NSO2b8d80 cases5..9: requests field/fld_smap.bin, waits, looks up each of30 names at7a0508+i*8 via397040, decodes3a41a0, publishes textures at4a70c88+i*8 and releases pack. Steam42f790/42f8a9..42f8e8 repeats archive request and exact30-pointer loop ending914a70. Ordered registry names independently agree across both Golden images. NSO2be4b0 compares full field/smap/... paths into the same30 indices and renders loaded slot; old flat path must become archive-qualified member lookup.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder.",
+        "golden-minimap-registry: bind the complete30-entry registry and all startup, draw, symbol and native routes together; use Golden indices and pack member names, not guest-copy basename into a PS2 flat-path call."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f0c70",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "minimap texture member in complete30-entry registry",
+      "ps2_consumers": [
+        {
+          "function": "0x15d730",
+          "name": "func_0015d730",
+          "file": "src/Kosaka/Field/k_fldData.c"
+        }
+      ],
+      "ps2_live_bytes": 20,
+      "retained_ps2_tail_bytes": 12,
+      "golden": {
+        "kind": "packed-member-name",
+        "value": "smap02_02.tmx",
+        "switch_address": "0x710062802f",
+        "size": 14,
+        "sha256": "1491f1099b772b384df40bb315bca3e8caf84a09f3af705a5164605f08ce4334",
+        "steam_span": {
+          "container": "P4G.exe",
+          "section": ".sdata",
+          "rva": "0x942a08",
+          "raw_offset": 9704968,
+          "size": 14,
+          "sha256": "1491f1099b772b384df40bb315bca3e8caf84a09f3af705a5164605f08ce4334",
+          "source_build": 10836033,
+          "mapping_proven": true
+        },
+        "logical_registry": {
+          "count": 30,
+          "index": 3,
+          "steam_rva": "0x914980",
+          "switch_address": "0x71007a0508",
+          "pointer_stride": 8,
+          "archive": "field/fld_smap.bin"
+        }
+      },
+      "structural_proof": "PS2 startup15d730 queues30 map texture slots. Golden relocated startup is NSO2b8d80 cases5..9: requests field/fld_smap.bin, waits, looks up each of30 names at7a0508+i*8 via397040, decodes3a41a0, publishes textures at4a70c88+i*8 and releases pack. Steam42f790/42f8a9..42f8e8 repeats archive request and exact30-pointer loop ending914a70. Ordered registry names independently agree across both Golden images. NSO2be4b0 compares full field/smap/... paths into the same30 indices and renders loaded slot; old flat path must become archive-qualified member lookup.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder.",
+        "golden-minimap-registry: bind the complete30-entry registry and all startup, draw, symbol and native routes together; use Golden indices and pack member names, not guest-copy basename into a PS2 flat-path call."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f0c90",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "minimap texture member in complete30-entry registry",
+      "ps2_consumers": [
+        {
+          "function": "0x15d730",
+          "name": "func_0015d730",
+          "file": "src/Kosaka/Field/k_fldData.c"
+        }
+      ],
+      "ps2_live_bytes": 17,
+      "retained_ps2_tail_bytes": 15,
+      "golden": {
+        "kind": "packed-member-name",
+        "value": "smap03.tmx",
+        "switch_address": "0x71005fa22e",
+        "size": 11,
+        "sha256": "de532ff85e72c0be6c5776596912f068674e104550014521efeb252e0c34d355",
+        "steam_span": {
+          "container": "P4G.exe",
+          "section": ".sdata",
+          "rva": "0x9429d8",
+          "raw_offset": 9704920,
+          "size": 11,
+          "sha256": "de532ff85e72c0be6c5776596912f068674e104550014521efeb252e0c34d355",
+          "source_build": 10836033,
+          "mapping_proven": true
+        },
+        "logical_registry": {
+          "count": 30,
+          "index": 4,
+          "steam_rva": "0x914980",
+          "switch_address": "0x71007a0508",
+          "pointer_stride": 8,
+          "archive": "field/fld_smap.bin"
+        }
+      },
+      "structural_proof": "PS2 startup15d730 queues30 map texture slots. Golden relocated startup is NSO2b8d80 cases5..9: requests field/fld_smap.bin, waits, looks up each of30 names at7a0508+i*8 via397040, decodes3a41a0, publishes textures at4a70c88+i*8 and releases pack. Steam42f790/42f8a9..42f8e8 repeats archive request and exact30-pointer loop ending914a70. Ordered registry names independently agree across both Golden images. NSO2be4b0 compares full field/smap/... paths into the same30 indices and renders loaded slot; old flat path must become archive-qualified member lookup.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder.",
+        "golden-minimap-registry: bind the complete30-entry registry and all startup, draw, symbol and native routes together; use Golden indices and pack member names, not guest-copy basename into a PS2 flat-path call."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f0cb0",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "minimap texture member in complete30-entry registry",
+      "ps2_consumers": [
+        {
+          "function": "0x15d730",
+          "name": "func_0015d730",
+          "file": "src/Kosaka/Field/k_fldData.c"
+        }
+      ],
+      "ps2_live_bytes": 17,
+      "retained_ps2_tail_bytes": 15,
+      "golden": {
+        "kind": "packed-member-name",
+        "value": "smap04.tmx",
+        "switch_address": "0x71005e4822",
+        "size": 11,
+        "sha256": "9c96ea5b20ae5a4f4c40fcc20f2de418af9d3bb5aa7c9eabfcf811e9d4223435",
+        "steam_span": {
+          "container": "P4G.exe",
+          "section": ".sdata",
+          "rva": "0x9429e8",
+          "raw_offset": 9704936,
+          "size": 11,
+          "sha256": "9c96ea5b20ae5a4f4c40fcc20f2de418af9d3bb5aa7c9eabfcf811e9d4223435",
+          "source_build": 10836033,
+          "mapping_proven": true
+        },
+        "logical_registry": {
+          "count": 30,
+          "index": 5,
+          "steam_rva": "0x914980",
+          "switch_address": "0x71007a0508",
+          "pointer_stride": 8,
+          "archive": "field/fld_smap.bin"
+        }
+      },
+      "structural_proof": "PS2 startup15d730 queues30 map texture slots. Golden relocated startup is NSO2b8d80 cases5..9: requests field/fld_smap.bin, waits, looks up each of30 names at7a0508+i*8 via397040, decodes3a41a0, publishes textures at4a70c88+i*8 and releases pack. Steam42f790/42f8a9..42f8e8 repeats archive request and exact30-pointer loop ending914a70. Ordered registry names independently agree across both Golden images. NSO2be4b0 compares full field/smap/... paths into the same30 indices and renders loaded slot; old flat path must become archive-qualified member lookup.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder.",
+        "golden-minimap-registry: bind the complete30-entry registry and all startup, draw, symbol and native routes together; use Golden indices and pack member names, not guest-copy basename into a PS2 flat-path call."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f0cd0",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "minimap texture member in complete30-entry registry",
+      "ps2_consumers": [
+        {
+          "function": "0x15d730",
+          "name": "func_0015d730",
+          "file": "src/Kosaka/Field/k_fldData.c"
+        }
+      ],
+      "ps2_live_bytes": 17,
+      "retained_ps2_tail_bytes": 15,
+      "golden": {
+        "kind": "packed-member-name",
+        "value": "smap05.tmx",
+        "switch_address": "0x710062803d",
+        "size": 11,
+        "sha256": "b266509f376eb1c36f6622f13b088cabfb3c9bb236e7bfba6621c398f160fa87",
+        "steam_span": {
+          "container": "P4G.exe",
+          "section": ".sdata",
+          "rva": "0x942a38",
+          "raw_offset": 9705016,
+          "size": 11,
+          "sha256": "b266509f376eb1c36f6622f13b088cabfb3c9bb236e7bfba6621c398f160fa87",
+          "source_build": 10836033,
+          "mapping_proven": true
+        },
+        "logical_registry": {
+          "count": 30,
+          "index": 6,
+          "steam_rva": "0x914980",
+          "switch_address": "0x71007a0508",
+          "pointer_stride": 8,
+          "archive": "field/fld_smap.bin"
+        }
+      },
+      "structural_proof": "PS2 startup15d730 queues30 map texture slots. Golden relocated startup is NSO2b8d80 cases5..9: requests field/fld_smap.bin, waits, looks up each of30 names at7a0508+i*8 via397040, decodes3a41a0, publishes textures at4a70c88+i*8 and releases pack. Steam42f790/42f8a9..42f8e8 repeats archive request and exact30-pointer loop ending914a70. Ordered registry names independently agree across both Golden images. NSO2be4b0 compares full field/smap/... paths into the same30 indices and renders loaded slot; old flat path must become archive-qualified member lookup.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder.",
+        "golden-minimap-registry: bind the complete30-entry registry and all startup, draw, symbol and native routes together; use Golden indices and pack member names, not guest-copy basename into a PS2 flat-path call."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f0cf0",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "minimap texture member in complete30-entry registry",
+      "ps2_consumers": [
+        {
+          "function": "0x15d730",
+          "name": "func_0015d730",
+          "file": "src/Kosaka/Field/k_fldData.c"
+        }
+      ],
+      "ps2_live_bytes": 17,
+      "retained_ps2_tail_bytes": 15,
+      "golden": {
+        "kind": "packed-member-name",
+        "value": "smap06.tmx",
+        "switch_address": "0x71005d3e33",
+        "size": 11,
+        "sha256": "bb9b1b632fe765e58803c8bb24120280e74657846bde0af98e22222307d6ae38",
+        "steam_span": {
+          "container": "P4G.exe",
+          "section": ".sdata",
+          "rva": "0x942a48",
+          "raw_offset": 9705032,
+          "size": 11,
+          "sha256": "bb9b1b632fe765e58803c8bb24120280e74657846bde0af98e22222307d6ae38",
+          "source_build": 10836033,
+          "mapping_proven": true
+        },
+        "logical_registry": {
+          "count": 30,
+          "index": 7,
+          "steam_rva": "0x914980",
+          "switch_address": "0x71007a0508",
+          "pointer_stride": 8,
+          "archive": "field/fld_smap.bin"
+        }
+      },
+      "structural_proof": "PS2 startup15d730 queues30 map texture slots. Golden relocated startup is NSO2b8d80 cases5..9: requests field/fld_smap.bin, waits, looks up each of30 names at7a0508+i*8 via397040, decodes3a41a0, publishes textures at4a70c88+i*8 and releases pack. Steam42f790/42f8a9..42f8e8 repeats archive request and exact30-pointer loop ending914a70. Ordered registry names independently agree across both Golden images. NSO2be4b0 compares full field/smap/... paths into the same30 indices and renders loaded slot; old flat path must become archive-qualified member lookup.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder.",
+        "golden-minimap-registry: bind the complete30-entry registry and all startup, draw, symbol and native routes together; use Golden indices and pack member names, not guest-copy basename into a PS2 flat-path call."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f0d10",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "minimap texture member in complete30-entry registry",
+      "ps2_consumers": [
+        {
+          "function": "0x15d730",
+          "name": "func_0015d730",
+          "file": "src/Kosaka/Field/k_fldData.c"
+        }
+      ],
+      "ps2_live_bytes": 17,
+      "retained_ps2_tail_bytes": 15,
+      "golden": {
+        "kind": "packed-member-name",
+        "value": "smap07.tmx",
+        "switch_address": "0x710061752c",
+        "size": 11,
+        "sha256": "50272dc78481239f150137cc002cb5a978f636d422786dc1e17231ff1c92eb1e",
+        "steam_span": {
+          "container": "P4G.exe",
+          "section": ".sdata",
+          "rva": "0x942a18",
+          "raw_offset": 9704984,
+          "size": 11,
+          "sha256": "50272dc78481239f150137cc002cb5a978f636d422786dc1e17231ff1c92eb1e",
+          "source_build": 10836033,
+          "mapping_proven": true
+        },
+        "logical_registry": {
+          "count": 30,
+          "index": 8,
+          "steam_rva": "0x914980",
+          "switch_address": "0x71007a0508",
+          "pointer_stride": 8,
+          "archive": "field/fld_smap.bin"
+        }
+      },
+      "structural_proof": "PS2 startup15d730 queues30 map texture slots. Golden relocated startup is NSO2b8d80 cases5..9: requests field/fld_smap.bin, waits, looks up each of30 names at7a0508+i*8 via397040, decodes3a41a0, publishes textures at4a70c88+i*8 and releases pack. Steam42f790/42f8a9..42f8e8 repeats archive request and exact30-pointer loop ending914a70. Ordered registry names independently agree across both Golden images. NSO2be4b0 compares full field/smap/... paths into the same30 indices and renders loaded slot; old flat path must become archive-qualified member lookup.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder.",
+        "golden-minimap-registry: bind the complete30-entry registry and all startup, draw, symbol and native routes together; use Golden indices and pack member names, not guest-copy basename into a PS2 flat-path call."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f0d30",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "minimap texture member in complete30-entry registry",
+      "ps2_consumers": [
+        {
+          "function": "0x15d730",
+          "name": "func_0015d730",
+          "file": "src/Kosaka/Field/k_fldData.c"
+        }
+      ],
+      "ps2_live_bytes": 17,
+      "retained_ps2_tail_bytes": 15,
+      "golden": {
+        "kind": "packed-member-name",
+        "value": "smap08.tmx",
+        "switch_address": "0x71005ef5dc",
+        "size": 11,
+        "sha256": "11fca3e4d697ba4bd1c1df5127e19a57bb7ad3e00a30aa196f5e116d28ab8e65",
+        "steam_span": {
+          "container": "P4G.exe",
+          "section": ".sdata",
+          "rva": "0x942a28",
+          "raw_offset": 9705000,
+          "size": 11,
+          "sha256": "11fca3e4d697ba4bd1c1df5127e19a57bb7ad3e00a30aa196f5e116d28ab8e65",
+          "source_build": 10836033,
+          "mapping_proven": true
+        },
+        "logical_registry": {
+          "count": 30,
+          "index": 9,
+          "steam_rva": "0x914980",
+          "switch_address": "0x71007a0508",
+          "pointer_stride": 8,
+          "archive": "field/fld_smap.bin"
+        }
+      },
+      "structural_proof": "PS2 startup15d730 queues30 map texture slots. Golden relocated startup is NSO2b8d80 cases5..9: requests field/fld_smap.bin, waits, looks up each of30 names at7a0508+i*8 via397040, decodes3a41a0, publishes textures at4a70c88+i*8 and releases pack. Steam42f790/42f8a9..42f8e8 repeats archive request and exact30-pointer loop ending914a70. Ordered registry names independently agree across both Golden images. NSO2be4b0 compares full field/smap/... paths into the same30 indices and renders loaded slot; old flat path must become archive-qualified member lookup.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder.",
+        "golden-minimap-registry: bind the complete30-entry registry and all startup, draw, symbol and native routes together; use Golden indices and pack member names, not guest-copy basename into a PS2 flat-path call."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f0d50",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "minimap texture member in complete30-entry registry",
+      "ps2_consumers": [
+        {
+          "function": "0x15d730",
+          "name": "func_0015d730",
+          "file": "src/Kosaka/Field/k_fldData.c"
+        }
+      ],
+      "ps2_live_bytes": 17,
+      "retained_ps2_tail_bytes": 15,
+      "golden": {
+        "kind": "packed-member-name",
+        "value": "smap09.tmx",
+        "switch_address": "0x710060500b",
+        "size": 11,
+        "sha256": "f6a8ab14daabfea22141bd2dddf7e51682db94de7c207ba44b6b3de74e5901ba",
+        "steam_span": {
+          "container": "P4G.exe",
+          "section": ".sdata",
+          "rva": "0x942a78",
+          "raw_offset": 9705080,
+          "size": 11,
+          "sha256": "f6a8ab14daabfea22141bd2dddf7e51682db94de7c207ba44b6b3de74e5901ba",
+          "source_build": 10836033,
+          "mapping_proven": true
+        },
+        "logical_registry": {
+          "count": 30,
+          "index": 10,
+          "steam_rva": "0x914980",
+          "switch_address": "0x71007a0508",
+          "pointer_stride": 8,
+          "archive": "field/fld_smap.bin"
+        }
+      },
+      "structural_proof": "PS2 startup15d730 queues30 map texture slots. Golden relocated startup is NSO2b8d80 cases5..9: requests field/fld_smap.bin, waits, looks up each of30 names at7a0508+i*8 via397040, decodes3a41a0, publishes textures at4a70c88+i*8 and releases pack. Steam42f790/42f8a9..42f8e8 repeats archive request and exact30-pointer loop ending914a70. Ordered registry names independently agree across both Golden images. NSO2be4b0 compares full field/smap/... paths into the same30 indices and renders loaded slot; old flat path must become archive-qualified member lookup.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder.",
+        "golden-minimap-registry: bind the complete30-entry registry and all startup, draw, symbol and native routes together; use Golden indices and pack member names, not guest-copy basename into a PS2 flat-path call."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f0d70",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "minimap texture member in complete30-entry registry",
+      "ps2_consumers": [
+        {
+          "function": "0x15d730",
+          "name": "func_0015d730",
+          "file": "src/Kosaka/Field/k_fldData.c"
+        }
+      ],
+      "ps2_live_bytes": 20,
+      "retained_ps2_tail_bytes": 12,
+      "golden": {
+        "kind": "packed-member-name",
+        "value": "smap09_01.tmx",
+        "switch_address": "0x710060cd39",
+        "size": 14,
+        "sha256": "2593b00a6373b5a621914b901cbc94a0550a691ce7a39476df4c010ba50bfb31",
+        "steam_span": {
+          "container": "P4G.exe",
+          "section": ".sdata",
+          "rva": "0x942a88",
+          "raw_offset": 9705096,
+          "size": 14,
+          "sha256": "2593b00a6373b5a621914b901cbc94a0550a691ce7a39476df4c010ba50bfb31",
+          "source_build": 10836033,
+          "mapping_proven": true
+        },
+        "logical_registry": {
+          "count": 30,
+          "index": 11,
+          "steam_rva": "0x914980",
+          "switch_address": "0x71007a0508",
+          "pointer_stride": 8,
+          "archive": "field/fld_smap.bin"
+        }
+      },
+      "structural_proof": "PS2 startup15d730 queues30 map texture slots. Golden relocated startup is NSO2b8d80 cases5..9: requests field/fld_smap.bin, waits, looks up each of30 names at7a0508+i*8 via397040, decodes3a41a0, publishes textures at4a70c88+i*8 and releases pack. Steam42f790/42f8a9..42f8e8 repeats archive request and exact30-pointer loop ending914a70. Ordered registry names independently agree across both Golden images. NSO2be4b0 compares full field/smap/... paths into the same30 indices and renders loaded slot; old flat path must become archive-qualified member lookup.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder.",
+        "golden-minimap-registry: bind the complete30-entry registry and all startup, draw, symbol and native routes together; use Golden indices and pack member names, not guest-copy basename into a PS2 flat-path call."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f0d90",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "minimap texture member in complete30-entry registry",
+      "ps2_consumers": [
+        {
+          "function": "0x15d730",
+          "name": "func_0015d730",
+          "file": "src/Kosaka/Field/k_fldData.c"
+        }
+      ],
+      "ps2_live_bytes": 20,
+      "retained_ps2_tail_bytes": 12,
+      "golden": {
+        "kind": "packed-member-name",
+        "value": "smap09_02.tmx",
+        "switch_address": "0x710060a4ec",
+        "size": 14,
+        "sha256": "b2979c3ebc68a02daa9d9f8b9e967c5c00fb52d13a68c517eded0b9d99732847",
+        "steam_span": {
+          "container": "P4G.exe",
+          "section": ".sdata",
+          "rva": "0x942a58",
+          "raw_offset": 9705048,
+          "size": 14,
+          "sha256": "b2979c3ebc68a02daa9d9f8b9e967c5c00fb52d13a68c517eded0b9d99732847",
+          "source_build": 10836033,
+          "mapping_proven": true
+        },
+        "logical_registry": {
+          "count": 30,
+          "index": 12,
+          "steam_rva": "0x914980",
+          "switch_address": "0x71007a0508",
+          "pointer_stride": 8,
+          "archive": "field/fld_smap.bin"
+        }
+      },
+      "structural_proof": "PS2 startup15d730 queues30 map texture slots. Golden relocated startup is NSO2b8d80 cases5..9: requests field/fld_smap.bin, waits, looks up each of30 names at7a0508+i*8 via397040, decodes3a41a0, publishes textures at4a70c88+i*8 and releases pack. Steam42f790/42f8a9..42f8e8 repeats archive request and exact30-pointer loop ending914a70. Ordered registry names independently agree across both Golden images. NSO2be4b0 compares full field/smap/... paths into the same30 indices and renders loaded slot; old flat path must become archive-qualified member lookup.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder.",
+        "golden-minimap-registry: bind the complete30-entry registry and all startup, draw, symbol and native routes together; use Golden indices and pack member names, not guest-copy basename into a PS2 flat-path call."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f0db0",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "minimap texture member in complete30-entry registry",
+      "ps2_consumers": [
+        {
+          "function": "0x15d730",
+          "name": "func_0015d730",
+          "file": "src/Kosaka/Field/k_fldData.c"
+        }
+      ],
+      "ps2_live_bytes": 17,
+      "retained_ps2_tail_bytes": 15,
+      "golden": {
+        "kind": "packed-member-name",
+        "value": "smap10.tmx",
+        "switch_address": "0x71005defdd",
+        "size": 11,
+        "sha256": "1af5efb8275df42c5ce101f31716a722c001bb4af89ddc19a54ed192dcfd1de1",
+        "steam_span": {
+          "container": "P4G.exe",
+          "section": ".sdata",
+          "rva": "0x942a68",
+          "raw_offset": 9705064,
+          "size": 11,
+          "sha256": "1af5efb8275df42c5ce101f31716a722c001bb4af89ddc19a54ed192dcfd1de1",
+          "source_build": 10836033,
+          "mapping_proven": true
+        },
+        "logical_registry": {
+          "count": 30,
+          "index": 13,
+          "steam_rva": "0x914980",
+          "switch_address": "0x71007a0508",
+          "pointer_stride": 8,
+          "archive": "field/fld_smap.bin"
+        }
+      },
+      "structural_proof": "PS2 startup15d730 queues30 map texture slots. Golden relocated startup is NSO2b8d80 cases5..9: requests field/fld_smap.bin, waits, looks up each of30 names at7a0508+i*8 via397040, decodes3a41a0, publishes textures at4a70c88+i*8 and releases pack. Steam42f790/42f8a9..42f8e8 repeats archive request and exact30-pointer loop ending914a70. Ordered registry names independently agree across both Golden images. NSO2be4b0 compares full field/smap/... paths into the same30 indices and renders loaded slot; old flat path must become archive-qualified member lookup.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder.",
+        "golden-minimap-registry: bind the complete30-entry registry and all startup, draw, symbol and native routes together; use Golden indices and pack member names, not guest-copy basename into a PS2 flat-path call."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f0dd0",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "minimap texture member in complete30-entry registry",
+      "ps2_consumers": [
+        {
+          "function": "0x15d730",
+          "name": "func_0015d730",
+          "file": "src/Kosaka/Field/k_fldData.c"
+        }
+      ],
+      "ps2_live_bytes": 20,
+      "retained_ps2_tail_bytes": 12,
+      "golden": {
+        "kind": "packed-member-name",
+        "value": "smap10_01.tmx",
+        "switch_address": "0x710060cd47",
+        "size": 14,
+        "sha256": "8fc11185130ec8d75bf8c7f4f60a94ce0e2db8ee67a89e5194f56f829eec5f1f",
+        "steam_span": {
+          "container": "P4G.exe",
+          "section": ".sdata",
+          "rva": "0x942ab8",
+          "raw_offset": 9705144,
+          "size": 14,
+          "sha256": "8fc11185130ec8d75bf8c7f4f60a94ce0e2db8ee67a89e5194f56f829eec5f1f",
+          "source_build": 10836033,
+          "mapping_proven": true
+        },
+        "logical_registry": {
+          "count": 30,
+          "index": 14,
+          "steam_rva": "0x914980",
+          "switch_address": "0x71007a0508",
+          "pointer_stride": 8,
+          "archive": "field/fld_smap.bin"
+        }
+      },
+      "structural_proof": "PS2 startup15d730 queues30 map texture slots. Golden relocated startup is NSO2b8d80 cases5..9: requests field/fld_smap.bin, waits, looks up each of30 names at7a0508+i*8 via397040, decodes3a41a0, publishes textures at4a70c88+i*8 and releases pack. Steam42f790/42f8a9..42f8e8 repeats archive request and exact30-pointer loop ending914a70. Ordered registry names independently agree across both Golden images. NSO2be4b0 compares full field/smap/... paths into the same30 indices and renders loaded slot; old flat path must become archive-qualified member lookup.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder.",
+        "golden-minimap-registry: bind the complete30-entry registry and all startup, draw, symbol and native routes together; use Golden indices and pack member names, not guest-copy basename into a PS2 flat-path call."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f0df0",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "minimap texture member in complete30-entry registry",
+      "ps2_consumers": [
+        {
+          "function": "0x15d730",
+          "name": "func_0015d730",
+          "file": "src/Kosaka/Field/k_fldData.c"
+        }
+      ],
+      "ps2_live_bytes": 20,
+      "retained_ps2_tail_bytes": 12,
+      "golden": {
+        "kind": "packed-member-name",
+        "value": "smap10_02.tmx",
+        "switch_address": "0x710061cab3",
+        "size": 14,
+        "sha256": "0794b3196aaf8b57be5015ec2d2b5cc52e1d9aaad3c922b67f5a071ab06674fc",
+        "steam_span": {
+          "container": "P4G.exe",
+          "section": ".sdata",
+          "rva": "0x942ac8",
+          "raw_offset": 9705160,
+          "size": 14,
+          "sha256": "0794b3196aaf8b57be5015ec2d2b5cc52e1d9aaad3c922b67f5a071ab06674fc",
+          "source_build": 10836033,
+          "mapping_proven": true
+        },
+        "logical_registry": {
+          "count": 30,
+          "index": 15,
+          "steam_rva": "0x914980",
+          "switch_address": "0x71007a0508",
+          "pointer_stride": 8,
+          "archive": "field/fld_smap.bin"
+        }
+      },
+      "structural_proof": "PS2 startup15d730 queues30 map texture slots. Golden relocated startup is NSO2b8d80 cases5..9: requests field/fld_smap.bin, waits, looks up each of30 names at7a0508+i*8 via397040, decodes3a41a0, publishes textures at4a70c88+i*8 and releases pack. Steam42f790/42f8a9..42f8e8 repeats archive request and exact30-pointer loop ending914a70. Ordered registry names independently agree across both Golden images. NSO2be4b0 compares full field/smap/... paths into the same30 indices and renders loaded slot; old flat path must become archive-qualified member lookup.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder.",
+        "golden-minimap-registry: bind the complete30-entry registry and all startup, draw, symbol and native routes together; use Golden indices and pack member names, not guest-copy basename into a PS2 flat-path call."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f0e10",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "minimap texture member in complete30-entry registry",
+      "ps2_consumers": [
+        {
+          "function": "0x15d730",
+          "name": "func_0015d730",
+          "file": "src/Kosaka/Field/k_fldData.c"
+        }
+      ],
+      "ps2_live_bytes": 17,
+      "retained_ps2_tail_bytes": 15,
+      "golden": {
+        "kind": "packed-member-name",
+        "value": "smap11.tmx",
+        "switch_address": "0x71005f778a",
+        "size": 11,
+        "sha256": "7945f44ce008d041af021e49eeab63c3ccef4803258696d8d67dbd7798bf314b",
+        "steam_span": {
+          "container": "P4G.exe",
+          "section": ".sdata",
+          "rva": "0x942a98",
+          "raw_offset": 9705112,
+          "size": 11,
+          "sha256": "7945f44ce008d041af021e49eeab63c3ccef4803258696d8d67dbd7798bf314b",
+          "source_build": 10836033,
+          "mapping_proven": true
+        },
+        "logical_registry": {
+          "count": 30,
+          "index": 16,
+          "steam_rva": "0x914980",
+          "switch_address": "0x71007a0508",
+          "pointer_stride": 8,
+          "archive": "field/fld_smap.bin"
+        }
+      },
+      "structural_proof": "PS2 startup15d730 queues30 map texture slots. Golden relocated startup is NSO2b8d80 cases5..9: requests field/fld_smap.bin, waits, looks up each of30 names at7a0508+i*8 via397040, decodes3a41a0, publishes textures at4a70c88+i*8 and releases pack. Steam42f790/42f8a9..42f8e8 repeats archive request and exact30-pointer loop ending914a70. Ordered registry names independently agree across both Golden images. NSO2be4b0 compares full field/smap/... paths into the same30 indices and renders loaded slot; old flat path must become archive-qualified member lookup.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder.",
+        "golden-minimap-registry: bind the complete30-entry registry and all startup, draw, symbol and native routes together; use Golden indices and pack member names, not guest-copy basename into a PS2 flat-path call."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f0e30",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "minimap texture member in complete30-entry registry",
+      "ps2_consumers": [
+        {
+          "function": "0x15d730",
+          "name": "func_0015d730",
+          "file": "src/Kosaka/Field/k_fldData.c"
+        }
+      ],
+      "ps2_live_bytes": 20,
+      "retained_ps2_tail_bytes": 12,
+      "golden": {
+        "kind": "packed-member-name",
+        "value": "smap11_01.tmx",
+        "switch_address": "0x710060cd55",
+        "size": 14,
+        "sha256": "7842eff3840e93e924d9325ecc06a1e31db4e5d3cd7f734f406fcba2687cf08f",
+        "steam_span": {
+          "container": "P4G.exe",
+          "section": ".sdata",
+          "rva": "0x942aa8",
+          "raw_offset": 9705128,
+          "size": 14,
+          "sha256": "7842eff3840e93e924d9325ecc06a1e31db4e5d3cd7f734f406fcba2687cf08f",
+          "source_build": 10836033,
+          "mapping_proven": true
+        },
+        "logical_registry": {
+          "count": 30,
+          "index": 17,
+          "steam_rva": "0x914980",
+          "switch_address": "0x71007a0508",
+          "pointer_stride": 8,
+          "archive": "field/fld_smap.bin"
+        }
+      },
+      "structural_proof": "PS2 startup15d730 queues30 map texture slots. Golden relocated startup is NSO2b8d80 cases5..9: requests field/fld_smap.bin, waits, looks up each of30 names at7a0508+i*8 via397040, decodes3a41a0, publishes textures at4a70c88+i*8 and releases pack. Steam42f790/42f8a9..42f8e8 repeats archive request and exact30-pointer loop ending914a70. Ordered registry names independently agree across both Golden images. NSO2be4b0 compares full field/smap/... paths into the same30 indices and renders loaded slot; old flat path must become archive-qualified member lookup.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder.",
+        "golden-minimap-registry: bind the complete30-entry registry and all startup, draw, symbol and native routes together; use Golden indices and pack member names, not guest-copy basename into a PS2 flat-path call."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f0e50",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "minimap texture member in complete30-entry registry",
+      "ps2_consumers": [
+        {
+          "function": "0x15d730",
+          "name": "func_0015d730",
+          "file": "src/Kosaka/Field/k_fldData.c"
+        }
+      ],
+      "ps2_live_bytes": 20,
+      "retained_ps2_tail_bytes": 12,
+      "golden": {
+        "kind": "packed-member-name",
+        "value": "smap11_02.tmx",
+        "switch_address": "0x71005f7795",
+        "size": 14,
+        "sha256": "f23a68de69f4ab91eb3546af89b07aa8c8f09fd27d0ba36eb1ed2c4c5b5a6d50",
+        "steam_span": {
+          "container": "P4G.exe",
+          "section": ".sdata",
+          "rva": "0x942af8",
+          "raw_offset": 9705208,
+          "size": 14,
+          "sha256": "f23a68de69f4ab91eb3546af89b07aa8c8f09fd27d0ba36eb1ed2c4c5b5a6d50",
+          "source_build": 10836033,
+          "mapping_proven": true
+        },
+        "logical_registry": {
+          "count": 30,
+          "index": 18,
+          "steam_rva": "0x914980",
+          "switch_address": "0x71007a0508",
+          "pointer_stride": 8,
+          "archive": "field/fld_smap.bin"
+        }
+      },
+      "structural_proof": "PS2 startup15d730 queues30 map texture slots. Golden relocated startup is NSO2b8d80 cases5..9: requests field/fld_smap.bin, waits, looks up each of30 names at7a0508+i*8 via397040, decodes3a41a0, publishes textures at4a70c88+i*8 and releases pack. Steam42f790/42f8a9..42f8e8 repeats archive request and exact30-pointer loop ending914a70. Ordered registry names independently agree across both Golden images. NSO2be4b0 compares full field/smap/... paths into the same30 indices and renders loaded slot; old flat path must become archive-qualified member lookup.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder.",
+        "golden-minimap-registry: bind the complete30-entry registry and all startup, draw, symbol and native routes together; use Golden indices and pack member names, not guest-copy basename into a PS2 flat-path call."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f0e70",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "minimap texture member in complete30-entry registry",
+      "ps2_consumers": [
+        {
+          "function": "0x15d730",
+          "name": "func_0015d730",
+          "file": "src/Kosaka/Field/k_fldData.c"
+        }
+      ],
+      "ps2_live_bytes": 17,
+      "retained_ps2_tail_bytes": 15,
+      "golden": {
+        "kind": "packed-member-name",
+        "value": "smap12.tmx",
+        "switch_address": "0x7100605016",
+        "size": 11,
+        "sha256": "90fd2c7d29094584d5faba507955c6f12f0a710e646abbb462c2fb77864963d8",
+        "steam_span": {
+          "container": "P4G.exe",
+          "section": ".sdata",
+          "rva": "0x942b08",
+          "raw_offset": 9705224,
+          "size": 11,
+          "sha256": "90fd2c7d29094584d5faba507955c6f12f0a710e646abbb462c2fb77864963d8",
+          "source_build": 10836033,
+          "mapping_proven": true
+        },
+        "logical_registry": {
+          "count": 30,
+          "index": 19,
+          "steam_rva": "0x914980",
+          "switch_address": "0x71007a0508",
+          "pointer_stride": 8,
+          "archive": "field/fld_smap.bin"
+        }
+      },
+      "structural_proof": "PS2 startup15d730 queues30 map texture slots. Golden relocated startup is NSO2b8d80 cases5..9: requests field/fld_smap.bin, waits, looks up each of30 names at7a0508+i*8 via397040, decodes3a41a0, publishes textures at4a70c88+i*8 and releases pack. Steam42f790/42f8a9..42f8e8 repeats archive request and exact30-pointer loop ending914a70. Ordered registry names independently agree across both Golden images. NSO2be4b0 compares full field/smap/... paths into the same30 indices and renders loaded slot; old flat path must become archive-qualified member lookup.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder.",
+        "golden-minimap-registry: bind the complete30-entry registry and all startup, draw, symbol and native routes together; use Golden indices and pack member names, not guest-copy basename into a PS2 flat-path call."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f0e90",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "minimap texture member in complete30-entry registry",
+      "ps2_consumers": [
+        {
+          "function": "0x15d730",
+          "name": "func_0015d730",
+          "file": "src/Kosaka/Field/k_fldData.c"
+        }
+      ],
+      "ps2_live_bytes": 20,
+      "retained_ps2_tail_bytes": 12,
+      "golden": {
+        "kind": "packed-member-name",
+        "value": "smap12_01.tmx",
+        "switch_address": "0x71005d3e3e",
+        "size": 14,
+        "sha256": "6ed3d46a32110435ae32cbb84ada6a94038d0ad6464f9fd08621ab21c226fe67",
+        "steam_span": {
+          "container": "P4G.exe",
+          "section": ".sdata",
+          "rva": "0x942ad8",
+          "raw_offset": 9705176,
+          "size": 14,
+          "sha256": "6ed3d46a32110435ae32cbb84ada6a94038d0ad6464f9fd08621ab21c226fe67",
+          "source_build": 10836033,
+          "mapping_proven": true
+        },
+        "logical_registry": {
+          "count": 30,
+          "index": 20,
+          "steam_rva": "0x914980",
+          "switch_address": "0x71007a0508",
+          "pointer_stride": 8,
+          "archive": "field/fld_smap.bin"
+        }
+      },
+      "structural_proof": "PS2 startup15d730 queues30 map texture slots. Golden relocated startup is NSO2b8d80 cases5..9: requests field/fld_smap.bin, waits, looks up each of30 names at7a0508+i*8 via397040, decodes3a41a0, publishes textures at4a70c88+i*8 and releases pack. Steam42f790/42f8a9..42f8e8 repeats archive request and exact30-pointer loop ending914a70. Ordered registry names independently agree across both Golden images. NSO2be4b0 compares full field/smap/... paths into the same30 indices and renders loaded slot; old flat path must become archive-qualified member lookup.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder.",
+        "golden-minimap-registry: bind the complete30-entry registry and all startup, draw, symbol and native routes together; use Golden indices and pack member names, not guest-copy basename into a PS2 flat-path call."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f0eb0",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "minimap texture member in complete30-entry registry",
+      "ps2_consumers": [
+        {
+          "function": "0x15d730",
+          "name": "func_0015d730",
+          "file": "src/Kosaka/Field/k_fldData.c"
+        }
+      ],
+      "ps2_live_bytes": 20,
+      "retained_ps2_tail_bytes": 12,
+      "golden": {
+        "kind": "packed-member-name",
+        "value": "smap12_02.tmx",
+        "switch_address": "0x71005dbfa5",
+        "size": 14,
+        "sha256": "d0a2e77f527ff7e1f671330ac24f1e49a2997d533ea3a50db156fc3be177b88f",
+        "steam_span": {
+          "container": "P4G.exe",
+          "section": ".sdata",
+          "rva": "0x942ae8",
+          "raw_offset": 9705192,
+          "size": 14,
+          "sha256": "d0a2e77f527ff7e1f671330ac24f1e49a2997d533ea3a50db156fc3be177b88f",
+          "source_build": 10836033,
+          "mapping_proven": true
+        },
+        "logical_registry": {
+          "count": 30,
+          "index": 21,
+          "steam_rva": "0x914980",
+          "switch_address": "0x71007a0508",
+          "pointer_stride": 8,
+          "archive": "field/fld_smap.bin"
+        }
+      },
+      "structural_proof": "PS2 startup15d730 queues30 map texture slots. Golden relocated startup is NSO2b8d80 cases5..9: requests field/fld_smap.bin, waits, looks up each of30 names at7a0508+i*8 via397040, decodes3a41a0, publishes textures at4a70c88+i*8 and releases pack. Steam42f790/42f8a9..42f8e8 repeats archive request and exact30-pointer loop ending914a70. Ordered registry names independently agree across both Golden images. NSO2be4b0 compares full field/smap/... paths into the same30 indices and renders loaded slot; old flat path must become archive-qualified member lookup.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder.",
+        "golden-minimap-registry: bind the complete30-entry registry and all startup, draw, symbol and native routes together; use Golden indices and pack member names, not guest-copy basename into a PS2 flat-path call."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f0ed0",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "minimap texture member in complete30-entry registry",
+      "ps2_consumers": [
+        {
+          "function": "0x15d730",
+          "name": "func_0015d730",
+          "file": "src/Kosaka/Field/k_fldData.c"
+        }
+      ],
+      "ps2_live_bytes": 17,
+      "retained_ps2_tail_bytes": 15,
+      "golden": {
+        "kind": "packed-member-name",
+        "value": "smap13.tmx",
+        "switch_address": "0x71005d3e4c",
+        "size": 11,
+        "sha256": "eda36ec316e75770ef2bd35bf68d14a661dcae74f6117f7c7287ffeac3f79387",
+        "steam_span": {
+          "container": "P4G.exe",
+          "section": ".sdata",
+          "rva": "0x942b38",
+          "raw_offset": 9705272,
+          "size": 11,
+          "sha256": "eda36ec316e75770ef2bd35bf68d14a661dcae74f6117f7c7287ffeac3f79387",
+          "source_build": 10836033,
+          "mapping_proven": true
+        },
+        "logical_registry": {
+          "count": 30,
+          "index": 22,
+          "steam_rva": "0x914980",
+          "switch_address": "0x71007a0508",
+          "pointer_stride": 8,
+          "archive": "field/fld_smap.bin"
+        }
+      },
+      "structural_proof": "PS2 startup15d730 queues30 map texture slots. Golden relocated startup is NSO2b8d80 cases5..9: requests field/fld_smap.bin, waits, looks up each of30 names at7a0508+i*8 via397040, decodes3a41a0, publishes textures at4a70c88+i*8 and releases pack. Steam42f790/42f8a9..42f8e8 repeats archive request and exact30-pointer loop ending914a70. Ordered registry names independently agree across both Golden images. NSO2be4b0 compares full field/smap/... paths into the same30 indices and renders loaded slot; old flat path must become archive-qualified member lookup.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder.",
+        "golden-minimap-registry: bind the complete30-entry registry and all startup, draw, symbol and native routes together; use Golden indices and pack member names, not guest-copy basename into a PS2 flat-path call."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f0ef0",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "minimap texture member in complete30-entry registry",
+      "ps2_consumers": [
+        {
+          "function": "0x15d730",
+          "name": "func_0015d730",
+          "file": "src/Kosaka/Field/k_fldData.c"
+        }
+      ],
+      "ps2_live_bytes": 20,
+      "retained_ps2_tail_bytes": 12,
+      "golden": {
+        "kind": "packed-member-name",
+        "value": "smap13_01.tmx",
+        "switch_address": "0x71005f77a3",
+        "size": 14,
+        "sha256": "0b3d5472eb6128bed2a166eaf427d5695653e01f7bbc55a18135e22aa5d2df3b",
+        "steam_span": {
+          "container": "P4G.exe",
+          "section": ".sdata",
+          "rva": "0x942b48",
+          "raw_offset": 9705288,
+          "size": 14,
+          "sha256": "0b3d5472eb6128bed2a166eaf427d5695653e01f7bbc55a18135e22aa5d2df3b",
+          "source_build": 10836033,
+          "mapping_proven": true
+        },
+        "logical_registry": {
+          "count": 30,
+          "index": 23,
+          "steam_rva": "0x914980",
+          "switch_address": "0x71007a0508",
+          "pointer_stride": 8,
+          "archive": "field/fld_smap.bin"
+        }
+      },
+      "structural_proof": "PS2 startup15d730 queues30 map texture slots. Golden relocated startup is NSO2b8d80 cases5..9: requests field/fld_smap.bin, waits, looks up each of30 names at7a0508+i*8 via397040, decodes3a41a0, publishes textures at4a70c88+i*8 and releases pack. Steam42f790/42f8a9..42f8e8 repeats archive request and exact30-pointer loop ending914a70. Ordered registry names independently agree across both Golden images. NSO2be4b0 compares full field/smap/... paths into the same30 indices and renders loaded slot; old flat path must become archive-qualified member lookup.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder.",
+        "golden-minimap-registry: bind the complete30-entry registry and all startup, draw, symbol and native routes together; use Golden indices and pack member names, not guest-copy basename into a PS2 flat-path call."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f0f10",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "minimap texture member in complete30-entry registry",
+      "ps2_consumers": [
+        {
+          "function": "0x15d730",
+          "name": "func_0015d730",
+          "file": "src/Kosaka/Field/k_fldData.c"
+        }
+      ],
+      "ps2_live_bytes": 20,
+      "retained_ps2_tail_bytes": 12,
+      "golden": {
+        "kind": "packed-member-name",
+        "value": "smap13_02.tmx",
+        "switch_address": "0x710060cd63",
+        "size": 14,
+        "sha256": "aaab67ffb918c24cd0e7cf5f33569e3cbfacf1559915fc12ade45bd84f31e59a",
+        "steam_span": {
+          "container": "P4G.exe",
+          "section": ".sdata",
+          "rva": "0x942b18",
+          "raw_offset": 9705240,
+          "size": 14,
+          "sha256": "aaab67ffb918c24cd0e7cf5f33569e3cbfacf1559915fc12ade45bd84f31e59a",
+          "source_build": 10836033,
+          "mapping_proven": true
+        },
+        "logical_registry": {
+          "count": 30,
+          "index": 24,
+          "steam_rva": "0x914980",
+          "switch_address": "0x71007a0508",
+          "pointer_stride": 8,
+          "archive": "field/fld_smap.bin"
+        }
+      },
+      "structural_proof": "PS2 startup15d730 queues30 map texture slots. Golden relocated startup is NSO2b8d80 cases5..9: requests field/fld_smap.bin, waits, looks up each of30 names at7a0508+i*8 via397040, decodes3a41a0, publishes textures at4a70c88+i*8 and releases pack. Steam42f790/42f8a9..42f8e8 repeats archive request and exact30-pointer loop ending914a70. Ordered registry names independently agree across both Golden images. NSO2be4b0 compares full field/smap/... paths into the same30 indices and renders loaded slot; old flat path must become archive-qualified member lookup.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder.",
+        "golden-minimap-registry: bind the complete30-entry registry and all startup, draw, symbol and native routes together; use Golden indices and pack member names, not guest-copy basename into a PS2 flat-path call."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f0f30",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "minimap texture member in complete30-entry registry",
+      "ps2_consumers": [
+        {
+          "function": "0x15d730",
+          "name": "func_0015d730",
+          "file": "src/Kosaka/Field/k_fldData.c"
+        }
+      ],
+      "ps2_live_bytes": 20,
+      "retained_ps2_tail_bytes": 12,
+      "golden": {
+        "kind": "packed-member-name",
+        "value": "smap13_03.tmx",
+        "switch_address": "0x710060226b",
+        "size": 14,
+        "sha256": "8ffa5fdb471edcb97d1dbe901f3f87a3bedb3fc4c864ce4c607633a75e31cea0",
+        "steam_span": {
+          "container": "P4G.exe",
+          "section": ".sdata",
+          "rva": "0x942b28",
+          "raw_offset": 9705256,
+          "size": 14,
+          "sha256": "8ffa5fdb471edcb97d1dbe901f3f87a3bedb3fc4c864ce4c607633a75e31cea0",
+          "source_build": 10836033,
+          "mapping_proven": true
+        },
+        "logical_registry": {
+          "count": 30,
+          "index": 25,
+          "steam_rva": "0x914980",
+          "switch_address": "0x71007a0508",
+          "pointer_stride": 8,
+          "archive": "field/fld_smap.bin"
+        }
+      },
+      "structural_proof": "PS2 startup15d730 queues30 map texture slots. Golden relocated startup is NSO2b8d80 cases5..9: requests field/fld_smap.bin, waits, looks up each of30 names at7a0508+i*8 via397040, decodes3a41a0, publishes textures at4a70c88+i*8 and releases pack. Steam42f790/42f8a9..42f8e8 repeats archive request and exact30-pointer loop ending914a70. Ordered registry names independently agree across both Golden images. NSO2be4b0 compares full field/smap/... paths into the same30 indices and renders loaded slot; old flat path must become archive-qualified member lookup.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder.",
+        "golden-minimap-registry: bind the complete30-entry registry and all startup, draw, symbol and native routes together; use Golden indices and pack member names, not guest-copy basename into a PS2 flat-path call."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f0f50",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "minimap texture member in complete30-entry registry",
+      "ps2_consumers": [
+        {
+          "function": "0x15d730",
+          "name": "func_0015d730",
+          "file": "src/Kosaka/Field/k_fldData.c"
+        }
+      ],
+      "ps2_live_bytes": 17,
+      "retained_ps2_tail_bytes": 15,
+      "golden": {
+        "kind": "packed-member-name",
+        "value": "smap14.tmx",
+        "switch_address": "0x71005f26f1",
+        "size": 11,
+        "sha256": "e744799ba0fb3e30ff5dded0d874a7309cd6c96737bd72a06b67f67707e2ad0a",
+        "steam_span": {
+          "container": "P4G.exe",
+          "section": ".sdata",
+          "rva": "0x942b78",
+          "raw_offset": 9705336,
+          "size": 11,
+          "sha256": "e744799ba0fb3e30ff5dded0d874a7309cd6c96737bd72a06b67f67707e2ad0a",
+          "source_build": 10836033,
+          "mapping_proven": true
+        },
+        "logical_registry": {
+          "count": 30,
+          "index": 26,
+          "steam_rva": "0x914980",
+          "switch_address": "0x71007a0508",
+          "pointer_stride": 8,
+          "archive": "field/fld_smap.bin"
+        }
+      },
+      "structural_proof": "PS2 startup15d730 queues30 map texture slots. Golden relocated startup is NSO2b8d80 cases5..9: requests field/fld_smap.bin, waits, looks up each of30 names at7a0508+i*8 via397040, decodes3a41a0, publishes textures at4a70c88+i*8 and releases pack. Steam42f790/42f8a9..42f8e8 repeats archive request and exact30-pointer loop ending914a70. Ordered registry names independently agree across both Golden images. NSO2be4b0 compares full field/smap/... paths into the same30 indices and renders loaded slot; old flat path must become archive-qualified member lookup.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder.",
+        "golden-minimap-registry: bind the complete30-entry registry and all startup, draw, symbol and native routes together; use Golden indices and pack member names, not guest-copy basename into a PS2 flat-path call."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f0f70",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "minimap texture member in complete30-entry registry",
+      "ps2_consumers": [
+        {
+          "function": "0x15d730",
+          "name": "func_0015d730",
+          "file": "src/Kosaka/Field/k_fldData.c"
+        }
+      ],
+      "ps2_live_bytes": 20,
+      "retained_ps2_tail_bytes": 12,
+      "golden": {
+        "kind": "packed-member-name",
+        "value": "smap14_01.tmx",
+        "switch_address": "0x71005d3e57",
+        "size": 14,
+        "sha256": "8a99c2cd3ea531621d0788087149c66373d810d95538def1faaf49d856f80e5e",
+        "steam_span": {
+          "container": "P4G.exe",
+          "section": ".sdata",
+          "rva": "0x942b88",
+          "raw_offset": 9705352,
+          "size": 14,
+          "sha256": "8a99c2cd3ea531621d0788087149c66373d810d95538def1faaf49d856f80e5e",
+          "source_build": 10836033,
+          "mapping_proven": true
+        },
+        "logical_registry": {
+          "count": 30,
+          "index": 27,
+          "steam_rva": "0x914980",
+          "switch_address": "0x71007a0508",
+          "pointer_stride": 8,
+          "archive": "field/fld_smap.bin"
+        }
+      },
+      "structural_proof": "PS2 startup15d730 queues30 map texture slots. Golden relocated startup is NSO2b8d80 cases5..9: requests field/fld_smap.bin, waits, looks up each of30 names at7a0508+i*8 via397040, decodes3a41a0, publishes textures at4a70c88+i*8 and releases pack. Steam42f790/42f8a9..42f8e8 repeats archive request and exact30-pointer loop ending914a70. Ordered registry names independently agree across both Golden images. NSO2be4b0 compares full field/smap/... paths into the same30 indices and renders loaded slot; old flat path must become archive-qualified member lookup.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder.",
+        "golden-minimap-registry: bind the complete30-entry registry and all startup, draw, symbol and native routes together; use Golden indices and pack member names, not guest-copy basename into a PS2 flat-path call."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f0f90",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "minimap texture member in complete30-entry registry",
+      "ps2_consumers": [
+        {
+          "function": "0x15d730",
+          "name": "func_0015d730",
+          "file": "src/Kosaka/Field/k_fldData.c"
+        }
+      ],
+      "ps2_live_bytes": 20,
+      "retained_ps2_tail_bytes": 12,
+      "golden": {
+        "kind": "packed-member-name",
+        "value": "smap14_02.tmx",
+        "switch_address": "0x7100619e7a",
+        "size": 14,
+        "sha256": "08ceab280ff6efc787ecf340784cda764d499c1f11455676f564c53e2edef3c7",
+        "steam_span": {
+          "container": "P4G.exe",
+          "section": ".sdata",
+          "rva": "0x942b58",
+          "raw_offset": 9705304,
+          "size": 14,
+          "sha256": "08ceab280ff6efc787ecf340784cda764d499c1f11455676f564c53e2edef3c7",
+          "source_build": 10836033,
+          "mapping_proven": true
+        },
+        "logical_registry": {
+          "count": 30,
+          "index": 28,
+          "steam_rva": "0x914980",
+          "switch_address": "0x71007a0508",
+          "pointer_stride": 8,
+          "archive": "field/fld_smap.bin"
+        }
+      },
+      "structural_proof": "PS2 startup15d730 queues30 map texture slots. Golden relocated startup is NSO2b8d80 cases5..9: requests field/fld_smap.bin, waits, looks up each of30 names at7a0508+i*8 via397040, decodes3a41a0, publishes textures at4a70c88+i*8 and releases pack. Steam42f790/42f8a9..42f8e8 repeats archive request and exact30-pointer loop ending914a70. Ordered registry names independently agree across both Golden images. NSO2be4b0 compares full field/smap/... paths into the same30 indices and renders loaded slot; old flat path must become archive-qualified member lookup.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder.",
+        "golden-minimap-registry: bind the complete30-entry registry and all startup, draw, symbol and native routes together; use Golden indices and pack member names, not guest-copy basename into a PS2 flat-path call."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f0fb0",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "minimap texture member in complete30-entry registry",
+      "ps2_consumers": [
+        {
+          "function": "0x15d730",
+          "name": "func_0015d730",
+          "file": "src/Kosaka/Field/k_fldData.c"
+        }
+      ],
+      "ps2_live_bytes": 20,
+      "retained_ps2_tail_bytes": 12,
+      "golden": {
+        "kind": "packed-member-name",
+        "value": "smap14_03.tmx",
+        "switch_address": "0x7100602279",
+        "size": 14,
+        "sha256": "386c2bdf920ce92973b1e794669a1f01c56afe0c2ffacacf70e03a1f239ae98c",
+        "steam_span": {
+          "container": "P4G.exe",
+          "section": ".sdata",
+          "rva": "0x942b68",
+          "raw_offset": 9705320,
+          "size": 14,
+          "sha256": "386c2bdf920ce92973b1e794669a1f01c56afe0c2ffacacf70e03a1f239ae98c",
+          "source_build": 10836033,
+          "mapping_proven": true
+        },
+        "logical_registry": {
+          "count": 30,
+          "index": 29,
+          "steam_rva": "0x914980",
+          "switch_address": "0x71007a0508",
+          "pointer_stride": 8,
+          "archive": "field/fld_smap.bin"
+        }
+      },
+      "structural_proof": "PS2 startup15d730 queues30 map texture slots. Golden relocated startup is NSO2b8d80 cases5..9: requests field/fld_smap.bin, waits, looks up each of30 names at7a0508+i*8 via397040, decodes3a41a0, publishes textures at4a70c88+i*8 and releases pack. Steam42f790/42f8a9..42f8e8 repeats archive request and exact30-pointer loop ending914a70. Ordered registry names independently agree across both Golden images. NSO2be4b0 compares full field/smap/... paths into the same30 indices and renders loaded slot; old flat path must become archive-qualified member lookup.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder.",
+        "golden-minimap-registry: bind the complete30-entry registry and all startup, draw, symbol and native routes together; use Golden indices and pack member names, not guest-copy basename into a PS2 flat-path call."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f5380",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "field mipmap source level0",
+      "ps2_consumers": [
+        {
+          "function": "0x18bfb0",
+          "name": "fldMipmapLoadUpdate",
+          "file": "src/Kosaka/Field/k_fldMipmap.c"
+        }
+      ],
+      "ps2_live_bytes": 19,
+      "retained_ps2_tail_bytes": 13,
+      "golden": {
+        "kind": "cstring",
+        "value": "field/fldmp_m0.tmx",
+        "switch_address": "0x71005fc6a6",
+        "mapped_offset": 6276774,
+        "size": 19,
+        "sha256": "08d2b2b55eeb8e101b941469415f29b7f6cb0ed5474e6cbcbe486fcecc400c77",
+        "steam_spans": [
+          {
+            "section": ".sdata",
+            "rva": "0x9306a0",
+            "raw_offset": 9630368,
+            "size": 19,
+            "sha256": "08d2b2b55eeb8e101b941469415f29b7f6cb0ed5474e6cbcbe486fcecc400c77",
+            "readers": [
+              {
+                "function": "0x2f9400",
+                "end": "0x2f954b",
+                "pc": "0x2f94e9",
+                "argument": 0
+              }
+            ]
+          }
+        ]
+      },
+      "structural_proof": "PS2 FldMipmapLoadUpdate18bfb0 requests five levels, polls all five, adopts raw images, constructs raster mip levels0..4, then releases requests. Ordinary Steam2f9400 preserves the same four-state five-handle loader: requests at2f94e7..2f953d, five ready-state==12 tests2f949b..94d7, five-slot poll2f9470..948b, five destroys2f9436..945e. This directly qualifies all FIVE Steam filenames. Switch1c9160 folds only levels0..3 into startup; it must not be used to infer absence of Steam level4.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder.",
+        "golden-field-mips: use the Steam five-level source/loader contract; qualify the Golden texture pipeline rather than reusing the PS2 raster constructor solely because filenames agree."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f53a0",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "field mipmap source level1",
+      "ps2_consumers": [
+        {
+          "function": "0x18bfb0",
+          "name": "fldMipmapLoadUpdate",
+          "file": "src/Kosaka/Field/k_fldMipmap.c"
+        }
+      ],
+      "ps2_live_bytes": 19,
+      "retained_ps2_tail_bytes": 13,
+      "golden": {
+        "kind": "cstring",
+        "value": "field/fldmp_m1.tmx",
+        "switch_address": "0x7100616d17",
+        "mapped_offset": 6384919,
+        "size": 19,
+        "sha256": "017cebc2f8baed3168acf741690384a6f9785aadceeb5e8d6dfc64ccce6223f3",
+        "steam_spans": [
+          {
+            "section": ".sdata",
+            "rva": "0x930688",
+            "raw_offset": 9630344,
+            "size": 19,
+            "sha256": "017cebc2f8baed3168acf741690384a6f9785aadceeb5e8d6dfc64ccce6223f3",
+            "readers": [
+              {
+                "function": "0x2f9400",
+                "end": "0x2f954b",
+                "pc": "0x2f94fb",
+                "argument": 0
+              }
+            ]
+          }
+        ]
+      },
+      "structural_proof": "PS2 FldMipmapLoadUpdate18bfb0 requests five levels, polls all five, adopts raw images, constructs raster mip levels0..4, then releases requests. Ordinary Steam2f9400 preserves the same four-state five-handle loader: requests at2f94e7..2f953d, five ready-state==12 tests2f949b..94d7, five-slot poll2f9470..948b, five destroys2f9436..945e. This directly qualifies all FIVE Steam filenames. Switch1c9160 folds only levels0..3 into startup; it must not be used to infer absence of Steam level4.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder.",
+        "golden-field-mips: use the Steam five-level source/loader contract; qualify the Golden texture pipeline rather than reusing the PS2 raster constructor solely because filenames agree."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f53c0",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "field mipmap source level2",
+      "ps2_consumers": [
+        {
+          "function": "0x18bfb0",
+          "name": "fldMipmapLoadUpdate",
+          "file": "src/Kosaka/Field/k_fldMipmap.c"
+        }
+      ],
+      "ps2_live_bytes": 19,
+      "retained_ps2_tail_bytes": 13,
+      "golden": {
+        "kind": "cstring",
+        "value": "field/fldmp_m2.tmx",
+        "switch_address": "0x71005d36a4",
+        "mapped_offset": 6108836,
+        "size": 19,
+        "sha256": "f988fe623149a346f4be26e82acbfd8258e07a365572608e9bf700535956e2d2",
+        "steam_spans": [
+          {
+            "section": ".sdata",
+            "rva": "0x9306d0",
+            "raw_offset": 9630416,
+            "size": 19,
+            "sha256": "f988fe623149a346f4be26e82acbfd8258e07a365572608e9bf700535956e2d2",
+            "readers": [
+              {
+                "function": "0x2f9400",
+                "end": "0x2f954b",
+                "pc": "0x2f950d",
+                "argument": 0
+              }
+            ]
+          }
+        ]
+      },
+      "structural_proof": "PS2 FldMipmapLoadUpdate18bfb0 requests five levels, polls all five, adopts raw images, constructs raster mip levels0..4, then releases requests. Ordinary Steam2f9400 preserves the same four-state five-handle loader: requests at2f94e7..2f953d, five ready-state==12 tests2f949b..94d7, five-slot poll2f9470..948b, five destroys2f9436..945e. This directly qualifies all FIVE Steam filenames. Switch1c9160 folds only levels0..3 into startup; it must not be used to infer absence of Steam level4.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder.",
+        "golden-field-mips: use the Steam five-level source/loader contract; qualify the Golden texture pipeline rather than reusing the PS2 raster constructor solely because filenames agree."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f53e0",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "field mipmap source level3",
+      "ps2_consumers": [
+        {
+          "function": "0x18bfb0",
+          "name": "fldMipmapLoadUpdate",
+          "file": "src/Kosaka/Field/k_fldMipmap.c"
+        }
+      ],
+      "ps2_live_bytes": 19,
+      "retained_ps2_tail_bytes": 13,
+      "golden": {
+        "kind": "cstring",
+        "value": "field/fldmp_m3.tmx",
+        "switch_address": "0x71005db7bc",
+        "mapped_offset": 6141884,
+        "size": 19,
+        "sha256": "088ad244fc77c9f8abd11b9ff86d3436f7fc11e8c122949cabdcd35103cc9dfe",
+        "steam_spans": [
+          {
+            "section": ".sdata",
+            "rva": "0x9306b8",
+            "raw_offset": 9630392,
+            "size": 19,
+            "sha256": "088ad244fc77c9f8abd11b9ff86d3436f7fc11e8c122949cabdcd35103cc9dfe",
+            "readers": [
+              {
+                "function": "0x2f9400",
+                "end": "0x2f954b",
+                "pc": "0x2f951f",
+                "argument": 0
+              }
+            ]
+          }
+        ]
+      },
+      "structural_proof": "PS2 FldMipmapLoadUpdate18bfb0 requests five levels, polls all five, adopts raw images, constructs raster mip levels0..4, then releases requests. Ordinary Steam2f9400 preserves the same four-state five-handle loader: requests at2f94e7..2f953d, five ready-state==12 tests2f949b..94d7, five-slot poll2f9470..948b, five destroys2f9436..945e. This directly qualifies all FIVE Steam filenames. Switch1c9160 folds only levels0..3 into startup; it must not be used to infer absence of Steam level4.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder.",
+        "golden-field-mips: use the Steam five-level source/loader contract; qualify the Golden texture pipeline rather than reusing the PS2 raster constructor solely because filenames agree."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f5400",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "field mipmap source level4",
+      "ps2_consumers": [
+        {
+          "function": "0x18bfb0",
+          "name": "fldMipmapLoadUpdate",
+          "file": "src/Kosaka/Field/k_fldMipmap.c"
+        }
+      ],
+      "ps2_live_bytes": 19,
+      "retained_ps2_tail_bytes": 13,
+      "golden": {
+        "kind": "cstring",
+        "value": "field/fldmp_m4.tmx",
+        "switch_address": null,
+        "mapped_offset": null,
+        "size": 19,
+        "sha256": "b1699eaacba072309b3e221d0a4382035264d7b3157b7ef72dce3afc7f7d83b9",
+        "steam_spans": [
+          {
+            "section": ".sdata",
+            "rva": "0x9312f8",
+            "raw_offset": 9633528,
+            "size": 19,
+            "sha256": "b1699eaacba072309b3e221d0a4382035264d7b3157b7ef72dce3afc7f7d83b9",
+            "readers": [
+              {
+                "function": "0x2f9400",
+                "end": "0x2f954b",
+                "pc": "0x2f9531",
+                "argument": 0
+              }
+            ]
+          }
+        ]
+      },
+      "structural_proof": "PS2 FldMipmapLoadUpdate18bfb0 requests five levels, polls all five, adopts raw images, constructs raster mip levels0..4, then releases requests. Ordinary Steam2f9400 preserves the same four-state five-handle loader: requests at2f94e7..2f953d, five ready-state==12 tests2f949b..94d7, five-slot poll2f9470..948b, five destroys2f9436..945e. This directly qualifies all FIVE Steam filenames. Switch1c9160 folds only levels0..3 into startup; it must not be used to infer absence of Steam level4.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder.",
+        "golden-field-mips: use the Steam five-level source/loader contract; qualify the Golden texture pipeline rather than reusing the PS2 raster constructor solely because filenames agree."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f60d0",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "rain texture request identity",
+      "ps2_consumers": [
+        {
+          "function": "0x1901d0",
+          "name": "func_001901d0",
+          "file": "src/Kosaka/k_readtex.c"
+        }
+      ],
+      "ps2_live_bytes": 23,
+      "retained_ps2_tail_bytes": 9,
+      "golden": {
+        "kind": "cstring",
+        "value": "field/fldEff_rainA.tmx",
+        "switch_address": "0x71005f9b49",
+        "mapped_offset": 6265673,
+        "size": 23,
+        "sha256": "65db2571575a04c63026ed7b86d8a9ec12cb5bd6c5d5f9813d201768ff744cf3",
+        "steam_spans": [
+          {
+            "section": ".sdata",
+            "rva": "0x9305e0",
+            "raw_offset": 9630176,
+            "size": 23,
+            "sha256": "65db2571575a04c63026ed7b86d8a9ec12cb5bd6c5d5f9813d201768ff744cf3",
+            "readers": []
+          }
+        ]
+      },
+      "structural_proof": "PS2 K_ReadTexUpdate1901d0 independently loads rainA/rainB/rainC into ordered request slots. Golden1c9160 adopts that exact three-resource family through398470 ->39ae30 ->33b240 at consecutive global texture slotsa00b20/a00b28/a00b30. The lifecycle and three-slot texture role identify these literals, not asset-byte equality. Legacy debug tool invocation is not admitted as Golden functionality.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f60f0",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "rain texture request identity",
+      "ps2_consumers": [
+        {
+          "function": "0x1901d0",
+          "name": "func_001901d0",
+          "file": "src/Kosaka/k_readtex.c"
+        }
+      ],
+      "ps2_live_bytes": 23,
+      "retained_ps2_tail_bytes": 9,
+      "golden": {
+        "kind": "cstring",
+        "value": "field/fldEff_rainB.tmx",
+        "switch_address": "0x71005f6f70",
+        "mapped_offset": 6254448,
+        "size": 23,
+        "sha256": "80975e09833809980ab5c7ff993a58321c8d25583546f5dbc7a479302f7db051",
+        "steam_spans": [
+          {
+            "section": ".sdata",
+            "rva": "0x9305c8",
+            "raw_offset": 9630152,
+            "size": 23,
+            "sha256": "80975e09833809980ab5c7ff993a58321c8d25583546f5dbc7a479302f7db051",
+            "readers": []
+          }
+        ]
+      },
+      "structural_proof": "PS2 K_ReadTexUpdate1901d0 independently loads rainA/rainB/rainC into ordered request slots. Golden1c9160 adopts that exact three-resource family through398470 ->39ae30 ->33b240 at consecutive global texture slotsa00b20/a00b28/a00b30. The lifecycle and three-slot texture role identify these literals, not asset-byte equality. Legacy debug tool invocation is not admitted as Golden functionality.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f6110",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "rain texture request identity",
+      "ps2_consumers": [
+        {
+          "function": "0x1901d0",
+          "name": "func_001901d0",
+          "file": "src/Kosaka/k_readtex.c"
+        }
+      ],
+      "ps2_live_bytes": 23,
+      "retained_ps2_tail_bytes": 9,
+      "golden": {
+        "kind": "cstring",
+        "value": "field/fldEff_rainC.tmx",
+        "switch_address": "0x71005eeed8",
+        "mapped_offset": 6221528,
+        "size": 23,
+        "sha256": "e975267cfe7b7d8899ca57a4ad02373801347ae901a1b1522a9886613b6a487f",
+        "steam_spans": [
+          {
+            "section": ".sdata",
+            "rva": "0x930610",
+            "raw_offset": 9630224,
+            "size": 23,
+            "sha256": "e975267cfe7b7d8899ca57a4ad02373801347ae901a1b1522a9886613b6a487f",
+            "readers": []
+          }
+        ]
+      },
+      "structural_proof": "PS2 K_ReadTexUpdate1901d0 independently loads rainA/rainB/rainC into ordered request slots. Golden1c9160 adopts that exact three-resource family through398470 ->39ae30 ->33b240 at consecutive global texture slotsa00b20/a00b28/a00b30. The lifecycle and three-slot texture role identify these literals, not asset-byte equality. Legacy debug tool invocation is not admitted as Golden functionality.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005efc40",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "transition effect resource",
+      "ps2_consumers": [
+        {
+          "function": "0x14ec50",
+          "name": "func_0014ec50",
+          "file": "src/Kosaka/Field/k_fldrc_inferred.c"
+        }
+      ],
+      "ps2_live_bytes": 17,
+      "retained_ps2_tail_bytes": 15,
+      "golden": {
+        "kind": "cstring",
+        "value": "field/TRAEST.EPL",
+        "switch_address": "0x71005f9b38",
+        "mapped_offset": 6265656,
+        "size": 17,
+        "sha256": "0ea40574cef42c7c094b845c0f46bf29f16d2e876c5c62f5893fd131eb3ebcfd",
+        "steam_spans": [
+          {
+            "section": ".sdata",
+            "rva": "0x9301f0",
+            "raw_offset": 9629168,
+            "size": 17,
+            "sha256": "0ea40574cef42c7c094b845c0f46bf29f16d2e876c5c62f5893fd131eb3ebcfd",
+            "readers": [
+              {
+                "function": "0x2cb7e0",
+                "end": "0x2cb877",
+                "pc": "0x2cb84f",
+                "argument": 1
+              },
+              {
+                "function": "0x321e50",
+                "end": "0x321ee4",
+                "pc": "0x321ea6",
+                "argument": 1
+              }
+            ]
+          }
+        ]
+      },
+      "structural_proof": "PS2 transition14ec50 and NSO1bda10 allocate parent/child tasks and use the same mode0/mode1 durations83/50, child effect loader and path copy. Steam2cb7e0 fixes mode1/duration50 and321e50 supplies the other transition route. The specific duration and task/loader graph independently pair this resource.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005efda8",
+      "size": 16,
+      "class": "PROVEN",
+      "role": "field entry model/effect filename suffix",
+      "ps2_consumers": [
+        {
+          "function": "0x151710",
+          "name": "fldResourceRequestEntryLoads",
+          "file": "src/Kosaka/Field/k_fldResource.c"
+        }
+      ],
+      "ps2_live_bytes": 9,
+      "retained_ps2_tail_bytes": 7,
+      "golden": {
+        "kind": "cstring",
+        "value": "%03d.AMD",
+        "switch_address": "0x71005d9728",
+        "mapped_offset": 6133544,
+        "size": 9,
+        "sha256": "14bcaea175d258949dec671f300598bdabede2fee2064745b7e8090af951ef69",
+        "steam_spans": [
+          {
+            "container": "P4G.exe",
+            "section": ".sdata",
+            "rva": "0x93ce48",
+            "raw_offset": 9681480,
+            "size": 9,
+            "sha256": "14bcaea175d258949dec671f300598bdabede2fee2064745b7e8090af951ef69",
+            "source_build": 10836033,
+            "mapping_proven": true
+          }
+        ]
+      },
+      "structural_proof": "PS2 request151710 enumerates clump entry type0 model,type1 effect,type2 shared model and adds1000 to shared IDs. NSO1ed2e0 enumerates the corresponding loaded AMD entry properties, preserves types0/1/2 and shared-ID+1000, appends model suffix%03d.AMD to flat/archive model prefixes and effect suffix%03d.EPL to effect prefixes, then calls model/effect loaders. Steam312a95..31383c corroborates the AMD entry path constructor using suffix93ce48. This is a typed format-field correspondence; AMD is not a rename permission for arbitrary RMD payloads.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005efdd8",
+      "size": 16,
+      "class": "PROVEN",
+      "role": "field entry model/effect filename suffix",
+      "ps2_consumers": [
+        {
+          "function": "0x151710",
+          "name": "fldResourceRequestEntryLoads",
+          "file": "src/Kosaka/Field/k_fldResource.c"
+        }
+      ],
+      "ps2_live_bytes": 9,
+      "retained_ps2_tail_bytes": 7,
+      "golden": {
+        "kind": "cstring",
+        "value": "%03d.EPL",
+        "switch_address": "0x71005f747a",
+        "mapped_offset": 6255738,
+        "size": 9,
+        "sha256": "d9a1822dc9fb61853cd52ea03d1731a52eec220a674a6fcfa80120c98a1c2935",
+        "steam_spans": []
+      },
+      "structural_proof": "PS2 request151710 enumerates clump entry type0 model,type1 effect,type2 shared model and adds1000 to shared IDs. NSO1ed2e0 enumerates the corresponding loaded AMD entry properties, preserves types0/1/2 and shared-ID+1000, appends model suffix%03d.AMD to flat/archive model prefixes and effect suffix%03d.EPL to effect prefixes, then calls model/effect loaders. Steam312a95..31383c corroborates the AMD entry path constructor using suffix93ce48. This is a typed format-field correspondence; AMD is not a rename permission for arbitrary RMD payloads.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f10d0",
+      "size": 24,
+      "class": "PROVEN",
+      "role": "field editor placeholder model",
+      "ps2_consumers": [
+        {
+          "function": "0x15e960",
+          "name": "func_0015e960",
+          "file": "src/Kosaka/Field/k_fldFBN.c"
+        }
+      ],
+      "ps2_live_bytes": 17,
+      "retained_ps2_tail_bytes": 7,
+      "golden": {
+        "kind": "cstring",
+        "value": "field/editor.AMD",
+        "switch_address": "0x71005e9942",
+        "mapped_offset": 6199618,
+        "size": 17,
+        "sha256": "08cb2911c449370364d17422a037d0d6fdbef010044028fd879c202ccc55838c",
+        "steam_spans": []
+      },
+      "structural_proof": "PS2 FldFBN15e960 recognizes kind4/idFFFF and creates editor.RMD with model kind4/idFFFF. NSO1d78a0 preserves exactly that sentinel branch, loads editor.AMD through387010(4,FFFF,path,20), and maps the resource through its FBN index list. Positive sentinel/loader context establishes changed resource name.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f18d0",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "shadow scheduler task name",
+      "ps2_consumers": [
+        {
+          "function": "0x17b510",
+          "name": "fldShadowCreateCaster",
+          "file": "src/Kosaka/k_shadow.c"
+        }
+      ],
+      "ps2_live_bytes": 21,
+      "retained_ps2_tail_bytes": 11,
+      "golden": {
+        "kind": "cstring",
+        "value": "renderTex for shadow",
+        "switch_address": "0x71005ec9e9",
+        "mapped_offset": 6212073,
+        "size": 21,
+        "sha256": "3d907e903909e03a5e5bb2426e5423ddd7e0cd2f370315ab045d489ce8544bf1",
+        "steam_spans": [
+          {
+            "section": ".sdata",
+            "rva": "0x942228",
+            "raw_offset": 9702952,
+            "size": 21,
+            "sha256": "3d907e903909e03a5e5bb2426e5423ddd7e0cd2f370315ab045d489ce8544bf1",
+            "readers": []
+          }
+        ]
+      },
+      "structural_proof": "PS2 caster17b510 and NSO29fb20 create a shadow caster task, store resourceId/requestedMode, traverse scene kind0x13 mirror nodes, select mode4 by first two positions, and resolve model genus1/3. Priority changes16 to15, workE0 to110; the named producer role is unchanged.",
+      "required_seams": [
+        "golden-shadow-lifecycle: supply Golden task names to the actual corresponding native/translated scheduler constructors and preserve query/teardown name identity. Shadow rendering and old per-caster raster constants are separate obligations."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f1910",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "shadow scheduler task name",
+      "ps2_consumers": [
+        {
+          "function": "0x17ccc0",
+          "name": "fldShadowCreateDrawQueue",
+          "file": "src/Kosaka/k_shadow.c"
+        }
+      ],
+      "ps2_live_bytes": 18,
+      "retained_ps2_tail_bytes": 14,
+      "golden": {
+        "kind": "cstring",
+        "value": "shadow map camera",
+        "switch_address": "0x710060f49f",
+        "mapped_offset": 6354079,
+        "size": 18,
+        "sha256": "e75c8c25a8e79e99d3a975ba2ea7f7d5785caf5121ef0693d9d13f6c19dde952",
+        "steam_spans": [
+          {
+            "section": ".sdata",
+            "rva": "0x942240",
+            "raw_offset": 9702976,
+            "size": 18,
+            "sha256": "e75c8c25a8e79e99d3a975ba2ea7f7d5785caf5121ef0693d9d13f6c19dde952",
+            "readers": [
+              {
+                "function": "0x3d9f21",
+                "end": "0x3da8b0",
+                "pc": "0x3da2dd",
+                "argument": 0
+              },
+              {
+                "function": "0x40b9d0",
+                "end": "0x40ba77",
+                "pc": "0x40ba2b",
+                "argument": 0
+              },
+              {
+                "function": "0x40e930",
+                "end": "0x40e9bb",
+                "pc": "0x40e962",
+                "argument": 0
+              }
+            ]
+          }
+        ]
+      },
+      "structural_proof": "PS217ccc0 and NSO2a0110 allocate caster-queue work and construct priority8 task with update/destroy pair; Golden explicitly links the parent hierarchy. It is the queue-task name, not the separate render-to-texture camera state.",
+      "required_seams": [
+        "golden-shadow-lifecycle: supply Golden task names to the actual corresponding native/translated scheduler constructors and preserve query/teardown name identity. Shadow rendering and old per-caster raster constants are separate obligations."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x0063eff0",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "minimap cell texture selector path",
+      "ps2_consumers": [
+        {
+          "function": "0x2b07a0",
+          "name": "func_002b07a0",
+          "file": "src/Yajima/y_smap.c"
+        }
+      ],
+      "ps2_live_bytes": 20,
+      "retained_ps2_tail_bytes": 12,
+      "golden": {
+        "kind": "cstring",
+        "value": "field/smap/smap09_01.tmx",
+        "switch_address": "0x71005d98ee",
+        "mapped_offset": 6133998,
+        "size": 25,
+        "sha256": "6fcff531206d178d256192101e0830aff05609d4a376db9227f903c8ccdeede3",
+        "steam_spans": []
+      },
+      "structural_proof": "PS2 smapDrawCell2b07a0 and NSO2be4b0 share cell-kind selectors2,9/10,11/12,13/14; mode1 vsother selects the paired01/02 textures, special mode3 uses09_01, ordinary kinds format smap%02d. Golden then maps the full field/smap path to an exact30-entry loaded registry index and renders4 vertices. Source strings are identified by branch and registry role; generated paths and member basenames are not interchangeable.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder.",
+        "golden-minimap-cell: adopt Golden selector, fullpath-to-index resolver and30 loaded texture slots as one route; qualify vertex/UV layout and added Golden cell kinds."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x0063f010",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "minimap cell texture selector path",
+      "ps2_consumers": [
+        {
+          "function": "0x2b07a0",
+          "name": "func_002b07a0",
+          "file": "src/Yajima/y_smap.c"
+        }
+      ],
+      "ps2_live_bytes": 20,
+      "retained_ps2_tail_bytes": 12,
+      "golden": {
+        "kind": "cstring",
+        "value": "field/smap/smap11_01.tmx",
+        "switch_address": "0x71005f4d79",
+        "mapped_offset": 6245753,
+        "size": 25,
+        "sha256": "0a6917b47a2a6438ee177b23bec07e8d73d6e11da6bf52a076695eb235e2215e",
+        "steam_spans": []
+      },
+      "structural_proof": "PS2 smapDrawCell2b07a0 and NSO2be4b0 share cell-kind selectors2,9/10,11/12,13/14; mode1 vsother selects the paired01/02 textures, special mode3 uses09_01, ordinary kinds format smap%02d. Golden then maps the full field/smap path to an exact30-entry loaded registry index and renders4 vertices. Source strings are identified by branch and registry role; generated paths and member basenames are not interchangeable.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder.",
+        "golden-minimap-cell: adopt Golden selector, fullpath-to-index resolver and30 loaded texture slots as one route; qualify vertex/UV layout and added Golden cell kinds."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x0063f030",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "minimap cell texture selector path",
+      "ps2_consumers": [
+        {
+          "function": "0x2b07a0",
+          "name": "func_002b07a0",
+          "file": "src/Yajima/y_smap.c"
+        }
+      ],
+      "ps2_live_bytes": 20,
+      "retained_ps2_tail_bytes": 12,
+      "golden": {
+        "kind": "cstring",
+        "value": "field/smap/smap09_02.tmx",
+        "switch_address": "0x71005dbf8c",
+        "mapped_offset": 6143884,
+        "size": 25,
+        "sha256": "70053f2dbc0bb40dd80211a2c0d020c8a5f5416c6a957525835c21efed5d4425",
+        "steam_spans": []
+      },
+      "structural_proof": "PS2 smapDrawCell2b07a0 and NSO2be4b0 share cell-kind selectors2,9/10,11/12,13/14; mode1 vsother selects the paired01/02 textures, special mode3 uses09_01, ordinary kinds format smap%02d. Golden then maps the full field/smap path to an exact30-entry loaded registry index and renders4 vertices. Source strings are identified by branch and registry role; generated paths and member basenames are not interchangeable.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder.",
+        "golden-minimap-cell: adopt Golden selector, fullpath-to-index resolver and30 loaded texture slots as one route; qualify vertex/UV layout and added Golden cell kinds."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x0063f050",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "minimap cell texture selector path",
+      "ps2_consumers": [
+        {
+          "function": "0x2b07a0",
+          "name": "func_002b07a0",
+          "file": "src/Yajima/y_smap.c"
+        }
+      ],
+      "ps2_live_bytes": 20,
+      "retained_ps2_tail_bytes": 12,
+      "golden": {
+        "kind": "cstring",
+        "value": "field/smap/smap11_02.tmx",
+        "switch_address": "0x71005f7763",
+        "mapped_offset": 6256483,
+        "size": 25,
+        "sha256": "d7feb672a31ff8b503e1ad4ab7ead0008beda8bd66820f12160758617602cc82",
+        "steam_spans": []
+      },
+      "structural_proof": "PS2 smapDrawCell2b07a0 and NSO2be4b0 share cell-kind selectors2,9/10,11/12,13/14; mode1 vsother selects the paired01/02 textures, special mode3 uses09_01, ordinary kinds format smap%02d. Golden then maps the full field/smap path to an exact30-entry loaded registry index and renders4 vertices. Source strings are identified by branch and registry role; generated paths and member basenames are not interchangeable.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder.",
+        "golden-minimap-cell: adopt Golden selector, fullpath-to-index resolver and30 loaded texture slots as one route; qualify vertex/UV layout and added Golden cell kinds."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x0063f070",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "minimap cell texture selector path",
+      "ps2_consumers": [
+        {
+          "function": "0x2b07a0",
+          "name": "func_002b07a0",
+          "file": "src/Yajima/y_smap.c"
+        }
+      ],
+      "ps2_live_bytes": 20,
+      "retained_ps2_tail_bytes": 12,
+      "golden": {
+        "kind": "cstring",
+        "value": "field/smap/smap13_02.tmx",
+        "switch_address": "0x7100617513",
+        "mapped_offset": 6386963,
+        "size": 25,
+        "sha256": "a7fe465a12bbeac40315d0b188fb4d7eb9d4f724d16d1988d5704d839c82ca62",
+        "steam_spans": []
+      },
+      "structural_proof": "PS2 smapDrawCell2b07a0 and NSO2be4b0 share cell-kind selectors2,9/10,11/12,13/14; mode1 vsother selects the paired01/02 textures, special mode3 uses09_01, ordinary kinds format smap%02d. Golden then maps the full field/smap path to an exact30-entry loaded registry index and renders4 vertices. Source strings are identified by branch and registry role; generated paths and member basenames are not interchangeable.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder.",
+        "golden-minimap-cell: adopt Golden selector, fullpath-to-index resolver and30 loaded texture slots as one route; qualify vertex/UV layout and added Golden cell kinds."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x0063f090",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "minimap cell texture selector path",
+      "ps2_consumers": [
+        {
+          "function": "0x2b07a0",
+          "name": "func_002b07a0",
+          "file": "src/Yajima/y_smap.c"
+        }
+      ],
+      "ps2_live_bytes": 20,
+      "retained_ps2_tail_bytes": 12,
+      "golden": {
+        "kind": "cstring",
+        "value": "field/smap/smap02_01.tmx",
+        "switch_address": "0x71005d3e0f",
+        "mapped_offset": 6110735,
+        "size": 25,
+        "sha256": "5ab4b313cd5e73991eae6be8e547cfdbcdbc5a954e119ae4399108ef36bc10c9",
+        "steam_spans": []
+      },
+      "structural_proof": "PS2 smapDrawCell2b07a0 and NSO2be4b0 share cell-kind selectors2,9/10,11/12,13/14; mode1 vsother selects the paired01/02 textures, special mode3 uses09_01, ordinary kinds format smap%02d. Golden then maps the full field/smap path to an exact30-entry loaded registry index and renders4 vertices. Source strings are identified by branch and registry role; generated paths and member basenames are not interchangeable.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder.",
+        "golden-minimap-cell: adopt Golden selector, fullpath-to-index resolver and30 loaded texture slots as one route; qualify vertex/UV layout and added Golden cell kinds."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x0063f0b0",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "minimap cell texture selector path",
+      "ps2_consumers": [
+        {
+          "function": "0x2b07a0",
+          "name": "func_002b07a0",
+          "file": "src/Yajima/y_smap.c"
+        }
+      ],
+      "ps2_live_bytes": 20,
+      "retained_ps2_tail_bytes": 12,
+      "golden": {
+        "kind": "cstring",
+        "value": "field/smap/smap02_02.tmx",
+        "switch_address": "0x71005ea03a",
+        "mapped_offset": 6201402,
+        "size": 25,
+        "sha256": "8285c2044d0e045a1c3740c194664b87f5a7b0222a346cc0dacafa868c238a3a",
+        "steam_spans": []
+      },
+      "structural_proof": "PS2 smapDrawCell2b07a0 and NSO2be4b0 share cell-kind selectors2,9/10,11/12,13/14; mode1 vsother selects the paired01/02 textures, special mode3 uses09_01, ordinary kinds format smap%02d. Golden then maps the full field/smap path to an exact30-entry loaded registry index and renders4 vertices. Source strings are identified by branch and registry role; generated paths and member basenames are not interchangeable.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder.",
+        "golden-minimap-cell: adopt Golden selector, fullpath-to-index resolver and30 loaded texture slots as one route; qualify vertex/UV layout and added Golden cell kinds."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x0063ef70",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "minimap sprite pack",
+      "ps2_consumers": [
+        {
+          "function": "0x2ac400",
+          "name": "func_002ac400",
+          "file": "src/Yajima/y_smap.c"
+        }
+      ],
+      "ps2_live_bytes": 22,
+      "retained_ps2_tail_bytes": 10,
+      "golden": {
+        "kind": "cstring",
+        "value": "smap/i_mini_map01x2.spr",
+        "switch_address": "0x71005e1de2",
+        "mapped_offset": 6168034,
+        "size": 24,
+        "sha256": "580d77ef04557ed242c443e484991753973f457793af609f9016827b3e19110d",
+        "steam_spans": [
+          {
+            "section": ".sdata",
+            "rva": "0x942ea8",
+            "raw_offset": 9706152,
+            "size": 24,
+            "sha256": "580d77ef04557ed242c443e484991753973f457793af609f9016827b3e19110d",
+            "readers": [
+              {
+                "function": "0x42f790",
+                "end": "0x42f8f1",
+                "pc": "0x42f7d2",
+                "argument": 0
+              },
+              {
+                "function": "0x42f790",
+                "end": "0x42f8f1",
+                "pc": "0x42f7e3",
+                "argument": 0
+              }
+            ]
+          }
+        ]
+      },
+      "structural_proof": "PS2 smapLoadStep2ac400 requests i_mini_map01.spr and waits. NSO2b8d80 cases0/1 and Steam42f790 first request i_mini_map01x2.spr via cached lookup/adoption or sprite request fallback and wait on the same sprite readiness before symbol/map texture loading. This positive loader-state correspondence establishes the HD pack replacement.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x0063efd8",
+      "size": 24,
+      "class": "PROVEN",
+      "role": "minimap scheduler task name",
+      "ps2_consumers": [
+        {
+          "function": "0x2ae630",
+          "name": "func_002ae630",
+          "file": "src/Yajima/y_smap.c"
+        },
+        {
+          "function": "0x2b0250",
+          "name": "func_002b0250",
+          "file": "src/Yajima/y_smap.c"
+        }
+      ],
+      "ps2_live_bytes": 13,
+      "retained_ps2_tail_bytes": 11,
+      "golden": {
+        "kind": "cstring",
+        "value": "YazySMapDraw",
+        "switch_address": "0x7100625801",
+        "mapped_offset": 6445057,
+        "size": 13,
+        "sha256": "612a30add582aaafd14074aeadf230bd27e7332a83851cea012abdbb1d4a0e25",
+        "steam_spans": [
+          {
+            "section": ".sdata",
+            "rva": "0x942f58",
+            "raw_offset": 9706328,
+            "size": 13,
+            "sha256": "612a30add582aaafd14074aeadf230bd27e7332a83851cea012abdbb1d4a0e25",
+            "readers": [
+              {
+                "function": "0x430ee1",
+                "end": "0x431847",
+                "pc": "0x430f22",
+                "argument": 0
+              },
+              {
+                "function": "0x430ee1",
+                "end": "0x431847",
+                "pc": "0x4313d2",
+                "argument": 0
+              },
+              {
+                "function": "0x432cad",
+                "end": "0x433008",
+                "pc": "0x432ccb",
+                "argument": 0
+              }
+            ]
+          }
+        ]
+      },
+      "structural_proof": "PS2 primary/mask creators2ae630/2b0250/2b2830 correspond to NSO2ba6a0/2bbb80: priority15 named main task owns grid child tasks and a named mask child; mask color,position,scale and teardown state bind the role. Steam430ee1/432cad/435c50 independently materialize the matching task names.",
+      "required_seams": [
+        "golden-minimap-lifecycle: route all constructors, native/inlined cell creation and destruction through matching Golden task-name identity; do not retain PS2 dimensions/work layouts."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x0063f0f0",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "minimap scheduler task name",
+      "ps2_consumers": [
+        {
+          "function": "0x2b2830",
+          "name": "func_002b2830",
+          "file": "src/Yajima/y_smap.c"
+        }
+      ],
+      "ps2_live_bytes": 17,
+      "retained_ps2_tail_bytes": 15,
+      "golden": {
+        "kind": "cstring",
+        "value": "YazySMapMaskDraw",
+        "switch_address": "0x71005e7509",
+        "mapped_offset": 6190345,
+        "size": 17,
+        "sha256": "19883a9f54efbd618abee766e1d978a479033acef8dff37d2e8905af5d11497f",
+        "steam_spans": [
+          {
+            "section": ".sdata",
+            "rva": "0x942f30",
+            "raw_offset": 9706288,
+            "size": 17,
+            "sha256": "19883a9f54efbd618abee766e1d978a479033acef8dff37d2e8905af5d11497f",
+            "readers": [
+              {
+                "function": "0x430ee1",
+                "end": "0x431847",
+                "pc": "0x43102b",
+                "argument": 0
+              },
+              {
+                "function": "0x435c50",
+                "end": "0x435d2e",
+                "pc": "0x435c9d",
+                "argument": 0
+              }
+            ]
+          }
+        ]
+      },
+      "structural_proof": "PS2 primary/mask creators2ae630/2b0250/2b2830 correspond to NSO2ba6a0/2bbb80: priority15 named main task owns grid child tasks and a named mask child; mask color,position,scale and teardown state bind the role. Steam430ee1/432cad/435c50 independently materialize the matching task names.",
+      "required_seams": [
+        "golden-minimap-lifecycle: route all constructors, native/inlined cell creation and destruction through matching Golden task-name identity; do not retain PS2 dimensions/work layouts."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x0064e4f0",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "card atlas request",
+      "ps2_consumers": [
+        {
+          "function": "0x36c450",
+          "name": "func_0036c450",
+          "file": "src/Main/Social/pscRes.c"
+        }
+      ],
+      "ps2_live_bytes": 20,
+      "retained_ps2_tail_bytes": 12,
+      "golden": {
+        "kind": "cstring",
+        "value": "card/misc/w_c00.tmx",
+        "switch_address": "0x71005ee67e",
+        "mapped_offset": 6219390,
+        "size": 20,
+        "sha256": "f17aeed23f9b0beeda57023138bdfb5e47eabc40a4214c4b962b3443e70c2cc5",
+        "steam_spans": [
+          {
+            "section": ".sdata",
+            "rva": "0x91b130",
+            "raw_offset": 9542960,
+            "size": 20,
+            "sha256": "f17aeed23f9b0beeda57023138bdfb5e47eabc40a4214c4b962b3443e70c2cc5",
+            "readers": [
+              {
+                "function": "0x139a9f",
+                "end": "0x139b01",
+                "pc": "0x139ab4",
+                "argument": 0
+              },
+              {
+                "function": "0x139b01",
+                "end": "0x139b26",
+                "pc": "0x139b01",
+                "argument": null
+              }
+            ]
+          }
+        ]
+      },
+      "structural_proof": "PS2 pscRes36c450/36c900 and NSO0c7b00/0c7c90 have distinct feature/reference-count gates, reserve a free card request, set resource kind3 and atlas selector1/2, look up w_c00/w_c01 respectively and enqueue texture decoding; missing-cache branch copies the same exact name into request storage. Steam139a9f/139b01 and139b62/139bc4 show both lookup and inline-copy branches.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x0064e570",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "card atlas request",
+      "ps2_consumers": [
+        {
+          "function": "0x36c900",
+          "name": "func_0036c900",
+          "file": "src/Main/Social/pscRes.c"
+        }
+      ],
+      "ps2_live_bytes": 20,
+      "retained_ps2_tail_bytes": 12,
+      "golden": {
+        "kind": "cstring",
+        "value": "card/misc/w_c01.tmx",
+        "switch_address": "0x71005fbc92",
+        "mapped_offset": 6274194,
+        "size": 20,
+        "sha256": "8132b7bf0cf752e2073f1da07fc248dc38af2e6e95a3f7b88ce168bd2704a7df",
+        "steam_spans": [
+          {
+            "section": ".sdata",
+            "rva": "0x91b148",
+            "raw_offset": 9542984,
+            "size": 20,
+            "sha256": "8132b7bf0cf752e2073f1da07fc248dc38af2e6e95a3f7b88ce168bd2704a7df",
+            "readers": [
+              {
+                "function": "0x139b62",
+                "end": "0x139bc4",
+                "pc": "0x139b77",
+                "argument": 0
+              },
+              {
+                "function": "0x139bc4",
+                "end": "0x139be9",
+                "pc": "0x139bc4",
+                "argument": null
+              }
+            ]
+          }
+        ]
+      },
+      "structural_proof": "PS2 pscRes36c450/36c900 and NSO0c7b00/0c7c90 have distinct feature/reference-count gates, reserve a free card request, set resource kind3 and atlas selector1/2, look up w_c00/w_c01 respectively and enqueue texture decoding; missing-cache branch copies the same exact name into request storage. Steam139a9f/139b01 and139b62/139bc4 show both lookup and inline-copy branches.",
+      "required_seams": [
+        "golden-field-resources: all direct, translated, native, inlined and cached resource consumers must request the qualified Golden namespace and retain actual request completion/ownership; no PS2 CVM name fallback. Seal the complete named archive/member or executable source. Filename proof does not qualify the model/texture payload decoder."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x0063ba30",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "font script flag-bank base array",
+      "ps2_consumers": [
+        {
+          "function": "0x26ef60",
+          "name": "frFontSetDataFlagTable",
+          "file": "src/fmGslCont_inferred_0026e350.c"
+        },
+        {
+          "function": "0x26f0a0",
+          "name": "func_0026f0a0",
+          "file": "src/fmGslCont_inferred_0026e350.c"
+        },
+        {
+          "function": "0x26f5e0",
+          "name": "func_0026f5e0",
+          "file": "src/fmGslCont_inferred_0026e350.c"
+        }
+      ],
+      "ps2_live_bytes": 20,
+      "retained_ps2_tail_bytes": 12,
+      "golden": {
+        "kind": "u32-array",
+        "values": [
+          0,
+          1024,
+          3072,
+          4608,
+          5120
+        ],
+        "steam_span": {
+          "container": "P4G.exe",
+          "section": ".sdata",
+          "rva": "0x914278",
+          "raw_offset": 9514616,
+          "size": 20,
+          "sha256": "8a7930290def7ad930d2e737121b6f6d24eb49b85912c6bb723db329c2ea711a",
+          "source_build": 10836033,
+          "mapping_proven": true
+        },
+        "switch_address": "0x71007a0688",
+        "size": 20,
+        "sha256": "8a7930290def7ad930d2e737121b6f6d24eb49b85912c6bb723db329c2ea711a"
+      },
+      "structural_proof": "PS2 frFont set26ef60/clear26f0a0 decode two signed16 biased byte operands, gate mode0 and write base[table]+offset with1/0; community26f5e0 mode3 case0 adds the same base. NSO2c9c60/2c9d20/2ca4d0 repeat the exact biased-byte decoder, signed16 index/offset and mode0/mode3 gates through GOT881008 ->7a0688 and setter2e30d0. Steam44b900 uses914278+index*4 plusrelative offset and setter46afa0, with extra conditional write authorization. All five source bases independently agree. Retain12 PS2 alignment bytes, not the unrelated Steam suffix.",
+      "required_seams": [
+        "golden-font-flag-bases: share one five-u32 sealed bank across mode0 set/clear, mode3 command0, native/inlined aliases. Preserve Golden conditional write authorization0d8640/0d8650 (Steam150070), signed operand decoder and the true flag namespace. Never use a table label to remove the authorization gate."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x00763880",
+      "size": 8,
+      "class": "PROVEN",
+      "role": "event editor lookup key",
+      "ps2_consumers": [
+        {
+          "function": "0x2853c0",
+          "name": "evtLookupTask",
+          "file": "src/fmGslCont_inferred_002853b0.c"
+        }
+      ],
+      "ps2_live_bytes": 8,
+      "retained_ps2_tail_bytes": 0,
+      "golden": {
+        "kind": "cstring",
+        "value": "evtEdit",
+        "switch_address": "0x71005fef59",
+        "mapped_offset": 6287193,
+        "size": 8,
+        "sha256": "ce85c9b1ce3d0b9cfc0c7478ac1e02566cfd1e390fd1e8f1dc161b69e17b128c",
+        "steam_spans": []
+      },
+      "structural_proof": "PS2 evtLookupTask2853c0 calls scheduler name lookup with evtEdit. NSO13b290 computes the scheduler hash for this same full key then walks scheduler buckets and compares full names; it is a name-key lookup, not an asset path or function-label guess.",
+      "required_seams": [
+        "golden-event-editor-task-key: bind actual name-hash/lookup consumers; does not assert a Golden editor producer exists or authorize creating an obsolete PS2 editor subsystem."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x00713088",
+      "size": 24,
+      "class": "PROVEN",
+      "role": "allocator diagnostic source-file field",
+      "ps2_consumers": [
+        {
+          "function": "0x46a430",
+          "name": "func_0046a430",
+          "file": "src/Kosaka/Field/k_fldrc_inferred_00468d10.c"
+        }
+      ],
+      "ps2_live_bytes": 12,
+      "retained_ps2_tail_bytes": 12,
+      "golden": {
+        "kind": "cstring",
+        "value": "D:/Projects/P4G-NSW/xrd654v/sdk/src/kernel/sdkMalloc.c",
+        "switch_address": "0x7100628d3a",
+        "mapped_offset": 6458682,
+        "size": 55,
+        "sha256": "7eaca2f20e411c77bd02a0637a080ef92b19b3b175a813a963924fca92440b07",
+        "steam_spans": []
+      },
+      "structural_proof": "Every observed PS2 use is argument0 of kAssertFail or kAssertFailMsg in46a430 (multiline calls are not unknown uses). NSO39e750 allocation-pool traversal and bounds errors positively pass this exact full path in x0 with line inw1 to release assertion349960 or formatted assertion349970. The true pool allocator/source-file diagnostic role, matching allocation metadata provenance and full path bounds identify the field. Historical no-argument0-to-349960 scanner rejected349970 and multiline PS2 calls; those are scanner coverage gaps, not absence.",
+      "required_seams": [
+        "golden-allocator-source-file: replace every basename/GP/interior alias with the sealed full Golden source path at actual file/line ABI slots; never guest-copy a longer string over PS2 partitions. Do not invent logging/abort behavior for release stubs."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x00756720",
+      "size": 16,
+      "class": "PROVEN",
+      "role": "allocator diagnostic source-file field",
+      "ps2_consumers": [
+        {
+          "function": "0x46a430",
+          "name": "func_0046a430",
+          "file": "src/Kosaka/Field/k_fldrc_inferred_00468d10.c"
+        }
+      ],
+      "ps2_live_bytes": 12,
+      "retained_ps2_tail_bytes": 4,
+      "golden": {
+        "kind": "cstring",
+        "value": "D:/Projects/P4G-NSW/xrd654v/sdk/src/kernel/sdkMalloc.c",
+        "switch_address": "0x7100628d3a",
+        "mapped_offset": 6458682,
+        "size": 55,
+        "sha256": "7eaca2f20e411c77bd02a0637a080ef92b19b3b175a813a963924fca92440b07",
+        "steam_spans": []
+      },
+      "structural_proof": "Every observed PS2 use is argument0 of kAssertFail or kAssertFailMsg in46a430 (multiline calls are not unknown uses). NSO39e750 allocation-pool traversal and bounds errors positively pass this exact full path in x0 with line inw1 to release assertion349960 or formatted assertion349970. The true pool allocator/source-file diagnostic role, matching allocation metadata provenance and full path bounds identify the field. Historical no-argument0-to-349960 scanner rejected349970 and multiline PS2 calls; those are scanner coverage gaps, not absence.",
+      "required_seams": [
+        "golden-allocator-source-file: replace every basename/GP/interior alias with the sealed full Golden source path at actual file/line ABI slots; never guest-copy a longer string over PS2 partitions. Do not invent logging/abort behavior for release stubs."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x00756748",
+      "size": 16,
+      "class": "PROVEN",
+      "role": "allocator diagnostic source-file field",
+      "ps2_consumers": [
+        {
+          "function": "0x46a430",
+          "name": "func_0046a430",
+          "file": "src/Kosaka/Field/k_fldrc_inferred_00468d10.c"
+        }
+      ],
+      "ps2_live_bytes": 12,
+      "retained_ps2_tail_bytes": 4,
+      "golden": {
+        "kind": "cstring",
+        "value": "D:/Projects/P4G-NSW/xrd654v/sdk/src/kernel/sdkMalloc.c",
+        "switch_address": "0x7100628d3a",
+        "mapped_offset": 6458682,
+        "size": 55,
+        "sha256": "7eaca2f20e411c77bd02a0637a080ef92b19b3b175a813a963924fca92440b07",
+        "steam_spans": []
+      },
+      "structural_proof": "Every observed PS2 use is argument0 of kAssertFail or kAssertFailMsg in46a430 (multiline calls are not unknown uses). NSO39e750 allocation-pool traversal and bounds errors positively pass this exact full path in x0 with line inw1 to release assertion349960 or formatted assertion349970. The true pool allocator/source-file diagnostic role, matching allocation metadata provenance and full path bounds identify the field. Historical no-argument0-to-349960 scanner rejected349970 and multiline PS2 calls; those are scanner coverage gaps, not absence.",
+      "required_seams": [
+        "golden-allocator-source-file: replace every basename/GP/interior alias with the sealed full Golden source path at actual file/line ABI slots; never guest-copy a longer string over PS2 partitions. Do not invent logging/abort behavior for release stubs."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x0063c700",
+      "size": 16,
+      "class": "PROVEN",
+      "role": "polygon-movie default PMD1 bank partition",
+      "ps2_consumers": [
+        {
+          "function": "0x2904f0",
+          "name": "evtPolygonMovieAllocDefaultPrimary",
+          "file": "src/Event/evtPolygonMovie.c"
+        }
+      ],
+      "ps2_live_bytes": 16,
+      "retained_ps2_tail_bytes": 0,
+      "golden": {
+        "kind": "binary-default-bank-view",
+        "bank": "PMD1",
+        "switch_bank_address": "0x710062abc8",
+        "bank_size": 32,
+        "bank_sha256": "7ba0339aadbe79c0ff620d5efd522f9505f676a956ca4f73624a872377b91aa9",
+        "bank_offset": 0,
+        "size": 16,
+        "sha256": "5aef74c7903cc51ba8184c4c39f18e70d3ec37c68e3a23ca8be636551926659c",
+        "steam_corroboration": "No identical complete data-bank hit observed; NSO typed default constructors are the source authority. Not an M2 Steam window admission."
+      },
+      "structural_proof": "PS22904f0/2905a0/290660 and NSO14ba90/14bb20/14bbd0 allocate32/84/32 bytes, charge memory account4/5/6, copy the complete respective default and return via out-pointer. Actual NSO constructor loads source62abc8/632c64/62b0e8. PMD1/3 headers have zero entries; PMD2 has one table,relative offsets36/48,record IDs999/1000. Selected PMD2 partition contains84 live+12alignment bytes. Full constructors, allocation sizes, memory accounts and output role prove each bank; magic equality alone does not.",
+      "required_seams": [
+        "golden-polymovie-defaults: seal complete32/84/32-byte Golden default banks; all event-file fallback allocations and native/inlined default constructors use the bank matching memory-account role4/5/6. Preserve relative-offset interpretation and actual Golden parser semantics; no pointer widening guess."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x0063c710",
+      "size": 16,
+      "class": "PROVEN",
+      "role": "polygon-movie default PMD1 bank partition",
+      "ps2_consumers": [
+        {
+          "function": "0x2904f0",
+          "name": "evtPolygonMovieAllocDefaultPrimary",
+          "file": "src/Event/evtPolygonMovie.c"
+        }
+      ],
+      "ps2_live_bytes": 16,
+      "retained_ps2_tail_bytes": 0,
+      "golden": {
+        "kind": "binary-default-bank-view",
+        "bank": "PMD1",
+        "switch_bank_address": "0x710062abc8",
+        "bank_size": 32,
+        "bank_sha256": "7ba0339aadbe79c0ff620d5efd522f9505f676a956ca4f73624a872377b91aa9",
+        "bank_offset": 16,
+        "size": 16,
+        "sha256": "02e678aec3c85a09905dacf00f30750045a9d40e26f69d8c36f6e9ca95b7bf10",
+        "steam_corroboration": "No identical complete data-bank hit observed; NSO typed default constructors are the source authority. Not an M2 Steam window admission."
+      },
+      "structural_proof": "PS22904f0/2905a0/290660 and NSO14ba90/14bb20/14bbd0 allocate32/84/32 bytes, charge memory account4/5/6, copy the complete respective default and return via out-pointer. Actual NSO constructor loads source62abc8/632c64/62b0e8. PMD1/3 headers have zero entries; PMD2 has one table,relative offsets36/48,record IDs999/1000. Selected PMD2 partition contains84 live+12alignment bytes. Full constructors, allocation sizes, memory accounts and output role prove each bank; magic equality alone does not.",
+      "required_seams": [
+        "golden-polymovie-defaults: seal complete32/84/32-byte Golden default banks; all event-file fallback allocations and native/inlined default constructors use the bank matching memory-account role4/5/6. Preserve relative-offset interpretation and actual Golden parser semantics; no pointer widening guess."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x0063c720",
+      "size": 96,
+      "class": "PROVEN",
+      "role": "polygon-movie default PMD2 bank partition",
+      "ps2_consumers": [
+        {
+          "function": "0x2905a0",
+          "name": "evtPolygonMovieAllocDefaultSecondary",
+          "file": "src/Event/evtPolygonMovie.c"
+        }
+      ],
+      "ps2_live_bytes": 84,
+      "retained_ps2_tail_bytes": 12,
+      "golden": {
+        "kind": "binary-default-bank-view",
+        "bank": "PMD2",
+        "switch_bank_address": "0x7100632c64",
+        "bank_size": 84,
+        "bank_sha256": "6be6f38d47ecaad1b6152a4d5ab8c62759bfd1a6ac83db1d10e1663ba984e064",
+        "bank_offset": 0,
+        "size": 84,
+        "sha256": "6be6f38d47ecaad1b6152a4d5ab8c62759bfd1a6ac83db1d10e1663ba984e064",
+        "steam_corroboration": "No identical complete data-bank hit observed; NSO typed default constructors are the source authority. Not an M2 Steam window admission."
+      },
+      "structural_proof": "PS22904f0/2905a0/290660 and NSO14ba90/14bb20/14bbd0 allocate32/84/32 bytes, charge memory account4/5/6, copy the complete respective default and return via out-pointer. Actual NSO constructor loads source62abc8/632c64/62b0e8. PMD1/3 headers have zero entries; PMD2 has one table,relative offsets36/48,record IDs999/1000. Selected PMD2 partition contains84 live+12alignment bytes. Full constructors, allocation sizes, memory accounts and output role prove each bank; magic equality alone does not.",
+      "required_seams": [
+        "golden-polymovie-defaults: seal complete32/84/32-byte Golden default banks; all event-file fallback allocations and native/inlined default constructors use the bank matching memory-account role4/5/6. Preserve relative-offset interpretation and actual Golden parser semantics; no pointer widening guess."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x0063c780",
+      "size": 16,
+      "class": "PROVEN",
+      "role": "polygon-movie default PMD3 bank partition",
+      "ps2_consumers": [
+        {
+          "function": "0x290660",
+          "name": "evtPolygonMovieAllocDefaultOverlay",
+          "file": "src/Event/evtPolygonMovie.c"
+        }
+      ],
+      "ps2_live_bytes": 16,
+      "retained_ps2_tail_bytes": 0,
+      "golden": {
+        "kind": "binary-default-bank-view",
+        "bank": "PMD3",
+        "switch_bank_address": "0x710062b0e8",
+        "bank_size": 32,
+        "bank_sha256": "79c02afef596ef48890e4bf21d7966aea86780cb118dbdc5b5a59c8d00197c7a",
+        "bank_offset": 0,
+        "size": 16,
+        "sha256": "c61102d059467d2947e97590fa62e6ff63f433a1ab7daa53b6c40557300b7eb4",
+        "steam_corroboration": "No identical complete data-bank hit observed; NSO typed default constructors are the source authority. Not an M2 Steam window admission."
+      },
+      "structural_proof": "PS22904f0/2905a0/290660 and NSO14ba90/14bb20/14bbd0 allocate32/84/32 bytes, charge memory account4/5/6, copy the complete respective default and return via out-pointer. Actual NSO constructor loads source62abc8/632c64/62b0e8. PMD1/3 headers have zero entries; PMD2 has one table,relative offsets36/48,record IDs999/1000. Selected PMD2 partition contains84 live+12alignment bytes. Full constructors, allocation sizes, memory accounts and output role prove each bank; magic equality alone does not.",
+      "required_seams": [
+        "golden-polymovie-defaults: seal complete32/84/32-byte Golden default banks; all event-file fallback allocations and native/inlined default constructors use the bank matching memory-account role4/5/6. Preserve relative-offset interpretation and actual Golden parser semantics; no pointer widening guess."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x0063c790",
+      "size": 16,
+      "class": "PROVEN",
+      "role": "polygon-movie default PMD3 bank partition",
+      "ps2_consumers": [
+        {
+          "function": "0x290660",
+          "name": "evtPolygonMovieAllocDefaultOverlay",
+          "file": "src/Event/evtPolygonMovie.c"
+        }
+      ],
+      "ps2_live_bytes": 16,
+      "retained_ps2_tail_bytes": 0,
+      "golden": {
+        "kind": "binary-default-bank-view",
+        "bank": "PMD3",
+        "switch_bank_address": "0x710062b0e8",
+        "bank_size": 32,
+        "bank_sha256": "79c02afef596ef48890e4bf21d7966aea86780cb118dbdc5b5a59c8d00197c7a",
+        "bank_offset": 16,
+        "size": 16,
+        "sha256": "02e678aec3c85a09905dacf00f30750045a9d40e26f69d8c36f6e9ca95b7bf10",
+        "steam_corroboration": "No identical complete data-bank hit observed; NSO typed default constructors are the source authority. Not an M2 Steam window admission."
+      },
+      "structural_proof": "PS22904f0/2905a0/290660 and NSO14ba90/14bb20/14bbd0 allocate32/84/32 bytes, charge memory account4/5/6, copy the complete respective default and return via out-pointer. Actual NSO constructor loads source62abc8/632c64/62b0e8. PMD1/3 headers have zero entries; PMD2 has one table,relative offsets36/48,record IDs999/1000. Selected PMD2 partition contains84 live+12alignment bytes. Full constructors, allocation sizes, memory accounts and output role prove each bank; magic equality alone does not.",
+      "required_seams": [
+        "golden-polymovie-defaults: seal complete32/84/32-byte Golden default banks; all event-file fallback allocations and native/inlined default constructors use the bank matching memory-account role4/5/6. Preserve relative-offset interpretation and actual Golden parser semantics; no pointer widening guess."
+      ],
+      "runtime_status": "pending-seam"
+    }
+  ],
+  "counts": {
+    "PROVEN": 72
+  },
+  "ps2_bytes": 2192,
+  "runtime_status": "pending-seam",
+  "evidence_receipts": [
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\71000c7b00-c6b.txt",
+      "sha256": "ca9df43b783be6fdc8d2f77a47f98c35faad9275fbcc5d473fa0b237b02e10d1"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\71000c7c90-c6b.txt",
+      "sha256": "641d3f485851f27a45c5b38e94c69aaeba2e1e02df41ca68579107edd882757e"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\7100115630-c6b.txt",
+      "sha256": "1df6ecfdd101746bd81e719bfc5eef2db26c540feb7954327c224cdc3b01ffd9"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\7100116d40-c6b.txt",
+      "sha256": "4ccbcaa8146f2c3f7b7d9e48ebeda000eff856a88773559e5cd239cfd6c89e35"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\7100116e60-c6b.txt",
+      "sha256": "594597f37c43b51252a9d1148252faa30bc6072e5c7be3439ce5c95d16f6614b"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\7100116fd0-c6b.txt",
+      "sha256": "2a756099bcdf17db21d940f0af8b034bad32e929021f05936f8c2ccee905ce97"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\710013b290-c6b.txt",
+      "sha256": "363861d4650daec44369a4d662ca26aa8c2c2a68dc682ab6191cce505c02a845"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\710013c960-c6b.txt",
+      "sha256": "091370c94ddf56f7564d838f553fe1d18ad7ee3e3e21d93416a5349ce757b9e6"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\71001496a0-c6b.txt",
+      "sha256": "c988262219aee2325f2becf729ce1a327b329bfa81c707568879cd344a1f40f1"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\71001498c0-c6b.txt",
+      "sha256": "c40d0132e5a583ea6d967c3d282c78a0ce88a962230657305678a8b50f598f75"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\710014ab60-c6b.txt",
+      "sha256": "9fc1f9917dc2f1d126e02e9fd150da4480782ce9bfff51463fb798b19d56f209"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\710014b1d0-c6b.txt",
+      "sha256": "a411d8ca3bd2b0dad714882e47032572b51319c400136ce1f549bb647103733d"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\710014b3b0-c6b.txt",
+      "sha256": "3378042d8ec5f0962c9ff04851ec5f9f17c611af106dc8be775b045a0c667959"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\710014b440-c6b.txt",
+      "sha256": "b8c00d904b34ce58b3c40ccb7625bca48b8e250b432cfa563d42548e1fc336be"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\710014ba90-c6b.txt",
+      "sha256": "1c72520522ca19cb35231e490fe039a14fd9169a6e91e5635846998df90bc876"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\710014bb20-c6b.txt",
+      "sha256": "e62ed141a46948012cdfb0d515f36233bab148c39ce7b459d9160b89dad68c5d"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\710014bbd0-c6b.txt",
+      "sha256": "b19f0f7bec070a54415144bf0f7f0c67d7776c28d5f9fcc2c369aed58af83ad1"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\710014bc60-c6b.txt",
+      "sha256": "6702392bef17b8888279e4163ab2a4677f9f4fa60e550406f91c96f968f69e90"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\7100159720-c6b.txt",
+      "sha256": "08c14edbd09669fc23adbe5242261b12d2046ebf7d44a04a0c52412ed2ecb7d0"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\71001969b0-c6b.txt",
+      "sha256": "f00ade39f8709e412a623d03d90962520e9ac0af30a46a20ccbf02add9223fd6"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\7100196b30-c6b.txt",
+      "sha256": "4697e454b0187a1105acdf1ad2c89ef9d0a613c1e66c77afda346e31973c7e80"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\7100197a40-c6b.txt",
+      "sha256": "dd52c1e3c6aacb5c97106baa73357d87beac15fccbb52cac4313543d48a48a78"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\7100197c60-c6b.txt",
+      "sha256": "fd686ad1ebd71f3e261b711788e82e197993a3e606187686e7091f4cb527cd77"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\7100197e80-c6b.txt",
+      "sha256": "e1df8e58b59157b5b1ffdfc45286321bdbe57e49a3dff4015468ce5b0dfc741e"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\710019c750-c6b.txt",
+      "sha256": "a7357e857f86a23a17955316e3a4d9bcbc60633d8a37f6ef116fbb5a7f5bf83f"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\710019c7e0-c6b.txt",
+      "sha256": "ad50559624b3929e81c7630036f8c47e6dd43ed948d9140744e42e3d671cb84a"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\710019c960-c6b.txt",
+      "sha256": "29c67aa9468603a8751d51f633cb783236e1e32107b6e86d5c33a9c4588047bb"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\71001bda10-c6b.txt",
+      "sha256": "e1e48fab9e5103930f15cb7ffdef6ca36a48c74def64d59e86d7101ec92293d8"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\71001bf210-c6b.txt",
+      "sha256": "d1604551e848ef8ba71a4b9ba4f01c63d5123629737cae908148f22ba2fccd7b"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\71001c8ea0-c6b.txt",
+      "sha256": "a1f783332ec6bf0bcc3a91817fe4767ce04843a82ac4a4bd95bf3e5c2ee159ae"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\71001c9160-c6b.txt",
+      "sha256": "3e77221c6a585df3c7e0ba8fdf8f2243a7dbac57b9f95bed9b12a751fd20f95d"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\71001d78a0-c6b.txt",
+      "sha256": "fc1fb2f44ab8795a7199edfdce9d8a692735d93b5d88caf567c3630cff1b04ec"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\71001d7f00-c6b.txt",
+      "sha256": "2652c06a0015bea5fefc286b50e6fdc5d4279ac4876394b92b12828c006d6086"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\71001dbac0-c6b.txt",
+      "sha256": "8967e753f4a759ecc34a3850fa1dd65da225af375300d28df87644e27c9758c9"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\71001dbcb0-c6b.txt",
+      "sha256": "30c6c4bc501d4b5dadbb78e26964d32c973838ac7c623905d9ca776fceb10932"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\71001dbcdc-c6b.txt",
+      "sha256": "a2e8f8c5ac4e71b4c42da3b8a8ab04bbe0eadfe18824094ba57cd8d5dfe71903"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\71001dbe20-c6b.txt",
+      "sha256": "45187a64a9de31ac01f609c81e25d32e3af6556c1ba1c0bbee7eb55770ecf7b6"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\71001dbe30-c6b.txt",
+      "sha256": "cf978c73d180482ce286f6d1aa108a3a642703afa64cf8333cf1b2c9a193b9ee"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\71001de500-c6b.txt",
+      "sha256": "c5353bc6553f9f92d235577e848d99891bb316ef8239eba83961fc695b68c4a0"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\71001ed2e0-c6b.txt",
+      "sha256": "134d4145e782dafdb2d6c4f6890a96ad6210897b8c4a4234bee639a22503e677"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\71001ee490-c6b.txt",
+      "sha256": "75429c5d1885d9ab72ad6336a9d4a9d576eac1a27897128b000fd6e7f4c66709"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\71001ee650-c6b.txt",
+      "sha256": "0062bf6694bf41cf3ed501e4cbfe3db98f806624e7d6d4a5469cd95ef2906a73"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\71001ee890-c6b.txt",
+      "sha256": "acd67e3077ccf25e2db2d86524fbf51c6db4241898f1c7f12f179e4b5f1ba149"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\71001f7900-c6b.txt",
+      "sha256": "1f6713f38ae4e9c077c0c3e172a726f076af4468a4bcd585ee32c18e693f814a"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\71001f7940-c6b.txt",
+      "sha256": "34cff06980150a34005cb9040f08608191226c40a07e3391f30d75ee51425c97"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\710020a110-c6b.txt",
+      "sha256": "aec62addcdcc1bb610d79322f6232af546ac6c4ade0a8158c7d295ca698a3ef5"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\7100281240-c6b.txt",
+      "sha256": "4fb165e84fae38af73e5e697f342c12e2f4a0d0f8d5dbec493588ec5ee8bfad0"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\710029fb20-c6b.txt",
+      "sha256": "047c46bec1d87b904ef2ab05de7a6cee53dc2b0c615c3c5cfea69182aa23404b"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\710029fdb0-c6b.txt",
+      "sha256": "3f7f91de0879b1c4f6738c615267f34802ce2a68c31d5a2655e1ea69d566c06e"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\71002a0110-c6b.txt",
+      "sha256": "c339c60faf9dcc918056a4bfcf30859c9d5777c6fc01ced0a91ffd2b0aa20505"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\71002a0190-c6b.txt",
+      "sha256": "84a3192897278e844c44f3f3a389bf56bb4124e1fe7037fb64b38ad9445e760c"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\71002a0490-c6b.txt",
+      "sha256": "37b21e08b8c5a683cfe9eb82b6cd5a27142e75c2097633c7c473d1d59c9d65db"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\71002b8d80-c6b.txt",
+      "sha256": "29d273074cd3d568af75be08f6d832179359ef91e941aab7068fa921f0738abb"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\71002ba6a0-c6b.txt",
+      "sha256": "d51c5cc01e6be8be325fb1ece05ad8181dc628293b598469ce76180743c1728f"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\71002bbb80-c6b.txt",
+      "sha256": "e7b48c73c96582fd01e9fe3f9afdfd6d3c6f591ea864321532d6fa997a77f509"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\71002be4b0-c6b.txt",
+      "sha256": "47c3d500d9419b9604b08856a9c6b68e88ddb8ee98010a87a6e6062835d5420e"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\71002c0270-c6b.txt",
+      "sha256": "ee0a1c6759cb8cff2c35b03d172b608f9c06123babc9ee98fa0f2395e2e69d01"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\71002c0460-c6b.txt",
+      "sha256": "cab29c976a636d8ded00a61cc89b7bdcbc96ca0db2a343afa950d50f00a48a0e"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\71002c39c0-c6b.txt",
+      "sha256": "68d1d95fe5bfe4e302beed48bb9e6e45f629905295c365a2792b83a7a86a2345"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\71002c3c20-c6b.txt",
+      "sha256": "6085ad02b3054c921af333aa301d66bdf1b0f2f6b50f37c73b8c782748c82f05"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\71002c9c60-c6b.txt",
+      "sha256": "2f4a7088f580cf24db7fec4820bc42443257e896788f34ca25337d9b05d56970"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\71002c9d20-c6b.txt",
+      "sha256": "4a530adf0c1cdb0d928c447001e8729f18b9f5ed63eb5a8f2f524bdd1dfedf27"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\71002ca4d0-c6b.txt",
+      "sha256": "cbdf199c4bd2efd16a047f8a8d2931d174b762d574afd36b3a4b139857ffa38c"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\710039e750-c6b.txt",
+      "sha256": "1736aebd287b91153d23eae2e521990cf0c7b4e13c83e79589d39e8d70950361"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\c6b-steam-instructions.txt",
+      "sha256": "db908a559ff7e0499299a3aa7e16b236e5a848e81cd3bd43ba53612adc4add25"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\c6b-ps2-readers.txt",
+      "sha256": "c12acf6266956e26358726a479e045f44c2f6adeacd427529b702fd3a567f831"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\c6b-steam-facts.json",
+      "sha256": "91ec679f42ffa91ccbbbcb044e92c2077cf8a558400f3068cf969f923bb8e1d2"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\c6b-static-facts.json",
+      "sha256": "8c45bf90ba90ccb8286297b46528cda7db9217bc3c0a96bc7f8f1c4f7feb854a"
+    }
+  ]
+}

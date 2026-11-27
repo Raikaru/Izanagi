@@ -386,8 +386,10 @@ static inline int p4la_title_gate(const P4WalkHost *h, uint32_t out[8]) {
 static inline int p4la_dialog_gate(const P4WalkHost *h, uint32_t out[8]) {
     const uint32_t sw=p4la_word(h,p4la_word(h,0x00764298u)+0x38u);
     const uint32_t sequence=p4la_word(h,sw+4u);
-    /* 9 field, 10 event, 11 field-event messages; 6 the battle (its intro and result windows, NG-7n). */
-    if (sequence!=6u && sequence!=9u && sequence!=10u && sequence!=11u) return 0;
+    /* 9 field, 10 event, 11 field-event messages; 6 the battle (its intro and result windows, NG-7n); 13 a facility
+     * scene (Junes' food court, 2026-11-25: its conversation was ungated, so retail, whose windows open later than the
+     * port's, took its presses by read count and never finished the scene). */
+    if (sequence!=6u && sequence!=9u && sequence!=10u && sequence!=11u && sequence!=13u) return 0;
     uint32_t entry=p4la_word(h,P4LA_MES_MANAGER+0xcu);
     int found=0;
     for (unsigned count=0;entry;count++,entry=p4la_word(h,entry+4u)) {

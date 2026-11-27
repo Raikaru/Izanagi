@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "proof_id": "L1-c12-shuffle-count-roster",
+  "decision": "PROVEN",
+  "runtime_status": "pending-seam",
+  "source_boundary": "PS2 btlShuffle.c readers0036ea00/0036ee60; ordinary SwitchNSOa4180 onward and source relocations; unique complete corresponding Steam .sdata spans. No Steam .arch decode.",
+  "sources": [
+    {
+      "address": "0x0064e5f1",
+      "ps2_size": 31,
+      "ps2_real_base": "0x0064e5f0",
+      "golden_base_rva": "0x90b488",
+      "golden_base_raw": 9478280,
+      "golden_base_size": 20,
+      "golden_base_sha256": "db5246c664c147fc76ccb3cfeaf53ccdfb7c0914179674071b3ac3b596140229",
+      "nso_storage": "0x7100880870",
+      "nso_base": "0x710073bc9d",
+      "layout": "10x2 u8(min,max), not the31-byte column1 M2 window",
+      "install": "Selected partition begins+1: copy19B fromSteam90b489 toPS264e5f1; retain12PS2tailbytes. Native readers bind the complete20-byte source, including the unselected first minimum byte.",
+      "reader": "a457c..a45d8 chooses index0 for level0,9 for bytelevel>99, otherwise(level-1)/10; readsmin+0/max+1; if unequal draws random(max-min+1), addsmin; subsequent pattern shaping isa45d8..a4650. PS2 has the same ten-pair reader role at36ea00.",
+      "required_seams": [
+        {
+          "ps2_addresses": [
+            "0x0036ea00"
+          ],
+          "action": "Route both aliases64e5f0/64e5f1 and all native/inlined card-count reads to one coherent20-byte source. For the selected row install only19B at+1; retain12B tail. No write outside the selected partition."
+        },
+        {
+          "action": "Preserve live level/pattern producers. Index uses level byte:0->0,1..10->0,11..20->1,99/100/255->9. Golden has a sixth pattern branch; qualify its producer and post-lookup shaping rather than assuming five-pattern PS2 control flow is globally equivalent. The source admission itself is the20-byte min/max table, not full shuffle behavior."
+        }
+      ]
+    },
+    {
+      "address": "0x0064e76f",
+      "ps2_size": 17,
+      "golden_rva": "0x90ba50",
+      "golden_raw": 9479760,
+      "golden_size": 9,
+      "sha256": "e5cda9ac42aa763838df8334e0f45b49b2d66cbb932a457b5657254a7ac73da7",
+      "nso_storage": "0x7100880860",
+      "nso_base": "0x710073bd7e",
+      "layout": "nine u8 low-player-level upper bounds, indexedplayerLevel-1; PS2 selected partition has dummy0 at+0, nine valuesat+1..9 and seven tail bytes",
+      "install": "Copy9B to selected destination+1, retaining dummy0 and tail+10..16; or bind a Golden-only nine-entry semantic reader. Not17-byte prefix-copy.",
+      "reader": "a41ac gets unit1 playerlevel; unsignedbyte(level-1)<=8 admits1..9; a41cc loads pointer and a41d4 readsu8[level-1]. Other levels take arithmetic bounds. Subsequent roster builder walks256stride14records withmaskdb and owns three candidate pools, matching PS2 36ee60. The byte after the9-entry NSO span is unrelated98; earlier10-byte search was an overread and is rejected.",
+      "required_seams": [
+        {
+          "ps2_addresses": [
+            "0x0036ee60"
+          ],
+          "action": "For current playerlevel1..9 read qualifiedGolden9-byte table atlevel-1, not the retainedPS2dummy or unrelated tenthsourcebyte. Cover translated/inlined/native roster pool creation. Keep non1..9 arithmetic path distinct."
+        },
+        {
+          "action": "Preserve live unit1 level, encounter level, loaded candidate flags/levels (256x14,maskdb), roster-membership lookup and per-pool RNG shuffle state. No default-empty roster or byte-equality claim of all Golden upper-bound arithmetic."
+        }
+      ]
+    }
+  ],
+  "other_rows": {
+    "0x0064e670": "PROVEN by l1-shuffle-variants-reward-proof.json: the surviving ordinary Steam109090 pattern3/1432 reader positively selects40 bytes at90b3c8. Earlier six-column-table ambiguity is resolved by the actual four-column consumer, not by a byte vote.",
+    "0x0064e7b8": "PROVEN by l1-shuffle-variants-reward-proof.json: full44-record Steam/NSO dispatch domains and five structurally paired callback roles; transcode64-bit pointers/stride16 into the selected guest callback-column view, not a raw candidate copy."
+  },
+  "qualification": "Static source/extent/consumer proof only. All source admissions remain pending-seam, not runtime closure."
+}

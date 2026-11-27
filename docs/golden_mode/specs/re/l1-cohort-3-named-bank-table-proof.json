@@ -1,0 +1,1400 @@
+{
+  "proof_id": "L1-C3-named-help-bank-table-20261113",
+  "scope": "One48B owned cohort3 row, the complete immutable shop help filename-pointer table. Source PROVEN only; runtime pending-seam. No selector or live-handle row is changed.",
+  "source_images": {
+    "steam": {
+      "build": 10836033,
+      "file": "P4G.exe",
+      "sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+      "data_section_bounds": {
+        "section": ".sdata",
+        "rva_start": "0x887000",
+        "size": 1674240,
+        "raw_start": 8936448
+      },
+      "code_witness_bounds": {
+        "section": ".shared",
+        "rva_start": "0x1000",
+        "size": 8934912,
+        "raw_start": 1536
+      },
+      "runtime_input": "Owned Steam install only; never require NSO or private research cache."
+    },
+    "switch": {
+      "version": "1.2",
+      "nso_sha256": "854c7a1e33de1619abf009fa7f32b8c012960d685c8bf1bf99a92a6a4d0bda1c",
+      "mapped_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+      "base": "0x7100000000",
+      "segments": [
+        {
+          "name": "text",
+          "file_offset": 257,
+          "mapped_offset": 0,
+          "decompressed_size": 5448752,
+          "compressed_size": 3719998,
+          "lz4_compressed": true
+        },
+        {
+          "name": "rodata",
+          "file_offset": 3720255,
+          "mapped_offset": 5451776,
+          "decompressed_size": 1870824,
+          "compressed_size": 990563,
+          "lz4_compressed": true
+        },
+        {
+          "name": "data",
+          "file_offset": 4710818,
+          "mapped_offset": 7323648,
+          "decompressed_size": 1606720,
+          "compressed_size": 439860,
+          "lz4_compressed": true
+        }
+      ],
+      "purpose": "Independent static structural witness, not runtime dependency."
+    }
+  },
+  "ps2_object": {
+    "address": "0x0063f520",
+    "size": 48,
+    "rows": 9,
+    "pointer_width": 4,
+    "live_size": 36,
+    "alignment_tail": 12,
+    "pointers": [
+      "0x63f400",
+      "0x63f420",
+      "0x63f440",
+      "0x63f460",
+      "0x63f480",
+      "0x63f4a0",
+      "0x63f4c0",
+      "0x63f4e0",
+      "0x63f500"
+    ],
+    "names": [
+      "help/datWeaponHelp.bmd",
+      "help/datArmorHelp.bmd",
+      "help/datAccessoryHelp.bmd",
+      "help/datAddEffectHelp.bmd",
+      "help/datItemHelp.bmd",
+      "help/datEventItemHelp.bmd",
+      "help/datSkillHelp.bmd",
+      "help/datMaterialHelp.bmd",
+      "help/datQuestHelp.bmd"
+    ],
+    "all_direct_users": [
+      "0x002bdf20"
+    ],
+    "consumer_semantics": "fclShopLoadMessageResources copies9 pointer words into its stack vector, loads help/datMsg.pak, passes each word to455f70 as a pathname address, and installs the returned member under the same slot0..8. The inferred resourceIds name is misleading:455f70 uppercases/normalizes the supplied string and compares archive entry names, not numeric resource IDs."
+  },
+  "golden_object": {
+    "shape": "13 ordered filename pointers, not resource IDs or live handles",
+    "steam_pointer_table": {
+      "container": "P4G.exe",
+      "section": ".sdata",
+      "rva": "0x90e6c0",
+      "offset": 554688,
+      "raw_offset": 9491136,
+      "size": 104,
+      "sha256": "541f37cc951bf13c6e4e0e7cc708b25928306657f7c4d29308174526d3765ea0",
+      "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+      "mapping_proven": true
+    },
+    "pointer_width": 8,
+    "rows": 13,
+    "preferred_image_base": "0x140000000",
+    "normalization": "Decode each file-stored pointer as a preferred-image VA, subtract the sealed PE preferred base, and resolve the resulting bounded RVA to the individually qualified NUL-terminated source string. Never install these host VAs as guest pointers.",
+    "members": [
+      {
+        "bank_index": 0,
+        "member": "datWeaponHelp.bmd",
+        "steam": {
+          "section": ".sdata",
+          "offset": 683304,
+          "rva": "0x92dd28",
+          "raw_offset": 9619752,
+          "size": 18,
+          "sha256": "99d4039705bb9337ae2bf20a6ed40b335cabc5bed32deb959cc59117a1f9e07e",
+          "container": "P4G.exe",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        },
+        "switch": {
+          "address": "0x71005e4092",
+          "read_sites": [
+            "0x7100174820"
+          ],
+          "install_call": "0x710017483c"
+        }
+      },
+      {
+        "bank_index": 1,
+        "member": "datArmorHelp.bmd",
+        "steam": {
+          "section": ".sdata",
+          "offset": 683280,
+          "rva": "0x92dd10",
+          "raw_offset": 9619728,
+          "size": 17,
+          "sha256": "01d72e3e4953e329c66ff513a1aafd13b4723784924fbcfb79cb20a0fd5f96a5",
+          "container": "P4G.exe",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        },
+        "switch": {
+          "address": "0x7100625078",
+          "read_sites": [
+            "0x7100174844"
+          ],
+          "install_call": "0x710017485c"
+        }
+      },
+      {
+        "bank_index": 2,
+        "member": "datAccessoryHelp.bmd",
+        "steam": {
+          "section": ".sdata",
+          "offset": 683352,
+          "rva": "0x92dd58",
+          "raw_offset": 9619800,
+          "size": 21,
+          "sha256": "342f1ffcd672172ce1922c831cf01a48a098b68f694f2f3c3e1ca20601f87710",
+          "container": "P4G.exe",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        },
+        "switch": {
+          "address": "0x71005fc610",
+          "read_sites": [
+            "0x7100174864"
+          ],
+          "install_call": "0x7100174880"
+        }
+      },
+      {
+        "bank_index": 3,
+        "member": "datAddEffectHelp.bmd",
+        "steam": {
+          "section": ".sdata",
+          "offset": 683328,
+          "rva": "0x92dd40",
+          "raw_offset": 9619776,
+          "size": 21,
+          "sha256": "e74f537fb67265c6414d91e1cf596dbd67aaa81c5369222d390ac5d45679268a",
+          "container": "P4G.exe",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        },
+        "switch": {
+          "address": "0x7100607501",
+          "read_sites": [
+            "0x7100174888"
+          ],
+          "install_call": "0x71001748a0"
+        }
+      },
+      {
+        "bank_index": 4,
+        "member": "datItemHelp.bmd",
+        "steam": {
+          "section": ".sdata",
+          "offset": 683400,
+          "rva": "0x92dd88",
+          "raw_offset": 9619848,
+          "size": 16,
+          "sha256": "4524033b579b311def0a4b1d94765d8a26feeb959e279685af7352cb511a1115",
+          "container": "P4G.exe",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        },
+        "switch": {
+          "address": "0x71006141b0",
+          "read_sites": [
+            "0x71001748a8"
+          ],
+          "install_call": "0x71001748c0"
+        }
+      },
+      {
+        "bank_index": 5,
+        "member": "datEventItemHelp.bmd",
+        "steam": {
+          "section": ".sdata",
+          "offset": 683376,
+          "rva": "0x92dd70",
+          "raw_offset": 9619824,
+          "size": 21,
+          "sha256": "4b5068966f2279f8ce33520ed7eabc17968cddc6637a40cffcd073efb3d0a92d",
+          "container": "P4G.exe",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        },
+        "switch": {
+          "address": "0x71005d91d5",
+          "read_sites": [
+            "0x71001748c8"
+          ],
+          "install_call": "0x71001748e0"
+        }
+      },
+      {
+        "bank_index": 6,
+        "member": "datSkillHelp.bmd",
+        "steam": {
+          "section": ".sdata",
+          "offset": 683440,
+          "rva": "0x92ddb0",
+          "raw_offset": 9619888,
+          "size": 17,
+          "sha256": "eb9d64177e9e4ed76b48f387739ed7bb606dfa91fe376f96a670de772b9bf422",
+          "container": "P4G.exe",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        },
+        "switch": {
+          "address": "0x71006141c0",
+          "read_sites": [
+            "0x71001748e8"
+          ],
+          "install_call": "0x7100174900"
+        }
+      },
+      {
+        "bank_index": 7,
+        "member": "datMaterialHelp.bmd",
+        "steam": {
+          "section": ".sdata",
+          "offset": 683416,
+          "rva": "0x92dd98",
+          "raw_offset": 9619864,
+          "size": 20,
+          "sha256": "c0cab345c96dadd7be7cf8e7b011417b63ba7251a82e4aaa794d987d92a01687",
+          "container": "P4G.exe",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        },
+        "switch": {
+          "address": "0x71006141d1",
+          "read_sites": [
+            "0x7100174908"
+          ],
+          "install_call": "0x7100174920"
+        }
+      },
+      {
+        "bank_index": 8,
+        "member": "datQuestHelp.bmd",
+        "steam": {
+          "section": ".sdata",
+          "offset": 683488,
+          "rva": "0x92dde0",
+          "raw_offset": 9619936,
+          "size": 17,
+          "sha256": "13d82bf94712c10790e4d1637e5db4287b5e32b96ec73c3b0ebe7cbb87a8f737",
+          "container": "P4G.exe",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        },
+        "switch": {
+          "address": "0x71005d3617",
+          "read_sites": [
+            "0x7100174928"
+          ],
+          "install_call": "0x7100174940"
+        }
+      },
+      {
+        "bank_index": 9,
+        "member": "datSkillCardHelp.bmd",
+        "steam": {
+          "section": ".sdata",
+          "offset": 683464,
+          "rva": "0x92ddc8",
+          "raw_offset": 9619912,
+          "size": 21,
+          "sha256": "7f8efb5c733c08c4edb21c0c9a696ee1167a74e0c4291fcb856ad7002304508c",
+          "container": "P4G.exe",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        },
+        "switch": {
+          "address": "0x71006141e5",
+          "read_sites": [
+            "0x7100174948"
+          ],
+          "install_call": "0x7100174960"
+        }
+      },
+      {
+        "bank_index": 10,
+        "member": "datDressHelp.bmd",
+        "steam": {
+          "section": ".sdata",
+          "offset": 683536,
+          "rva": "0x92de10",
+          "raw_offset": 9619984,
+          "size": 17,
+          "sha256": "d978399ce04c4847f3f0705610babffe3d1584055277e0b3f0caba41cb6f3c70",
+          "container": "P4G.exe",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        },
+        "switch": {
+          "address": "0x71005de747",
+          "read_sites": [
+            "0x7100174968"
+          ],
+          "install_call": "0x7100174980"
+        }
+      },
+      {
+        "bank_index": 11,
+        "member": "datItem2Help.bmd",
+        "steam": {
+          "section": ".sdata",
+          "offset": 683512,
+          "rva": "0x92ddf8",
+          "raw_offset": 9619960,
+          "size": 17,
+          "sha256": "59a0e2df49448813f4fdf57950e9492cfaa609c866ce35cd88197c702f1c14d7",
+          "container": "P4G.exe",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        },
+        "switch": {
+          "address": "0x7100625089",
+          "read_sites": [
+            "0x7100174988"
+          ],
+          "install_call": "0x71001749a0"
+        }
+      },
+      {
+        "bank_index": 12,
+        "member": "datWeapon2Help.bmd",
+        "steam": {
+          "section": ".sdata",
+          "offset": 683576,
+          "rva": "0x92de38",
+          "raw_offset": 9620024,
+          "size": 19,
+          "sha256": "b9ef062e4e278cdc8249508d59c079c6414e086147f21b78c2f79740a5f7779d",
+          "container": "P4G.exe",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        },
+        "switch": {
+          "address": "0x71005f6f0b",
+          "read_sites": [
+            "0x71001749a8"
+          ],
+          "install_call": "0x71001749c0"
+        }
+      }
+    ],
+    "ordinary_steam_readers": [
+      {
+        "function_envelope": "0x248740",
+        "pc": "0x248769",
+        "target": "0x90e6c0",
+        "mnemonic": "lea",
+        "operands": "rsi, [rip + 0x6c5f50]"
+      },
+      {
+        "function_envelope": "0x2491ca",
+        "pc": "0x2492b3",
+        "target": "0x90e6c0",
+        "mnemonic": "lea",
+        "operands": "rsi, [rip + 0x6c5406]"
+      }
+    ],
+    "reader_census_scope": "All known PE exception-directory envelopes wholly inside.shared; two direct RIP table references. Non-unwind/indirect/alias readers are not excluded, and lack of a reference is not absence proof.",
+    "steam_code_witnesses": [
+      {
+        "container": "P4G.exe",
+        "section": ".shared",
+        "rva": "0x248740",
+        "offset": 2389824,
+        "raw_offset": 2391360,
+        "size": 194,
+        "sha256": "9bec1d6abe7417efa02114a320a67a650d2c64ee27b22599cfc532379cff7dc1",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true,
+        "role": "Complete13-row named-bank lookup/registration loop, including found-member branch",
+        "instructions": [
+          {
+            "pc": "0x248740",
+            "mnemonic": "mov",
+            "operands": "qword ptr [rsp + 8], rbx"
+          },
+          {
+            "pc": "0x248745",
+            "mnemonic": "mov",
+            "operands": "qword ptr [rsp + 0x10], rbp"
+          },
+          {
+            "pc": "0x24874a",
+            "mnemonic": "mov",
+            "operands": "qword ptr [rsp + 0x18], rsi"
+          },
+          {
+            "pc": "0x24874f",
+            "mnemonic": "push",
+            "operands": "rdi"
+          },
+          {
+            "pc": "0x248750",
+            "mnemonic": "push",
+            "operands": "r14"
+          },
+          {
+            "pc": "0x248752",
+            "mnemonic": "push",
+            "operands": "r15"
+          },
+          {
+            "pc": "0x248754",
+            "mnemonic": "sub",
+            "operands": "rsp, 0x20"
+          },
+          {
+            "pc": "0x248758",
+            "mnemonic": "mov",
+            "operands": "r14, rcx"
+          },
+          {
+            "pc": "0x24875b",
+            "mnemonic": "lea",
+            "operands": "rcx, [rip + 0x1e26736c]"
+          },
+          {
+            "pc": "0x248762",
+            "mnemonic": "call",
+            "operands": "0x881a04"
+          },
+          {
+            "pc": "0x248767",
+            "mnemonic": "xor",
+            "operands": "edi, edi"
+          },
+          {
+            "pc": "0x248769",
+            "mnemonic": "lea",
+            "operands": "rsi, [rip + 0x6c5f50]"
+          },
+          {
+            "pc": "0x248770",
+            "mnemonic": "lea",
+            "operands": "r15, [rip + 0x8c0d19]"
+          },
+          {
+            "pc": "0x248777",
+            "mnemonic": "nop",
+            "operands": "word ptr [rax + rax]"
+          },
+          {
+            "pc": "0x248780",
+            "mnemonic": "mov",
+            "operands": "r11d, dword ptr [r14]"
+          },
+          {
+            "pc": "0x248783",
+            "mnemonic": "lea",
+            "operands": "r9, [r14 + 4]"
+          },
+          {
+            "pc": "0x248787",
+            "mnemonic": "mov",
+            "operands": "rbx, qword ptr [rsi]"
+          },
+          {
+            "pc": "0x24878a",
+            "mnemonic": "xor",
+            "operands": "r10d, r10d"
+          },
+          {
+            "pc": "0x24878d",
+            "mnemonic": "test",
+            "operands": "r11d, r11d"
+          },
+          {
+            "pc": "0x248790",
+            "mnemonic": "jle",
+            "operands": "0x2487ca"
+          },
+          {
+            "pc": "0x248792",
+            "mnemonic": "mov",
+            "operands": "r8, rbx"
+          },
+          {
+            "pc": "0x248795",
+            "mnemonic": "mov",
+            "operands": "rax, r9"
+          },
+          {
+            "pc": "0x248798",
+            "mnemonic": "sub",
+            "operands": "r8, r9"
+          },
+          {
+            "pc": "0x24879b",
+            "mnemonic": "nop",
+            "operands": "dword ptr [rax + rax]"
+          },
+          {
+            "pc": "0x2487a0",
+            "mnemonic": "movzx",
+            "operands": "edx, byte ptr [rax]"
+          },
+          {
+            "pc": "0x2487a3",
+            "mnemonic": "movzx",
+            "operands": "ecx, byte ptr [rax + r8]"
+          },
+          {
+            "pc": "0x2487a8",
+            "mnemonic": "sub",
+            "operands": "edx, ecx"
+          },
+          {
+            "pc": "0x2487aa",
+            "mnemonic": "jne",
+            "operands": "0x2487b3"
+          },
+          {
+            "pc": "0x2487ac",
+            "mnemonic": "inc",
+            "operands": "rax"
+          },
+          {
+            "pc": "0x2487af",
+            "mnemonic": "test",
+            "operands": "ecx, ecx"
+          },
+          {
+            "pc": "0x2487b1",
+            "mnemonic": "jne",
+            "operands": "0x2487a0"
+          },
+          {
+            "pc": "0x2487b3",
+            "mnemonic": "test",
+            "operands": "edx, edx"
+          },
+          {
+            "pc": "0x2487b5",
+            "mnemonic": "je",
+            "operands": "0x2487fc"
+          },
+          {
+            "pc": "0x2487b7",
+            "mnemonic": "mov",
+            "operands": "eax, dword ptr [r9 + 0x20]"
+          },
+          {
+            "pc": "0x2487bb",
+            "mnemonic": "inc",
+            "operands": "r10d"
+          },
+          {
+            "pc": "0x2487be",
+            "mnemonic": "add",
+            "operands": "r9, 0x24"
+          },
+          {
+            "pc": "0x2487c2",
+            "mnemonic": "add",
+            "operands": "r9, rax"
+          },
+          {
+            "pc": "0x2487c5",
+            "mnemonic": "cmp",
+            "operands": "r10d, r11d"
+          },
+          {
+            "pc": "0x2487c8",
+            "mnemonic": "jl",
+            "operands": "0x248792"
+          },
+          {
+            "pc": "0x2487ca",
+            "mnemonic": "xor",
+            "operands": "ecx, ecx"
+          },
+          {
+            "pc": "0x2487cc",
+            "mnemonic": "call",
+            "operands": "0x45b830"
+          },
+          {
+            "pc": "0x2487d1",
+            "mnemonic": "movsxd",
+            "operands": "rcx, edi"
+          },
+          {
+            "pc": "0x2487d4",
+            "mnemonic": "add",
+            "operands": "rsi, 8"
+          },
+          {
+            "pc": "0x2487d8",
+            "mnemonic": "inc",
+            "operands": "edi"
+          },
+          {
+            "pc": "0x2487da",
+            "mnemonic": "mov",
+            "operands": "dword ptr [r15 + rcx*4], eax"
+          },
+          {
+            "pc": "0x2487de",
+            "mnemonic": "cmp",
+            "operands": "edi, 0xd"
+          },
+          {
+            "pc": "0x2487e1",
+            "mnemonic": "jb",
+            "operands": "0x248780"
+          },
+          {
+            "pc": "0x2487e3",
+            "mnemonic": "mov",
+            "operands": "rbx, qword ptr [rsp + 0x40]"
+          },
+          {
+            "pc": "0x2487e8",
+            "mnemonic": "mov",
+            "operands": "rbp, qword ptr [rsp + 0x48]"
+          },
+          {
+            "pc": "0x2487ed",
+            "mnemonic": "mov",
+            "operands": "rsi, qword ptr [rsp + 0x50]"
+          },
+          {
+            "pc": "0x2487f2",
+            "mnemonic": "add",
+            "operands": "rsp, 0x20"
+          },
+          {
+            "pc": "0x2487f6",
+            "mnemonic": "pop",
+            "operands": "r15"
+          },
+          {
+            "pc": "0x2487f8",
+            "mnemonic": "pop",
+            "operands": "r14"
+          },
+          {
+            "pc": "0x2487fa",
+            "mnemonic": "pop",
+            "operands": "rdi"
+          },
+          {
+            "pc": "0x2487fb",
+            "mnemonic": "ret",
+            "operands": ""
+          },
+          {
+            "pc": "0x2487fc",
+            "mnemonic": "lea",
+            "operands": "rcx, [r9 + 0x24]"
+          },
+          {
+            "pc": "0x248800",
+            "mnemonic": "jmp",
+            "operands": "0x2487cc"
+          }
+        ]
+      },
+      {
+        "container": "P4G.exe",
+        "section": ".shared",
+        "rva": "0x2492a7",
+        "offset": 2392743,
+        "raw_offset": 2394279,
+        "size": 437,
+        "sha256": "0d835d2e1b4e76f549f1fd5c7f5e0fcd30d65b7dca46c251b66ffec7bac78b48",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true,
+        "role": "Complete13-row named-bank lookup/registration loop, including found-member branch",
+        "instructions": [
+          {
+            "pc": "0x2492a7",
+            "mnemonic": "lea",
+            "operands": "r15, [rdi + 0x34]"
+          },
+          {
+            "pc": "0x2492ab",
+            "mnemonic": "lea",
+            "operands": "r12, [rdi + 0x28]"
+          },
+          {
+            "pc": "0x2492af",
+            "mnemonic": "mov",
+            "operands": "eax, dword ptr [r12]"
+          },
+          {
+            "pc": "0x2492b3",
+            "mnemonic": "lea",
+            "operands": "rsi, [rip + 0x6c5406]"
+          },
+          {
+            "pc": "0x2492ba",
+            "mnemonic": "movups",
+            "operands": "xmm0, xmmword ptr [rsp + 0x20]"
+          },
+          {
+            "pc": "0x2492bf",
+            "mnemonic": "mov",
+            "operands": "dword ptr [rbp + 0x40], eax"
+          },
+          {
+            "pc": "0x2492c2",
+            "mnemonic": "xor",
+            "operands": "edi, edi"
+          },
+          {
+            "pc": "0x2492c4",
+            "mnemonic": "movups",
+            "operands": "xmm1, xmmword ptr [rsp + 0x38]"
+          },
+          {
+            "pc": "0x2492c9",
+            "mnemonic": "mov",
+            "operands": "rax, qword ptr [rip + 0xf5e610]"
+          },
+          {
+            "pc": "0x2492d0",
+            "mnemonic": "lea",
+            "operands": "r12, [rip + 0x8c01b9]"
+          },
+          {
+            "pc": "0x2492d7",
+            "mnemonic": "movups",
+            "operands": "xmmword ptr [rip + 0xf5e4a2], xmm0"
+          },
+          {
+            "pc": "0x2492de",
+            "mnemonic": "mov",
+            "operands": "qword ptr [rbp + 0x38], r15"
+          },
+          {
+            "pc": "0x2492e2",
+            "mnemonic": "movups",
+            "operands": "xmm0, xmmword ptr [rsp + 0x48]"
+          },
+          {
+            "pc": "0x2492e7",
+            "mnemonic": "movups",
+            "operands": "xmmword ptr [rip + 0xf5e57a], xmm1"
+          },
+          {
+            "pc": "0x2492ee",
+            "mnemonic": "movups",
+            "operands": "xmm1, xmmword ptr [rsp + 0x58]"
+          },
+          {
+            "pc": "0x2492f3",
+            "mnemonic": "movups",
+            "operands": "xmmword ptr [rip + 0xf5e4b6], xmm0"
+          },
+          {
+            "pc": "0x2492fa",
+            "mnemonic": "movups",
+            "operands": "xmm0, xmmword ptr [rsp + 0x68]"
+          },
+          {
+            "pc": "0x2492ff",
+            "mnemonic": "movups",
+            "operands": "xmmword ptr [rip + 0xf5e552], xmm1"
+          },
+          {
+            "pc": "0x249306",
+            "mnemonic": "movups",
+            "operands": "xmm1, xmmword ptr [rsp + 0x78]"
+          },
+          {
+            "pc": "0x24930b",
+            "mnemonic": "movups",
+            "operands": "xmmword ptr [rip + 0xf5e4be], xmm0"
+          },
+          {
+            "pc": "0x249312",
+            "mnemonic": "movups",
+            "operands": "xmm0, xmmword ptr [rbp - 0x78]"
+          },
+          {
+            "pc": "0x249316",
+            "mnemonic": "movups",
+            "operands": "xmmword ptr [rip + 0xf5e473], xmm1"
+          },
+          {
+            "pc": "0x24931d",
+            "mnemonic": "movups",
+            "operands": "xmm1, xmmword ptr [rbp - 0x68]"
+          },
+          {
+            "pc": "0x249321",
+            "mnemonic": "movups",
+            "operands": "xmmword ptr [rip + 0xf5e520], xmm0"
+          },
+          {
+            "pc": "0x249328",
+            "mnemonic": "movups",
+            "operands": "xmm0, xmmword ptr [rbp - 0x58]"
+          },
+          {
+            "pc": "0x24932c",
+            "mnemonic": "movups",
+            "operands": "xmmword ptr [rip + 0xf5e48d], xmm1"
+          },
+          {
+            "pc": "0x249333",
+            "mnemonic": "movups",
+            "operands": "xmm1, xmmword ptr [rbp - 0x48]"
+          },
+          {
+            "pc": "0x249337",
+            "mnemonic": "movaps",
+            "operands": "xmmword ptr [rip + 0xf5e4a2], xmm0"
+          },
+          {
+            "pc": "0x24933e",
+            "mnemonic": "movups",
+            "operands": "xmm0, xmmword ptr [rbp - 0x38]"
+          },
+          {
+            "pc": "0x249342",
+            "mnemonic": "movaps",
+            "operands": "xmmword ptr [rip + 0xf5e4a7], xmm1"
+          },
+          {
+            "pc": "0x249349",
+            "mnemonic": "movups",
+            "operands": "xmm1, xmmword ptr [rbp - 0x28]"
+          },
+          {
+            "pc": "0x24934d",
+            "mnemonic": "movaps",
+            "operands": "xmmword ptr [rip + 0xf5e4ac], xmm0"
+          },
+          {
+            "pc": "0x249354",
+            "mnemonic": "movups",
+            "operands": "xmm0, xmmword ptr [rbp - 0x18]"
+          },
+          {
+            "pc": "0x249358",
+            "mnemonic": "movaps",
+            "operands": "xmmword ptr [rip + 0xf5e4b1], xmm1"
+          },
+          {
+            "pc": "0x24935f",
+            "mnemonic": "movups",
+            "operands": "xmm1, xmmword ptr [rbp - 8]"
+          },
+          {
+            "pc": "0x249363",
+            "mnemonic": "movaps",
+            "operands": "xmmword ptr [rip + 0xf5e4b6], xmm0"
+          },
+          {
+            "pc": "0x24936a",
+            "mnemonic": "movups",
+            "operands": "xmm0, xmmword ptr [rbp + 8]"
+          },
+          {
+            "pc": "0x24936e",
+            "mnemonic": "movaps",
+            "operands": "xmmword ptr [rip + 0xf5e4bb], xmm1"
+          },
+          {
+            "pc": "0x249375",
+            "mnemonic": "movups",
+            "operands": "xmm1, xmmword ptr [rbp + 0x18]"
+          },
+          {
+            "pc": "0x249379",
+            "mnemonic": "mov",
+            "operands": "r14, qword ptr [rax + 8]"
+          },
+          {
+            "pc": "0x24937d",
+            "mnemonic": "movups",
+            "operands": "xmmword ptr [rip + 0xf5e4f4], xmm0"
+          },
+          {
+            "pc": "0x249384",
+            "mnemonic": "movups",
+            "operands": "xmm0, xmmword ptr [rbp + 0x28]"
+          },
+          {
+            "pc": "0x249388",
+            "mnemonic": "movups",
+            "operands": "xmmword ptr [rip + 0xf5e411], xmm1"
+          },
+          {
+            "pc": "0x24938f",
+            "mnemonic": "movups",
+            "operands": "xmm1, xmmword ptr [rbp + 0x38]"
+          },
+          {
+            "pc": "0x249393",
+            "mnemonic": "movups",
+            "operands": "xmmword ptr [rip + 0xf5e4fe], xmm0"
+          },
+          {
+            "pc": "0x24939a",
+            "mnemonic": "movups",
+            "operands": "xmmword ptr [rip + 0xf5e4e7], xmm1"
+          },
+          {
+            "pc": "0x2493a1",
+            "mnemonic": "nop",
+            "operands": "dword ptr [rax]"
+          },
+          {
+            "pc": "0x2493a5",
+            "mnemonic": "nop",
+            "operands": "word ptr [rax + rax]"
+          },
+          {
+            "pc": "0x2493b0",
+            "mnemonic": "mov",
+            "operands": "r11d, dword ptr [r14]"
+          },
+          {
+            "pc": "0x2493b3",
+            "mnemonic": "lea",
+            "operands": "r9, [r14 + 4]"
+          },
+          {
+            "pc": "0x2493b7",
+            "mnemonic": "mov",
+            "operands": "rbx, qword ptr [rsi]"
+          },
+          {
+            "pc": "0x2493ba",
+            "mnemonic": "xor",
+            "operands": "r10d, r10d"
+          },
+          {
+            "pc": "0x2493bd",
+            "mnemonic": "test",
+            "operands": "r11d, r11d"
+          },
+          {
+            "pc": "0x2493c0",
+            "mnemonic": "jle",
+            "operands": "0x2493fe"
+          },
+          {
+            "pc": "0x2493c2",
+            "mnemonic": "mov",
+            "operands": "r8, rbx"
+          },
+          {
+            "pc": "0x2493c5",
+            "mnemonic": "mov",
+            "operands": "rax, r9"
+          },
+          {
+            "pc": "0x2493c8",
+            "mnemonic": "sub",
+            "operands": "r8, r9"
+          },
+          {
+            "pc": "0x2493cb",
+            "mnemonic": "nop",
+            "operands": "dword ptr [rax + rax]"
+          },
+          {
+            "pc": "0x2493d0",
+            "mnemonic": "movzx",
+            "operands": "edx, byte ptr [rax]"
+          },
+          {
+            "pc": "0x2493d3",
+            "mnemonic": "movzx",
+            "operands": "ecx, byte ptr [rax + r8]"
+          },
+          {
+            "pc": "0x2493d8",
+            "mnemonic": "sub",
+            "operands": "edx, ecx"
+          },
+          {
+            "pc": "0x2493da",
+            "mnemonic": "jne",
+            "operands": "0x2493e7"
+          },
+          {
+            "pc": "0x2493e0",
+            "mnemonic": "inc",
+            "operands": "rax"
+          },
+          {
+            "pc": "0x2493e3",
+            "mnemonic": "test",
+            "operands": "ecx, ecx"
+          },
+          {
+            "pc": "0x2493e5",
+            "mnemonic": "jne",
+            "operands": "0x2493d0"
+          },
+          {
+            "pc": "0x2493e7",
+            "mnemonic": "test",
+            "operands": "edx, edx"
+          },
+          {
+            "pc": "0x2493e9",
+            "mnemonic": "je",
+            "operands": "0x249456"
+          },
+          {
+            "pc": "0x2493eb",
+            "mnemonic": "mov",
+            "operands": "eax, dword ptr [r9 + 0x20]"
+          },
+          {
+            "pc": "0x2493ef",
+            "mnemonic": "inc",
+            "operands": "r10d"
+          },
+          {
+            "pc": "0x2493f2",
+            "mnemonic": "add",
+            "operands": "r9, 0x24"
+          },
+          {
+            "pc": "0x2493f6",
+            "mnemonic": "add",
+            "operands": "r9, rax"
+          },
+          {
+            "pc": "0x2493f9",
+            "mnemonic": "cmp",
+            "operands": "r10d, r11d"
+          },
+          {
+            "pc": "0x2493fc",
+            "mnemonic": "jl",
+            "operands": "0x2493c2"
+          },
+          {
+            "pc": "0x2493fe",
+            "mnemonic": "xor",
+            "operands": "ecx, ecx"
+          },
+          {
+            "pc": "0x249400",
+            "mnemonic": "call",
+            "operands": "0x45b830"
+          },
+          {
+            "pc": "0x249405",
+            "mnemonic": "movsxd",
+            "operands": "rcx, edi"
+          },
+          {
+            "pc": "0x249408",
+            "mnemonic": "add",
+            "operands": "rsi, 8"
+          },
+          {
+            "pc": "0x24940c",
+            "mnemonic": "inc",
+            "operands": "edi"
+          },
+          {
+            "pc": "0x24940e",
+            "mnemonic": "mov",
+            "operands": "dword ptr [r12 + rcx*4], eax"
+          },
+          {
+            "pc": "0x249412",
+            "mnemonic": "cmp",
+            "operands": "edi, 0xd"
+          },
+          {
+            "pc": "0x249415",
+            "mnemonic": "jb",
+            "operands": "0x2493b0"
+          },
+          {
+            "pc": "0x249417",
+            "mnemonic": "mov",
+            "operands": "rax, qword ptr [rsp + 0x30]"
+          },
+          {
+            "pc": "0x24941c",
+            "mnemonic": "mov",
+            "operands": "r15, qword ptr [rsp + 0x280]"
+          },
+          {
+            "pc": "0x249424",
+            "mnemonic": "mov",
+            "operands": "r14, qword ptr [rsp + 0x288]"
+          },
+          {
+            "pc": "0x24942c",
+            "mnemonic": "mov",
+            "operands": "r12, qword ptr [rsp + 0x2c8]"
+          },
+          {
+            "pc": "0x249434",
+            "mnemonic": "mov",
+            "operands": "rdi, qword ptr [rsp + 0x2c0]"
+          },
+          {
+            "pc": "0x24943c",
+            "mnemonic": "mov",
+            "operands": "rsi, qword ptr [rsp + 0x2b8]"
+          },
+          {
+            "pc": "0x249444",
+            "mnemonic": "mov",
+            "operands": "dword ptr [rax], 2"
+          },
+          {
+            "pc": "0x24944a",
+            "mnemonic": "mov",
+            "operands": "rax, 0xffffffffffffffff"
+          },
+          {
+            "pc": "0x249451",
+            "mnemonic": "jmp",
+            "operands": "0x248861"
+          },
+          {
+            "pc": "0x249456",
+            "mnemonic": "lea",
+            "operands": "rcx, [r9 + 0x24]"
+          },
+          {
+            "pc": "0x24945a",
+            "mnemonic": "jmp",
+            "operands": "0x249400"
+          }
+        ]
+      }
+    ],
+    "steam_registration_semantics": "Both ordinary readers walk the same pointer table by8, perform exact named archive-member lookup, create a BMD handle with45b830 and store it at the ordered index in persistent bank array RVA b09490. Both compare the loop index against13. Missing member passes null to the same constructor; no new fallback is invented.",
+    "nso_correspondence": {
+      "reader": "0x7100174430",
+      "end": "0x7100174a00",
+      "sha256": "e6795a43d5d6fd39ee25f5b5f740ca3a0d7ea2abebf4ed8f01962dc80e49e9ff",
+      "archive": "init/datMsg.pak",
+      "lookup": "0x7100397040",
+      "install": "0x710018b250",
+      "complete_banks": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "method": "Thirteen ordinary named lookups and explicit index0..12 registrations; first9 correspond in order to the PS2 table after the documented old help/ directory is replaced by the named archive-member namespace. Four additional named banks are positively observed, not inferred from padding."
+    }
+  },
+  "admissions": [
+    {
+      "address": "0x0063f520",
+      "ps2_size": 48,
+      "role": "complete persistent-help filename registration vector,9 old entries ->13 Golden entries",
+      "all_ps2_table_users": [
+        "0x002bdf20"
+      ],
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x90e6c0",
+        "offset": 554688,
+        "raw_offset": 9491136,
+        "size": 104,
+        "sha256": "541f37cc951bf13c6e4e0e7cc708b25928306657f7c4d29308174526d3765ea0",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true,
+        "source_group": "L1-C3-named-help-bank-table-20261113",
+        "source_build": 10836033,
+        "shape": "ordered-name-pointer-table",
+        "element_width": 8,
+        "rows": 13,
+        "preferred_image_base": "0x140000000",
+        "components": [
+          {
+            "section": ".sdata",
+            "offset": 683304,
+            "rva": "0x92dd28",
+            "raw_offset": 9619752,
+            "size": 18,
+            "sha256": "99d4039705bb9337ae2bf20a6ed40b335cabc5bed32deb959cc59117a1f9e07e",
+            "container": "P4G.exe",
+            "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+            "mapping_proven": true
+          },
+          {
+            "section": ".sdata",
+            "offset": 683280,
+            "rva": "0x92dd10",
+            "raw_offset": 9619728,
+            "size": 17,
+            "sha256": "01d72e3e4953e329c66ff513a1aafd13b4723784924fbcfb79cb20a0fd5f96a5",
+            "container": "P4G.exe",
+            "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+            "mapping_proven": true
+          },
+          {
+            "section": ".sdata",
+            "offset": 683352,
+            "rva": "0x92dd58",
+            "raw_offset": 9619800,
+            "size": 21,
+            "sha256": "342f1ffcd672172ce1922c831cf01a48a098b68f694f2f3c3e1ca20601f87710",
+            "container": "P4G.exe",
+            "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+            "mapping_proven": true
+          },
+          {
+            "section": ".sdata",
+            "offset": 683328,
+            "rva": "0x92dd40",
+            "raw_offset": 9619776,
+            "size": 21,
+            "sha256": "e74f537fb67265c6414d91e1cf596dbd67aaa81c5369222d390ac5d45679268a",
+            "container": "P4G.exe",
+            "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+            "mapping_proven": true
+          },
+          {
+            "section": ".sdata",
+            "offset": 683400,
+            "rva": "0x92dd88",
+            "raw_offset": 9619848,
+            "size": 16,
+            "sha256": "4524033b579b311def0a4b1d94765d8a26feeb959e279685af7352cb511a1115",
+            "container": "P4G.exe",
+            "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+            "mapping_proven": true
+          },
+          {
+            "section": ".sdata",
+            "offset": 683376,
+            "rva": "0x92dd70",
+            "raw_offset": 9619824,
+            "size": 21,
+            "sha256": "4b5068966f2279f8ce33520ed7eabc17968cddc6637a40cffcd073efb3d0a92d",
+            "container": "P4G.exe",
+            "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+            "mapping_proven": true
+          },
+          {
+            "section": ".sdata",
+            "offset": 683440,
+            "rva": "0x92ddb0",
+            "raw_offset": 9619888,
+            "size": 17,
+            "sha256": "eb9d64177e9e4ed76b48f387739ed7bb606dfa91fe376f96a670de772b9bf422",
+            "container": "P4G.exe",
+            "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+            "mapping_proven": true
+          },
+          {
+            "section": ".sdata",
+            "offset": 683416,
+            "rva": "0x92dd98",
+            "raw_offset": 9619864,
+            "size": 20,
+            "sha256": "c0cab345c96dadd7be7cf8e7b011417b63ba7251a82e4aaa794d987d92a01687",
+            "container": "P4G.exe",
+            "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+            "mapping_proven": true
+          },
+          {
+            "section": ".sdata",
+            "offset": 683488,
+            "rva": "0x92dde0",
+            "raw_offset": 9619936,
+            "size": 17,
+            "sha256": "13d82bf94712c10790e4d1637e5db4287b5e32b96ec73c3b0ebe7cbb87a8f737",
+            "container": "P4G.exe",
+            "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+            "mapping_proven": true
+          },
+          {
+            "section": ".sdata",
+            "offset": 683464,
+            "rva": "0x92ddc8",
+            "raw_offset": 9619912,
+            "size": 21,
+            "sha256": "7f8efb5c733c08c4edb21c0c9a696ee1167a74e0c4291fcb856ad7002304508c",
+            "container": "P4G.exe",
+            "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+            "mapping_proven": true
+          },
+          {
+            "section": ".sdata",
+            "offset": 683536,
+            "rva": "0x92de10",
+            "raw_offset": 9619984,
+            "size": 17,
+            "sha256": "d978399ce04c4847f3f0705610babffe3d1584055277e0b3f0caba41cb6f3c70",
+            "container": "P4G.exe",
+            "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+            "mapping_proven": true
+          },
+          {
+            "section": ".sdata",
+            "offset": 683512,
+            "rva": "0x92ddf8",
+            "raw_offset": 9619960,
+            "size": 17,
+            "sha256": "59a0e2df49448813f4fdf57950e9492cfaa609c866ce35cd88197c702f1c14d7",
+            "container": "P4G.exe",
+            "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+            "mapping_proven": true
+          },
+          {
+            "section": ".sdata",
+            "offset": 683576,
+            "rva": "0x92de38",
+            "raw_offset": 9620024,
+            "size": 19,
+            "sha256": "b9ef062e4e278cdc8249508d59c079c6414e086147f21b78c2f79740a5f7779d",
+            "container": "P4G.exe",
+            "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+            "mapping_proven": true
+          }
+        ],
+        "structural_reader_platform": "Steam.shared and Switch1.2",
+        "structural_readers": [
+          "0x248740..0x248802",
+          "0x2492a7..0x24945c",
+          "0x7100174430"
+        ]
+      },
+      "structural_correspondence": "The PS2 nine-word table points to9 help pathnames consumed in a named-lookup/install loop. The full Steam thirteen-pointer array is independently bounded by two ordinary13-iteration named-lookup/install loops, and the NSO constructor confirms the exact thirteen names and index0..12 registrations. This is an immutable resource-key vector, distinct from mutable message handles and the Flags-versus-Kind selector tables.",
+      "installation": {
+        "kind": "semantic-named-bank-family",
+        "retain_ps2_partition": true,
+        "ps2_live_size": 36,
+        "retain_ps2_tail": 12,
+        "requirement": "Replace the complete9-name PS2 registration vector with the complete13-name Golden family at fclShopLoadMessageResources002bdf20, including translated/inlined/compiled-native table copies and callers. Use hash-qualified Steam13*8 pointer-table and named-string data only; decode file VAs to bounded RVAs, never guest/host runtime pointers. Request init/datMsg.pak, wait for readiness, resolve all13 named members in order and install banks0..12 through the Golden-aware message-bank provider. Preserve the guest-owned lifecycle and contextual banks13/14 described in l1-cohort-3-field-bank-proof.json. Do not write104 Golden bytes or thirteen pointers over the48B guest partition or its36B stack vector. Retain that partition/tail and consume the source through the semantic route. Raw PS2 resource offsets, ordinal-only selectors, live Golden handles, guessed fallback and runtime NSO dependency are forbidden. Complete archive/BMD provider and selector/native-user seams remain pending; a data-only filename patch is insufficient. Preserve the datLoadEntryTable continuation and all surrounding non-table loader effects; a replacement must not drop item/progression initialization."
+      }
+    }
+  ]
+}

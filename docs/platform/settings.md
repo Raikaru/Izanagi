@@ -33,6 +33,15 @@ mapping. Other player keys are:
 - `[golden] install`: the player's own Persona 4 Golden (Steam) folder for the
   Golden mechanics mod; `P4PC_GOLDEN` overrides it. When neither is set, the
   standard Steam libraries are searched. See [Golden mechanics](../modding/golden.md).
+- `[golden] hca_key`: private, user-supplied HCA key, 1–16 hexadecimal digits
+  with optional `0x`; empty/zero means no key and keyed audio is refused.
+  There is no key environment variable or bundled/derived key. Do not share
+  this INI. Generic getters redact it and session captures blank its value.
+  Numeric copies are cleared after transfer into FFmpeg extradata; the INI,
+  live config and decoder necessarily retain sensitive data in memory.
+  Structured crash metadata never contains a config dump; raw OS register/
+  stack diagnostics are not a secure-memory boundary.
+  See [Golden audio](../golden_mode/audio.md).
 - `audio.volume` / `P4PC_VOLUME`: 0..100, default 100, applied to the device stream via
   `p4snd_set_user_volume`. Offline test renders do not observe device volume.
 - `input.deadzone` / `P4PC_STICK_DEADZONE`: 0..50 percent, default 0.

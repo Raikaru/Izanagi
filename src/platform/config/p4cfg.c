@@ -7,6 +7,7 @@
 #include <string.h>
 
 #include <SDL3/SDL.h>
+#include "p4pc/hostpath.h"
 
 #define MAX_ENTRIES 96
 #define KEY_LEN 40
@@ -42,6 +43,10 @@ const char *p4cfg_template(void)
            "\n"
            "[game]\n"
            "# The path of your own Persona 4 (USA) disc image (.iso). The game asks for it on the first run and writes it here; delete the line to be asked again.\n"
+           "\n"
+           "[golden]\n"
+           "# Private HCA audio key supplied by you, in hexadecimal (up to 16 digits). Empty refuses keyed audio. Do not share this file.\n"
+           "hca_key =\n"
            "\n"
            "[video]\n"
            "# 1: borderless fullscreen on the desktop. F11 or Alt+Enter switch it while playing.\n"
@@ -260,7 +265,7 @@ void p4cfg_load(void)
     }
     sLoaded = 1;
     sCount = 0;
-    over = getenv("P4PC_CONFIG");
+    over = p4_host_getenv("P4PC_CONFIG");
     if (over != NULL && strcmp(over, "none") == 0) {
         return;
     }
@@ -275,7 +280,7 @@ void p4cfg_load(void)
         snprintf(sPath, sizeof sPath, "%sp4pc.ini", pref);
         SDL_free(pref);
     }
-    f = fopen(sPath, "rb");
+    f = p4_host_fopen(sPath, "rb");
     if (f != NULL) {
         char *text = (char *)malloc(1u << 16);
         size_t n = text != NULL ? fread(text, 1, (1u << 16) - 1, f) : 0;
@@ -291,7 +296,7 @@ void p4cfg_load(void)
     }
     if (over == NULL && p4cfg_player_run()) {
         /* the first run of a player: write the file (and use it), so the settings can be found */
-        f = fopen(sPath, "wb");
+        f = p4_host_fopen(sPath, "wb");
         if (f != NULL) {
             const char *t = p4cfg_template();
 
@@ -308,7 +313,7 @@ void p4cfg_load(void)
 int p4cfg_refresh_startup(void)
 {
     if(!sLoaded||!sPath[0])return -1;
-    FILE *file=fopen(sPath,"rb");
+    FILE *file=p4_host_fopen(sPath,"rb");
     if(!file)return -1;
     char *text=malloc(1u<<16);
     if(!text){fclose(file);return -1;}
@@ -333,7 +338,7 @@ const char *p4cfg_get(const char *key)
 
     for (i = 0; i < sizeof kEnv / sizeof kEnv[0]; i++) {
         if (strcmp(kEnv[i].key, key) == 0) {
-            const char *e = getenv(kEnv[i].env);
+            const char *e = p4_host_getenv(kEnv[i].env);
 
             if (e != NULL && e[0] != '\0') {
                 return e;
@@ -342,10 +347,45 @@ const char *p4cfg_get(const char *key)
     }
     for (k = 0; k < sCount; k++) {
         if (strcmp(sEntries[k].key, key) == 0) {
+            if (!strcmp(key, "golden.hca_key") && sEntries[k].val[0])
+                return "[redacted]";
             return sEntries[k].val;
         }
     }
     return NULL;
+}
+
+int p4cfg_hca_key(uint64_t *key)
+{
+    const char *value = "";
+    uint64_t parsed = 0;
+    size_t digits = 0;
+    if (!key) return -1;
+    *key = 0;
+    p4cfg_load();
+    for (int i = 0; i < sCount; ++i) {
+        if (!strcmp(sEntries[i].key, "golden.hca_key")) {
+            value = sEntries[i].val;
+            break;
+        }
+    }
+    if (value[0] == '0' && (value[1] == 'x' || value[1] == 'X')) {
+        value += 2;
+        if (!*value) return -1;
+    }
+    for (; *value; ++value) {
+        unsigned digit;
+        if (*value >= '0' && *value <= '9') digit = (unsigned)(*value - '0');
+        else if (*value >= 'a' && *value <= 'f') digit = (unsigned)(*value - 'a' + 10);
+        else if (*value >= 'A' && *value <= 'F') digit = (unsigned)(*value - 'A' + 10);
+        else { *(volatile uint64_t *)&parsed = 0; return -1; }
+        if (++digits > 16) { *(volatile uint64_t *)&parsed = 0; return -1; }
+        parsed = (parsed << 4) | digit;
+    }
+    *key = parsed;
+    int present = parsed != 0;
+    *(volatile uint64_t *)&parsed = 0;
+    return present;
 }
 
 int p4cfg_int(const char *key, int def)

@@ -8,6 +8,7 @@
  * Direct transliteration of the retail code (the decomp's NON_MATCHING body has the same
  * behaviour). */
 
+#include "p4pc/golden_ai_native.h"
 extern u32 p4pc_rng_draws;
 extern void p4pc_rng_value(u32 draw, u32 value);
 extern int p4pc_align_rng_calls_enabled;
@@ -21,6 +22,11 @@ u32 RpRandom(void)
     p4pc_rng_draws++;
     if (p4pc_align_rng_calls_enabled)
         p4pc_align_rng_call(p4pc_rng_draws, __builtin_return_address(0));
+    u32 goldenValue;
+    if (p4_golden_ai_native_random(&goldenValue)) {
+        p4pc_rng_value(p4pc_rng_draws, goldenValue);
+        return goldenValue;
+    }
     u8 *blk = D_008872E0 + iGpffffb618;
     u32 *front = *(u32 **)(blk + 4);
     u32 *back = *(u32 **)(blk + 8);

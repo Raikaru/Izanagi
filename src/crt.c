@@ -24,10 +24,12 @@
 #include "p4pc/guest.h"
 #include "p4pc/image.h"
 #include "p4pc/crt.h"
+#include "p4pc/eefloat.h"
 #include "p4pc/hostmath.h"
 #include "p4pc/os.h"
 #include "p4pc/tables.h"
 #include "p4pc/lockstep.h"
+#include "p4pc/vu0.h"
 
 #define IMAGE_LO 0x00100000u
 #define IMAGE_HI 0x00938a00u /* end of the retail image; bss is inside it */
@@ -79,6 +81,13 @@ void func_0043dc60(int code) {
     exit(code);
 }
 
+extern void (*p4pc_ee_add_report)(uint32_t a, uint32_t b);   /* src/platform/ee_float.c; not declared in eefloat.h: a pointer-typed declaration there counts in the rewriter census of every unit that includes it */
+
+/* P4PC_EE_ADD_HW=check: the host adder and the integer adder disagreed (src/platform/ee_float.c); the trap names the first operand as the PS2 address and the second as the caller */
+static void ee_add_mismatch(uint32_t a, uint32_t b) {
+    p4pc_trap("EE add: host adder differs from the integer adder (operands: PS2 address, caller)", a, (void *)(uintptr_t)b);
+}
+
 void p4pc_kernel_pre_init(void) {
     /* Game code runs with the EE's rounding (include/p4pc/hostmath.h). */
     if (p4pc_fpu_ee_mode()) {
@@ -88,8 +97,23 @@ void p4pc_kernel_pre_init(void) {
         fprintf(stderr, "p4pc: EE float mode (MXCSR round toward zero, FTZ, DAZ)\n");
 #endif
     }
+#if defined(__SSE2__) || defined(__aarch64__)
+    {
+        /* the packed VU0 operations (src/vu0.c; the thread must be in the EE mode, which p4pc_vu0_simd_init checks); P4PC_VU0_SIMD=0 keeps the lane-by-lane helpers */
+        const char *simd = getenv("P4PC_VU0_SIMD");
+
+        p4pc_vu0_simd_init(!(simd != NULL && simd[0] == '0'));
+    }
+#endif
     if (getenv("P4PC_FPU_LOG") != NULL) {
         p4pc_fpu_state_log("in pre-init");
+    }
+    {
+        /* the EE adder through the host adder (include/p4pc/eefloat.h; it checks that the thread is in the EE mode): P4PC_EE_ADD_HW=0 keeps the integer one, =check compares the two */
+        const char *hw = getenv("P4PC_EE_ADD_HW");
+
+        p4pc_ee_add_report = ee_add_mismatch;
+        p4pc_ee_float_init(hw != NULL && hw[0] == '0' ? 0 : (hw != NULL && strcmp(hw, "check") == 0) ? 2 : 1);
     }
     memset(P4_G2H(BSS_LO), 0, IMAGE_HI - BSS_LO);
     func_0042bcd8();

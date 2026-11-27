@@ -1,0 +1,16 @@
+# Stage 1 of the HCA/VP9 generation: builds the Windows FFmpeg with the HCA and VP9 decoders.
+# Context: this directory (ci/hcavp9). Pass an accepted immutable sha256:<id> as P4PC_BASE_IMAGE.
+#   podman build --no-cache --identity-label=false --build-arg P4PC_BASE_IMAGE=sha256:<id> -f Dockerfile.build -t p4pc-hcavp9-build .
+# The delta (opt/p4win32, opt/p4win64, usr/bin/patch) is exported with `tar` from a container of the result;
+# Dockerfile.apply then adds it to every host's base image without recompiling. SDL3 is not rebuilt: build_deps.sh
+# only recompiles FFmpeg when ffmpeg.opts or the patch changed.
+ARG P4PC_BASE_IMAGE
+FROM ${P4PC_BASE_IMAGE}
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends patch \
+ && rm -rf /var/lib/apt/lists/*
+COPY build_deps.sh /usr/local/share/p4pc/ci/win32/build_deps.sh
+COPY ffmpeg-7.1.1-hca-window-alignment.patch /usr/local/share/p4pc/ci/
+RUN sh /usr/local/share/p4pc/ci/win32/build_deps.sh /opt/p4win32 /opt/llvm-mingw i686-w64-mingw32 \
+ && sh /usr/local/share/p4pc/ci/win32/build_deps.sh /opt/p4win64 /opt/llvm-mingw x86_64-w64-mingw32 \
+ && rm -rf /opt/deps-build-i686-w64-mingw32 /opt/deps-build-x86_64-w64-mingw32 /opt/dl-cache

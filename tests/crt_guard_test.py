@@ -392,6 +392,20 @@ static void frontend(const char *spec) {
                                                   host, project, {}, {})
                     self.assertFalse(failures, failures)
 
+    def test_host_exports_reads_static_coff_lib_members(self):
+        with tempfile.TemporaryDirectory(prefix="p4-crt-coff-lib-") as directory:
+            root = Path(directory)
+            source, obj = root / "runtime.c", root / "runtime.obj"
+            source.write_text("int runtime_guard(void) { return 7; }\n", encoding="utf-8")
+            subprocess.run([self.clang, "--target=x86_64-w64-mingw32", "-c", str(source), "-o", str(obj)],
+                           check=True, capture_output=True)
+            ar = str(Path(self.clang).with_name("llvm-ar" + Path(self.clang).suffix))
+            for suffix in (".a", ".lib", ".LIB"):
+                with self.subTest(suffix=suffix):
+                    archive = root / ("compiler_rt" + suffix)
+                    subprocess.run([ar, "rcs", str(archive), str(obj)], check=True, capture_output=True)
+                    self.assertIn("runtime_guard", crt_guard.host_exports([archive], self.nm, False))
+
     def test_address_taken_parameter_preserves_guard_abi_assertions(self):
         source = """
 typedef unsigned int u32;

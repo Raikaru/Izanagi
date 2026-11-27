@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "status": "RESEARCH-only; program namespace ownership established, individual PS2 literal correspondence still OPEN",
+  "source": "Switch1.2 ordinary NSO; static relocations and typed program consumers, not .arch code or executed game",
+  "filename": {"address":"0x71005f6834","value":"battle/AICALC.TBL"},
+  "filename_record_addresses": ["0x710071ca98","0x710071d4d8","0x710071df18","0x710071e990"],
+  "loader": {
+    "call_site":"0x71000582ec..0x71000582f4 selects the AICALC filename record and calls58aa0(record,1)",
+    "reader":"0x7100058aa0..0x7100058be0",
+    "filename_input":"ldr x0,[record] at58ad4/58af4, shared archive/file acquire398470 or397d20",
+    "program_framing":"The loaded span is a sequence of length-prefixed blocks. At58b68 readu32size, body starts+4. Publish aligned destination pointer, copyexactsize at58b94; advance source byalign16(size+4), destination arena byalign16(size). No pack-byte padding is a logical program body.",
+    "destination_registration":"First destination-pointer slot isrecord+8; following slots step16B throughrecord+18,+28,..., stop atnull. All four observed AICALC records register the same eleven destination globals in the same slot order.",
+    "lifecycle":"shared pending file request9857d8; completion waits/polls398080. Loader releases request397cd0 and clears9857d8. Destination bytes are copied into arena8857d0 using cursor9857d0; published globals are live producer outputs, not static NSO file offsets."
+  },
+  "blocks": [
+    {"index":0,"published_pointer":"0x71008856d0"},
+    {"index":1,"published_pointer":"0x71008856d8"},
+    {"index":2,"published_pointer":"0x71008856e0","role":"not resolved; no direct materialized reference is not absence"},
+    {"index":3,"published_pointer":"0x71008856e8"},
+    {"index":4,"published_pointer":"0x71008856f0"},
+    {"index":5,"published_pointer":"0x71008856f8"},
+    {"index":6,"published_pointer":"0x7100885700"},
+    {"index":7,"published_pointer":"0x7100885708"},
+    {"index":8,"published_pointer":"0x7100885688","role":"enemy character-ID-indexed AI metadata, stride164; script/procedure identifieru16+2","reader":"1c9a8..1c9bc via GOT8805d0->885688"},
+    {"index":9,"published_pointer":"0x7100885730","role":"player-character AI FLW procedure namespace","reader":"1c9f8 selects via GOT8805e0 whenaction.unit.genus0;1d140 formats AI_PC_%03X_ASSISTSKILL with value5, looks up and creates a procedure in this same block"},
+    {"index":10,"published_pointer":"0x7100885738","role":"enemy AI FLW procedure namespace","reader":"1c9a0..1c9dc usesgenus1, block8metadata[unit.charId].u16+2 asprocedureindex, loadsprogram through GOT8805d8->885738, starts through1ca50; zeroidentifier takesfallback1cbe0"}
+  ],
+  "named_procedure_packet": {
+    "reader":"0x710002cc30..0x710002ccec",
+    "selector":"kind1 selects block9/player-program via8805e0;kind2 selectsblock10/enemy-program via8805d8;kind3 calls0018e0(0) for a separate current boss program, not either AICALC program block",
+    "lookup":"stores actual selected program in packetWork+16, calls2e0ad0(program,name) and stores procedureindex at+8",
+    "followthrough":"callback2ccf0..2cd64 starts actual indexed procedure through1ca50 and polls its task lifecycle"
+  },
+  "source_identity_witness":"1d164 references AI_PC_%03X_ASSISTSKILL at5f92bb; assertion identity5e630b is battle/btlAI.c. The module string alone is not the proof: loader publication, genotype dispatch, index producer and program lookup/launch give the role.",
+  "remaining_literal_blocker":"Prior Steam candidates in AICALC program blocks9/10 are now assigned distinct player/enemy FLW namespaces. Their interior offsets still require an actual PS2 owner/procedure/operand correspondence. Three PS2 objects voting for the same block10 window do not become three source proofs. Boss record-camera banks proved separately in this cohort are executable-data sources, not AICALC program data.",
+  "scope":"No row promotion, game bytes or instruction listings in this research receipt. Original candidate rows outside cohorts1–2 retain their assigned owners;00645240 and0064732e are c5-owned and are not edited here.",
+  "qualification":"Static source research only; program interpreter semantics, full candidate-literal ownership and runtime binding remain unqualified. Private scripts l1c12_aicalc*.py retain reproducing pointer/relocation/instruction receipts."
+}

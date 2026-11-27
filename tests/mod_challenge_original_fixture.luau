@@ -20,7 +20,10 @@ p4 = {
     authorize = {on = function(name, fn) F.authorizers[name] = fn return subscription() end},
     battle = {formation = function() return subscription() end},
     damage = {on = function() return subscription() end},
-    mem = {alloc = function() return {address = 100} end, read = function() return 0 end},
+    mem = {alloc = function() return {address = 100} end, read = function(kind)
+        if kind == "u8" then return F.heal_kind or 0 end
+        return 0
+    end},
     lifecycle = {session = function() return 1 end},
     call = function(address)
         if address == 0x00105510 then return 101 end

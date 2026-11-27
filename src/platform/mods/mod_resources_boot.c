@@ -6,6 +6,8 @@
 #include "package_memory_internal.h"
 #include "mod_resources_native.h"
 #include "resource_png.h"
+#include "../golden/golden_icons.h"
+#include <stdlib.h>
 #include <limits.h>
 #include <stdio.h>
 #include <string.h>
@@ -24,6 +26,7 @@ typedef struct ImageInput {
     P4PackageFilePlan *plan;
     P4ContentSource source;
     P4ResourcePng image;
+    P4GoldenIconImage golden;
 } ImageInput;
 struct P4ResourceImagesPrepared {
     ImageInput *images;
@@ -72,7 +75,10 @@ static int decimal(const char *text, uint32_t *out)
 }
 static void image_release(ImageInput *image)
 {
-    p4_resource_png_free(&image->image);
+    if (p4_game_mode() == P4_GAME_MODE_GOLDEN && image->golden.object)
+        free(image->golden.object);
+    else
+        p4_resource_png_free(&image->image);
     p4_package_file_plan_release(image->plan);
     memset(image, 0, sizeof *image);
 }
@@ -212,10 +218,34 @@ static int prepare_image(const P4PackageProvider *provider, const P4PackageField
     prepared.images[prepared.count++] = image;
     return 0;
 }
+static int prepare_golden(void)
+{
+    P4GoldenIconImage icons[P4_GOLDEN_ICON_COUNT] = {0};
+    char reason[192];
+    if (p4_golden_icons_images(P4_GAME_MODE_GOLDEN, icons, reason, sizeof reason))
+        return p4_package_boot_fail(NULL, reason);
+    for (size_t i = 0; i < P4_GOLDEN_ICON_COUNT; ++i) {
+        if (grow()) {
+            for (size_t j = i; j < P4_GOLDEN_ICON_COUNT; ++j) free(icons[j].object);
+            return p4_package_boot_fail(NULL, "Golden image metadata budget exhausted");
+        }
+        ImageInput image = {0};
+        image.golden = icons[i];
+        strcpy(image.owner, "p4pc.golden");
+        strcpy(image.key, icons[i].key);
+        image.revision = 1;
+        image.source = icons[i].source;
+        image.image = (P4ResourcePng){icons[i].object + 44, icons[i].width,
+                                     icons[i].height, icons[i].size - 44};
+        prepared.images[prepared.count++] = image;
+    }
+    return 0;
+}
 static int prepare(void *unused)
 {
     (void)unused;
     if (runtime_resources || prepared.images || prepared.count) return -1;
+    if (p4_game_mode() == P4_GAME_MODE_GOLDEN && prepare_golden()) return -1;
     for (size_t i = 0, n = p4_packages_count(); i < n; ++i) {
         const P4PackageProvider *provider = p4_packages_provider(i);
         size_t count = 0;
@@ -240,6 +270,12 @@ static int finalize_prepare(void *unused)
     (void)unused;
     for (size_t i = 0; i < prepared.count; ++i) {
         const ImageInput *image = &prepared.images[i];
+        if (p4_game_mode() == P4_GAME_MODE_GOLDEN && image->golden.object) {
+            if (!p4_content_fingerprint_matches(&image->golden.identity,
+                                                image->golden.object, image->golden.size))
+                return p4_package_boot_fail(NULL, "Golden image changed before publication");
+            continue;
+        }
         P4PackageFile *check = NULL;
         if (p4_package_file_plan_open(image->plan, &check))
             return refuse(image->provider, image->key, image->source.key,
@@ -266,7 +302,8 @@ static int runtime_prepare(void *unused)
     for (size_t i = 0; i < prepared.count; ++i) {
         const ImageInput *image = &prepared.images[i];
         uint32_t token;
-        if (!p4_package_provider_selected(image->provider))
+        if (!(p4_game_mode() == P4_GAME_MODE_GOLDEN && image->golden.object) &&
+            !p4_package_provider_selected(image->provider))
             return p4_package_boot_fail(NULL, "Selected image provider is no longer active");
         int result = p4_battle_sim_renderless ?
             p4_resources_image_metadata(runtime_resources, image->owner, image->key, &image->source,

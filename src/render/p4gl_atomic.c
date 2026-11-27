@@ -16,6 +16,7 @@
 
 #include "p4gl.h"
 #include "p4gl_gl.h"
+#include "p4gl_passcull.h"
 #include "p4gl_profile.h"
 #include "p4pc/gmem.h"
 
@@ -71,33 +72,65 @@ typedef struct P4AtomicCacheEntry {
     int32_t numMaterials;
     GLuint vbo;
     GLuint ibo;
+    GLuint vao; /* the entry's vertex array: its two buffers and the four attribute pointers, bound by one call (0: P4PC_ATOMIC_VAO=0) */
     uint32_t *ranges; /* per material bucket (numMaterials + 1): first index, index count */
+    uint8_t *alphaRange; /* per material bucket: the smallest and largest vertex alpha of its triangles (alpha-test pass culling) */
+    uint8_t skinAlphaLo, skinAlphaHi; /* the same over the whole mesh, of the last skinned upload */
     uint8_t modelEdgeCount, modelBasis[2]; /* 0: unprepared; 255: invalid mask */
     uint8_t modelEdges[8][3]; /* vertex pair, crop kind */
 } P4AtomicCacheEntry;
+
+/* The per-draw values of both shaders, packed in one vec4 array so that a draw costs one glUniform4fv instead of about a dozen uniform calls (the GL driver pays
+ * per call, and on the render thread per recorded call). The macros keep the shaders' code as it was; every value is the float it was before (integers
+ * and flags travel as small exact floats). Layout (sD below): 0-3 mvp columns, 4-6 normal matrix columns, 7-9 world rotation columns, 10 model uv xyz + lit mode,
+ * 11 ambient + textured, 12 light 0 direction + border mode, 13 light 1 direction + lit, 14 light 0 colour + date, 15 light 1 colour + alpha function, 16 material colour,
+ * 17 fog colour + fog on, 18 light direction + alpha reference, 19 fog start, fog end, alpha invert, 20-22 the material's UV transform columns (RpMatFX). */
+#define P4_ATOMIC_PACKED_COUNT 23
+#define P4_ATOMIC_PACKED_UNIFORMS \
+    "uniform vec4 uD[23];\n" \
+    "#define uMvp mat4(uD[0], uD[1], uD[2], uD[3])\n" \
+    "#define uNrm mat3(uD[4].xyz, uD[5].xyz, uD[6].xyz)\n" \
+    "#define uWorldRot mat3(uD[7].xyz, uD[8].xyz, uD[9].xyz)\n" \
+    "#define uModelUv uD[10].xyz\n" \
+    "#define uLitMode int(uD[10].w)\n" \
+    "#define uAmb uD[11].xyz\n" \
+    "#define uTextured int(uD[11].w)\n" \
+    "#define uDirAt0 uD[12].xyz\n" \
+    "#define uBorder int(uD[12].w)\n" \
+    "#define uDirAt1 uD[13].xyz\n" \
+    "#define uLit int(uD[13].w)\n" \
+    "#define uDirCol0 uD[14].xyz\n" \
+    "#define uDate int(uD[14].w)\n" \
+    "#define uDirCol1 uD[15].xyz\n" \
+    "#define uAlphaFunc int(uD[15].w)\n" \
+    "#define uMatColor uD[16]\n" \
+    "#define uFogColor uD[17].xyz\n" \
+    "#define uFogOn int(uD[17].w)\n" \
+    "#define uLightDir uD[18].xyz\n" \
+    "#define uAlphaRef uD[18].w\n" \
+    "#define uFogStart uD[19].x\n" \
+    "#define uFogEnd uD[19].y\n" \
+    "#define uAlphaInvert int(uD[19].z)\n" \
+    "#define uUvM mat3(uD[20].xyz, uD[21].xyz, uD[22].xyz)\n"
 
 static const char kAtomicVertexSource[] =
     "layout(location = 0) in vec3 aPos;\n"
     "layout(location = 1) in vec3 aNrm;\n"
     "layout(location = 2) in vec2 aUv;\n"
     "layout(location = 3) in vec4 aCol;\n"
-    "uniform mat4 uMvp;\n"
-    "uniform vec3 uModelUv;\n"
-    "uniform mat3 uNrm;\n"
-    "uniform int uLitMode;\n"
-    "uniform mat3 uWorldRot;\n"
-    "uniform vec3 uAmb;\n"
-    "uniform vec3 uDirAt[2];\n"
-    "uniform vec3 uDirCol[2];\n"
+    P4_ATOMIC_PACKED_UNIFORMS
     "out vec3 vNrm;\n"
     "out vec2 vUv;\n"
     "out vec4 vCol;\n"
     "out float vFogZ;\n"
+    "out float vFog;\n"
     "void main() {\n"
     "    gl_Position = uMvp * vec4(aPos, 1.0);\n"
     "    vFogZ = gl_Position.w;\n"
+    "    /* The retail vertex fog byte is linear in depth and clamped per vertex; the GS interpolates it affinely in screen space (like the colour below). */\n"
+    "    vFog = clamp((uFogEnd - gl_Position.w) / max(uFogEnd - uFogStart, 1e-3), 0.0, 1.0) * gl_Position.w;\n"
     "    vNrm = uNrm * aNrm;\n"
-    "    vUv = aUv;\n"
+    "    vUv = (uUvM * vec3(aUv, 1.0)).xy;\n"
     "    if (uModelUv.x > 1.0) vUv = aUv * uModelUv.x + uModelUv.yz;\n"
     "    vCol = aCol;\n"
     "    if (uLitMode != 0) {\n"
@@ -105,7 +138,7 @@ static const char kAtomicVertexSource[] =
     "         * lights (surfaces facing against the light's at vector), each scaled by the material's ambient or\n"
     "         * diffuse coefficient (uAmb and uDirCol arrive scaled). */\n"
     "        vec3 n = normalize(uWorldRot * aNrm);\n"
-    "        vec3 l = uAmb + uDirCol[0] * max(-dot(n, uDirAt[0]), 0.0) + uDirCol[1] * max(-dot(n, uDirAt[1]), 0.0);\n"
+    "        vec3 l = uAmb + uDirCol0 * max(-dot(n, uDirAt0), 0.0) + uDirCol1 * max(-dot(n, uDirAt1), 0.0);\n"
     "        vCol.rgb = min(aCol.rgb + l, vec3(1.0));\n"
     "    }\n"
     "    /* GS Gouraud RGBA is affine in screen space; only STQ is perspective-correct.\n"
@@ -119,22 +152,10 @@ static const char kAtomicFragmentSource[] =
     "in vec2 vUv;\n"
     "in vec4 vCol;\n"
     "in float vFogZ;\n"
-    "uniform int uFogOn;\n"
-    "uniform vec3 uFogColor;\n"
-    "uniform float uFogStart;\n"
-    "uniform float uFogEnd;\n"
-    "uniform vec4 uMatColor;\n"
-    "uniform int uTextured;\n"
-    "uniform vec3 uModelUv;\n"
-    "uniform int uBorder;\n"
-    "uniform int uLit;\n"
-    "uniform vec3 uLightDir;\n"
+    "in float vFog;\n"
+    P4_ATOMIC_PACKED_UNIFORMS
     "uniform sampler2D uTex;\n"
     "uniform sampler2D uDest;\n"
-    "uniform int uDate;\n"
-    "uniform int uAlphaFunc;\n"
-    "uniform float uAlphaRef;\n"
-    "uniform int uAlphaInvert;\n"
     "bool alphaPasses(float a) {\n"
     "    float t = p4GsAlpha(a);\n"
     "    if (uAlphaFunc == 8) return false;\n"
@@ -170,7 +191,7 @@ static const char kAtomicFragmentSource[] =
     "    }\n"
     "    if (uFogOn != 0) {\n"
     "        c.rgb = mix(uFogColor, c.rgb,\n"
-    "                    clamp((uFogEnd - vFogZ) / max(uFogEnd - uFogStart, 1e-3), 0.0, 1.0));\n"
+    "                    clamp(vFog / vFogZ, 0.0, 1.0));\n"
     "    }\n"
     "#ifdef P4_ROUND_BIAS\n"
     "    c.rgb = p4GsTruncate(c.rgb);\n"
@@ -196,33 +217,40 @@ static uint32_t sCacheNext;
 static int sReady;
 static GLuint sVao;
 static GLuint sProgram;
-static GLint sLocMvp;
-static GLint sLocModelUv;
+static GLint sLocD; /* uD[0]: the packed per-draw values (P4_ATOMIC_PACKED_UNIFORMS) */
+static float sD[P4_ATOMIC_PACKED_COUNT][4]; /* what the draw wants */
+static float sDSent[P4_ATOMIC_PACKED_COUNT][4]; /* what the program holds */
+static int sDSentValid;
 static int sModelUvActive;
 static float sModelAnchor[4][2];
 static unsigned sModelAnchorValid;
 
-static GLint sLocNrm;
-static GLint sLocLightDir;
-static GLint sLocLit;
-static GLint sLocLitMode;
-static GLint sLocWorldRot;
-static GLint sLocAmb;
-static GLint sLocDirAt;
-static GLint sLocDirCol;
-static GLint sLocMatColor;
-static GLint sLocTextured;
 static GLint sLocTexture;
 static GLint sLocDest;
-static GLint sLocDate;
-static GLint sLocAlphaFunc;
-static GLint sLocAlphaRef;
-static GLint sLocAlphaInvert;
-static GLint sLocFogOn;
-static GLint sLocFogColor;
-static GLint sLocFogStart;
-static GLint sLocFogEnd;
-static GLint sLocBorder;
+
+/* Sends the packed per-draw values when they differ from what the program holds (one call; the draw's own order of setting them does not matter). */
+static int d_differs(void)
+{
+    for (size_t i = 0; i < sizeof sD / sizeof(uint64_t); i++) {
+        uint64_t a, b;
+
+        memcpy(&a, (const uint8_t *)sD + i * sizeof a, sizeof a);
+        memcpy(&b, (const uint8_t *)sDSent + i * sizeof b, sizeof b);
+        if (a != b) {
+            return 1; /* bit patterns, so -0 and +0 differ as they would to the shader */
+        }
+    }
+    return 0;
+}
+
+static void d_flush(void)
+{
+    if (!sDSentValid || d_differs()) {
+        p4gl_glUniform4fv(sLocD, P4_ATOMIC_PACKED_COUNT, &sD[0][0]);
+        memcpy(sDSent, sD, sizeof sD);
+        sDSentValid = 1;
+    }
+}
 
 void p4gl_atomic_model_scope_begin(void)
 {
@@ -291,29 +319,10 @@ static int ensure_ready(void)
         return 0;
     }
 
-    sLocMvp = p4gl_glGetUniformLocation(sProgram, "uMvp");
-    sLocModelUv = p4gl_glGetUniformLocation(sProgram, "uModelUv");
-    sLocNrm = p4gl_glGetUniformLocation(sProgram, "uNrm");
-    sLocLightDir = p4gl_glGetUniformLocation(sProgram, "uLightDir");
-    sLocLit = p4gl_glGetUniformLocation(sProgram, "uLit");
-    sLocLitMode = p4gl_glGetUniformLocation(sProgram, "uLitMode");
-    sLocWorldRot = p4gl_glGetUniformLocation(sProgram, "uWorldRot");
-    sLocAmb = p4gl_glGetUniformLocation(sProgram, "uAmb");
-    sLocDirAt = p4gl_glGetUniformLocation(sProgram, "uDirAt[0]");
-    sLocDirCol = p4gl_glGetUniformLocation(sProgram, "uDirCol[0]");
-    sLocMatColor = p4gl_glGetUniformLocation(sProgram, "uMatColor");
-    sLocTextured = p4gl_glGetUniformLocation(sProgram, "uTextured");
+    sLocD = p4gl_glGetUniformLocation(sProgram, "uD[0]");
     sLocTexture = p4gl_glGetUniformLocation(sProgram, "uTex");
     sLocDest = p4gl_glGetUniformLocation(sProgram, "uDest");
-    sLocDate = p4gl_glGetUniformLocation(sProgram, "uDate");
-    sLocAlphaFunc = p4gl_glGetUniformLocation(sProgram, "uAlphaFunc");
-    sLocAlphaRef = p4gl_glGetUniformLocation(sProgram, "uAlphaRef");
-    sLocAlphaInvert = p4gl_glGetUniformLocation(sProgram, "uAlphaInvert");
-    sLocFogOn = p4gl_glGetUniformLocation(sProgram, "uFogOn");
-    sLocFogColor = p4gl_glGetUniformLocation(sProgram, "uFogColor");
-    sLocFogStart = p4gl_glGetUniformLocation(sProgram, "uFogStart");
-    sLocFogEnd = p4gl_glGetUniformLocation(sProgram, "uFogEnd");
-    sLocBorder = p4gl_glGetUniformLocation(sProgram, "uBorder");
+    sDSentValid = 0; /* a new program holds zeros */
 
     p4gl_glGenVertexArrays(1, &sVao);
     p4gl_glBindVertexArray(sVao);
@@ -325,8 +334,29 @@ static int ensure_ready(void)
     p4gl_glUseProgram(sProgram);
     p4gl_glUniform1i(sLocTexture, 0);
     p4gl_glUniform1i(sLocDest, 1);
+    sD[20][0] = 1.0f; sD[20][1] = 0.0f; sD[20][2] = 0.0f; sD[20][3] = 0.0f;
+    sD[21][0] = 0.0f; sD[21][1] = 1.0f; sD[21][2] = 0.0f; sD[21][3] = 0.0f;
+    sD[22][0] = 0.0f; sD[22][1] = 0.0f; sD[22][2] = 1.0f; sD[22][3] = 0.0f;
     sReady = 1;
     return 1;
+}
+
+/* Vertex arrays of freed entries wait here for the next entry to build into (glDeleteVertexArrays is not in the GL table); every use rebinds both
+ * buffers and the four pointers, so nothing of the previous entry survives. */
+static GLuint sVaoPool[P4_ATOMIC_CACHE_SIZE];
+static unsigned sVaoPoolCount;
+static int sVaoOn = -1;
+
+static void entry_attribs(void)
+{
+    p4gl_glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(P4AtomicVertex),
+                               (const void *)offsetof(P4AtomicVertex, pos));
+    p4gl_glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(P4AtomicVertex),
+                               (const void *)offsetof(P4AtomicVertex, nrm));
+    p4gl_glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(P4AtomicVertex),
+                               (const void *)offsetof(P4AtomicVertex, uv));
+    p4gl_glVertexAttribPointer(3, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(P4AtomicVertex),
+                               (const void *)offsetof(P4AtomicVertex, rgba));
 }
 
 static void cache_free_entry(P4AtomicCacheEntry *e)
@@ -334,10 +364,14 @@ static void cache_free_entry(P4AtomicCacheEntry *e)
     if (e->valid) {
         GLuint buffers[2];
 
+        if (e->vao != 0 && sVaoPoolCount < P4_ATOMIC_CACHE_SIZE) {
+            sVaoPool[sVaoPoolCount++] = e->vao;
+        }
         buffers[0] = e->vbo;
         buffers[1] = e->ibo;
         p4gl_glDeleteBuffers(2, buffers);
         free(e->ranges);
+        free(e->alphaRange);
     }
     memset(e, 0, sizeof *e);
 }
@@ -346,15 +380,18 @@ void p4gl_atomic_context_lost(void)
 {
     for (int i = 0; i < P4_ATOMIC_CACHE_SIZE; i++) {
         if (sCache[i].valid) {
+            free(sCache[i].alphaRange);
             free(sCache[i].ranges); /* the buffers went with the context: no glDeleteBuffers, the names are other objects' now */
         }
         memset(&sCache[i], 0, sizeof sCache[i]);
     }
     sCacheNext = 0;
+    sVaoPoolCount = 0;
     sVao = 0;
     sProgram = 0;
     sModelUvActive = 0;
     sModelAnchorValid = 0;
+    sDSentValid = 0;
     sReady = 0;
 }
 
@@ -605,6 +642,7 @@ static int build_entry(P4AtomicCacheEntry *e, const P4GeomView *g)
     uint32_t *indices = NULL;
     uint32_t *cursor = NULL;
     uint32_t *ranges = NULL;
+    uint8_t *alphaRange = NULL;
     P4Tri *tris = NULL;
     int32_t numTris = 0;
     uint32_t bucketCount;
@@ -613,6 +651,7 @@ static int build_entry(P4AtomicCacheEntry *e, const P4GeomView *g)
     int32_t i;
     uint32_t b;
     GLuint buffers[2];
+    GLuint vao = 0;
 
     if (numVertices <= 0 || numMaterials < 0 || numMaterials > P4_ATOMIC_MAX_MATERIALS || g->verts == NULL ||
         (g->mesh == NULL && (g->numTriangles <= 0 || g->triangles == NULL))) {
@@ -625,10 +664,15 @@ static int build_entry(P4AtomicCacheEntry *e, const P4GeomView *g)
 
     bucketCount = (uint32_t)numMaterials + 1u;
     ranges = calloc(bucketCount * 2u, sizeof *ranges);
+    alphaRange = malloc((size_t)bucketCount * 2u);
     cursor = calloc(bucketCount, sizeof *cursor);
     vertices = malloc((size_t)numVertices * sizeof *vertices);
-    if (!ranges || !cursor || !vertices) {
+    if (!ranges || !cursor || !vertices || !alphaRange) {
         goto fail;
+    }
+    for (b = 0; b < bucketCount; b++) {
+        alphaRange[2u * b] = 255;
+        alphaRange[2u * b + 1u] = 0;
     }
 
     for (i = 0; i < numVertices; i++) {
@@ -649,8 +693,17 @@ static int build_entry(P4AtomicCacheEntry *e, const P4GeomView *g)
     }
 
     for (t = 0; t < numTris; t++) {
+        uint8_t *ar = alphaRange + 2u * tris[t].bucket;
+        int k;
+
         ranges[2u * tris[t].bucket + 1u] += 3;
         total += 3;
+        for (k = 0; k < 3; k++) {
+            const uint8_t a = vertices[tris[t].idx[k]].rgba[3];
+
+            ar[0] = a < ar[0] ? a : ar[0];
+            ar[1] = a > ar[1] ? a : ar[1];
+        }
     }
 
     indices = malloc((size_t)total * sizeof *indices + sizeof *indices);
@@ -678,6 +731,17 @@ static int build_entry(P4AtomicCacheEntry *e, const P4GeomView *g)
         cursor[tris[t].bucket] = slot + 3u;
     }
 
+    if (sVaoOn < 0) {
+        sVaoOn = p4gl_gl_feature("P4PC_ATOMIC_VAO");
+    }
+    if (sVaoOn) {
+        if (sVaoPoolCount != 0) {
+            vao = sVaoPool[--sVaoPoolCount];
+        } else {
+            p4gl_glGenVertexArrays(1, &vao);
+        }
+        p4gl_glBindVertexArray(vao); /* the element buffer below becomes this array's */
+    }
     p4gl_glGenBuffers(2, buffers);
     p4gl_glBindBuffer(GL_ARRAY_BUFFER, buffers[0]);
     p4gl_glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr)numVertices * (GLsizeiptr)sizeof *vertices,
@@ -686,9 +750,18 @@ static int build_entry(P4AtomicCacheEntry *e, const P4GeomView *g)
     p4gl_glBufferData(GL_ELEMENT_ARRAY_BUFFER, (GLsizeiptr)total * (GLsizeiptr)sizeof *indices,
                       indices, GL_STATIC_DRAW);
 
+    if (vao != 0) {
+        p4gl_glEnableVertexAttribArray(0);
+        p4gl_glEnableVertexAttribArray(1);
+        p4gl_glEnableVertexAttribArray(2);
+        p4gl_glEnableVertexAttribArray(3);
+        entry_attribs(); /* the array buffer bound last is this entry's vertex buffer */
+    }
+    e->vao = vao;
     e->vbo = buffers[0];
     e->ibo = buffers[1];
     e->ranges = ranges;
+    e->alphaRange = alphaRange;
     e->numVertices = numVertices;
     e->numTriangles = g->numTriangles;
     e->numMaterials = numMaterials;
@@ -711,6 +784,7 @@ fail:
     free(tris);
     free(indices);
     free(ranges);
+    free(alphaRange);
     free(cursor);
     free(vertices);
     return 0;
@@ -814,6 +888,7 @@ static int skin_upload(P4AtomicCacheEntry *e, const void *geometry, const void *
     int32_t i;
     int32_t k;
     int32_t usable;
+    uint8_t aLo = 255, aHi = 0;
     P4GeomView gv;
 
     view_of_geometry(&gv, geometry, morph);
@@ -883,7 +958,11 @@ static int skin_upload(P4AtomicCacheEntry *e, const void *geometry, const void *
             v->uv[0] = v->uv[1] = 0.0f;
         }
         vertex_colour(v->rgba, prelit, i, geometry_lit(&gv));
+        aLo = v->rgba[3] < aLo ? v->rgba[3] : aLo;
+        aHi = v->rgba[3] > aHi ? v->rgba[3] : aHi;
     }
+    e->skinAlphaLo = aLo;
+    e->skinAlphaHi = aHi;
     p4gl_glBindBuffer(GL_ARRAY_BUFFER, e->vbo);
     p4gl_glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr)numVertices * (GLsizeiptr)sizeof *scratch, scratch, GL_DYNAMIC_DRAW);
     return 1;
@@ -909,8 +988,11 @@ static int upload_transforms(const void *atomicFrame, const void *camera, float 
         }
     }
 
-    p4gl_glUniformMatrix4fv(sLocMvp, 1, GL_FALSE, mvpCol);
-    p4gl_glUniformMatrix3fv(sLocNrm, 1, GL_FALSE, nrmCol);
+    memcpy(sD[0], mvpCol, 16 * sizeof(float));
+    for (c = 0; c < 3; c++) {
+        memcpy(sD[4 + c], nrmCol + 3 * c, 3 * sizeof(float));
+        sD[4 + c][3] = 0.0f;
+    }
     {
         /* The object-to-world rotation (the LTM's right, up and at rows as the columns): world normals for the lights. */
         float rot[9] = { 1, 0, 0, 0, 1, 0, 0, 0, 1 };
@@ -922,7 +1004,10 @@ static int upload_transforms(const void *atomicFrame, const void *camera, float 
                 memcpy(rot + 3 * row, (const uint8_t *)ltm + 16 * row, 12);
             }
         }
-        p4gl_glUniformMatrix3fv(sLocWorldRot, 1, GL_FALSE, rot);
+        for (c = 0; c < 3; c++) {
+            memcpy(sD[7 + c], rot + 3 * c, 3 * sizeof(float));
+            sD[7 + c][3] = 0.0f;
+        }
     }
     return 1;
 }
@@ -1121,10 +1206,104 @@ static void gather_lights(void)
 }
 
 
+/* RpMatFX material data (RpMatFXMaterialGetEffects 0x00399d80 and the slot-search family at 0x0039a0xx): the record is the pointer at
+ * material + the plugin offset the retail registration stored at 0x007646D0. Its effect kind is the word at +0x80 (1 bump, 2 env map,
+ * 3 bump env, 4 dual texture, 5 UV transform, 6 dual UV transform) and two 0x40-byte slots hold the effect data, each tagged by an effect
+ * type word at +0x20. The UV transform slot (type 5) holds the base RwMatrix pointer at +0 and the dual one at +4: the game's UVAnim
+ * interpolators (mdlSetAnimControlTime, rpuvanim.c) rewrite those matrices every frame, which is how retail blinks, scrolls the TV
+ * portal and moves the arena backdrops. The GS pipe applies a texture matrix to the vertex UVs before it draws:
+ * u' = u * right.x + v * up.x + pos.x, v' = u * right.y + v * up.y + pos.y. */
+#define P4_MATFX_PLUGIN_ADDR 0x007646D0u
+#define P4_MATFX_SLOT_SIZE 0x40
+#define P4_MATFX_SLOT_TYPE 0x20
+#define P4_MATFX_EFFECTS 0x80
+#define P4_MATFX_UVTRANSFORM 5
+#define P4_MATFX_DUALUVTRANSFORM 6
+
+static const uint8_t *matfx_record(const void *mat)
+{
+    const uint32_t off = *(const uint32_t *)P4_G2H(P4_MATFX_PLUGIN_ADDR);
+
+    return mat != NULL && off != 0 ? ptr_at(mat, off) : NULL;
+}
+
+/* The material's base UV transform as the three columns of a mat3 (applied to (u, v, 1)) in the packed rows 20-22; identity when it has none. */
+static void matfx_uv_columns(const void *mat)
+{
+    const uint8_t *rec = matfx_record(mat);
+    int slot;
+
+    sD[20][0] = 1.0f; sD[20][1] = 0.0f;
+    sD[21][0] = 0.0f; sD[21][1] = 1.0f;
+    sD[22][0] = 0.0f; sD[22][1] = 0.0f;
+    if (rec == NULL) {
+        return;
+    }
+    {
+        const int32_t effects = i32_at(rec, P4_MATFX_EFFECTS);
+
+        if (effects != P4_MATFX_UVTRANSFORM && effects != P4_MATFX_DUALUVTRANSFORM) {
+            return;
+        }
+    }
+    for (slot = 0; slot < 2; slot++) {
+        const uint8_t *entry = rec + (size_t)slot * P4_MATFX_SLOT_SIZE;
+
+        if (i32_at(entry, P4_MATFX_SLOT_TYPE) == P4_MATFX_UVTRANSFORM) {
+            const uint8_t *m = ptr_at(entry, 0);
+
+            if (m == NULL) {
+                return;
+            }
+            sD[20][0] = f32_at(m, 0);   sD[20][1] = f32_at(m, 4);
+            sD[21][0] = f32_at(m, 16);  sD[21][1] = f32_at(m, 20);
+            sD[22][0] = f32_at(m, 48);  sD[22][1] = f32_at(m, 52);
+            return;
+        }
+    }
+}
+
 static char sLogMat[160];
+
+/* Alpha-test pass culling (p4gl_passcull.h): the bounds of this draw's fragment alpha, then the decision. P4PC_PASSCULL=0 keeps both passes. Returns bit 0: leave
+ * out the first pass, bit 1: leave out the second. */
+static unsigned fb_pass_cull(const P4AtomicCacheEntry *e, uint32_t bucket, int skinned, const void *mat, int32_t func, float ref)
+{
+    static int enabled = -1;
+    unsigned tlo = 255, thi = 255;
+    float matAlpha = 1.0f;
+
+    if (enabled < 0) {
+        enabled = p4gl_gl_feature("P4PC_PASSCULL");
+    }
+    if (!enabled) {
+        return 0u;
+    }
+    if (func == 8) {
+        return 1u; /* NEVER: the first pass discards every fragment */
+    }
+    if (mat != NULL) {
+        const void *texture = ptr_at(mat, P4_MATERIAL_TEXTURE);
+        const void *raster = texture != NULL ? ptr_at(texture, P4_TEXTURE_RASTER) : NULL;
+
+        matAlpha = ((const uint8_t *)mat)[P4_MATERIAL_COLOR + 3] / 255.0f;
+        if (raster != NULL) {
+            const uint32_t sampler = (uint32_t)i32_at(texture, P4_TEXTURE_SAMPLER);
+
+            /* border addressing samples a transparent border; a raster whose pixels are not all known may hold any alpha */
+            if (((sampler >> 8) & 15u) == 4u || ((sampler >> 12) & 15u) == 4u || !p4gl_raster_alpha_range((const P4RwRaster *)raster, &tlo, &thi)) {
+                return 0u;
+            }
+        }
+    }
+    return p4gl_alpha_pass_cull(func, ref, skinned ? e->skinAlphaLo : e->alphaRange[2u * bucket], skinned ? e->skinAlphaHi : e->alphaRange[2u * bucket + 1u], matAlpha,
+                                tlo, thi);
+}
 
 static void bind_material(const void *mat)
 {
+    const int logWanted = p4gl_drawlog_wanted();
+
     sLogMat[0] = '\0';
     float color[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
     int textured = 0;
@@ -1137,22 +1316,27 @@ static void bind_material(const void *mat)
         color[1] = rgba[1] / 255.0f;
         color[2] = rgba[2] / 255.0f;
         color[3] = rgba[3] / 255.0f;
-        snprintf(sLogMat, sizeof sLogMat, "material rgba %02x%02x%02x%02x", rgba[0], rgba[1], rgba[2], rgba[3]);
+        if (logWanted) {
+            snprintf(sLogMat, sizeof sLogMat, "material rgba %02x%02x%02x%02x", rgba[0], rgba[1], rgba[2], rgba[3]);
+        }
         if (texture) {
             const void *raster = ptr_at(texture, P4_TEXTURE_RASTER);
 
             if (raster) {
                 const P4RwRaster *rr = (const P4RwRaster *)raster;
-                size_t l = strlen(sLogMat);
 
                 textured = p4gl_texture_bind_sampler(P4_H2G(raster), (uint32_t)i32_at(texture, P4_TEXTURE_SAMPLER));
-                snprintf(sLogMat + l, sizeof sLogMat - l, " texture %dx%d d%d fmt%02x", (int)rr->width, (int)rr->height, (int)rr->depth, (unsigned)rr->cFormat);
+                if (logWanted) {
+                    size_t l = strlen(sLogMat);
+                    snprintf(sLogMat + l, sizeof sLogMat - l, " texture %dx%d d%d fmt%02x", (int)rr->width, (int)rr->height, (int)rr->depth, (unsigned)rr->cFormat);
+                }
             }
         }
     }
-    p4gl_glUniform4f(sLocMatColor, color[0], color[1], color[2], color[3]);
-    p4gl_glUniform1i(sLocTextured, textured);
-    p4gl_glUniform1i(sLocBorder, textured ? p4gl_texture_border_mode() : 0);
+    matfx_uv_columns(mat);
+    memcpy(sD[16], color, sizeof color);
+    sD[11][3] = (float)textured;
+    sD[12][3] = (float)(textured ? p4gl_texture_border_mode() : 0);
     {
         /* RpMaterial.surfaceProps (ambient, specular, diffuse) at +12 scale the ambient and the directional lights. */
         float sp[3] = { 1.0f, 0.0f, 1.0f };
@@ -1172,8 +1356,9 @@ static void bind_material(const void *mat)
         for (d = sLights.numDir; d < 2; d++) {
             col[d][0] = col[d][1] = col[d][2] = 0.0f;
         }
-        p4gl_glUniform3f(sLocAmb, amb[0], amb[1], amb[2]);
-        p4gl_glUniform3fv(sLocDirCol, 2, &col[0][0]);
+        memcpy(sD[11], amb, sizeof amb);
+        memcpy(sD[14], col[0], sizeof col[0]);
+        memcpy(sD[15], col[1], sizeof col[1]);
     }
 }
 
@@ -1284,10 +1469,18 @@ int p4gl_atomic_draw(void *atomic)
         return 0;
     }
 
-    p4gl_glBindVertexArray(sVao);
+    if (sVaoOn < 0) {
+        sVaoOn = p4gl_gl_feature("P4PC_ATOMIC_VAO");
+    }
+    if (!sVaoOn) {
+        p4gl_glBindVertexArray(sVao);
+    }
     e = cache_lookup_or_build(&gv);
     if (e == NULL) {
         return 0;
+    }
+    if (e->vao != 0) {
+        p4gl_glBindVertexArray(e->vao);
     }
 
     if (sector) {
@@ -1308,11 +1501,12 @@ int p4gl_atomic_draw(void *atomic)
     }
 
     p4gl_glUseProgram(sProgram);
-    p4gl_glUniform3f(sLocLightDir, kLightDir[0], kLightDir[1], kLightDir[2]);
-    p4gl_glUniform1i(sLocLit, sViewerLight && gv.normals != NULL);
+    memcpy(sD[18], kLightDir, sizeof kLightDir);
+    sD[13][3] = (float)(sViewerLight && gv.normals != NULL);
     gather_lights();
-    p4gl_glUniform1i(sLocLitMode, geometry_lit(&gv));
-    p4gl_glUniform3fv(sLocDirAt, 2, &sLights.at[0][0]);
+    sD[10][3] = (float)geometry_lit(&gv);
+    memcpy(sD[12], sLights.at[0], sizeof sLights.at[0]);
+    memcpy(sD[13], sLights.at[1], sizeof sLights.at[1]);
 
     /* Depth, blending and fog follow the render state the game set. Derived from sky2hook
      * src/render_queue.cpp (readRenderStateInto) and src/device.cpp (captureCameraState),
@@ -1336,34 +1530,29 @@ int p4gl_atomic_draw(void *atomic)
         if (fogEnd == 0.0f) {
             fogEnd = f32_at(camera, P4_CAMERA_FAR);
         }
-        p4gl_glUniform1i(sLocFogOn, p4gl_render_state_or(P4GL_RS_FOGENABLE, 0u) != 0u);
-        p4gl_glUniform3f(sLocFogColor, (float)((fogColor >> 16) & 0xffu) / 255.0f,
-                         (float)((fogColor >> 8) & 0xffu) / 255.0f,
-                         (float)(fogColor & 0xffu) / 255.0f);
-        p4gl_glUniform1f(sLocFogStart, fogStart);
-        p4gl_glUniform1f(sLocFogEnd, fogEnd);
+        sD[17][3] = (float)(p4gl_render_state_or(P4GL_RS_FOGENABLE, 0u) != 0u);
+        sD[17][0] = (float)((fogColor >> 16) & 0xffu) / 255.0f;
+        sD[17][1] = (float)((fogColor >> 8) & 0xffu) / 255.0f;
+        sD[17][2] = (float)(fogColor & 0xffu) / 255.0f;
+        sD[19][0] = fogStart;
+        sD[19][1] = fogEnd;
     }
-    p4gl_glUniform1i(sLocAlphaFunc, p4gl_sky_alpha_func());
-    p4gl_glUniform1f(sLocAlphaRef, p4gl_sky_alpha_ref());
-    p4gl_glUniform1i(sLocAlphaInvert, 0);
-    p4gl_glUniform1i(sLocDate, p4gl_sky_date());
+    sD[15][3] = (float)p4gl_sky_alpha_func();
+    sD[18][3] = p4gl_sky_alpha_ref();
+    sD[19][2] = 0.0f;
+    sD[14][3] = (float)p4gl_sky_date();
     fbOnly = p4gl_gs_alpha_color_fail(p4gl_sky_test_raw(), &fbFunc, &fbRef);
     if (fbOnly) {
-        p4gl_glUniform1i(sLocAlphaFunc, fbFunc);
-        p4gl_glUniform1f(sLocAlphaRef, fbRef);
+        sD[15][3] = (float)fbFunc;
+        sD[18][3] = fbRef;
     }
     p4gl_frame_mask_apply();
 
-    p4gl_glBindBuffer(GL_ARRAY_BUFFER, e->vbo);
-    p4gl_glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, e->ibo);
-    p4gl_glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(P4AtomicVertex),
-                               (const void *)offsetof(P4AtomicVertex, pos));
-    p4gl_glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(P4AtomicVertex),
-                               (const void *)offsetof(P4AtomicVertex, nrm));
-    p4gl_glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(P4AtomicVertex),
-                               (const void *)offsetof(P4AtomicVertex, uv));
-    p4gl_glVertexAttribPointer(3, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(P4AtomicVertex),
-                               (const void *)offsetof(P4AtomicVertex, rgba));
+    if (e->vao == 0) {
+        p4gl_glBindBuffer(GL_ARRAY_BUFFER, e->vbo);
+        p4gl_glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, e->ibo);
+        entry_attribs();
+    }
 
     numMaterials = gv.numMaterials;
     const int modelCanvas = p4gl_layout_model_scale() != 1.0f;
@@ -1401,10 +1590,10 @@ int p4gl_atomic_draw(void *atomic)
                 fprintf(stderr, "p4gl_atomic: invalid all-out portrait mask\n");
                 return 0;
             }
-            p4gl_glUniform3f(sLocModelUv, uv[0], uv[1], uv[2]);
+            memcpy(sD[10], uv, sizeof uv);
             sModelUvActive = 1;
         } else if (sModelUvActive) {
-            p4gl_glUniform3f(sLocModelUv, 0.0f, 0.0f, 0.0f);
+            sD[10][0] = sD[10][1] = sD[10][2] = 0.0f;
             sModelUvActive = 0;
         }
         if (transformChanged) {
@@ -1412,7 +1601,7 @@ int p4gl_atomic_draw(void *atomic)
                 mvp[column * 4] = originalXY[column * 2] * targetScaleX + shift[0] * mvp[column * 4 + 3];
                 mvp[column * 4 + 1] = originalXY[column * 2 + 1] * targetScaleY + shift[1] * mvp[column * 4 + 3];
             }
-            p4gl_glUniformMatrix4fv(sLocMvp, 1, GL_FALSE, mvp);
+            memcpy(sD[0], mvp, sizeof mvp);
             canvasScale[0] = targetScaleX;
             canvasScale[1] = targetScaleY;
             memcpy(canvasShift, shift, sizeof canvasShift);
@@ -1434,11 +1623,17 @@ int p4gl_atomic_draw(void *atomic)
             if (!p4gl_target_pixel_size(&width, &height)) return 0;
             p4gl_dest_alpha_snapshot(width, height);
         }
-        p4gl_glDrawElements(GL_TRIANGLES, (GLsizei)count, GL_UNSIGNED_INT,
-                            (const void *)(uintptr_t)(e->ranges[2u * b] * sizeof(uint32_t))); /* byte offset into the bound index buffer */
-        if (fbOnly) {
+        const unsigned cull = fbOnly ? fb_pass_cull(e, b, skinned, mat, fbFunc, fbRef) : 0u;
+
+        if (!(cull & 1u)) {
+            d_flush();
+            p4gl_glDrawElements(GL_TRIANGLES, (GLsizei)count, GL_UNSIGNED_INT,
+                                (const void *)(uintptr_t)(e->ranges[2u * b] * sizeof(uint32_t))); /* byte offset into the bound index buffer */
+        }
+        if (fbOnly && !(cull & 2u)) {
             /* Failed FB_ONLY/RGB_ONLY fragments never write Z; RGB_ONLY also keeps Ad. */
-            p4gl_glUniform1i(sLocAlphaInvert, 1);
+            sD[19][2] = 1.0f;
+            d_flush();
             p4gl_glDepthMask(GL_FALSE);
             if (fbOnly == 3) {
                 p4gl_frame_mask_rgb_only();
@@ -1450,8 +1645,8 @@ int p4gl_atomic_draw(void *atomic)
                 p4gl_frame_mask_apply();
             }
             p4gl_glDepthMask(p4gl_render_state_or(P4GL_RS_ZWRITEENABLE, 1u) != 0u ? GL_TRUE : GL_FALSE);
-            p4gl_glUniform1i(sLocAlphaInvert, 0);
-            }
+            sD[19][2] = 0.0f;
+        }
     }
     p4gl_frame_mask_restore();
     p4gl_depth_restore();

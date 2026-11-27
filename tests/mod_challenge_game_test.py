@@ -29,6 +29,12 @@ Scenarios:
             both when the player attacks and when they touch; no battle starts.
   quota     story0422 through four save walks: saves 1..3 publish, the fourth
             is refused before any slot byte is written.
+  items     story0420_5f, castle training walk, authorize.item_use on real
+            battle state. NO ITEMS IN BATTLE armed: a fixture rewrites one
+            party action into a Medicine command as READY starts (a direct
+            writer past the menu); the action becomes a native wait and no
+            Medicine is debited. Control run, rule off: the walk's own menu
+            Medicine use reaches READY as an item command and is debited.
 """
 import argparse
 import os
@@ -180,6 +186,49 @@ p4.hook(0x00304580, "vp", "before", function()
 end)
 p4.log("TEST_ROSTER_READY")
 """,
+    # Forces the first party action that READY sees into a Medicine command (kind 3)
+    # while the party still holds Medicine: the direct-writer case no menu or AI
+    # setter guard sees. Reports the kind READY leaves behind and the stock later.
+    # Action layout: unit +0x30, kind +0x6C (1 attack, 2 skill, 3 item, 7 wait), item ID
+    # +0x70; unit genus +0xA2 (0 = party). Shared by the rule-on run (the command must
+    # become a native wait) and the rule-off control (the same command must stay an item
+    # command and be debited): the walk itself never uses an item in battle.
+    "test.challenge.itemforce": """--!strict
+local forced = 0
+local before = 0
+local frames = 0
+local reported = false
+p4.hook(0x001a4800, "vp", "before", function(context)
+    if forced ~= 0 then return end
+    local action = context.args[1] :: number
+    local unit = p4.mem.read("u32", action + 0x30)
+    if unit == 0 or p4.mem.read("u8", unit + 0xa2) ~= 0 then return end
+    local kind = p4.mem.read("u16", action + 0x6c)
+    if kind ~= 1 and kind ~= 2 then return end
+    before = p4.inventory.count("Medicine")
+    if before < 1 then return end
+    local medicine = p4.data.item("Medicine").id :: number -- the catalog's id, not a literal
+    forced = action
+    p4.mem.write("u16", action + 0x6c, 3)
+    p4.mem.write("u16", action + 0x70, medicine)
+    p4.log(string.format("TEST_ITEM_FORCED action=0x%x was_kind=%d medicine=%d", action, kind, before))
+end)
+p4.hook(0x001a4800, "vp", "after", function(context)
+    if forced == 0 or context.args[1] ~= forced or frames > 0 then return end
+    frames = 1
+    p4.log(string.format("TEST_ITEM_RESULT kind=%d state=0x%x", p4.mem.read("u16", forced + 0x6c),
+        p4.mem.read("u16", forced + 0xc)))
+end)
+p4.events.on("frame_start", function(event)
+    if frames == 0 or reported then return end
+    frames += 1
+    if frames > 900 then
+        reported = true
+        p4.log(string.format("TEST_ITEM_REPORT medicine_before=%d medicine_after=%d", before, p4.inventory.count("Medicine")))
+    end
+end)
+p4.log("TEST_ITEMFORCE_READY")
+""",
     # Knocks Yu out when a battle starts.
     "test.challenge.frail": """--!strict
 -- Yu enters the battle already knocked out (his record's HP is 0), so the
@@ -198,7 +247,7 @@ def write_fixtures(root):
     for name, source in FIXTURES.items():
         package = root / name
         package.mkdir(parents=True)
-        requirement = "requires = data.catalog@1\n" if name == "test.challenge.observe" else ""
+        requirement = "requires = data.catalog@1\n" if name in ("test.challenge.observe", "test.challenge.itemforce") else ""
         (package / "mod.ini").write_text(
             f"[mod]\nid = {name}\nname = Challenge witness fixture\nversion = 1.0.0\napi = 1.3\n"
             f"{requirement}"
@@ -599,11 +648,31 @@ def quota(s):
     assert (s.card / SLOT / SLOT).read_bytes() == kept, "the refused save changed the slot"
 
 
+def items(s, forced):
+    text = s.walk("items", "save0420_5f_to_training.walk", "999999,20:1,4/20", timeout=2400,
+                  stop_on=r"TEST_ITEM_REPORT", grace=3)
+    stock = need(text, r"TEST_ITEM_FORCED action=0x[0-9a-f]+ was_kind=[12] medicine=(\d+)", "forced item command")
+    result = need(text, r"TEST_ITEM_RESULT kind=(\d+) state=0x([0-9a-f]+)", "READY outcome")
+    report = need(text, r"TEST_ITEM_REPORT medicine_before=(\d+) medicine_after=(\d+)", "stock report")
+    assert report.group(1) == stock.group(1), f"stock changed before the report: {report.groups()}"
+    if forced:
+        need(text, r"CHALLENGE_ARMED run=R1 rules=\S*no_battle_items\S* custom=true", "no_battle_items armed")
+        # READY decoded the refused item command to the native wait (kind 7); wait is not an item use.
+        assert result.group(1) == "7", f"the denied item command did not become a native wait: kind {result.group(1)}"
+        assert report.group(1) == report.group(2), f"a refused item changed stock: {report.groups()}"
+    else:
+        # Control: the same forced command with the rule off is an ordinary item use.
+        assert "BATTLE_ITEMS_REFUSED" not in text, "the rule is off in the control run"
+        assert not re.search(r"CHALLENGE_ARMED run=R1 rules=\S*no_battle_items", text), "the control armed the rule"
+        assert result.group(1) == "3", f"the allowed item command did not stay an item command: kind {result.group(1)}"
+        assert int(report.group(2)) == int(report.group(1)) - 1, f"the allowed Medicine use was not debited once: {report.groups()}"
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--scenario", action="append", choices=("camp", "training", "loss", "strict", "fusion", "roster", "solo", "yosuke", "naoto", "severe", "mandatory",
-                                                            "boss", "quota", "party"))
+                                                            "boss", "quota", "party", "items"))
     parser.add_argument("--driver", nargs=argparse.REMAINDER, required=True)
     args = parser.parse_args()
     if not args.driver:
@@ -670,6 +739,11 @@ def main():
             severe(scenario("severe", ("severe_damage", "custom_on_load"), ("test.challenge.observe",), "story0420_5f"))
         if "party" in selected:
             party(scenario("party", ("custom_on_load",), ("test.challenge.party",), "story0420_5f"))
+        if "items" in selected:
+            items(scenario("items", ("no_battle_items", "custom_on_load"), ("test.challenge.observe", "test.challenge.itemforce"),
+                           "story0420_5f"), True)
+            items(scenario("items-control", ("custom_on_load",), ("test.challenge.observe", "test.challenge.itemforce"),
+                           "story0420_5f"), False)
         if "strict" in selected:
             s = scenario("strict", STRICT_RULES, ("test.challenge.observe",), "story0420_5f")
             strict_training(s)

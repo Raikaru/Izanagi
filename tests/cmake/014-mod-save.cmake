@@ -25,6 +25,7 @@ target_sources(memcard_test PRIVATE ${_p4_mc_core} ${_p4_save_transport})
 target_include_directories(memcard_test PRIVATE "${CMAKE_SOURCE_DIR}/src/platform/files")
 add_executable(mod_save_transport_test mod_save_transport_test.c ${_p4_save_core} ${_p4_save_transport}
   "${CMAKE_SOURCE_DIR}/src/platform/memcard/ps2_memcard.c")
+target_sources(mod_save_transport_test PRIVATE "${CMAKE_SOURCE_DIR}/src/platform/golden/c03_guard.c")
 target_include_directories(mod_save_transport_test PRIVATE "${CMAKE_SOURCE_DIR}/src/platform/files")
 target_compile_definitions(mod_save_transport_test PRIVATE ${P4_PORT_DEFINES})
 target_link_libraries(mod_save_transport_test m)

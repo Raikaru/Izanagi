@@ -20,12 +20,22 @@ if(P4_PORT64_LINK AND P4_PORT64_OBJS)
     set_tests_properties(field_mad_ctxloss64 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;port64" TIMEOUT 600)
     set_tests_properties(title_mad64 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;port64" TIMEOUT 300)
     set_tests_properties(field_mad64 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;port64" TIMEOUT 600)
+    # The ground shadow under the player (the field's shadow camera) is about 1/300 of the frame: field_mad64's whole-frame limit never saw it
+    # missing. The same retail frame, judged on the box that holds the shadow (the feet of the player in the Dojima living room).
+    add_test(NAME scene_retail_field_shadow64 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/scene_mad.sh" $<TARGET_FILE:p4pc_viewer64> "${CMAKE_BINARY_DIR}/64_field_shadow.png" field:7:2 field 1.9 P4PC_DRAW_WINDOW=4)
+    set_tests_properties(scene_retail_field_shadow64 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes64;port64" TIMEOUT 600
+      ENVIRONMENT "P4PC_REGION_MAD=296,255,318,268,2.0")
+    # The fog on the far wall of the same frame (the doorway): retail fogs mid-polygon as the GS interpolates its vertex fog in screen space; 0.79% now, 1.66% with
+    # the fog taken per pixel from the depth.
+    add_test(NAME scene_retail_field_fog64 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/scene_mad.sh" $<TARGET_FILE:p4pc_viewer64> "${CMAKE_BINARY_DIR}/64_field_fog.png" field:7:2 field 1.9 P4PC_DRAW_WINDOW=4)
+    set_tests_properties(scene_retail_field_fog64 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes64;port64" TIMEOUT 600
+      ENVIRONMENT "P4PC_REGION_MAD=340,120,400,200,1.2")
     # Viewer gates need explicit twins; the registration prelude clones only p4pc.
     add_test(NAME scene_resolution_title108064 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/scene_mad.sh" $<TARGET_FILE:p4pc_viewer64>
       "${CMAKE_BINARY_DIR}/64_resolution_title1080.png" title p4-resolution-title1080 0.5
       P4PC_RESOLUTION=1920x1080 P4PC_TITLE_FRAME=400 P4PC_DRAW_WINDOW=4)
     add_test(NAME scene_resolution_field136664 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/scene_mad.sh" $<TARGET_FILE:p4pc_viewer64>
-      "${CMAKE_BINARY_DIR}/64_resolution_field1366.png" field:7:2 p4-resolution-field1366 0.5
+      "${CMAKE_BINARY_DIR}/64_resolution_field1366.png" field:7:2 p4-resolution-field1366-sf 0.5
       P4PC_RESOLUTION=1366x768 P4PC_DRAW_WINDOW=4)
     include("${CMAKE_CURRENT_LIST_DIR}/private/scene-resolution-private.cmake" OPTIONAL)
     set_tests_properties(scene_resolution_title108064 scene_resolution_field136664
@@ -42,7 +52,7 @@ if(P4_PORT64_LINK AND P4_PORT64_OBJS)
       PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;port64" TIMEOUT 600 ENVIRONMENT "P4PC_TITLE_EDGES=1")
     add_test(NAME widescreen_field_16_9_nvidia64 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/scene_mad.sh"
       $<TARGET_FILE:p4pc_viewer64> "${CMAKE_BINARY_DIR}/64_widescreen_field_16_9_nvidia.png"
-      field:7:2 port-wide-field-16-9-${nvidiaFrame} 0.1 P4PC_ASPECT=16:9 P4PC_DRAW_WINDOW=4
+      field:7:2 port-wide-field-16-9-${nvidiaFrame}-sf 0.1 P4PC_ASPECT=16:9 P4PC_DRAW_WINDOW=4
       "P4PC_GATE_RENDERER=NVIDIA GeForce RTX 4080 Laptop GPU/PCIe/SSE2")
     set_tests_properties(widescreen_field_16_9_nvidia64 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes64;widescreen;port64" TIMEOUT 600)
     foreach(wideRatio IN ITEMS 16-9 21-9)
@@ -68,7 +78,7 @@ if(P4_PORT64_LINK AND P4_PORT64_OBJS)
   # software/hardware colour quantization with a looser limit.
   if(TARGET p4pc64)
     add_test(NAME widescreen_battle_16_9_nvidia64 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/battle_mad.sh"
-      $<TARGET_FILE:p4pc64> 532 port-wide-battle-16-9-${nvidiaFrame} 0 0.1
+      $<TARGET_FILE:p4pc64> 532 port-wide-battle-16-9-${nvidiaFrame}-uv-sf 0 0.1
       "cross@360:2/150,start@500:2/300" P4PC_ASPECT=16:9
       "P4PC_GATE_RENDERER=NVIDIA GeForce RTX 4080 Laptop GPU/PCIe/SSE2"
       P4PC_VIRTUAL_CLOCK=1 P4PC_CAPTURE_STATE=battle-menu,40,1,4000)
@@ -81,12 +91,14 @@ if(P4_PORT64_LINK AND P4_PORT64_OBJS)
         set(wideVariant full)
         # The DATE-aware reference excludes the unmasked battle-floor reflection.
         set(wideRef port-wide-shuffle-full-date-${wideRatio})
+        set(wideRefTag -uv-sf)
         if(wideScene STREQUAL "allout")
           set(wideVariant masked)
           set(wideRef port-wide-allout-masked-${wideRatio})
+          set(wideRefTag -uv)
         endif()
         add_test(NAME widescreen_${wideScene}_${wideVariant}_${wideName}_nvidia64 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/widescreen_saved_gate.sh"
-          $<TARGET_FILE:p4pc64> ${wideScene} ${wideAspect} ${wideRef}-${nvidiaFrame})
+          $<TARGET_FILE:p4pc64> ${wideScene} ${wideAspect} ${wideRef}-${nvidiaFrame}${wideRefTag})
         set_tests_properties(widescreen_${wideScene}_${wideVariant}_${wideName}_nvidia64 PROPERTIES
           SKIP_RETURN_CODE 77 LABELS "gl;scenes64;widescreen;port64" TIMEOUT 900
           ENVIRONMENT "P4PC_GATE_RENDERER=NVIDIA GeForce RTX 4080 Laptop GPU/PCIe/SSE2")
@@ -98,7 +110,7 @@ if(P4_PORT64_LINK AND P4_PORT64_OBJS)
           set(wideCutinRef port-wide-cast-eyes-date-${wideRatio})
         endif()
         add_test(NAME widescreen_${wideCutinName}_${wideName}_nvidia64 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/widescreen_saved_gate.sh"
-          $<TARGET_FILE:p4pc64> ${wideCutin} ${wideAspect} ${wideCutinRef}-${nvidiaFrame})
+          $<TARGET_FILE:p4pc64> ${wideCutin} ${wideAspect} ${wideCutinRef}-${nvidiaFrame}-uv)
         set_tests_properties(widescreen_${wideCutinName}_${wideName}_nvidia64 PROPERTIES
           SKIP_RETURN_CODE 77 LABELS "gl;scenes64;widescreen;port64" TIMEOUT 900
           ENVIRONMENT "P4PC_GATE_RENDERER=NVIDIA GeForce RTX 4080 Laptop GPU/PCIe/SSE2")
@@ -123,11 +135,19 @@ if(P4_PORT64_LINK AND P4_PORT64_OBJS)
 
   include("${CMAKE_CURRENT_LIST_DIR}/private/scene-event-definition-private.cmake" OPTIONAL)
 
+  # These frames contain materials the game animates through RpMatFX UV transforms; their references were captured
+  # after the renderer applied those transforms, under a new name (the earlier ones show the frozen texture).
   function(p4_port_viewer_frame name mode reference)
     set(frameTest scene_port_${name}_${portFrameBackend}64)
+    set(refSuffix "")
+    if(reference STREQUAL "sky-black-tint" OR reference STREQUAL "save-butterfly-glow")
+      set(refSuffix -uv-sf)
+    elseif(reference STREQUAL "field")
+      set(refSuffix -sf)
+    endif()
     add_test(NAME ${frameTest} COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/scene_mad.sh"
       $<TARGET_FILE:p4pc_viewer64> "${CMAKE_BINARY_DIR}/${frameTest}.png"
-      ${mode} port-scene-${reference}-${portFrameRef} 0.05 ${ARGN})
+      ${mode} port-scene-${reference}-${portFrameRef}${refSuffix} 0.05 ${ARGN})
     p4_port_frame_properties(${frameTest} 600)
   endfunction()
 
@@ -138,12 +158,12 @@ if(P4_PORT64_LINK AND P4_PORT64_OBJS)
   if(TARGET p4pc64)
     set(frameTest scene_port_fog_battle_${portFrameBackend}64)
     add_test(NAME ${frameTest} COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/battle_mad.sh"
-      $<TARGET_FILE:p4pc64> 532 port-scene-fog-battle-${portFrameRef} 1700 0.05
+      $<TARGET_FILE:p4pc64> 532 port-scene-fog-battle-${portFrameRef}-uv-sf 1700 0.05
       "cross@360:2/150,start@500:2/300")
     p4_port_frame_properties(${frameTest} 300)
     set(frameTest scene_port_tv_entrance_${portFrameBackend}64)
     add_test(NAME ${frameTest} COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/systems_gate.sh"
-      $<TARGET_FILE:p4pc64> entrance 0.05 port-scene-tv-entrance-${portFrameRef})
+      $<TARGET_FILE:p4pc64> entrance 0.05 port-scene-tv-entrance-${portFrameRef}-uv-sf)
     p4_port_frame_properties(${frameTest} 1200)
     include("${CMAKE_CURRENT_LIST_DIR}/private/scene-event-calls-private.cmake" OPTIONAL)
   endif()
@@ -409,13 +429,18 @@ if(P4_PORT64_LINK AND P4_PORT64_OBJS)
         set(guestsrcs ${P4_GUEST_TEST_SRC})
       endif()
       string(JOIN " " target_string ${targetflags})
+      # The Android build's rewriter environment (080-port64-profile.cmake): position independent objects and the i686 layout oracle of the NDK.
+      set(extra_env)
+      if(P4_ANDROID64 AND suffix STREQUAL "64")
+        set(extra_env P4_PORT64_PIC=1 "P4_PORT32_TARGET=--target=${P4_X32_TRIPLE}")
+      endif()
       set(objs)
       foreach(addr IN LISTS O_OVERRIDES)
         set(o "${CMAKE_CURRENT_BINARY_DIR}/ovr${suffix}/${exe}/${addr}.o")
         add_custom_command(OUTPUT "${o}"
-          COMMAND "${CMAKE_COMMAND}" -E env "P4_PORT64_TARGET=${target_string}"
+          COMMAND "${CMAKE_COMMAND}" -E env "P4_PORT64_TARGET=${target_string}" ${extra_env}
                   "${P4_PYTHON}" -W ignore "${CMAKE_SOURCE_DIR}/tools/port64/unit64.py" build
-                  --gen "${P4_GEN}" --root "${CMAKE_SOURCE_DIR}" --src "${CMAKE_SOURCE_DIR}/overrides/${addr}.c"
+                  --gen "${P4_GEN}" --root "${CMAKE_SOURCE_DIR}" --decomp "${P4_DECOMP}" --src "${CMAKE_SOURCE_DIR}/overrides/${addr}.c"
                   --out "${o}" --clang "${CMAKE_C_COMPILER}" --opt "${opt}" --check ${launcher} ${flagargs}
           DEPFILE "${o}.d"
           DEPENDS "${CMAKE_SOURCE_DIR}/overrides/${addr}.c" "${CMAKE_CURRENT_SOURCE_DIR}/override_test_types.h"
@@ -445,6 +470,8 @@ if(P4_PORT64_LINK AND P4_PORT64_OBJS)
   p4_ovr_test64(qsort_test qsort_test.c OVERRIDES 00440bb8
     SOURCES "${CMAKE_SOURCE_DIR}/src/platform/ee_bytes.c")
   p4_ovr_test64(spline_test spline_test.c OVERRIDES 003b9a40)
+  # Fusion Forecast text tags: <R1>/<P2>/<R2> each read their own replacement (overrides/002b32d0.c).
+  p4_ovr_test64(fcl_expand_tags_test fcl_expand_tags_test.c OVERRIDES 002b32d0)
   p4_ovr_test64(lockstep_restore_witness_test lockstep_restore_witness_test.c OVERRIDES 0010e710
     FLAGS -include "${CMAKE_CURRENT_SOURCE_DIR}/lockstep_restore_witness_prelude.h"
     SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/lockstep_align_guest_header_test.c"
@@ -466,7 +493,7 @@ if(P4_PORT64_LINK AND P4_PORT64_OBJS)
     SOURCES "${CMAKE_SOURCE_DIR}/src/platform/rx_heap_realloc.c")
 
   set(P4_HOST64_SKIP "")
-  if(P4_PORT64_ARCH STREQUAL "aarch64")
+  if(P4_PORT64_ARCH STREQUAL "aarch64" OR P4_ANDROID_ARM64)
     list(APPEND P4_HOST64_SKIP fpu_state)       # (checks the x86 MXCSR/x87 state restore of state_dump.c: SSE intrinsics)
   endif()
   # Called after every reference fixture and final source-test policy exists,

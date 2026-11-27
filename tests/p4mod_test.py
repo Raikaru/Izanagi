@@ -197,7 +197,7 @@ def main():
         assert re.search(r"data/tables/rows\.xml:2:1: warning: uses <skill delivery=\.\.\.> "
                          r"\(capability table-source\.skill-delivery@1\)", output), output
         assert "(capability table-source.skill-derive@1)" in output, output
-        assert re.search(r"data/tables/rows\.xml:3:1: warning: uses <status-ailment> \(capability table-source\.status@3\)",
+        assert re.search(r"data/tables/rows\.xml:3:1: warning: uses <status-ailment> \(capability table-source\.status@4\)",
                          output), output
         assert re.search(r"data/tables/rows\.xml:4:1: warning: uses <item icon-source=\.\.\.> "
                          r"\(capability table-source\.item-icon-anchor@1\)", output), output

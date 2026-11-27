@@ -6,6 +6,7 @@ list(REMOVE_ITEM _p4_persona_native_sources game_table_sources_test.c "${CMAKE_C
 add_executable(game_personas_native_test game_personas_native_test.c ${_p4_persona_native_sources}
   "${CMAKE_SOURCE_DIR}/src/platform/mods/game_table_inputs_use.c"
   "${CMAKE_SOURCE_DIR}/src/platform/mods/game_skills_native.c"
+  "${CMAKE_SOURCE_DIR}/src/platform/golden/golden_battle_rows.c"
   "${CMAKE_SOURCE_DIR}/src/platform/mods/game_enemies_native.c"
   "${CMAKE_SOURCE_DIR}/src/platform/mods/game_personas_native.c"
   "${CMAKE_SOURCE_DIR}/src/platform/mods/game_personas_save.c"

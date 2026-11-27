@@ -119,6 +119,12 @@ function(p4_luau_profile suffix)
   add_executable(luau_sandbox_test${suffix} "${P4_LUAU_ROOT}/tests/luau_sandbox_test.c")
   target_compile_options(luau_sandbox_test${suffix} PRIVATE ${flags} -O2 -g1)
   target_link_libraries(luau_sandbox_test${suffix} PRIVATE p4_luau${suffix})
+  add_executable(golden_recipe_luau_test${suffix}
+    "${P4_LUAU_ROOT}/tests/golden_recipe_luau_test.c"
+    "${P4_LUAU_ROOT}/src/platform/mods/lua_data_fusion.c"
+    "${P4_LUAU_ROOT}/src/platform/golden/golden_recipe_runtime.c")
+  target_compile_options(golden_recipe_luau_test${suffix} PRIVATE ${flags} -O2 -g1)
+  target_link_libraries(golden_recipe_luau_test${suffix} PRIVATE p4_luau${suffix})
   # Headless mod-only qualification: bundled mods' Luau in this pinned VM with
   # a synthetic p4 fixture (no game, no budget) and the shared native digest.
   add_executable(luau_script_runner${suffix} "${P4_LUAU_ROOT}/tests/luau_script_runner.c"
@@ -137,7 +143,7 @@ function(p4_luau_profile suffix)
   target_compile_definitions(p4_luau_size_baseline${suffix} PRIVATE P4_LUAU_SIZE_BASELINE=1)
   if(suffix STREQUAL "64w")
     set_target_properties(p4_luau_check${suffix} p4mod${suffix} luau_sandbox_test${suffix} luau_script_runner${suffix}
-      fusion_arts_safety_test${suffix}
+      fusion_arts_safety_test${suffix} golden_recipe_luau_test${suffix}
       p4_luau_size_probe${suffix} p4_luau_size_baseline${suffix} PROPERTIES
       SUFFIX ".exe")
     find_program(P4_LUAU_WINE NAMES wine64 wine)
@@ -149,22 +155,29 @@ function(p4_luau_profile suffix)
     add_test(NAME fusion_arts_safety${suffix} COMMAND "${P4_LUAU_WINE}" "$<TARGET_FILE:fusion_arts_safety_test${suffix}>"
       "${P4_LUAU_ROOT}/tests/fusion_arts_safety_setup.luau" "${P4_LUAU_ROOT}/mods/p4pc.fusion-arts/main.luau"
       "${P4_LUAU_ROOT}/tests/fusion_arts_safety_cases.luau")
+    add_test(NAME golden_recipe_luau${suffix} COMMAND "${P4_LUAU_WINE}" "$<TARGET_FILE:golden_recipe_luau_test${suffix}>")
   else()
     add_test(NAME luau_sandbox${suffix} COMMAND luau_sandbox_test${suffix})
     add_test(NAME fusion_arts_safety${suffix} COMMAND fusion_arts_safety_test${suffix}
       "${P4_LUAU_ROOT}/tests/fusion_arts_safety_setup.luau" "${P4_LUAU_ROOT}/mods/p4pc.fusion-arts/main.luau"
       "${P4_LUAU_ROOT}/tests/fusion_arts_safety_cases.luau")
+    add_test(NAME golden_recipe_luau${suffix} COMMAND golden_recipe_luau_test${suffix})
   endif()
   set_tests_properties(luau_sandbox${suffix} PROPERTIES LABELS "host" TIMEOUT 20
     ENVIRONMENT "P4PC_INPUT=script;P4PC_MODS=0;P4PC_PACKS=0")
   set_tests_properties(fusion_arts_safety${suffix} PROPERTIES LABELS "host" TIMEOUT 20
     ENVIRONMENT "P4PC_INPUT=script;P4PC_MODS=0;P4PC_PACKS=0")
+  set_tests_properties(golden_recipe_luau${suffix} PROPERTIES LABELS "host" TIMEOUT 20)
   if(suffix STREQUAL "64")
     set_property(TEST luau_sandbox${suffix} APPEND PROPERTY LABELS port64)
     set_property(TEST fusion_arts_safety${suffix} APPEND PROPERTY LABELS port64)
+    set_property(TEST golden_recipe_luau${suffix} APPEND PROPERTY LABELS port64)
   elseif(suffix STREQUAL "64w")
     set_tests_properties(luau_sandbox${suffix} PROPERTIES LABELS "host;port64win"
       FIXTURES_REQUIRED wine64_ready)
+    set_tests_properties(golden_recipe_luau${suffix} PROPERTIES LABELS "host;port64win"
+      FIXTURES_REQUIRED wine64_ready ENVIRONMENT "WINEDEBUG=-all;WINEPREFIX=${CMAKE_BINARY_DIR}/tests/wine64prefix")
+    p4_wine_scale_timeouts(golden_recipe_luau${suffix})
     set_property(TEST luau_sandbox${suffix} APPEND PROPERTY ENVIRONMENT
       WINEDEBUG=-all "WINEPREFIX=${CMAKE_BINARY_DIR}/tests/wine64prefix")
     p4_wine_scale_timeouts(luau_sandbox${suffix})
@@ -214,7 +227,7 @@ function(p4_luau_profile suffix)
   # window-boss weakness rule and its one-way step-down and in-place boss retry
   # (the p4.battle.defeat handler) in the real VM over a synthetic p4 provider;
   # not gameplay witnesses.
-  foreach(_hm IN ITEMS lifecycle weakness retry)
+  foreach(_hm IN ITEMS lifecycle weakness retry gigas)
     add_test(NAME mod_hardmode_${_hm}${suffix} COMMAND "${Python3_EXECUTABLE}"
       "${P4_LUAU_ROOT}/tests/mod_hardmode_${_hm}_test.py" -- ${emulator} "$<TARGET_FILE:luau_script_runner${suffix}>")
     set_tests_properties(mod_hardmode_${_hm}${suffix} PROPERTIES LABELS "host" TIMEOUT 120

@@ -14,6 +14,8 @@
   remaining two are BMD message files).
 - Public: Amicitia wiki, "FTD" (header of payload size and entry count, 8 padding bytes; entry size =
   size / count) and "SKILL.TBL" (packed tables padded to 16 bytes).
+- Public: [CRI CPK](https://reverseengineering.wiki/index.php/Format:CRI_CPK), including
+  the ITOC DataL/DataH ID-indexed table variant and ETOC.
 
 ## Container
 
@@ -31,6 +33,11 @@ constant, `0x50` per row; type `0..9` numbers of 1/1/2/2/4/4/8/8/4/8 bytes, `0x0
 the size word. The header table's `TocOffset` (and `ContentOffset`) locate the `TOC ` chunk, whose @UTF
 rows carry `DirName`, `FileName`, `FileSize` (stored), `ExtractSize`, `FileOffset`; a member's absolute
 offset is `min(TocOffset, ContentOffset) + FileOffset`.
+
+ITOC's DataL and DataH cells contain nested @UTF tables with ID, stored size,
+and extracted size. The ID-sorted entries begin at ContentOffset, each next
+offset aligned to the header's Align. The native lookup addresses these entries
+as `#<decimal ID>`. ETOC is retained as a separate @UTF table when present.
 
 ### CRILAYLA
 

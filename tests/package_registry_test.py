@@ -1,6 +1,7 @@
 """Native package metadata/provider evidence; no retail bytes or production codecs."""
 import os
 import pathlib
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -358,6 +359,24 @@ class NativePackages(unittest.TestCase):
                 out = self.requirements("mod.d,mod.x")
                 self.assertIn(f"refused=mod.x reason={reason}\n", out)
                 self.assertIn("admitted=mod.d\n", out)
+
+    def test_every_bundled_mod_manifest_is_accepted_by_the_real_parser(self):
+        # A manifest the game refuses (a line of 512 bytes or more, an unknown key, a bad version) drops the mod from the
+        # player's MODS list with only a log line, so every shipped mod must scan and stage here.
+        repository_mods = pathlib.Path(__file__).resolve().parent.parent / "mods"
+        folders = sorted(p.name for p in repository_mods.iterdir() if (p / "mod.ini").is_file())
+        self.assertGreaterEqual(len(folders), 8, folders)
+        # Only the manifests go to the driver: the phone unit run copies a folder argument to the device on every launch.
+        staged = self.root / "bundled"
+        for folder in folders:
+            (staged / folder).mkdir(parents=True)
+            shutil.copyfile(repository_mods / folder / "mod.ini", staged / folder / "mod.ini")
+        result = subprocess.run(
+            [*DRIVER, "bundled-manifests", str(staged), str(staged)],
+            capture_output=True, text=True, check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn(f"bundled manifests: {len(folders)} scanned, 0 refused, PASS", result.stdout)
 
     def test_requirements_stay_within_their_kind(self):
         self.manifest("shared.base", "")

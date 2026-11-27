@@ -13,6 +13,7 @@
 
 #include <SDL3/SDL.h>
 
+#include "gles_context_evidence.h"
 #include "p4gl_api.h"
 #include "p4gl_gl.h"
 #include "p4gl_win.h"
@@ -32,6 +33,7 @@ static int unavailable(const char *what)
     return sRequire ? 1 : 77;
 }
 
+
 static const char kVertex[] =
     "layout(location = 0) in vec2 aPos;\n"
     "layout(location = 1) in vec3 aColor;\n"
@@ -45,6 +47,175 @@ static const char kFragment[] =
 static int near(const unsigned char *px, int r, int g, int b)
 {
     return abs(px[0] - r) <= 2 && abs(px[1] - g) <= 2 && abs(px[2] - b) <= 2 && px[3] == 255;
+}
+
+/* The window framebuffer's sRGB encoding (src/render/p4gl_gl.c, probe_window_srgb): on a machine whose driver can give a window an sRGB-capable
+ * format and encode writes to it, the picture the present blit stores must be the one the game drew. This is the washed-out look of AMD's WGL
+ * (black 25 stored as 88). The stage makes such a window, switches the encoding on, and checks the renderer's three answers: p4gl_gl_load
+ * switches it off, a forced decoding blit stores texels as they are (nearest and bilinear), and nothing else changes. A driver that gives no such
+ * window or does not encode on request leaves the stage skipped, which is not a failure. */
+#define SRGB_ENABLE 0x8DB9u
+
+/* The window's encoding is switched on through the driver's own glEnable, not the renderer's state cache, which would remember a setting the
+ * renderer itself never makes. */
+static void srgb_encoding_on(void)
+{
+    static void (P4GL_APIENTRY *rawEnable)(GLenum cap);
+
+    if (rawEnable == NULL) {
+        rawEnable = (void (P4GL_APIENTRY *)(GLenum))p4gl_win_proc("glEnable");
+    }
+    if (rawEnable != NULL) {
+        rawEnable(SRGB_ENABLE);
+    }
+}
+
+static int window_red(int value)
+{
+    unsigned char px[4] = {0, 0, 0, 0};
+
+    p4gl_glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    p4gl_glColorMask(1, 1, 1, 1);
+    p4gl_glClearColor((float)value / 255.0f, (float)value / 255.0f, (float)value / 255.0f, 1.0f);
+    p4gl_glClear(GL_COLOR_BUFFER_BIT);
+    p4gl_glReadPixels(0, 0, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, px);
+    return px[0];
+}
+
+static int close_to(int got, int want, int slack)
+{
+    return abs(got - want) <= slack;
+}
+
+static int srgb_window_stage(int fallbackDesktop)
+{
+    enum { kSrc = 4, kOut = 8 };
+    SDL_Window *window;
+    SDL_GLContext ctx;
+    int capable = 0, bad = 0, stored;
+    GLuint tex = 0;
+    unsigned char texels[kSrc * kSrc * 4], out[kOut * kOut * 4];
+    static const int kValues[kSrc] = {0, 25, 128, 255};
+
+    if (fallbackDesktop) {
+        SDL_GL_ResetAttributes();
+        p4gl_api_set_attributes_desktop();
+    } else {
+        p4gl_api_set_attributes();
+    }
+    SDL_GL_SetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, 1);
+    window = p4gl_api_create_window("gles_context_smoke srgb", kSize, kSize, P4GL_WIN_FLAG | SDL_WINDOW_HIDDEN);
+    if (window == NULL) {
+        printf("gles_context_smoke: window sRGB stage skipped: no window (%s)\n", SDL_GetError());
+        return 0;
+    }
+    ctx = p4gl_win_create_context(window);
+    if (ctx == NULL || !p4gl_win_make_current(window, ctx) || p4gl_gl_load() != 0) {
+        printf("gles_context_smoke: window sRGB stage skipped: no context\n");
+        if (ctx != NULL) p4gl_win_destroy_context(ctx);
+        SDL_DestroyWindow(window);
+        return 0;
+    }
+    SDL_GL_GetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, &capable);
+    p4gl_glGetError();
+    srgb_encoding_on();
+    stored = p4gl_glGetError() == GL_NO_ERROR ? window_red(25) : -1;
+    if (!capable || !close_to(stored, 88, 4)) {
+        printf("gles_context_smoke: window sRGB stage skipped: this window does not encode (sRGB capable %d, 25/255 stored as %d)\n", capable, stored);
+        p4gl_win_destroy_context(ctx);
+        SDL_DestroyWindow(window);
+        return 0;
+    }
+    printf("gles_context_smoke: window sRGB stage: the window encodes (25/255 stored as %d)\n", stored);
+
+    /* 1. the renderer's load of a context (also its recovery after a loss) finds the encoding and switches it off */
+    if (p4gl_gl_load() != 0) {
+        printf("gles_context_smoke: FAIL: p4gl_gl_load again\n");
+        return 1;
+    }
+    stored = window_red(25);
+    printf("gles_context_smoke: after p4gl_gl_load 25/255 is stored as %d, window decodes: %d\n", stored, p4gl_gl_window_srgb());
+    if (!close_to(stored, 25, 1) || p4gl_gl_window_srgb()) {
+        printf("gles_context_smoke: FAIL: the window still stores 25/255 as %d (decode pass %d): the picture would be washed out\n", stored, p4gl_gl_window_srgb());
+        bad = 1;
+    }
+
+    /* 2. a window that keeps encoding: the decoding blit stores the frame as it is */
+    SDL_setenv_unsafe("P4PC_WINDOW_SRGB", "decode", 1);
+    if (p4gl_gl_load() != 0) {
+        printf("gles_context_smoke: FAIL: p4gl_gl_load with the decoding blit forced\n");
+        return 1;
+    }
+    SDL_unsetenv_unsafe("P4PC_WINDOW_SRGB");
+    srgb_encoding_on();
+    if (!p4gl_gl_window_srgb()) {
+        printf("gles_context_smoke: FAIL: the forced decoding blit is not on\n");
+        bad = 1;
+    }
+    for (int y = 0; y < kSrc; y++) {
+        for (int x = 0; x < kSrc; x++) {
+            unsigned char *t = texels + (y * kSrc + x) * 4;
+
+            t[0] = (unsigned char)kValues[x];
+            t[1] = (unsigned char)kValues[y];
+            t[2] = (unsigned char)((kValues[x] + kValues[y]) / 2);
+            t[3] = 255;
+        }
+    }
+    p4gl_glGenTextures(1, &tex);
+    p4gl_glBindTexture(GL_TEXTURE_2D, tex);
+    p4gl_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    p4gl_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    p4gl_glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, kSrc, kSrc, 0, GL_RGBA, GL_UNSIGNED_BYTE, texels);
+    for (int linear = 0; linear < 2; linear++) {
+        int worst = 0;
+
+        p4gl_glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        p4gl_glColorMask(1, 1, 1, 1);
+        p4gl_glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        p4gl_glClear(GL_COLOR_BUFFER_BIT);
+        /* nearest: 1:1 (4x4 into 4x4); linear: 4x4 stretched to 8x8, each output pixel the mean of its four source texels as a blit filters */
+        if (!p4gl_gl_present_decoded(tex, kSrc, kSrc, 0, 0, linear ? kOut : kSrc, linear ? kOut : kSrc, linear)) {
+            printf("gles_context_smoke: FAIL: the decoding blit did not run\n");
+            bad = 1;
+            break;
+        }
+        p4gl_glReadPixels(0, 0, linear ? kOut : kSrc, linear ? kOut : kSrc, GL_RGBA, GL_UNSIGNED_BYTE, out);
+        for (int y = 0; y < (linear ? kOut : kSrc); y++) {
+            for (int x = 0; x < (linear ? kOut : kSrc); x++) {
+                for (int c = 0; c < 3; c++) {
+                    float want;
+                    int got = out[(y * (linear ? kOut : kSrc) + x) * 4 + c];
+
+                    if (linear) {
+                        const float sx = ((float)x + 0.5f) / 2.0f - 0.5f, sy = ((float)y + 0.5f) / 2.0f - 0.5f;
+                        int x0 = (int)(sx < 0.0f ? -1.0f : sx), y0 = (int)(sy < 0.0f ? -1.0f : sy);
+                        const float fx = sx - (float)x0, fy = sy - (float)y0;
+                        int xs[2] = {x0 < 0 ? 0 : x0, x0 + 1 > kSrc - 1 ? kSrc - 1 : x0 + 1};
+                        int ys[2] = {y0 < 0 ? 0 : y0, y0 + 1 > kSrc - 1 ? kSrc - 1 : y0 + 1};
+                        float v[2][2];
+
+                        for (int j = 0; j < 2; j++) {
+                            for (int i = 0; i < 2; i++) v[j][i] = (float)texels[(ys[j] * kSrc + xs[i]) * 4 + c];
+                        }
+                        want = (v[0][0] * (1.0f - fx) + v[0][1] * fx) * (1.0f - fy) + (v[1][0] * (1.0f - fx) + v[1][1] * fx) * fy;
+                    } else {
+                        want = (float)texels[(y * kSrc + x) * 4 + c];
+                    }
+                    if (abs(got - (int)(want + 0.5f)) > worst) worst = abs(got - (int)(want + 0.5f));
+                }
+            }
+        }
+        printf("gles_context_smoke: decoding blit (%s), largest difference from the frame's texels %d\n", linear ? "bilinear" : "nearest", worst);
+        if (worst > (linear ? 2 : 1)) {
+            printf("gles_context_smoke: FAIL: the decoding blit does not store the frame as it is\n");
+            bad = 1;
+        }
+    }
+    p4gl_glDeleteTextures(1, &tex);
+    p4gl_win_destroy_context(ctx);
+    SDL_DestroyWindow(window);
+    return bad;
 }
 
 int main(int argc, char **argv)
@@ -174,8 +345,10 @@ int main(int argc, char **argv)
             printf("gles_context_smoke: wrote %s\n", argv[1]);
         }
     }
+    if (!bad) p4pc_write_renderer_evidence((const char *)p4gl_glGetString(GL_RENDERER), p4gl_gl_is_es(), fallback);
     p4gl_win_destroy_context(ctx);
     SDL_DestroyWindow(window);
+    if (!bad && srgb_window_stage(fallback)) bad = 1;
     SDL_Quit();
     if (!bad) {
         printf("gles_context_smoke: OK\n");

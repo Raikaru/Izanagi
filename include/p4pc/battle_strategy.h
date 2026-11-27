@@ -1,5 +1,5 @@
 /* The strategic candidate's decision rules (battle_sim party policy 8,
- * strategic-player-candidate-v1). Pure functions over facts policy.c has
+ * strategic-player-candidate-v1). Pure functions over facts policy.zig has
  * already gathered from state a player sees or remembers: buffs the party
  * cast and their lapse, outcomes the party saw land, item/skill descriptions,
  * and the protagonist's own stocked Personas. No enemy HP, affinity table, RNG

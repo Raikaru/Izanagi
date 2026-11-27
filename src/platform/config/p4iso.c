@@ -17,6 +17,7 @@
 
 #include "../files/iso9660.h"
 #include "p4cfg.h"
+#include "p4pc/hostpath.h"
 #include "p4pc/os.h"
 
 #define ELF_NAME "SLUS_217.82"
@@ -39,7 +40,7 @@ static void visit(void *ctx, const char *path, long long offset, long long size)
 
 int p4iso_locate_elf(const char *iso, long long *offset, long long *size)
 {
-    FILE *fp = fopen(iso, "rb");
+    FILE *fp = p4_host_fopen(iso, "rb");
     ElfFind f = {0, 0, 0};
 
     if (fp == NULL) {
@@ -166,7 +167,7 @@ static int extract_elf(const char *iso, char *elf, size_t cap)
         dir[0] = '\0';
     }
     snprintf(elf, cap, "%s%s", dir, ELF_NAME);
-    out = fopen(elf, "rb");
+    out = p4_host_fopen(elf, "rb");
     if (out != NULL) {
         fseek(out, 0, SEEK_END);
         cur = ftell(out);
@@ -175,7 +176,7 @@ static int extract_elf(const char *iso, char *elf, size_t cap)
     if (cur == (long)size) {
         return 0; /* the one from this disc, as before */
     }
-    in = fopen(iso, "rb");
+    in = p4_host_fopen(iso, "rb");
     buf = malloc((size_t)size);
     if (in == NULL || buf == NULL || seek64(in, off) != 0 || fread(buf, 1, (size_t)size, in) != (size_t)size) {
         if (in != NULL) {
@@ -186,7 +187,7 @@ static int extract_elf(const char *iso, char *elf, size_t cap)
         return -1;
     }
     fclose(in);
-    out = fopen(elf, "wb");
+    out = p4_host_fopen(elf, "wb");
     if (out == NULL || fwrite(buf, 1, (size_t)size, out) != (size_t)size) {
         char msg[1200];
 
@@ -201,6 +202,87 @@ static int extract_elf(const char *iso, char *elf, size_t cap)
     fclose(out);
     free(buf);
     fprintf(stderr, "p4pc: read %s from the disc (%lld bytes) to %s\n", ELF_NAME, size, elf);
+    return 0;
+}
+
+/* "<dir>/p4pc.log" with `tag` before the extension: "<dir>/p4pc.prev.log". 0, or -1 when it does not fit. */
+static int sibling_log(const char *path, const char *tag, char *out, size_t cap)
+{
+    const char *slash = strrchr(path, '/'), *back = strrchr(path, '\\'), *dot = strrchr(path, '.');
+    int n;
+
+    if (back != NULL && (slash == NULL || back > slash)) {
+        slash = back;
+    }
+    if (dot == NULL || (slash != NULL && dot < slash)) {
+        dot = path + strlen(path);
+    }
+    n = snprintf(out, cap, "%.*s.%s%s", (int)(dot - path), path, tag, dot);
+    return n > 0 && (size_t)n < cap ? 0 : -1;
+}
+
+/* True when the log's last lines hold the clean-exit marker: the run ended by itself (p4diag_startup writes the marker from an atexit handler). */
+static int log_ended_cleanly(FILE *f, long size)
+{
+    char tail[1024];
+    size_t got, keep = size < (long)sizeof tail - 1 ? (size_t)size : sizeof tail - 1;
+
+    if (fseek(f, size - (long)keep, SEEK_SET) != 0) {
+        return 0;
+    }
+    got = fread(tail, 1, keep, f);
+    tail[got] = '\0';
+    return strstr(tail, P4_LOG_CLEAN_EXIT) != NULL;
+}
+
+static void copy_log(const char *from, const char *to)
+{
+    FILE *in = p4_os_fopen_utf8(from, "rb"), *out = in != NULL ? p4_os_fopen_utf8(to, "wb") : NULL;
+    char buf[8192];
+    size_t got;
+
+    while (out != NULL && (got = fread(buf, 1, sizeof buf, in)) > 0) {
+        if (fwrite(buf, 1, got, out) != got) {
+            break;
+        }
+    }
+    if (out != NULL) {
+        fclose(out);
+    }
+    if (in != NULL) {
+        fclose(in);
+    }
+}
+
+int p4iso_rotate_log(const char *path)
+{
+    char prev[1100], unclean[1100];
+    FILE *f = p4_os_fopen_utf8(path, "rb");
+    long size = 0;
+    int clean = 1;
+
+    if (f == NULL) {
+        return 0; /* the first run: nothing to keep */
+    }
+    if (fseek(f, 0, SEEK_END) == 0) {
+        size = ftell(f);
+    }
+    if (size > 0) {
+        clean = log_ended_cleanly(f, size);
+    }
+    fclose(f);
+    if (size <= 0) {
+        return 0;
+    }
+    if (sibling_log(path, "prev", prev, sizeof prev) != 0 || sibling_log(path, "unclean", unclean, sizeof unclean) != 0) {
+        return -1;
+    }
+    if (p4_os_replace_file(path, prev) != 0) {
+        return -1;
+    }
+    if (!clean) {
+        copy_log(prev, unclean); /* the next clean run must not push a crashed run's log out of reach */
+    }
     return 0;
 }
 
@@ -224,7 +306,9 @@ void p4iso_player_log(void)
 #ifndef _WIN32
     p4_os_setenv("P4PC_LOG_FILE", path, 1);
 #endif
-    if (freopen(path, "w", stdout) == NULL) {
+    /* The previous run's log is kept as p4pc.prev.log (and p4pc.unclean.log when it did not end by itself); when that fails the log is truncated as before. */
+    (void)p4iso_rotate_log(path);
+    if (p4_host_freopen(path, "w", stdout) == NULL) {
         return;
     }
     setvbuf(stdout, NULL, _IOLBF, 4096);
@@ -243,7 +327,7 @@ static void default_save_dir(void)
 {
     char dir[1024], *slash;
 
-    if (getenv("P4PC_SAVE_DIR") != NULL && getenv("P4PC_SAVE_DIR")[0] != '\0') {
+    if (p4_host_getenv("P4PC_SAVE_DIR") != NULL && p4_host_getenv("P4PC_SAVE_DIR")[0] != '\0') {
         return;
     }
     settings_path(dir, sizeof dir);
@@ -264,7 +348,7 @@ int p4iso_prepare(char *elf, size_t cap)
     char chosen[1024];
 
     p4cfg_load();
-    iso = getenv("P4PC_ISO");
+    iso = p4_host_getenv("P4PC_ISO");
     if (iso == NULL || iso[0] == '\0') {
         iso = p4cfg_str("game.iso", NULL);
         if (iso != NULL) {

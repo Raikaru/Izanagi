@@ -26,6 +26,19 @@ relocations. lld `/sectionlayout` places `.ps2ram` first at `0x00100000`.
 `p4_ps2_exe()` applies this only to exes/tests using fixed guest memory; unrelated tools
 need not carry 31 MiB. The EE register page uses VirtualAlloc.
 
+## Paths are UTF-8
+
+Every host path the port builds is UTF-8 (`SDL_GetPrefPath`, the ISO the player picked, saves, mods, caches, the log). The Windows C
+library's `fopen`/`stat`/`remove`/`mkdir`/`opendir`/`getenv` use the ANSI codepage, so a player whose profile folder has a non-ASCII
+name would silently get no settings file, no mods and no saves. Port code therefore opens, stats, removes and creates through
+`include/p4pc/hostpath.h` (`p4_host_fopen`, `p4_host_freopen`, `p4_host_stat`, `p4_host_remove`, `p4_host_mkdir`, `p4_host_getenv`;
+header-only, wide CRT calls on Windows, the plain POSIX calls elsewhere) and the UTF-8 `p4_os_*` calls in `os.h` (`p4_os_rename`,
+`p4_os_list_dir`, `p4_os_fopen_rb`, `p4_os_rmdir`, `p4_os_replace_file`, `p4_os_setenv`). `tests/os_path_audit_test.py` fails the build on a
+raw call in `src/` (developer harnesses that read paths from `P4PC_*` test variables are listed there), and `utf8_path_test` and
+`memcard_test --utf8` run the settings file, the loose-file layer and the memory-card shim in a folder named with 2-, 3- and 4-byte
+UTF-8 (checked through the wide API on Windows, so ANSI mojibake cannot pass). SDL's own path functions (`SDL_IOFromFile`,
+`SDL_RenamePath`, ...) are UTF-8 already.
+
 ## Toolchain and symbols
 
 `ci/Dockerfile` pins llvm-mingw 20261006 (clang/lld 23.1.3, UCRT).

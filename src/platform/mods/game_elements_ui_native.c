@@ -385,7 +385,7 @@ int p4_game_elements_ui_native_analyze_affinities(void *work, void *unit,
 
 /* ---- Analyze ailment page. Columns follow the hard-mode order
  * (Panic, Fear, Rage,
- * Silence, Poison, Exhaustion, Enervation, Freeze, Shock) over status leaves
+ * Silence, Poison, Exhaustion, Enervation, Freeze, Shock, Burn) over status leaves
  * (datCalcStatusElement: 0x10 8, 0x4 10, 0x2 11, 0x8 15, 0x20 9, 0x40 13,
  * 0x80 14; authored Freeze 24 and Shock 25). A leaf is a column only when the
  * target has a pair for it (000681) and a package gives it header art
@@ -394,7 +394,7 @@ int p4_game_elements_ui_native_analyze_affinities(void *work, void *unit,
 extern uint32_t datGetFlag(int32_t bit);
 extern void *datPersonaGetRecord(uint16_t id);
 extern int32_t datPersonaFindSkillSlot(uint8_t *persona, uint16_t skill);
-static const uint32_t ailment_leaves[] = {8u, 10u, 11u, 15u, 9u, 13u, 14u, 24u, 25u};
+static const uint32_t ailment_leaves[] = {8u, 10u, 11u, 15u, 9u, 13u, 14u, 24u, 25u, 26u};
 enum { AILMENT_COLUMNS = (int)(sizeof ailment_leaves / sizeof ailment_leaves[0]) };
 typedef struct AilmentColumn {
     uint32_t state, known, icon;

@@ -1,6 +1,7 @@
 /* Cooked-model cache: <directory>/<source hash>.p4mc, written atomically, trusted only after
  * p4_model_cooked_check and a matching hash. A missing, stale or damaged file is simply a miss. */
 #include "p4model.h"
+#include "p4pc/hostpath.h"
 #include "p4pc/os.h"
 
 #include <errno.h>
@@ -58,12 +59,12 @@ int p4_model_cache_store(const char *directory, const uint8_t *blob, size_t size
         cache_path(directory, source, ".p4mc.tmp", temporary, sizeof temporary))
         return -1;
     if (p4_os_mkdir(directory) != 0 && errno != EEXIST) return -1;
-    FILE *stream = fopen(temporary, "wb");
+    FILE *stream = p4_host_fopen(temporary, "wb");
     if (!stream) return -1;
     int failed = fwrite(blob, 1, size, stream) != size;
     if (fclose(stream) != 0) failed = 1;
     if (failed || p4_os_replace_file(temporary, path) != 0) {
-        remove(temporary);
+        p4_host_remove(temporary);
         return -1;
     }
     return 0;

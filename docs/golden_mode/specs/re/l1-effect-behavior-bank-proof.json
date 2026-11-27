@@ -1,0 +1,239 @@
+{
+  "proof_id": "L1-c6A-effect-behavior-bank-20261113",
+  "class": "PROVEN",
+  "runtime_status": "pending-seam",
+  "scope": "Complete twelve-kind effect behavior/update-scale descriptor bank; selected PS2 parameter-size alias partition00713d5c/180. Source bank qualification only; native callback semantics and render lifecycle remain runtime prerequisites.",
+  "source_pins": {
+    "ps2_decomp_commit": "18016afe6",
+    "steam_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+    "switch_nso_sha256": "854c7a1e33de1619abf009fa7f32b8c012960d685c8bf1bf99a92a6a4d0bda1c",
+    "switch_mapped_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+    "method": "Static ELF/data, ordinary Steam .shared/.sdata/.xpdata and decompressed NSO code/data only. No .arch decode, game execution or runtime binding."
+  },
+  "ps2": {
+    "complete_base": "0x00713d50",
+    "complete_size": 192,
+    "complete_sha256": "ce24a280ed8544897b6ebf81ca381c361934ab61363d7202d8d184ab6da11b59",
+    "selected_address": "0x00713d5c",
+    "selected_size": 180,
+    "selected_partition_offset": 12,
+    "selected_live_bytes": 180,
+    "retained_tail_bytes": 0,
+    "record_count": 12,
+    "record_stride": 16,
+    "fields": {
+      "update_callback": [
+        0,
+        4
+      ],
+      "scale_callback": [
+        4,
+        4
+      ],
+      "state_bytes_per_primary": [
+        8,
+        4
+      ],
+      "parameter_bytes": [
+        12,
+        4
+      ]
+    },
+    "independent_readers": [
+      "0x00492b20 allocator, src/Graphics/Model/mdlEffect_inferred_00492b20.c:39..87",
+      "0x00492d10 mdlEffectAdvanceEmitter, mdlEffect.c:1748..1771, first-tick inactive sample initialization then callback+0",
+      "0x00492e30 EffEmitterApplyScale, callback+4, float scale argument"
+    ],
+    "misclassification": "Not45 independent int32 coefficients: first selected word is row0 parameter_bytes, followed by eleven complete16-byte records."
+  },
+  "golden": {
+    "record_count": 12,
+    "record_stride": 24,
+    "fields": {
+      "update_callback": [
+        0,
+        8
+      ],
+      "scale_callback": [
+        8,
+        8
+      ],
+      "state_bytes_per_primary": [
+        16,
+        4
+      ],
+      "parameter_bytes": [
+        20,
+        4
+      ]
+    },
+    "switch": {
+      "base": "0x710086f808",
+      "mapped_offset": 8845320,
+      "size": 288,
+      "sha256": "d54fef3b270d29a6ad15f7f15072dede090c5a1d914f82e2cc397c4f48b89459",
+      "pointer_encoding": "Resolve relative RELA code targets; on-disk zero pointer words do not denote null except actual kind0. GOT slot881798 resolves to86f808.",
+      "readers": [
+        "0x710035b590 allocator: kind&ffff <12; record index*24; state/parameter bytes loaded together+16/+20; two copied parameter blocks",
+        "0x710035b720 advance: first-tick sample -1.0f initialization, callback+0; further substep/update behavior differs from PS2",
+        "0x710035bbd0 scale: kind u16 *24, LDR x1,[row,#8], tail BR x1. Actual entry is35bbd0, not broad cached function boundary35bb70."
+      ]
+    },
+    "steam": {
+      "section": ".xpdata",
+      "rva": "0xae98f0",
+      "raw_offset": 11436272,
+      "size": 288,
+      "sha256": "6379fc08f42d2595242fc73921c7a7368d15c3202a122e483a9e3826143ca7ca",
+      "source_identity": "Unique complete12-record state/parameter-size vector at24-byte stride in permitted .sdata/.xpdata, independently tied to ordinary .shared update dispatch and full NSO typed allocator/scale readers. Not pointer-byte equality.",
+      "ordinary_reader_fragment": "0x58d064..58d106: float first-tick check, inactive0xbf800000 stores every0x58, bank base0xae98f0 at58d0a4, kind*24 update call58d0b2. Fragment begins inside a function; no claim it is the true entry, and no.arch code decoded."
+    }
+  },
+  "records": [
+    {
+      "kind": 0,
+      "state_bytes": 0,
+      "parameter_bytes": 0,
+      "ps2_update": "0x0",
+      "ps2_scale": "0x0",
+      "steam_update_rva": null,
+      "steam_scale_rva": null,
+      "switch_update": null,
+      "switch_scale": null
+    },
+    {
+      "kind": 1,
+      "state_bytes": 60,
+      "parameter_bytes": 240,
+      "ps2_update": "0x48b9e0",
+      "ps2_scale": "0x48c440",
+      "steam_update_rva": "0x585970",
+      "steam_scale_rva": "0x586310",
+      "switch_update": "0x7100354330",
+      "switch_scale": "0x7100354d10"
+    },
+    {
+      "kind": 2,
+      "state_bytes": 28,
+      "parameter_bytes": 224,
+      "ps2_update": "0x48c4e0",
+      "ps2_scale": "0x48cd60",
+      "steam_update_rva": "0x5863f0",
+      "steam_scale_rva": "0x586c90",
+      "switch_update": "0x7100354d90",
+      "switch_scale": "0x7100355580"
+    },
+    {
+      "kind": 3,
+      "state_bytes": 64,
+      "parameter_bytes": 244,
+      "ps2_update": "0x48cdf0",
+      "ps2_scale": "0x48d820",
+      "steam_update_rva": "0x586d50",
+      "steam_scale_rva": "0x587780",
+      "switch_update": "0x7100355600",
+      "switch_scale": "0x7100356040"
+    },
+    {
+      "kind": 4,
+      "state_bytes": 52,
+      "parameter_bytes": 232,
+      "ps2_update": "0x48d8c0",
+      "ps2_scale": "0x48e270",
+      "steam_update_rva": "0x587860",
+      "steam_scale_rva": "0x588140",
+      "switch_update": "0x71003560c0",
+      "switch_scale": "0x7100356a10"
+    },
+    {
+      "kind": 5,
+      "state_bytes": 28,
+      "parameter_bytes": 232,
+      "ps2_update": "0x48e2f0",
+      "ps2_scale": "0x48ebc0",
+      "steam_update_rva": "0x5881f0",
+      "steam_scale_rva": "0x588af0",
+      "switch_update": "0x7100356a80",
+      "switch_scale": "0x7100357350"
+    },
+    {
+      "kind": 6,
+      "state_bytes": 28,
+      "parameter_bytes": 236,
+      "ps2_update": "0x48ec50",
+      "ps2_scale": "0x48f560",
+      "steam_update_rva": "0x588bb0",
+      "steam_scale_rva": "0x5894f0",
+      "switch_update": "0x71003573d0",
+      "switch_scale": "0x7100357cd0"
+    },
+    {
+      "kind": 7,
+      "state_bytes": 76,
+      "parameter_bytes": 292,
+      "ps2_update": "0x48f5f0",
+      "ps2_scale": "0x490360",
+      "steam_update_rva": "0x5896f0",
+      "steam_scale_rva": "0x58a4c0",
+      "switch_update": "0x7100357d50",
+      "switch_scale": "0x7100358d50"
+    },
+    {
+      "kind": 8,
+      "state_bytes": 248,
+      "parameter_bytes": 248,
+      "ps2_update": "0x4903c0",
+      "ps2_scale": "0x490bb0",
+      "steam_update_rva": "0x58a540",
+      "steam_scale_rva": "0x58ada0",
+      "switch_update": "0x7100358da0",
+      "switch_scale": "0x7100359550"
+    },
+    {
+      "kind": 9,
+      "state_bytes": 232,
+      "parameter_bytes": 232,
+      "ps2_update": "0x490c40",
+      "ps2_scale": "0x491660",
+      "steam_update_rva": "0x58ae60",
+      "steam_scale_rva": "0x58b9f0",
+      "switch_update": "0x71003595d0",
+      "switch_scale": "0x710035a100"
+    },
+    {
+      "kind": 10,
+      "state_bytes": 36,
+      "parameter_bytes": 248,
+      "ps2_update": "0x4916f0",
+      "ps2_scale": "0x492080",
+      "steam_update_rva": "0x58bab0",
+      "steam_scale_rva": "0x58c400",
+      "switch_update": "0x710035a180",
+      "switch_scale": "0x710035ab60"
+    },
+    {
+      "kind": 11,
+      "state_bytes": 64,
+      "parameter_bytes": 272,
+      "ps2_update": "0x492100",
+      "ps2_scale": "0x492a80",
+      "steam_update_rva": "0x58c4b0",
+      "steam_scale_rva": "0x58cdc0",
+      "switch_update": "0x710035abd0",
+      "switch_scale": "0x710035b510"
+    }
+  ],
+  "structural_proof": [
+    "Allocator kind bound12 and totalCount=primaryCount*(trailWidth*trailCount+1) agree; both use per-primary state byte count plus two parameter byte counts from the indexed descriptors.",
+    "Both partition one allocation into sample array, copied parameters, copied original parameters and state, then initialize the first two parameter quads to(0,0,0,1) and test the byte at parameter+bc. This multi-field control/data-flow correspondence, not effBehavior.c label, identifies the source.",
+    "Independent advance and scale readers fix the two callback roles and descriptor strides. Same12 ordered state/parameter sizes across PS2, Steam and NSO corroborate, but are not the sole proof.",
+    "All180 selected PS2 bytes belong to the final field of row0 and rows1..11. Complete table ends713e10, where the independently qualified effBehavior.c diagnostic begins. No tail/padding retention claim applies within this selection."
+  ],
+  "required_seams": [
+    "Bind one complete normalized twelve-kind Golden behavior descriptor bank. Do not copy288 host bytes into the old180-byte partition or truncate callback pointers to32bits.",
+    "Normalize callback identities by(kind, update/scale phase), route all allocator/advance/scale consumers and native/inlined copies, and qualify real Golden implementations against the sealed code targets. No silent PS2 callback retention. Kind0 explicitly has null callbacks and zero sizes; do not invent a fallback implementation.",
+    "Golden sample stride grows0x20->0x58 and emitter header0x30->0x50. Golden first-tick inactive marker is float-1 at sample+0x30; PS2 has integer-1 mode in its old sample. Port dependent allocation, parameter pointers, state, callback accesses and update/copy/substep behavior together; this bank does not authorize copying parent/sample layouts.",
+    "Preserve all12 exact state/parameter byte sizes, including kind7 state76/params292 and kind8 state248/params248. Sizes are independently Golden-proven even where identical to PS2. Keep the existing16-bit kind interface and source count12; no new validation/fallback scope.",
+    "GoldenM6b must witness Golden bank resolution at all readers, real update/scale lifecycle, allocation bounds/native-pointer normalization and unchanged PS2 mode. Source proof is not runtime or visual equivalence."
+  ]
+}

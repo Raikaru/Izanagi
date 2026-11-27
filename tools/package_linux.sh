@@ -87,11 +87,14 @@ cp "$root"/third_party/licenses/FFmpeg-LGPL-2.1.txt "$root"/third_party/licenses
   "$root"/third_party/licenses/GCC-GPL-3.0.txt "$root"/third_party/licenses/GCC-runtime-exception.txt \
   "$root"/third_party/licenses/fdlibm-Sun.txt "$root"/third_party/licenses/newlib-BSD.txt "$root"/third_party/licenses/recvx-decomp-MIT.txt \
   "$root"/third_party/licenses/sky2hook-permission.txt "$stage/$name/licenses/"
+cp "$root/third_party/licenses/bcdec-MIT.txt" "$stage/$name/licenses/"
 cp "$root/third_party/miniz/LICENSE" "$stage/$name/licenses/miniz-MIT.txt"
 tar -C "$root" -czf "$stage/$name/usr/share/p4pc/source/luau-source.tar.gz" third_party/luau third_party/luau_patches
 cp "$pkg/runtime-provenance.txt" "$stage/$name/usr/share/p4pc/source/runtime-provenance.txt"
 cp "$root/packaging/org.p4pc.game.desktop" "$root/packaging/org.p4pc.game.svg" "$stage/$name/"
-cp "$root/ci/win32/build_deps.sh" "$stage/$name/usr/share/p4pc/source/"
+mkdir -p "$stage/$name/usr/share/p4pc/source/ci/win32"
+cp "$root/ci/win32/build_deps.sh" "$stage/$name/usr/share/p4pc/source/ci/win32/"
+cp "$root/ci/ffmpeg-7.1.1-hca-window-alignment.patch" "$stage/$name/usr/share/p4pc/source/ci/"
 cat > "$stage/$name/AppRun" <<'LAUNCH'
 #!/bin/sh
 # Keep the player's XDG paths; never write settings or saves inside the AppDir.

@@ -1,0 +1,37 @@
+{
+  "format": 1,
+  "method": "layout_anchor.py v3; Main-authorized local PROVEN-layout rule",
+  "selection": {"population": 587, "count": 20, "random_seed": 20261112, "algorithm": "random.Random(seed).sample(all executable rows,20)"},
+  "reviewer": "GoldenRE-L1a2",
+  "review_status": "All twenty interval summaries manually checked after independent anchor byte/hash and gap arithmetic checks. No original game execution.",
+  "source_report_sha256": "7b6c19ff883ba46809e443fcba1706c3d80c8ec6b08b5bb4ebd34b0922179bd3",
+  "detailed_hand_receipt_sha256": "606d9f2ba82bcb8bc3982604ad6b2352716caf62a4911fc0b94fcc64678acfe2",
+  "detailed_hand_receipt": "<scratch>/GoldenRE-notes/l1/layout-current-l1a2/sample-hand-review.json",
+  "sample": [
+    {"address":"0x005f7440","decision":"OPEN-retain","check":"Forward Steam gap exceeds required extent by40; other images reversed or mismatched."},
+    {"address":"0x0070af50","decision":"OPEN-retain","check":"Steam gap deltas1344/6159; NSO anchors reversed. No matching interval."},
+    {"address":"0x005f7170","decision":"OPEN-retain","check":"Steam sdata delta312056, xpdata reversed; NSOdelta1052399."},
+    {"address":"0x0063b4d0","decision":"OPEN-retain","check":"Steam deltas208576/321308; NSO reversed. Full flanks alone do not fix a valid gap."},
+    {"address":"0x00625160","decision":"OPEN-retain","check":"Steam sdata shrink1592; xpdata/NSO expand827248/975614. No documented widening."},
+    {"address":"0x005f0cf0","decision":"OPEN-retain","check":"Both Steam orders reversed; NSOdelta1126632."},
+    {"address":"0x0060abb0","decision":"OPEN-retain","check":"Source gap deltas2384/844535/249743; no contiguous same-size tiling."},
+    {"address":"0x0063f0b0","decision":"OPEN-retain","check":"Sdata gap240 bytes short; xpdata/NSO reversed. No inferred shrink conversion."},
+    {"address":"0x00638fa0","decision":"OPEN-retain","check":"Sdata shrink5656; xpdata/NSO expansions25620/284629."},
+    {"address":"0x005f5470","decision":"OPEN-retain","check":"Both Steam orders reversed; NSOdelta1887565. No global data-order assumption."},
+    {"address":"0x0064e320","decision":"OPEN-retain","check":"Source gap excess15534/850816/158025; no admissible size delta."},
+    {"address":"0x007548f0","decision":"OPEN-retain","check":"Xpdata gap shrinks215; sdata/NSO expand46768/66715."},
+    {"address":"0x005f72c0","decision":"OPEN-retain","check":"Both Steam orders reversed; NSOdelta1052399."},
+    {"address":"0x00609630","decision":"OPEN-retain","check":"Single-object sdata gap excess52440; other images differ85992/81094. Adjacency is insufficient."},
+    {"address":"0x0064eca0","decision":"OPEN-retain","check":"Sdata excess177536; xpdata/NSO reversed."},
+    {"address":"0x0063f030","decision":"OPEN-retain","check":"Sdata gap shrinks240; other image orders reversed."},
+    {"address":"0x0063f188","decision":"OPEN-retain","check":"All source placements reversed or overlapping."},
+    {"address":"0x00594244","decision":"OPEN-retain","check":"Newest proved right anchor5dc974 independently rechecked: expected xpdata gap706847, only positive source gap470630, delta-236217; four other placements reversed. Other image checks unchanged."},
+    {"address":"0x007133a0","decision":"OPEN-retain","check":"Single-object xpdata gap16 bytes short; sdata/NSO shrink368/18. No documented size change."},
+    {"address":"0x00635690","decision":"OPEN-retain","check":"All source gap excesses74488/101560/608690; equal slots would be unsupported."}
+  ],
+  "additional_admission_checks": [
+    {"address":"0x00609c38","decision":"PROVEN-layout","check":"PS2 A609c28/16 ->B609c38/16 ->C609c48/16; Steam sdata offsets592440/16 ->592456/16 ->592472/16. Complete identical flanks, one slot, alignment1, unique source."},
+    {"address":"0x00626f00","decision":"PROVEN-layout","check":"PS2 A626de0/288 ->B626f00/96 ->C626f60/96; NSO mapped6480644/288 ->6480932/96 ->6481028/96. Complete identical flanks, one slot, alignment4. Full96-byte span occurs uniquely in Steam atRVA90b890; Steam flank order itself is not proved."}
+  ],
+  "interpretation": "Uniform sample happened to contain no admitted rows; all twenty OPEN decisions were retained. Both actual admissions were additionally hand-checked, not substituted into the random sample. Layout correspondence is not reader or runtime-binding proof."
+}

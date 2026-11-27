@@ -1,4 +1,5 @@
 #include "p4pc/mod_setting_store.h"
+#include "p4pc/hostpath.h"
 #include "p4pc/os.h"
 #include <errno.h>
 #include <stdarg.h>
@@ -292,7 +293,7 @@ static StoreFile *load(const char *id, char *reason, size_t capacity)
     if (root) {
         char path[PATH_CAP];
         FILE *stream = NULL;
-        if (file_path(id, "", path) || (!(stream = fopen(path, "rb")) && errno != ENOENT)) {
+        if (file_path(id, "", path) || (!(stream = p4_host_fopen(path, "rb")) && errno != ENOENT)) {
             free(file);
             fail(reason, capacity, "Cannot read the settings of %s", id);
             return NULL;
@@ -343,7 +344,7 @@ static int write_file(const StoreFile *file, const StoreValue *values, size_t co
         return fail(reason, capacity, "Settings path is too long");
     if (p4_os_mkdir(directory) && errno != EEXIST)
         return fail(reason, capacity, "Cannot create the mod-settings folder");
-    FILE *stream = fopen(temporary, "wb");
+    FILE *stream = p4_host_fopen(temporary, "wb");
     if (!stream) return fail(reason, capacity, "Cannot write the settings of %s", file->id);
     int bad = fprintf(stream, "# Settings of mod %s, written by the game. Edit only while it is closed.\n",
                       file->id) < 0;
@@ -354,7 +355,7 @@ static int write_file(const StoreFile *file, const StoreValue *values, size_t co
     if (p4_os_sync_file(stream)) bad = 1;
     if (fclose(stream)) bad = 1;
     if (bad || p4_os_replace_file_durable(temporary, path)) {
-        remove(temporary);
+        p4_host_remove(temporary);
         return fail(reason, capacity, "Cannot write the settings of %s", file->id);
     }
     return 0;

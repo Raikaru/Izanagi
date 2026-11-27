@@ -121,6 +121,16 @@ static void toggleFullscreen(void)
 
 /* SDL_EVENT_RENDER_DEVICE_RESET: on Android SDL replaces the GL context itself when the old one did not survive a pause (src/render/p4gl_context.c). */
 static volatile int sDeviceReset;
+/* SDL_EVENT_DID_ENTER_FOREGROUND: the app came back (Android: with a new window surface). The render thread's context is bound to the old surface until it is bound again. */
+static volatile int sForeground;
+
+int p4pc_pad_sdl_take_foreground(void)
+{
+    const int r = sForeground;
+
+    sForeground = 0;
+    return r;
+}
 
 int p4pc_pad_sdl_take_device_reset(void)
 {
@@ -189,6 +199,9 @@ static void pumpEvents(void)
             exit(0);
         case SDL_EVENT_RENDER_DEVICE_RESET:
             sDeviceReset = 1;
+            break;
+        case SDL_EVENT_DID_ENTER_FOREGROUND:
+            sForeground = 1;
             break;
         case SDL_EVENT_GAMEPAD_ADDED:
             if (sInputMode == 0) openGamepad((SDL_JoystickID)event.gdevice.which);

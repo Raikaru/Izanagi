@@ -16,6 +16,8 @@ void p4_game_side_ailment_native_battle_end(void);
 /* The unit holds a side ailment or one landed on it this action: the single
  * slot retail tests as DatUnit.bad low bits (002397D0, 00242360). */
 int p4_side_ailment_native_occupied(void *unit);
+/* Held side leaf + 1 for immutable damage-stage snapshots; 0 means none. */
+uint32_t p4_side_ailment_native_leaf(void *unit);
 /* The unit holds a side ailment that costs its next own turn: its turn takes
  * the bad state (001F6770), 001A31E0 spends it and it cannot evade (0023E6F0). */
 int p4_side_ailment_native_lose_turn(void *unit);
@@ -41,6 +43,10 @@ void p4_side_ailment_native_defeat(void *unit);
 int p4_side_ailment_native_spend_turn(void *unit);
 /* 001A31E0 end of that turn: the ailment recovers. */
 void p4_side_ailment_native_turn_end(void *unit);
+/* 001AFB50 once after the holder's last action of its own turn. */
+void p4_side_ailment_native_tick_end(void *unit);
+/* The native turn-end call retains the original secondary-buff advance. */
+void p4_side_ailment_native_finish_turn(void *unit);
 /* 001A06D0 turn start: landings marked by earlier actions are dropped. */
 void p4_side_ailment_native_action_begin(void);
 /* AI status queries: 1 when the unit holds a side ailment and mask asks for

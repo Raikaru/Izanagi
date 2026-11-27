@@ -1,0 +1,16 @@
+local bytes = buffer.create(12)
+buffer.writeu16(bytes, 0, 0xabcd)
+buffer.writei32(bytes, 2, -12345)
+buffer.writestring(bytes, 6, 'hello')
+assert(buffer.readu16(bytes, 0) == 0xabcd and buffer.readi32(bytes, 2) == -12345)
+assert(buffer.readstring(bytes, 6, 5) == 'hello')
+assert(not pcall(buffer.readu32, bytes, 10))
+assert(bit32.bxor(0xf0, 0xaa) == 0x5a and bit32.rrotate(1, 1) == 0x80000000)
+local a = {1, 2, 3}
+table.move(a, 1, 2, 2, a)
+assert(table.concat(a, ',') == '1,1,2')
+assert(string.unpack('<I2', string.pack('<I2', 0x1234)) == 0x1234)
+assert(utf8.len('a\195\169') == 2)
+local mt = {__add = function(x, y) return x.n + y.n end}
+assert(setmetatable({n = 3}, mt) + setmetatable({n = 4}, mt) == 7)
+emit('libraries:abcd:-12345:5a')

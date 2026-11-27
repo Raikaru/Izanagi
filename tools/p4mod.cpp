@@ -1663,7 +1663,7 @@ static std::string hex32(uint32_t value)
     return text;
 }
 /* Why bytes are not a complete native save image, or "" when they are: p4_battle_save_valid's checks
- * (src/platform/battle_sim/entry.c), so a bad save is named here instead of inside the game. */
+ * (src/platform/battle_sim/entry.zig), so a bad save is named here instead of inside the game. */
 static std::string save_image_problem(const std::string &bytes)
 {
     const unsigned char *image = (const unsigned char *)bytes.data();

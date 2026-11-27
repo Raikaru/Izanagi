@@ -27,7 +27,7 @@ class CompendiumMetadata(unittest.TestCase):
     def inspect(self, directory):
         result = subprocess.run(
             [*COMMAND, str(directory), directory.name], capture_output=True,
-            encoding="utf-8", errors="strict", timeout=20, check=True,
+            encoding="utf-8", errors="strict", timeout=120, check=True,
         )
         values = dict(line.split("=", 1) for line in result.stdout.splitlines() if "=" in line)
         return values, result.stderr

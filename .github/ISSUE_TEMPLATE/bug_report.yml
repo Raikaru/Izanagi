@@ -1,0 +1,70 @@
+name: Bug report
+description: "Something does not work: a crash, a slowdown, a sound or graphics problem, a mod problem."
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. The more of this you can fill in, the fewer questions we have to ask.
+
+        **Never attach your ISO, the game executable (`SLUS_217.82`), extracted game files, or save/memory-card files.**
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options:
+        - Windows
+        - Linux
+        - macOS
+        - Android
+        - Windows through RecompLauncher or another launcher
+        - Other (say which below)
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: "Desktop: the build line near the top of p4pc.log, or the package name (for example p4pc-win64-v0.1.3.zip; VERSION.txt inside it says which). Android: the app's version (Settings > Apps > Persona 4 > App info), or device.txt in the exported logs."
+    validations:
+      required: true
+  - type: textarea
+    id: device
+    attributes:
+      label: Your device
+      description: "Phone or PC model, processor, graphics card and driver, memory. The os, cpu, device and p4gl lines of the log hold most of it; paste them if you can."
+      placeholder: "Infinix Edge 5G, Dimensity 7100, 8 GB, Android 14 / GTX 1060, driver 560.94, Windows 11"
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: "What you did and what you saw or heard. Where in the game (the place and the day, or the scene), and whether it happens every time."
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+  - type: textarea
+    id: settings
+    attributes:
+      label: Settings and mods
+      description: "The Resolution, Fit, Volume and other values you changed in the game's Config menu; which mods are on. The settings and mods lines of the log list them."
+  - type: checkboxes
+    id: logs
+    attributes:
+      label: Logs
+      description: |
+        Please attach the logs. They hold the version, system, settings, a frame-time and audio summary for each area, and, after a crash, the crash report.
+
+        - **Windows, Linux, macOS:** p4pc.log, from the folder next to p4pc.ini (Windows: press Win+R and paste %APPDATA%\p4pc\Persona4\ ; Linux: ~/.local/share/p4pc/Persona4/ ; macOS: ~/Library/Application Support/p4pc/Persona4/). If the problem was in an earlier run, also p4pc.prev.log, p4pc.unclean.log or p4pc-crash.log. Copy them before you start the game again if you can.
+        - **Android:** open the app, tap **Export logs (for a bug report)** on the first screen, save the zip, and attach the zip.
+        - Look through the log before posting it in public: some older lines can hold your user name.
+      options:
+        - label: I attached the logs
+        - label: I could not get the logs (say why below)
+  - type: textarea
+    id: more
+    attributes:
+      label: Anything else
+      description: "A short screen recording of the problem is a great help for slowdowns and sound problems (on Android, record with the system sound on)."

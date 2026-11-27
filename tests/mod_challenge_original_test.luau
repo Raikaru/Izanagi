@@ -45,6 +45,28 @@ F.save.load(noItems, "load")
 assert(not protection(protectionContext))
 assert(fusion(personaFusion))
 
+local itemUse = assert(F.authorizers.item_use)
+assert(not itemUse({source = 1, item = 0x301, effect = 0}))
+assert(not itemUse({source = 2, item = 0x31e, effect = 0}))
+assert(not itemUse({source = 4, item = 0x301, effect = 0}))
+assert(not itemUse({source = 5, item = 0x301, effect = 0}))
+assert(itemUse({source = 0, item = 0x301, effect = 12}))
+assert(itemUse({source = 3, item = 1550, effect = 0})) -- battle rule does not restrict field categories
+F.settings.no_battle_items = false
+F.settings.no_field_recovery = true
+F.save.load(nil, "reset")
+F.events.field_enter()
+F.heal_kind = 2
+assert(not itemUse({source = 0, item = 0x301, effect = 12}))
+assert(itemUse({source = 1, item = 0x301, effect = 0}))
+assert(itemUse({source = 4, item = 0x301, effect = 0}))
+assert(itemUse({source = 5, item = 0x301, effect = 0}))
+F.heal_kind = 0
+assert(itemUse({source = 0, item = 0x301, effect = 12}))
+local categoryAllowed, categoryReason = itemUse({source = 3, item = 1550, effect = 0})
+assert(not categoryAllowed and categoryReason == "NO FIELD RECOVERY cannot classify custom item")
+F.settings.no_field_recovery = false
+
 -- Exercise the actual Challenge authorizers and run lifecycle, not a duplicate
 -- of their rule logic. Stage 0 is the offer; stage 1 is the forge safe point.
 local weapon = assert(F.authorizers.weapon_fusion)
@@ -94,6 +116,7 @@ weaponDenied(commit)
 assert(not fusion(personaFusion))
 arm(false, false)
 assert(weapon(offer) and weapon(commit) and fusion(personaFusion))
+assert(itemUse({source = 3, item = 1550, effect = 0}))
 
 -- The capability is advertised only when the corresponding retry authorizer is available.
 assert(p4.has("authorize.retry") and not p4.has("unknown.capability"))

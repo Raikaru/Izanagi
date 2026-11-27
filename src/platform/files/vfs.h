@@ -35,6 +35,23 @@ int vfs_override_register(const char *root, const char *provider,
 /* Rolls back pre-mount registrations (used when mod activation fails). */
 void vfs_override_clear(void);
 
+/* One read-only virtual source, registered before mount. open returns a handle
+ * retained until release; reads fill exactly the requested in-range span.
+ * 0 found, 1 absent, -1 error. A miss falls through only if allow_disc is set. */
+typedef int (*P4VfsVirtualVisitor)(const char *name, int directory, long long size, void *user);
+typedef struct P4VfsVirtualSource {
+    int (*open)(void *user, const char *key, size_t *size, void **handle,
+                char *chain, size_t chain_capacity, char sha256[65]);
+    int (*read)(void *user, void *handle, size_t offset, void *bytes, size_t size);
+    void (*release)(void *user, void *handle);
+    int (*list)(void *user, const char *directory, P4VfsVirtualVisitor visitor, void *visitor_user);
+    void *user;
+    int allow_disc;
+} P4VfsVirtualSource;
+/* Test-witness registration: retains the source without adding it to lookup. */
+int vfs_virtual_register_dormant(const P4VfsVirtualSource *source);
+int vfs_virtual_register(const P4VfsVirtualSource *source);
+
 /* In a forked process (the battle simulator's fork search), gives the disc stream a private descriptor at the same
  * offset, so concurrent children never share a file position. The stream's buffered bytes stay valid: they are the
  * same file's content. 0 on success or without a disc, -1 when a host file layer is open or on a host error. */

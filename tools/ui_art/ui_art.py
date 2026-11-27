@@ -122,6 +122,7 @@ ASSETS = [
     ("mods/p4pc.hardmode/art/ailment-enervation.png", "element-header", "vector:ailment-enervation", None),
     ("mods/p4pc.hardmode/art/ailment-freeze.png", "element-header", "vector:ailment-freeze", None),
     ("mods/p4pc.hardmode/art/ailment-shock.png", "element-header", "vector:ailment-shock", None),
+    ("mods/p4pc.hardmode/art/ailment-burn.png", "element-header", "vector:ailment-burn", None),
     ("mods/p4pc.fusion-arts/art/weapon-fusion.png", "velvet-symbol", "vector:weapon-fusion", (0, 0, 72, 77)),
     ("mods/p4pc.fusion-arts/art/weapon-fusion.png", "velvet-label", "label:weapon-fusion", (80, 0, 99, 31)),
     ("mods/p4pc.fusion-arts/art/weapon-fusion.png", "velvet-label-small", "label:weapon-fusion-small", (80, 40, 72, 18)),
@@ -433,6 +434,10 @@ def _ailment(kind):
         ix, iy = 10.6, 17.4
         _star(r, ix, iy, 5.6, 2.4, 8, rotation=-90)
         r.polygon([(14.6, 0.6), (23.6, 0.6), (18.6, 6.6), (23.2, 6.6), (ix, iy), (14.0, 10.0), (9.4, 10.0)])
+    elif kind == "burn":
+        r.polygon([(15, 1), (18, 7), (21, 5), (24, 12), (23, 18), (19, 21),
+                   (11, 21), (7, 18), (6, 13), (9, 8), (11, 12)])
+        r.polygon([(15, 11), (18, 16), (17, 19), (13, 19), (12, 16)], 0)
     else:
         raise ValueError(kind)
     return r, HEADER_RAMP
@@ -471,7 +476,7 @@ VECTOR = {
     "plus-menu": lambda: _menu_sign("plus"),
     "minus-menu": lambda: _menu_sign("minus"),
 }
-for _kind in ("panic", "fear", "rage", "silence", "poison", "exhaustion", "enervation", "freeze", "shock"):
+for _kind in ("panic", "fear", "rage", "silence", "poison", "exhaustion", "enervation", "freeze", "shock", "burn"):
     VECTOR["ailment-" + _kind] = (lambda kind: lambda: _ailment(kind))(_kind)
 
 

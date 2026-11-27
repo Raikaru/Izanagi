@@ -24,8 +24,32 @@
  *   Nothing else in the work changes between state 10 and state 12, so the
  *   retried battle starts exactly as the lost one did, at the same place.
  *
+ *   Script battles (btlScriptStartEncounter 0x001932f0, a story boss started by
+ *   a field script: sequence 6, Start callback 0x00102e70) never reach state 12.
+ *   The script that started the battle polls btlScriptResolvePartyDeath
+ *   (0x00193450) each frame: while the battle context (gp-0x4c54, 0x0076449c)
+ *   exists it answers "not yet"; once it is gone it starts the Game Over
+ *   procedure when the protagonist's record is dead, else revives the fallen
+ *   allies. That call is the seam: the same handler answers just before it
+ *   reads the dead protagonist:
+ *     game over  the call runs untouched, so the script starts the Game Over;
+ *     hold       the battle context is shown as present for that one call, so
+ *                the script keeps waiting;
+ *     retry      the snapshot is copied back, fresh party and enemy groups are
+ *                built from the recorded setup exactly as 001932f0 builds them,
+ *                btlTaskCreate (0x00192e90) starts the battle again, so the
+ *                script never saw the loss.
+ *   The enemy groups of a script battle are freed with the battle, so they are
+ *   re-created, never copied back.
+ *
  * The persistent inventory, Persona stock and selection, party slots, flags
- * and money are also restored. In particular, retry refunds consumed items:
+ * and money are also restored, and so are the two native sidecars that hold
+ * battle-relevant state outside guest memory: the expanded item table's
+ * quantities, availability and equipment references, and the enemy-knowledge
+ * observations (known flags and the retail status/side bits). Both are
+ * captured with the battle start, compared before a retry is allowed and copied
+ * back exactly; a sidecar that cannot be captured or is no longer the captured
+ * one refuses the retry with its own reason. In particular, retry refunds consumed items:
  * the loss is treated as though the battle never happened. */
 #include "p4pc/mod_defeat.h"
 #include "p4pc/gmem.h"
@@ -33,13 +57,27 @@
 #include "p4pc/mod_entry.h"
 #include "p4pc/mod_failure.h"
 #include "p4pc/mod_hooks.h"
+#include "p4pc/mod_memory.h"
+#include "p4pc/game_items.h"
 #include "p4pc/game_items_native.h"
 #include "game_knowledge_runtime_internal.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+extern void *datUnitCreatePc(uint16_t id);
+extern void *datUnitCreateEncounterGroup(uint16_t encounter);
+extern void hFadeTaskStart(int16_t mode);
+extern int32_t btlTaskCreate(int32_t setup);
+extern void btlSetFreeUnitsOnTeardown(void);
+
 #define BATTLE_CREATE 0x00192e90u   /* btlTaskCreate(setup) */
+#define SEQ_BATTLE_START 0x00102e70u   /* the BATTLE sequence's Start callback (sequence 6) */
+#define SCRIPT_RESOLVE 0x00193450u     /* btlScriptResolvePartyDeath, the script's post-battle poll */
+#define BATTLE_CONTEXT 0x0076449Cu     /* gp-0x4c54: the battle context pointer, 0 once released */
+#define SETUP_SIZE 0x3Cu
+#define SETUP_FORMATION 0x20u       /* u16 formation, u16 variant */
+#define SCRIPT_START_POLLS 600u     /* polls a retried battle may take to appear */
 #define FIELD_TO_BATTLE 0x00172e00u /* FldEvent_FieldToBattle(task) */
 #define TASK_WORK 0x38u
 #define WORK_STATE 0x04u
@@ -83,13 +121,24 @@ struct P4ModDefeatHandler {
     void *user;
 };
 static P4ModDefeatHandler *handler;
-static P4ModHook *begin_hook, *field_hook;
+static P4ModHook *begin_hook, *field_hook, *start_before_hook, *start_after_hook, *resolve_before_hook, *resolve_after_hook;
 static unsigned depth;
+static unsigned script_start; /* inside the BATTLE sequence's Start callback */
+static int restarting;        /* the retry's own btlTaskCreate */
+static uint32_t shown_context; /* a placeholder battle context shown to one resolve call */
 
 static struct {
     int valid;
-    int unsupported_sidecars;
+    char unsupported[128]; /* a sidecar that could not be captured, else empty */
+    P4GameItemsCapture *items_store;
+    P4GameKnowledgeCapture *knowledge_store;
     uint32_t setup;
+    int script;                   /* started by a script battle's sequence 6 */
+    char script_unsupported[96];  /* a script battle that cannot be rebuilt, else empty */
+    uint32_t encounter;
+    uint16_t party_ids[4];
+    int party_count;
+    uint8_t setup_bytes[SETUP_SIZE];
     uint8_t records[RECORDS][UNIT_SIZE];
     uint8_t hero_tail[0x18];
     uint8_t party_slots[PARTY_SIZE];
@@ -106,6 +155,11 @@ static struct {
     P4ModDefeatMember party[4];
 } snapshot;
 
+/* A script battle's life: running once its battle task exists, then the
+ * defeat question; a retried battle is awaited for SCRIPT_START_POLLS polls. */
+static struct {
+    int running, restart_polls;
+} script_battle;
 static struct {
     int active;
     uint32_t work, encounter, polls;
@@ -155,35 +209,63 @@ static int active(void)
 static int seam_callback(P4ModCall *call, void *user)
 {
     if (user == &begin_hook) p4_mod_defeat_battle_begin((uint32_t)call->args[0].u);
+    else if (user == &start_before_hook) ++script_start;
+    else if (user == &start_after_hook) { if (script_start) --script_start; }
+    else if (user == &resolve_before_hook) p4_mod_defeat_script();
+    else if (user == &resolve_after_hook) {
+        if (shown_context) put_word(BATTLE_CONTEXT, 0);
+        shown_context = 0;
+    }
     else p4_mod_defeat_field((uint32_t)call->args[0].u);
     return 0;
 }
+static P4ModHook *seam_add(uint32_t address, const char *signature, int phase, void *user)
+{
+    P4ModFunction *function = p4_mod_function_find(address, signature);
+    P4ModHook *hook = function ? p4_mod_hook_add(P4_MOD_NATIVE_OWNER, function, phase, seam_callback, user) : NULL;
+    if (hook) p4_mod_hook_enable(hook, 0);
+    return hook;
+}
 static int seams(void)
 {
-    if (begin_hook && field_hook) return 0;
-    if (!begin_hook) {
-        P4ModFunction *function = p4_mod_function_find(BATTLE_CREATE, "ii");
-        begin_hook = function ? p4_mod_hook_add(P4_MOD_NATIVE_OWNER, function, P4_MOD_BEFORE, seam_callback, &begin_hook) : NULL;
-        if (begin_hook) p4_mod_hook_enable(begin_hook, 0);
-    }
-    if (!field_hook) {
-        P4ModFunction *function = p4_mod_function_find(FIELD_TO_BATTLE, "ip");
-        field_hook = function ? p4_mod_hook_add(P4_MOD_NATIVE_OWNER, function, P4_MOD_BEFORE, seam_callback, &field_hook) : NULL;
-        if (field_hook) p4_mod_hook_enable(field_hook, 0);
-    }
-    if (begin_hook && field_hook) return 0;
-    fprintf(stderr, "p4pc: mods: battle defeat seams unavailable: %08x ii %s, %08x ip %s\n", BATTLE_CREATE,
-            begin_hook ? "ok" : "missing", FIELD_TO_BATTLE, field_hook ? "ok" : "missing");
+    if (!begin_hook) begin_hook = seam_add(BATTLE_CREATE, "ii", P4_MOD_BEFORE, &begin_hook);
+    if (!field_hook) field_hook = seam_add(FIELD_TO_BATTLE, "ip", P4_MOD_BEFORE, &field_hook);
+    if (!start_before_hook) start_before_hook = seam_add(SEQ_BATTLE_START, "vi", P4_MOD_BEFORE, &start_before_hook);
+    if (!start_after_hook) start_after_hook = seam_add(SEQ_BATTLE_START, "vi", P4_MOD_AFTER, &start_after_hook);
+    if (!resolve_before_hook) resolve_before_hook = seam_add(SCRIPT_RESOLVE, "i", P4_MOD_BEFORE, &resolve_before_hook);
+    if (!resolve_after_hook) resolve_after_hook = seam_add(SCRIPT_RESOLVE, "i", P4_MOD_AFTER, &resolve_after_hook);
+    if (begin_hook && field_hook && start_before_hook && start_after_hook && resolve_before_hook && resolve_after_hook)
+        return 0;
+    fprintf(stderr, "p4pc: mods: battle defeat seams unavailable: %08x ii %s, %08x ip %s, %08x vi %s, %08x i %s\n",
+            BATTLE_CREATE, begin_hook ? "ok" : "missing", FIELD_TO_BATTLE, field_hook ? "ok" : "missing",
+            SEQ_BATTLE_START, start_before_hook && start_after_hook ? "ok" : "missing",
+            SCRIPT_RESOLVE, resolve_before_hook && resolve_after_hook ? "ok" : "missing");
     return -1;
+}
+static void sidecars_free(void)
+{
+    p4_game_tables_items_capture_free(snapshot.items_store);
+    p4_game_knowledge_capture_free(snapshot.knowledge_store);
+    snapshot.items_store = NULL;
+    snapshot.knowledge_store = NULL;
 }
 static void seams_update(void)
 {
     int on = active();
     if (begin_hook) p4_mod_hook_enable(begin_hook, on);
     if (field_hook) p4_mod_hook_enable(field_hook, on);
+    if (start_before_hook) p4_mod_hook_enable(start_before_hook, on);
+    if (start_after_hook) p4_mod_hook_enable(start_after_hook, on);
+    if (resolve_before_hook) p4_mod_hook_enable(resolve_before_hook, on);
+    if (resolve_after_hook) p4_mod_hook_enable(resolve_after_hook, on);
     if (!on) {
         snapshot.valid = 0;
+        sidecars_free();
         pending.active = 0;
+        script_battle.running = script_battle.restart_polls = 0;
+        script_start = 0;
+        if (shown_context) put_word(BATTLE_CONTEXT, 0);
+        shown_context = 0;
     }
 }
 
@@ -242,8 +324,18 @@ void p4_mod_defeat_battle_begin(uint32_t setup)
     pending.active = 0;
     snapshot.valid = 0;
     if (!active() || !guest(setup, 0x3Cu)) return;
-    snapshot.unsupported_sidecars = p4_game_tables_items_native_expanded() ||
-                                   p4_game_knowledge_native_active() != NULL;
+    sidecars_free();
+    snapshot.unsupported[0] = 0;
+    int result = p4_game_tables_items_battle_capture(&snapshot.items_store);
+    if (result) snprintf(snapshot.unsupported, sizeof snapshot.unsupported,
+                         "the expanded item state could not be captured (%s)", p4_game_tables_error(result));
+    else if ((result = p4_game_knowledge_battle_capture(&snapshot.knowledge_store)))
+        snprintf(snapshot.unsupported, sizeof snapshot.unsupported,
+                 "the enemy knowledge state could not be captured (%s)", p4_game_tables_error(result));
+    if (!snapshot.unsupported[0] && (snapshot.items_store || snapshot.knowledge_store))
+        fprintf(stderr, "p4pc: mods: battle defeat: battle start sidecar state, items %016llx, knowledge %016llx\n",
+                (unsigned long long)p4_game_tables_items_capture_digest(snapshot.items_store),
+                (unsigned long long)p4_game_knowledge_capture_digest(snapshot.knowledge_store));
     void *party = guest(PARTY_SLOTS, PARTY_SIZE);
     void *inventory = guest(INVENTORY, INVENTORY_SIZE);
     void *personas = guest(PERSONA_STOCK, PERSONA_STOCK_SIZE);
@@ -289,8 +381,27 @@ void p4_mod_defeat_battle_begin(uint32_t setup)
         memcpy(&m->sp, r + UNIT_SP, 2);
         memcpy(&m->ailments, r + UNIT_BAD, 4);
     }
+    snapshot.script = script_start != 0 || restarting;
+    snapshot.script_unsupported[0] = 0;
+    snapshot.encounter = snapshot.groups[0] ? half(snapshot.groups[0] + 8u) : 0xFFFFu;
+    snapshot.party_count = 0;
+    memcpy(snapshot.setup_bytes, guest(setup, SETUP_SIZE), SETUP_SIZE);
+    for (int i = 0; i < 4; ++i) {
+        uint32_t group = word(setup + SETUP_PARTY + 4u * (uint32_t)i);
+        if (!group) continue;
+        uint32_t unit = group && half(group) == GENUS_PC ? word(group + 4u) : 0;
+        uint16_t id = unit ? half(unit + 2u) : 0;
+        if (id < 1 || id > RECORDS || unit != record_address(id))
+            snprintf(snapshot.script_unsupported, sizeof snapshot.script_unsupported,
+                     "a party member of the battle is not a playable record");
+        else snapshot.party_ids[snapshot.party_count++] = id;
+    }
+    if (!snapshot.groups[0] || snapshot.groups[1] || snapshot.groups[2])
+        snprintf(snapshot.script_unsupported, sizeof snapshot.script_unsupported,
+                 "the battle's enemy groups are not one retail encounter group");
     snapshot.setup = setup;
     snapshot.valid = 1;
+    if (snapshot.script) script_battle.running = 0;
 }
 
 /* ---- the lost field battle */
@@ -303,8 +414,23 @@ static int leader_dead(void)
     if (!guest(unit, UNIT_SIZE)) return 0;
     return (word(unit + UNIT_BAD) & UNIT_KO) != 0 || half(unit + UNIT_HP) == 0;
 }
-static void restore(void)
+/* The protagonist's record: a script battle's loss is a fallen protagonist,
+ * which the script reads back through the record, not a field group. */
+static int hero_dead(void)
 {
+    if (!guest(HERO_RECORD, UNIT_SIZE)) return 0;
+    return (word(HERO_RECORD + UNIT_BAD) & UNIT_KO) != 0 || half(HERO_RECORD + UNIT_HP) == 0;
+}
+/* enemy_groups: a field battle's groups belong to the field and are copied
+ * back; a script battle's are freed with it and re-created by the caller. */
+static int restore(int enemy_groups)
+{
+    /* Both sidecars were matched when the retry was allowed and nothing runs in
+     * between, so these cannot fail; if one does, nothing else is copied. */
+    if (p4_game_tables_items_battle_matches(snapshot.items_store) || p4_game_knowledge_battle_matches(snapshot.knowledge_store) ||
+        p4_game_tables_items_battle_restore(snapshot.items_store))
+        return -1;
+    if (p4_game_knowledge_battle_restore(snapshot.knowledge_store)) return -1;
     memcpy(guest(PARTY_SLOTS, PARTY_SIZE), snapshot.party_slots, PARTY_SIZE);
     memcpy(guest(INVENTORY, INVENTORY_SIZE), snapshot.inventory, INVENTORY_SIZE);
     memcpy(guest(PERSONA_STOCK, PERSONA_STOCK_SIZE), snapshot.personas, PERSONA_STOCK_SIZE);
@@ -318,59 +444,70 @@ static void restore(void)
         void *host = guest(record_address(id), UNIT_SIZE);
         if (host) memcpy(host, snapshot.records[id - 1], UNIT_SIZE);
     }
-    for (int i = 0; i < GROUPS; ++i) {
+    for (int i = 0; enemy_groups && i < GROUPS; ++i) {
         void *host = snapshot.groups[i] ? guest(snapshot.groups[i], GROUP_SIZE) : NULL;
         if (host) memcpy(host, snapshot.group_bytes[i], GROUP_SIZE);
     }
+    return 0;
 }
-static int game_over(uint32_t work, const char *why)
+static const char *source_name(int source)
+{
+    return source == P4_MOD_DEFEAT_FIELD ? "field" : source == P4_MOD_DEFEAT_SCRIPT ? "script" : "collision";
+}
+static void game_over_note(const char *why)
 {
     fprintf(stderr, "p4pc: mods: battle defeat: encounter %u game over (%s)\n", (unsigned)pending.encounter, why);
     pending.active = 0;
+}
+static int game_over(uint32_t work, const char *why)
+{
+    game_over_note(why);
     put_word(work + WORK_STATE, STATE_RESULT);
     return P4_MOD_DEFEAT_GAME_OVER;
 }
-
-int p4_mod_defeat_field(uint32_t task)
+/* The first question of one defeat: whether a retry is possible at all (a
+ * recorded battle start, capturable and unchanged sidecars, the authorizers),
+ * logged once. */
+static void defeat_begin(uint32_t key, uint32_t setup, uint32_t encounter, int source)
 {
-    if (!active()) return -1;
-    uint32_t work = word(task + TASK_WORK);
-    if (!guest(work, WORK_RETURN_MODE + 4u)) return -1;
-    uint32_t state = word(work + WORK_STATE);
-    if (pending.active && pending.work == work && state == STATE_BATTLE) {
-        /* held: the poll after a hold */
-    } else if (state == STATE_RESULT && leader_dead()) {
-        uint32_t setup = work + WORK_SETUP;
-        uint32_t group = word(setup + SETUP_ENEMIES);
-        pending.active = 1;
-        pending.work = work;
-        pending.encounter = group ? half(group + 8u) : 0xFFFFu;
-        pending.polls = 0;
-        pending.source = word(work + WORK_RETURN_MODE) == 1 ? P4_MOD_DEFEAT_FIELD : P4_MOD_DEFEAT_COLLISION;
-        pending.allowed = 1;
-        pending.reason[0] = 0;
-        if (!snapshot.valid || snapshot.setup != setup) {
-            pending.allowed = 0;
-            snprintf(pending.reason, sizeof pending.reason, "the battle start was not recorded");
-        } else if (snapshot.unsupported_sidecars || p4_game_tables_items_native_expanded() ||
-                   p4_game_knowledge_native_active() != NULL) {
-            pending.allowed = 0;
-            snprintf(pending.reason, sizeof pending.reason, "expanded item or enemy knowledge state cannot be restored");
-        } else if (p4_mod_authorize_mask & P4_MOD_AUTH_RETRY_BIT) {
-            P4ModEvent context = {"retry", 2, {{"encounter", pending.encounter}, {"source", pending.source}}};
-            pending.allowed = p4_mod_authorize(P4_MOD_AUTH_RETRY, &context, pending.reason, sizeof pending.reason);
-            if (!pending.allowed && !pending.reason[0]) snprintf(pending.reason, sizeof pending.reason, "a retry authorizer refused it");
-        }
-        fprintf(stderr, "p4pc: mods: battle defeat: encounter %u (%s) answered by owner %zu, retry %s%s%s\n",
-                (unsigned)pending.encounter, pending.source == P4_MOD_DEFEAT_FIELD ? "field" : "collision", handler->owner,
-                pending.allowed ? "allowed" : "refused", pending.allowed ? "" : ": ", pending.reason);
-    } else {
-        if (pending.active && pending.work == work) pending.active = 0;
-        return -1;
+    pending.active = 1;
+    pending.work = key;
+    pending.encounter = encounter;
+    pending.polls = 0;
+    pending.source = source;
+    pending.allowed = 1;
+    pending.reason[0] = 0;
+    if (!snapshot.valid || snapshot.setup != setup) {
+        pending.allowed = 0;
+        snprintf(pending.reason, sizeof pending.reason, "the battle start was not recorded");
+    } else if (source == P4_MOD_DEFEAT_SCRIPT && snapshot.script_unsupported[0]) {
+        pending.allowed = 0;
+        snprintf(pending.reason, sizeof pending.reason, "%s", snapshot.script_unsupported);
+    } else if (snapshot.unsupported[0]) {
+        pending.allowed = 0;
+        snprintf(pending.reason, sizeof pending.reason, "%s", snapshot.unsupported);
+    } else if (p4_game_tables_items_battle_matches(snapshot.items_store)) {
+        pending.allowed = 0;
+        snprintf(pending.reason, sizeof pending.reason,
+                 "the expanded item table is no longer the one captured at the battle start");
+    } else if (p4_game_knowledge_battle_matches(snapshot.knowledge_store)) {
+        pending.allowed = 0;
+        snprintf(pending.reason, sizeof pending.reason,
+                 "the enemy knowledge store is no longer the one captured at the battle start");
+    } else if (p4_mod_authorize_mask & P4_MOD_AUTH_RETRY_BIT) {
+        P4ModEvent context = {"retry", 2, {{"encounter", pending.encounter}, {"source", pending.source}}};
+        pending.allowed = p4_mod_authorize(P4_MOD_AUTH_RETRY, &context, pending.reason, sizeof pending.reason);
+        if (!pending.allowed && !pending.reason[0]) snprintf(pending.reason, sizeof pending.reason, "a retry authorizer refused it");
     }
-
+    fprintf(stderr, "p4pc: mods: battle defeat: encounter %u (%s) answered by owner %zu, retry %s%s%s\n",
+            (unsigned)pending.encounter, source_name(pending.source), handler->owner,
+            pending.allowed ? "allowed" : "refused", pending.allowed ? "" : ": ", pending.reason);
+}
+/* Asks the handler: its answer, game over for a failure or an unknown word. */
+static int defeat_ask(uint32_t setup)
+{
     P4ModDefeat defeat = {pending.encounter, pending.source, pending.polls, pending.allowed, pending.reason, 0, {{0}}};
-    if (snapshot.valid && snapshot.setup == work + WORK_SETUP) {
+    if (snapshot.valid && snapshot.setup == setup) {
         defeat.members = snapshot.members;
         memcpy(defeat.party, snapshot.party, sizeof defeat.party);
     }
@@ -379,6 +516,37 @@ int p4_mod_defeat_field(uint32_t task)
     int answer = h->callback(&defeat, h->user);
     --depth;
     if (answer < 0) p4_mod_failure(h->owner, "Native battle defeat handler failed");
+    return answer;
+}
+static void restored_note(void)
+{
+    fprintf(stderr, "p4pc: mods: battle defeat: encounter %u retried from its battle start (%d records, %d enemy groups)\n",
+            (unsigned)pending.encounter, RECORDS, (snapshot.groups[0] != 0) + (snapshot.groups[1] != 0) + (snapshot.groups[2] != 0));
+    if (snapshot.items_store || snapshot.knowledge_store)
+        fprintf(stderr, "p4pc: mods: battle defeat: sidecar state restored, items %016llx, knowledge %016llx\n",
+                (unsigned long long)p4_game_tables_items_battle_digest(),
+                (unsigned long long)p4_game_knowledge_battle_digest());
+}
+
+int p4_mod_defeat_field(uint32_t task)
+{
+    if (!active()) return -1;
+    uint32_t work = word(task + TASK_WORK);
+    if (!guest(work, WORK_RETURN_MODE + 4u)) return -1;
+    uint32_t state = word(work + WORK_STATE);
+    uint32_t setup = work + WORK_SETUP;
+    if (pending.active && pending.work == work && state == STATE_BATTLE) {
+        /* held: the poll after a hold */
+    } else if (state == STATE_RESULT && leader_dead()) {
+        uint32_t group = word(setup + SETUP_ENEMIES);
+        defeat_begin(work, setup, group ? half(group + 8u) : 0xFFFFu,
+                     word(work + WORK_RETURN_MODE) == 1 ? P4_MOD_DEFEAT_FIELD : P4_MOD_DEFEAT_COLLISION);
+    } else {
+        if (pending.active && pending.work == work) pending.active = 0;
+        return -1;
+    }
+
+    int answer = defeat_ask(setup);
     if (answer == P4_MOD_DEFEAT_HOLD) {
         if (++pending.polls >= P4_MOD_DEFEAT_HOLD_LIMIT) return game_over(work, "held too long");
         put_word(work + WORK_STATE, STATE_HOLD);
@@ -390,12 +558,114 @@ int p4_mod_defeat_field(uint32_t task)
             snprintf(why, sizeof why, "retry refused: %s", pending.reason);
             return game_over(work, why);
         }
-        restore();
-        fprintf(stderr, "p4pc: mods: battle defeat: encounter %u retried from its battle start (%d records, %d enemy groups)\n",
-                (unsigned)pending.encounter, RECORDS, (snapshot.groups[0] != 0) + (snapshot.groups[1] != 0) + (snapshot.groups[2] != 0));
+        if (restore(1)) return game_over(work, "retry refused: a sidecar state could not be restored");
+        restored_note();
         pending.active = 0;
         put_word(work + WORK_STATE, STATE_BATTLE);
         return P4_MOD_DEFEAT_RETRY;
     }
     return game_over(work, "the handler let it run");
+}
+
+/* ---- the lost script battle */
+
+/* The retail 001932f0 body, from the recorded setup: fresh groups for the
+ * same party and encounter, the same formation, then the battle itself. */
+static int script_restart(void)
+{
+    /* One port-owned packet for every retry; mods may read it (the battle_start
+     * event hands them its address) but never write it. */
+    static uint32_t packet;
+    if (!packet) {
+        packet = p4_gport_alloc(SETUP_SIZE, 16);
+        if (packet) p4_mod_memory_declare(packet, SETUP_SIZE, P4_MOD_MEMORY_READ);
+    }
+    uint8_t *bytes = packet ? guest(packet, SETUP_SIZE) : NULL;
+    if (!bytes) return -1;
+    memcpy(bytes, snapshot.setup_bytes, SETUP_SIZE);
+    memset(bytes + SETUP_PARTY, 0, 16);
+    memset(bytes + SETUP_ENEMIES, 0, 12);
+    hFadeTaskStart(1);
+    for (int i = 0; i < snapshot.party_count; ++i) {
+        uint32_t group = P4_H2G(datUnitCreatePc(snapshot.party_ids[i]));
+        memcpy(bytes + SETUP_PARTY + 4 * i, &group, 4);
+    }
+    uint32_t enemies = P4_H2G(datUnitCreateEncounterGroup((uint16_t)snapshot.encounter));
+    memcpy(bytes + SETUP_ENEMIES, &enemies, 4);
+    restarting = 1;
+    btlTaskCreate((int32_t)packet);
+    btlSetFreeUnitsOnTeardown();
+    restarting = 0;
+    return snapshot.valid && snapshot.script ? 0 : -1;
+}
+
+/* Shows the script a battle that is still there for this one poll: the
+ * resolve call then answers "not yet" and the script keeps waiting. */
+static void show_running(void)
+{
+    if (!shown_context) shown_context = p4_gport_alloc(16, 16);
+    if (shown_context) put_word(BATTLE_CONTEXT, shown_context);
+}
+
+void p4_mod_defeat_script(void)
+{
+    if (!active() || !snapshot.valid || !snapshot.script) return;
+    if (word(BATTLE_CONTEXT) != 0) {
+        /* A real battle exists. */
+        script_battle.running = 1;
+        script_battle.restart_polls = 0;
+        return;
+    }
+    if (!script_battle.running) {
+        /* Not started yet (the sequence's delay frames), or a retried battle
+         * that has not published its context: the wait goes on for the latter. */
+        if (script_battle.restart_polls > 0 && script_battle.restart_polls++ < (int)SCRIPT_START_POLLS) show_running();
+        return;
+    }
+    script_battle.running = 0;
+    if (!hero_dead()) {
+        snapshot.valid = 0; /* won, or no loss: the script goes on */
+        pending.active = 0;
+        return;
+    }
+    if (!(pending.active && pending.work == snapshot.setup))
+        defeat_begin(snapshot.setup, snapshot.setup, snapshot.encounter, P4_MOD_DEFEAT_SCRIPT);
+    int answer = defeat_ask(snapshot.setup);
+    if (answer == P4_MOD_DEFEAT_HOLD) {
+        if (++pending.polls >= P4_MOD_DEFEAT_HOLD_LIMIT) {
+            game_over_note("held too long");
+            snapshot.valid = 0;
+            return;
+        }
+        script_battle.running = 1; /* still asking: the next poll is the same defeat */
+        show_running();
+        return;
+    }
+    if (answer == P4_MOD_DEFEAT_RETRY) {
+        if (!pending.allowed) {
+            char why[160];
+            snprintf(why, sizeof why, "retry refused: %s", pending.reason);
+            game_over_note(why);
+            snapshot.valid = 0;
+            return;
+        }
+        if (restore(0)) {
+            game_over_note("retry refused: a sidecar state could not be restored");
+            snapshot.valid = 0;
+            return;
+        }
+        restored_note();
+        pending.active = 0;
+        if (script_restart()) {
+            game_over_note("retry refused: the battle could not be started again");
+            snapshot.valid = 0;
+            return;
+        }
+        script_battle.running = 0;
+        script_battle.restart_polls = 1;
+        if (word(BATTLE_CONTEXT) == 0) show_running();
+        return;
+    }
+    game_over_note("the handler let it run");
+    snapshot.valid = 0;
 }

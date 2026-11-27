@@ -1,0 +1,1150 @@
+{
+  "proof_id": "L1-c6C-font-native-render-20261113",
+  "runtime_status": "pending-seam",
+  "scope": "Fourteen exact owned setC objects. Code-source proof and positive typed replacements; no runtime closure.",
+  "source_pins": {
+    "steam_build": 10836033,
+    "steam_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+    "switch_version": "1.2",
+    "switch_mapped_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+    "switch_nso_sha256": "854c7a1e33de1619abf009fa7f32b8c012960d685c8bf1bf99a92a6a4d0bda1c",
+    "ps2_elf_sha256": "f90675b8a38138ddb5dc5cdf641550f41800fcb86bb499c586073e964fb41836",
+    "ps2_decomp_revision": "18016afe6"
+  },
+  "counts": {
+    "PROVEN-code": {
+      "objects": 4,
+      "ps2_bytes": 188
+    },
+    "D10c": {
+      "objects": 7,
+      "ps2_bytes": 308
+    },
+    "PROVEN": {
+      "objects": 3,
+      "ps2_bytes": 88
+    }
+  },
+  "rows": [
+    {
+      "address": "0x005dd680",
+      "size": 32,
+      "decision": "PROVEN-code",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "1e22619bc9d1a7c4d201fb234002fe2def60dfca41465d40cd4bf695f141e9de",
+        "readers": [
+          {
+            "function": "0x103f00",
+            "name": "func_00103f00",
+            "file": "src/Event/Fcl/fclBankManager_inferred_00103510.c"
+          }
+        ]
+      },
+      "source": {
+        "kind": "authored-Golden-code-constant",
+        "steam_prefix": {
+          "container": "P4G.exe",
+          "source_build": 10836033,
+          "section": ".sdata",
+          "rva": "0x966e00",
+          "raw_offset": 9853440,
+          "size": 16,
+          "sha256": "6fd7359b2243ebe2ee17b9d9d145b3d29a75e4c12ed6cae756484e0651200054",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        },
+        "steam_readers": [
+          "43b7e0..43b878",
+          "43bf81..43bff7"
+        ],
+        "steam_immediate_stores": [
+          "43b808:2",
+          "43b820:80",
+          "43bf94:2",
+          "43bfa8:80"
+        ],
+        "switch": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x710063a844",
+          "size": 24,
+          "sha256": "32d580ab5473ce27809aa3d72f43f59855b1e0a6b8d28220f6373b43da1c9890",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+        },
+        "logical_sha256": "32d580ab5473ce27809aa3d72f43f59855b1e0a6b8d28220f6373b43da1c9890"
+      },
+      "structural_correspondence": "PS2103f00 copies six signed32 blink durations, decrements the timer, toggles overlay phase, advances modulo6 and reloads duration. It is NOT a primitive-type/texture-index array. Golden2c42c0 does identical timer/phase/modulo6 transition at2c4754 with63a844. Steam43b7e0 constructs the actualsix values from a16-byte vector plus explicit2/80 immediates, indexes phase modulo6 and converts selected duration to float timer; its inlined draw-path43bf81 repeats construction. Both complete24-byte logical banks agree. Only8 trailing zero alignment bytes belong to the selected32-byte PS2 allocation.",
+      "required_seams": [
+        "bustup-blink:author-six-int32-Golden-durations",
+        "bustup-blink:both-direct-and-inlined-phase-mod6-consumers",
+        "bustup-blink:Golden-delta-times-half-timer-not-PS2-decrement-one"
+      ],
+      "golden_values": [
+        3,
+        100,
+        2,
+        2,
+        2,
+        80
+      ],
+      "ps2_live_bytes": 24,
+      "ps2_alignment_tail_bytes": 8,
+      "layout": {
+        "kind": "six signed32 blink durations",
+        "count": 6,
+        "stride": 4
+      },
+      "installation": "Author24live bytes or equivalent native constants; never copy32bytes from966e00, whose next8bytes are unrelated."
+    },
+    {
+      "address": "0x00628fa0",
+      "size": 24,
+      "decision": "PROVEN-code",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "ea7c6769cafcba4e90ead0761ab6cb6912277d95add51b242bb64ccc0e9755bf",
+        "readers": [
+          {
+            "function": "0x21a7b0",
+            "name": "func_0021a7b0",
+            "file": "src/Main/Battle/Data/datCalc_inferred_0021a7b0.c"
+          }
+        ]
+      },
+      "source": {
+        "kind": "authored-Golden-code-topology",
+        "steam_reader": {
+          "container": "P4G.exe",
+          "source_build": 10836033,
+          "section": ".shared",
+          "rva": "0xdf200",
+          "raw_offset": 911360,
+          "size": 1001,
+          "sha256": "da267af0f7621ea9e56e40144190a80576a17a31a3768c468628d285ee572274",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        },
+        "steam_constructor_rva": "0xdf200",
+        "switch": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x710062defa",
+          "size": 24,
+          "sha256": "ea7c6769cafcba4e90ead0761ab6cb6912277d95add51b242bb64ccc0e9755bf",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+        },
+        "logical_sha256": "ea7c6769cafcba4e90ead0761ab6cb6912277d95add51b242bb64ccc0e9755bf"
+      },
+      "structural_correspondence": "PS221a7b0 builds six control vertices and draws12u16 indexed triangle vertices with this exact selector order. GoldenNSO88810 uses the same6vertex/12index primitive with62defa copied as threeqwords into stack; flags, fade, height alternatives and phase drawing bind this same flourish role. Steam draws the same topology through df200: instead of a literal index buffer, straight-line SSE shuffles/stores expand six control positions into12packed24-byte vertices atfd02a0, copies288bytes and draws12vertices atdf5b7. Static evaluation of those actual SSE operations yields exactly[0,1,2,1,2,3,1,4,3,4,3,5], independently agreeing with NSO. M2ab6070 is not the source. This is structural topology embedded by code, not a byte-window or visual comparison.",
+      "required_seams": [
+        "advantage-topology:author-exact-twelve-Golden-selectors-or-equivalent-expanded-order",
+        "advantage-topology:all-six-native-control-vertices-fade-and-height-producers",
+        "advantage-topology:Steam12-expanded-versus-Switch6-indexed-backend-ABI"
+      ],
+      "golden_values": [
+        0,
+        1,
+        2,
+        1,
+        2,
+        3,
+        1,
+        4,
+        3,
+        4,
+        3,
+        5
+      ],
+      "static_evaluation": {
+        "reader_rva": "0xdf200",
+        "construction_range": [
+          "0xdf229",
+          "0xdf4cc"
+        ],
+        "working_vertex_rva": "0xfd02a0",
+        "vertex_stride": 24,
+        "expanded_vertex_count": 12,
+        "witness_inputs": [
+          17,
+          29,
+          31
+        ],
+        "witness_xy": [
+          [
+            17.0,
+            29.0
+          ],
+          [
+            475.0,
+            29.0
+          ],
+          [
+            17.0,
+            60.0
+          ],
+          [
+            475.0,
+            29.0
+          ],
+          [
+            17.0,
+            60.0
+          ],
+          [
+            475.0,
+            60.0
+          ],
+          [
+            475.0,
+            29.0
+          ],
+          [
+            715.0,
+            29.0
+          ],
+          [
+            475.0,
+            60.0
+          ],
+          [
+            715.0,
+            29.0
+          ],
+          [
+            475.0,
+            60.0
+          ],
+          [
+            715.0,
+            60.0
+          ]
+        ],
+        "ordered_distinct_xy": [
+          [
+            17.0,
+            29.0
+          ],
+          [
+            475.0,
+            29.0
+          ],
+          [
+            17.0,
+            60.0
+          ],
+          [
+            475.0,
+            60.0
+          ],
+          [
+            715.0,
+            29.0
+          ],
+          [
+            715.0,
+            60.0
+          ]
+        ],
+        "source_vertex_selectors": [
+          0,
+          1,
+          2,
+          1,
+          2,
+          3,
+          1,
+          4,
+          3,
+          4,
+          3,
+          5
+        ],
+        "native_copy_bytes": 288,
+        "proof": "Static evaluation of straight-line SSE stores only; no game code execution."
+      },
+      "layout": {
+        "kind": "u16 topology semantics",
+        "switch_index_count": 12,
+        "switch_control_vertex_count": 6,
+        "steam_expanded_vertex_count": 12,
+        "steam_vertex_stride": 24,
+        "steam_copy_bytes": 288
+      }
+    },
+    {
+      "address": "0x0063bbb0",
+      "size": 64,
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "65a7797ea255eace876dd513abd8e397b0c4234abe2e567760409707260ebee2",
+        "readers": [
+          {
+            "function": "0x271a40",
+            "name": "func_00271a40",
+            "file": "src/frFont.c"
+          }
+        ]
+      },
+      "source": {
+        "kind": "Golden-font-style-teardown-code",
+        "switch_reader": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x71002cd9d0",
+          "size": 960,
+          "sha256": "26b5b381121a7cf68b06e1c7a8e9039822cf3bee38ae128d3e2a80dfea4e6a3d",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+        },
+        "style_count": 17
+      },
+      "structural_correspondence": "The only PS2 reader271a40 is the release loop i=0..8; its mask=i&ff then mask>=9 assertion consumes this FrDelFontStyle error. Golden2cd9d0 positively replaces that loop with17unrolled style releases: each checks object and request, releases397cd0, clears handle/object and resets style tag. It then releases both font buffers/backend handles and raster storage. No variable style index or range-check/source-error field exists in this complete teardown; it is not a missing-reference inference. The AddFontStyle guard is separate and remains required/proven by batch1.",
+      "required_seams": [
+        "font-release:all17-native-style-object-request-pairs",
+        "font-release:clear-slots-then-font-backend-and-raster-lifetimes",
+        "font-release:no-retired-unreachable-DelFontStyle-error"
+      ],
+      "resource_route_contract": "docs/golden_mode/specs/re/l1-c6c-native-render-routes.md",
+      "absence_scope": "The old unreachable release-loop range-check diagnostic only; font style loading and all actual errors remain required."
+    },
+    {
+      "address": "0x0063c000",
+      "size": 24,
+      "decision": "PROVEN",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "3c0576bf7fe571dc0adb87399b12a79b680c241b770ce449fc356e74e4db24aa",
+        "readers": [
+          {
+            "function": "0x27d2f0",
+            "name": "func_0027d2f0",
+            "file": "src/itfMsgProcedure_Window.c"
+          }
+        ]
+      },
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".sdata",
+        "rva": "0x93d530",
+        "raw_offset": 9683248,
+        "size": 21,
+        "sha256": "7b6be0d4ab9d31aee67d11a33f8626b27036a7286c5506fd47758446cd6abaf1",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "structural_correspondence": "PS227d2f0 resolves font/game_help.spr, adopts itsSPR blob and publishes the message-window helper resource. Golden main message dispatcher208370 reads the helper selector, creates cmm_spr atpriorityF with20d600/20d6a0 and waits for its source group readiness before rendering helper entries.20d600 instantiates descriptor76f240 through2e74f0 and polls2e7660; resolved R_AARCH64_RELATIVE records identify exactlyone member font/game_helpx2.spr atnamesarray76f260. The source loader copies whole declared names and keeps native resource lifetime; this proves the same message-window helper resource field, not x2 basename similarity. Steam contains this actual new fullpath and actual CPK132208-byteSPR source is freshlysealed.",
+      "required_seams": [
+        "message-help:full-Golden-lazy-cmm_spr-producer-and-selector",
+        "message-help:descriptor76f240-one-member-load-readiness-release",
+        "message-help:Golden-SPR-helper-entry-domain-not-PS2-index-assumptions"
+      ],
+      "golden_string": "font/game_helpx2.spr",
+      "switch": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x71005f74b8",
+        "size": 21,
+        "sha256": "7b6be0d4ab9d31aee67d11a33f8626b27036a7286c5506fd47758446cd6abaf1",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "steam_span_alternatives": [
+        {
+          "container": "P4G.exe",
+          "source_build": 10836033,
+          "section": ".sdata",
+          "rva": "0x93d530",
+          "raw_offset": 9683248,
+          "size": 21,
+          "sha256": "7b6be0d4ab9d31aee67d11a33f8626b27036a7286c5506fd47758446cd6abaf1",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        }
+      ],
+      "ps2_live_bytes": 19,
+      "ps2_alignment_tail_bytes": 5,
+      "tail_policy": "Do not source Golden suffix bytes. Retain only inert zero alignment; all live uses take the sealed Golden string, including when longer than PS2 storage. No truncation or guest overrun.",
+      "resource_group": {
+        "descriptor": "0x76f240",
+        "count": 1,
+        "name_array": "0x76f260",
+        "names": [
+          "font/game_helpx2.spr"
+        ]
+      },
+      "actual_source": {
+        "archive": "data.cpk",
+        "compressed": true,
+        "container": "cri-cpk",
+        "depth": 1,
+        "index": 7811,
+        "locale": "",
+        "magic": "01000000",
+        "path": "data.cpk::font/game_helpx2.spr",
+        "sha256": "6311bc9db594aaae3e8dea88ee662bffc59b16a22d73391f71b4aa98cae26b07",
+        "signature": "spr",
+        "size": 132208,
+        "stored": 13728,
+        "stored_sha256": "c478e4524c9989113b4e238349cd7aa58761c339ccc1acc674fa0eae21f7a3d2",
+        "header_hex": "0100000000000000535052302000000068040200010007002000000028000000"
+      }
+    },
+    {
+      "address": "0x0063c030",
+      "size": 80,
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "11c7ead65959e6a390c48bdd21ebf42d1e40672a99f5972a96ebd893e4655ebb",
+        "readers": [
+          {
+            "function": "0x27d800",
+            "name": "func_0027d800",
+            "file": "src/itfMsgProcedure_Window.c"
+          },
+          {
+            "function": "0x27d970",
+            "name": "func_0027d970",
+            "file": "src/itfMsgProcedure_Window.c"
+          }
+        ]
+      },
+      "source": {
+        "kind": "Golden-message-window-sprite-composition",
+        "switch_reader": "0x7100208370",
+        "cache_loader": "0x710034bad0",
+        "primary_sprite_source": "init/c_main01x2.spr",
+        "message_sprite_source": "init/mswx2.spr",
+        "filename_GOT_relocations": {
+          "0x880800": "0x7595c8",
+          "0x880c68": "0x7595dc"
+        }
+      },
+      "structural_correspondence": "PS227d800/27d970 copy ten f32x2 corner-strip points, mutate heights and emit the old two rounded-color bands. The complete corresponding Golden normal-message phase dispatcher208370 gets actual residentSPR sources through34bad0, animates GoldenSPR selections (including215 for the native name/header branch) through2e7290/2e7370, and enqueues its new native panel callback from880c70. Its phase4/5 constructs these sprite/panel packets instead of either old ten-point band. Both opening and idle paths are positively accounted for in the complete new phase dispatcher, including cmm helper/picture variants. This old two-band polygon-template representation is replaced; an unrelated still-existing generic18point rounded-rectangle helper2e3c90 is explicitly NOT claimed as this table source.",
+      "required_seams": [
+        "message-background:resident-Golden-mswx2-and-c_main01x2-sources",
+        "message-background:complete208370-phase4-5-and-helper-picture-selector-packets",
+        "message-background:actual-native-SPR-entry-layout-opacity-queue-lifecycle-no-ten-point-template"
+      ],
+      "resource_route_contract": "docs/golden_mode/specs/re/l1-c6c-native-render-routes.md",
+      "absence_scope": "The old ten-point two-band message background template only; Golden message/background artwork is required.",
+      "runtime_contract": "Use the actual Golden message phase composer and resident SPR entry namespaces. No old ten-point strip, old two-color bands, visual substitute or missing-resource fallback."
+    },
+    {
+      "address": "0x0063c080",
+      "size": 128,
+      "decision": "PROVEN-code",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "03e8c62e9a798a54c83a7cd324f029aeb12a2532960b2672b2b8c54f4a36276d",
+        "readers": [
+          {
+            "function": "0x27d970",
+            "name": "func_0027d970",
+            "file": "src/itfMsgProcedure_Window.c"
+          }
+        ]
+      },
+      "source": {
+        "kind": "authored-Golden-choice-layout-code",
+        "switch_reader": "0x7100208370:phase12",
+        "native_primitive": "0x7100394870",
+        "background_argument_u32": [
+          "0x42200000",
+          "0x43070000",
+          "0x44070000",
+          "0x434a0000"
+        ],
+        "selection_argument_u32": [
+          "0x42e00000",
+          "dynamic-Y",
+          "0x43af0000",
+          "0x41e00000"
+        ]
+      },
+      "structural_correspondence": "PS227d970 phases11/12/13 build and animate a sixteen-point choice-area corner strip and position row highlights from actual choicecount/selection. In the complete corresponding Golden208370 dispatcher, phase12 instead constructs the choice background and selection through two actual394870 rectangle requests. Its ordered four float arguments are40,135,540,202; selected-row request has112,dynamicY,350,28. Phase9 publishes native procedure coordinates and phase12 gets the real row count and selected row to compute its nativeY. These exact code-authored geometry operands are the Golden value for this old choice-area template role; no16point memcpy or same-count layout assumption is authorized.",
+      "required_seams": [
+        "choice-area:author-native-two-rectangle-argument-contract",
+        "choice-area:actual-choice-count-selected-row-and-phase9-coordinates",
+        "choice-area:394870-coordinate-color-queue-convention-not-PS2-corner-strip"
+      ],
+      "golden_values": {
+        "background_ordered_float_arguments": [
+          40.0,
+          135.0,
+          540.0,
+          202.0
+        ],
+        "selection_ordered_arguments": [
+          112,
+          "dynamicY",
+          350,
+          28
+        ],
+        "background_color_u32": "0xcc07a1ff",
+        "selection_color_u32": "0xff567884",
+        "selected_y_formula": "step=(int)(100.f/count); delta=count==5?selected*0x1e0:(selected*step+((unsigned)(int)(200.f/count)>>1))*8; Y=(delta+0xaa0)>>3",
+        "procedure_x_fixed": 2240
+      },
+      "installation": "Implement the actual Native394870 ABI and its coordinate normalization. Ordered arguments are source evidence; do not assume a guessed physical viewport scaling or reinterpret them as sixteen old XY pairs."
+    },
+    {
+      "address": "0x0064e590",
+      "size": 32,
+      "decision": "PROVEN",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "c7be32521791acd010b99510013ab108e53291ab63e690ee783df7e16fb0ec27",
+        "readers": [
+          {
+            "function": "0x33e5c0",
+            "name": "func_0033e5c0",
+            "file": "src/Event/y_CmbCardEff.c"
+          }
+        ]
+      },
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".sdata",
+        "rva": "0x91d280",
+        "raw_offset": 9551488,
+        "size": 19,
+        "sha256": "d0981bbfe51684725afe682f62a35209ec0dcb855202243f31b27e21071f6423",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "structural_correspondence": "PS233e5c0 requests the basic persona-shuffle card resource. Golden152660 corresponding combine-card preloader guards resource bits40000400, calls2e4e30 with the basic card name obtained through GOT880890, flags0 and parent facility/cmbroot.arc, publishes request+2ab0 and advances preload state2 with GAT/PER/card_l neighbors. The actual source name and parent-qualified slot/lifecycle bind this same basic-card resource field; source payload layout is not inferred.",
+      "required_seams": [
+        "combine-card:psc_basic-parent-qualified-cmbroot-source",
+        "combine-card:preload-state-request-poll-take-release-and-real-card-consumer"
+      ],
+      "golden_string": "card/psc_basic.bin",
+      "switch": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x710073c06a",
+        "size": 19,
+        "sha256": "d0981bbfe51684725afe682f62a35209ec0dcb855202243f31b27e21071f6423",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "steam_span_alternatives": [
+        {
+          "container": "P4G.exe",
+          "source_build": 10836033,
+          "section": ".sdata",
+          "rva": "0x91d280",
+          "raw_offset": 9551488,
+          "size": 19,
+          "sha256": "d0981bbfe51684725afe682f62a35209ec0dcb855202243f31b27e21071f6423",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        },
+        {
+          "container": "P4G.exe",
+          "source_build": 10836033,
+          "section": ".xpdata",
+          "rva": "0xa4a488",
+          "raw_offset": 10783880,
+          "size": 19,
+          "sha256": "d0981bbfe51684725afe682f62a35209ec0dcb855202243f31b27e21071f6423",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        }
+      ],
+      "ps2_live_bytes": 19,
+      "ps2_alignment_tail_bytes": 13,
+      "tail_policy": "Do not source Golden suffix bytes. Retain only inert zero alignment; all live uses take the sealed Golden string, including when longer than PS2 storage. No truncation or guest overrun.",
+      "actual_source": {
+        "archive": "data.cpk",
+        "compressed": true,
+        "container": "cri-cpk",
+        "depth": 1,
+        "index": 1839,
+        "locale": "",
+        "magic": "64000000",
+        "path": "data.cpk::card/psc_basic.bin",
+        "sha256": "3993de4b4f27853ea462f87141d1c55d5920afe8601736b4181460a2110400b1",
+        "signature": "magic:64000000",
+        "size": 235008,
+        "stored": 116412,
+        "stored_sha256": "775b8f57b5f88aa482a290edf32ae42ff8df66709bf9dd9f0338ab9628307a1b",
+        "header_hex": "640000000700000040000000400401008004010040040100c0080200400c0000"
+      }
+    },
+    {
+      "address": "0x0064ea80",
+      "size": 32,
+      "decision": "PROVEN",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "c1c10d8a35abbee59d5ed1e5c4e4bdee70a15b29312cf753ec4b1a1eeff98023",
+        "readers": [
+          {
+            "function": "0x3781d0",
+            "name": "func_003781d0",
+            "file": "src/Battle/btlShuffleDraw.c"
+          }
+        ]
+      },
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".sdata",
+        "rva": "0x91aa38",
+        "raw_offset": 9541176,
+        "size": 27,
+        "sha256": "75278af4a977a5b4db65378ee555fd768a33679dea5b43a3b52164473db46d75",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "structural_correspondence": "PS23781d0 masks cardID to unsigned8, formats sha_card%02x.tmx into256bytebuffer, sends it to texture-name slot(work+8), then resets ready/state. Goldenade50 creates battle_shuffle_arcana_card atpriority12 and exactlyformats card/arcana/c_card%02x.tmx with unsigned8 cardID, passes it to f7500(work+8), clears ready/state and configures native card vertices/texture region. This actual filename-field/argument/texture-slot correspondence proves the new format, not a similarity search or an atlas substitution.",
+      "required_seams": [
+        "shuffle-card:unsigned8-identity-formatter-and-native-texture-slot",
+        "shuffle-card:Golden-TMX-decoder-card-geometry-ready-release-lifecycle"
+      ],
+      "golden_string": "card/arcana/c_card%02x.tmx",
+      "switch": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x710060bec1",
+        "size": 27,
+        "sha256": "75278af4a977a5b4db65378ee555fd768a33679dea5b43a3b52164473db46d75",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "steam_span_alternatives": [
+        {
+          "container": "P4G.exe",
+          "source_build": 10836033,
+          "section": ".sdata",
+          "rva": "0x91aa38",
+          "raw_offset": 9541176,
+          "size": 27,
+          "sha256": "75278af4a977a5b4db65378ee555fd768a33679dea5b43a3b52164473db46d75",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        }
+      ],
+      "ps2_live_bytes": 29,
+      "ps2_alignment_tail_bytes": 3,
+      "tail_policy": "Do not source Golden suffix bytes. Retain only inert zero alignment; all live uses take the sealed Golden string, including when longer than PS2 storage. No truncation or guest overrun.",
+      "actual_zero_card_source": {
+        "archive": "data.cpk",
+        "compressed": true,
+        "container": "cri-cpk",
+        "depth": 1,
+        "index": 1553,
+        "locale": "",
+        "magic": "02000000",
+        "path": "data.cpk::card/arcana/c_card00.tmx",
+        "sha256": "b7c771caee9ad5836387597796c2ccee8c6d258e4e82772d1a5ea6e7de57943f",
+        "signature": "tmx",
+        "size": 1048640,
+        "stored": 441068,
+        "stored_sha256": "bf02d53905607d8cdbd62a989ee0f443d78a7e83f0fe643fce7cbcbcb446801c",
+        "header_hex": "0200000040001000544d5830000000000000000200020000000000ff00000000"
+      }
+    },
+    {
+      "address": "0x007144a8",
+      "size": 16,
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "6503c44ef9148cb7df14c41f783c019e093a9ba7ab2b6a1f6b51cd2095028224",
+        "readers": [
+          {
+            "function": "0x4abd80",
+            "name": "effModelFindOrCreate",
+            "file": "src/Graphics/Model/effModel.c"
+          },
+          {
+            "function": "0x4abe80",
+            "name": "effModelCreate",
+            "file": "src/Graphics/Model/effModel.c"
+          },
+          {
+            "function": "0x4ac170",
+            "name": "effModelRebindModel",
+            "file": "src/Graphics/Model/effModel.c"
+          },
+          {
+            "function": "0x4ac640",
+            "name": "effModelCreateDrawable",
+            "file": "src/Graphics/Model/effModel.c"
+          },
+          {
+            "function": "0x4ac9a0",
+            "name": "effModelRebindDrawable",
+            "file": "src/Graphics/Model/effModel.c"
+          }
+        ]
+      },
+      "source": {
+        "kind": "Golden-model-effect-validation-and-ownership",
+        "switch_functions": [
+          "0x361b50",
+          "0x361bd0",
+          "0x361d70",
+          "0x361f50",
+          "0x362440",
+          "0x362620"
+        ]
+      },
+      "structural_correspondence": "PS24abd80/4abe80/4ac170/4ac640/4ac9a0 use effModel.c for failed owned-model lookup, allocation/source/kind and rebind checks. Golden361d70/362440 positively implement the same distinctive68/A4 payload constructors, optionalAMD resource validation38b790 and owned-model creation361bd0; latter scans type6 IDs then builds AMD and sets animation/reset behavior.361f50/362620 implement the same rebind, default animation, layerweight, reset/draw callbacks, visibility/option40000 and frame-range behavior, but without those old filename-bearing checks.361f50 explicitly skips missing source model rather than issuing the old assert; the shared initializer361b50 accepts an already-owned native model. The allocation source tag itself remains separately PROVEN at7144b8. Thus only this old repeated model-effect guard filename field is retired, not the model subsystem.",
+      "required_seams": [
+        "model-effects:actual-AMD-validation-type6-ID-allocation-and-owned-model-lifetime",
+        "model-effects:68-A4-constructors-rebinds-native-callbacks-and-frame-range",
+        "model-effects:no-retired-effModel.c-guard-filename-fallback"
+      ],
+      "resource_route_contract": "docs/golden_mode/specs/re/l1-c6c-native-render-routes.md",
+      "absence_scope": "Old effModel.c filename-bearing guard sites, positively removed/restructured in the corresponding typed constructors and rebinds."
+    },
+    {
+      "address": "0x007146b0",
+      "size": 16,
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "2cbbf13200cf4014dcb5e2617225a14d4fe8eb8cc806505840dbef9cbd8b8f5a",
+        "readers": [
+          {
+            "function": "0x4b6030",
+            "name": "effAfPackBindResource",
+            "file": "src/Graphics/Effect/eff_afpack.c"
+          },
+          {
+            "function": "0x4b6900",
+            "name": "effAfPackCreateInstance",
+            "file": "src/Graphics/Effect/eff_afpack.c"
+          },
+          {
+            "function": "0x4b6c90",
+            "name": "effAfPackInit",
+            "file": "src/Graphics/Effect/eff_afpack.c"
+          },
+          {
+            "function": "0x4b6e80",
+            "name": "effAfPackRunList",
+            "file": "src/Graphics/Effect/eff_afpack.c"
+          },
+          {
+            "function": "0x4b7140",
+            "name": "effAfPackReleaseByOwner",
+            "file": "src/Graphics/Effect/eff_afpack.c"
+          }
+        ]
+      },
+      "source": {
+        "kind": "Golden-per-model-after-track-route",
+        "startup": "0x71002deb2c ->0x710034dc40",
+        "z0": "data.cpk::init_free.bin::battle/effect/z0.tmx",
+        "attach": "0x71003890b8 /0x710038912c ->0x7100385d90 ->0x710034dd00",
+        "detach": "0x71003890a8 /0x710038911c ->0x7100385dc0 ->0x710034e260",
+        "step": "0x71003891a8 /0x7100389224 ->0x7100385c30 ->0x710034e370",
+        "submit": "0x7100385d68 ->0x710034f600"
+      },
+      "structural_correspondence": "This row is old AFP resource parser/allocation/linked-list diagnostic identity. PS24b6030 binds AFP parameter/material/section/command groups with kind64/65 streams;4b6900 instantiates their RenderWare objects;4b6c90 logs %s %d, loads effect/z0.tmx, installs a global linked-list task and draw callback;4b6e80/4b7140 traverse/release that list. Positive Golden replacement is different: actual startup2deb2c calls34dc40, which loads battle/effect/z0.tmx, uploads33b3a0 to51c8ad8 and releases request, with no task/list/log setup. Active model-manager attach/detach and frame-update callers at3890a8/b8,38911c/12c,3891a8/224 invoke385d90/dc0/c30. New34dd00 builds per-model tracks from a count atresource+8 and44-byte records, allocates90-byte native track states and native geometry/material buffers;34e260 releases those owned buffers;385ca0 tail-dispatches34e370 and385d68 tail-dispatches34f600 into actual model draw queues. These are observed live manager integration sites, not just an eff_track.c label. The AFP64/65/RenderWare/global-task representation is replaced by per-model native track ownership, so this old field has no counterpart.",
+      "required_seams": [
+        "after-track:exact-startup-Z0-source-loader-and-texture-lifetime",
+        "after-track:Golden-model-resource-track-parser-44-to90-layout-and-geometry",
+        "after-track:active-manager-attach-detach-frame-step-and-draw-queue-contract",
+        "after-track:no-AFP64-65-stream-or-global-effect_after-task-or-init-log"
+      ],
+      "resource_route_contract": "docs/golden_mode/specs/re/l1-c6c-native-render-routes.md",
+      "absence_scope": "old AFP resource parser/allocation/linked-list diagnostic identity",
+      "source_dispatch_observations": [
+        {
+          "pc": "0x27130c",
+          "target": "0x385bd0",
+          "branch": "BL"
+        },
+        {
+          "pc": "0x271374",
+          "target": "0x385bd0",
+          "branch": "BL"
+        },
+        {
+          "pc": "0x385ca0",
+          "target": "0x34e370",
+          "branch": "B"
+        },
+        {
+          "pc": "0x385d68",
+          "target": "0x34f600",
+          "branch": "B"
+        },
+        {
+          "pc": "0x388010",
+          "target": "0x385b70",
+          "branch": "BL"
+        },
+        {
+          "pc": "0x3880f8",
+          "target": "0x385b70",
+          "branch": "BL"
+        },
+        {
+          "pc": "0x388770",
+          "target": "0x385bd0",
+          "branch": "BL"
+        },
+        {
+          "pc": "0x3887e8",
+          "target": "0x385bd0",
+          "branch": "BL"
+        },
+        {
+          "pc": "0x3890a8",
+          "target": "0x385dc0",
+          "branch": "BL"
+        },
+        {
+          "pc": "0x3890b8",
+          "target": "0x385d90",
+          "branch": "BL"
+        },
+        {
+          "pc": "0x38911c",
+          "target": "0x385dc0",
+          "branch": "BL"
+        },
+        {
+          "pc": "0x38912c",
+          "target": "0x385d90",
+          "branch": "BL"
+        },
+        {
+          "pc": "0x3891a8",
+          "target": "0x385c30",
+          "branch": "BL"
+        },
+        {
+          "pc": "0x389224",
+          "target": "0x385c30",
+          "branch": "BL"
+        },
+        {
+          "pc": "0x38ee34",
+          "target": "0x385b70",
+          "branch": "BL"
+        }
+      ],
+      "runtime_contract": "Implement Golden per-model track ownership and actual geometry/material/animation rules; retain no PS2 AFP parser, RW pointer image, global linked list or cosmetic task/log value. Qualify M10 runtime seams before L1 closure."
+    },
+    {
+      "address": "0x007146d0",
+      "size": 16,
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "fd700046194af90d7b8591465f6c4072aae39c6008006db335dd07e87e72db5f",
+        "readers": [
+          {
+            "function": "0x4b6c90",
+            "name": "effAfPackInit",
+            "file": "src/Graphics/Effect/eff_afpack.c"
+          }
+        ]
+      },
+      "source": {
+        "kind": "Golden-per-model-after-track-route",
+        "startup": "0x71002deb2c ->0x710034dc40",
+        "z0": "data.cpk::init_free.bin::battle/effect/z0.tmx",
+        "attach": "0x71003890b8 /0x710038912c ->0x7100385d90 ->0x710034dd00",
+        "detach": "0x71003890a8 /0x710038911c ->0x7100385dc0 ->0x710034e260",
+        "step": "0x71003891a8 /0x7100389224 ->0x7100385c30 ->0x710034e370",
+        "submit": "0x7100385d68 ->0x710034f600"
+      },
+      "structural_correspondence": "This row is global effect_after scheduled task identity. PS24b6030 binds AFP parameter/material/section/command groups with kind64/65 streams;4b6900 instantiates their RenderWare objects;4b6c90 logs %s %d, loads effect/z0.tmx, installs a global linked-list task and draw callback;4b6e80/4b7140 traverse/release that list. Positive Golden replacement is different: actual startup2deb2c calls34dc40, which loads battle/effect/z0.tmx, uploads33b3a0 to51c8ad8 and releases request, with no task/list/log setup. Active model-manager attach/detach and frame-update callers at3890a8/b8,38911c/12c,3891a8/224 invoke385d90/dc0/c30. New34dd00 builds per-model tracks from a count atresource+8 and44-byte records, allocates90-byte native track states and native geometry/material buffers;34e260 releases those owned buffers;385ca0 tail-dispatches34e370 and385d68 tail-dispatches34f600 into actual model draw queues. These are observed live manager integration sites, not just an eff_track.c label. The AFP64/65/RenderWare/global-task representation is replaced by per-model native track ownership, so this old field has no counterpart.",
+      "required_seams": [
+        "after-track:exact-startup-Z0-source-loader-and-texture-lifetime",
+        "after-track:Golden-model-resource-track-parser-44-to90-layout-and-geometry",
+        "after-track:active-manager-attach-detach-frame-step-and-draw-queue-contract",
+        "after-track:no-AFP64-65-stream-or-global-effect_after-task-or-init-log"
+      ],
+      "resource_route_contract": "docs/golden_mode/specs/re/l1-c6c-native-render-routes.md",
+      "absence_scope": "global effect_after scheduled task identity",
+      "source_dispatch_observations": [
+        {
+          "pc": "0x27130c",
+          "target": "0x385bd0",
+          "branch": "BL"
+        },
+        {
+          "pc": "0x271374",
+          "target": "0x385bd0",
+          "branch": "BL"
+        },
+        {
+          "pc": "0x385ca0",
+          "target": "0x34e370",
+          "branch": "B"
+        },
+        {
+          "pc": "0x385d68",
+          "target": "0x34f600",
+          "branch": "B"
+        },
+        {
+          "pc": "0x388010",
+          "target": "0x385b70",
+          "branch": "BL"
+        },
+        {
+          "pc": "0x3880f8",
+          "target": "0x385b70",
+          "branch": "BL"
+        },
+        {
+          "pc": "0x388770",
+          "target": "0x385bd0",
+          "branch": "BL"
+        },
+        {
+          "pc": "0x3887e8",
+          "target": "0x385bd0",
+          "branch": "BL"
+        },
+        {
+          "pc": "0x3890a8",
+          "target": "0x385dc0",
+          "branch": "BL"
+        },
+        {
+          "pc": "0x3890b8",
+          "target": "0x385d90",
+          "branch": "BL"
+        },
+        {
+          "pc": "0x38911c",
+          "target": "0x385dc0",
+          "branch": "BL"
+        },
+        {
+          "pc": "0x38912c",
+          "target": "0x385d90",
+          "branch": "BL"
+        },
+        {
+          "pc": "0x3891a8",
+          "target": "0x385c30",
+          "branch": "BL"
+        },
+        {
+          "pc": "0x389224",
+          "target": "0x385c30",
+          "branch": "BL"
+        },
+        {
+          "pc": "0x38ee34",
+          "target": "0x385b70",
+          "branch": "BL"
+        }
+      ],
+      "runtime_contract": "Implement Golden per-model track ownership and actual geometry/material/animation rules; retain no PS2 AFP parser, RW pointer image, global linked list or cosmetic task/log value. Qualify M10 runtime seams before L1 closure."
+    },
+    {
+      "address": "0x00764210",
+      "size": 112,
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "d399d8f3e72bea177342604fc7875149e29ec576a1950626c7d29eefe6cfe41e",
+        "readers": [
+          {
+            "function": "0x4b6c90",
+            "name": "effAfPackInit",
+            "file": "src/Graphics/Effect/eff_afpack.c"
+          }
+        ]
+      },
+      "source": {
+        "kind": "Golden-per-model-after-track-route",
+        "startup": "0x71002deb2c ->0x710034dc40",
+        "z0": "data.cpk::init_free.bin::battle/effect/z0.tmx",
+        "attach": "0x71003890b8 /0x710038912c ->0x7100385d90 ->0x710034dd00",
+        "detach": "0x71003890a8 /0x710038911c ->0x7100385dc0 ->0x710034e260",
+        "step": "0x71003891a8 /0x7100389224 ->0x7100385c30 ->0x710034e370",
+        "submit": "0x7100385d68 ->0x710034f600"
+      },
+      "structural_correspondence": "This row is old AfPackInit file/line printf format and its106zero-alignment bytes. PS24b6030 binds AFP parameter/material/section/command groups with kind64/65 streams;4b6900 instantiates their RenderWare objects;4b6c90 logs %s %d, loads effect/z0.tmx, installs a global linked-list task and draw callback;4b6e80/4b7140 traverse/release that list. Positive Golden replacement is different: actual startup2deb2c calls34dc40, which loads battle/effect/z0.tmx, uploads33b3a0 to51c8ad8 and releases request, with no task/list/log setup. Active model-manager attach/detach and frame-update callers at3890a8/b8,38911c/12c,3891a8/224 invoke385d90/dc0/c30. New34dd00 builds per-model tracks from a count atresource+8 and44-byte records, allocates90-byte native track states and native geometry/material buffers;34e260 releases those owned buffers;385ca0 tail-dispatches34e370 and385d68 tail-dispatches34f600 into actual model draw queues. These are observed live manager integration sites, not just an eff_track.c label. The AFP64/65/RenderWare/global-task representation is replaced by per-model native track ownership, so this old field has no counterpart.",
+      "required_seams": [
+        "after-track:exact-startup-Z0-source-loader-and-texture-lifetime",
+        "after-track:Golden-model-resource-track-parser-44-to90-layout-and-geometry",
+        "after-track:active-manager-attach-detach-frame-step-and-draw-queue-contract",
+        "after-track:no-AFP64-65-stream-or-global-effect_after-task-or-init-log"
+      ],
+      "resource_route_contract": "docs/golden_mode/specs/re/l1-c6c-native-render-routes.md",
+      "absence_scope": "old AfPackInit file/line printf format and its106zero-alignment bytes",
+      "source_dispatch_observations": [
+        {
+          "pc": "0x27130c",
+          "target": "0x385bd0",
+          "branch": "BL"
+        },
+        {
+          "pc": "0x271374",
+          "target": "0x385bd0",
+          "branch": "BL"
+        },
+        {
+          "pc": "0x385ca0",
+          "target": "0x34e370",
+          "branch": "B"
+        },
+        {
+          "pc": "0x385d68",
+          "target": "0x34f600",
+          "branch": "B"
+        },
+        {
+          "pc": "0x388010",
+          "target": "0x385b70",
+          "branch": "BL"
+        },
+        {
+          "pc": "0x3880f8",
+          "target": "0x385b70",
+          "branch": "BL"
+        },
+        {
+          "pc": "0x388770",
+          "target": "0x385bd0",
+          "branch": "BL"
+        },
+        {
+          "pc": "0x3887e8",
+          "target": "0x385bd0",
+          "branch": "BL"
+        },
+        {
+          "pc": "0x3890a8",
+          "target": "0x385dc0",
+          "branch": "BL"
+        },
+        {
+          "pc": "0x3890b8",
+          "target": "0x385d90",
+          "branch": "BL"
+        },
+        {
+          "pc": "0x38911c",
+          "target": "0x385dc0",
+          "branch": "BL"
+        },
+        {
+          "pc": "0x38912c",
+          "target": "0x385d90",
+          "branch": "BL"
+        },
+        {
+          "pc": "0x3891a8",
+          "target": "0x385c30",
+          "branch": "BL"
+        },
+        {
+          "pc": "0x389224",
+          "target": "0x385c30",
+          "branch": "BL"
+        },
+        {
+          "pc": "0x38ee34",
+          "target": "0x385b70",
+          "branch": "BL"
+        }
+      ],
+      "runtime_contract": "Implement Golden per-model track ownership and actual geometry/material/animation rules; retain no PS2 AFP parser, RW pointer image, global linked list or cosmetic task/log value. Qualify M10 runtime seams before L1 closure."
+    },
+    {
+      "address": "0x00761398",
+      "size": 4,
+      "decision": "PROVEN-code",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "8af68b77b2c6114a49f61b783f6796ba0e501d6faa238487b06f8f3d1bf7f444",
+        "readers": [
+          {
+            "function": "0x250ad0",
+            "name": "cmmRankUpStepSparkle",
+            "file": "src/comuTimerSequence_inferred_00250ad0.c"
+          }
+        ]
+      },
+      "source": {
+        "kind": "authored-Golden-code-f32",
+        "switch_reader": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x7100126820",
+          "size": 1808,
+          "sha256": "806592aaa8f873126ecc7dbd176a1dba5974dd4919b30f8f235965e922980eb4",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+        },
+        "native_addend_u32": "0xc199999a",
+        "semantic_subtracted_radius_u32": "0x4199999a"
+      },
+      "structural_correspondence": "PS2250ad0 flags6 branch draws rotating small glows with size42*.6=25.2, subtracting this selected scalar from both sparkle coordinates. Golden126820 is the corresponding full sparkle step: same flags6/4/8, four large/small glow passes, sin/RNG fade, period120, fade30 and random60..100 timer. Its base radius is32 rather than42; both rotating small-glow coordinate pairs explicitly add float -19.2 twice, then apply native pack offsets and issue sprite draw2e71b0 with scale.6, angle360*timer/120 and dimensions38/38. Exact embedded negative operand is c199999a, so native semantic radius is19.200000762939453, NOT25.2 or automatically doubled50.4.",
+      "required_seams": [
+        "rankup-small-glow:author-exact19.2-f32-radius",
+        "rankup-small-glow:both-rotating-passes-and-native-double-coordinate-pack-offsets",
+        "rankup-small-glow:full-flags-RNG-fade-timers-SPR-entry-and-draw-ABI"
+      ],
+      "golden_values": {
+        "radius": 19.200000762939453,
+        "addend": -19.200000762939453,
+        "scale_u32": "0x3f19999a",
+        "draw_dimensions": [
+          38,
+          38
+        ],
+        "coordinate_expression": "(record.xy + f32(-19.2)) + (record.xy + f32(-19.2)), then actual native SPR offsets"
+      },
+      "steam_corroboration": "No Steam scalar span is asserted; value is proven from the corresponding full NSO code as authorized PROVEN-code."
+    },
+    {
+      "address": "0x00763824",
+      "size": 4,
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "ee50c235af5866f1c9006029ad5406ab89842bf85d9ff778a70c3f9da747d15e",
+        "readers": [
+          {
+            "function": "0x26fba0",
+            "name": "frFontAppendFirstPersonaNamePart",
+            "file": "src/frFont_inferred_0026fba0.c"
+          },
+          {
+            "function": "0x26fc20",
+            "name": "frFontAppendSecondPersonaNamePart",
+            "file": "src/frFont_inferred_0026fba0.c"
+          },
+          {
+            "function": "0x26fca0",
+            "name": "frFontAppendJoinedPersonaNameParts",
+            "file": "src/frFont_inferred_0026fba0.c"
+          }
+        ]
+      },
+      "source": {
+        "kind": "Golden-direct-name-component-copy",
+        "switch_functions": [
+          "0x2ca830",
+          "0x2ca9c0",
+          "0x2cab50"
+        ],
+        "part_getters": [
+          "0x111990",
+          "0x1119d0"
+        ],
+        "hero_component_buffers": [
+          "0x9b8a38",
+          "0x9b8a4a"
+        ]
+      },
+      "structural_correspondence": "PS226fba0/26fc20/26fca0 call datPersonaNamePart0/1(1), sprintf with this %s literal, then font update/layout; joined form emits two parts and encodedspace. Actual native getters111990/1119d0 return distinct hero18-byte components at9b8a38/9b8a4a, otherwise locale-indexed name tables. Corresponding2ca830/2ca9c0 use getter(1), strlen530a30 and memcpy530a40(length+1) into36-byte local, then2cc270/2cc3a0.2cab50 does both copies with actual locale-dependent order, emits the current-language separator from native table, and preserves final-glyph classification. These complete typed commands contain no printf-format operand: the old %s formatting representation is positively lowered to direct copying. Names/encoding/layout are not removed.",
+      "required_seams": [
+        "font-hero-name:both-actual-components-and-locale-source-getters",
+        "font-hero-name:exact-strlen-plus1-copy-and-locale-order-separator",
+        "font-hero-name:native-font-update-layout-classifier-no-printf-format"
+      ],
+      "resource_route_contract": "docs/golden_mode/specs/re/l1-c6c-native-render-routes.md",
+      "absence_scope": "Only the redundant string printf-format object; the actual localized hero-name component display remains required."
+    }
+  ]
+}

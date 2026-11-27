@@ -621,6 +621,20 @@ all game code with `-mfpmath=sse -msse2 -ffp-contract=off`, so single-precision 
 
 - **Do not hand-truncate.** A plain `a * b` truncates already (the old per-function emulations of RtQuatRotate's half angle and the ACS fader dB multiply
   and divide are gone). The VU0 helpers (`include/p4pc/vu0.h`) compute in double and narrow, which truncates the exact result once.
+- **The VU0 helpers run packed (`P4PC_VU0_SIMD`).** The lane-by-lane helpers of `vu0.h` stay the definition (the scalar bodies, the `P4PC_VU0_SIMD=0` path and the
+  test oracle), but every call goes to a packed single-precision version in `src/vu0.c` (`p4_vu0_mul_s`, `_add_s`, `_sub_s`, `_madd_s`, `_msub_s`, `_mulq_s`,
+  `_move_s`, `_opmula_s`, `_opmsub_s`, `_itof_s`, `_ftoi_s`; the macros at the end of the arithmetic section of the header rename the calls, so the rewriter's
+  per-unit census is unchanged, and `src/vu0.c` undoes them for its own scalar fallbacks). In the EE mode the packed operation is the same arithmetic: a float
+  product is exact in a double, so narrowing truncates it once, as a packed multiply under round toward zero does; `(double)a + (double)b` truncated to double and
+  then to float is the float sum truncated once (truncating to a finer grid and then to a coarser one is one truncation, and an overflow truncates to FLT_MAX in
+  both); `madd`/`msub` truncate the product first and then the sum, as two packed operations (never fused: the file is compiled with contraction off); DAZ and
+  FTZ read a denormal operand as a signed zero and flush a tiny result to one, as `p4_vu0_in` does. The fix-up is integer compares on the four lanes' bits (NaN to
+  +0, +-Inf to +-FLT_MAX, a nonzero denormal to +0, +-0 kept) and the destination mask is a bit blend, so unselected lanes keep every bit. One source (GCC/Clang
+  vector extensions) is SSE2 and NEON. `vu0_helpers` compares each of the 11 operations with the scalar helper on 400,000 random and edge cases (all masks,
+  broadcasts, destinations including vf0 and ACC, aliased operands), bit for bit over the whole register file, on the x64 and the Android arm64 builds. The
+  switch is read in `p4pc_kernel_pre_init`; the packed path also requires the calling thread to be in the EE mode, so `P4PC_EE_ROUNDING=near` keeps the scalar
+  helpers. (An unoptimised build's scalar fix-up compares a denormal word under DAZ, finds it equal to zero and keeps it, where the optimised one, which the game
+  runs, makes it +0; the packed fix-up is the optimised behaviour, and only `p4_vu0_move` of a denormal word can show the difference.)
 - **Add and subtract are not truncated exact sums.** The EE adder aligns the smaller operand by truncation with one guard bit and truncates the result
   (`p4pc_ee_add_bits`, `include/p4pc/eefloat.h`): `func_003dc490` (RtQuatConvertFromMatrix, x-dominant branch) matches 12 of 12 golden calls, against 3 of
   12 with a truncated exact sum and 10 of 12 with round-to-nearest. **Division and square root are nearest** (`func_003d6d50`: 12 of 12 with a nearest
@@ -632,6 +646,19 @@ all game code with `-mfpmath=sse -msse2 -ffp-contract=off`, so single-precision 
   add" per function and `tools/ee_float_sites.py` compares it with the retail div.s/sqrt.s counts (on the build tree of this commit 92 of the 106 mirror
   functions with a rewritten div/sqrt match the retail counts; the others are overrides written differently from the retail code, or sqrt.s that objdump
   prints as a coprocessor instruction).
+- **Add and subtract through the host adder (`P4PC_EE_ADD_HW`).** `p4pc_ee_add`/`p4pc_ee_sub` (the calls the launcher puts in place of every float `fadd`/`fsub`) do
+  not run the integer guard-bit adder when the game thread is in the EE mode: they use `p4pc_ee_add_hw_bits` (`include/p4pc/eefloat.h`). Round toward zero with
+  flush-to-zero and denormals-are-zero makes the host adder the EE's for every operand pair but one kind. The host truncates the exact sum; the EE adder truncates
+  it after dropping the smaller operand's bits below one guard bit under the larger one's last place. For the same sign the dropped bits lie below the
+  truncation point of the result, so nothing differs; for opposite signs it matters when the exponents differ by two or more. So the operands are ordered by
+  magnitude, the smaller one's low `d - 1` mantissa bits (`d` the exponent difference; all of them, keeping the sign, from `d - 1 >= 24`) are cleared, and the
+  hardware adds: the cleared operand is representable and the exact sum fits in 26 bits, so the hardware truncation is the EE's. Zero, denormal operands (zero
+  under DAZ), overflow (round toward zero gives +-FLT_MAX), a tiny result (flushed to a signed zero, the larger operand's sign) and the +0 of an exact
+  cancellation come out of the hardware as the EE defines them. An exponent-255 operand is the one case left: the sum is Inf or NaN, so an exponent-255 result
+  takes `p4pc_ee_add_bits`, which reads such operands as +-FLT_MAX. `p4pc_ee_add_bits` stays the reference and the model of the oracles (`tools/mipsdiff/r5900.c`);
+  `tests/ee_float_test.c` compares the two on 290 million results (every exponent pair with 11 mantissa patterns and all four sign combinations, six kinds of random
+  operands, near-cancelling pairs). The hardware path needs the mode: `p4pc_kernel_pre_init` enables it only for a thread that is in it (`P4PC_EE_ROUNDING=near`,
+  or `P4PC_EE_ADD_HW=0`, keeps the integer adder); `P4PC_EE_ADD_HW=check` runs both on every call and traps on the first difference, with the integer result returned.
 - **mul.s truncates and madd.s/msub.s are not fused.** The truncation comes from MXCSR. Fusing `c + a * b` into one truncation (the exact product, as the
   EE's accumulator suggests) was measured and loses golden exactness (six functions lose 35 cases, one gains 1; `func_00415bc0` 9/12 -> 0/12), so a
   plain C multiply and add, each step through the machinery above, is right. The VU0 helpers (`include/p4pc/vu0.h`) keep the truncated exact sum: the
@@ -710,6 +737,8 @@ all game code with `-mfpmath=sse -msse2 -ffp-contract=off`, so single-precision 
 - **Hand-written natives go through the launcher too.** `p4portee` (CMake) holds the port natives that translate retail float code (CRI aixp/acs/glue, rw_skin_callees,
   rw_rtanim, rw_rtanim_record, rw_normalize2/3, ee_libm): same options as `p4port` plus the `tools/ee_float_cc.py` launcher. `ee_float.c` itself stays in `p4port`
   (a rewritten helper would call itself) and so do the host seams.
+  The launcher drops the input language option before its LLVM IR backend pass;
+  the backend explicitly selects `-x ir`, including when the input was preprocessed C.
 - **Mesa llvmpipe runs in the EE mode on purpose.** Its worker threads inherit MXCSR; with them (and the draw calls) in nearest the scene gates' MAD against
   the retail captures rises (title 1.14 -> 1.20, field 1.78 -> 2.00, near-fog and sky-black-tint worse), because the GS truncates colours and
   coordinates where llvmpipe rounds. A real GPU driver is unaffected (no MXCSR dependence in the rasteriser).

@@ -1,0 +1,2030 @@
+{
+  "proof_id": "L1-C5-camera-state-labels-20261113",
+  "class": "PROVEN",
+  "runtime_status": "pending-seam",
+  "scope": "Five selected camera descriptor name fields only; no cross-cohort row changes and no whole callback-code equivalence claim.",
+  "sources": {
+    "steam_build": 10836033,
+    "steam_image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+    "steam_code_policy": "Only ordinary .shared instructions decoded; no .arch decoding or game execution.",
+    "nso": "Switch1.2 static mapped main.nso"
+  },
+  "ps2_descriptor_bank": {
+    "base": "0x005f74c0",
+    "records": 51,
+    "stride": 20,
+    "size": 1020,
+    "alignment_tail": 4,
+    "fields": {
+      "init_pointer": 0,
+      "update_pointer": 4,
+      "forceReset_s32": 8,
+      "updateRange_s32": 12,
+      "name_pointer": 16
+    },
+    "sha256": "3dc3185b65f26e3243f6822f13ccd39c595ef5f519557bf4a2380762718d34f0",
+    "reader": "btlCameraSetState001bc660, source Battle/btlCamera.c:262-311, fallback entry=(u16)state*20 after btlEncounterGetRecord; actual forceReset/updateRange and init callback reads"
+  },
+  "golden_descriptor_bank": {
+    "steam_rva": "0xafa280",
+    "nso_offset": "0x70a8f0",
+    "records": 55,
+    "stride": 32,
+    "size": 1760,
+    "fields": {
+      "init_pointer": 0,
+      "update_pointer": 8,
+      "forceReset_s32": 16,
+      "updateRange_s32": 20,
+      "name_pointer": 24
+    },
+    "boundary": "NSO70afd0 is the independently qualified next full768*52 camera preset bank, not another descriptor. Steam55 complete records match NSO ordered names, flag pairs and callback nullness; raw function addresses are platform-specific.",
+    "steam_raw_sha256": "07f63cd7919050f966ffa67569bf61816c5295df0707ac75b44a7e1a8b49d0c8",
+    "nso_raw_sha256": "164220c614e0f4ef95baaedcdb0b57ef7e4872634245132e6e12fc792c1bad6c"
+  },
+  "typed_records": [
+    {
+      "id": 0,
+      "nso_record": "0x70a8f0",
+      "nso_values": [
+        "0x0",
+        "0x0",
+        "0x0",
+        "0x0",
+        "0x0"
+      ],
+      "steam_record": "0xafa280",
+      "steam_values": [
+        "0x0",
+        "0x0",
+        "0x0",
+        "0x0",
+        "0x0"
+      ],
+      "name": "",
+      "ps2_values": [
+        "0x0",
+        "0x0",
+        "0x0",
+        "0x0",
+        "0x0"
+      ],
+      "ps2_name": "",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 1,
+      "nso_record": "0x70a910",
+      "nso_values": [
+        "0x0",
+        "0x0",
+        "0x1",
+        "0x0",
+        "0x5e6377"
+      ],
+      "steam_record": "0xafa2a0",
+      "steam_values": [
+        "0x0",
+        "0x0",
+        "0x1",
+        "0x0",
+        "0x917bc4"
+      ],
+      "name": "NOP",
+      "ps2_values": [
+        "0x0",
+        "0x0",
+        "0x1",
+        "0x0",
+        "0x7632ec"
+      ],
+      "ps2_name": "NOP",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 2,
+      "nso_record": "0x70a930",
+      "nso_values": [
+        "0x41c40",
+        "0x0",
+        "0x1",
+        "0x0",
+        "0x5ee572"
+      ],
+      "steam_record": "0xafa2c0",
+      "steam_values": [
+        "0x8fc00",
+        "0x0",
+        "0x1",
+        "0x0",
+        "0x917bc8"
+      ],
+      "name": "ENCOUNT",
+      "ps2_values": [
+        "0x1ccdb0",
+        "0x0",
+        "0x1",
+        "0x0",
+        "0x7632f0"
+      ],
+      "ps2_name": "ENCOUNT",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 3,
+      "nso_record": "0x70a950",
+      "nso_values": [
+        "0x42d40",
+        "0x0",
+        "0x1",
+        "0x1",
+        "0x5d2d5c"
+      ],
+      "steam_record": "0xafa2e0",
+      "steam_values": [
+        "0x91470",
+        "0x0",
+        "0x1",
+        "0x1",
+        "0x90a7d0"
+      ],
+      "name": "ANALYZE",
+      "ps2_values": [
+        "0x1ce420",
+        "0x0",
+        "0x1",
+        "0x1",
+        "0x7632f8"
+      ],
+      "ps2_name": "ANALYZE",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 4,
+      "nso_record": "0x70a970",
+      "nso_values": [
+        "0x42d50",
+        "0x42d60",
+        "0x1",
+        "0x1",
+        "0x5e3781"
+      ],
+      "steam_record": "0xafa300",
+      "steam_values": [
+        "0x91480",
+        "0x914b0",
+        "0x1",
+        "0x1",
+        "0x90a874"
+      ],
+      "name": "ASSIST",
+      "ps2_values": [
+        "0x1ce430",
+        "0x1ce470",
+        "0x1",
+        "0x1",
+        "0x763300"
+      ],
+      "ps2_name": "ASSIST",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 5,
+      "nso_record": "0x70a990",
+      "nso_values": [
+        "0x429c0",
+        "0x42cd0",
+        "0x1",
+        "0x1",
+        "0x6271dc"
+      ],
+      "steam_record": "0xafa320",
+      "steam_values": [
+        "0x90f90",
+        "0x913f0",
+        "0x1",
+        "0x1",
+        "0x917bd0"
+      ],
+      "name": "REINFORCE",
+      "ps2_values": [
+        "0x1cde50",
+        "0x1ce390",
+        "0x1",
+        "0x1",
+        "0x5f72c0"
+      ],
+      "ps2_name": "REINFORCE",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 6,
+      "nso_record": "0x70a9b0",
+      "nso_values": [
+        "0x42f50",
+        "0x42fa0",
+        "0x1",
+        "0x1",
+        "0x5d89b6"
+      ],
+      "steam_record": "0xafa340",
+      "steam_values": [
+        "0x917a0",
+        "0x91820",
+        "0x1",
+        "0x1",
+        "0x90a8f8"
+      ],
+      "name": "ROUNDUP",
+      "ps2_values": [
+        "0x1ce7f0",
+        "0x1ce880",
+        "0x1",
+        "0x1",
+        "0x763308"
+      ],
+      "ps2_name": "ROUNDUP",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 7,
+      "nso_record": "0x70a9d0",
+      "nso_values": [
+        "0x42fc0",
+        "0x430b0",
+        "0x1",
+        "0x1",
+        "0x5f92af"
+      ],
+      "steam_record": "0xafa360",
+      "steam_values": [
+        "0x91c80",
+        "0x91d70",
+        "0x1",
+        "0x1",
+        "0x90a8e8"
+      ],
+      "name": "ROUNDUP_MES",
+      "ps2_values": [
+        "0x1ceba0",
+        "0x1cecb0",
+        "0x1",
+        "0x1",
+        "0x5f72d0"
+      ],
+      "ps2_name": "ROUNDUP_MES",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 8,
+      "nso_record": "0x70a9f0",
+      "nso_values": [
+        "0x43320",
+        "0x0",
+        "0x1",
+        "0x1",
+        "0x621ee1"
+      ],
+      "steam_record": "0xafa380",
+      "steam_values": [
+        "0x91db0",
+        "0x0",
+        "0x1",
+        "0x1",
+        "0x90a8dc"
+      ],
+      "name": "ESCAPE",
+      "ps2_values": [
+        "0x1cece0",
+        "0x0",
+        "0x1",
+        "0x1",
+        "0x763310"
+      ],
+      "ps2_name": "ESCAPE",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 9,
+      "nso_record": "0x70aa10",
+      "nso_values": [
+        "0x434f0",
+        "0x43540",
+        "0x1",
+        "0x1",
+        "0x5fed53"
+      ],
+      "steam_record": "0xafa3a0",
+      "steam_values": [
+        "0x92050",
+        "0x920d0",
+        "0x1",
+        "0x1",
+        "0x90a8d0"
+      ],
+      "name": "ESCAPE_MES",
+      "ps2_values": [
+        "0x1cef20",
+        "0x1cefb0",
+        "0x1",
+        "0x1",
+        "0x5f72e0"
+      ],
+      "ps2_name": "ESCAPE_MES",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 10,
+      "nso_record": "0x70aa30",
+      "nso_values": [
+        "0x37880",
+        "0x378a0",
+        "0x1",
+        "0x1",
+        "0x610e58"
+      ],
+      "steam_record": "0xafa3c0",
+      "steam_values": [
+        "0x80ba0",
+        "0x80be0",
+        "0x1",
+        "0x1",
+        "0x917bdc"
+      ],
+      "name": "OWN",
+      "ps2_values": [
+        "0x1be8d0",
+        "0x1be900",
+        "0x1",
+        "0x1",
+        "0x763318"
+      ],
+      "ps2_name": "OWN",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 11,
+      "nso_record": "0x70aa50",
+      "nso_values": [
+        "0x3f4a0",
+        "0x3f500",
+        "0x1",
+        "0x1",
+        "0x5d5a98"
+      ],
+      "steam_record": "0xafa3e0",
+      "steam_values": [
+        "0x8c3e0",
+        "0x8c460",
+        "0x1",
+        "0x1",
+        "0x917be0"
+      ],
+      "name": "ATTACK_SHORT",
+      "ps2_values": [
+        "0x1c9750",
+        "0x1c97b0",
+        "0x1",
+        "0x1",
+        "0x5f72f0"
+      ],
+      "ps2_name": "ATTACK_SHORT",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 12,
+      "nso_record": "0x70aa70",
+      "nso_values": [
+        "0x3fec0",
+        "0x3fee0",
+        "0x1",
+        "0x1",
+        "0x60e54e"
+      ],
+      "steam_record": "0xafa400",
+      "steam_values": [
+        "0x8d080",
+        "0x8d0b0",
+        "0x1",
+        "0x1",
+        "0x917bf0"
+      ],
+      "name": "ATTACK_LONG",
+      "ps2_values": [
+        "0x1ca550",
+        "0x1ca580",
+        "0x1",
+        "0x1",
+        "0x5f7300"
+      ],
+      "ps2_name": "ATTACK_LONG",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 13,
+      "nso_record": "0x70aa90",
+      "nso_values": [
+        "0x40e30",
+        "0x40e80",
+        "0x1",
+        "0x1",
+        "0x5dae4a"
+      ],
+      "steam_record": "0xafa420",
+      "steam_values": [
+        "0x8ee40",
+        "0x8eea0",
+        "0x1",
+        "0x1",
+        "0x917c00"
+      ],
+      "name": "ATTACK_DOWN_E",
+      "ps2_values": [
+        "0x1cbf80",
+        "0x1cbfe0",
+        "0x1",
+        "0x1",
+        "0x5f7310"
+      ],
+      "ps2_name": "ATTACK_DOWN_E",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 14,
+      "nso_record": "0x70aab0",
+      "nso_values": [
+        "0x41360",
+        "0x41710",
+        "0x1",
+        "0x1",
+        "0x606c39"
+      ],
+      "steam_record": "0xafa440",
+      "steam_values": [
+        "0x8ef70",
+        "0x8f470",
+        "0x1",
+        "0x1",
+        "0x917c10"
+      ],
+      "name": "ATTACK_SLIP",
+      "ps2_values": [
+        "0x1cc0a0",
+        "0x1cc5c0",
+        "0x1",
+        "0x1",
+        "0x5f7320"
+      ],
+      "ps2_name": "ATTACK_SLIP",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 15,
+      "nso_record": "0x70aad0",
+      "nso_values": [
+        "0x3fef0",
+        "0x40900",
+        "0x1",
+        "0x1",
+        "0x5e9332"
+      ],
+      "steam_record": "0xafa460",
+      "steam_values": [
+        "0x8df00",
+        "0x8dfd0",
+        "0x1",
+        "0x1",
+        "0x917c20"
+      ],
+      "name": "ATTACK_COMB",
+      "ps2_values": [
+        "0x1cb0f0",
+        "0x1cb200",
+        "0x1",
+        "0x1",
+        "0x5f7330"
+      ],
+      "ps2_name": "ATTACK_COMB",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 16,
+      "nso_record": "0x70aaf0",
+      "nso_values": [
+        "0x40960",
+        "0x409c0",
+        "0x1",
+        "0x1",
+        "0x5ebb2c"
+      ],
+      "steam_record": "0xafa480",
+      "steam_values": [
+        "0x8e050",
+        "0x8e0b0",
+        "0x1",
+        "0x1",
+        "0x917c30"
+      ],
+      "name": "ATTACK_CRI",
+      "ps2_values": [
+        "0x1cb2e0",
+        "0x1cb380",
+        "0x1",
+        "0x1",
+        "0x5f7340"
+      ],
+      "ps2_name": "ATTACK_CRI",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 17,
+      "nso_record": "0x70ab10",
+      "nso_values": [
+        "0x40b90",
+        "0x40e20",
+        "0x1",
+        "0x0",
+        "0x610e5c"
+      ],
+      "steam_record": "0xafa4a0",
+      "steam_values": [
+        "0x8e2f0",
+        "0x8e760",
+        "0x1",
+        "0x0",
+        "0x917c40"
+      ],
+      "name": "ATTACK_SCF",
+      "ps2_values": [
+        "0x1cb610",
+        "0x1cb960",
+        "0x1",
+        "0x0",
+        "0x5f7350"
+      ],
+      "ps2_name": "ATTACK_SCF",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 18,
+      "nso_record": "0x70ab30",
+      "nso_values": [
+        "0x409d0",
+        "0x40a40",
+        "0x1",
+        "0x0",
+        "0x5e0c24"
+      ],
+      "steam_record": "0xafa4c0",
+      "steam_values": [
+        "0x8e0e0",
+        "0x8e150",
+        "0x1",
+        "0x0",
+        "0x917c50"
+      ],
+      "name": "ATTACK_SP_REC",
+      "ps2_values": [
+        "0x1cb3a0",
+        "0x1cb440",
+        "0x1",
+        "0x0",
+        "0x5f7360"
+      ],
+      "ps2_name": "ATTACK_SP_REC",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 19,
+      "nso_record": "0x70ab50",
+      "nso_values": [
+        "0x40a50",
+        "0x40af0",
+        "0x1",
+        "0x0",
+        "0x5d2d89"
+      ],
+      "steam_record": "0xafa4e0",
+      "steam_values": [
+        "0x8e180",
+        "0x8e240",
+        "0x1",
+        "0x0",
+        "0x917c60"
+      ],
+      "name": "ATTACK_SP_EXEC",
+      "ps2_values": [
+        "0x1cb460",
+        "0x1cb540",
+        "0x1",
+        "0x0",
+        "0x5f7370"
+      ],
+      "ps2_name": "ATTACK_SP_EXEC",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 20,
+      "nso_record": "0x70ab70",
+      "nso_values": [
+        "0x37910",
+        "0x38080",
+        "0x1",
+        "0x1",
+        "0x5d89ef"
+      ],
+      "steam_record": "0xafa500",
+      "steam_values": [
+        "0x81530",
+        "0x81660",
+        "0x1",
+        "0x1",
+        "0x917c70"
+      ],
+      "name": "SKILL_RECITE_P",
+      "ps2_values": [
+        "0x1bf3a0",
+        "0x1bf530",
+        "0x1",
+        "0x1",
+        "0x5f7380"
+      ],
+      "ps2_name": "SKILL_RECITE_P",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 21,
+      "nso_record": "0x70ab90",
+      "nso_values": [
+        "0x38110",
+        "0x38460",
+        "0x1",
+        "0x1",
+        "0x60bd9f"
+      ],
+      "steam_record": "0xafa520",
+      "steam_values": [
+        "0x81700",
+        "0x81c00",
+        "0x1",
+        "0x1",
+        "0x917c80"
+      ],
+      "name": "SKILL_RECITE_E",
+      "ps2_values": [
+        "0x1bf5e0",
+        "0x1bfb70",
+        "0x1",
+        "0x1",
+        "0x5f7390"
+      ],
+      "ps2_name": "SKILL_RECITE_E",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 22,
+      "nso_record": "0x70abb0",
+      "nso_values": [
+        "0x384d0",
+        "0x38aa0",
+        "0x1",
+        "0x1",
+        "0x610e67"
+      ],
+      "steam_record": "0xafa540",
+      "steam_values": [
+        "0x81c80",
+        "0x825f0",
+        "0x1",
+        "0x1",
+        "0x917c90"
+      ],
+      "name": "MOVE_TARGET",
+      "ps2_values": [
+        "0x1bfc00",
+        "0x1c04d0",
+        "0x1",
+        "0x1",
+        "0x5f73a0"
+      ],
+      "ps2_name": "MOVE_TARGET",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 23,
+      "nso_record": "0x70abd0",
+      "nso_values": [
+        "0x38ab0",
+        "0x393f0",
+        "0x1",
+        "0x1",
+        "0x5f681f"
+      ],
+      "steam_record": "0xafa560",
+      "steam_values": [
+        "0x82600",
+        "0x82b10",
+        "0x1",
+        "0x1",
+        "0x917ca0"
+      ],
+      "name": "MOVE_TARGET_A",
+      "ps2_values": [
+        "0x1c04e0",
+        "0x1c09a0",
+        "0x1",
+        "0x1",
+        "0x5f73b0"
+      ],
+      "ps2_name": "MOVE_TARGET_A",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 24,
+      "nso_record": "0x70abf0",
+      "nso_values": [
+        "0x39400",
+        "0x396d0",
+        "0x1",
+        "0x1",
+        "0x610e73"
+      ],
+      "steam_record": "0xafa580",
+      "steam_values": [
+        "0x82b20",
+        "0x82fb0",
+        "0x1",
+        "0x1",
+        "0x917cb0"
+      ],
+      "name": "MOVE_HOME",
+      "ps2_values": [
+        "0x1c09b0",
+        "0x1c0e40",
+        "0x1",
+        "0x1",
+        "0x5f73c0"
+      ],
+      "ps2_name": "MOVE_HOME",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 25,
+      "nso_record": "0x70ac10",
+      "nso_values": [
+        "0x39850",
+        "0x3c6c0",
+        "0x1",
+        "0x1",
+        "0x618f02"
+      ],
+      "steam_record": "0xafa5a0",
+      "steam_values": [
+        "0x87780",
+        "0x878a0",
+        "0x1",
+        "0x1",
+        "0x917cc0"
+      ],
+      "name": "SKILL_EXEC_PC",
+      "ps2_values": [
+        "0x1c5110",
+        "0x1c52c0",
+        "0x1",
+        "0x1",
+        "0x5f73d0"
+      ],
+      "ps2_name": "SKILL_EXEC_PC",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 26,
+      "nso_record": "0x70ac30",
+      "nso_values": [
+        "0x3c7f0",
+        "0x3d590",
+        "0x1",
+        "0x1",
+        "0x60e55a"
+      ],
+      "steam_record": "0xafa5c0",
+      "steam_values": [
+        "0x88d30",
+        "0x88de0",
+        "0x1",
+        "0x1",
+        "0x917cd0"
+      ],
+      "name": "SKILL_EXEC_EC",
+      "ps2_values": [
+        "0x1c6560",
+        "0x1c6650",
+        "0x1",
+        "0x1",
+        "0x5f73e0"
+      ],
+      "ps2_name": "SKILL_EXEC_EC",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 27,
+      "nso_record": "0x70ac50",
+      "nso_values": [
+        "0x3d9e0",
+        "0x3da00",
+        "0x1",
+        "0x0",
+        "0x616312"
+      ],
+      "steam_record": "0xafa5e0",
+      "steam_values": [
+        "0x89300",
+        "0x89350",
+        "0x1",
+        "0x0",
+        "0x917ce0"
+      ],
+      "name": "SKILL_EXEC_ONE",
+      "ps2_values": [
+        "0x1c6b10",
+        "0x1c6b50",
+        "0x1",
+        "0x0",
+        "0x5f73f0"
+      ],
+      "ps2_name": "SKILL_EXEC_ONE",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 28,
+      "nso_record": "0x70ac70",
+      "nso_values": [
+        "0x3da10",
+        "0x3da30",
+        "0x1",
+        "0x0",
+        "0x616321"
+      ],
+      "steam_record": "0xafa600",
+      "steam_values": [
+        "0x89360",
+        "0x893b0",
+        "0x1",
+        "0x0",
+        "0x917cf0"
+      ],
+      "name": "SKILL_EXEC_REC",
+      "ps2_values": [
+        "0x1c6b60",
+        "0x1c6ba0",
+        "0x1",
+        "0x0",
+        "0x5f7400"
+      ],
+      "ps2_name": "SKILL_EXEC_REC",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 29,
+      "nso_record": "0x70ac90",
+      "nso_values": [
+        "0x3da40",
+        "0x3dc10",
+        "0x1",
+        "0x1",
+        "0x5d5aa5"
+      ],
+      "steam_record": "0xafa620",
+      "steam_values": [
+        "0x893c0",
+        "0x893f0",
+        "0x1",
+        "0x1",
+        "0x917d00"
+      ],
+      "name": "SKILL_EXEC_PS",
+      "ps2_values": [
+        "0x1c6bb0",
+        "0x1c6be0",
+        "0x1",
+        "0x1",
+        "0x5f7410"
+      ],
+      "ps2_name": "SKILL_EXEC_PS",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 30,
+      "nso_record": "0x70acb0",
+      "nso_values": [
+        "0x3dc20",
+        "0x3deb0",
+        "0x1",
+        "0x0",
+        "0x609751"
+      ],
+      "steam_record": "0xafa640",
+      "steam_values": [
+        "0x89400",
+        "0x89860",
+        "0x1",
+        "0x0",
+        "0x917d10"
+      ],
+      "name": "SKILL_SCF",
+      "ps2_values": [
+        "0x1c6bf0",
+        "0x1c6f30",
+        "0x1",
+        "0x0",
+        "0x5f7420"
+      ],
+      "ps2_name": "SKILL_SCF",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 31,
+      "nso_record": "0x70acd0",
+      "nso_values": [
+        "0x3e350",
+        "0x3e500",
+        "0x1",
+        "0x1",
+        "0x5dae2d"
+      ],
+      "steam_record": "0xafa660",
+      "steam_values": [
+        "0x89eb0",
+        "0x8a120",
+        "0x1",
+        "0x1",
+        "0x90a8b8"
+      ],
+      "name": "PERSONA",
+      "ps2_values": [
+        "0x1c7510",
+        "0x1c7770",
+        "0x1",
+        "0x1",
+        "0x763320"
+      ],
+      "ps2_name": "PERSONA",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 32,
+      "nso_record": "0x70acf0",
+      "nso_values": [
+        "0x3e510",
+        "0x3e6c0",
+        "0x1",
+        "0x1",
+        "0x5e637b"
+      ],
+      "steam_record": "0xafa680",
+      "steam_values": [
+        "0x8a130",
+        "0x8a3a0",
+        "0x1",
+        "0x1",
+        "0x917d20"
+      ],
+      "name": "OVERLIMIT",
+      "ps2_values": [
+        "0x1c7780",
+        "0x1c79e0",
+        "0x1",
+        "0x1",
+        "0x5f7430"
+      ],
+      "ps2_name": "OVERLIMIT",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 33,
+      "nso_record": "0x70ad10",
+      "nso_values": [
+        "0x3dec0",
+        "0x3e340",
+        "0x0",
+        "0x1",
+        "0x61ed37"
+      ],
+      "steam_record": "0xafa6a0",
+      "steam_values": [
+        "0x89d90",
+        "0x89ea0",
+        "0x0",
+        "0x1",
+        "0x90a7c0"
+      ],
+      "name": "COMMAND",
+      "ps2_values": [
+        "0x1c73e0",
+        "0x1c7500",
+        "0x0",
+        "0x1",
+        "0x763328"
+      ],
+      "ps2_name": "COMMAND",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 34,
+      "nso_record": "0x70ad30",
+      "nso_values": [
+        "0x3ec30",
+        "0x3ec80",
+        "0x0",
+        "0x1",
+        "0x5fed4c"
+      ],
+      "steam_record": "0xafa6c0",
+      "steam_values": [
+        "0x8b7b0",
+        "0x8b810",
+        "0x0",
+        "0x1",
+        "0x90a7c8"
+      ],
+      "name": "TARGET",
+      "ps2_values": [
+        "0x1c8cf0",
+        "0x1c8d50",
+        "0x0",
+        "0x1",
+        "0x763330"
+      ],
+      "ps2_name": "TARGET",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 35,
+      "nso_record": "0x70ad50",
+      "nso_values": [
+        "0x41720",
+        "0x41980",
+        "0x0",
+        "0x1",
+        "0x60e568"
+      ],
+      "steam_record": "0xafa6e0",
+      "steam_values": [
+        "0x8f7a0",
+        "0x8f840",
+        "0x0",
+        "0x1",
+        "0x917d2c"
+      ],
+      "name": "FREE",
+      "ps2_values": [
+        "0x1cc9e0",
+        "0x1cca50",
+        "0x0",
+        "0x1",
+        "0x763338"
+      ],
+      "ps2_name": "FREE",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 36,
+      "nso_record": "0x70ad70",
+      "nso_values": [
+        "0x41990",
+        "0x41c30",
+        "0x0",
+        "0x1",
+        "0x613937"
+      ],
+      "steam_record": "0xafa700",
+      "steam_values": [
+        "0x8f850",
+        "0x8fbf0",
+        "0x0",
+        "0x1",
+        "0x917d34"
+      ],
+      "name": "RESET",
+      "ps2_values": [
+        "0x1cca60",
+        "0x1ccda0",
+        "0x0",
+        "0x1",
+        "0x763340"
+      ],
+      "ps2_name": "RESET",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 37,
+      "nso_record": "0x70ad90",
+      "nso_values": [
+        "0x42310",
+        "0x42370",
+        "0x1",
+        "0x0",
+        "0x618f10"
+      ],
+      "steam_record": "0xafa720",
+      "steam_values": [
+        "0x907c0",
+        "0x90820",
+        "0x1",
+        "0x0",
+        "0x917d3c"
+      ],
+      "name": "WIN_S",
+      "ps2_values": [
+        "0x1cd600",
+        "0x1cd6a0",
+        "0x1",
+        "0x0",
+        "0x763348"
+      ],
+      "ps2_name": "WIN_S",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 38,
+      "nso_record": "0x70adb0",
+      "nso_values": [
+        "0x42380",
+        "0x42430",
+        "0x1",
+        "0x0",
+        "0x5f3fc5"
+      ],
+      "steam_record": "0xafa740",
+      "steam_values": [
+        "0x90850",
+        "0x90950",
+        "0x1",
+        "0x0",
+        "0x917d44"
+      ],
+      "name": "WIN_P",
+      "ps2_values": [
+        "0x1cd6c0",
+        "0x1cd7b0",
+        "0x1",
+        "0x0",
+        "0x763350"
+      ],
+      "ps2_name": "WIN_P",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 39,
+      "nso_record": "0x70add0",
+      "nso_values": [
+        "0x42440",
+        "0x0",
+        "0x1",
+        "0x0",
+        "0x616330"
+      ],
+      "steam_record": "0xafa760",
+      "steam_values": [
+        "0x90980",
+        "0x0",
+        "0x1",
+        "0x0",
+        "0x917d50"
+      ],
+      "name": "CONDITION",
+      "ps2_values": [
+        "0x1cd7d0",
+        "0x0",
+        "0x1",
+        "0x0",
+        "0x5f7440"
+      ],
+      "ps2_name": "CONDITION",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 40,
+      "nso_record": "0x70adf0",
+      "nso_values": [
+        "0x42810",
+        "0x0",
+        "0x1",
+        "0x1",
+        "0x60e56d"
+      ],
+      "steam_record": "0xafa780",
+      "steam_values": [
+        "0x90d80",
+        "0x0",
+        "0x1",
+        "0x1",
+        "0x917d5c"
+      ],
+      "name": "ORDER",
+      "ps2_values": [
+        "0x1cdaf0",
+        "0x0",
+        "0x1",
+        "0x1",
+        "0x763358"
+      ],
+      "ps2_name": "ORDER",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 41,
+      "nso_record": "0x70ae10",
+      "nso_values": [
+        "0x43560",
+        "0x43580",
+        "0x0",
+        "0x1",
+        "0x624759"
+      ],
+      "steam_record": "0xafa7a0",
+      "steam_values": [
+        "0x92110",
+        "0x92160",
+        "0x0",
+        "0x1",
+        "0x917d68"
+      ],
+      "name": "CHANGE FORM",
+      "ps2_values": [
+        "0x1ceff0",
+        "0x1cf020",
+        "0x0",
+        "0x1",
+        "0x5f7450"
+      ],
+      "ps2_name": "CHANGE FORM",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 42,
+      "nso_record": "0x70ae30",
+      "nso_values": [
+        "0x435d0",
+        "0x43640",
+        "0x1",
+        "0x0",
+        "0x5ee534"
+      ],
+      "steam_record": "0xafa7c0",
+      "steam_values": [
+        "0x921c0",
+        "0x92260",
+        "0x1",
+        "0x0",
+        "0x90a7f8"
+      ],
+      "name": "COOPERATE",
+      "ps2_values": [
+        "0x1cf070",
+        "0x1cf140",
+        "0x1",
+        "0x0",
+        "0x5f7460"
+      ],
+      "ps2_name": "COOPERATE",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 43,
+      "nso_record": "0x70ae50",
+      "nso_values": [
+        "0x43650",
+        "0x43690",
+        "0x0",
+        "0x1",
+        "0x60e573"
+      ],
+      "steam_record": "0xafa7e0",
+      "steam_values": [
+        "0x92290",
+        "0x92310",
+        "0x0",
+        "0x1",
+        "0x917d78"
+      ],
+      "name": "NYX FEATHER",
+      "ps2_values": [
+        "0x1cf160",
+        "0x1cf1f0",
+        "0x0",
+        "0x1",
+        "0x5f7470"
+      ],
+      "ps2_name": "NYX FEATHER",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 44,
+      "nso_record": "0x70ae70",
+      "nso_values": [
+        "0x437c0",
+        "0x0",
+        "0x1",
+        "0x0",
+        "0x5e0c05"
+      ],
+      "steam_record": "0xafa800",
+      "steam_values": [
+        "0x92510",
+        "0x0",
+        "0x1",
+        "0x0",
+        "0x917d84"
+      ],
+      "name": "ALL",
+      "ps2_values": [
+        "0x1cf350",
+        "0x0",
+        "0x1",
+        "0x0",
+        "0x763360"
+      ],
+      "ps2_name": "ALL",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 45,
+      "nso_record": "0x70ae90",
+      "nso_values": [
+        "0x43d70",
+        "0x0",
+        "0x1",
+        "0x0",
+        "0x5e0c32"
+      ],
+      "steam_record": "0xafa820",
+      "steam_values": [
+        "0x92e50",
+        "0x0",
+        "0x1",
+        "0x0",
+        "0x917d88"
+      ],
+      "name": "ENEMY_ALL",
+      "ps2_values": [
+        "0x1cf730",
+        "0x0",
+        "0x1",
+        "0x0",
+        "0x5f7480"
+      ],
+      "ps2_name": "ENEMY_ALL",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 46,
+      "nso_record": "0x70aeb0",
+      "nso_values": [
+        "0x37860",
+        "0x0",
+        "0x1",
+        "0x0",
+        "0x5ee57a"
+      ],
+      "steam_record": "0xafa840",
+      "steam_values": [
+        "0x93900",
+        "0x0",
+        "0x1",
+        "0x0",
+        "0x917d98"
+      ],
+      "name": "TARGET_ONLY",
+      "ps2_values": [
+        "0x1cfed0",
+        "0x0",
+        "0x1",
+        "0x0",
+        "0x5f7490"
+      ],
+      "ps2_name": "TARGET_ONLY",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 47,
+      "nso_record": "0x70aed0",
+      "nso_values": [
+        "0x44360",
+        "0x0",
+        "0x1",
+        "0x1",
+        "0x5e3779"
+      ],
+      "steam_record": "0xafa860",
+      "steam_values": [
+        "0x93940",
+        "0x0",
+        "0x1",
+        "0x1",
+        "0x90a818"
+      ],
+      "name": "PURSUIT",
+      "ps2_values": [
+        "0x1cff00",
+        "0x0",
+        "0x1",
+        "0x1",
+        "0x763368"
+      ],
+      "ps2_name": "PURSUIT",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 48,
+      "nso_record": "0x70aef0",
+      "nso_values": [
+        "0x44530",
+        "0x0",
+        "0x1",
+        "0x0",
+        "0x5e92e8"
+      ],
+      "steam_record": "0xafa880",
+      "steam_values": [
+        "0x93c60",
+        "0x0",
+        "0x1",
+        "0x0",
+        "0x90a808"
+      ],
+      "name": "PURSUIT_MES",
+      "ps2_values": [
+        "0x1d01c0",
+        "0x0",
+        "0x1",
+        "0x0",
+        "0x5f74a0"
+      ],
+      "ps2_name": "PURSUIT_MES",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": true
+    },
+    {
+      "id": 49,
+      "nso_record": "0x70af10",
+      "nso_values": [
+        "0x44860",
+        "0x0",
+        "0x1",
+        "0x0",
+        "0x621f1b"
+      ],
+      "steam_record": "0xafa8a0",
+      "steam_values": [
+        "0x94130",
+        "0x0",
+        "0x1",
+        "0x0",
+        "0x917da8"
+      ],
+      "name": "BIKE_PURSUIT_MES",
+      "ps2_values": [
+        "0x1d05b0",
+        "0x1d05e0",
+        "0x1",
+        "0x1",
+        "0x5f74b0"
+      ],
+      "ps2_name": "DOWN_REC",
+      "flags_equal": false,
+      "callback_presence_equal": false,
+      "name_equal": false
+    },
+    {
+      "id": 50,
+      "nso_record": "0x70af30",
+      "nso_values": [
+        "0x44c10",
+        "0x44c30",
+        "0x1",
+        "0x1",
+        "0x5e933e"
+      ],
+      "steam_record": "0xafa8c0",
+      "steam_values": [
+        "0x94730",
+        "0x94770",
+        "0x1",
+        "0x1",
+        "0x917dc0"
+      ],
+      "name": "DOWN_REC",
+      "ps2_values": [
+        "0x1d0670",
+        "0x1d06a0",
+        "0x1",
+        "0x1",
+        "0x763370"
+      ],
+      "ps2_name": "DEFENSE",
+      "flags_equal": true,
+      "callback_presence_equal": true,
+      "name_equal": false
+    },
+    {
+      "id": 51,
+      "nso_record": "0x70af50",
+      "nso_values": [
+        "0x44ca0",
+        "0x44cc0",
+        "0x1",
+        "0x1",
+        "0x5f15db"
+      ],
+      "steam_record": "0xafa8e0",
+      "steam_values": [
+        "0x947a0",
+        "0x947e0",
+        "0x1",
+        "0x1",
+        "0x917dd0"
+      ],
+      "name": "DEFENSE"
+    },
+    {
+      "id": 52,
+      "nso_record": "0x70af70",
+      "nso_values": [
+        "0x44d30",
+        "0x0",
+        "0x1",
+        "0x0",
+        "0x606c45"
+      ],
+      "steam_record": "0xafa900",
+      "steam_values": [
+        "0x94810",
+        "0x0",
+        "0x1",
+        "0x0",
+        "0x917dd8"
+      ],
+      "name": "UNION_A"
+    },
+    {
+      "id": 53,
+      "nso_record": "0x70af90",
+      "nso_values": [
+        "0x450c0",
+        "0x0",
+        "0x1",
+        "0x0",
+        "0x621f2c"
+      ],
+      "steam_record": "0xafa920",
+      "steam_values": [
+        "0x94e20",
+        "0x0",
+        "0x1",
+        "0x0",
+        "0x917de0"
+      ],
+      "name": "UNION_B"
+    },
+    {
+      "id": 54,
+      "nso_record": "0x70afb0",
+      "nso_values": [
+        "0x43ae0",
+        "0x43d60",
+        "0x1",
+        "0x0",
+        "0x5f682d"
+      ],
+      "steam_record": "0xafa940",
+      "steam_values": [
+        "0x92a30",
+        "0x92e40",
+        "0x1",
+        "0x0",
+        "0x917de8"
+      ],
+      "name": "ALL_SP"
+    }
+  ],
+  "reader_correspondence": {
+    "steam_setter": {
+      "rva": "0x7dbb0",
+      "end": "0x7dcbf",
+      "section": ".shared",
+      "sha256": "fbd31cacb0453e920984f33f13840dab4fb8dc867b9880287c95f3c639e3f492",
+      "evidence": "7dbd7 encounter override call3fb80;7dbe8 LEAafa280;7dbef SHL5 then ADD;7dc09 forceReset+10;7dc36 publishes actualu16 state;7dc44 publishes action;7dc4b updateRange+14;7dca1 callback+0,7dcad indirect init(camera+30)."
+    },
+    "steam_frame": {
+      "rva": "0x7ed06",
+      "end": "0x7f111",
+      "section": ".shared",
+      "evidence": "7ed53 actual currentu16 state;7ed5d override3fb80;7ed6a LEAafa280;7ed71 SHL5;7ed78 callback+8;7ed8c indirect update(camera+30)."
+    },
+    "nso_setter": {
+      "offset": "0x35430",
+      "end": "0x35550",
+      "worker_status": 0,
+      "evidence": "actualu16 state, override2560 else70a8f0+state*32, forceReset+16, updateRange+20, real camera global through880528, init+0(camera+30)"
+    },
+    "nso_frame": {
+      "offset": "0x35ee0",
+      "end": "0x366d0",
+      "worker_status": 0,
+      "evidence": "same live state+104, actual override2560 and32-byte fallback, per-frame callback+8, actual delay/enable state"
+    }
+  },
+  "negative_evidence": [
+    {
+      "name": "ESCAPE_MES",
+      "requirement": "Same literal also occurs in action-state descriptors: Steam a24f20 and NSO709d50. These are not the camera descriptor label fields afa3b8/70aa28; name uniqueness alone would choose the wrong enclosing object."
+    },
+    {
+      "requirement": "All51 old records are not index-equivalent: full-table comparison positively found the inserted bike message at49 and shifted down/defense states. No blanket pointer-width or numeric-address match is used."
+    }
+  ],
+  "required_seams": [
+    {
+      "owner": "Golden camera-label value supplier",
+      "requirement": "Golden-only resolve each selected label through its actual native camera descriptor identity: IDs5 REINFORCE,9 ESCAPE_MES,32 OVERLIMIT,39 CONDITION,43 NYX FEATHER. Author qualified Steam NUL-terminated values, never PS2 literal values or arbitrary numeric xrefs. Retain only explicitly recorded PS2 alignment tails. Cover every direct/translated/inlined/native reference. This qualifies label fields, not the entire camera callback implementation."
+    },
+    {
+      "owner": "actual camera state producers and descriptor role",
+      "requirement": "Actual state setter accepts u16 requested state, actual action reference and clear-unit-flags argument. Preserve actual encounter-specific descriptor override (Steam3fb80/NSO2560) before fallback32-byte table indexing, same-state forceReset, state history/repeat count, frame/delay reset, action publication, updateRange flag and optional initialization. Per-frame reader consumes the current real camera state and its actual override, delay/enable flags and +8 callback. Runtime label identity must follow the selected descriptor, not a fake isolated state or cosmetic unused table; no PS2/host pointer reinterpretation."
+    },
+    {
+      "owner": "Golden state identity and qualification",
+      "requirement": "Do not treat a widened51-record PS2 copy as the Golden55-record table. IDs0..48 keep their observed names/flags/callback-nullness; Golden inserts BIKE_PURSUIT_MES49, moves DOWN_REC49->50 and DEFENSE50->51, and adds UNION_A52,UNION_B53,ALL_SP54. Selected five IDs are unchanged. Qualify mode isolation, all five label references and retained boundaries, same-state reset and encounter override, including an override-name path. Source proof alone is not a runtime consumer witness; callback code behavior is not admitted by matching names."
+    }
+  ],
+  "admissions": [
+    {
+      "address": "0x005f72c0",
+      "ps2_size": 16,
+      "role": "camera state descriptor name",
+      "state_id": 5,
+      "name": "REINFORCE",
+      "golden": {
+        "kind": "typed-record-name",
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x917bd0",
+        "raw_offset": 9529296,
+        "offset": 592848,
+        "size": 10,
+        "sha256": "2b959a0b82b7a0cd6e03f9dbab816ddc567f0cd6554ff8992f2b4aaa1ab73019",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "source_group": "L1-C5-camera-state-labels-20261113",
+        "mapping_proven": true,
+        "descriptor_rva": "0xafa320",
+        "descriptor_stride": 32,
+        "name_field_offset": 24,
+        "state_id": 5,
+        "nso_name": "0x6271dc",
+        "nso_descriptor": "0x70a990"
+      },
+      "layout": {
+        "kind": "nul-terminated-name-with-retained-alignment",
+        "ps2_live_size": 10,
+        "retained_tail": {
+          "offset": 10,
+          "size": 6,
+          "sha256": "b0f66adc83641586656866813fd9dd0b8ebb63796075661ba45d1aa8089e1d44"
+        },
+        "copy_policy": "Golden authoritative name including NUL; preserve only old alignment tail; no pointer-table byte copy"
+      },
+      "required_seams": [
+        {
+          "owner": "Golden camera-label value supplier",
+          "requirement": "Golden-only resolve each selected label through its actual native camera descriptor identity: IDs5 REINFORCE,9 ESCAPE_MES,32 OVERLIMIT,39 CONDITION,43 NYX FEATHER. Author qualified Steam NUL-terminated values, never PS2 literal values or arbitrary numeric xrefs. Retain only explicitly recorded PS2 alignment tails. Cover every direct/translated/inlined/native reference. This qualifies label fields, not the entire camera callback implementation."
+        },
+        {
+          "owner": "actual camera state producers and descriptor role",
+          "requirement": "Actual state setter accepts u16 requested state, actual action reference and clear-unit-flags argument. Preserve actual encounter-specific descriptor override (Steam3fb80/NSO2560) before fallback32-byte table indexing, same-state forceReset, state history/repeat count, frame/delay reset, action publication, updateRange flag and optional initialization. Per-frame reader consumes the current real camera state and its actual override, delay/enable flags and +8 callback. Runtime label identity must follow the selected descriptor, not a fake isolated state or cosmetic unused table; no PS2/host pointer reinterpretation."
+        },
+        {
+          "owner": "Golden state identity and qualification",
+          "requirement": "Do not treat a widened51-record PS2 copy as the Golden55-record table. IDs0..48 keep their observed names/flags/callback-nullness; Golden inserts BIKE_PURSUIT_MES49, moves DOWN_REC49->50 and DEFENSE50->51, and adds UNION_A52,UNION_B53,ALL_SP54. Selected five IDs are unchanged. Qualify mode isolation, all five label references and retained boundaries, same-state reset and encounter override, including an override-name path. Source proof alone is not a runtime consumer witness; callback code behavior is not admitted by matching names."
+        }
+      ]
+    },
+    {
+      "address": "0x005f72e0",
+      "ps2_size": 16,
+      "role": "camera state descriptor name",
+      "state_id": 9,
+      "name": "ESCAPE_MES",
+      "golden": {
+        "kind": "typed-record-name",
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x90a8d0",
+        "raw_offset": 9475280,
+        "offset": 538832,
+        "size": 11,
+        "sha256": "03dc25aceaa1479c9f09fd686e2a7ec3e1e550907ef45c0fbe3a81c28d3d74be",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "source_group": "L1-C5-camera-state-labels-20261113",
+        "mapping_proven": true,
+        "descriptor_rva": "0xafa3a0",
+        "descriptor_stride": 32,
+        "name_field_offset": 24,
+        "state_id": 9,
+        "nso_name": "0x5fed53",
+        "nso_descriptor": "0x70aa10"
+      },
+      "layout": {
+        "kind": "nul-terminated-name-with-retained-alignment",
+        "ps2_live_size": 11,
+        "retained_tail": {
+          "offset": 11,
+          "size": 5,
+          "sha256": "8855508aade16ec573d21e6a485dfd0a7624085c1a14b5ecdd6485de0c6839a4"
+        },
+        "copy_policy": "Golden authoritative name including NUL; preserve only old alignment tail; no pointer-table byte copy"
+      },
+      "required_seams": [
+        {
+          "owner": "Golden camera-label value supplier",
+          "requirement": "Golden-only resolve each selected label through its actual native camera descriptor identity: IDs5 REINFORCE,9 ESCAPE_MES,32 OVERLIMIT,39 CONDITION,43 NYX FEATHER. Author qualified Steam NUL-terminated values, never PS2 literal values or arbitrary numeric xrefs. Retain only explicitly recorded PS2 alignment tails. Cover every direct/translated/inlined/native reference. This qualifies label fields, not the entire camera callback implementation."
+        },
+        {
+          "owner": "actual camera state producers and descriptor role",
+          "requirement": "Actual state setter accepts u16 requested state, actual action reference and clear-unit-flags argument. Preserve actual encounter-specific descriptor override (Steam3fb80/NSO2560) before fallback32-byte table indexing, same-state forceReset, state history/repeat count, frame/delay reset, action publication, updateRange flag and optional initialization. Per-frame reader consumes the current real camera state and its actual override, delay/enable flags and +8 callback. Runtime label identity must follow the selected descriptor, not a fake isolated state or cosmetic unused table; no PS2/host pointer reinterpretation."
+        },
+        {
+          "owner": "Golden state identity and qualification",
+          "requirement": "Do not treat a widened51-record PS2 copy as the Golden55-record table. IDs0..48 keep their observed names/flags/callback-nullness; Golden inserts BIKE_PURSUIT_MES49, moves DOWN_REC49->50 and DEFENSE50->51, and adds UNION_A52,UNION_B53,ALL_SP54. Selected five IDs are unchanged. Qualify mode isolation, all five label references and retained boundaries, same-state reset and encounter override, including an override-name path. Source proof alone is not a runtime consumer witness; callback code behavior is not admitted by matching names."
+        }
+      ]
+    },
+    {
+      "address": "0x005f7430",
+      "ps2_size": 16,
+      "role": "camera state descriptor name",
+      "state_id": 32,
+      "name": "OVERLIMIT",
+      "golden": {
+        "kind": "typed-record-name",
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x917d20",
+        "raw_offset": 9529632,
+        "offset": 593184,
+        "size": 10,
+        "sha256": "b25da2b9d424df7166c2203f28306d60d1ede92fa8ab2ce56cc5b07915ed6fa0",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "source_group": "L1-C5-camera-state-labels-20261113",
+        "mapping_proven": true,
+        "descriptor_rva": "0xafa680",
+        "descriptor_stride": 32,
+        "name_field_offset": 24,
+        "state_id": 32,
+        "nso_name": "0x5e637b",
+        "nso_descriptor": "0x70acf0"
+      },
+      "layout": {
+        "kind": "nul-terminated-name-with-retained-alignment",
+        "ps2_live_size": 10,
+        "retained_tail": {
+          "offset": 10,
+          "size": 6,
+          "sha256": "b0f66adc83641586656866813fd9dd0b8ebb63796075661ba45d1aa8089e1d44"
+        },
+        "copy_policy": "Golden authoritative name including NUL; preserve only old alignment tail; no pointer-table byte copy"
+      },
+      "required_seams": [
+        {
+          "owner": "Golden camera-label value supplier",
+          "requirement": "Golden-only resolve each selected label through its actual native camera descriptor identity: IDs5 REINFORCE,9 ESCAPE_MES,32 OVERLIMIT,39 CONDITION,43 NYX FEATHER. Author qualified Steam NUL-terminated values, never PS2 literal values or arbitrary numeric xrefs. Retain only explicitly recorded PS2 alignment tails. Cover every direct/translated/inlined/native reference. This qualifies label fields, not the entire camera callback implementation."
+        },
+        {
+          "owner": "actual camera state producers and descriptor role",
+          "requirement": "Actual state setter accepts u16 requested state, actual action reference and clear-unit-flags argument. Preserve actual encounter-specific descriptor override (Steam3fb80/NSO2560) before fallback32-byte table indexing, same-state forceReset, state history/repeat count, frame/delay reset, action publication, updateRange flag and optional initialization. Per-frame reader consumes the current real camera state and its actual override, delay/enable flags and +8 callback. Runtime label identity must follow the selected descriptor, not a fake isolated state or cosmetic unused table; no PS2/host pointer reinterpretation."
+        },
+        {
+          "owner": "Golden state identity and qualification",
+          "requirement": "Do not treat a widened51-record PS2 copy as the Golden55-record table. IDs0..48 keep their observed names/flags/callback-nullness; Golden inserts BIKE_PURSUIT_MES49, moves DOWN_REC49->50 and DEFENSE50->51, and adds UNION_A52,UNION_B53,ALL_SP54. Selected five IDs are unchanged. Qualify mode isolation, all five label references and retained boundaries, same-state reset and encounter override, including an override-name path. Source proof alone is not a runtime consumer witness; callback code behavior is not admitted by matching names."
+        }
+      ]
+    },
+    {
+      "address": "0x005f7440",
+      "ps2_size": 16,
+      "role": "camera state descriptor name",
+      "state_id": 39,
+      "name": "CONDITION",
+      "golden": {
+        "kind": "typed-record-name",
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x917d50",
+        "raw_offset": 9529680,
+        "offset": 593232,
+        "size": 10,
+        "sha256": "31ea9809eba6cbf76df65eb0de16d5b59e5af52c60b6dd2f31f4ad054d087471",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "source_group": "L1-C5-camera-state-labels-20261113",
+        "mapping_proven": true,
+        "descriptor_rva": "0xafa760",
+        "descriptor_stride": 32,
+        "name_field_offset": 24,
+        "state_id": 39,
+        "nso_name": "0x616330",
+        "nso_descriptor": "0x70add0"
+      },
+      "layout": {
+        "kind": "nul-terminated-name-with-retained-alignment",
+        "ps2_live_size": 10,
+        "retained_tail": {
+          "offset": 10,
+          "size": 6,
+          "sha256": "b0f66adc83641586656866813fd9dd0b8ebb63796075661ba45d1aa8089e1d44"
+        },
+        "copy_policy": "Golden authoritative name including NUL; preserve only old alignment tail; no pointer-table byte copy"
+      },
+      "required_seams": [
+        {
+          "owner": "Golden camera-label value supplier",
+          "requirement": "Golden-only resolve each selected label through its actual native camera descriptor identity: IDs5 REINFORCE,9 ESCAPE_MES,32 OVERLIMIT,39 CONDITION,43 NYX FEATHER. Author qualified Steam NUL-terminated values, never PS2 literal values or arbitrary numeric xrefs. Retain only explicitly recorded PS2 alignment tails. Cover every direct/translated/inlined/native reference. This qualifies label fields, not the entire camera callback implementation."
+        },
+        {
+          "owner": "actual camera state producers and descriptor role",
+          "requirement": "Actual state setter accepts u16 requested state, actual action reference and clear-unit-flags argument. Preserve actual encounter-specific descriptor override (Steam3fb80/NSO2560) before fallback32-byte table indexing, same-state forceReset, state history/repeat count, frame/delay reset, action publication, updateRange flag and optional initialization. Per-frame reader consumes the current real camera state and its actual override, delay/enable flags and +8 callback. Runtime label identity must follow the selected descriptor, not a fake isolated state or cosmetic unused table; no PS2/host pointer reinterpretation."
+        },
+        {
+          "owner": "Golden state identity and qualification",
+          "requirement": "Do not treat a widened51-record PS2 copy as the Golden55-record table. IDs0..48 keep their observed names/flags/callback-nullness; Golden inserts BIKE_PURSUIT_MES49, moves DOWN_REC49->50 and DEFENSE50->51, and adds UNION_A52,UNION_B53,ALL_SP54. Selected five IDs are unchanged. Qualify mode isolation, all five label references and retained boundaries, same-state reset and encounter override, including an override-name path. Source proof alone is not a runtime consumer witness; callback code behavior is not admitted by matching names."
+        }
+      ]
+    },
+    {
+      "address": "0x005f7470",
+      "ps2_size": 16,
+      "role": "camera state descriptor name",
+      "state_id": 43,
+      "name": "NYX FEATHER",
+      "golden": {
+        "kind": "typed-record-name",
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x917d78",
+        "raw_offset": 9529720,
+        "offset": 593272,
+        "size": 12,
+        "sha256": "1f8cf53230e502adcd1053a636ab0d54000b24f99c96b71f1567c4afc749198f",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "source_group": "L1-C5-camera-state-labels-20261113",
+        "mapping_proven": true,
+        "descriptor_rva": "0xafa7e0",
+        "descriptor_stride": 32,
+        "name_field_offset": 24,
+        "state_id": 43,
+        "nso_name": "0x60e573",
+        "nso_descriptor": "0x70ae50"
+      },
+      "layout": {
+        "kind": "nul-terminated-name-with-retained-alignment",
+        "ps2_live_size": 12,
+        "retained_tail": {
+          "offset": 12,
+          "size": 4,
+          "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+        },
+        "copy_policy": "Golden authoritative name including NUL; preserve only old alignment tail; no pointer-table byte copy"
+      },
+      "required_seams": [
+        {
+          "owner": "Golden camera-label value supplier",
+          "requirement": "Golden-only resolve each selected label through its actual native camera descriptor identity: IDs5 REINFORCE,9 ESCAPE_MES,32 OVERLIMIT,39 CONDITION,43 NYX FEATHER. Author qualified Steam NUL-terminated values, never PS2 literal values or arbitrary numeric xrefs. Retain only explicitly recorded PS2 alignment tails. Cover every direct/translated/inlined/native reference. This qualifies label fields, not the entire camera callback implementation."
+        },
+        {
+          "owner": "actual camera state producers and descriptor role",
+          "requirement": "Actual state setter accepts u16 requested state, actual action reference and clear-unit-flags argument. Preserve actual encounter-specific descriptor override (Steam3fb80/NSO2560) before fallback32-byte table indexing, same-state forceReset, state history/repeat count, frame/delay reset, action publication, updateRange flag and optional initialization. Per-frame reader consumes the current real camera state and its actual override, delay/enable flags and +8 callback. Runtime label identity must follow the selected descriptor, not a fake isolated state or cosmetic unused table; no PS2/host pointer reinterpretation."
+        },
+        {
+          "owner": "Golden state identity and qualification",
+          "requirement": "Do not treat a widened51-record PS2 copy as the Golden55-record table. IDs0..48 keep their observed names/flags/callback-nullness; Golden inserts BIKE_PURSUIT_MES49, moves DOWN_REC49->50 and DEFENSE50->51, and adds UNION_A52,UNION_B53,ALL_SP54. Selected five IDs are unchanged. Qualify mode isolation, all five label references and retained boundaries, same-state reset and encounter override, including an override-name path. Source proof alone is not a runtime consumer witness; callback code behavior is not admitted by matching names."
+        }
+      ]
+    }
+  ],
+  "counts": {
+    "new_PROVEN": 5,
+    "new_ps2_partition_bytes": 80,
+    "cohort_PROVEN": 40,
+    "cohort_proven_bytes": 56045,
+    "cohort_OPEN_retain": 37,
+    "cohort_open_bytes": 3221,
+    "assigned_objects": 77,
+    "assigned_ps2_bytes": 59266,
+    "PROVEN-code": 0,
+    "PROVEN-layout": 0,
+    "D10a": 0,
+    "D10b": 0,
+    "D10c": 0
+  }
+}

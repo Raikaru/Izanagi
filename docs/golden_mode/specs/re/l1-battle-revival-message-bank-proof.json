@@ -1,0 +1,396 @@
+{
+  "schema": 1,
+  "proof_id": "L1-c12-battle-revival-localized-message-bank",
+  "decision": "PROVEN",
+  "runtime_status": "pending-seam",
+  "address": "0x005f7000",
+  "ps2_size": 272,
+  "ps2": {
+    "base": "0x005f7000",
+    "live_size": 271,
+    "retained_tail": {
+      "offset": 271,
+      "size": 1,
+      "observed": "00"
+    },
+    "size": 271,
+    "header": [
+      7,
+      271,
+      826757965,
+      0,
+      264,
+      7,
+      2
+    ],
+    "labels": [
+      [
+        1,
+        "BTL_REVIVAL_SEL"
+      ],
+      [
+        0,
+        "BTL_REVIVAL_SEL_001"
+      ]
+    ],
+    "sha256": "b1ca0ab96d57b4eaaaaa18e54e1c6d9cfd0459fd18537e31e92b6ed3ffb7d551"
+  },
+  "steam_image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+  "locale_table": {
+    "steam_rva": "0x90acb0",
+    "steam_section": ".sdata",
+    "steam_pointer_stride": 8,
+    "nso_address": "0x710071f858",
+    "nso_got": "0x7100880688",
+    "entries": 9,
+    "nso_selector_storage": "0x711d201960",
+    "selector_evidence": "5dccc loads GOT880540;5dcdc loads signed32 selector;5dce0 indexes nine-pointer table71f858 with stride8. GOT880540 RELATIVE->1d201960. Steam table90acb0 contains the same nine complete bank identities in the same positional order.",
+    "extent_evidence": "Actual indexed reader starts at71f858; exactly nine contiguous pointers in both images target complete three-entry MSG1 banks. NSO prior word46 and next0; Steam prior0a and following two f32(0.8), not further bank pointers. Physical payloads may appear in a different order; use the actual pointer-table order, not address sorting.",
+    "steam_reader_status": "No ordinary Steam table-reader instruction was found by the bounded .shared RIP-LEA scan; no Steam reader body or .arch decode is claimed. Actual complete NSO typed reader and paired unique Steam payloads establish the source; mandatory payload and image hashes/refuse are required."
+  },
+  "localized_banks": [
+    {
+      "locale_slot": 0,
+      "entry_count": 3,
+      "size": 385,
+      "ordered_kind_name": [
+        [
+          1,
+          "BTL_REVIVAL_SEL"
+        ],
+        [
+          0,
+          "BTL_REVIVAL_SEL_001"
+        ],
+        [
+          0,
+          "BTL_REVIVAL_SEL_002"
+        ]
+      ],
+      "sha256": "a94fdc67005b7f03b2a3a037f9244ac1ecaf95561e42e991479637becc2af922",
+      "steam": {
+        "container": "P4G.exe",
+        "section": ".xpdata",
+        "rva": "0xa2f620",
+        "raw_offset": 10673696,
+        "offset": 63008,
+        "size": 385,
+        "sha256": "a94fdc67005b7f03b2a3a037f9244ac1ecaf95561e42e991479637becc2af922",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "mapping_proven": true
+      },
+      "nso_address": "0x710071eb1c"
+    },
+    {
+      "locale_slot": 1,
+      "entry_count": 3,
+      "size": 361,
+      "ordered_kind_name": [
+        [
+          1,
+          "BTL_REVIVAL_SEL"
+        ],
+        [
+          0,
+          "BTL_REVIVAL_SEL_001"
+        ],
+        [
+          0,
+          "BTL_REVIVAL_SEL_002"
+        ]
+      ],
+      "sha256": "5b380af593e7ea927783309a74accd7e01791c5136a5d659586aac2e044fd558",
+      "steam": {
+        "container": "P4G.exe",
+        "section": ".xpdata",
+        "rva": "0xa2fac0",
+        "raw_offset": 10674880,
+        "offset": 64192,
+        "size": 361,
+        "sha256": "5b380af593e7ea927783309a74accd7e01791c5136a5d659586aac2e044fd558",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "mapping_proven": true
+      },
+      "nso_address": "0x710071ec9d"
+    },
+    {
+      "locale_slot": 2,
+      "entry_count": 3,
+      "size": 405,
+      "ordered_kind_name": [
+        [
+          1,
+          "BTL_REVIVAL_SEL"
+        ],
+        [
+          0,
+          "BTL_REVIVAL_SEL_001"
+        ],
+        [
+          0,
+          "BTL_REVIVAL_SEL_002"
+        ]
+      ],
+      "sha256": "8156f798f1dee0c4aa9531e02390014f160deeb0de2f64ca9fda0661eb9ffcba",
+      "steam": {
+        "container": "P4G.exe",
+        "section": ".xpdata",
+        "rva": "0xa300d0",
+        "raw_offset": 10676432,
+        "offset": 65744,
+        "size": 405,
+        "sha256": "8156f798f1dee0c4aa9531e02390014f160deeb0de2f64ca9fda0661eb9ffcba",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "mapping_proven": true
+      },
+      "nso_address": "0x710071ee06"
+    },
+    {
+      "locale_slot": 3,
+      "entry_count": 3,
+      "size": 349,
+      "ordered_kind_name": [
+        [
+          1,
+          "BTL_REVIVAL_SEL"
+        ],
+        [
+          0,
+          "BTL_REVIVAL_SEL_001"
+        ],
+        [
+          0,
+          "BTL_REVIVAL_SEL_002"
+        ]
+      ],
+      "sha256": "4ccda03cb4a12d37b906903153e45f68e2579671aeedae592e911e81dc7bc681",
+      "steam": {
+        "container": "P4G.exe",
+        "section": ".xpdata",
+        "rva": "0xa2ff70",
+        "raw_offset": 10676080,
+        "offset": 65392,
+        "size": 349,
+        "sha256": "4ccda03cb4a12d37b906903153e45f68e2579671aeedae592e911e81dc7bc681",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "mapping_proven": true
+      },
+      "nso_address": "0x710071ef9b"
+    },
+    {
+      "locale_slot": 4,
+      "entry_count": 3,
+      "size": 349,
+      "ordered_kind_name": [
+        [
+          1,
+          "BTL_REVIVAL_SEL"
+        ],
+        [
+          0,
+          "BTL_REVIVAL_SEL_001"
+        ],
+        [
+          0,
+          "BTL_REVIVAL_SEL_002"
+        ]
+      ],
+      "sha256": "10596d0573f6e0b3ad126da61074b8b187b87f3b0e94c1ca3fcc8cd834df197e",
+      "steam": {
+        "container": "P4G.exe",
+        "section": ".xpdata",
+        "rva": "0xa30290",
+        "raw_offset": 10676880,
+        "offset": 66192,
+        "size": 349,
+        "sha256": "10596d0573f6e0b3ad126da61074b8b187b87f3b0e94c1ca3fcc8cd834df197e",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "mapping_proven": true
+      },
+      "nso_address": "0x710071f0f8"
+    },
+    {
+      "locale_slot": 5,
+      "entry_count": 3,
+      "size": 369,
+      "ordered_kind_name": [
+        [
+          1,
+          "BTL_REVIVAL_SEL"
+        ],
+        [
+          0,
+          "BTL_REVIVAL_SEL_001"
+        ],
+        [
+          0,
+          "BTL_REVIVAL_SEL_002"
+        ]
+      ],
+      "sha256": "0ff299a0c063b37e3f36428269fc8badf21fb9428c0fcefc0f641a797b25b4ea",
+      "steam": {
+        "container": "P4G.exe",
+        "section": ".xpdata",
+        "rva": "0xa2fdc0",
+        "raw_offset": 10675648,
+        "offset": 64960,
+        "size": 369,
+        "sha256": "0ff299a0c063b37e3f36428269fc8badf21fb9428c0fcefc0f641a797b25b4ea",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "mapping_proven": true
+      },
+      "nso_address": "0x710071f255"
+    },
+    {
+      "locale_slot": 6,
+      "entry_count": 3,
+      "size": 381,
+      "ordered_kind_name": [
+        [
+          1,
+          "BTL_REVIVAL_SEL"
+        ],
+        [
+          0,
+          "BTL_REVIVAL_SEL_001"
+        ],
+        [
+          0,
+          "BTL_REVIVAL_SEL_002"
+        ]
+      ],
+      "sha256": "082d38d3d065660f884954f3f19754b35335446e3cdb75e3b39f02258d5fbd90",
+      "steam": {
+        "container": "P4G.exe",
+        "section": ".xpdata",
+        "rva": "0xa2f940",
+        "raw_offset": 10674496,
+        "offset": 63808,
+        "size": 381,
+        "sha256": "082d38d3d065660f884954f3f19754b35335446e3cdb75e3b39f02258d5fbd90",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "mapping_proven": true
+      },
+      "nso_address": "0x710071f3c6"
+    },
+    {
+      "locale_slot": 7,
+      "entry_count": 3,
+      "size": 393,
+      "ordered_kind_name": [
+        [
+          1,
+          "BTL_REVIVAL_SEL"
+        ],
+        [
+          0,
+          "BTL_REVIVAL_SEL_001"
+        ],
+        [
+          0,
+          "BTL_REVIVAL_SEL_002"
+        ]
+      ],
+      "sha256": "b60d5c0d8d6c266c10d92979f006cc25cbd5c26b45db7056d20373ee89260e10",
+      "steam": {
+        "container": "P4G.exe",
+        "section": ".xpdata",
+        "rva": "0xa2f7b0",
+        "raw_offset": 10674096,
+        "offset": 63408,
+        "size": 393,
+        "sha256": "b60d5c0d8d6c266c10d92979f006cc25cbd5c26b45db7056d20373ee89260e10",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "mapping_proven": true
+      },
+      "nso_address": "0x710071f543"
+    },
+    {
+      "locale_slot": 8,
+      "entry_count": 3,
+      "size": 389,
+      "ordered_kind_name": [
+        [
+          1,
+          "BTL_REVIVAL_SEL"
+        ],
+        [
+          0,
+          "BTL_REVIVAL_SEL_001"
+        ],
+        [
+          0,
+          "BTL_REVIVAL_SEL_002"
+        ]
+      ],
+      "sha256": "cda318ce3da38aa3f8a6b35465a0a6b47767ccd9abb44c12ab9d0248636f0ed2",
+      "steam": {
+        "container": "P4G.exe",
+        "section": ".xpdata",
+        "rva": "0xa2fc30",
+        "raw_offset": 10675248,
+        "offset": 64560,
+        "size": 389,
+        "sha256": "cda318ce3da38aa3f8a6b35465a0a6b47767ccd9abb44c12ab9d0248636f0ed2",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "mapping_proven": true
+      },
+      "nso_address": "0x710071f6cc"
+    }
+  ],
+  "reader_correspondence": {
+    "ps2": "Original1b3f14/18 constructs5f7000,1b3f1c calls2baac0;1b3f24/28 shows record1 through2bad10. Actual sourcebtlMainRevivalMesInit at1b3f00 then clears window flag/param, creates formation slot3/fff, attaches real selected actionUID, queues it and camera state2b. Pinned btlAction_inferred_001b1510.c:1531..1565 corroborates; generic R5900 save-opcode misdecodes are not evidence.",
+    "nso": "Complete5dcb0..5dd40 obtains actual battle selected action+1b8, opens selected localized bank through2c8560, chooses record1 or2 from real flag100d, clears actual flag/param, creates formation slot3/fff, attaches actual actionUID at packet+a0, queues through5ae80 and creates camera state2b through35610. Paired5dd50..5ddc4 steps real window; while open returns0; nonzero2c8af0 result clears battle flag800000 and returns8; zero result clears actual retracted state via context+1500 and returns10; both release/reset window. No semantic accept/cancel label is inferred from the predicate alone.",
+    "parser": "Actual2c8560..2c85ac resets real current-window state at4a72784, slot=-1 and flags; passes full source to2d8240, stores actual returned slot, restarts it through2d65b0. This is the established MSG1 parser family2d8240->2d8440 in other bank proofs. Actual2c86f0..2c875c rejects negative slots, restarts slot, sets200000, calls2d6630(slot,actualRecord,0), then2d7ac0(slot,-1), and marks open. No pretend slot or synthetic successful dialog is allowed.",
+    "changed_record_producer": "71580..7159c reads actual flag100d through2e2fd0 and returns Boolean.5dce8 calls it;5dcf0/5dcf4 computes flagClear?1:2. Unlike PS2 fixed record1, Golden has a complete extra record2 BTL_REVIVAL_SEL_002. Getter2e2fd0..2e2fe8 loads actual bit-store pointer4a89ff0, word[id>>5], bit[id&31]. Actual set2e2ff0..2e3050 and clear2e3060..2e30c0 bounds-check using4a89fe8 and OR/BIC/store the same backing word. Semantic name of flag100d and the complete high-level writer graph are not asserted."
+  },
+  "layout": {
+    "kind": "semantic-localized-message-bank",
+    "ps2_bank_offset": 0,
+    "ps2_live_size": 271,
+    "ps2_entry_count": 2,
+    "golden_entry_count": 3,
+    "locale_slots": 9,
+    "retained_tail": {
+      "offset": 271,
+      "size": 1
+    },
+    "copy_policy": "Route the complete selected-locale Golden bank through real parser/resource/native aliases; preserve old final alignment byte. Never copy349..405B over the272-byte PS2 image, truncate a Golden bank, or reuse old byte offsets in changed localized texts."
+  },
+  "required_seams": [
+    {
+      "owner": "btlMainRevivalMesInit/current message parser",
+      "ps2_addresses": [
+        "0x001b3f00",
+        "0x002baac0",
+        "0x002bad10"
+      ],
+      "requirement": "Seal all nine full Steam payloads and the actual signed locale-index producer0..8; preserve table90acb0 positional order and real language state across the entire message lifetime. Source each payload from the pinned image and require exact full span/image hashes; refuse mismatch, never choose an M2 window, guessed language, English-only fixed slot or NSO runtime read. Route guest/direct/translated/inlined/native current-window allocation, relocation, encoding and complete message/choice bodies through the actual full localized Golden bank. Use owned full-bank memory/native resource routing, not a larger write over the272-byte PS2 partition; preserve selected tail+271."
+    },
+    {
+      "owner": "Golden flag100d producer and record selection",
+      "requirement": "Bind the actual Golden flag store and real producers/writers, initialization, persistence/load and reset lifecycle corresponding to read2e2fd0/set2e2ff0/clear2e3060. Preserve real flag100d input: clear selects record1, set selects record2. Do not substitute PS2 fixed record1, infer a difficulty/Plume semantic name, force false/true, invent state, or default a missing producer. Exercise both flag states and every locale; record2 is a real additional Golden message, not padding."
+    },
+    {
+      "owner": "battle selected action, packet/camera and current-window lifecycle",
+      "requirement": "Preserve actual selected actionUID, formation-slot3/fff graph, packet dependencies, camera state2b, current-window slot/selection/flag/param, real input and text controls, per-frame completion, accept/cancel branch, battle flag800000 and retracted state, transitions8/10 and release/reset. Route native and compiled-inline readers through the same real Golden source/state. Preserve allocator/parser failure and invalid-slot behavior; no fake slot, preaccepted prompt, empty message, constant-success callback or synthetic packet completion. This bank admission alone does not qualify all later revival gameplay/item effects or all message rendering."
+    }
+  ],
+  "source_verification": {
+    "script": "<scratch>/GoldenRE-notes/l1/l1c12_revival_proof.py",
+    "observed_result": "exit0; nine SOURCE_PASS and PS2_PARTITION_PASS271/1",
+    "checks": "Pinned complete Steam image SHA; each full bank unique in Steam and NSO, equal complete bytes and SHA, correct section/RVA/raw coordinates, exact three ordered kind/name identities, declared relocation/file extent, actual Steam table positional pointers, original271B hash and retained zero alignment byte.",
+    "scope": "Static source assertions, not runtime, build, verify, objdiff, unittest or CI."
+  },
+  "source_boundary": "Ordinary Switch1.2 typed code/static relocations, Steam10836033 .sdata pointer table and complete .xpdata bank data, original PS2 ELF and pinned typed source. No protected .arch decode, game/emulator execution or runtime match claim.",
+  "reproduction": "Private l1c12_revival_banks.py,revival_roles.py,revival_readers.py,revival_witness.py. First exact-two-label discovery found no candidates because Golden expands to three records; widened discovery then found nine complete banks per image and actual indexed table. Negative first search was NOT absence proof. Nine positional full-span byte/hash comparisons passed; original prompt instructions, actual Golden flag reader/set/clear, source tail and table edges were observed."
+}

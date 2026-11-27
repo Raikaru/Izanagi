@@ -228,7 +228,7 @@ static int invoke_defeat(lua_State *L)
     lua_createtable(L, 0, 7);
     lua_pushliteral(L, "defeat"); lua_setfield(L, -2, "name");
     lua_pushunsigned(L, d->encounter); lua_setfield(L, -2, "encounter");
-    lua_pushstring(L, d->source == P4_MOD_DEFEAT_FIELD ? "field" : "collision"); lua_setfield(L, -2, "source");
+    lua_pushstring(L, d->source == P4_MOD_DEFEAT_FIELD ? "field" : d->source == P4_MOD_DEFEAT_SCRIPT ? "script" : "collision"); lua_setfield(L, -2, "source");
     lua_pushunsigned(L, d->polls); lua_setfield(L, -2, "polls");
     lua_pushboolean(L, d->allowed); lua_setfield(L, -2, "allowed");
     lua_pushstring(L, d->reason ? d->reason : ""); lua_setfield(L, -2, "reason");
@@ -302,7 +302,7 @@ void p4_lua_authorize_initialize(lua_State *L)
     lua_setfield(L, -2, "authorize");
     static const luaL_Reg battle[] = {{"formation", add_formation}, {"defeat", add_defeat}, {NULL, NULL}};
     p4_lua_library(L, battle);
-    lua_setfield(L, -2, "battle");
+    p4_lua_namespace_merge(L, "battle");
     static const luaL_Reg velvet[] = {{"command", add_velvet}, {NULL, NULL}};
     p4_lua_library(L, velvet);
     lua_setfield(L, -2, "velvet");

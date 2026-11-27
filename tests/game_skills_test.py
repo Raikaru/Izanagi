@@ -21,7 +21,7 @@ def main():
     driver = sys.argv[1:separator]
     if not driver:
         raise SystemExit("supply native driver before --driver-end")
-    for mode in ("valid", "bad-metadata", "bad-names"):
+    for mode in ("valid", "bad-metadata", "bad-names", "golden"):
         with tempfile.TemporaryDirectory(prefix="p4-skills-inputs-") as temporary:
             root = Path(temporary)
             metadata = bytes([0xA5]) * (440 * 40 - (mode == "bad-metadata"))
@@ -35,6 +35,7 @@ def main():
             image = root / "fixture.iso"
             image.write_bytes(disc({"BTL": banks}))
             environment = dict(os.environ)
+            environment["P4PC_MODE"] = "golden" if mode == "golden" else "ps2"
             environment["P4PC_ISO"] = str(image)
             environment.pop("P4PC_OVERRIDE_DIR", None)
             result = subprocess.run([*driver, mode], env=environment, timeout=30)

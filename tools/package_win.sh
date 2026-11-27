@@ -73,7 +73,9 @@ cp "$win/runtime-provenance.txt" "$stage/$name/source/runtime-provenance.txt"
 # the exact tarball ci/win32/build_deps.sh pins, fetched and sha256-checked again here.
 curl -fL --retry 6 --retry-all-errors --retry-delay 10 "https://ffmpeg.org/releases/ffmpeg-$ffver.tar.xz" -o "$stage/$name/source/ffmpeg-$ffver.tar.xz"
 echo "$ffsha  $stage/$name/source/ffmpeg-$ffver.tar.xz" | sha256sum -c -
-cp "$root/ci/win32/build_deps.sh" "$stage/$name/source/"
+mkdir -p "$stage/$name/source/ci/win32"
+cp "$root/ci/win32/build_deps.sh" "$stage/$name/source/ci/win32/"
+cp "$root/ci/ffmpeg-7.1.1-hca-window-alignment.patch" "$stage/$name/source/ci/"
 printf '%s, commit %s\r\nbuilt %s (%s)\r\n' "$version" "$sha" "$(date -u +%Y-%m-%dT%H:%MZ)" "$arch" > "$stage/$name/VERSION.txt"
 
 # 4. Checks: imports, then the FFmpeg licence check against the DLLs that ship.

@@ -1,5 +1,6 @@
 #include "game_knowledge_runtime_internal.h"
 #include "p4pc/game_table_refs.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -143,6 +144,8 @@ static int encode(const P4ModSaveContext *context, P4ModSaveWriter *writer, void
     int result = snapshot_ready(source);
     if (result) return result;
     const P4GameKnowledge *state = p4_game_knowledge_native_active();
+    fprintf(stderr, "p4pc: mods: enemy knowledge saved, digest %016llx\n",
+            (unsigned long long)p4_game_knowledge_state_digest(state));
     uint32_t count = 0;
     for (size_t i = 0; i < p4_game_knowledge_count(state); ++i) {
         P4KnowledgeIdentity identity; int known;
@@ -355,6 +358,8 @@ static void commit(void *staged, void *user)
         if (p4_game_knowledge_replace(load->state, load->indices, load->count, &load->retail)) abort();
         free(load);
     }
+    fprintf(stderr, "p4pc: mods: enemy knowledge loaded, digest %016llx\n",
+            (unsigned long long)p4_game_knowledge_state_digest(p4_game_knowledge_native_active()));
 }
 static void discard(void *staged, void *user) { (void)user; free(staged); }
 int p4_game_knowledge_save_register(const P4GameTables *tables, const P4GameTableSources *sources)

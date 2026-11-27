@@ -40,4 +40,8 @@ The Gradle project and Java activity are in `android/`; native entry and JNI glu
 are in `src/platform/android/`. `ci/android/build_deps.sh` builds SDL3 and FFmpeg
 for the selected ABI. Android uses position-independent native code and the
 Storage Access Framework to access the selected disc image. Log output goes to
-logcat under the `p4pc` tag and to the app's `files/boot.log`.
+logcat under the `p4pc` tag and to the app's `files/boot.log`; the run before is kept as
+`boot.prev.log` (`boot.unclean.log` when it did not end by itself). The launcher's
+**Export logs** button saves the logs, the settings without paths and the device facts as
+one zip through the system file dialog (`LogExport.java`, `LogBundle.java`);
+[diagnostics](platform/diagnostics.md) lists what the logs hold.

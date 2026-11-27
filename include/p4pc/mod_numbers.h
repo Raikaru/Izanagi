@@ -9,6 +9,9 @@
 uint32_t p4_mod_f32_encode(double value);
 double p4_mod_f32_decode(uint32_t bits);
 double p4_mod_f64_quiet(double value);
+/* Outbound policy for script numbers: any NaN becomes 0x7ff8000000000000 (f64) or 0x7fc00000 (f32). Not for reads. */
+double p4_mod_f64_canonical(double value);
+uint32_t p4_mod_f32_encode_canonical(double value);
 static inline double p4_mod_f32_number(float value)
 {
     uint32_t bits;

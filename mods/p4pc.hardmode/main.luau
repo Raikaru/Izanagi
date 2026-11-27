@@ -70,6 +70,7 @@ local A = {
     btlAISelectWeightedEntry = seam("btlAISelectWeightedEntry", 0x001dea90, "ppI"),
     btlAICommandPickTableAction = seam("btlAICommandPickTableAction", 0x001de800, "Bp"),
     btlAICommandSetActionCode = seam("btlAICommandSetActionCode", 0x001de640, "vppH"),
+    datCalcInflictStatus = seam("datCalcInflictStatus", 0x00238940, "iippi"),
     -- The boss redesigns' script steering (design §4.A/§4.B): the enemy script's
     -- own random draw, condition queries and flags, read and answered through
     -- the script VM's parameter and return slots.
@@ -136,6 +137,7 @@ local WINDOW_PRIORITY = 50 -- the status chance stage: a guarded window boss's r
 -- BTL.CVM AICALC block 10). Enemy IDs are DatUnit IDs; skills are native skill
 -- IDs every action code names.
 local KNIGHT = 310 -- Avenger Knight, encounter 811: AICALC table row only
+local GIGAS = 311 -- Daring Gigas, encounter 812: Fear / Ice Technical
 local YUKIKO = 258 -- Shadow Yukiko, encounter 514 (0x202): enemy script AI_yukiko
 local PRINCE = 269 -- Charming Prince, summoned by AI_yukiko: enemy script AI_ouji
 local KANJI = 259 -- Shadow Kanji, encounter 515 (0x203): enemy script enemyAI_d_kanji
@@ -144,6 +146,7 @@ local TOUGH_GUY = 273 -- enemyAI_aniki_B: Kill Rush, Rampage, Dekaja
 local YUKIKO_ENCOUNTER = 0x202
 local KANJI_ENCOUNTER = 0x203
 local POWER_CHARGE = 227 -- self: the next physical hit is charged (DatUnit +0x14 0x40000)
+local SINGLE_SHOT = 149 -- 0x95; the real skill row, not a selected-action index
 local GALE_SLASH = 145 -- physical, every party member
 local MIND_CHARGE = 228 -- self: the next magic hit is charged
 local BURN_TO_ASHES = 354 -- Yukiko's fire burst on the whole party
@@ -154,7 +157,6 @@ local TETRAKARN = 229 -- Kanji's physical-repelling barrier on himself (AI_kanji
 local SPIRIT_DRAIN, ROAR_OF_WRATH = 102, 359 -- what AI_kanji_25 asks he used last
 local FANATICAL_SPARK = 360 -- Kanji's electric hit on the whole party
 local DIA, DIARAMA = 192, 193
-local ICE = 2 -- retail element ID: the Prince's weakness
 -- The battle AI script flags (BIT 448.. in AICALC block 10), which btlInit
 -- clears for every battle. AI_yukiko: first summon done, resummon done.
 -- enemyAI_d_kanji: opening Power Charge, Forbidden Murmur at 75%, Fanatical
@@ -579,6 +581,74 @@ local windows: {[number]: Window} = {}
 -- Read by the chance stage (snapshot mode: no memory reads there): whether a
 -- window boss, by enemy ID, shrugs its ailment off until its next turn.
 local windowProtected: {[number]: boolean} = {}
+local TECHNICAL_NOTES_MAX = 32
+local technicalNotes: {string} = {}
+local technicalDropped = 0
+
+-- Gigas alone needs an execution-length guard. Never key it by enemy ID or
+-- recycled BtlAction address: two instances of 311 have independent unit UIDs.
+type GigasWindow = {
+    uid: number, data: number, guard: boolean, generic: boolean,
+    pending: {[string]: boolean}, shot: string?,
+}
+local gigasWindows: {[number]: GigasWindow} = {}
+local gigasOwners: {[number]: number} = {} -- DatUnit -> last proven unit UID
+local gigasFault = false -- new/unattributed actors fail to baseline after loss
+local gigasEpoch = ""
+type StatusAttempt = {
+    target: number, source: number, skill: number, options: number, state: GigasWindow?,
+}
+local statusAttempts: {StatusAttempt} = {}
+local function noteWindow(message: string)
+    -- Reuse the existing bounded snapshot-safe diagnostics, not p4.log here.
+    if #technicalNotes < TECHNICAL_NOTES_MAX then table.insert(technicalNotes, message)
+    else technicalDropped += 1 end
+end
+local function resetGigas()
+    for _, state in gigasWindows do windows[state.data] = nil end
+    table.clear(gigasWindows)
+    table.clear(gigasOwners)
+    table.clear(statusAttempts)
+    gigasFault = false
+end
+local function abandonGigas(state: GigasWindow, reason: string)
+    state.guard, state.shot = true, nil
+    table.clear(state.pending)
+    noteWindow(string.format("HARDMODE_GIGAS abandon uid=%u reason=%s baseline=immune", state.uid, reason))
+end
+local function abandonGigasAll(reason: string)
+    gigasFault = true
+    for _, state in gigasWindows do abandonGigas(state, reason) end
+    noteWindow("HARDMODE_GIGAS abandon unattributed reason=" .. reason .. " baseline=immune")
+end
+local function gigasState(actor: P4BattleExecutionUnit): GigasWindow
+    local state = gigasWindows[actor.uid]
+    if state == nil then
+        state = {uid = actor.uid, data = actor.data, guard = gigasFault, generic = false, pending = {}} :: GigasWindow
+        gigasWindows[actor.uid] = state
+        local old = gigasOwners[actor.data]
+        if old ~= nil and old ~= actor.uid then
+            windows[actor.data] = nil
+            abandonGigas(state, "recycled_data")
+        end
+        gigasOwners[actor.data] = actor.uid
+    elseif state.data ~= actor.data then
+        abandonGigas(state, "changed_data")
+        state.data = actor.data
+    end
+    return state
+end
+local function gigasBlocked(state: GigasWindow?): boolean
+    return state == nil or state.guard or state.generic or next(state.pending) ~= nil
+end
+local function gigasTarget(target: number): GigasWindow?
+    local actor = p4.battle.execution.unit(target)
+    if actor == nil or actor.side ~= "enemy" or actor.id ~= GIGAS or actor.data ~= target then
+        abandonGigasAll("target_identity")
+        return nil
+    end
+    return gigasState(actor)
+end
 
 local function enemyLevel(enemy: number): number
     local rows = p4.mem.read("u32", ENEMY_ROWS)
@@ -794,6 +864,7 @@ local function resetFightState()
     table.clear(pendingBanners)
     table.clear(windows)
     table.clear(windowProtected)
+    resetGigas()
 end
 
 local encounterHook = p4.hook(A.datUnitCreateEncounterGroup.address, A.datUnitCreateEncounterGroup.signature, "before",
@@ -1084,9 +1155,6 @@ end)
 -- recovery and SP amounts never reach this. The callback runs in snapshot mode,
 -- where even p4.log is refused: resolved hits are noted in Lua state, logged at
 -- the next frame, and call TECHNICAL on the stance panel.
-local TECHNICAL_NOTES_MAX = 32
-local technicalNotes: {string} = {}
-local technicalDropped = 0
 local technicalBanner = false
 -- Declared at the stance-panel section below; the frame handler needs it visible.
 local showBanner: (text: string, why: string) -> ()
@@ -1098,7 +1166,8 @@ local technicalModifier = p4.damage.on({kind = "multiply", priority = TECHNICAL_
     end
     local data = tuning().technical
     local mask = data.masks[element]
-    if mask == nil or bit32.band(hit.target_status, mask) == 0 then
+    local burnTechnical = element == 4 and hit.target_side_ailment == 26
+    if not burnTechnical and (mask == nil or bit32.band(hit.target_status, mask) == 0) then
         return nil
     end
     local factor = if hit.source_side == "party" then data.partyFactor else data.enemyFactor
@@ -1118,7 +1187,7 @@ end})
 -- called on the stance panel at the next frame, like TECHNICAL.
 local windowShrugged: number? = nil -- enemy ID
 local WINDOW_NAMES: {[number]: string} = {[KNIGHT] = "Knight", [YUKIKO] = "Yukiko", [KANJI] = "Kanji",
-    [304] = "Contrarian King"}
+    [304] = "Contrarian King", [GIGAS] = "Gigas"}
 local technicalLog = p4.events.on("frame_start", function(event)
     if #technicalNotes == 0 and technicalDropped == 0 and not technicalBanner and windowShrugged == nil then
         return
@@ -1173,7 +1242,19 @@ local windowGuard = p4.chance.on({kind = "multiply", priority = WINDOW_PRIORITY,
     if current == nil or not current.technical then
         return 0
     end
-    if windowProtected[hit.target_id] then
+    local protected = windowProtected[hit.target_id]
+    if hit.target_id == GIGAS then
+        -- The chance snapshot has no target UID. Only the enclosing, paired
+        -- native status call can authorize an instance; no target-id guess.
+        local attempt = statusAttempts[#statusAttempts]
+        if attempt == nil or attempt.skill ~= hit.skill or attempt.state == nil then
+            abandonGigasAll("chance_context")
+            protected = true
+        else
+            protected = gigasBlocked(attempt.state)
+        end
+    end
+    if protected then
         windowShrugged = hit.target_id
         return 0
     end
@@ -1306,7 +1387,127 @@ local function windowTurn(current: Run, unit: number, enemy: number, chosen: num
         log(string.format("HARDMODE_GUARD enemy=%d %s", enemy, if protected then "on " .. (reason :: string) else "off"))
     end
     windowProtected[enemy] = protected
+    -- F-G3 supplies permanent Freeze/Shock immunity in data. Burn can land on
+    -- susceptible bosses, but must still respect the Technical window guard.
+    if current.freezeShock then
+        local ok, why = p4.status.protect(unit, protected)
+        assert(ok, string.format("Burn guard unit=%x refused: %s", unit, tostring(why)))
+    end
 end
+
+-- Synchronous observations run before admission's initializer and before READY
+-- resolves a selected command. Pending admission is conservatively closed
+-- until that choice is proven; START/resume is not another admission.
+local gigasExecution = p4.battle.execution.on(function(event: P4BattleExecutionEvent)
+    if event.kind == "battle_start" or event.kind == "battle_end" then
+        resetGigas()
+        gigasEpoch = event.epoch
+        return
+    end
+    if event.epoch ~= gigasEpoch or not event.battle_active then
+        abandonGigasAll("epoch")
+        gigasEpoch = event.epoch
+    end
+    if event.kind == "lost" then
+        abandonGigasAll("lost_" .. tostring(event.reason))
+        return
+    end
+    local execution = event.execution
+    if execution == nil or execution.actor.side ~= "enemy" or execution.actor.id ~= GIGAS then return end
+    if execution.actor.data == 0 then
+        abandonGigasAll("actor_data")
+        return
+    end
+    local state = gigasState(execution.actor)
+    local token = execution.token
+    if event.kind == "admitted" then
+        state.pending[token] = true
+        local current = run
+        if current ~= nil and current.technical and execution.base_turn then
+            -- Exactly the existing generic landing/recovery/phase rules.
+            -- One More and extra admissions never age the held ailment.
+            windowTurn(current, state.data, GIGAS, 0, execution.actor.action)
+            state.generic = windowProtected[GIGAS] == true
+        end
+    end
+    if execution.uncertainty ~= 0 or event.kind == "uncertain" then
+        abandonGigas(state, "execution_" .. tostring(execution.uncertainty))
+        return
+    end
+    local skillCommand = execution.command == 1 or execution.command == 2
+        or execution.command == 3 or execution.command == 9
+    if event.kind == "committed" then
+        state.pending[token] = nil
+        if skillCommand and execution.skill == POWER_CHARGE then
+            state.guard, state.shot = true, nil
+            log(string.format("HARDMODE_GIGAS charge uid=%u token=%s", state.uid, token))
+        elseif skillCommand and execution.skill == SINGLE_SHOT then
+            state.shot = token
+        end
+    elseif event.kind == "terminal" then
+        state.pending[token] = nil
+        if state.shot == token and skillCommand and execution.skill == SINGLE_SHOT
+            and execution.committed and execution.sealed and execution.end_seen
+            and not execution.direct_end and execution.pending_packets == 0
+            and (execution.outcome == "resolved" or execution.outcome == "hitless") then
+            state.guard, state.shot = false, nil
+            log(string.format("HARDMODE_GIGAS shot_complete uid=%u token=%s", state.uid, token))
+        elseif execution.outcome ~= "resolved" and execution.outcome ~= "hitless" then
+            abandonGigas(state, execution.outcome)
+        elseif state.shot == token then
+            -- Completion, not a landed hit or charge consumption, is the
+            -- boundary. Malformed/incomplete terminal facts cannot release it.
+            abandonGigas(state, "shot_completion")
+        end
+    end
+end)
+
+-- This is a result veto, not an alternate roll. Stock guaranteed attempts
+-- bypass the chance stage, so x0 there alone cannot preserve baseline Fear
+-- immunity. Pair every native call (including non-Gigas/nested calls); any
+-- broken pairing abandons the window before a result can be committed.
+local function nativeInfliction(skill: number): boolean
+    local rows = p4.mem.read("u32", SKILL_TABLE)
+    if rows == 0 then return false end
+    local kind = p4.mem.read("u8", rows + bit32.band(skill, 0xffff) * 0x28 + 0x18)
+    -- datCalcStatusEffectResult admits kinds 1/3. Kind 2 uses the SAME
+    -- function to produce a REMOVAL mask: suppressing it would prevent cures.
+    return kind == 1 or kind == 3
+end
+local gigasStatusBefore = p4.hook(A.datCalcInflictStatus.address, A.datCalcInflictStatus.signature, "before",
+    function(context)
+    local target = context.args[3] :: number
+    local state: GigasWindow? = nil
+    if target ~= 0 and bit32.band(p4.mem.read("u16", target), 4) ~= 0
+        and p4.mem.read("u16", target + 2) == GIGAS and nativeInfliction(context.args[1] :: number) then
+        state = gigasTarget(target)
+    end
+    if #statusAttempts >= 64 then
+        table.clear(statusAttempts)
+        abandonGigasAll("status_capacity")
+    end
+    table.insert(statusAttempts, {target = target, source = context.args[2] :: number,
+        skill = bit32.band(context.args[1] :: number, 0xffff), options = context.args[4] :: number, state = state})
+end)
+local gigasStatusAfter = p4.hook(A.datCalcInflictStatus.address, A.datCalcInflictStatus.signature, "after",
+    function(context)
+    local target = context.args[3] :: number
+    local attempt = table.remove(statusAttempts)
+    if attempt == nil or attempt.target ~= target or attempt.source ~= context.args[2]
+        or attempt.skill ~= bit32.band(context.args[1] :: number, 0xffff) or attempt.options ~= context.args[4] then
+        table.clear(statusAttempts)
+        abandonGigasAll("status_pairing")
+    end
+    if target == 0 or bit32.band(p4.mem.read("u16", target), 4) == 0
+        or p4.mem.read("u16", target + 2) ~= GIGAS then return end
+    if not nativeInfliction(context.args[1] :: number) then return end
+    local current = run
+    local protected = current == nil or not current.technical or gigasBlocked(gigasTarget(target))
+    if protected and context.result ~= nil and bit32.band(context.result :: number, 0x04) ~= 0 then
+        context.result = bit32.band(context.result :: number, bit32.bnot(0x04))
+        windowShrugged = GIGAS
+    end
+end)
 
 -- Boss tactics, redesigns and window turns ---------------------------------------
 
@@ -1805,10 +2006,29 @@ local function advance(action: number, unit: number, plan: Plan, native: number,
         if plan.beat == "summon" then
             state.summoned = true
             if chosen == SUMMON_PRINCE then
-                -- The Prince's Ice weakness is shown openly: Analyze knows it
-                -- (the retail knowledge bit a landed Ice hit sets).
-                p4.call(A.datSetBitmapBit.address, A.datSetBitmapBit.signature, PRINCE, ICE)
-                log(string.format("HARDMODE_REVEAL enemy=%d element=%d", PRINCE, ICE))
+                -- Reveal the loaded row's weaknesses, not a disc-specific value.
+                -- Resolve the whole row before setting any knowledge bits.
+                local ok, result = pcall(function(): {number}
+                    local affinities = p4.data.enemy(PRINCE).affinities
+                    local weak: {number} = {}
+                    for index, element in ATTACK_ELEMENTS do
+                        local kind = affinities[element]
+                        assert(kind == "normal" or kind == "weak" or kind == "resist" or kind == "null"
+                            or kind == "repel" or kind == "drain", "invalid affinity for " .. element)
+                        if kind == "weak" then
+                            table.insert(weak, index - 1)
+                        end
+                    end
+                    return weak
+                end)
+                if ok then
+                    for _, element in result do
+                        p4.call(A.datSetBitmapBit.address, A.datSetBitmapBit.signature, PRINCE, element)
+                        log(string.format("HARDMODE_REVEAL enemy=%d element=%d", PRINCE, element))
+                    end
+                else
+                    log("HARDMODE_REVEAL disabled: cannot read Prince affinities: " .. tostring(result))
+                end
             end
         elseif plan.beat == "formation" then
             state.formed = true
@@ -1972,7 +2192,7 @@ local bossTurnHook = p4.hook(A.btlAICommandSetActionCode.address, A.btlAICommand
             chosen = redesignTurn(context, unit, native)
         end
     end
-    if current.technical then
+    if current.technical and enemy ~= GIGAS then
         windowTurn(current, unit, enemy, chosen, context.args[1] :: number)
     end
 end)
@@ -2124,10 +2344,11 @@ applyFeatures() -- everything but the window guard off until a run is armed
 -- A lost boss battle of a run with BATTLE RETRY is answered through
 -- p4.battle.defeat before the game's Game Over. A screen prompt offers RETRY
 -- BATTLE or GIVE UP: RETRY has the port copy back the battle start (every
--- playable character's HP, SP, ailments and buffs, and the enemy group) and
--- fight the same encounter again where it was lost; GIVE UP lets the retail
--- Game Over run. Items used stay used, Analyze knowledge is kept and the lost
--- battle grants nothing, so rewards come once, from the battle that is won. A
+-- playable character's HP, SP, ailments and buffs, the items, the enemy
+-- knowledge and the enemy group) and fight the same encounter again where it
+-- was lost; GIVE UP lets the retail Game Over run. Items used come back, what
+-- Analyze learned is forgotten and the lost battle grants nothing, so rewards
+-- come once, from the battle that is won. A
 -- "retry" authorizer (Challenge IRONMAN) refuses it: the prompt says why, then
 -- the Game Over runs. Ordinary encounters are never retried.
 local RETRY_INPUT_DELAY = 30 -- polls before the prompt takes input, so a Cross held from the battle never answers it
@@ -2353,6 +2574,7 @@ local function adopt(next: Run?, why: string)
     rewardLogged = {}
     currentBoss = false
     table.clear(windowProtected)
+    abandonGigasAll("run_change")
     weaknessesCleared = false -- the load or new game undid the session edit
     local current = run
     if current then
@@ -2502,6 +2724,7 @@ p4.save.register({
             rewardLogged = {}
             currentBoss = false
             table.clear(windowProtected)
+            resetGigas()
             applyFeatures()
             updateStatus()
             setPending(p4.settings.get("mode") == "Hard")

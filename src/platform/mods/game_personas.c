@@ -1,4 +1,6 @@
 #include "p4pc/game_personas.h"
+#include "p4pc/game_mode.h"
+#include "p4pc/golden_names_native.h"
 #include "p4pc/game_table_inputs.h"
 #include <stdlib.h>
 #include <string.h>
@@ -8,6 +10,11 @@ static const uint32_t bank_stride[BANK_COUNT] = {
     P4_PERSONA_METADATA_SIZE, P4_PERSONA_GROWTH_SIZE, P4_PERSONA_MODEL_SIZE, P4_PERSONA_CANDIDATES_SIZE, P4_PERSONA_NAME_SIZE,
     P4_PERSONA_AFFINITY_SIZE
 };
+static uint32_t persona_bank_stride(unsigned bank)
+{
+    return bank == BANK_NAMES && p4_game_mode() == P4_GAME_MODE_GOLDEN ?
+        P4_GOLDEN_PERSONA_NAME_SIZE : bank_stride[bank];
+}
 typedef struct PersonaRow {
     P4GamePersonaView view;
 } PersonaRow;
@@ -136,7 +143,7 @@ int p4_game_personas_native_admit(const P4GamePersonas *personas)
 static uint32_t bank_offset(const P4GamePersonas *personas, unsigned bank)
 {
     uint32_t offset = 0;
-    for (unsigned i = 0; i < bank; ++i) offset = (offset + personas->limit * bank_stride[i] + 15u) & ~15u;
+    for (unsigned i = 0; i < bank; ++i) offset = (offset + personas->limit * persona_bank_stride(i) + 15u) & ~15u;
     return offset;
 }
 static int span_role(const P4GameTableInputSpan *span, P4GameTableInputKind kind, size_t index)
@@ -166,7 +173,7 @@ int p4_game_personas_seal(P4GamePersonas *personas,
             !span_role(affinity, P4_TABLE_INPUT_UNIT, 2))
             return P4_TABLE_INVALID;
         for (unsigned bank = 0; bank < BANK_COUNT; ++bank)
-            if (p4_game_table_input_span_size(spans[bank]) != (size_t)P4_PERSONA_RETAIL_ROWS * bank_stride[bank])
+            if (p4_game_table_input_span_size(spans[bank]) != (size_t)P4_PERSONA_RETAIL_ROWS * persona_bank_stride(bank))
                 return P4_TABLE_INVALID;
     }
     if (personas->count) {
@@ -181,7 +188,7 @@ int p4_game_personas_seal(P4GamePersonas *personas,
             int result = p4_game_tables_text_definition_find(names, P4_TEXT_PERSONA,
                 personas->rows[i].view.desc.id, P4_TEXT_NAME, &definition);
             if (result) return result;
-            if (!definition.size || definition.size > P4_PERSONA_NAME_SIZE) return P4_TABLE_INVALID;
+            if (!definition.size || definition.size > persona_bank_stride(BANK_NAMES)) return P4_TABLE_INVALID;
         }
         personas->bytes = bank_offset(personas, BANK_COUNT);
     }
@@ -231,12 +238,12 @@ int p4_game_personas_materialize(P4GamePersonas *personas,
     memset(arena, 0, personas->bytes);
     const uint8_t *original[BANK_COUNT] = {metadata, growth, model, candidates, original_names, affinity};
     for (unsigned bank = 0; bank < BANK_COUNT; ++bank)
-        memcpy(arena + bank_offset(personas, bank), original[bank], (size_t)P4_PERSONA_RETAIL_ROWS * bank_stride[bank]);
+        memcpy(arena + bank_offset(personas, bank), original[bank], (size_t)P4_PERSONA_RETAIL_ROWS * persona_bank_stride(bank));
     for (size_t i = 0; i < personas->count; ++i) {
         const P4GamePersonaDesc *row = &personas->rows[i].view.desc;
         P4GameTextDefinition name;
         if (p4_game_tables_text_definition_find(personas->names, P4_TEXT_PERSONA, row->id, P4_TEXT_NAME, &name) ||
-            !name.size || name.size > P4_PERSONA_NAME_SIZE) {
+            !name.size || name.size > persona_bank_stride(BANK_NAMES)) {
             personas->allocator.release(personas->allocator.user, guest, arena, personas->bytes);
             return P4_TABLE_NOT_READY;
         }
@@ -244,7 +251,7 @@ int p4_game_personas_materialize(P4GamePersonas *personas,
         memcpy(arena + bank_offset(personas, BANK_GROWTH) + row->id * P4_PERSONA_GROWTH_SIZE, row->growth, P4_PERSONA_GROWTH_SIZE);
         memcpy(arena + bank_offset(personas, BANK_MODEL) + row->id * P4_PERSONA_MODEL_SIZE, row->model, P4_PERSONA_MODEL_SIZE);
         memcpy(arena + bank_offset(personas, BANK_CANDIDATES) + row->id * P4_PERSONA_CANDIDATES_SIZE, row->candidates, P4_PERSONA_CANDIDATES_SIZE);
-        memcpy(arena + bank_offset(personas, BANK_NAMES) + row->id * P4_PERSONA_NAME_SIZE, name.bytes, name.size);
+        memcpy(arena + bank_offset(personas, BANK_NAMES) + row->id * persona_bank_stride(BANK_NAMES), name.bytes, name.size);
         memcpy(arena + bank_offset(personas, BANK_AFFINITY) + row->id * P4_PERSONA_AFFINITY_SIZE, row->affinity, P4_PERSONA_AFFINITY_SIZE);
     }
     personas->arena = arena;

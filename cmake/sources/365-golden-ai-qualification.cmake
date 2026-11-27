@@ -1,0 +1,23 @@
+# Explicit test-only targets. Neither is built by ALL or included in packages.
+if(P4_GOLDEN_AI_QUALIFICATION)
+  if(TARGET p4pc64)
+    add_executable(golden_ai_native_install64 EXCLUDE_FROM_ALL
+      tests/golden_ai_native_install.c "${P4_TABLES64}" ${P4_OBJS64})
+    target_compile_options(golden_ai_native_install64 PRIVATE ${P4_X64_FLAGS} -fno-builtin)
+    target_compile_definitions(golden_ai_native_install64 PRIVATE ${P4_PORT_DEFINES} P4_GOLDEN_AI_QUALIFICATION=1)
+    target_link_options(golden_ai_native_install64 PRIVATE ${P4_X64_LINK_FLAGS})
+    target_link_libraries(golden_ai_native_install64 m ${P4_SDL3_LIB64} ${P4_FFMPEG_LIBS64})
+    add_dependencies(golden_ai_native_install64 p4decomp64)
+  endif()
+  if(TARGET p4pc64w)
+    add_executable(golden_ai_native_install64w EXCLUDE_FROM_ALL
+      tests/golden_ai_native_install.c "${P4W_TABLES}" ${P4W_OBJS})
+    target_compile_options(golden_ai_native_install64w PRIVATE ${P4W_FLAGS} -fno-builtin)
+    target_compile_definitions(golden_ai_native_install64w PRIVATE ${P4_PORT_DEFINES} P4_GOLDEN_AI_QUALIFICATION=1)
+    target_include_directories(golden_ai_native_install64w SYSTEM PRIVATE "${P4_WIN64_PREFIX}/include")
+    target_link_options(golden_ai_native_install64w PRIVATE ${P4W_LINK_FLAGS} -Wl,--stack=8388608)
+    target_link_libraries(golden_ai_native_install64w ${P4W_SDL3} ${P4W_AVCODEC} ${P4W_SWSCALE} ${P4W_AVUTIL} -Wl,-Bstatic winpthread -Wl,-Bdynamic)
+    set_target_properties(golden_ai_native_install64w PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${P4W_OUT}" SUFFIX ".exe")
+    add_dependencies(golden_ai_native_install64w p4decomp64w p4pc64w_dlls)
+  endif()
+endif()

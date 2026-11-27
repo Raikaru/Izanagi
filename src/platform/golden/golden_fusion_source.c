@@ -73,11 +73,8 @@ int p4_golden_fusion_load(const char *directory, const P4GoldenDomainMap *map,
                 snprintf(why, room, "invalid fusion recipe source %s", sources[i].member); goto done;
             }
             for (uint32_t j = 0; j < rows; ++j) {
-                uint8_t discarded[32];
-                uint8_t *dest = group < 5 ? built.recipes[recipe_index] : discarded;
-                int rc = p4_golden_recipe_convert(map, payload.bytes + j * 44, 44, materials[group], dest, why, room);
-                if (group == 5 && rc == 1) { ++built.unsupported_twelfth; continue; }
-                if (rc || group >= 5) goto done;
+                if (p4_golden_recipe_convert(map, payload.bytes + j * 44, 44, materials[group],
+                                             &built.recipes[recipe_index], why, room)) goto done;
                 ++recipe_index;
                 ++built.recipe_counts[group];
             }

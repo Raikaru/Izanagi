@@ -95,6 +95,12 @@ void func_004d6d68(void *adxt, int patid, int fid);                             
 SjObj *SJMEM_Create(void *buf, int32_t bsize);
 void *kwlnProbeHeapBudget(void);
 
+/* The mixer's output limiter (p4snd_soft_limit) bends samples past 0.9 of full scale; the reference is passed through it the same way. */
+static double limited16(double s)
+{
+    return (double)p4snd_soft_limit((float)(s / 32768.0)) * 32768.0;
+}
+
 static int failures;
 
 /* The directory list the game's table holds for `dir` of the main volume (names at `names`, lists at `blobs`). */
@@ -556,7 +562,7 @@ static int test_main(int argc, char **argv)
             idx = 0;
             frac = 0.0;
             for (j = 0; j < n; j++) {
-                double s = ((double)r[idx] + ((double)r[idx + 1] - (double)r[idx]) * (float)frac) * gain;
+                double s = limited16(((double)r[idx] + ((double)r[idx + 1] - (double)r[idx]) * (float)frac) * gain);
 
                 if (j >= EDGE && j < n - EDGE) {
                     err = fabs(s - (double)pcm[(startFrame + j) * 2 + ch]);

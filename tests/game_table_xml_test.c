@@ -348,7 +348,7 @@ static void invalid(void)
         "<p4-tables schema=\"1\"><status-ailment element=\"22\" flags=\"1\" cure-mask=\"0x16\" transfer=\"101\" key=\"xml:s\"/></p4-tables>",
         "<p4-tables schema=\"1\"><status-ailment element=\"22\" flags=\"1\" cure-mask=\"0x16\" enemy-scale=\"0\" key=\"xml:s\"/></p4-tables>",
         "<p4-tables schema=\"1\"><status-ailment element=\"22\" flags=\"1\" cure-mask=\"0x16\" enemy-scale=\"101\" key=\"xml:s\"/></p4-tables>",
-        "<p4-tables schema=\"1\"><status-ailment element=\"22\" flags=\"16\" cure-mask=\"0x16\" key=\"xml:s\"/></p4-tables>",
+        "<p4-tables schema=\"1\"><status-ailment element=\"22\" flags=\"64\" cure-mask=\"0x16\" key=\"xml:s\"/></p4-tables>",
         /* Status rider: skill, element, rate and key, all required. */
         "<p4-tables schema=\"1\"><status-rider skill=\"26\" element=\"22\" key=\"xml:r\"/></p4-tables>",
         "<p4-tables schema=\"1\"><status-rider skill=\"26\" element=\"22\" rate=\"0\" key=\"xml:r\"/></p4-tables>",

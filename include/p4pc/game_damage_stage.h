@@ -54,6 +54,7 @@ typedef struct P4GameDamageHit {
     uint32_t reflected, resolved;
     int32_t stock;
     uint32_t origin, source_persona, source_persona_level;
+    uint32_t target_side_leaf; /* held side ailment leaf + 1, or 0 */
 } P4GameDamageHit;
 /* Returns 1 with *value set (a factor for MULTIPLY, an addend for ADD) to
  * apply, 0 to leave the hit alone. A modifier must be a pure function of the

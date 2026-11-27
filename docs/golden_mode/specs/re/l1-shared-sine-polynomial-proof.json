@@ -1,0 +1,396 @@
+{
+  "schema": 1,
+  "proof_id": "L1-c12-shared-sine-polynomial",
+  "runtime_status": "pending-seam",
+  "source_boundary": "Original ELF/pinned18016afe6 inline polynomial and ordinary Steam10836033 .shared code/.sdata literal operands only; no .arch decode, NSO/runtime execution, byte-similarity promotion or function-match claim.",
+  "source_pins": {
+    "steam_image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+    "steam_build": 10836033,
+    "ordinary_owner_span": {
+      "rva": "0x4fff10",
+      "size": 1118,
+      "sha256": "0b372a26557a235b2aad85ee8c2ca984350c2994b544b4252aed43fa911341da",
+      "ordinary_section": ".shared"
+    }
+  },
+  "structural_correspondence": "Pinned mdlBlendTranslationRotation1ba790 source src/unplaced/unplaced_inferred_001ba790.c:90-107 constructs squared angle and six-coefficient Horner S(x)=x+x^3P(x^2), twice for the slerp weights after actual3dcc70 cache preparation. Actual original ELF1ba8b8/8bc/8c8/8d4/8e0/8ec independently load the six selected GP slots. Ordinary Steam4fff10..50036e is a real quaternion-cache owner: copies both input quaternion halves, computes dot/sign/angle and linear flag atcache24, saves angle20, then5002bc..315 builds exactly the same degree13 sine kernel and divides actual weight by it, scaling both actual cached quaternion halves. The complete six operations and intrinsic polynomial role, not coefficient byte similarity or a module label, identify the values. No equivalence of original3dcc70 body or callers is asserted.",
+  "coefficient_order": [
+    "x13",
+    "x11",
+    "x9",
+    "x7",
+    "x5",
+    "x3"
+  ],
+  "polynomial": "S(x)=x+x^3*(((((p13*x^2+p11)*x^2+p9)*x^2+p7)*x^2+p5)*x^2+p3)",
+  "sign_rule": "Steam holds positive magnitudes for x11,x7,x3 but SUBSS supplies the negative effective coefficients. They are PROVEN-code, authored as exact signed coefficient bits; never prefix-copy positive magnitudes to negative guest slots. The three positive coefficients are ordinary data-span PROVEN. x3 magnitude is loaded4ffff7 intoXMM9 and subtracted500305. This distinction explains failed negative-literal searches and makes no absence/D10 claim.",
+  "source_verification": {
+    "script": "<scratch>/GoldenRE-notes/l1/l1c12_sine_proof.py",
+    "observed_result": "exit0 SINE_CODE_SOURCE_PASS6",
+    "checks": "Full pinned Steam hash, all6 exact code operands/RIP targets, sign-derived effective f32 bits, original actual1ba790 coefficient loads and GP addresses, source owner span hash, actual square/Horner/x+x^3P and reciprocal-sine instructions. Initial assertion incorrectly looked for these TU-local GP slots inside original3dcc70; corrected to actual coefficient-bearing1ba790. Extended decoder window for9-byte XMM9 load; no assertion was weakened. Old private facts metadata original_cache_helper describes the callee, not the coefficient load sites."
+  },
+  "objects": {
+    "0x007611f4": {
+      "address": "0x007611f4",
+      "value_hex": "d3c92e2f",
+      "f32_value": 1.5896910177115586e-10,
+      "steam_positive_operand": {
+        "rva": "0x964a28",
+        "raw_offset": 9844264,
+        "section": ".sdata",
+        "size": 4,
+        "hex": "d3c92e2f"
+      },
+      "operation": {
+        "site": "0x5002c9",
+        "instruction": "mulss",
+        "operands": "xmm1, dword ptr [rip + 0x464757]",
+        "coefficient_sign": 1
+      },
+      "original_quaternion_blend_coefficient_loads": [
+        "0x1ba8b8"
+      ],
+      "size": 4,
+      "decision": "PROVEN",
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "rva": "0x964a28",
+        "raw_offset": 9844264,
+        "section": ".sdata",
+        "size": 4,
+        "hex": "d3c92e2f",
+        "sha256": "04a4a3dbc39105fa4676872548db03eccd9b71ee51c06bf8c1daddafbd9f5a4f"
+      },
+      "ps2_consumers": [
+        "func_001bf5e0",
+        "func_001c80f0",
+        "func_001c8e90",
+        "mdlBlendTranslationRotation"
+      ],
+      "required_seams": [
+        {
+          "owner": "Shared intrinsic sine coefficients and all original GP aliases",
+          "requirement": "Author exact signed coefficient bits d3c92e2f for 0x007611f4 from this actual Golden polynomial source; preserve f32 type and all direct/inlined/native polynomial aliases listed in ps2_consumers. Negative effective coefficients derive from actual SUBSS, not copying positive source magnitude. Pin exact image/source and ordinary owner span; refuse mismatches. No universal patch of unrelated equal-number literals."
+        },
+        {
+          "owner": "Real quaternion/angle/blend producers and native evaluation",
+          "requirement": "Bind real angle/omega, quaternion endpoints, sign/linear cache fields, blend/time/pose and model/camera/packet lifecycle producers. Preserve actual endpoint/linear selection, real polynomial operand/evaluation order, reciprocal-sine scaling and native precision/rounding/fenv rules; this coefficient-only proof does not assert unchanged cache preparation, native timing, RNG or whole-function semantics. Qualify every observed direct/native/inlined consumer before runtime closure; no synthetic identity quaternion, zero angle, forced linear path or unchanged-PS2 consumer assumption."
+        }
+      ]
+    },
+    "0x00761144": {
+      "address": "0x00761144",
+      "value_hex": "342fd7b2",
+      "f32_value": -2.5050759688838298e-8,
+      "steam_positive_operand": {
+        "rva": "0x964a38",
+        "raw_offset": 9844280,
+        "section": ".sdata",
+        "size": 4,
+        "hex": "342fd732"
+      },
+      "operation": {
+        "site": "0x5002d1",
+        "instruction": "subss",
+        "operands": "xmm1, dword ptr [rip + 0x46475f]",
+        "coefficient_sign": -1
+      },
+      "original_quaternion_blend_coefficient_loads": [
+        "0x1ba8bc"
+      ],
+      "size": 4,
+      "decision": "PROVEN-code",
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "rva": "0x964a38",
+        "raw_offset": 9844280,
+        "section": ".sdata",
+        "size": 4,
+        "hex": "342fd732",
+        "sha256": "a53e99abb7e111e3272096654c13e28d94d2c1aa578af126a979c9c9c9e9f974"
+      },
+      "ps2_consumers": [
+        "btlAct_CONDITION",
+        "btlAct_SKILL_RECITE_E",
+        "func_001bb9b0",
+        "func_001be050",
+        "func_001be990",
+        "func_001bf5e0",
+        "func_001c09b0",
+        "func_001c80f0",
+        "func_001c8e90",
+        "func_001cc5d0",
+        "func_001cde50",
+        "func_001ef110",
+        "func_00372960",
+        "func_00372d60",
+        "func_0046a7f0",
+        "func_0046b380",
+        "func_00471370",
+        "func_00475cd0",
+        "mdlBlendTranslationRotation"
+      ],
+      "required_seams": [
+        {
+          "owner": "Shared intrinsic sine coefficients and all original GP aliases",
+          "requirement": "Author exact signed coefficient bits 342fd7b2 for 0x00761144 from this actual Golden polynomial source; preserve f32 type and all direct/inlined/native polynomial aliases listed in ps2_consumers. Negative effective coefficients derive from actual SUBSS, not copying positive source magnitude. Pin exact image/source and ordinary owner span; refuse mismatches. No universal patch of unrelated equal-number literals."
+        },
+        {
+          "owner": "Real quaternion/angle/blend producers and native evaluation",
+          "requirement": "Bind real angle/omega, quaternion endpoints, sign/linear cache fields, blend/time/pose and model/camera/packet lifecycle producers. Preserve actual endpoint/linear selection, real polynomial operand/evaluation order, reciprocal-sine scaling and native precision/rounding/fenv rules; this coefficient-only proof does not assert unchanged cache preparation, native timing, RNG or whole-function semantics. Qualify every observed direct/native/inlined consumer before runtime closure; no synthetic identity quaternion, zero angle, forced linear path or unchanged-PS2 consumer assumption."
+        }
+      ]
+    },
+    "0x00761148": {
+      "address": "0x00761148",
+      "value_hex": "1bef3836",
+      "f32_value": 0.0000027557314297155244,
+      "steam_positive_operand": {
+        "rva": "0x964a44",
+        "raw_offset": 9844292,
+        "section": ".sdata",
+        "size": 4,
+        "hex": "1bef3836"
+      },
+      "operation": {
+        "site": "0x5002dd",
+        "instruction": "addss",
+        "operands": "xmm1, dword ptr [rip + 0x46475f]",
+        "coefficient_sign": 1
+      },
+      "original_quaternion_blend_coefficient_loads": [
+        "0x1ba8c8"
+      ],
+      "size": 4,
+      "decision": "PROVEN",
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "rva": "0x964a44",
+        "raw_offset": 9844292,
+        "section": ".sdata",
+        "size": 4,
+        "hex": "1bef3836",
+        "sha256": "1f77733d620775e2dcbcad078530b96fe48a4949b97f2bd6a53ab103240d74b6"
+      },
+      "ps2_consumers": [
+        "btlAct_CONDITION",
+        "btlAct_SKILL_RECITE_E",
+        "func_001bb9b0",
+        "func_001be050",
+        "func_001be990",
+        "func_001bf5e0",
+        "func_001c09b0",
+        "func_001c80f0",
+        "func_001c8e90",
+        "func_001cc5d0",
+        "func_001cde50",
+        "func_001ef110",
+        "func_00372960",
+        "func_00372d60",
+        "func_0046a7f0",
+        "func_0046b380",
+        "func_00471370",
+        "func_00475cd0",
+        "mdlBlendTranslationRotation"
+      ],
+      "required_seams": [
+        {
+          "owner": "Shared intrinsic sine coefficients and all original GP aliases",
+          "requirement": "Author exact signed coefficient bits 1bef3836 for 0x00761148 from this actual Golden polynomial source; preserve f32 type and all direct/inlined/native polynomial aliases listed in ps2_consumers. Negative effective coefficients derive from actual SUBSS, not copying positive source magnitude. Pin exact image/source and ordinary owner span; refuse mismatches. No universal patch of unrelated equal-number literals."
+        },
+        {
+          "owner": "Real quaternion/angle/blend producers and native evaluation",
+          "requirement": "Bind real angle/omega, quaternion endpoints, sign/linear cache fields, blend/time/pose and model/camera/packet lifecycle producers. Preserve actual endpoint/linear selection, real polynomial operand/evaluation order, reciprocal-sine scaling and native precision/rounding/fenv rules; this coefficient-only proof does not assert unchanged cache preparation, native timing, RNG or whole-function semantics. Qualify every observed direct/native/inlined consumer before runtime closure; no synthetic identity quaternion, zero angle, forced linear path or unchanged-PS2 consumer assumption."
+        }
+      ]
+    },
+    "0x0076114c": {
+      "address": "0x0076114c",
+      "value_hex": "010d50b9",
+      "f32_value": -0.00019841270113829523,
+      "steam_positive_operand": {
+        "rva": "0x964a60",
+        "raw_offset": 9844320,
+        "section": ".sdata",
+        "size": 4,
+        "hex": "010d5039"
+      },
+      "operation": {
+        "site": "0x5002e9",
+        "instruction": "subss",
+        "operands": "xmm1, dword ptr [rip + 0x46476f]",
+        "coefficient_sign": -1
+      },
+      "original_quaternion_blend_coefficient_loads": [
+        "0x1ba8d4"
+      ],
+      "size": 4,
+      "decision": "PROVEN-code",
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "rva": "0x964a60",
+        "raw_offset": 9844320,
+        "section": ".sdata",
+        "size": 4,
+        "hex": "010d5039",
+        "sha256": "27c0c2140ec1aede107a796773a55383d8789169b7954e17dfb01647cd7e797a"
+      },
+      "ps2_consumers": [
+        "btlAct_CONDITION",
+        "btlAct_SKILL_RECITE_E",
+        "func_001be050",
+        "func_001be990",
+        "func_001bf5e0",
+        "func_001c09b0",
+        "func_001c80f0",
+        "func_001c8e90",
+        "func_001cc5d0",
+        "func_001cde50",
+        "func_0046a7f0",
+        "func_0046b380",
+        "func_00471370",
+        "func_00475cd0",
+        "mdlBlendTranslationRotation"
+      ],
+      "required_seams": [
+        {
+          "owner": "Shared intrinsic sine coefficients and all original GP aliases",
+          "requirement": "Author exact signed coefficient bits 010d50b9 for 0x0076114c from this actual Golden polynomial source; preserve f32 type and all direct/inlined/native polynomial aliases listed in ps2_consumers. Negative effective coefficients derive from actual SUBSS, not copying positive source magnitude. Pin exact image/source and ordinary owner span; refuse mismatches. No universal patch of unrelated equal-number literals."
+        },
+        {
+          "owner": "Real quaternion/angle/blend producers and native evaluation",
+          "requirement": "Bind real angle/omega, quaternion endpoints, sign/linear cache fields, blend/time/pose and model/camera/packet lifecycle producers. Preserve actual endpoint/linear selection, real polynomial operand/evaluation order, reciprocal-sine scaling and native precision/rounding/fenv rules; this coefficient-only proof does not assert unchanged cache preparation, native timing, RNG or whole-function semantics. Qualify every observed direct/native/inlined consumer before runtime closure; no synthetic identity quaternion, zero angle, forced linear path or unchanged-PS2 consumer assumption."
+        }
+      ]
+    },
+    "0x00761150": {
+      "address": "0x00761150",
+      "value_hex": "8988083c",
+      "f32_value": 0.008333333767950535,
+      "steam_positive_operand": {
+        "rva": "0x964aa0",
+        "raw_offset": 9844384,
+        "section": ".sdata",
+        "size": 4,
+        "hex": "8988083c"
+      },
+      "operation": {
+        "site": "0x5002f5",
+        "instruction": "addss",
+        "operands": "xmm1, dword ptr [rip + 0x4647a3]",
+        "coefficient_sign": 1
+      },
+      "original_quaternion_blend_coefficient_loads": [
+        "0x1ba8e0"
+      ],
+      "size": 4,
+      "decision": "PROVEN",
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "rva": "0x964aa0",
+        "raw_offset": 9844384,
+        "section": ".sdata",
+        "size": 4,
+        "hex": "8988083c",
+        "sha256": "d4c416901d43509af84d01d9b93a6862c7a404721e2321d442d33ed01594c38f"
+      },
+      "ps2_consumers": [
+        "btlAct_CONDITION",
+        "btlAct_SKILL_RECITE_E",
+        "func_001be050",
+        "func_001be990",
+        "func_001bf5e0",
+        "func_001c09b0",
+        "func_001c80f0",
+        "func_001c8e90",
+        "func_001cc5d0",
+        "func_001cde50",
+        "func_001ef110",
+        "func_00372960",
+        "func_00372d60",
+        "func_0046a7f0",
+        "func_0046b380",
+        "func_00471370",
+        "func_00475cd0",
+        "mdlBlendTranslationRotation"
+      ],
+      "required_seams": [
+        {
+          "owner": "Shared intrinsic sine coefficients and all original GP aliases",
+          "requirement": "Author exact signed coefficient bits 8988083c for 0x00761150 from this actual Golden polynomial source; preserve f32 type and all direct/inlined/native polynomial aliases listed in ps2_consumers. Negative effective coefficients derive from actual SUBSS, not copying positive source magnitude. Pin exact image/source and ordinary owner span; refuse mismatches. No universal patch of unrelated equal-number literals."
+        },
+        {
+          "owner": "Real quaternion/angle/blend producers and native evaluation",
+          "requirement": "Bind real angle/omega, quaternion endpoints, sign/linear cache fields, blend/time/pose and model/camera/packet lifecycle producers. Preserve actual endpoint/linear selection, real polynomial operand/evaluation order, reciprocal-sine scaling and native precision/rounding/fenv rules; this coefficient-only proof does not assert unchanged cache preparation, native timing, RNG or whole-function semantics. Qualify every observed direct/native/inlined consumer before runtime closure; no synthetic identity quaternion, zero angle, forced linear path or unchanged-PS2 consumer assumption."
+        }
+      ]
+    },
+    "0x007611f8": {
+      "address": "0x007611f8",
+      "value_hex": "abaa2abe",
+      "f32_value": -0.1666666716337204,
+      "steam_positive_operand": {
+        "rva": "0x964b8c",
+        "raw_offset": 9844620,
+        "section": ".sdata",
+        "size": 4,
+        "hex": "abaa2a3e"
+      },
+      "operation": {
+        "site": "0x4ffff7",
+        "instruction": "movss",
+        "operands": "xmm9, dword ptr [rip + 0x464b8c]",
+        "coefficient_sign": -1
+      },
+      "original_quaternion_blend_coefficient_loads": [
+        "0x1ba8ec"
+      ],
+      "size": 4,
+      "decision": "PROVEN-code",
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "rva": "0x964b8c",
+        "raw_offset": 9844620,
+        "section": ".sdata",
+        "size": 4,
+        "hex": "abaa2a3e",
+        "sha256": "6485cbdd373470a6523b9c9f208e957967a94a33edfccc23eda482a056f2c8d9"
+      },
+      "ps2_consumers": [
+        "btlAct_CONDITION",
+        "btlAct_SKILL_RECITE_E",
+        "func_001be050",
+        "func_001be990",
+        "func_001bf5e0",
+        "func_001c09b0",
+        "func_001c80f0",
+        "func_001c8e90",
+        "func_001cc5d0",
+        "func_001cde50",
+        "mdlBlendTranslationRotation"
+      ],
+      "required_seams": [
+        {
+          "owner": "Shared intrinsic sine coefficients and all original GP aliases",
+          "requirement": "Author exact signed coefficient bits abaa2abe for 0x007611f8 from this actual Golden polynomial source; preserve f32 type and all direct/inlined/native polynomial aliases listed in ps2_consumers. Negative effective coefficients derive from actual SUBSS, not copying positive source magnitude. Pin exact image/source and ordinary owner span; refuse mismatches. No universal patch of unrelated equal-number literals."
+        },
+        {
+          "owner": "Real quaternion/angle/blend producers and native evaluation",
+          "requirement": "Bind real angle/omega, quaternion endpoints, sign/linear cache fields, blend/time/pose and model/camera/packet lifecycle producers. Preserve actual endpoint/linear selection, real polynomial operand/evaluation order, reciprocal-sine scaling and native precision/rounding/fenv rules; this coefficient-only proof does not assert unchanged cache preparation, native timing, RNG or whole-function semantics. Qualify every observed direct/native/inlined consumer before runtime closure; no synthetic identity quaternion, zero angle, forced linear path or unchanged-PS2 consumer assumption."
+        }
+      ]
+    }
+  }
+}

@@ -714,7 +714,7 @@ def main(argv=None):
     parser.add_argument("--action-limit", type=int, default=10000)
     parser.add_argument("--fight-timeout", type=int, default=200000, help="the walk's timeout: line before battle:")
     parser.add_argument("--beam", type=int, default=8)
-    parser.add_argument("--jobs", type=int, default=max(1, (os.cpu_count() or 2) - 1))
+    parser.add_argument("--jobs", type=int, default=max(1, min((os.cpu_count() or 2) - 1, int(os.environ.get("P4PC_JOBS") or 1 << 30))))   # (P4PC_JOBS: the container's CPU share, tools/p4pc_run.sh)
     parser.add_argument("--max-depth", type=int, default=400)
     parser.add_argument("--root-timeout", type=float, default=900)
     parser.add_argument("--step-timeout", type=float, default=10,

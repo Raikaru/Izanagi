@@ -17,9 +17,15 @@ The [settings file](settings.md#file-and-precedence) lives in SDL's per-user dat
 `~/.local/share/p4pc/Persona4/` on Linux, `%APPDATA%\p4pc\Persona4\` on Windows and
 `~/Library/Application Support/p4pc/Persona4/` on macOS.
 Player saves default to its sibling `save/`, overridden by `P4PC_SAVE_DIR`.
-On Windows, Linux and macOS, player startup redirects stdout/stderr to sibling `p4pc.log`,
-truncated on each launch. Android uses internal `boot.log` plus logcat. Fatal native
-signals on Linux, macOS and Android also retain `p4pc-crash.log` beside it; attach both logs.
+On Windows, Linux and macOS, player startup redirects stdout/stderr to sibling `p4pc.log`. The previous run's log is kept
+as `p4pc.prev.log` (and as `p4pc.unclean.log` when that run did not end by itself) instead of being truncated. Android
+uses internal `boot.log` (with `boot.prev.log` and `boot.unclean.log`) plus logcat; its launcher has **Export logs**. Fatal native
+signals on Linux, macOS and Android also retain `p4pc-crash.log` beside it; attach it too. What the logs hold, and how a player
+sends them: [diagnostics](diagnostics.md).
+The log's first line, and the first lines of every native crash report, name the build: `p4pc: build 49eee0d109ab` (12 hex digits of the
+git commit; `-dirty` when the tree had uncommitted changes, `unknown` when no commit was known). The id comes from the source tree alone
+(tools/build_id.py, include/p4pc/build_id.h), never the time, so building one commit twice gives identical binaries. A build made outside git
+(the land check's container) takes the commit from `P4PC_CHECK_SHA`; a packaging script can set `P4PC_BUILD_ID=<40 hex>[-dirty]`.
 
 A nonplayer run (test/harness/capture/headless switches, dummy audio, offscreen video)
 may read an existing INI but never creates it or asks for a disc. Automated tools force

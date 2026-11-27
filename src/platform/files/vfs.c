@@ -13,7 +13,6 @@
  */
 #define _POSIX_C_SOURCE 200809L
 
-#include <dirent.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -25,6 +24,7 @@
 
 #include "iso9660.h"
 #include "vfs.h"
+#include "p4pc/hostpath.h"
 #include "p4pc/os.h"
 #include "p4pc/vfs_source.h"
 #include <limits.h>
@@ -58,6 +58,8 @@ typedef struct {
     long long base;   /* absolute offset of byte 0 of the file within fp */
     long long size;
     long long pos;
+    void *virtual_handle;
+    char virtual_chain[1024], virtual_sha256[65];
 } slot_t;
 
 static FILE *disc;
@@ -78,7 +80,9 @@ static int mounted;
 static slot_t slots[OPEN_MAX];
 static P4VfsReadObserver read_observer;
 static void *read_observer_user;
-static const P4VfsOrigin disc_origin = {P4_VFS_DISC, 0, "disc", NULL};
+static P4VfsVirtualSource virtual_source;
+static P4VfsVirtualSource dormant_source;
+static const P4VfsOrigin disc_origin = {P4_VFS_DISC, 0, "disc", NULL, NULL, NULL};
 static int full_key(const entry_t *entry, char *buffer, size_t capacity);
 /* A demand-only boot view, NOT a mount or an exposed replacement layer. */
 static int source_prepared;
@@ -230,6 +234,7 @@ fail:
 
 int vfs_fork_private(void)
 {
+    if (virtual_source.open) return -1;
 #ifdef _WIN32
     return disc ? -1 : 0;
 #else
@@ -238,7 +243,7 @@ int vfs_fork_private(void)
     for (int i = 0; i < OPEN_MAX; i++) if (slots[i].used && slots[i].owned) return -1;
     const int shared = fileno(disc);
     const off_t position = lseek(shared, 0, SEEK_CUR);
-    const int fd = open(disc_path, O_RDONLY | O_CLOEXEC);
+    const int fd = open(disc_path, O_RDONLY | O_CLOEXEC); /* path-audit-ok: POSIX-only (vfs_fork_private) */
     if (position < 0 || fd < 0) { if (fd >= 0) close(fd); return -1; }
     struct stat a, b;
     if (fstat(fd, &a) || fstat(shared, &b) || a.st_dev != b.st_dev || a.st_ino != b.st_ino ||
@@ -287,6 +292,22 @@ void vfs_override_clear(void)
         override_count = 0;
 }
 
+int vfs_virtual_register(const P4VfsVirtualSource *source)
+{
+    if (mounted || virtual_source.open || !source || !source->open || !source->read || !source->release || !source->list)
+        return -1;
+    virtual_source = *source;
+    return 0;
+}
+
+int vfs_virtual_register_dormant(const P4VfsVirtualSource *source)
+{
+    if (mounted || dormant_source.open || !source || !source->open || !source->read || !source->release || !source->list)
+        return -1;
+    dormant_source = *source;
+    return 0;
+}
+
 int vfs_mount(const char *iso_path, const char *override_dir)
 {
     int before = override_count;
@@ -324,7 +345,7 @@ int vfs_source_prepare_selected(void)
 {
     if (source_prepared) return disc && !same_identity(disc, &source_disc_identity) ? -1 : 0;
     if (mounted) return -1;
-    const char *iso = getenv("P4PC_ISO"), *developer = getenv("P4PC_OVERRIDE_DIR");
+    const char *iso = p4_host_getenv("P4PC_ISO"), *developer = p4_host_getenv("P4PC_OVERRIDE_DIR");
     if ((iso && strlen(iso) >= sizeof source_iso) ||
         (developer && strlen(developer) >= sizeof source_developer.path)) return -1;
     if (iso && index_disc(iso, 1)) return -1;
@@ -336,12 +357,12 @@ int vfs_source_prepare_selected(void)
 }
 const char *vfs_source_selected_iso(void)
 {
-    return source_prepared ? (*source_iso ? source_iso : NULL) : getenv("P4PC_ISO");
+    return source_prepared ? (*source_iso ? source_iso : NULL) : p4_host_getenv("P4PC_ISO");
 }
 int vfs_source_mount_selected(void)
 {
     return vfs_mount(vfs_source_selected_iso(), source_prepared ?
-        (*source_developer.path ? source_developer.path : NULL) : getenv("P4PC_OVERRIDE_DIR"));
+        (*source_developer.path ? source_developer.path : NULL) : p4_host_getenv("P4PC_OVERRIDE_DIR"));
 }
 int vfs_source_disc_identity(P4OSFileIdentity *identity)
 {
@@ -451,12 +472,12 @@ static int alloc_slot(void)
 static int resolve_root(const OverrideRoot *root, const char *key, char *out, size_t cap)
 {
     const char *relative = root->index.resolve ? root->index.resolve(key, root->index_user) : key;
-    struct stat st;
+    P4HostStat st;
     if (!relative) return -1;
     int n = relative[0] ? snprintf(out, cap, "%s/%s", root->path, relative)
                         : snprintf(out, cap, "%s", root->path);
     if (n < 0 || (size_t)n >= cap) return -1;
-    return root->index.resolve || stat(out, &st) == 0 ? 0 : -1;
+    return root->index.resolve || p4_host_stat(out, &st) == 0 ? 0 : -1;
 }
 
 static int host_path(const char *key, int index, int container, char *out, size_t cap)
@@ -478,16 +499,15 @@ static int host_path(const char *key, int index, int container, char *out, size_
     return -1;
 }
 
-/* Size of a host file. Port code is built without -malign-double, so struct stat matches
- * glibc's layout and st_size is read directly. */
+/* Size of a host file. */
 static int host_size(const char *path, long long *size)
 {
-    struct stat st;
+    P4HostStat st;
 
-    if (stat(path, &st) != 0) {
+    if (p4_host_stat(path, &st) != 0) {
         return -1;
     }
-    *size = (long long)st.st_size;
+    *size = (long long)st.size;
     return 0;
 }
 
@@ -495,7 +515,7 @@ int vfs_open(const char *path, int writable)
 {
     char key[KEY_MAX];
     char host[HOST_PATH_MAX];
-    struct stat st;
+    P4HostStat st;
     long long size;
     const char *rest;
     FILE *fp;
@@ -516,10 +536,10 @@ int vfs_open(const char *path, int writable)
     container = split_label(key, &rest);
     idx = find_entry(rest, container);
 
-    int layer = host_path(key, idx, container, host, sizeof host);
+    int layer = virtual_source.open ? -1 : host_path(key, idx, container, host, sizeof host);
     if (layer >= 0 && (!override_roots[layer].index.resolve || p4_os_is_file_nofollow(host)) &&
-        stat(host, &st) == 0 && S_ISREG(st.st_mode) && host_size(host, &size) == 0) {
-        fp = fopen(host, "rb");
+        p4_host_stat(host, &st) == 0 && st.is_file && host_size(host, &size) == 0) {
+        fp = p4_host_fopen(host, "rb");
         if (fp) {
             slots[fd].used = 1;
             slots[fd].fp = fp;
@@ -536,6 +556,25 @@ int vfs_open(const char *path, int writable)
     }
     if (layer >= 0) return -1;
 
+    if (virtual_source.open) {
+        size_t length = 0;
+        void *handle = NULL;
+        int result = virtual_source.open(virtual_source.user, key, &length, &handle,
+                                         slots[fd].virtual_chain, sizeof slots[fd].virtual_chain,
+                                         slots[fd].virtual_sha256);
+        if (result == 0) {
+            if (length > LLONG_MAX || !handle) {
+                if (handle) virtual_source.release(virtual_source.user, handle);
+                return -1;
+            }
+            slots[fd].used = 1; slots[fd].virtual_handle = handle;
+            slots[fd].entry = -1; slots[fd].layer = -3; slots[fd].size = (long long)length;
+            slots[fd].pos = 0; slots[fd].base = 0; slots[fd].owned = 0; slots[fd].fp = NULL;
+            memcpy(slots[fd].origin_key, key, strlen(key) + 1);
+            return fd;
+        }
+        if (result < 0 || !virtual_source.allow_disc) return -1;
+    }
     if (idx < 0) {
         return -1;
     }
@@ -565,6 +604,11 @@ static int slot_origin(slot_t *slot, P4VfsOrigin *out)
         out->kind = P4_VFS_DEVELOPER;
         out->rank = (uint32_t)override_count + (mounted ? 0u : 1u);
         out->provider = source_developer.provider;
+    } else if (slot->layer == -3) {
+        out->kind = P4_VFS_GOLDEN;
+        out->provider = "golden";
+        out->chain = slot->virtual_chain;
+        out->sha256 = slot->virtual_sha256;
     }
     out->key = slot->origin_key;
     return 0;
@@ -597,7 +641,7 @@ static void observe_slot(slot_t *slot, const void *bytes, size_t size)
     P4VfsOrigin origin;
     if (!slot_origin(slot, &origin)) {
         int64_t offset = slot->pos - (long long)size;
-        read_observer(&origin, bytes, size, offset, slot->owned ? -1 : slot->base + offset, read_observer_user);
+        read_observer(&origin, bytes, size, offset, (slot->owned || slot->virtual_handle) ? -1 : slot->base + offset, read_observer_user);
     }
 }
 
@@ -608,7 +652,8 @@ static void trace_read(slot_t *slot, uint64_t start, uint64_t end, uint64_t requ
     P4VfsOrigin origin;
     if (start && !slot_origin(slot, &origin)) {
         const char *operation = origin.kind == P4_VFS_DISC ? "vfs.read.disc"
-            : origin.kind == P4_VFS_MOD ? "vfs.read.mod" : "vfs.read.developer";
+            : origin.kind == P4_VFS_MOD ? "vfs.read.mod"
+            : origin.kind == P4_VFS_GOLDEN ? "vfs.read.golden" : "vfs.read.developer";
         p4pc_prof_span_record(start, end, operation, requested, result, offset, origin.key);
     }
 }
@@ -629,7 +674,9 @@ static int read_slot(slot_t *s, void *dst, int n)
     }
     offset = (off_t)(s->base + s->pos);
     trace_start = p4pc_prof_span_begin();
-    if (iso_read_at(s->fp, (long long)offset, dst, (size_t)n) != 0) {
+    if ((s->virtual_handle && virtual_source.read(virtual_source.user, s->virtual_handle,
+                                                   (size_t)s->pos, dst, (size_t)n)) ||
+        (!s->virtual_handle && iso_read_at(s->fp, (long long)offset, dst, (size_t)n) != 0)) {
         trace_read(s, trace_start, p4pc_prof_span_stop(trace_start), (uint64_t)n, -1, (uint64_t)offset);
         return -1;
     }
@@ -674,7 +721,7 @@ int vfs_source_plan_acquire(P4VfsOriginKind layer, const char *path, P4VfsSource
         if (!stream) return -1;
         if (p4_os_file_identity(stream, &identity) || identity.size > INT64_MAX) { fclose(stream); return -1; }
     }
-    P4VfsSourcePlan *plan = malloc(sizeof *plan);
+    P4VfsSourcePlan *plan = calloc(1, sizeof *plan);
     if (!plan) { if (layer == P4_VFS_DEVELOPER) fclose(stream); return -1; }
     plan->slot.used = 1; plan->slot.fp = stream; plan->slot.owned = layer == P4_VFS_DEVELOPER;
     plan->slot.entry = index; plan->slot.layer = layer == P4_VFS_DEVELOPER ? -2 : -1;
@@ -762,6 +809,7 @@ int vfs_close(int fd)
         return -1;
     }
     s = &slots[fd];
+    if (s->virtual_handle) virtual_source.release(virtual_source.user, s->virtual_handle);
     if (s->owned) {
         fclose(s->fp);
     }
@@ -778,7 +826,8 @@ int vfs_disc_locate(const char *path, long long *offset, long long *size)
     int container;
     int idx;
 
-    if (!mounted || normalise(path, key, sizeof key) != 0 || key[0] == '\0') {
+    if (!mounted || (virtual_source.open && !virtual_source.allow_disc) ||
+        normalise(path, key, sizeof key) != 0 || key[0] == '\0') {
         return -1;
     }
     container = split_label(key, &rest);
@@ -809,7 +858,7 @@ int vfs_disc_extent(int fd, long long *offset, int *container)
 
 int vfs_is_override(int fd)
 {
-    return fd >= 0 && fd < OPEN_MAX && slots[fd].used && slots[fd].owned;
+    return fd >= 0 && fd < OPEN_MAX && slots[fd].used && (slots[fd].owned || slots[fd].virtual_handle);
 }
 
 int vfs_disc_read_sectors(unsigned int lsn, unsigned int sectors, void *dst)
@@ -817,7 +866,7 @@ int vfs_disc_read_sectors(unsigned int lsn, unsigned int sectors, void *dst)
     size_t want = (size_t)sectors * CD_SECTOR;
     uint64_t trace_start, trace_end;
 
-    if (!mounted || !disc) {
+    if (!mounted || !disc || (virtual_source.open && !virtual_source.allow_disc)) {
         return -1;
     }
     trace_start = p4pc_prof_span_begin();
@@ -937,6 +986,14 @@ static int cmp_item(const void *a, const void *b)
     return y->from_override - x->from_override;
 }
 
+typedef struct VirtualListing { listing_t *listing; int priority; } VirtualListing;
+static int gather_virtual(const char *name, int directory, long long size, void *user)
+{
+    VirtualListing *context = user;
+    if (!name || !*name || strchr(name, '/') || strchr(name, '\\') || size < 0 || context->priority <= 0) return -1;
+    return add_item(context->listing, name, strlen(name), directory, context->priority--, size);
+}
+
 typedef struct IndexedListing { listing_t *listing; int layer; } IndexedListing;
 static int gather_indexed(const char *relative, int directory, void *user)
 {
@@ -958,6 +1015,36 @@ static int gather_indexed(const char *relative, int directory, void *user)
     return add_item(context->listing, name, name_length, directory, context->layer + 1, size);
 }
 
+/* One entry of a loose-file layer's directory: a directory or a regular file whose name is already upper case. */
+typedef struct { listing_t *L; int layer; const char *host_dir; int failed; } HostScan;
+static void gather_host_entry(const char *name, void *user)
+{
+    HostScan *scan = user;
+    char host[HOST_PATH_MAX];
+    char upper[NAME_CAP];
+    P4HostStat st;
+    long long sz = 0;
+    size_t nl = strlen(name);
+
+    if (scan->failed || strcmp(name, ".") == 0 || strcmp(name, "..") == 0 || nl >= NAME_CAP) {
+        return;
+    }
+    for (size_t k = 0; k <= nl; k++) {
+        upper[k] = upper_ascii((unsigned char)name[k]);
+    }
+    if (strcmp(upper, name) != 0) return;
+    if (snprintf(host, sizeof host, "%s/%s", scan->host_dir, name) >= (int)sizeof host ||
+        p4_host_stat(host, &st) != 0) {
+        return;
+    }
+    if (st.is_dir) {
+        if (add_item(scan->L, upper, nl, 1, scan->layer + 1, 0) != 0) scan->failed = 1;
+    } else if (st.is_file) {
+        if (host_size(host, &sz) != 0) return;
+        if (add_item(scan->L, upper, nl, 0, scan->layer + 1, sz) != 0) scan->failed = 1;
+    }
+}
+
 /* Gathers the children of directory `dir` from both layers, one per name, sorted. Sets
  * L->any when `dir` exists in either layer (it has a child, or an override directory). */
 static int gather(const char *dir, listing_t *L)
@@ -969,16 +1056,14 @@ static int gather(const char *dir, listing_t *L)
     int more;
     int w = 0;
     int n;
-    DIR *d;
-    struct dirent *de;
 
     if (dir[0]) {
-        struct stat st;
-        int winner = host_path(dir, -1, -1, host_dir, sizeof host_dir);
-        if (winner >= 0 && (stat(host_dir, &st) != 0 || !S_ISDIR(st.st_mode) ||
+        P4HostStat st;
+        int winner = virtual_source.open ? -1 : host_path(dir, -1, -1, host_dir, sizeof host_dir);
+        if (winner >= 0 && (p4_host_stat(host_dir, &st) != 0 || !st.is_dir ||
             (override_roots[winner].index.resolve && !p4_os_is_dir_nofollow(host_dir)))) return -1;
     }
-    for (int i = 0; i < n_entries; i++) {
+    for (int i = 0; i < n_entries && (!virtual_source.open || virtual_source.allow_disc); i++) {
         if (full_key(&entries[i], full, sizeof full) != 0 || child_of(dir, full, &name, &len, &more) != 0) {
             continue;
         }
@@ -987,8 +1072,14 @@ static int gather(const char *dir, listing_t *L)
             return -1;
         }
     }
+    if (virtual_source.open) {
+        VirtualListing context = {L, INT_MAX / 2};
+        int result = virtual_source.list(virtual_source.user, dir, gather_virtual, &context);
+        if (result < 0) return -1;
+        if (!result) L->any = 1;
+    }
 
-    for (int layer = 0; layer < override_count; layer++) {
+    for (int layer = 0; layer < override_count && !virtual_source.open; layer++) {
         const OverrideRoot *root = &override_roots[layer];
         if (root->index.list) {
             IndexedListing context = {L, layer};
@@ -998,43 +1089,10 @@ static int gather(const char *dir, listing_t *L)
             continue;
         }
         if (resolve_root(root, dir, host_dir, sizeof host_dir) != 0) continue;
-        d = opendir(host_dir);
-        if (d) {
+        HostScan scan = {L, layer, host_dir, 0};
+        if (p4_os_list_dir(host_dir, gather_host_entry, &scan) == 0) {
             L->any = 1;
-            while ((de = readdir(d)) != NULL) {
-                char host[HOST_PATH_MAX];
-                char upper[NAME_CAP];
-                struct stat st;
-                long long sz = 0;
-                size_t nl = strlen(de->d_name);
-
-                if (strcmp(de->d_name, ".") == 0 || strcmp(de->d_name, "..") == 0 || nl >= NAME_CAP) {
-                    continue;
-                }
-                for (size_t k = 0; k <= nl; k++) {
-                    upper[k] = upper_ascii((unsigned char)de->d_name[k]);
-                }
-                if (strcmp(upper, de->d_name) != 0) continue;
-                if (snprintf(host, sizeof host, "%s/%s", host_dir, de->d_name) >= (int)sizeof host ||
-                    stat(host, &st) != 0) {
-                    continue;
-                }
-                if (S_ISDIR(st.st_mode)) {
-                    if (add_item(L, upper, nl, 1, layer + 1, 0) != 0) {
-                        closedir(d);
-                        return -1;
-                    }
-                } else if (S_ISREG(st.st_mode)) {
-                    if (host_size(host, &sz) != 0) {
-                        continue;
-                    }
-                    if (add_item(L, upper, nl, 0, layer + 1, sz) != 0) {
-                        closedir(d);
-                        return -1;
-                    }
-                }
-            }
-            closedir(d);
+            if (scan.failed) return -1;
         }
     }
 
@@ -1117,7 +1175,7 @@ int vfs_stat(const char *path, int *is_dir, long long *size)
 {
     char key[KEY_MAX];
     char host[HOST_PATH_MAX];
-    struct stat st;
+    P4HostStat st;
     const char *rest;
     listing_t L;
     int container;
@@ -1134,23 +1192,33 @@ int vfs_stat(const char *path, int *is_dir, long long *size)
     }
     container = split_label(key, &rest);
     idx = find_entry(rest, container);
-    int layer = host_path(key, idx, container, host, sizeof host);
+    int layer = virtual_source.open ? -1 : host_path(key, idx, container, host, sizeof host);
     if (layer >= 0) {
-        if (stat(host, &st) != 0 || (override_roots[layer].index.resolve &&
+        if (p4_host_stat(host, &st) != 0 || (override_roots[layer].index.resolve &&
             !p4_os_is_file_nofollow(host) && !p4_os_is_dir_nofollow(host))) return -1;
-        if (S_ISREG(st.st_mode)) {
+        if (st.is_file) {
             *is_dir = 0;
             if (host_size(host, size) != 0) {
                 return -1;
             }
             return 0;
         }
-        if (S_ISDIR(st.st_mode)) {
+        if (st.is_dir) {
             *is_dir = 1;
             *size = 0;
             return 0;
         }
         return -1;
+    }
+    if (virtual_source.open) {
+        int fd = vfs_open(path, 0);
+        if (fd >= 0) {
+            *is_dir = 0;
+            *size = slots[fd].size;
+            vfs_close(fd);
+            return 0;
+        }
+        if (!virtual_source.allow_disc) idx = -1;
     }
     if (idx >= 0) {
         *is_dir = 0;

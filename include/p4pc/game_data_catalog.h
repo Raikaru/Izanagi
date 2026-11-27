@@ -25,17 +25,27 @@ int p4_data_catalog_capture(void);
  * the selected disc is an unmodified retail image. No added-row IDs. */
 int p4_data_original_enemy_level(uint32_t id, uint8_t *level, const char **source,
     const char **sha256, const char **reason);
+/* Capture verified, unmodified Golden inputs before any edit layer. The
+ * catalog owns its keys and retains no input pointers. No-op if not requested. */
+int p4_data_catalog_capture_golden(const uint8_t *msg, size_t msg_size,
+    const uint8_t *item_names, size_t item_names_size);
+/* Discard the current unpublished Golden capture; keep the admission request
+ * so a later retry must capture verified inputs again. */
+void p4_data_catalog_golden_rollback(void);
 
 /* The working rows of the table seal, laid out as the loaded banks are (row
- * strides of game_data.h). While a view is installed every catalog read uses
- * it instead of the loaded banks; item names are the disc's. */
+ * strides of game_data.h, except the explicitly sized name banks below).
+ * While a view is installed every catalog read uses it instead of the loaded
+ * banks; item names are the disc's. */
 typedef struct P4DataBanks {
     const uint8_t *skill_element, *skill, *skill_name;   /* SKILL0, SKILL1, MSG1 */
     uint32_t skill_elements, skills, skill_names;
+    uint32_t skill_name_stride;
     const uint8_t *enemy, *enemy_affinity, *enemy_name;  /* UNIT0, UNIT1, MSG2 */
     uint32_t enemies, enemy_names;
     const uint8_t *persona, *persona_growth, *party, *persona_affinity, *persona_name; /* PERSONA0/1/2, UNIT2, MSG3 */
     uint32_t personas, parties, persona_names;
+    uint32_t persona_name_stride;
     const uint8_t *item;                                 /* ITEMTBL rows after the 16-byte header */
     uint32_t items;
     const uint8_t *floor, *formation, *encounters, *treasure; /* ENCOUNT 1, 0, 3, 4 (relocated when moved) */

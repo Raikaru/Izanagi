@@ -19,5 +19,5 @@ void p4_game_damage_native_hit_end(void);
 int32_t p4_game_damage_native_amount(uint32_t skill, uint32_t source_enemy, uint32_t source_id,
     uint32_t source_status, uint32_t target_enemy, uint32_t target_id, uint32_t target_status,
     uint32_t hit_kind, uint32_t element_valid, uint32_t element_id, int32_t stock,
-    uint32_t source_persona, uint32_t source_persona_level);
+    uint32_t source_persona, uint32_t source_persona_level, uint32_t target_side_leaf);
 #endif

@@ -3,6 +3,8 @@
 #include "game_items_internal.h"
 #include "game_table_derived_internal.h"
 #include "p4pc/game_data_edit.h"
+#include "p4pc/game_mode.h"
+#include "p4pc/golden_names_native.h"
 #include "p4pc/game_enemies.h"
 #include "p4pc/game_enemies_native.h"
 #include "p4pc/game_items.h"
@@ -42,6 +44,13 @@ static struct Disc {
     P4DataKeys *keys[P4_DATA_KIND_COUNT];
     char arcana[ARCANA_ROWS][ARCANA_NAME + 1];
 } disc;
+static int golden_requested;
+
+static void clear_catalog(void)
+{
+    for (unsigned k = 0; k < P4_DATA_KIND_COUNT; ++k) p4_data_keys_destroy(disc.keys[k]);
+    memset(&disc, 0, sizeof disc);
+}
 
 /* Independent of the effective table input: only the selected disc layer,
  * captured before VFS mount and before any package can replace UNIT.TBL. */
@@ -200,6 +209,8 @@ static P4DataKeys *unnamed_keys(P4DataKind kind, size_t rows)
 int p4_data_catalog_capture(void)
 {
     if (disc.state) return disc.state > 0 ? 0 : -1;
+    if (p4_game_mode() == P4_GAME_MODE_GOLDEN)
+        return unavailable("verified Golden catalog inputs are not available");
     P4VfsSourcePlan *plan = NULL;
     if (vfs_source_prepare_selected() || vfs_source_plan_acquire(P4_VFS_DISC, "battle/MSG.TBL", &plan) || !plan)
         return unavailable("the disc's battle/MSG.TBL could not be opened");
@@ -239,6 +250,52 @@ int p4_data_catalog_capture(void)
     disc.state = 1;
     return 0;
 }
+int p4_data_catalog_capture_golden(const uint8_t *msg, size_t msg_size,
+    const uint8_t *item_names, size_t item_names_size)
+{
+    if (!golden_requested) return 0;
+    if (disc.state > 0) return 0;
+    clear_catalog();
+    const uint8_t *blocks[4] = {0};
+    size_t sizes[4] = {0}, offset = 0;
+    if (!msg || msg_size > MSG_MAX || !item_names || item_names_size % 24u) goto invalid;
+    for (size_t i = 0; i < 4; ++i) {
+        if (offset > msg_size || msg_size - offset < 4u) goto invalid;
+        size_t n = u32le(msg + offset);
+        if (n > msg_size - offset - 4u) goto invalid;
+        blocks[i] = msg + offset + 4u;
+        sizes[i] = n;
+        offset = (offset + 4u + n + 15u) & ~(size_t)15u;
+        if (offset > msg_size) goto invalid;
+    }
+    if (sizes[0] < ARCANA_ROWS * ARCANA_NAME || sizes[0] % ARCANA_NAME ||
+        sizes[1] % P4_GOLDEN_SKILL_NAME_SIZE || sizes[2] % P4_ENEMY_NAME_SIZE ||
+        sizes[3] % P4_GOLDEN_PERSONA_NAME_SIZE ||
+        sizes[1] / P4_GOLDEN_SKILL_NAME_SIZE < P4_SKILL_RETAIL_COUNT ||
+        sizes[2] / P4_ENEMY_NAME_SIZE < P4_ENEMY_RETAIL_ROWS ||
+        sizes[3] / P4_GOLDEN_PERSONA_NAME_SIZE < P4_PERSONA_RETAIL_ROWS ||
+        item_names_size / 24u < P4_ITEM_RETAIL_COUNT) goto invalid;
+    for (size_t i = 0; i < ARCANA_ROWS && (i + 1) * ARCANA_NAME <= sizes[0]; ++i)
+        fixed_name(blocks[0] + i * ARCANA_NAME, ARCANA_NAME, disc.arcana[i], sizeof disc.arcana[i]);
+    disc.keys[P4_DATA_SKILL] = bank_keys(P4_DATA_SKILL, blocks[1], sizes[1], P4_GOLDEN_SKILL_NAME_SIZE, sizes[1] / P4_GOLDEN_SKILL_NAME_SIZE);
+    disc.keys[P4_DATA_ENEMY] = bank_keys(P4_DATA_ENEMY, blocks[2], sizes[2], P4_ENEMY_NAME_SIZE, sizes[2] / P4_ENEMY_NAME_SIZE);
+    disc.keys[P4_DATA_PERSONA] = bank_keys(P4_DATA_PERSONA, blocks[3], sizes[3], P4_GOLDEN_PERSONA_NAME_SIZE, sizes[3] / P4_GOLDEN_PERSONA_NAME_SIZE);
+    disc.keys[P4_DATA_ITEM] = bank_keys(P4_DATA_ITEM, item_names, item_names_size, 24u, item_names_size / 24u);
+    disc.keys[P4_DATA_FLOOR] = floor_keys();
+    disc.keys[P4_DATA_FORMATION] = unnamed_keys(P4_DATA_FORMATION, RETAIL_FORMATIONS);
+    disc.keys[P4_DATA_ENCOUNTERS] = unnamed_keys(P4_DATA_ENCOUNTERS, RETAIL_ENCOUNTERS);
+    disc.keys[P4_DATA_TREASURE] = unnamed_keys(P4_DATA_TREASURE, RETAIL_TREASURES);
+    for (unsigned kind = 0; kind < P4_DATA_KIND_COUNT; ++kind)
+        if (!disc.keys[kind]) { clear_catalog(); return unavailable("not enough memory for the Golden catalog keys"); }
+    disc.state = 1;
+    return 0;
+invalid:
+    return unavailable("invalid verified Golden catalog name banks");
+}
+void p4_data_catalog_golden_rollback(void)
+{
+    if (golden_requested) clear_catalog();
+}
 /* Keys come from the disc as the player owns it, before any package or
  * script can change a name; nothing is read without a script package or a
  * data layer. The data layers join the table seal here: this handler sorts
@@ -252,12 +309,16 @@ static int prepare(void *unused)
     for (size_t i = 0, count = p4_packages_count(); i < count && !needed; ++i)
         needed = (p4_package_provider_claims(p4_packages_provider(i)) & P4_PACKAGE_CLAIM_SCRIPT) != 0;
     if (needed) {
-        (void)p4_data_catalog_capture(); /* Failures are reported by the corresponding read. */
+        if (p4_game_mode() == P4_GAME_MODE_GOLDEN) golden_requested = 1;
+        else (void)p4_data_catalog_capture(); /* Failure is reported by p4.data. */
         capture_original_enemies();
     }
     return 0;
 }
-static void rollback(void *unused) { (void)unused; p4_data_edits_discard(); }
+static void rollback(void *unused) {
+    (void)unused; p4_data_edits_discard();
+    if (golden_requested) { clear_catalog(); golden_requested = 0; }
+}
 const P4PackageHandler p4_game_data_boot_provider = {
     .name = "game-data.catalog", .prepare = prepare, .rollback = rollback, .boot_phase = P4_PACKAGE_BOOT_TABLES
 };
@@ -321,7 +382,8 @@ int p4_data_catalog_live_banks(P4DataBanks *out)
     Bank b;
     if (bank(SLOT_SKILL_ELEMENT, P4_SKILL_ELEMENT_SIZE, &b)) { out->skill_element = b.base; out->skill_elements = b.rows; }
     if (bank(SLOT_SKILL, P4_SKILL_ROW_SIZE, &b)) { out->skill = b.base; out->skills = b.rows; }
-    if (bank(SLOT_SKILL_NAME, 19, &b)) { out->skill_name = b.base; out->skill_names = b.rows; }
+    out->skill_name_stride = p4_game_mode() == P4_GAME_MODE_GOLDEN ? P4_GOLDEN_SKILL_NAME_SIZE : 19;
+    if (bank(SLOT_SKILL_NAME, out->skill_name_stride, &b)) { out->skill_name = b.base; out->skill_names = b.rows; }
     Bank affinity;
     if (bank(SLOT_ENEMY, P4_ENEMY_ROW_SIZE, &b) && bank(SLOT_ENEMY_AFFINITY, P4_ENEMY_AFFINITY_SIZE, &affinity)) {
         out->enemy = b.base; out->enemy_affinity = affinity.base;
@@ -336,7 +398,8 @@ int p4_data_catalog_live_banks(P4DataBanks *out)
         if (affinity.rows < out->personas) out->personas = affinity.rows;
     }
     if (bank(SLOT_PERSONA_PARTY, P4_DATA_PARTY_ROW_SIZE, &b)) { out->party = b.base; out->parties = b.rows; }
-    if (bank(SLOT_PERSONA_NAME, P4_PERSONA_NAME_SIZE, &b)) { out->persona_name = b.base; out->persona_names = b.rows; }
+    out->persona_name_stride = p4_game_mode() == P4_GAME_MODE_GOLDEN ? P4_GOLDEN_PERSONA_NAME_SIZE : P4_PERSONA_NAME_SIZE;
+    if (bank(SLOT_PERSONA_NAME, out->persona_name_stride, &b)) { out->persona_name = b.base; out->persona_names = b.rows; }
     /* Added items read an immutable projection; only retail rows are written. */
     const P4GameItems *items = p4_game_tables_items_active();
     if (!(items && p4_game_tables_items_base(items)) && P4_G32(SLOT_ITEM)) {
@@ -421,8 +484,9 @@ static const char *authored_key(P4DataKind kind, const char *key)
 const char *p4_data_catalog_key(P4DataKind kind, size_t index)
 {
     const P4DataKeys *keys = (unsigned)kind < P4_DATA_KIND_COUNT ? disc.keys[kind] : NULL;
-    if (keys && index < p4_data_keys_count(keys)) return p4_data_keys_at(keys, (uint32_t)index);
     const uint32_t id = p4_data_catalog_id(kind, index);
+    const size_t key_index = p4_game_mode() == P4_GAME_MODE_GOLDEN && kind <= P4_DATA_ITEM ? id : index;
+    if (keys && key_index < p4_data_keys_count(keys)) return p4_data_keys_at(keys, (uint32_t)key_index);
     switch (kind) {
     case P4_DATA_SKILL: {
         const P4GameSkillView *view = p4_game_skills_find(p4_game_skills_active(), id);
@@ -461,21 +525,34 @@ const char *p4_data_catalog_name(P4DataKind kind, size_t index, char *out, size_
     if (!capacity || id == UINT32_MAX) return NULL;
     switch (kind) {
     case P4_DATA_SKILL:
-        if ((row = bank_row(SLOT_SKILL_NAME, 19, id))) { fixed_name(row, 19, out, capacity); name = out; }
+        if (seal) {
+            const uint32_t width = seal->skill_name_stride ? seal->skill_name_stride : 19;
+            if ((row = bank_row(SLOT_SKILL_NAME, width, id))) { fixed_name(row, width, out, capacity); name = out; }
+        } else if (p4_game_mode() == P4_GAME_MODE_GOLDEN)
+            name = guest_string(p4_golden_skill_name(id), out, capacity);
+        else if ((row = bank_row(SLOT_SKILL_NAME, 19, id))) { fixed_name(row, 19, out, capacity); name = out; }
         else name = guest_string(p4_game_skills_name(p4_game_skills_active(), id), out, capacity);
         break;
     case P4_DATA_ENEMY:
         if ((row = bank_row(SLOT_ENEMY_NAME, P4_ENEMY_NAME_SIZE, id))) { fixed_name(row, P4_ENEMY_NAME_SIZE, out, capacity); name = out; }
         break;
     case P4_DATA_PERSONA:
-        if ((row = bank_row(SLOT_PERSONA_NAME, P4_PERSONA_NAME_SIZE, id))) { fixed_name(row, P4_PERSONA_NAME_SIZE, out, capacity); name = out; }
+        if (seal) {
+            const uint32_t width = seal->persona_name_stride ? seal->persona_name_stride : P4_PERSONA_NAME_SIZE;
+            if ((row = bank_row(SLOT_PERSONA_NAME, width, id))) { fixed_name(row, width, out, capacity); name = out; }
+        } else if (p4_game_mode() == P4_GAME_MODE_GOLDEN)
+            name = guest_string(p4_golden_persona_name(id), out, capacity);
+        else if ((row = bank_row(SLOT_PERSONA_NAME, P4_PERSONA_NAME_SIZE, id))) {
+            fixed_name(row, P4_PERSONA_NAME_SIZE, out, capacity); name = out;
+        }
         break;
     case P4_DATA_ITEM: {
         /* A renamed retail item: the composed name, which datGetItemNameId
          * returns once battle-table completion published it. */
         const char *renamed = p4_game_tables_derived_item_name(id);
-        const char *original = seal && id < P4_ITEM_RETAIL_COUNT ? p4_data_keys_name(disc.keys[kind], id) : NULL;
-        if (renamed || seal) {
+        const int golden = p4_game_mode() == P4_GAME_MODE_GOLDEN;
+        const char *original = (seal || golden) ? p4_data_keys_name(disc.keys[kind], id) : NULL;
+        if (renamed || seal || (golden && id < P4_ITEM_RETAIL_COUNT)) {
             snprintf(out, capacity, "%s", renamed ? renamed : original ? original : "");
             name = out;
         }
@@ -522,8 +599,12 @@ int p4_data_catalog_skill(size_t index, P4DataSkill *out)
     if (id == UINT32_MAX || p4_game_skills_definition_find(p4_game_skills_active(), id, &definition)) return -1;
     uint8_t element[2] = {P4_DATA_ELEMENT_NONE, 0};
     if (definition.retail_element) memcpy(element, definition.retail_element, sizeof element);
-    else if (definition.authored && definition.authored->element_id < P4_DATA_ELEMENTS)
-        element[0] = (uint8_t)definition.authored->element_id;
+    else if (definition.authored) {
+        if (definition.authored->element_id < P4_DATA_ELEMENTS)
+            element[0] = (uint8_t)definition.authored->element_id;
+        if (p4_game_mode() == P4_GAME_MODE_GOLDEN)
+            element[1] = definition.authored->element_aux;
+    }
     p4_data_skill_decode(id, element, definition.active ? definition.metadata : NULL, out);
     return 0;
 }

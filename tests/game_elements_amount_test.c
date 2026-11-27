@@ -72,6 +72,18 @@ uint32_t p4_game_elements_native_offensive_effects(void *unit, uint32_t leaf)
     ++offense_calls;
     return leaf == offense_leaf ? offense_flags : 0;
 }
+static unsigned golden_enabled, golden_lookups;
+static u32 golden_flags, golden_selected;
+static DatUnit *golden_units;
+int p4_golden_battle_rows_enabled(void) { return (int)golden_enabled; }
+uint32_t p4_golden_skill_flags(uint32_t id) { assert(id == 10); return golden_flags; }
+uint32_t p4_golden_skill_selector(uint32_t id) { return (p4_golden_skill_flags(id) >> 9) & 15u; }
+uint32_t p4_golden_skill_unit_guest(uint32_t selector)
+{
+    assert(selector > 0 && selector <= 15);
+    ++golden_lookups; golden_selected = selector;
+    return (uint32_t)(uintptr_t)&golden_units[selector - 1];
+}
 static jmp_buf failure;
 static int expecting_failure;
 static u32 failed_line;
@@ -171,6 +183,7 @@ void (*D_00635950[11])(void) = {datCalcFormulaNoop, datScriptCalcPhysicalDamage,
 static unsigned persona_reads;
 static u16 datPersonaGetRecordId(u16 party) { assert(party == source_unit->id); ++persona_reads; return 0x2a; }
 static u8 datPersonaGetLevelByPcId(u16 party) { assert(party == source_unit->id); ++persona_reads; return 31; }
+uint32_t p4_side_ailment_native_leaf(void *unit) { (void)unit; return 0; }
 #include "../overrides/00235520.c"
 
 typedef struct Receipt {
@@ -650,6 +663,7 @@ static int initialize(void)
 #endif
     if (!arena || (uintptr_t)arena > UINT32_MAX - size) return 77;
     iGpffffb3b8 = DAT_007644A8 = arena; iGpffffb3c4 = arena + 0x10000; DAT_0076449c = arena + 0x18000;
+    golden_units = (DatUnit *)(arena + 0x1e000);
     assert(((uintptr_t)iGpffffb3b8 & 15u) == 0);
     for (unsigned i = 0; i < 190; ++i) level_factors[i] = 1.0f + i * 0.001f;
     for (unsigned i = 0; i < 32; ++i) level_steps[i] = 1.0f;
@@ -768,6 +782,21 @@ int main(int argc, char **argv)
         offense_composition(row);
         offense_policy(row);
         *row = saved;
+    }
+    {
+        static const u32 flags[] = {0, 0x100, 0x200, 0x400, 0x800, 0x1000, 0x1e00, 0x80001000u};
+        DatUnit *caller = source_unit;
+        golden_enabled = 1;
+        row->effectKind = 1; row->damageClass = 1;
+        for (size_t i = 0; i < sizeof flags / sizeof flags[0]; ++i) {
+            golden_flags = flags[i];
+            const u32 selector = (golden_flags >> 9) & 15u;
+            source_unit = selector ? &golden_units[selector - 1] : caller;
+            reset(10, 1); golden_lookups = golden_selected = 0;
+            (void)datCalcSkillAmount(10, (u8 *)caller, (u8 *)target_unit, 1, 1, 1, 0, 1);
+            assert(golden_lookups == (unsigned)(selector != 0) && golden_selected == selector);
+        }
+        golden_enabled = golden_flags = 0; source_unit = caller;
     }
     expecting_failure = 1; failed_line = 0;
     if (!setjmp(failure)) { frame.skill_id = 11; p4_game_elements_native_amount(10, source_unit, target_unit, 1, 1, 1, 0, 1, &frame, NULL); assert(0); }

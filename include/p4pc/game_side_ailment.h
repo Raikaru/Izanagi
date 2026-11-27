@@ -38,6 +38,8 @@ int p4_side_ailment_set(uint32_t unit, uint32_t leaf, uint32_t reason);
 uint32_t p4_side_ailment_clear(uint32_t unit, uint32_t reason);
 /* Landings of leaf on unit this battle (the P4_SIDE_SMTV_DECAY count). */
 uint32_t p4_side_ailment_landings(uint32_t unit, uint32_t leaf);
+/* Count a held ailment's end-of-turn tick, reset on each landing. */
+uint32_t p4_side_ailment_tick(uint32_t unit);
 /* The unit's lost turn (P4_SIDE_LOSE_TURN): reports TURN_LOST; returns 1 when
  * it holds a lose-turn ailment, else 0. Recovery is clear(RECOVERED). */
 int p4_side_ailment_turn_lost(uint32_t unit);

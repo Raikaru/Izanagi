@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctest binary="/reference/upstream_api_reference" version="2.4.9">
+  <Options order_by="file" rand_seed="0" first="0" last="4294967295" abort_after="0" subcase_filter_levels="2147483647" case_sensitive="false" no_throw="false" no_skip="false"/>
+  <TestSuite name="Conformance">
+    <TestCase name="Debugger" filename="Conformance.test.cpp" line="2252" skipped="true"/>
+    <TestCase name="InterruptInspection" filename="Conformance.test.cpp" line="2450" skipped="true"/>
+    <TestCase name="InterruptErrorInspection" filename="Conformance.test.cpp" line="2498" skipped="true"/>
+    <TestCase name="NDebugGetUpValue" filename="Conformance.test.cpp" line="2561" skipped="true"/>
+    <TestCase name="Reference" filename="Conformance.test.cpp" line="2611" skipped="true"/>
+    <TestCase name="NewUserdataOverflow" filename="Conformance.test.cpp" line="2660" skipped="true"/>
+    <TestCase name="SandboxWithoutLibs" filename="Conformance.test.cpp" line="2682" skipped="true"/>
+    <TestCase name="ApiTables" filename="Conformance.test.cpp" line="2693" skipped="true"/>
+    <TestCase name="ApiIter" filename="Conformance.test.cpp" line="2786" skipped="true"/>
+    <TestCase name="ApiCalls" filename="Conformance.test.cpp" line="2857" skipped="true"/>
+    <TestCase name="ApiAtoms" filename="Conformance.test.cpp" line="3127" skipped="true"/>
+    <TestCase name="ApiType" filename="Conformance.test.cpp" line="3171" skipped="true"/>
+    <TestCase name="ApiBuffer" filename="Conformance.test.cpp" line="3199" skipped="true"/>
+    <TestCase name="ApiStack" filename="Conformance.test.cpp" line="3255" skipped="true"/>
+    <TestCase name="ApiAlloc" filename="Conformance.test.cpp" line="3284">
+      <OverallResultsAsserts successes="2" failures="0" test_case_success="true"/>
+    </TestCase>
+    <TestCase name="ApiAllocationRateAfterFullGC" filename="Conformance.test.cpp" line="3296" skipped="true"/>
+    <TestCase name="ApiEncode" filename="Conformance.test.cpp" line="3342" skipped="true"/>
+    <TestCase name="TagMethodError" filename="Conformance.test.cpp" line="3511" skipped="true"/>
+    <TestCase name="Interrupt" filename="Conformance.test.cpp" line="3899" skipped="true"/>
+    <TestCase name="UserdataApi" filename="Conformance.test.cpp" line="4035" skipped="true"/>
+    <TestCase name="UserdataMarkCallback" filename="Conformance.test.cpp" line="4143" skipped="true"/>
+    <TestCase name="WeakRefSurvivesWhenMarked" filename="Conformance.test.cpp" line="4182" skipped="true"/>
+    <TestCase name="WeakRefCollectedWhenNotMarked" filename="Conformance.test.cpp" line="4221" skipped="true"/>
+    <TestCase name="WeakRefFullChain" filename="Conformance.test.cpp" line="4240" skipped="true"/>
+    <TestCase name="UserdataAlignment" filename="Conformance.test.cpp" line="4325" skipped="true"/>
+    <TestCase name="LightuserdataApi" filename="Conformance.test.cpp" line="4364" skipped="true"/>
+    <TestCase name="DebugApi" filename="Conformance.test.cpp" line="4426" skipped="true"/>
+    <TestCase name="HugeFunction" filename="Conformance.test.cpp" line="4985" skipped="true"/>
+    <TestCase name="HugeFunctionLoadFailure" filename="Conformance.test.cpp" line="5020" skipped="true"/>
+    <TestCase name="HugeConstantTable" filename="Conformance.test.cpp" line="5086" skipped="true"/>
+    <TestCase name="LargeNestedClosure" filename="Conformance.test.cpp" line="5139" skipped="true"/>
+    <TestCase name="SandboxFreezesVectorMetatable" filename="Conformance.test.cpp" line="5612" skipped="true"/>
+    <TestCase name="ClassInheritanceRepeatedCallMemberOffsetCorruption" filename="Conformance.test.cpp" line="5635" skipped="true"/>
+    <TestCase name="SandboxFreezesVectorMetatable" filename="Conformance.test.cpp" line="5675" skipped="true"/>
+  </TestSuite>
+  <TestSuite name="DirectFieldAccess">
+    <TestCase name="handler_setnumber_result" filename="DirectFieldAccess.test.cpp" line="61" skipped="true"/>
+    <TestCase name="handler_setboolean_result" filename="DirectFieldAccess.test.cpp" line="89" skipped="true"/>
+    <TestCase name="repeated_access_handler_called_every_iteration" filename="DirectFieldAccess.test.cpp" line="127" skipped="true"/>
+    <TestCase name="unregistered_tag_falls_through_to_index_metamethod" filename="DirectFieldAccess.test.cpp" line="162" skipped="true"/>
+    <TestCase name="multiple_fields_same_type_dispatch_independently" filename="DirectFieldAccess.test.cpp" line="216" skipped="true"/>
+    <TestCase name="same_field_name_different_tags_dispatch_independently" filename="DirectFieldAccess.test.cpp" line="254" skipped="true"/>
+  </TestSuite>
+  <OverallResultsAsserts successes="2" failures="0"/>
+  <OverallResultsTestCases successes="1" failures="0" skipped="39"/>
+</doctest>

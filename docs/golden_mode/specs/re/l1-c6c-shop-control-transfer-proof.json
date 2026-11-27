@@ -1,0 +1,180 @@
+{
+  "proof_id": "L1-c6C-Main-transferred-shop-controller-trace-20261113",
+  "scope": "Only Main-authorized0063f3e0/00763960; separate from original114setC and new44A1C. No shared coefficients changed.",
+  "runtime_status": "pending-seam",
+  "source_pins": {
+    "steam_build": 10836033,
+    "steam_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+    "switch_mapped_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+    "switch_nso_sha256": "854c7a1e33de1619abf009fa7f32b8c012960d685c8bf1bf99a92a6a4d0bda1c",
+    "ps2_elf_sha256": "f90675b8a38138ddb5dc5cdf641550f41800fcb86bb499c586073e964fb41836",
+    "ps2_decomp_revision": "18016afe6"
+  },
+  "method": "Positive exact common/concrete task constructors, descriptor/resource/state correspondence and actual old varargs argument ABI. No label-only/no-reference/byte-similarity absence closure, no.arch decoding or game execution.",
+  "rows": [
+    {
+      "address": "0x0063f3e0",
+      "size": 32,
+      "decision": "PROVEN",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "be20dde45e62a3099606804508cf58fa56385f73a5b1fbef1ac72175efc3a61c",
+        "readers": [
+          {
+            "function": "0x2bdb50",
+            "name": "fclShopCreate",
+            "file": "src/Event/Fcl/y_fclShop.c"
+          }
+        ]
+      },
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".xpdata",
+        "rva": "0xa7a290",
+        "raw_offset": 10979984,
+        "size": 14,
+        "sha256": "646b9a8133216902b0d98c352bf00037a0564bbcff547bad3827227d7dd53b29",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "structural_correspondence": "PS22bdb50 creates shared Y_FclShopMainProc at priorityF,1840-hex-byte work and mode-dependent shop state, followed by old draw/task/resource paths. Golden splits that old ownership into registered concrete weapon/item owners and a true shared core. Native1987f0 is the corresponding common resource/state task constructor:39f2b0(parent,fcl_shop_base,C6,0,0,198910,19b9f0,work), sized8c0 plus actual descriptor counts, publishes callback-vector at+858,descriptor+860 and actual adopted resource arrays. Native1b15d0 weapon and18b540 item supply their actual descriptor/callbacks and own root/draw/state work; the published facility proof independently seals their actual Steam ARC/PLG/CTB/BF/SPR lifetimes. Actual Steam.shared286650..2867a1 constructs the corresponding shared core from a7a290 and the same descriptor/count-driven resource shape; NativeGOT880a98 resolves to764d8b. The source-proven common-core scheduler name is fcl_shop_base, not the old single controller name. The complete native namespace also includes concrete fcl_shop_weapon and fcl_shop_item, so this is not permission to rename an old single task and retain its mode/work/child graph.",
+      "required_seams": [
+        "shop-controller-identity:replace all old2bdb50/shared-name/create/lookup/update/destroy and computed aliases with actual registered concrete weapon/item roots plus native descriptor/callback-driven fcl_shop_base child and parent association",
+        "shop-controller-identity:bind exact full native three-task namespace and actual work sizes, callbacks, resources, state/input/draw/lifetime from facility proof; never treat priorityC6 or any native layout as oldF/1840 compatibility"
+      ],
+      "golden_string": "fcl_shop_base",
+      "switch": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x7100764d8b",
+        "size": 14,
+        "sha256": "646b9a8133216902b0d98c352bf00037a0564bbcff547bad3827227d7dd53b29",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "native_constructor": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x71001987f0",
+        "size": 320,
+        "sha256": "b88ecc3e6425ce3c354284a9eb03e0575df57b0c0b37ff025ea86e7a5d5f6fc8",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "steam_constructor": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".shared",
+        "rva": "0x286650",
+        "raw_offset": 2645072,
+        "size": 337,
+        "sha256": "3da35d42489eeda529fc65dd820ee2a944be7c4728e040ede870f5636caf26ca",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "native_name_GOT": "880a98",
+      "native_owner_names": [
+        {
+          "role": "weapon-root",
+          "string": "fcl_shop_weapon",
+          "steam": {
+            "container": "P4G.exe",
+            "source_build": 10836033,
+            "section": ".xpdata",
+            "rva": "0xa7a310",
+            "raw_offset": 10980112,
+            "size": 16,
+            "sha256": "019afee7bec1043e854797a8c3c5ce11773765a5178e6aabdd9c406de8ac57f8",
+            "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+            "mapping_proven": true
+          },
+          "switch": {
+            "container": "Switch 1.2 mapped NSO",
+            "address": "0x7100764f67",
+            "size": 16,
+            "sha256": "019afee7bec1043e854797a8c3c5ce11773765a5178e6aabdd9c406de8ac57f8",
+            "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+          },
+          "constructor": "1b15d0",
+          "registered_entry": "278290"
+        },
+        {
+          "role": "item-root",
+          "string": "fcl_shop_item",
+          "steam": {
+            "container": "P4G.exe",
+            "source_build": 10836033,
+            "section": ".xpdata",
+            "rva": "0xa7a240",
+            "raw_offset": 10979904,
+            "size": 14,
+            "sha256": "6fe1375d2f436eb26d32c0e3ee901dbb008f6d0721f6cc7e1a4ee2e2eaf2e656",
+            "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+            "mapping_proven": true
+          },
+          "switch": {
+            "container": "Switch 1.2 mapped NSO",
+            "address": "0x7100764bc0",
+            "size": 14,
+            "sha256": "6fe1375d2f436eb26d32c0e3ee901dbb008f6d0721f6cc7e1a4ee2e2eaf2e656",
+            "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+          },
+          "constructor": "18b540",
+          "registered_entry": "2782d0"
+        }
+      ],
+      "ps2_live_bytes": 18,
+      "ps2_alignment_tail_bytes": 14
+    },
+    {
+      "address": "0x00763960",
+      "size": 8,
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "03ab91834d212ad6962ddfafc8ba107d89613f750829c975e7b47e45c328b4c5",
+        "readers": [
+          {
+            "function": "0x2bdf20",
+            "name": "fclShopLoadMessageResources",
+            "file": "src/Event/Fcl/y_fclShop.c"
+          }
+        ]
+      },
+      "source": {
+        "kind": "retired-old-shop-source-location-printf-in-replaced-loader-protocol",
+        "native_loader": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x7100198930",
+          "size": 8896,
+          "sha256": "542eaa71cc0c9206ea1141c88a330bcb76286448c502e17160d1f88fc1241775",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+        },
+        "native_tag_operation": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x710039d420",
+          "size": 4,
+          "sha256": "110f46b5b35c069160560c6ad6786f647dd44e8760a52a46fc22dbbcd7630b91",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+        },
+        "related_facility_proof": "docs/golden_mode/specs/re/l1-c6c-facility-native-proof.json"
+      },
+      "structural_correspondence": "Actual old format use is positive and more precise than a load-progress label: gp7690f0-5790=763960; at2bdf58..2bdf68 a0 is this%s %d format,a1 is old sourcefilename63f3c8,a2 is source-line179hex. The call440b68 is the real varargs debug printer: it saves a1..a7, sets a1=original-format,a2=va_list, loads current output-area context and calls4447f8. Thus this prints a sourcefile and line before old directory loading, not a resource path/count and not a mutable pair or false LUI reference. The positively corresponding Golden shop resource protocol is the actual shared Native198930 state machine, fed by descriptors764fe0/764c20 and concrete weapon/item constructors: it requests the actual five/six qualified parent/member sources, polls them, adopts/copies the typed BMD/BF/CTB/PLG/SPR resources, and owns destruction/state progression. This complete replacement graph is sealed in the facility proof and has no old nine-message directory-load/source-printf step. Native allocation-site instrumentation at actual owner/loader copy sites uses39d420(file,line); its observed entry instruction is RET, so it has neither a format/buffer nor a print side effect. The old separate source-location-printf image literal/ABI retires with that positively replaced operation. Do not infer removal merely because identical%s %d bytes also occur elsewhere.",
+      "required_seams": [
+        "shop-source-trace-retirement:replace complete old2bdf20 directory/nine-message/trace operation and every alias with actual native descriptor-qualified5/6-resource lifecycle and native source-tag behavior; do not emit old%s %d or add substitute release logging",
+        "shop-source-trace-retirement:preserve real loader readiness/errors/adoption/free and UI startup semantics; retain only native actual behavior, not an empty/fake loader"
+      ],
+      "ps2_call": {
+        "gp": "7690f0",
+        "signed_offset": "-5790",
+        "pc": "2bdf58..2bdf68",
+        "format": "%s %d",
+        "arguments": [
+          "sourcefilename63f3c8",
+          "source-line179hex"
+        ],
+        "printf_wrapper": "440b68",
+        "vprintf_target": "4447f8"
+      },
+      "ps2_live_bytes": 6,
+      "ps2_alignment_tail_bytes": 2
+    }
+  ]
+}

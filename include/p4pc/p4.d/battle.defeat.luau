@@ -1,11 +1,11 @@
 --!capability battle.defeat@1
--- p4.battle.defeat: the one handler that answers a lost field battle before its Game Over: let it run, hold it, or retry the battle from its start.
--- source: "field" for a field script's encounter (story bosses), "collision" for a shadow touched on the field.
+-- p4.battle.defeat: the one handler that answers a lost field or script battle before its Game Over: let it run, hold it, or retry the battle from its start.
+-- source: "field" for a field event's encounter, "script" for a story boss a script starts (Shadow Yukiko), "collision" for a shadow touched on the field.
 -- polls: earlier calls for this defeat. allowed/reason: whether the "retry" authorizers (and a recorded
 -- battle start) allow a retry. party: the fighters' battle-start HP, SP and ailment word, which a retry restores.
 export type P4DefeatMember = { id: number, hp: number, sp: number, ailments: number }
 export type P4DefeatContext = {
-    name: "defeat", encounter: number, source: "field" | "collision", polls: number,
+    name: "defeat", encounter: number, source: "field" | "script" | "collision", polls: number,
     allowed: boolean, reason: string, party: { P4DefeatMember },
 }
 --!in p4.battle

@@ -1,0 +1,1633 @@
+{
+  "schema": 1,
+  "cohort": 4,
+  "date": "2026-11-13",
+  "checkpoint_status": "Initial d6d680ade source checkpoint; remaining 13 directory rows superseded by followup. Four non-directory rows transferred to c6 by Main; not modified by followup.",
+  "followup_receipt": "docs/golden_mode/specs/re/l1-directory-migration-followup-proof.json",
+  "author": "GoldenRE-L1-c4",
+  "contract": "docs/golden_mode/specs/re/l1-directory-resource-routes.md",
+  "owner_direction": "Main 2026-11-13: source/architecture D10c may be pending-seam; M10 implements Golden-resource routes, not current M6b typed-table loader. Keep unproved mappings OPEN.",
+  "counts": {
+    "PROVEN": {
+      "objects": 0,
+      "ps2_bytes": 0
+    },
+    "PROVEN-code": {
+      "objects": 0,
+      "ps2_bytes": 0
+    },
+    "PROVEN-layout": {
+      "objects": 0,
+      "ps2_bytes": 0
+    },
+    "D10a": {
+      "objects": 0,
+      "ps2_bytes": 0
+    },
+    "D10b": {
+      "objects": 0,
+      "ps2_bytes": 0
+    },
+    "D10c": {
+      "objects": 43,
+      "ps2_bytes": 42644
+    },
+    "OPEN-retain": {
+      "objects": 17,
+      "ps2_bytes": 32562
+    }
+  },
+  "runtime_qualification": false,
+  "ps2_decomp_pin": "18016afe6",
+  "steam_build": 10836033,
+  "steam_exe_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+  "nso_sha256": "854c7a1e33de1619abf009fa7f32b8c012960d685c8bf1bf99a92a6a4d0bda1c",
+  "nso_mapped_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+  "source_boundary": "ordinary NSO + Steam CPK TOCs/data; no protected .arch decode, game execution, or runtime NSO use",
+  "architecture_proof": {
+    "ps2_selector": "00455230: paired nonempty names to actual #DirLst# list pointers, not command bytecode",
+    "table_counts": {
+      "BTL": 19,
+      "VOL": 146
+    },
+    "ps2_registration": [
+      {
+        "volume": "DATA",
+        "cvm": "CDV:/data.cvm",
+        "list_root": "0x00559840"
+      },
+      {
+        "volume": "BGM",
+        "cvm": "CDV:/bgm.cvm",
+        "list_root": "0x005c4ec0"
+      },
+      {
+        "volume": "BTL",
+        "cvm": "CDV:/btl.cvm",
+        "list_root": "0x005c6350"
+      },
+      {
+        "volume": "ENV",
+        "cvm": "CDV:/env.cvm",
+        "list_root": "0x005db850"
+      }
+    ],
+    "ps2_list_shape": {
+      "header_size": 24,
+      "entry_stride": 48,
+      "entry_name_offset": 14,
+      "flags_offset": 12,
+      "allocation_alignment": 16,
+      "selected_directory_partitions": 56,
+      "selected_directory_bytes": 72730,
+      "rejected_non_directory_objects": 4,
+      "rejected_non_directory_bytes": 2476
+    },
+    "golden_bind": "3974a0 initialization; 39779c/3977ac/3977bc/3977cc bind selected locale/base/movie/sysdat via 397850 -> 42d7b0 -> 42d7c0",
+    "golden_request": "397d20 copies logical name at request+10; 3979a0 pump: 397a78..397a88 queries binder/name, 397b38..397b50 reads queried size at offset zero",
+    "scope": "No counterpart of PS2 static CVM image-literal representation on these positively traced Golden routes. Dynamic Golden archive metadata is the functional successor, not an identical PS2 layout. No exhaustive binary non-use claim."
+  },
+  "classes": {
+    "event-polymovie": [
+      "0x0056fd40",
+      "0x00570053",
+      "0x00570109",
+      "0x005702bc",
+      "0x005703f0",
+      "0x00570503",
+      "0x00572140",
+      "0x00572910",
+      "0x00573c00",
+      "0x00574dd0",
+      "0x005766e0",
+      "0x00577320",
+      "0x00578580",
+      "0x00579370",
+      "0x00579a20",
+      "0x0057a160",
+      "0x0057bb90",
+      "0x0057c980",
+      "0x0057cc40",
+      "0x0057d640",
+      "0x0057db40",
+      "0x0057fec0",
+      "0x00584170",
+      "0x00584341",
+      "0x00589720",
+      "0x0058a530",
+      "0x0058ab90",
+      "0x0058c000"
+    ],
+    "event-script": [
+      "0x00594244",
+      "0x00594d45",
+      "0x0059524f",
+      "0x00595452"
+    ],
+    "field-grmd": [
+      "0x005968d0"
+    ],
+    "field-script": [
+      "0x005a0023",
+      "0x005a0069",
+      "0x005a0113",
+      "0x005a02bc",
+      "0x005a03f7"
+    ],
+    "staff": [
+      "0x005bbcd0"
+    ],
+    "minimap": [
+      "0x005bc5d0",
+      "0x005bc6e0"
+    ],
+    "battle-boss": [
+      "0x005c67b0"
+    ],
+    "skill-effects": [
+      "0x005d00d0"
+    ]
+  },
+  "packed_sources": [
+    {
+      "logical_path": "system/effect/effpack.bin",
+      "members": [
+        {
+          "children": 22,
+          "kind": "pak-v2",
+          "path": "data.cpk::init_free.bin::system/effect/effpack.bin",
+          "sha256": "5d044b2b1060dd2caefdd1210fc093af274bd974d097f15732c865fcbd7c7b3b",
+          "signature": "rw-chunk-16",
+          "size": 208540
+        }
+      ]
+    },
+    {
+      "logical_path": "smap/i_mini_map01x2.spr",
+      "members": [
+        {
+          "path": "data.cpk::init_free.bin::smap/i_mini_map01x2.spr",
+          "sha256": "af495b3192b46a9bc16d6dc17fde56794fe89e82e725b74c472653da793ca17a",
+          "signature": "spr",
+          "size": 273696
+        }
+      ]
+    },
+    {
+      "logical_path": "smap/symbol/smap_p.tmx",
+      "members": [
+        {
+          "path": "data.cpk::init_free.bin::smap/symbol/smap_p.tmx",
+          "sha256": "099116af4952225ff2d1f31b3d45b16bea26cc56f4099b1fc329b2cb661cc823",
+          "signature": "tmx",
+          "size": 2112
+        }
+      ]
+    },
+    {
+      "logical_path": "facility/46shop_spr01.spr",
+      "members": []
+    },
+    {
+      "logical_path": "facility/ps_model.bin",
+      "members": []
+    },
+    {
+      "logical_path": "model/field/fc_01_00.amd",
+      "members": [
+        {
+          "path": "data.cpk::model/field/fc_01_00.AMD",
+          "sha256": "97946a90c321986afd156af3cfb03c629ea49b85c8793c8d28656aca80458294",
+          "signature": "amd-chunk",
+          "size": 362816
+        }
+      ]
+    },
+    {
+      "logical_path": "sound/adx2/bgm/snd00_bgm.awb",
+      "members": [
+        {
+          "children": 871,
+          "kind": "cri-afs2",
+          "path": "data.cpk::sound/adx2/bgm/snd00_bgm.awb",
+          "sha256": "fa4ce7c774bb852875695d5737a002ab258d2d7e0e51a9555cc5fe69a361f6f8",
+          "signature": "cri-afs2",
+          "size": 298338478
+        }
+      ]
+    }
+  ],
+  "rows": [
+    {
+      "address": "0x0056d430",
+      "root": "0x0056d430",
+      "size": 224,
+      "offset": 0,
+      "live_size": 216,
+      "header_count": 4,
+      "volume": "VOL",
+      "path": "\\EFFECT\\",
+      "ps2_file_count": 2,
+      "golden_subtree_count": 91,
+      "same_basename_count": 0,
+      "matched_path_examples": [],
+      "source_sha256": "6f6ba53d8c0c712c60ba0772a23af44dfd002553dc80c1afb11cac2c8e485005",
+      "route_class": null,
+      "decision": "OPEN-retain",
+      "runtime_status": "unproven-source",
+      "required_seams": [],
+      "blocker": "EFFPACK has a named Golden successor, but full Z0.TMX consumer/routing contract is unproved."
+    },
+    {
+      "address": "0x0056fd40",
+      "root": "0x0056fd40",
+      "size": 787,
+      "offset": 0,
+      "live_size": 1704,
+      "header_count": 35,
+      "volume": "VOL",
+      "path": "\\EVENT\\E120\\",
+      "ps2_file_count": 33,
+      "golden_subtree_count": 33,
+      "same_basename_count": 33,
+      "matched_path_examples": [
+        "event/e120/E120_001.PM1",
+        "event/e120/E120_001.PM2",
+        "event/e120/E120_001.PM3"
+      ],
+      "source_sha256": "16b75f2f5633cac421af3fd8b6d6bd4393b03fe79a2e824a192d400d872b5ed2",
+      "route_class": "event-polymovie",
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:event-polymovie"
+      ]
+    },
+    {
+      "address": "0x00570053",
+      "root": "0x0056fd40",
+      "size": 112,
+      "offset": 787,
+      "live_size": 1704,
+      "header_count": 35,
+      "volume": "VOL",
+      "path": "\\EVENT\\E120\\",
+      "ps2_file_count": 33,
+      "golden_subtree_count": 33,
+      "same_basename_count": 33,
+      "matched_path_examples": [
+        "event/e120/E120_001.PM1",
+        "event/e120/E120_001.PM2",
+        "event/e120/E120_001.PM3"
+      ],
+      "source_sha256": "16b75f2f5633cac421af3fd8b6d6bd4393b03fe79a2e824a192d400d872b5ed2",
+      "route_class": "event-polymovie",
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:event-polymovie"
+      ]
+    },
+    {
+      "address": "0x00570109",
+      "root": "0x0056fd40",
+      "size": 435,
+      "offset": 969,
+      "live_size": 1704,
+      "header_count": 35,
+      "volume": "VOL",
+      "path": "\\EVENT\\E120\\",
+      "ps2_file_count": 33,
+      "golden_subtree_count": 33,
+      "same_basename_count": 33,
+      "matched_path_examples": [
+        "event/e120/E120_001.PM1",
+        "event/e120/E120_001.PM2",
+        "event/e120/E120_001.PM3"
+      ],
+      "source_sha256": "16b75f2f5633cac421af3fd8b6d6bd4393b03fe79a2e824a192d400d872b5ed2",
+      "route_class": "event-polymovie",
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:event-polymovie"
+      ]
+    },
+    {
+      "address": "0x005702bc",
+      "root": "0x0056fd40",
+      "size": 308,
+      "offset": 1404,
+      "live_size": 1704,
+      "header_count": 35,
+      "volume": "VOL",
+      "path": "\\EVENT\\E120\\",
+      "ps2_file_count": 33,
+      "golden_subtree_count": 33,
+      "same_basename_count": 33,
+      "matched_path_examples": [
+        "event/e120/E120_001.PM1",
+        "event/e120/E120_001.PM2",
+        "event/e120/E120_001.PM3"
+      ],
+      "source_sha256": "16b75f2f5633cac421af3fd8b6d6bd4393b03fe79a2e824a192d400d872b5ed2",
+      "route_class": "event-polymovie",
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:event-polymovie"
+      ]
+    },
+    {
+      "address": "0x005703f0",
+      "root": "0x005703f0",
+      "size": 275,
+      "offset": 0,
+      "live_size": 1416,
+      "header_count": 29,
+      "volume": "VOL",
+      "path": "\\EVENT\\E130\\",
+      "ps2_file_count": 27,
+      "golden_subtree_count": 27,
+      "same_basename_count": 27,
+      "matched_path_examples": [
+        "event/e130/E132_001.PM1",
+        "event/e130/E132_001.PM2",
+        "event/e130/E132_001.PM3"
+      ],
+      "source_sha256": "8d87f38577f89a079a1548eba5ab21c9990b0961238de39fdfb5edbc27bc706f",
+      "route_class": "event-polymovie",
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:event-polymovie"
+      ]
+    },
+    {
+      "address": "0x00570503",
+      "root": "0x005703f0",
+      "size": 765,
+      "offset": 275,
+      "live_size": 1416,
+      "header_count": 29,
+      "volume": "VOL",
+      "path": "\\EVENT\\E130\\",
+      "ps2_file_count": 27,
+      "golden_subtree_count": 27,
+      "same_basename_count": 27,
+      "matched_path_examples": [
+        "event/e130/E132_001.PM1",
+        "event/e130/E132_001.PM2",
+        "event/e130/E132_001.PM3"
+      ],
+      "source_sha256": "8d87f38577f89a079a1548eba5ab21c9990b0961238de39fdfb5edbc27bc706f",
+      "route_class": "event-polymovie",
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:event-polymovie"
+      ]
+    },
+    {
+      "address": "0x00572140",
+      "root": "0x00572140",
+      "size": 2000,
+      "offset": 0,
+      "live_size": 1992,
+      "header_count": 41,
+      "volume": "VOL",
+      "path": "\\EVENT\\E180\\",
+      "ps2_file_count": 39,
+      "golden_subtree_count": 39,
+      "same_basename_count": 39,
+      "matched_path_examples": [
+        "event/e180/E180_001.PM1",
+        "event/e180/E180_001.PM2",
+        "event/e180/E180_001.PM3"
+      ],
+      "source_sha256": "c3eeb31c97ff28ccd59fde00a87ed44a01f806a137d4f655a5204844867b3212",
+      "route_class": "event-polymovie",
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:event-polymovie"
+      ]
+    },
+    {
+      "address": "0x00572910",
+      "root": "0x00572910",
+      "size": 1568,
+      "offset": 0,
+      "live_size": 1560,
+      "header_count": 32,
+      "volume": "VOL",
+      "path": "\\EVENT\\E190\\",
+      "ps2_file_count": 30,
+      "golden_subtree_count": 36,
+      "same_basename_count": 30,
+      "matched_path_examples": [
+        "event/e190/E190_001.PM1",
+        "event/e190/E190_001.PM2",
+        "event/e190/E190_001.PM3"
+      ],
+      "source_sha256": "1d9b1d37e503bd0fb27fcacea2e6c6603b3a6951ce0848839c003a72d93fc576",
+      "route_class": "event-polymovie",
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:event-polymovie"
+      ]
+    },
+    {
+      "address": "0x00573c00",
+      "root": "0x00573c00",
+      "size": 1424,
+      "offset": 0,
+      "live_size": 1416,
+      "header_count": 29,
+      "volume": "VOL",
+      "path": "\\EVENT\\E220\\",
+      "ps2_file_count": 27,
+      "golden_subtree_count": 51,
+      "same_basename_count": 27,
+      "matched_path_examples": [
+        "event/e220/E220_001.PM1",
+        "event/e220/E220_001.PM2",
+        "event/e220/E220_001.PM3"
+      ],
+      "source_sha256": "304bb6b894c332a93699ab743fe5bde6159789a7f634cf224128898de64a2d20",
+      "route_class": "event-polymovie",
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:event-polymovie"
+      ]
+    },
+    {
+      "address": "0x00574dd0",
+      "root": "0x00574dd0",
+      "size": 1712,
+      "offset": 0,
+      "live_size": 1704,
+      "header_count": 35,
+      "volume": "VOL",
+      "path": "\\EVENT\\E250\\",
+      "ps2_file_count": 33,
+      "golden_subtree_count": 33,
+      "same_basename_count": 33,
+      "matched_path_examples": [
+        "event/e250/E250_001.PM1",
+        "event/e250/E250_001.PM2",
+        "event/e250/E250_001.PM3"
+      ],
+      "source_sha256": "6a30b9d3107ad294a5ad956d86b11b07a6cfff40f3b90b7adfece5a24d243977",
+      "route_class": "event-polymovie",
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:event-polymovie"
+      ]
+    },
+    {
+      "address": "0x005766e0",
+      "root": "0x005766e0",
+      "size": 1424,
+      "offset": 0,
+      "live_size": 1416,
+      "header_count": 29,
+      "volume": "VOL",
+      "path": "\\EVENT\\E290\\",
+      "ps2_file_count": 27,
+      "golden_subtree_count": 27,
+      "same_basename_count": 27,
+      "matched_path_examples": [
+        "event/e290/E290_001.PM1",
+        "event/e290/E290_001.PM2",
+        "event/e290/E290_001.PM3"
+      ],
+      "source_sha256": "1f859d1875392ce613ef57e22f153a431779645bc13e6a39be787a4ce52437fd",
+      "route_class": "event-polymovie",
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:event-polymovie"
+      ]
+    },
+    {
+      "address": "0x00577320",
+      "root": "0x00577320",
+      "size": 1424,
+      "offset": 0,
+      "live_size": 1416,
+      "header_count": 29,
+      "volume": "VOL",
+      "path": "\\EVENT\\E310\\",
+      "ps2_file_count": 27,
+      "golden_subtree_count": 48,
+      "same_basename_count": 27,
+      "matched_path_examples": [
+        "event/e310/E310_001.PM1",
+        "event/e310/E310_001.PM2",
+        "event/e310/E310_001.PM3"
+      ],
+      "source_sha256": "c5ffc1e7dad5b22ab8b7e103b0a3d1e6d7d61134a137f0551333bdc08ba6e21c",
+      "route_class": "event-polymovie",
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:event-polymovie"
+      ]
+    },
+    {
+      "address": "0x00578580",
+      "root": "0x00578580",
+      "size": 1856,
+      "offset": 0,
+      "live_size": 1848,
+      "header_count": 38,
+      "volume": "VOL",
+      "path": "\\EVENT\\E340\\",
+      "ps2_file_count": 36,
+      "golden_subtree_count": 42,
+      "same_basename_count": 36,
+      "matched_path_examples": [
+        "event/e340/E340_001.PM1",
+        "event/e340/E340_001.PM2",
+        "event/e340/E340_001.PM3"
+      ],
+      "source_sha256": "6b4233f9f344344e5194af068aae76600ff97510ae8cfd143e27395d30c82f0c",
+      "route_class": "event-polymovie",
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:event-polymovie"
+      ]
+    },
+    {
+      "address": "0x00579370",
+      "root": "0x00579370",
+      "size": 731,
+      "offset": 0,
+      "live_size": 1704,
+      "header_count": 35,
+      "volume": "VOL",
+      "path": "\\EVENT\\E360\\",
+      "ps2_file_count": 33,
+      "golden_subtree_count": 33,
+      "same_basename_count": 33,
+      "matched_path_examples": [
+        "event/e360/E360_001.PM1",
+        "event/e360/E360_001.PM2",
+        "event/e360/E360_001.PM3"
+      ],
+      "source_sha256": "249db193a975482b17ce1532821a5f3eb86c57e1504ad5a8678768ccc25bd165",
+      "route_class": "event-polymovie",
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:event-polymovie"
+      ]
+    },
+    {
+      "address": "0x00579a20",
+      "root": "0x00579a20",
+      "size": 1856,
+      "offset": 0,
+      "live_size": 1848,
+      "header_count": 38,
+      "volume": "VOL",
+      "path": "\\EVENT\\E370\\",
+      "ps2_file_count": 36,
+      "golden_subtree_count": 36,
+      "same_basename_count": 36,
+      "matched_path_examples": [
+        "event/e370/E370_001.PM1",
+        "event/e370/E370_001.PM2",
+        "event/e370/E370_001.PM3"
+      ],
+      "source_sha256": "f3a827af2b1eb9d387d9802476abcc4004d9b849ad1df569ba69e18033ba6775",
+      "route_class": "event-polymovie",
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:event-polymovie"
+      ]
+    },
+    {
+      "address": "0x0057a160",
+      "root": "0x0057a160",
+      "size": 1856,
+      "offset": 0,
+      "live_size": 1848,
+      "header_count": 38,
+      "volume": "VOL",
+      "path": "\\EVENT\\E380\\",
+      "ps2_file_count": 36,
+      "golden_subtree_count": 36,
+      "same_basename_count": 36,
+      "matched_path_examples": [
+        "event/e380/E380_001.PM1",
+        "event/e380/E380_001.PM2",
+        "event/e380/E380_001.PM3"
+      ],
+      "source_sha256": "cf97bd7b31bd2a6cbe23c5a2b2d13660bada4f12b2f56179750aa9849be6fc80",
+      "route_class": "event-polymovie",
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:event-polymovie"
+      ]
+    },
+    {
+      "address": "0x0057bb90",
+      "root": "0x0057bb90",
+      "size": 2432,
+      "offset": 0,
+      "live_size": 2424,
+      "header_count": 50,
+      "volume": "VOL",
+      "path": "\\EVENT\\E420\\",
+      "ps2_file_count": 48,
+      "golden_subtree_count": 51,
+      "same_basename_count": 48,
+      "matched_path_examples": [
+        "event/e420/E420_001.PM1",
+        "event/e420/E420_001.PM2",
+        "event/e420/E420_001.PM3"
+      ],
+      "source_sha256": "906cd553916a3d6053ad84edcf54f4ef4d4ffab4db8bfa6f0b658645e949e06a",
+      "route_class": "event-polymovie",
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:event-polymovie"
+      ]
+    },
+    {
+      "address": "0x0057c980",
+      "root": "0x0057c980",
+      "size": 704,
+      "offset": 0,
+      "live_size": 696,
+      "header_count": 14,
+      "volume": "VOL",
+      "path": "\\EVENT\\E440\\",
+      "ps2_file_count": 12,
+      "golden_subtree_count": 123,
+      "same_basename_count": 12,
+      "matched_path_examples": [
+        "event/e440/E440_001.PM1",
+        "event/e440/E440_001.PM2",
+        "event/e440/E440_001.PM3"
+      ],
+      "source_sha256": "f76223a3bb98d35ba8767dcd8118e7ce5175c43a4ebcc67fb77d750271fd2df2",
+      "route_class": "event-polymovie",
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:event-polymovie"
+      ]
+    },
+    {
+      "address": "0x0057cc40",
+      "root": "0x0057cc40",
+      "size": 560,
+      "offset": 0,
+      "live_size": 552,
+      "header_count": 11,
+      "volume": "VOL",
+      "path": "\\EVENT\\E450\\",
+      "ps2_file_count": 9,
+      "golden_subtree_count": 144,
+      "same_basename_count": 9,
+      "matched_path_examples": [
+        "event/e450/E450_001.PM1",
+        "event/e450/E450_001.PM2",
+        "event/e450/E450_001.PM3"
+      ],
+      "source_sha256": "9aa57dde962df52e90959d4bee35f5a593ab3f25bb8123c82bcb524e272af9bc",
+      "route_class": "event-polymovie",
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:event-polymovie"
+      ]
+    },
+    {
+      "address": "0x0057d640",
+      "root": "0x0057d640",
+      "size": 1280,
+      "offset": 0,
+      "live_size": 1272,
+      "header_count": 26,
+      "volume": "VOL",
+      "path": "\\EVENT\\E470\\",
+      "ps2_file_count": 24,
+      "golden_subtree_count": 24,
+      "same_basename_count": 24,
+      "matched_path_examples": [
+        "event/e470/E470_001.PM1",
+        "event/e470/E470_001.PM2",
+        "event/e470/E470_001.PM3"
+      ],
+      "source_sha256": "6ca5b336939d71fcbfedf6c81fa2561a8159cf6ad55287bba6af3545bb936bd2",
+      "route_class": "event-polymovie",
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:event-polymovie"
+      ]
+    },
+    {
+      "address": "0x0057db40",
+      "root": "0x0057db40",
+      "size": 560,
+      "offset": 0,
+      "live_size": 552,
+      "header_count": 11,
+      "volume": "VOL",
+      "path": "\\EVENT\\E480\\",
+      "ps2_file_count": 9,
+      "golden_subtree_count": 9,
+      "same_basename_count": 9,
+      "matched_path_examples": [
+        "event/e480/E480_001.PM1",
+        "event/e480/E480_001.PM2",
+        "event/e480/E480_001.PM3"
+      ],
+      "source_sha256": "a48ed52446ef080de8618166d74a83de5dd43e4a75c7f34925d7f39902fd325e",
+      "route_class": "event-polymovie",
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:event-polymovie"
+      ]
+    },
+    {
+      "address": "0x0057fec0",
+      "root": "0x0057fec0",
+      "size": 344,
+      "offset": 0,
+      "live_size": 1752,
+      "header_count": 36,
+      "volume": "VOL",
+      "path": "\\EVENT\\E560\\",
+      "ps2_file_count": 34,
+      "golden_subtree_count": 36,
+      "same_basename_count": 33,
+      "matched_path_examples": [
+        "event/e560/E560_010.PM1",
+        "event/e560/E560_010.PM2",
+        "event/e560/E560_010.PM3"
+      ],
+      "source_sha256": "6e2e54ac1b37e488e10b62b1077a068b4c53319b29c6999af566bafc8de84290",
+      "route_class": "event-polymovie",
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:event-polymovie"
+      ]
+    },
+    {
+      "address": "0x00584170",
+      "root": "0x00584170",
+      "size": 465,
+      "offset": 0,
+      "live_size": 3000,
+      "header_count": 62,
+      "volume": "VOL",
+      "path": "\\EVENT\\E630\\",
+      "ps2_file_count": 60,
+      "golden_subtree_count": 60,
+      "same_basename_count": 60,
+      "matched_path_examples": [
+        "event/e630/E630_001.PM1",
+        "event/e630/E630_001.PM2",
+        "event/e630/E630_001.PM3"
+      ],
+      "source_sha256": "2adf29cf9e0d4ee87f95da217555945b0a2a823f10f6dbeaca2483ae7c1f6073",
+      "route_class": "event-polymovie",
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:event-polymovie"
+      ]
+    },
+    {
+      "address": "0x00584341",
+      "root": "0x00584170",
+      "size": 223,
+      "offset": 465,
+      "live_size": 3000,
+      "header_count": 62,
+      "volume": "VOL",
+      "path": "\\EVENT\\E630\\",
+      "ps2_file_count": 60,
+      "golden_subtree_count": 60,
+      "same_basename_count": 60,
+      "matched_path_examples": [
+        "event/e630/E630_001.PM1",
+        "event/e630/E630_001.PM2",
+        "event/e630/E630_001.PM3"
+      ],
+      "source_sha256": "2adf29cf9e0d4ee87f95da217555945b0a2a823f10f6dbeaca2483ae7c1f6073",
+      "route_class": "event-polymovie",
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:event-polymovie"
+      ]
+    },
+    {
+      "address": "0x00589720",
+      "root": "0x00589720",
+      "size": 2576,
+      "offset": 0,
+      "live_size": 2568,
+      "header_count": 53,
+      "volume": "VOL",
+      "path": "\\EVENT\\E720\\",
+      "ps2_file_count": 51,
+      "golden_subtree_count": 51,
+      "same_basename_count": 51,
+      "matched_path_examples": [
+        "event/e720/E720_005.PM1",
+        "event/e720/E720_005.PM2",
+        "event/e720/E720_005.PM3"
+      ],
+      "source_sha256": "f4f78bfae93793c8f907201f63f4b0bcf6dd596fd5ceabbfc8f08bd0dee60dfb",
+      "route_class": "event-polymovie",
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:event-polymovie"
+      ]
+    },
+    {
+      "address": "0x0058a530",
+      "root": "0x0058a530",
+      "size": 560,
+      "offset": 0,
+      "live_size": 552,
+      "header_count": 11,
+      "volume": "VOL",
+      "path": "\\EVENT\\E810\\",
+      "ps2_file_count": 9,
+      "golden_subtree_count": 9,
+      "same_basename_count": 9,
+      "matched_path_examples": [
+        "event/e810/E810_001.PM1",
+        "event/e810/E810_001.PM2",
+        "event/e810/E810_001.PM3"
+      ],
+      "source_sha256": "1e81f5f8ab77a626ec3049c73bc111091d239d0993da8c4dd96698e8b356406b",
+      "route_class": "event-polymovie",
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:event-polymovie"
+      ]
+    },
+    {
+      "address": "0x0058a760",
+      "root": "0x0058a760",
+      "size": 224,
+      "offset": 0,
+      "live_size": 216,
+      "header_count": 4,
+      "volume": "VOL",
+      "path": "\\EVENT\\E820\\",
+      "ps2_file_count": 2,
+      "golden_subtree_count": 0,
+      "same_basename_count": 0,
+      "matched_path_examples": [],
+      "source_sha256": "380dc9fb1e5b0aaffe2e89b169db7afb02556d63ca8637cf117eecc726457cb4",
+      "route_class": null,
+      "decision": "OPEN-retain",
+      "runtime_status": "unproven-source",
+      "required_seams": [],
+      "blocker": "Initial checkpoint: E820 owns E826_021.PM1/E826_022.PM1 (not E862). Later admitted representation-only by Main; see followup receipt and mandatory M11 script-request obligation. No asset rename inferred."
+    },
+    {
+      "address": "0x0058ab90",
+      "root": "0x0058ab90",
+      "size": 2864,
+      "offset": 0,
+      "live_size": 2856,
+      "header_count": 59,
+      "volume": "VOL",
+      "path": "\\EVENT\\E840\\",
+      "ps2_file_count": 57,
+      "golden_subtree_count": 99,
+      "same_basename_count": 57,
+      "matched_path_examples": [
+        "event/e840/E840_017.PM1",
+        "event/e840/E840_017.PM2",
+        "event/e840/E840_017.PM3"
+      ],
+      "source_sha256": "50e1fd642fb1afb560f5a2b755060b63d35d2ef208f3ace23f8480f468134433",
+      "route_class": "event-polymovie",
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:event-polymovie"
+      ]
+    },
+    {
+      "address": "0x0058c000",
+      "root": "0x0058b6c0",
+      "size": 195,
+      "offset": 2368,
+      "live_size": 3000,
+      "header_count": 62,
+      "volume": "VOL",
+      "path": "\\EVENT\\E850\\",
+      "ps2_file_count": 60,
+      "golden_subtree_count": 57,
+      "same_basename_count": 57,
+      "matched_path_examples": [
+        "event/e850/E850_001.PM1",
+        "event/e850/E850_001.PM2",
+        "event/e850/E850_001.PM3"
+      ],
+      "source_sha256": "44746165e6dd1a8bea2295a47b329f45e261a16104a54a0b170e356db3287d56",
+      "route_class": "event-polymovie",
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:event-polymovie"
+      ]
+    },
+    {
+      "address": "0x00594244",
+      "root": "0x0058feb0",
+      "size": 2570,
+      "offset": 17300,
+      "live_size": 22824,
+      "header_count": 475,
+      "volume": "VOL",
+      "path": "\\EVENT_DATA\\SCRIPT\\",
+      "ps2_file_count": 473,
+      "golden_subtree_count": 683,
+      "same_basename_count": 473,
+      "matched_path_examples": [
+        "event_data/script/E090_001A.bf",
+        "event_data/script/E090_002A.bf",
+        "event_data/script/E090_003A.bf"
+      ],
+      "source_sha256": "c8d789842f84a80904acc08345fba2570d6da0bb9faef43309c404ab6d4be009",
+      "route_class": "event-script",
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:event-script"
+      ]
+    },
+    {
+      "address": "0x00594d45",
+      "root": "0x0058feb0",
+      "size": 1290,
+      "offset": 20117,
+      "live_size": 22824,
+      "header_count": 475,
+      "volume": "VOL",
+      "path": "\\EVENT_DATA\\SCRIPT\\",
+      "ps2_file_count": 473,
+      "golden_subtree_count": 683,
+      "same_basename_count": 473,
+      "matched_path_examples": [
+        "event_data/script/E090_001A.bf",
+        "event_data/script/E090_002A.bf",
+        "event_data/script/E090_003A.bf"
+      ],
+      "source_sha256": "c8d789842f84a80904acc08345fba2570d6da0bb9faef43309c404ab6d4be009",
+      "route_class": "event-script",
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:event-script"
+      ]
+    },
+    {
+      "address": "0x0059524f",
+      "root": "0x0058feb0",
+      "size": 515,
+      "offset": 21407,
+      "live_size": 22824,
+      "header_count": 475,
+      "volume": "VOL",
+      "path": "\\EVENT_DATA\\SCRIPT\\",
+      "ps2_file_count": 473,
+      "golden_subtree_count": 683,
+      "same_basename_count": 473,
+      "matched_path_examples": [
+        "event_data/script/E090_001A.bf",
+        "event_data/script/E090_002A.bf",
+        "event_data/script/E090_003A.bf"
+      ],
+      "source_sha256": "c8d789842f84a80904acc08345fba2570d6da0bb9faef43309c404ab6d4be009",
+      "route_class": "event-script",
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:event-script"
+      ]
+    },
+    {
+      "address": "0x00595452",
+      "root": "0x0058feb0",
+      "size": 910,
+      "offset": 21922,
+      "live_size": 22824,
+      "header_count": 475,
+      "volume": "VOL",
+      "path": "\\EVENT_DATA\\SCRIPT\\",
+      "ps2_file_count": 473,
+      "golden_subtree_count": 683,
+      "same_basename_count": 473,
+      "matched_path_examples": [
+        "event_data/script/E090_001A.bf",
+        "event_data/script/E090_002A.bf",
+        "event_data/script/E090_003A.bf"
+      ],
+      "source_sha256": "c8d789842f84a80904acc08345fba2570d6da0bb9faef43309c404ab6d4be009",
+      "route_class": "event-script",
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:event-script"
+      ]
+    },
+    {
+      "address": "0x005957e0",
+      "root": "0x005957e0",
+      "size": 1184,
+      "offset": 0,
+      "live_size": 1176,
+      "header_count": 24,
+      "volume": "VOL",
+      "path": "\\FACILITY\\",
+      "ps2_file_count": 20,
+      "golden_subtree_count": 8,
+      "same_basename_count": 0,
+      "matched_path_examples": [],
+      "source_sha256": "cd054a6baf60efbe3bf4ca855c93af8f41ebb3f3d3b51136c3c2ba73f214c311",
+      "route_class": null,
+      "decision": "OPEN-retain",
+      "runtime_status": "unproven-source",
+      "required_seams": [],
+      "blocker": "Golden facility ARC/startup-member replacement is observed, not a complete routing proof for this loose-file directory."
+    },
+    {
+      "address": "0x005968d0",
+      "root": "0x005968d0",
+      "size": 512,
+      "offset": 0,
+      "live_size": 504,
+      "header_count": 10,
+      "volume": "VOL",
+      "path": "\\FIELD\\GRMD\\",
+      "ps2_file_count": 8,
+      "golden_subtree_count": 7,
+      "same_basename_count": 0,
+      "matched_path_examples": [],
+      "source_sha256": "f8d1b84696120b0fa22fcc665aefe40c41d4a3613c28ccf8e9f8a2b5e8d490b4",
+      "route_class": "field-grmd",
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:field-grmd"
+      ]
+    },
+    {
+      "address": "0x005a0023",
+      "root": "0x0059ef30",
+      "size": 70,
+      "offset": 4339,
+      "live_size": 6696,
+      "header_count": 139,
+      "volume": "VOL",
+      "path": "\\FIELD\\SCRIPT\\",
+      "ps2_file_count": 137,
+      "golden_subtree_count": 534,
+      "same_basename_count": 135,
+      "matched_path_examples": [
+        "field/script/comu00.bf",
+        "field/script/comu01.bf",
+        "field/script/comu02.bf"
+      ],
+      "source_sha256": "79d9019a80bed386ffe625f222db7078a4bc6dc06e5255ee929c6474a9c98980",
+      "route_class": "field-script",
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:field-script"
+      ]
+    },
+    {
+      "address": "0x005a0069",
+      "root": "0x0059ef30",
+      "size": 41,
+      "offset": 4409,
+      "live_size": 6696,
+      "header_count": 139,
+      "volume": "VOL",
+      "path": "\\FIELD\\SCRIPT\\",
+      "ps2_file_count": 137,
+      "golden_subtree_count": 534,
+      "same_basename_count": 135,
+      "matched_path_examples": [
+        "field/script/comu00.bf",
+        "field/script/comu01.bf",
+        "field/script/comu02.bf"
+      ],
+      "source_sha256": "79d9019a80bed386ffe625f222db7078a4bc6dc06e5255ee929c6474a9c98980",
+      "route_class": "field-script",
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:field-script"
+      ]
+    },
+    {
+      "address": "0x005a0113",
+      "root": "0x0059ef30",
+      "size": 425,
+      "offset": 4579,
+      "live_size": 6696,
+      "header_count": 139,
+      "volume": "VOL",
+      "path": "\\FIELD\\SCRIPT\\",
+      "ps2_file_count": 137,
+      "golden_subtree_count": 534,
+      "same_basename_count": 135,
+      "matched_path_examples": [
+        "field/script/comu00.bf",
+        "field/script/comu01.bf",
+        "field/script/comu02.bf"
+      ],
+      "source_sha256": "79d9019a80bed386ffe625f222db7078a4bc6dc06e5255ee929c6474a9c98980",
+      "route_class": "field-script",
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:field-script"
+      ]
+    },
+    {
+      "address": "0x005a02bc",
+      "root": "0x0059ef30",
+      "size": 315,
+      "offset": 5004,
+      "live_size": 6696,
+      "header_count": 139,
+      "volume": "VOL",
+      "path": "\\FIELD\\SCRIPT\\",
+      "ps2_file_count": 137,
+      "golden_subtree_count": 534,
+      "same_basename_count": 135,
+      "matched_path_examples": [
+        "field/script/comu00.bf",
+        "field/script/comu01.bf",
+        "field/script/comu02.bf"
+      ],
+      "source_sha256": "79d9019a80bed386ffe625f222db7078a4bc6dc06e5255ee929c6474a9c98980",
+      "route_class": "field-script",
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:field-script"
+      ]
+    },
+    {
+      "address": "0x005a03f7",
+      "root": "0x0059ef30",
+      "size": 1385,
+      "offset": 5319,
+      "live_size": 6696,
+      "header_count": 139,
+      "volume": "VOL",
+      "path": "\\FIELD\\SCRIPT\\",
+      "ps2_file_count": 137,
+      "golden_subtree_count": 534,
+      "same_basename_count": 135,
+      "matched_path_examples": [
+        "field/script/comu00.bf",
+        "field/script/comu01.bf",
+        "field/script/comu02.bf"
+      ],
+      "source_sha256": "79d9019a80bed386ffe625f222db7078a4bc6dc06e5255ee929c6474a9c98980",
+      "route_class": "field-script",
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:field-script"
+      ]
+    },
+    {
+      "address": "0x005a4450",
+      "root": "0x005a4450",
+      "size": 1424,
+      "offset": 0,
+      "live_size": 1416,
+      "header_count": 29,
+      "volume": "VOL",
+      "path": "\\MODEL\\FIELD\\",
+      "ps2_file_count": 27,
+      "golden_subtree_count": 37,
+      "same_basename_count": 0,
+      "matched_path_examples": [],
+      "source_sha256": "2181904786347862485b1845b4dec8a167eab4ac09fa7856909a7b521579b1f2",
+      "route_class": null,
+      "decision": "OPEN-retain",
+      "runtime_status": "unproven-source",
+      "required_seams": [],
+      "blocker": "Golden model/field AMD namespace exists; complete selector/constructor correspondence for the PS2 directory is not established."
+    },
+    {
+      "address": "0x005a49e0",
+      "root": "0x005a49e0",
+      "size": 3960,
+      "offset": 0,
+      "live_size": 43320,
+      "header_count": 902,
+      "volume": "VOL",
+      "path": "\\MODEL\\NPC\\",
+      "ps2_file_count": 900,
+      "golden_subtree_count": 1327,
+      "same_basename_count": 0,
+      "matched_path_examples": [],
+      "source_sha256": "e95f8d3c76dd0d613429ad85d370b868a7457870afa45588f4692086e8923179",
+      "route_class": null,
+      "decision": "OPEN-retain",
+      "runtime_status": "unproven-source",
+      "required_seams": [],
+      "blocker": "Golden NPC AMD namespace exists; complete model-id producer/constructor correspondence is not established."
+    },
+    {
+      "address": "0x005bbcd0",
+      "root": "0x005bbcd0",
+      "size": 320,
+      "offset": 0,
+      "live_size": 312,
+      "header_count": 6,
+      "volume": "VOL",
+      "path": "\\OPED\\",
+      "ps2_file_count": 4,
+      "golden_subtree_count": 1,
+      "same_basename_count": 0,
+      "matched_path_examples": [],
+      "source_sha256": "9ce1c1c8d6dd44e417c8d7b0c15861dfc7b0fb40d36dea56d57c2400c1083590",
+      "route_class": "staff",
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:staff"
+      ]
+    },
+    {
+      "address": "0x005bc5d0",
+      "root": "0x005bc5d0",
+      "size": 272,
+      "offset": 0,
+      "live_size": 264,
+      "header_count": 5,
+      "volume": "VOL",
+      "path": "\\SMAP\\",
+      "ps2_file_count": 2,
+      "golden_subtree_count": 0,
+      "same_basename_count": 0,
+      "matched_path_examples": [],
+      "source_sha256": "fdd62c1a6a1fae08b168213bdd582508b052f6255e2b415742e98d1ea4caa9cb",
+      "route_class": "minimap",
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:minimap"
+      ]
+    },
+    {
+      "address": "0x005bc6e0",
+      "root": "0x005bc6e0",
+      "size": 176,
+      "offset": 0,
+      "live_size": 168,
+      "header_count": 3,
+      "volume": "VOL",
+      "path": "\\SMAP\\SYMBOL\\",
+      "ps2_file_count": 1,
+      "golden_subtree_count": 0,
+      "same_basename_count": 0,
+      "matched_path_examples": [],
+      "source_sha256": "c3e9c397c2571b61b178e7ce816ea212abf6e6af0fe70402547194ec5d3d41e8",
+      "route_class": "minimap",
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:minimap"
+      ]
+    },
+    {
+      "address": "0x005c0c20",
+      "root": "0x005c0c20",
+      "size": 1040,
+      "offset": 0,
+      "live_size": 1032,
+      "header_count": 21,
+      "volume": "VOL",
+      "path": "\\SOUND\\BATTLE\\",
+      "ps2_file_count": 19,
+      "golden_subtree_count": 0,
+      "same_basename_count": 0,
+      "matched_path_examples": [],
+      "source_sha256": "ac76e5b36229ff80e875d4a1e346975cd6e0be351c26e41337cd76c8c935092a",
+      "route_class": null,
+      "decision": "OPEN-retain",
+      "runtime_status": "unproven-source",
+      "required_seams": [],
+      "blocker": "Golden ADX2 bank architecture is observed, but the consumed PS2 ADX/AHX/SPU resource-id to Golden cue/bank route and state/lifetime contract are unproved."
+    },
+    {
+      "address": "0x005c1030",
+      "root": "0x005c1030",
+      "size": 12574,
+      "offset": 0,
+      "live_size": 14856,
+      "header_count": 309,
+      "volume": "VOL",
+      "path": "\\SOUND\\EVENT\\",
+      "ps2_file_count": 307,
+      "golden_subtree_count": 0,
+      "same_basename_count": 0,
+      "matched_path_examples": [],
+      "source_sha256": "9780f58cffd928e3f47a219e8dcb0145348eb6aee184cfca989b408d570e165f",
+      "route_class": null,
+      "decision": "OPEN-retain",
+      "runtime_status": "unproven-source",
+      "required_seams": [],
+      "blocker": "Golden ADX2 bank architecture is observed, but the consumed PS2 ADX/AHX/SPU resource-id to Golden cue/bank route and state/lifetime contract are unproved."
+    },
+    {
+      "address": "0x005c414e",
+      "root": "0x005c1030",
+      "size": 514,
+      "offset": 12574,
+      "live_size": 14856,
+      "header_count": 309,
+      "volume": "VOL",
+      "path": "\\SOUND\\EVENT\\",
+      "ps2_file_count": 307,
+      "golden_subtree_count": 0,
+      "same_basename_count": 0,
+      "matched_path_examples": [],
+      "source_sha256": "9780f58cffd928e3f47a219e8dcb0145348eb6aee184cfca989b408d570e165f",
+      "route_class": null,
+      "decision": "OPEN-retain",
+      "runtime_status": "unproven-source",
+      "required_seams": [],
+      "blocker": "Golden ADX2 bank architecture is observed, but the consumed PS2 ADX/AHX/SPU resource-id to Golden cue/bank route and state/lifetime contract are unproved."
+    },
+    {
+      "address": "0x005c454c",
+      "root": "0x005c1030",
+      "size": 1268,
+      "offset": 13596,
+      "live_size": 14856,
+      "header_count": 309,
+      "volume": "VOL",
+      "path": "\\SOUND\\EVENT\\",
+      "ps2_file_count": 307,
+      "golden_subtree_count": 0,
+      "same_basename_count": 0,
+      "matched_path_examples": [],
+      "source_sha256": "9780f58cffd928e3f47a219e8dcb0145348eb6aee184cfca989b408d570e165f",
+      "route_class": null,
+      "decision": "OPEN-retain",
+      "runtime_status": "unproven-source",
+      "required_seams": [],
+      "blocker": "Golden ADX2 bank architecture is observed, but the consumed PS2 ADX/AHX/SPU resource-id to Golden cue/bank route and state/lifetime contract are unproved."
+    },
+    {
+      "address": "0x005c4a40",
+      "root": "0x005c4a40",
+      "size": 517,
+      "offset": 0,
+      "live_size": 600,
+      "header_count": 12,
+      "volume": "VOL",
+      "path": "\\SPU\\",
+      "ps2_file_count": 10,
+      "golden_subtree_count": 0,
+      "same_basename_count": 0,
+      "matched_path_examples": [],
+      "source_sha256": "1fcb4a0b04121c4e471dfaffea4e7041c39e005cdc7c876b5f70ce6bb573f6c4",
+      "route_class": null,
+      "decision": "OPEN-retain",
+      "runtime_status": "unproven-source",
+      "required_seams": [],
+      "blocker": "Golden ADX2 bank architecture is observed, but the consumed PS2 ADX/AHX/SPU resource-id to Golden cue/bank route and state/lifetime contract are unproved."
+    },
+    {
+      "address": "0x005c554b",
+      "root": "0x005c4ec0",
+      "size": 3589,
+      "offset": 1675,
+      "live_size": 5256,
+      "header_count": 109,
+      "volume": "BGM",
+      "path": "\\",
+      "ps2_file_count": 107,
+      "golden_subtree_count": 0,
+      "same_basename_count": 0,
+      "matched_path_examples": [],
+      "source_sha256": "0001131eca08bc731da5b247e29bfda7b8a07920cf2aa80e12c2773115c998d8",
+      "route_class": null,
+      "decision": "OPEN-retain",
+      "runtime_status": "unproven-source",
+      "required_seams": [],
+      "blocker": "Golden ADX2 bank architecture is observed, but the consumed PS2 ADX/AHX/SPU resource-id to Golden cue/bank route and state/lifetime contract are unproved."
+    },
+    {
+      "address": "0x005c6350",
+      "root": "0x005c6350",
+      "size": 272,
+      "offset": 0,
+      "live_size": 264,
+      "header_count": 5,
+      "volume": "BTL",
+      "path": "\\",
+      "ps2_file_count": 0,
+      "golden_subtree_count": 0,
+      "same_basename_count": 0,
+      "matched_path_examples": [],
+      "source_sha256": "b245bc2d4fc2a3edada1a56f8f0307db70fbb154111eb66767942bdea325fa18",
+      "route_class": null,
+      "decision": "OPEN-retain",
+      "runtime_status": "unproven-source",
+      "required_seams": [],
+      "blocker": "BTL root also routes MODEL_BTL; boss and skill class proofs do not close this union."
+    },
+    {
+      "address": "0x005c67b0",
+      "root": "0x005c67b0",
+      "size": 896,
+      "offset": 0,
+      "live_size": 888,
+      "header_count": 18,
+      "volume": "BTL",
+      "path": "\\BATTLE\\BOSS\\",
+      "ps2_file_count": 16,
+      "golden_subtree_count": 18,
+      "same_basename_count": 16,
+      "matched_path_examples": [
+        "battle/boss/e200.bin",
+        "battle/boss/e201.bin",
+        "battle/boss/e202.bin"
+      ],
+      "source_sha256": "282bb37757db58bd7dd9fc44e83e9b8d3c1b6d029c1740174b51101d34afbc57",
+      "route_class": "battle-boss",
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:battle-boss"
+      ]
+    },
+    {
+      "address": "0x005d00d0",
+      "root": "0x005d00d0",
+      "size": 1651,
+      "offset": 0,
+      "live_size": 46968,
+      "header_count": 978,
+      "volume": "BTL",
+      "path": "\\SKILL\\",
+      "ps2_file_count": 976,
+      "golden_subtree_count": 511,
+      "same_basename_count": 0,
+      "matched_path_examples": [],
+      "source_sha256": "bc1d564e63f1afffab44511b264a7f1722d701210510f320c47a5bab049f03bb",
+      "route_class": "skill-effects",
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:skill-effects"
+      ]
+    },
+    {
+      "address": "0x005db850",
+      "root": "0x005db850",
+      "size": 3296,
+      "offset": 0,
+      "live_size": 3288,
+      "header_count": 68,
+      "volume": "ENV",
+      "path": "\\",
+      "ps2_file_count": 66,
+      "golden_subtree_count": 0,
+      "same_basename_count": 0,
+      "matched_path_examples": [],
+      "source_sha256": "042be51c5557c2223ff241653f00c94db255250a765d23004a8e57e2d77987d2",
+      "route_class": null,
+      "decision": "OPEN-retain",
+      "runtime_status": "unproven-source",
+      "required_seams": [],
+      "blocker": "Golden ADX2 bank architecture is observed, but the consumed PS2 ADX/AHX/SPU resource-id to Golden cue/bank route and state/lifetime contract are unproved."
+    },
+    {
+      "address": "0x005dcaf8",
+      "size": 24,
+      "contained": false,
+      "route_class": null,
+      "not_directory": true,
+      "literal_text": "clear ot",
+      "decision": "OPEN-retain",
+      "runtime_status": "unproven-source",
+      "required_seams": [],
+      "blocker": "Outside final ENV list allocation; clear ot kernel diagnostic, not a directory record."
+    },
+    {
+      "address": "0x005dcb28",
+      "size": 24,
+      "contained": false,
+      "route_class": null,
+      "not_directory": true,
+      "literal_text": "sequence.c",
+      "decision": "OPEN-retain",
+      "runtime_status": "unproven-source",
+      "required_seams": [],
+      "blocker": "Outside final ENV list allocation; sequence.c diagnostic, not a directory record."
+    },
+    {
+      "address": "0x005dcb98",
+      "size": 24,
+      "contained": false,
+      "route_class": null,
+      "not_directory": true,
+      "literal_text": "debug menu",
+      "decision": "OPEN-retain",
+      "runtime_status": "unproven-source",
+      "required_seams": [],
+      "blocker": "Outside final ENV list allocation; debug menu sequence diagnostic, not a directory record."
+    },
+    {
+      "address": "0x005dcc6c",
+      "size": 2404,
+      "contained": false,
+      "route_class": null,
+      "not_directory": true,
+      "literal_text": "`-\u0010",
+      "decision": "OPEN-retain",
+      "runtime_status": "unproven-source",
+      "required_seams": [],
+      "blocker": "Outside final ENV list allocation; sequenceRequest-owned 2404-byte object, not a directory record."
+    }
+  ],
+  "reproduction": {
+    "shell": "<git-install>/bin/bash.exe -c export PATH=/usr/bin:/bin:$PATH; <fixed-python> <script>",
+    "python": "<python>/python.exe",
+    "private_root": "<scratch>/GoldenRE-notes\\l1",
+    "scripts": {
+      "c4_directory_ownership.py": "e46d46ceafad9b2374576d8dc0342e3289249b08b817e206d4d04af22c5cda11",
+      "c4_resource_inventory.py": "e2b18f9544ea6beb97151de8ef19216a5c2d7b13697607e1ef947cca555f2ee3",
+      "c4_spans.py": "411a52eb5aa3e416f47f12bbfaddbb3e4e5dfd9aab77f844d1e8303b2b6c03b7",
+      "c4_loader_research.py": "bb9547c0d2b7083b33dfe9bf0699b0a423f3d39fb7511a0ba6012de51290bd59",
+      "c4_resource_anchors.py": "f849a642199d69a1b8256cf8f93336c5cc0b40e2aea90d22283afef199bc2d2d",
+      "c4_evidence.py": "b8a95139312b75339f9cfa537fe018e92f2853a0d009ea919db6e2b3bdc898ea",
+      "c4_namespace_join.py": "0bc67cee8a9ada9566a2f6e0ebfb646943b140dcd0a59576086a48eca0a84cd5",
+      "c4_final_research.py": "d72390ee617e5c5cd83d9e91c79b32440c44a394846dfb6379094363db4c8fe0",
+      "c4_decisions.py": "7348db42e85642dafc83fc71388e289f50c0a6e08dcdea4f11c15c63e5e428b3"
+    },
+    "instruction_receipts": [
+      "c4-instruction-evidence.txt",
+      "c4-final-instructions.txt"
+    ],
+    "worker_receipts": [
+      "71003974a0-l1c3.txt",
+      "7100397850-l1c3.txt",
+      "710042d7c0-l1c3.txt",
+      "710042f7b0-l1c3.txt",
+      "7100397d20-l1c3.txt",
+      "71003985a0-l1c3.txt",
+      "710014ac10-l1c3.txt",
+      "710014bc60-l1c3.txt",
+      "7100144260-l1c3.txt",
+      "71001e6c60-l1c3.txt",
+      "71001d78a0-l1c3.txt",
+      "7100005d80-l1c3.txt",
+      "7100063340-l1c3.txt",
+      "71001d2cd0-l1c3.txt",
+      "71001f8ba0-l1c3.txt",
+      "71002b8d80-l1c3.txt",
+      "71002c1ab0-l1c3.txt"
+    ],
+    "worker_warning": "3979a0 decompiler discards jump-table successors; architecture claims use independent instructions. Early mistyped targets 5d8b0,2b8d0,2c12a0,1c2cd0 are rejected as class evidence.",
+    "checks_not_run": [
+      "build",
+      "unit tests",
+      "objdiff",
+      "runtime binder",
+      "BBV",
+      "game/emulator"
+    ]
+  }
+}

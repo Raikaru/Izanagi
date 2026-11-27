@@ -1,0 +1,1199 @@
+{
+  "version": 1,
+  "cases": [
+    {
+      "id": 1,
+      "path": "fast",
+      "name": "assert-fast",
+      "setup": "x = true",
+      "source": "assert(x)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 1,
+      "path": "fallback",
+      "name": "assert-fallback",
+      "setup": "x = false",
+      "source": "assert(x)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 40,
+      "path": "fast",
+      "name": "type-fast",
+      "setup": "x = 1",
+      "source": "return type(x)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 40,
+      "path": "fallback",
+      "name": "type-fallback",
+      "setup": "x = false",
+      "source": "local a, b = type(x); return a, b",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 44,
+      "path": "fast",
+      "name": "typeof-fast",
+      "setup": "x = 1",
+      "source": "return typeof(x)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 44,
+      "path": "fallback",
+      "name": "typeof-fallback",
+      "setup": "x = false",
+      "source": "local a, b = typeof(x); return a, b",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 54,
+      "path": "fast",
+      "name": "vector-create-fast",
+      "setup": "x = 1; y = 2",
+      "source": "return vector.create(x, y)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 54,
+      "path": "fallback",
+      "name": "vector-create-fallback",
+      "setup": "x = false; y = 2",
+      "source": "return vector.create(x, y)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 57,
+      "path": "fast",
+      "name": "select-vararg-fast",
+      "setup": "x = '#'",
+      "source": "local v = select(x, ...); return v",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 57,
+      "path": "fallback",
+      "name": "select-vararg-fallback",
+      "setup": "x = -1",
+      "source": "local v = select(x, ...); return v",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 78,
+      "path": "fast",
+      "name": "vector-magnitude-fast",
+      "setup": "x = vector.create(1, 2, 3); y = vector.create(2, 3, 4); z = vector.create(4, 5, 6)",
+      "source": "return vector.magnitude(x)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 78,
+      "path": "fallback",
+      "name": "vector-magnitude-fallback",
+      "setup": "x = false; y = vector.create(2, 3, 4); z = vector.create(4, 5, 6)",
+      "source": "return vector.magnitude(x)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 79,
+      "path": "fast",
+      "name": "vector-normalize-fast",
+      "setup": "x = vector.create(1, 2, 3); y = vector.create(2, 3, 4); z = vector.create(4, 5, 6)",
+      "source": "return vector.normalize(x)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 79,
+      "path": "fallback",
+      "name": "vector-normalize-fallback",
+      "setup": "x = false; y = vector.create(2, 3, 4); z = vector.create(4, 5, 6)",
+      "source": "return vector.normalize(x)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 80,
+      "path": "fast",
+      "name": "vector-cross-fast",
+      "setup": "x = vector.create(1, 2, 3); y = vector.create(2, 3, 4); z = vector.create(4, 5, 6)",
+      "source": "return vector.cross(x, y)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 80,
+      "path": "fallback",
+      "name": "vector-cross-fallback",
+      "setup": "x = false; y = vector.create(2, 3, 4); z = vector.create(4, 5, 6)",
+      "source": "return vector.cross(x, y)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 81,
+      "path": "fast",
+      "name": "vector-dot-fast",
+      "setup": "x = vector.create(1, 2, 3); y = vector.create(2, 3, 4); z = vector.create(4, 5, 6)",
+      "source": "return vector.dot(x, y)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 81,
+      "path": "fallback",
+      "name": "vector-dot-fallback",
+      "setup": "x = false; y = vector.create(2, 3, 4); z = vector.create(4, 5, 6)",
+      "source": "return vector.dot(x, y)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 82,
+      "path": "fast",
+      "name": "vector-floor-fast",
+      "setup": "x = vector.create(1, 2, 3); y = vector.create(2, 3, 4); z = vector.create(4, 5, 6)",
+      "source": "return vector.floor(x)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 82,
+      "path": "fallback",
+      "name": "vector-floor-fallback",
+      "setup": "x = false; y = vector.create(2, 3, 4); z = vector.create(4, 5, 6)",
+      "source": "return vector.floor(x)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 83,
+      "path": "fast",
+      "name": "vector-ceil-fast",
+      "setup": "x = vector.create(1, 2, 3); y = vector.create(2, 3, 4); z = vector.create(4, 5, 6)",
+      "source": "return vector.ceil(x)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 83,
+      "path": "fallback",
+      "name": "vector-ceil-fallback",
+      "setup": "x = false; y = vector.create(2, 3, 4); z = vector.create(4, 5, 6)",
+      "source": "return vector.ceil(x)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 84,
+      "path": "fast",
+      "name": "vector-abs-fast",
+      "setup": "x = vector.create(1, 2, 3); y = vector.create(2, 3, 4); z = vector.create(4, 5, 6)",
+      "source": "return vector.abs(x)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 84,
+      "path": "fallback",
+      "name": "vector-abs-fallback",
+      "setup": "x = false; y = vector.create(2, 3, 4); z = vector.create(4, 5, 6)",
+      "source": "return vector.abs(x)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 85,
+      "path": "fast",
+      "name": "vector-sign-fast",
+      "setup": "x = vector.create(1, 2, 3); y = vector.create(2, 3, 4); z = vector.create(4, 5, 6)",
+      "source": "return vector.sign(x)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 85,
+      "path": "fallback",
+      "name": "vector-sign-fallback",
+      "setup": "x = false; y = vector.create(2, 3, 4); z = vector.create(4, 5, 6)",
+      "source": "return vector.sign(x)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 86,
+      "path": "fast",
+      "name": "vector-clamp-fast",
+      "setup": "x = vector.create(1, 2, 3); y = vector.create(2, 3, 4); z = vector.create(4, 5, 6)",
+      "source": "return vector.clamp(x, y, z)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 86,
+      "path": "fallback",
+      "name": "vector-clamp-fallback",
+      "setup": "x = false; y = vector.create(2, 3, 4); z = vector.create(4, 5, 6)",
+      "source": "return vector.clamp(x, y, z)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 87,
+      "path": "fast",
+      "name": "vector-min-fast",
+      "setup": "x = vector.create(1, 2, 3); y = vector.create(2, 3, 4); z = vector.create(4, 5, 6)",
+      "source": "return vector.min(x, y)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 87,
+      "path": "fallback",
+      "name": "vector-min-fallback",
+      "setup": "x = false; y = vector.create(2, 3, 4); z = vector.create(4, 5, 6)",
+      "source": "return vector.min(x, y)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 88,
+      "path": "fast",
+      "name": "vector-max-fast",
+      "setup": "x = vector.create(1, 2, 3); y = vector.create(2, 3, 4); z = vector.create(4, 5, 6)",
+      "source": "return vector.max(x, y)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 88,
+      "path": "fallback",
+      "name": "vector-max-fallback",
+      "setup": "x = false; y = vector.create(2, 3, 4); z = vector.create(4, 5, 6)",
+      "source": "return vector.max(x, y)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 90,
+      "path": "fast",
+      "name": "vector-lerp-fast",
+      "setup": "x = vector.create(1, 2, 3); y = vector.create(2, 3, 4); z = 0.5",
+      "source": "return vector.lerp(x, y, z)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 90,
+      "path": "fallback",
+      "name": "vector-lerp-fallback",
+      "setup": "x = false; y = vector.create(2, 3, 4); z = 0.5",
+      "source": "return vector.lerp(x, y, z)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 94,
+      "path": "fast",
+      "name": "integer-create-fast",
+      "setup": "x = 3",
+      "source": "return integer.create(x)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 94,
+      "path": "fallback",
+      "name": "integer-create-fallback",
+      "setup": "x = false",
+      "source": "return integer.create(x)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 95,
+      "path": "fast",
+      "name": "integer-tonumber-fast",
+      "setup": "x = integer.create(3); y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.tonumber(x)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 95,
+      "path": "fallback",
+      "name": "integer-tonumber-fallback",
+      "setup": "x = false; y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.tonumber(x)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 96,
+      "path": "fast",
+      "name": "integer-neg-fast",
+      "setup": "x = integer.create(3); y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.neg(x)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 96,
+      "path": "fallback",
+      "name": "integer-neg-fallback",
+      "setup": "x = false; y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.neg(x)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 97,
+      "path": "fast",
+      "name": "integer-add-fast",
+      "setup": "x = integer.create(3); y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.add(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 97,
+      "path": "fallback",
+      "name": "integer-add-fallback",
+      "setup": "x = false; y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.add(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 98,
+      "path": "fast",
+      "name": "integer-sub-fast",
+      "setup": "x = integer.create(3); y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.sub(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 98,
+      "path": "fallback",
+      "name": "integer-sub-fallback",
+      "setup": "x = false; y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.sub(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 99,
+      "path": "fast",
+      "name": "integer-mul-fast",
+      "setup": "x = integer.create(3); y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.mul(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 99,
+      "path": "fallback",
+      "name": "integer-mul-fallback",
+      "setup": "x = false; y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.mul(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 100,
+      "path": "fast",
+      "name": "integer-div-fast",
+      "setup": "x = integer.create(3); y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.div(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 100,
+      "path": "fallback",
+      "name": "integer-div-fallback",
+      "setup": "x = false; y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.div(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 101,
+      "path": "fast",
+      "name": "integer-min-fast",
+      "setup": "x = integer.create(3); y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.min(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 101,
+      "path": "fallback",
+      "name": "integer-min-fallback",
+      "setup": "x = false; y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.min(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 102,
+      "path": "fast",
+      "name": "integer-max-fast",
+      "setup": "x = integer.create(3); y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.max(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 102,
+      "path": "fallback",
+      "name": "integer-max-fallback",
+      "setup": "x = false; y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.max(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 103,
+      "path": "fast",
+      "name": "integer-rem-fast",
+      "setup": "x = integer.create(3); y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.rem(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 103,
+      "path": "fallback",
+      "name": "integer-rem-fallback",
+      "setup": "x = false; y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.rem(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 104,
+      "path": "fast",
+      "name": "integer-idiv-fast",
+      "setup": "x = integer.create(3); y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.idiv(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 104,
+      "path": "fallback",
+      "name": "integer-idiv-fallback",
+      "setup": "x = false; y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.idiv(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 105,
+      "path": "fast",
+      "name": "integer-udiv-fast",
+      "setup": "x = integer.create(3); y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.udiv(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 105,
+      "path": "fallback",
+      "name": "integer-udiv-fallback",
+      "setup": "x = false; y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.udiv(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 106,
+      "path": "fast",
+      "name": "integer-urem-fast",
+      "setup": "x = integer.create(3); y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.urem(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 106,
+      "path": "fallback",
+      "name": "integer-urem-fallback",
+      "setup": "x = false; y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.urem(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 107,
+      "path": "fast",
+      "name": "integer-mod-fast",
+      "setup": "x = integer.create(3); y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.mod(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 107,
+      "path": "fallback",
+      "name": "integer-mod-fallback",
+      "setup": "x = false; y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.mod(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 108,
+      "path": "fast",
+      "name": "integer-clamp-fast",
+      "setup": "x = integer.create(3); y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.clamp(x, y, z)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 108,
+      "path": "fallback",
+      "name": "integer-clamp-fallback",
+      "setup": "x = false; y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.clamp(x, y, z)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 109,
+      "path": "fast",
+      "name": "integer-band-fast",
+      "setup": "x = integer.create(3); y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.band(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 109,
+      "path": "fallback",
+      "name": "integer-band-fallback",
+      "setup": "x = false; y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.band(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 110,
+      "path": "fast",
+      "name": "integer-bor-fast",
+      "setup": "x = integer.create(3); y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.bor(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 110,
+      "path": "fallback",
+      "name": "integer-bor-fallback",
+      "setup": "x = false; y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.bor(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 111,
+      "path": "fast",
+      "name": "integer-bnot-fast",
+      "setup": "x = integer.create(3); y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.bnot(x)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 111,
+      "path": "fallback",
+      "name": "integer-bnot-fallback",
+      "setup": "x = false; y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.bnot(x)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 112,
+      "path": "fast",
+      "name": "integer-bxor-fast",
+      "setup": "x = integer.create(3); y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.bxor(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 112,
+      "path": "fallback",
+      "name": "integer-bxor-fallback",
+      "setup": "x = false; y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.bxor(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 113,
+      "path": "fast",
+      "name": "integer-lt-fast",
+      "setup": "x = integer.create(3); y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.lt(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 113,
+      "path": "fallback",
+      "name": "integer-lt-fallback",
+      "setup": "x = false; y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.lt(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 114,
+      "path": "fast",
+      "name": "integer-le-fast",
+      "setup": "x = integer.create(3); y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.le(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 114,
+      "path": "fallback",
+      "name": "integer-le-fallback",
+      "setup": "x = false; y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.le(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 115,
+      "path": "fast",
+      "name": "integer-ult-fast",
+      "setup": "x = integer.create(3); y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.ult(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 115,
+      "path": "fallback",
+      "name": "integer-ult-fallback",
+      "setup": "x = false; y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.ult(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 116,
+      "path": "fast",
+      "name": "integer-ule-fast",
+      "setup": "x = integer.create(3); y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.ule(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 116,
+      "path": "fallback",
+      "name": "integer-ule-fallback",
+      "setup": "x = false; y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.ule(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 117,
+      "path": "fast",
+      "name": "integer-gt-fast",
+      "setup": "x = integer.create(3); y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.gt(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 117,
+      "path": "fallback",
+      "name": "integer-gt-fallback",
+      "setup": "x = false; y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.gt(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 118,
+      "path": "fast",
+      "name": "integer-ge-fast",
+      "setup": "x = integer.create(3); y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.ge(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 118,
+      "path": "fallback",
+      "name": "integer-ge-fallback",
+      "setup": "x = false; y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.ge(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 119,
+      "path": "fast",
+      "name": "integer-ugt-fast",
+      "setup": "x = integer.create(3); y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.ugt(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 119,
+      "path": "fallback",
+      "name": "integer-ugt-fallback",
+      "setup": "x = false; y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.ugt(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 120,
+      "path": "fast",
+      "name": "integer-uge-fast",
+      "setup": "x = integer.create(3); y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.uge(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 120,
+      "path": "fallback",
+      "name": "integer-uge-fallback",
+      "setup": "x = false; y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.uge(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 121,
+      "path": "fast",
+      "name": "integer-lshift-fast",
+      "setup": "x = integer.create(3); y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.lshift(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 121,
+      "path": "fallback",
+      "name": "integer-lshift-fallback",
+      "setup": "x = false; y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.lshift(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 122,
+      "path": "fast",
+      "name": "integer-rshift-fast",
+      "setup": "x = integer.create(3); y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.rshift(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 122,
+      "path": "fallback",
+      "name": "integer-rshift-fallback",
+      "setup": "x = false; y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.rshift(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 123,
+      "path": "fast",
+      "name": "integer-arshift-fast",
+      "setup": "x = integer.create(3); y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.arshift(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 123,
+      "path": "fallback",
+      "name": "integer-arshift-fallback",
+      "setup": "x = false; y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.arshift(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 124,
+      "path": "fast",
+      "name": "integer-lrotate-fast",
+      "setup": "x = integer.create(3); y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.lrotate(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 124,
+      "path": "fallback",
+      "name": "integer-lrotate-fallback",
+      "setup": "x = false; y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.lrotate(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 125,
+      "path": "fast",
+      "name": "integer-rrotate-fast",
+      "setup": "x = integer.create(3); y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.rrotate(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 125,
+      "path": "fallback",
+      "name": "integer-rrotate-fallback",
+      "setup": "x = false; y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.rrotate(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 126,
+      "path": "fast",
+      "name": "integer-extract-fast",
+      "setup": "x = integer.create(3); y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.extract(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 126,
+      "path": "fallback",
+      "name": "integer-extract-fallback",
+      "setup": "x = false; y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.extract(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 127,
+      "path": "fast",
+      "name": "integer-btest-fast",
+      "setup": "x = integer.create(3); y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.btest(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 127,
+      "path": "fallback",
+      "name": "integer-btest-fallback",
+      "setup": "x = false; y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.btest(x, y)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 128,
+      "path": "fast",
+      "name": "integer-countrz-fast",
+      "setup": "x = integer.create(3); y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.countrz(x)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 128,
+      "path": "fallback",
+      "name": "integer-countrz-fallback",
+      "setup": "x = false; y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.countrz(x)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 129,
+      "path": "fast",
+      "name": "integer-countlz-fast",
+      "setup": "x = integer.create(3); y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.countlz(x)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 129,
+      "path": "fallback",
+      "name": "integer-countlz-fallback",
+      "setup": "x = false; y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.countlz(x)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 130,
+      "path": "fast",
+      "name": "integer-bswap-fast",
+      "setup": "x = integer.create(3); y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.bswap(x)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    },
+    {
+      "id": 130,
+      "path": "fallback",
+      "name": "integer-bswap-fallback",
+      "setup": "x = false; y = integer.create(1); z = integer.create(5)",
+      "source": "return integer.bswap(x)",
+      "observe": [],
+      "compiler_flags": [
+        "LuauIntegerLibrary",
+        "LuauIntegerFastcalls"
+      ]
+    }
+  ]
+}

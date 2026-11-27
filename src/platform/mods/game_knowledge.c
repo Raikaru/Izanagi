@@ -308,6 +308,58 @@ int p4_game_knowledge_identity_find(const P4GameKnowledge *state,
     *index = found;
     return P4_TABLE_OK;
 }
+struct P4GameKnowledgeCapture {
+    const P4GameTables *tables;
+    P4KnowledgeRetail retail;
+    size_t count;
+    unsigned char known[];
+};
+int p4_game_knowledge_capture(const P4GameKnowledge *state, P4GameKnowledgeCapture **out)
+{
+    if (!state || !out) return P4_TABLE_INVALID;
+    P4GameKnowledgeCapture *capture = malloc(sizeof *capture + state->count);
+    if (!capture) return P4_TABLE_NOMEM;
+    capture->tables = state->tables;
+    capture->retail = state->retail;
+    capture->count = state->count;
+    for (size_t i = 0; i < state->count; ++i) capture->known[i] = state->entries[i].known;
+    *out = capture;
+    return P4_TABLE_OK;
+}
+int p4_game_knowledge_capture_matches(const P4GameKnowledge *state, const P4GameKnowledgeCapture *capture)
+{
+    return state && capture && capture->tables == state->tables && capture->count == state->count ?
+        P4_TABLE_OK : P4_TABLE_CONFLICT;
+}
+int p4_game_knowledge_restore(P4GameKnowledge *state, const P4GameKnowledgeCapture *capture)
+{
+    int result = p4_game_knowledge_capture_matches(state, capture);
+    if (result) return result;
+    for (size_t i = 0; i < state->count; ++i) state->entries[i].known = capture->known[i];
+    state->retail = capture->retail;
+    return P4_TABLE_OK;
+}
+void p4_game_knowledge_capture_free(P4GameKnowledgeCapture *capture) { free(capture); }
+static uint64_t knowledge_digest(uint64_t hash, const P4KnowledgeRetail *retail)
+{
+    const unsigned char *bytes = (const unsigned char *)retail;
+    for (size_t i = 0; i < sizeof *retail; ++i) hash = (hash ^ bytes[i]) * 1099511628211ull;
+    return hash;
+}
+uint64_t p4_game_knowledge_state_digest(const P4GameKnowledge *state)
+{
+    if (!state) return 0;
+    uint64_t hash = 1469598103934665603ull;
+    for (size_t i = 0; i < state->count; ++i) hash = (hash ^ state->entries[i].known) * 1099511628211ull;
+    return knowledge_digest(hash, &state->retail);
+}
+uint64_t p4_game_knowledge_capture_digest(const P4GameKnowledgeCapture *capture)
+{
+    if (!capture) return 0;
+    uint64_t hash = 1469598103934665603ull;
+    for (size_t i = 0; i < capture->count; ++i) hash = (hash ^ capture->known[i]) * 1099511628211ull;
+    return knowledge_digest(hash, &capture->retail);
+}
 int p4_game_knowledge_replace(P4GameKnowledge *state, const size_t *indices, size_t count,
     const P4KnowledgeRetail *retail)
 {

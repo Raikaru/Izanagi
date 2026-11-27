@@ -155,6 +155,13 @@ public class P4Activity extends SDLActivity implements InputManager.InputDeviceL
         nativeSetEnv("P4PC_SAVE_DIR", saves.getPath());
         nativeSetEnv("P4PC_LOG_FILE", new File(files, "boot.log").getPath());
         nativeSetEnv("P4PC_LOGCAT", "1"); // the log goes to logcat as well, unless a test launch says env0=P4PC_LOGCAT=0
+        try { // the app's version, for the log's header (the native side has no other way to know which build it is)
+            final android.content.pm.PackageInfo info = getPackageManager().getPackageInfo(getPackageName(), 0);
+            final long code = android.os.Build.VERSION.SDK_INT >= 28 ? info.getLongVersionCode() : info.versionCode;
+            nativeSetEnv("P4PC_APP_VERSION", info.versionName + " (code " + code + ")");
+        } catch (Exception e) {
+            Log.w(TAG, "cannot read the app's version", e);
+        }
         if (iso != null) nativeSetEnv("P4PC_ISO", open(iso));
         if (elf != null && !elf.isEmpty()) nativeSetEnv("P4PC_ELF", open(elf));
         final Bundle extras = in.getExtras();

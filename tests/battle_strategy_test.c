@@ -1,5 +1,5 @@
 /* The strategic candidate policy's (battle_sim 8) decision rules: which action
- * wins, and where each rule's boundary lies, for situations policy.c hands
+ * wins, and where each rule's boundary lies, for situations policy.zig hands
  * them. These do not qualify combat; native runs measure the policy itself. */
 #undef NDEBUG
 #include <assert.h>
@@ -7,7 +7,7 @@
 #include <stdint.h>
 #include "p4pc/battle_strategy.h"
 
-/* The attentive scores policy.c passes in as `inherited`. */
+/* The attentive scores policy.zig passes in as `inherited`. */
 #define ENEMY_DEBUFF 240
 #define PARTY_BUFF 260
 #define GUARD_ON_CHARGE 20000
@@ -148,6 +148,7 @@ static void persona_switch(void)
     assert(p4_strategy_switch(INT64_MIN, 0, 0));
     assert(!p4_strategy_switch(INT64_MAX - 1, INT64_MAX - 1, 0));
 }
+
 
 int main(void)
 {

@@ -25,6 +25,7 @@ static int prepare(void *unused)
     if (boot.cpu || boot.prepared || boot.exposed) return -1;
     if (p4_package_boot_product(P4_GAME_TABLES_BOOT_PROVIDER, &product)) return -1;
     const P4GameTablesBootProduct *root = product;
+    if (root && root->golden_ai) return p4_package_boot_provide(NULL);
     if (!root || !p4_game_elements_requested(root->tables))
         return p4_package_boot_provide(NULL);
     if (!root->tables || !root->sources || !root->skills || !root->native_uses ||
@@ -94,6 +95,7 @@ static int runtime_prepare(void *unused)
     (void)unused;
     if (p4_package_boot_product(P4_GAME_TABLES_BOOT_PROVIDER, &product)) return -1;
     const P4GameTablesBootProduct *root = product;
+    if (root && root->golden_ai) return p4_package_boot_provide(NULL);
     if (!boot.cpu) {
         if (root && p4_game_elements_requested(root->tables))
             return p4_package_boot_fail(NULL, "Expanded enemy AI has no retained CPU preparation.");

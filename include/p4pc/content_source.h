@@ -9,6 +9,9 @@
 /* A named package resource is opened from an issued provider file plan, not
  * from a VFS layer. This sentinel is not a layer number or a precedence rank. */
 #define P4_CONTENT_RANK_PACKAGE_PLAN UINT32_MAX
+/* Direct M5 hash-verified Golden cache objects, not a VFS layer or package
+ * file plan. The source key carries both manifest and object SHA-256. */
+#define P4_CONTENT_RANK_GOLDEN_CACHE (UINT32_MAX - 1u)
 
 typedef struct P4ContentSource {
     enum P4TextureOrigin origin;

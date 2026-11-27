@@ -1,0 +1,244 @@
+{
+  "schema": 1,
+  "proof_id": "L1-c12-calendar-weather-live-producer-subcontracts",
+  "address": "0x005e3a04",
+  "decision": "OPEN-retain",
+  "runtime_status": "pending-seam",
+  "source_value_admitted": false,
+  "finding": "Core Golden weather-stack and saved-real-calendar producer/state operations are structurally recovered. The image-literal row remains OPEN: full calendar physical/logical extent and legal raw signed-day producer domain are not proven. This research does not authorize a519/520-row supplier or freeze any live input.",
+  "source_pins": {
+    "steam_build": 10836033,
+    "steam_image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+    "switch_mapped_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+    "scope": "Static ordinary NSO code/data and Steam data only; no game/emulator/WSL or protected.arch execution/decode."
+  },
+  "source_windows": [
+    {
+      "begin": "0x71000ca480",
+      "end_exclusive": "0x71000ca530",
+      "role": "stack-reset-push-pop-count",
+      "sha256": "5d49fd99d88c8dabae1f4952a8f1999b5da62fae28ed6b78fd455a2c685cc1b2"
+    },
+    {
+      "begin": "0x71000ca640",
+      "end_exclusive": "0x71000ca7a0",
+      "role": "stack-bypass-flags-default-weather",
+      "sha256": "0e3779cde26b0c4f99e93b47bfc6c45f1e3fb4e9fe9d7cf8a6727b79bdc4cca9"
+    },
+    {
+      "begin": "0x71000d4408",
+      "end_exclusive": "0x71000d44a0",
+      "role": "save-real-date-phase-weather-and-enable-bypass",
+      "sha256": "20224a546c414220339c0f3f387a576681629816713d5540f3eaa456afadeb9d"
+    },
+    {
+      "begin": "0x71000d8360",
+      "end_exclusive": "0x71000d8574",
+      "role": "restore-real-calendar-flags-and-clear-bypass",
+      "sha256": "085ccefafa6611df4ab8d8de90dd6f743dea2f19204895bd636ef38fd2364820"
+    },
+    {
+      "begin": "0x71000d86c0",
+      "end_exclusive": "0x71000d8718",
+      "role": "initialize-saved-context-and-clear-bypass",
+      "sha256": "bdc178b2df29c342dce1c0743a53a9cce7b09a5074fb813032054fb05c6de228"
+    }
+  ],
+  "critical_instructions": [
+    {
+      "address": "0x71000ca484",
+      "mnemonic": "strb",
+      "operands": "wzr, [x8, #0x93c]"
+    },
+    {
+      "address": "0x71000ca4b0",
+      "mnemonic": "strb",
+      "operands": "w9, [x20, #0x93c]"
+    },
+    {
+      "address": "0x71000ca4b4",
+      "mnemonic": "cmp",
+      "operands": "w8, #5"
+    },
+    {
+      "address": "0x71000ca4dc",
+      "mnemonic": "strb",
+      "operands": "w19, [x8, #4]"
+    },
+    {
+      "address": "0x71000ca500",
+      "mnemonic": "strb",
+      "operands": "w9, [x8, #0x93c]"
+    },
+    {
+      "address": "0x71000ca504",
+      "mnemonic": "tbnz",
+      "operands": "w10, #0x1f, #0x71000ca50c"
+    },
+    {
+      "address": "0x71000ca684",
+      "mnemonic": "ldrsb",
+      "operands": "w8, [x21, #0x93c]"
+    },
+    {
+      "address": "0x71000ca68c",
+      "mnemonic": "cmp",
+      "operands": "w8, #4"
+    },
+    {
+      "address": "0x71000ca6a8",
+      "mnemonic": "tst",
+      "operands": "w8, #0xff"
+    },
+    {
+      "address": "0x71000ca6bc",
+      "mnemonic": "ldrb",
+      "operands": "w0, [x8, #4]"
+    },
+    {
+      "address": "0x71000ca6c0",
+      "mnemonic": "cmp",
+      "operands": "w0, #0xff"
+    },
+    {
+      "address": "0x71000d443c",
+      "mnemonic": "str",
+      "operands": "w8, [x26, #4]"
+    },
+    {
+      "address": "0x71000d4448",
+      "mnemonic": "str",
+      "operands": "w8, [x26]"
+    },
+    {
+      "address": "0x71000d446c",
+      "mnemonic": "str",
+      "operands": "w8, [x26, #8]"
+    },
+    {
+      "address": "0x71000d4474",
+      "mnemonic": "str",
+      "operands": "w8, [x26, #0x10]"
+    },
+    {
+      "address": "0x71000d8644",
+      "mnemonic": "ldr",
+      "operands": "w0, [x8, #0x454]"
+    },
+    {
+      "address": "0x71000d86dc",
+      "mnemonic": "stur",
+      "operands": "xzr, [x8, #0xc]"
+    },
+    {
+      "address": "0x71000d8544",
+      "mnemonic": "stp",
+      "operands": "wzr, wzr, [x19, #0xc]"
+    }
+  ],
+  "equal_calendar_prefix_bytes": 3114,
+  "equal_prefix_sha256": "b0fdf02a70e2c4d91626f62f70e6996c4b7e9dcb44782e7c7847253f462fef56",
+  "extent_still_unproved": true,
+  "restored_additional_flag_ids": [
+    2069,
+    2067,
+    23,
+    2369,
+    2638,
+    2073,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    5648,
+    5649,
+    5650,
+    1039,
+    1040,
+    100,
+    101,
+    102,
+    2375,
+    2767,
+    2620,
+    2621,
+    2373,
+    5697,
+    2746,
+    1692,
+    1693,
+    1690,
+    3168,
+    2074
+  ],
+  "stack": {
+    "depth": "NSO9b893c signed8 in the consuming weather query; unsigned8 in ca520 count getter.",
+    "reset": "ca480/ca484 clears depth only. It does not clear prior entry bytes. Observed reset calls27748c/2774d4/277514 are real source call sites, not guessed boot/load labels.",
+    "push": "ca490 loads old byte, increments/stores new byte first, interprets new byte as signed8 and asserts ifnot<5 atca4b4..4c8, then stores low8input at9b893c+signed8(depth). No range clamp or invented default; actual input and nesting come from real callers.",
+    "pop": "ca4f0 decrements/stores byte first; negative signed8 result takes assertionline2f8. Do not change underflow into a harmless zero reset.",
+    "query": "ca640 callsd8640 first. Nonzero bypass skips the stack but still traverses weather flags. Otherwise LDRSBdepth; zero goesflag chain, signeddepth>=4 assertsline2de, then nonzero byte depth indexes slot throughsigned8. Anyu8 slot other thanff is returned;ff continues to flags. Push permits depth4 before its<5 assertion while query asserts at>=4: preserve distinct actual checks, do not silently normalize them.",
+    "observed_push_calls": [
+      "0x1bf3a4",
+      "0x1bf750",
+      "0x1bf76c",
+      "0x1bf798",
+      "0x1bf7f0",
+      "0x1bf80c",
+      "0x250420",
+      "0x2b34a4",
+      "0x2b3558"
+    ],
+    "observed_pop_calls": [
+      "0x1bedb8",
+      "0x250424",
+      "0x2b355c"
+    ],
+    "caller_census_boundary": "DirectBL search0..400000 yielded these actual calls. This is not a claim of exhaustive indirect/native alias coverage or valid caller-domain qualification."
+  },
+  "bypass_and_saved_context": {
+    "base": "NSO759444",
+    "active_word": "759454=base+10hex; getterd8640/d8644. The earlier compacted-output758454 locator was wrong and is not used.",
+    "save_real_state": "d4438..4474 saves actual signed16date extended tos32 at+0, actual phase maskedtou8 then stored32 at+4, and stack-aware weather explicitly sign-extended fromlow8 tos32 at+8, before setting activeword+10 to1. Saves real flag8a at+c and additional record state at+14..24. d44bc..44d8 and onward update actual visual and logical calendar state; no constant-real-weather or dummydate source is valid.",
+    "initialize": "d86c0 stores real input through GOT880900 then initializes saved context. d86d8 writes64-bit-1 at+0 (date/phase); d86dc unaligned64-bit zero at+c covers savedflag8a and activeword. This is not an assertion that the initializer has no other registered/indirect callers.",
+    "restore": "Complete d8360..8570 restores saved weather throughd2c10, visual date/phase throughd2720/d2990 and actual date/phase throughc9d90/c9f30; actual refreshd2f50 follows. Restores flag8a, weatherflags1203..1208, flags94f..956 and33 additional flags from actual6332b4 IDbank; booleanizes saved values rather than inventing zeros. d8540 resets saved date/phase to-1 and d8544 clears both savedflag8a and activeword. Existing stack is not zeroed by this context restore.",
+    "visual_input_boundary": "d2c10 looks up real named task61bd19, then conditionally updates itsu16+8 only when task exists/value changes. Do not create a dummy visual task or relabel this operation as directly setting global weather flags."
+  },
+  "getter_roles": {
+    "ca530": "Only applies global weather override flags for matching actual current date and phase, then typed table fallback.",
+    "ca640": "Stack/bypass-aware getter applies stack/flag chain before table fallback; it does not repeatca530 current-date/phase gate. Keep actual caller choice, not a universal replacement of every weather query.",
+    "ca7a0": "Pure u16 column+2/+4 table fallback: choose+4 iff unsigned(phase-2)<4.",
+    "ca940": "Fusion fallback reads onlyu8+4; do not widen it to the aboveu16 operation.",
+    "ca9e0": "Packedfuture weather chooses high7bits only underbit15 andday>reference+3; otherwiselowbyte. First+(second<<4), withraw signed-day indexing."
+  },
+  "extent_evidence": {
+    "first_519_shaped_units": "Both images share exact3114-byte prefix with recorded hash. This is a byte count, not a declared519-row proof.",
+    "following_six_bytes": {
+      "nso": "000000000000",
+      "steam": "000000010100"
+    },
+    "typed_next_anchor": "NSO73fd08 six phase-label pointers. Upper3120bytes/520six-byte units is not a row count.",
+    "ordinary_steam_tail_reference_probe": "No directRIP or exact-RVA32 references toA5040A..A5040F found in the bounded ordinary.shared probe. Negative reference results do not prove padding, absence,519rows or object identity."
+  },
+  "required_seams": [
+    {
+      "owner": "Real signed depth, stack slots and request lifetime",
+      "requirement": "Use actualca480 reset and realpush/pop inputs and balanced caller/task/script lifecycle. Preserve signed query/index semantics, ff sentinel, actual byte stores and distinct push/query checks. Bind all genuine native/translated/inlined aliases and valid producer domains; do not clamp underflow, force depth0, clear unrequested slots, or replace inputs by fixed weather."
+    },
+    {
+      "owner": "Real saved/current-calendar and bypass lifetime",
+      "requirement": "Bind real context creation/input registration, saved date/phase/weather/flag8a and all actual saved flag writers. Save real state before activating bypass; preserve temporary visual/logical mutations and restore every saved state in actual order. Cleard8544/d86dc activeword at correct lifecycle boundaries; no permanentbypass, zero backups, syntheticdates or omitted visual task dependencies."
+    },
+    {
+      "owner": "Whole calendar source and query role domain",
+      "requirement": "Before admitting row5e3a04 prove full physical/logical Golden extent, valid raw signed16 day producers and source field layout. Respect selected oldcolumn4 view2192live+4tail versus actualfullold366x6base5e3a00. Bind actual pure/current-only/stack-aware/fusion-u8/packedfuture query roles and7schedulerphase labels; no flat2196copy, guessed519/520extent or blanket modulo366."
+    }
+  ],
+  "verification": {
+    "script": "<scratch>/GoldenRE-notes/l1/l1c12_calendar_producers_proof.py",
+    "observed_result": "exit0 CALENDAR_PRODUCER_SOURCE_PASS and CALENDAR_EXTENT_BOUNDARY_PASS",
+    "scope": "Pinned image hashes, exact critical instructions, producer/save/restore source window hashes, signed depth/sentinel/activeword operations, actual weatherflag restore constants, equal3114Bprefix and differing following6B; not runtime/source-literal admission or all-caller proof."
+  }
+}

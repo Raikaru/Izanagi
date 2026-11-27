@@ -1,0 +1,92 @@
+{
+  "schema": 1,
+  "proof_id": "L1-c12-scheduler-month-cache-and-local-tag-replacement",
+  "runtime_status": "pending-seam",
+  "source_boundary": "Original ELF and pinned decomp18016afe6 src/cldScheduler.c; ordinary Steam10836033 .shared/.xpdata and Switch1.2 NSO static code/data only. No .arch decode, execution, byte-similarity admission or runtime equivalence claim.",
+  "source_verification": {
+    "script": "<scratch>/GoldenRE-notes/l1/l1c12_scheduler_cache_proof.py",
+    "observed_result": "exit0 SCHEDULER_CACHE_SOURCE_PASS and SCHEDULER_TAG_REPLACEMENT_PASS",
+    "checks": "Full pinned Steam image SHA, original selected bytes, ELF.reginfo GP7690F0, exact ordinary ELF lw/sw and format/source-line/call operands, both source initializers/hash, four NSO actual cache references, exact typed sentinel/store instructions, Steam RIP-resolved cache addresses and fully enumerated Golden formatter-to-acquisition call blocks."
+  },
+  "objects": {
+    "0x007637a0": {
+      "decision": "PROVEN",
+      "ps2_size": 8,
+      "ps2": {
+        "type": "mutable s32 cached loaded month, not f64",
+        "live_size": 4,
+        "initial_value": -1,
+        "retained_tail": {
+          "offset": 4,
+          "size": 4,
+          "observed": "00000000"
+        },
+        "reader": "260020 cldSchedulerTaskUpdate; lw2600b0/2601f0 GP-5950, sw2600fc. ELF.reginfo GP7690f0 establishes actual7637a0."
+      },
+      "steam": {
+        "container": "P4G.exe",
+        "section": ".xpdata",
+        "rva": "0xaf321c",
+        "raw_offset": 11475484,
+        "offset": 864796,
+        "size": 4,
+        "sha256": "ad95131bc0b799c0b1af477fb14fcf26a6a9f76079e48bf090acb7e8367bfd0e",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "mapping_proven": true
+      },
+      "nso": {
+        "address": "0x7100758a38",
+        "size": 4,
+        "sha256": "ad95131bc0b799c0b1af477fb14fcf26a6a9f76079e48bf090acb7e8367bfd0e"
+      },
+      "identity_and_state": "Ordinary Steam1460f2 loads s32 actualAF321C;1460f8 tests-1 and146101 compares real current split month. A miss reaches14619f;1461a6 stores that month BEFORE path formatting1461b1 and asynchronous acquisition1461bc.1461df reuses same field to format resource path on loaded-state path. NSOd104c..1064 independently loads758a38 and tests-1/current split month;d145c writes real month before formatterd1468/acquired1474, d10d4 reuses actual slot, and d13b4..13c4 tests-1 to select null versus live script header before lookup. Exact same paired cache/read/write/lookup role proves the source, not four ff bytes. All four recovered NSO materializations are d1050/d10d4/d13b4/d145c.",
+      "layout": {
+        "kind": "prefix-copy",
+        "element_width": 4,
+        "logical_count": 1,
+        "live_size": 4,
+        "retained_tail": {
+          "offset": 4,
+          "size": 4
+        },
+        "copy_policy": "Project only initial4-byte signed-1 source once into original8-byte view; retain+4..7. Bind a real mutable cache thereafter; neither freeze-1 nor reapply initial bytes per task/frame."
+      },
+      "required_seams": [
+        {
+          "owner": "Real current-month cache and loaded scheduler BF lifecycle",
+          "requirement": "Pin image/source hash; initialize actual mutable s32 cache to-1 once at correct image/global lifetime. Preserve exact sentinel/current-month equality, and write real calSplitDayOfYear-produced month BEFORE formatting/acquisition, not after I/O success. Cover cache miss/hit, month transition, load pending/completed and script-header availability. Preserve actual source owner reset/teardown rules: NSO d0ee0 allocation/state clear does not reset758a38; do not invent reset on each scheduler init/start."
+        },
+        {
+          "owner": "Coherent actual scheduler producers and native aliases",
+          "requirement": "Use actual day-index/date-split/current-month producer, actual month path/BF asynchronous resource, file size/data, resident script buffer and real named procedure lookup/task handles. Native full Golden buffer is31000hex versus PS2old20000hex; this cache proof does not validate shrinking it. Route all direct/inlined/native cache aliases to one state; actual retained initializer bytes are not a replacement for producers. Calendar extent/phase/override proof remains independently OPEN. No fake loaded resource, forced current month, constant success or unqualified procedure-phase conversion."
+        }
+      ]
+    },
+    "0x007637a8": {
+      "decision": "D10c",
+      "ps2_size": 8,
+      "ps2": {
+        "live_size": 6,
+        "format": "%s %d",
+        "retained_tail": {
+          "offset": 6,
+          "size": 2
+        },
+        "actual_operation": "260118 passes GP-5948=7637a8 as format;26011c/120 passes source6372b0,260124 line87,260128 calls440b68 after path sprintf260110 and before AcquireDirectory260138."
+      },
+      "positive_replacement": "The exact corresponding Golden changed-month acquisition branch is fully enumerated: Steam14619f..1461d0 stores cache, formats path via38180, then directly acquires via4ea890, stores real returned handle and state1. NSOd1454..1488 likewise stores month, formats via530a20 then directly acquires via397d20, stores handle9b8978 and state1. There is no local format-consuming diagnostic call between formatting and acquisition in either build. This is paired operation removal, not failed string/reference search or blanket removal of diagnostics.",
+      "preserved_native_behavior": "NSOd1438..1450 still asserts if an acquisition handle already exists; original source filename remains real atNSO5daf7a and is used by native assertions. Separate scheduler initializationd0f04..0f24 still publishes file/line through39d420 and allocates real31000hex BF buffer. Do not remove those operations or infer allocator diagnostics absent globally.",
+      "required_seams": [
+        {
+          "owner": "Golden-only local monthly acquisition-tag removal",
+          "requirement": "Replace only original260118..26012c local printf/tag operation for7637a8 on corresponding Golden branch: real path formatter flows directly to real asynchronous acquisition with args preserved. Keep actual cached-month-before-acquire store, returned handle and state1, native outstanding-handle assertions and native initializer allocation-site metadata/31000hex buffer. This D10c does not remove original PS2 diagnostics in PS2 mode or other consumers of440b68; no replacement string/fake log needed."
+        },
+        {
+          "owner": "Real I/O and failure lifecycle",
+          "requirement": "Qualify direct/inlined/native changed-month routes with actual day/month producer, BF file loading/completion and actual errors; never turn acquisition into a no-op or guaranteed success. Admission is limited to the eliminated6-byte diagnostic representation plus2-byte tail, not entire scheduler failure equivalence. Existing l1-scheduler-missing-procedure-proof.json independently covers lookup-1 ->sequence10/return-1."
+        }
+      ]
+    }
+  }
+}

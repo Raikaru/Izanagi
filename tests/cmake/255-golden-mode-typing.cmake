@@ -3,3 +3,7 @@
 # follows the plain-test label sweep.
 add_test(NAME golden_mode_typing COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/golden_mode_typing_test.py")
 set_tests_properties(golden_mode_typing PROPERTIES LABELS "tools;port64" TIMEOUT 120)
+
+# L1 inventory and per-object decision closure are metadata-only.
+add_test(NAME golden_mode_literal_ledger COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/golden_mode_literal_ledger_test.py")
+set_tests_properties(golden_mode_literal_ledger PROPERTIES LABELS "tools;port64" TIMEOUT 120)

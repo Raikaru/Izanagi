@@ -1,0 +1,2147 @@
+{
+  "proof_id": "L1-c6A1R-narrow-rounded-frame-native-construction",
+  "class": "PROVEN-code",
+  "runtime_status": "pending-seam",
+  "source_pins": {
+    "ps2_decomp_commit": "18016afe6",
+    "steam_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+    "switch_nso_sha256": "854c7a1e33de1619abf009fa7f32b8c012960d685c8bf1bf99a92a6a4d0bda1c",
+    "switch_mapped_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+    "method": "Static ELF/data, ordinary Steam .shared/.sdata/.xpdata and decompressed NSO code/data only. No .arch decode, game execution or runtime binding."
+  },
+  "scope": "Entire selected0064e320/144B old eighteenfloat2 seed-template bank. Positivelycorresponding native eighteen-vertex construction authors equivalent ordered geometric field roles directly incode. Not genericroundedvisualsimilarity,commonzero/onevalues,orabsence ofa144Bimagearray.",
+  "counts": {
+    "selected_rows": 1,
+    "old_selected_bytes": 144,
+    "old_records": 18,
+    "old_record_stride": 8,
+    "old_tail_bytes": 0,
+    "native_vertices": 18,
+    "native_stride": 24,
+    "native_xyz_field_correspondences": 54,
+    "native_identical_color_fields": 18
+  },
+  "old": {
+    "address": "0x0064e320",
+    "sha256": "1e3d29d5618ca4531f437bc652603ab04e184c3838d5d256c93a7c9809d86ac1",
+    "initial_float2_values": [
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        5.0
+      ],
+      [
+        1.0,
+        3.0
+      ],
+      [
+        3.0,
+        1.0
+      ],
+      [
+        5.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0
+      ],
+      [
+        0.0,
+        3.0
+      ],
+      [
+        0.0,
+        5.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        5.0,
+        0.0
+      ],
+      [
+        3.0,
+        0.0
+      ],
+      [
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        5.0
+      ]
+    ],
+    "consumer": "00366380 sflDataDrawNarrowRoundedFrame",
+    "pinned_source_file": "src/Main/Battle/Panel/sfl_data_inferred.c",
+    "source_body_sha256": "dd7ced7ca858e00fd715f281f275aaa6ad4e2339366b5d19580f5b436ad2d7ac",
+    "field_assignments": [
+      [
+        "0",
+        "0",
+        "w * 0.5f + 5.0f"
+      ],
+      [
+        "0",
+        "1",
+        "h * 0.5f + 5.0f"
+      ],
+      [
+        "5",
+        "0",
+        "w + 5.0f"
+      ],
+      [
+        "6",
+        "0",
+        "v[5].point.v[0] + 2.0f"
+      ],
+      [
+        "7",
+        "0",
+        "v[5].point.v[0] + 4.0f"
+      ],
+      [
+        "8",
+        "0",
+        "v[5].point.v[0] + 5.0f"
+      ],
+      [
+        "9",
+        "0",
+        "v[5].point.v[0] + 5.0f"
+      ],
+      [
+        "9",
+        "1",
+        "h + 5.0f"
+      ],
+      [
+        "10",
+        "0",
+        "v[5].point.v[0] + 4.0f"
+      ],
+      [
+        "10",
+        "1",
+        "v[9].point.v[1] + 2.0f"
+      ],
+      [
+        "11",
+        "0",
+        "v[5].point.v[0] + 2.0f"
+      ],
+      [
+        "11",
+        "1",
+        "v[9].point.v[1] + 4.0f"
+      ],
+      [
+        "12",
+        "0",
+        "v[5].point.v[0]"
+      ],
+      [
+        "12",
+        "1",
+        "v[9].point.v[1] + 5.0f"
+      ],
+      [
+        "13",
+        "1",
+        "v[9].point.v[1] + 5.0f"
+      ],
+      [
+        "14",
+        "1",
+        "v[9].point.v[1] + 4.0f"
+      ],
+      [
+        "15",
+        "1",
+        "v[9].point.v[1] + 2.0f"
+      ],
+      [
+        "16",
+        "1",
+        "v[9].point.v[1]"
+      ]
+    ],
+    "construction_role": "Actualoldproducer copies18two-floatseeds,overwritesdimension-derivedfields,packsauniformcolorandemits18-pointcenter+closedboundary primitive throughrealqueued/immediatepaths. Seedfieldsnotreadbeforeoverwrite are notpersistentGoldenvalues. FullobjectretiresinGoldenmode; donotcopyonlyunchangedcells."
+  },
+  "native": {
+    "entry": "0x7100219960",
+    "end_exclusive": "0x7100219c70",
+    "byte_size": 784,
+    "sha256": "0f56858fea926ef13b19ce0a5d3f33ac82924af2662c9f4548f02066f2b08823",
+    "argument_registers": {
+      "s0": "input depth",
+      "w0": "originx signedint",
+      "w1": "originy signedint",
+      "w2": "width signedint",
+      "w3": "height signedint",
+      "w4": "RGB packedword",
+      "w5": "alpha signedint"
+    },
+    "guard": "width>=10 && height>=10 && alpha>=1; all3 rejectedges branch219c58->restore/ret219c64, no state/drawcall. Noextra clamping orretry.",
+    "guard_edges": [
+      [
+        "0x7100219a50",
+        "0x7100219c58"
+      ],
+      [
+        "0x7100219a58",
+        "0x7100219c58"
+      ],
+      [
+        "0x7100219a60",
+        "0x7100219c58"
+      ]
+    ],
+    "packet_pointer": "sp atactual3938d0 call; framepointer-240hex",
+    "field_layout": {
+      "stride": 24,
+      "packed_uniform_color": 8,
+      "x": 12,
+      "y": 16,
+      "z": 20,
+      "leading_bytes": "0..7 not deliberately authoredstreamUV bythisproducer; some stacktemporaryaliasing maywriteincidentalvalues. Actualpipelineformat/state mustgovern use; noUVvalue isqualified."
+    },
+    "color": "All18 actualcolorfields sharetheactualpackedRGB low24 andalpha low8 byte construction; signedalphaguardnotreplacedbyclamped/uint8guard. ActualBFI/BFXILexpressionsealedbelow.",
+    "color_actual_def_use_expression": [
+      "bfxil",
+      [
+        "bfxil",
+        [
+          "bfi",
+          [
+            "and",
+            [
+              "input-rgb"
+            ],
+            16711680
+          ],
+          [
+            "input-alpha"
+          ],
+          24,
+          8
+        ],
+        [
+          "input-rgb"
+        ],
+        0,
+        16
+      ],
+      [
+        "input-rgb"
+      ],
+      0,
+      8
+    ],
+    "depth": "Actual f32 subtraction65535.0f -inputdepth, not PS2camera near-plane/reciprocal format.",
+    "draw_calls": [
+      {
+        "address": "0x7100219c2c",
+        "callee": "0x710033b5a0",
+        "arguments": [
+          2,
+          0
+        ]
+      },
+      {
+        "address": "0x7100219c54",
+        "callee": "0x71003938d0",
+        "arguments": [
+          "0x10000000",
+          "0x80019e",
+          0,
+          18,
+          0,
+          "vertexbuffer",
+          2,
+          24
+        ]
+      }
+    ],
+    "instructions": [
+      {
+        "address": "0x7100219960",
+        "mnemonic": "stp",
+        "operands": "x29, x30, [sp, #-0x20]!"
+      },
+      {
+        "address": "0x7100219964",
+        "mnemonic": "str",
+        "operands": "x28, [sp, #0x10]"
+      },
+      {
+        "address": "0x7100219968",
+        "mnemonic": "mov",
+        "operands": "x29, sp"
+      },
+      {
+        "address": "0x710021996c",
+        "mnemonic": "sub",
+        "operands": "sp, sp, #0x240"
+      },
+      {
+        "address": "0x7100219970",
+        "mnemonic": "sub",
+        "operands": "w12, w2, #5"
+      },
+      {
+        "address": "0x7100219974",
+        "mnemonic": "scvtf",
+        "operands": "s6, w12"
+      },
+      {
+        "address": "0x7100219978",
+        "mnemonic": "sub",
+        "operands": "w12, w2, #1"
+      },
+      {
+        "address": "0x710021997c",
+        "mnemonic": "scvtf",
+        "operands": "s4, w12"
+      },
+      {
+        "address": "0x7100219980",
+        "mnemonic": "sub",
+        "operands": "w12, w3, #3"
+      },
+      {
+        "address": "0x7100219984",
+        "mnemonic": "subs",
+        "operands": "w13, w2, #0xa"
+      },
+      {
+        "address": "0x7100219988",
+        "mnemonic": "fmov",
+        "operands": "s16, #0.50000000"
+      },
+      {
+        "address": "0x710021998c",
+        "mnemonic": "scvtf",
+        "operands": "s19, w12"
+      },
+      {
+        "address": "0x7100219990",
+        "mnemonic": "sub",
+        "operands": "w12, w3, #0xa"
+      },
+      {
+        "address": "0x7100219994",
+        "mnemonic": "scvtf",
+        "operands": "s2, w13"
+      },
+      {
+        "address": "0x7100219998",
+        "mnemonic": "sub",
+        "operands": "w13, w2, #3"
+      },
+      {
+        "address": "0x710021999c",
+        "mnemonic": "scvtf",
+        "operands": "s7, w12"
+      },
+      {
+        "address": "0x71002199a0",
+        "mnemonic": "sub",
+        "operands": "w12, w3, #1"
+      },
+      {
+        "address": "0x71002199a4",
+        "mnemonic": "scvtf",
+        "operands": "s5, w13"
+      },
+      {
+        "address": "0x71002199a8",
+        "mnemonic": "sub",
+        "operands": "w13, w3, #5"
+      },
+      {
+        "address": "0x71002199ac",
+        "mnemonic": "scvtf",
+        "operands": "s3, w2"
+      },
+      {
+        "address": "0x71002199b0",
+        "mnemonic": "stur",
+        "operands": "s3, [x29, #-0x50]"
+      },
+      {
+        "address": "0x71002199b4",
+        "mnemonic": "scvtf",
+        "operands": "s1, w3"
+      },
+      {
+        "address": "0x71002199b8",
+        "mnemonic": "stur",
+        "operands": "s1, [x29, #-0x24]"
+      },
+      {
+        "address": "0x71002199bc",
+        "mnemonic": "scvtf",
+        "operands": "s18, w13"
+      },
+      {
+        "address": "0x71002199c0",
+        "mnemonic": "fmul",
+        "operands": "s2, s2, s16"
+      },
+      {
+        "address": "0x71002199c4",
+        "mnemonic": "scvtf",
+        "operands": "s20, w12"
+      },
+      {
+        "address": "0x71002199c8",
+        "mnemonic": "stp",
+        "operands": "s3, s18, [x29, #-0x48]"
+      },
+      {
+        "address": "0x71002199cc",
+        "mnemonic": "stur",
+        "operands": "s5, [x29, #-0x60]"
+      },
+      {
+        "address": "0x71002199d0",
+        "mnemonic": "stp",
+        "operands": "s5, s20, [x29, #-0x38]"
+      },
+      {
+        "address": "0x71002199d4",
+        "mnemonic": "fmul",
+        "operands": "s17, s7, s16"
+      },
+      {
+        "address": "0x71002199d8",
+        "mnemonic": "fmov",
+        "operands": "s7, #5.00000000"
+      },
+      {
+        "address": "0x71002199dc",
+        "mnemonic": "mov",
+        "operands": "x9, #0x3f800000"
+      },
+      {
+        "address": "0x71002199e0",
+        "mnemonic": "movk",
+        "operands": "x9, #0x4040, lsl #48"
+      },
+      {
+        "address": "0x71002199e4",
+        "mnemonic": "fadd",
+        "operands": "s17, s17, s7"
+      },
+      {
+        "address": "0x71002199e8",
+        "mnemonic": "fadd",
+        "operands": "s16, s2, s7"
+      },
+      {
+        "address": "0x71002199ec",
+        "mnemonic": "mov",
+        "operands": "x8, #0x40a0000000000000"
+      },
+      {
+        "address": "0x71002199f0",
+        "mnemonic": "stp",
+        "operands": "x8, x9, [x29, #-0x88]"
+      },
+      {
+        "address": "0x71002199f4",
+        "mnemonic": "mov",
+        "operands": "x9, #0x40400000"
+      },
+      {
+        "address": "0x71002199f8",
+        "mnemonic": "movk",
+        "operands": "x9, #0x3f80, lsl #48"
+      },
+      {
+        "address": "0x71002199fc",
+        "mnemonic": "mov",
+        "operands": "w10, #0x40a00000"
+      },
+      {
+        "address": "0x7100219a00",
+        "mnemonic": "mov",
+        "operands": "w11, #0x40400000"
+      },
+      {
+        "address": "0x7100219a04",
+        "mnemonic": "stp",
+        "operands": "x9, x10, [x29, #-0x78]"
+      },
+      {
+        "address": "0x7100219a08",
+        "mnemonic": "mov",
+        "operands": "w9, #0x3f800000"
+      },
+      {
+        "address": "0x7100219a0c",
+        "mnemonic": "stur",
+        "operands": "wzr, [x29, #-0x64]"
+      },
+      {
+        "address": "0x7100219a10",
+        "mnemonic": "stur",
+        "operands": "w9, [x29, #-0x5c]"
+      },
+      {
+        "address": "0x7100219a14",
+        "mnemonic": "stur",
+        "operands": "w11, [x29, #-0x54]"
+      },
+      {
+        "address": "0x7100219a18",
+        "mnemonic": "stur",
+        "operands": "w10, [x29, #-0x4c]"
+      },
+      {
+        "address": "0x7100219a1c",
+        "mnemonic": "stur",
+        "operands": "s6, [x29, #-0x68]"
+      },
+      {
+        "address": "0x7100219a20",
+        "mnemonic": "stur",
+        "operands": "s4, [x29, #-0x58]"
+      },
+      {
+        "address": "0x7100219a24",
+        "mnemonic": "stp",
+        "operands": "s4, s19, [x29, #-0x40]"
+      },
+      {
+        "address": "0x7100219a28",
+        "mnemonic": "stp",
+        "operands": "s6, s1, [x29, #-0x30]"
+      },
+      {
+        "address": "0x7100219a2c",
+        "mnemonic": "stur",
+        "operands": "w10, [x29, #-0x28]"
+      },
+      {
+        "address": "0x7100219a30",
+        "mnemonic": "stur",
+        "operands": "w11, [x29, #-0x20]"
+      },
+      {
+        "address": "0x7100219a34",
+        "mnemonic": "stur",
+        "operands": "s20, [x29, #-0x1c]"
+      },
+      {
+        "address": "0x7100219a38",
+        "mnemonic": "stur",
+        "operands": "s19, [x29, #-0x14]"
+      },
+      {
+        "address": "0x7100219a3c",
+        "mnemonic": "stur",
+        "operands": "wzr, [x29, #-0x10]"
+      },
+      {
+        "address": "0x7100219a40",
+        "mnemonic": "stur",
+        "operands": "s18, [x29, #-0xc]"
+      },
+      {
+        "address": "0x7100219a44",
+        "mnemonic": "stur",
+        "operands": "x8, [x29, #-8]"
+      },
+      {
+        "address": "0x7100219a48",
+        "mnemonic": "stp",
+        "operands": "s16, s17, [x29, #-0x90]"
+      },
+      {
+        "address": "0x7100219a4c",
+        "mnemonic": "stur",
+        "operands": "w9, [x29, #-0x18]"
+      },
+      {
+        "address": "0x7100219a50",
+        "mnemonic": "b.lt",
+        "operands": "#0x7100219c58"
+      },
+      {
+        "address": "0x7100219a54",
+        "mnemonic": "cmp",
+        "operands": "w3, #0xa"
+      },
+      {
+        "address": "0x7100219a58",
+        "mnemonic": "b.lt",
+        "operands": "#0x7100219c58"
+      },
+      {
+        "address": "0x7100219a5c",
+        "mnemonic": "cmp",
+        "operands": "w5, #1"
+      },
+      {
+        "address": "0x7100219a60",
+        "mnemonic": "b.lt",
+        "operands": "#0x7100219c58"
+      },
+      {
+        "address": "0x7100219a64",
+        "mnemonic": "mov",
+        "operands": "w8, #0xff00"
+      },
+      {
+        "address": "0x7100219a68",
+        "mnemonic": "movk",
+        "operands": "w8, #0x477f, lsl #16"
+      },
+      {
+        "address": "0x7100219a6c",
+        "mnemonic": "fmov",
+        "operands": "s18, #1.00000000"
+      },
+      {
+        "address": "0x7100219a70",
+        "mnemonic": "fmov",
+        "operands": "s1, w8"
+      },
+      {
+        "address": "0x7100219a74",
+        "mnemonic": "and",
+        "operands": "w8, w4, #0xff0000"
+      },
+      {
+        "address": "0x7100219a78",
+        "mnemonic": "fsub",
+        "operands": "s0, s1, s0"
+      },
+      {
+        "address": "0x7100219a7c",
+        "mnemonic": "scvtf",
+        "operands": "s1, w0"
+      },
+      {
+        "address": "0x7100219a80",
+        "mnemonic": "fadd",
+        "operands": "s16, s16, s1"
+      },
+      {
+        "address": "0x7100219a84",
+        "mnemonic": "scvtf",
+        "operands": "s2, w1"
+      },
+      {
+        "address": "0x7100219a88",
+        "mnemonic": "fmov",
+        "operands": "s19, #3.00000000"
+      },
+      {
+        "address": "0x7100219a8c",
+        "mnemonic": "fadd",
+        "operands": "s20, s2, s7"
+      },
+      {
+        "address": "0x7100219a90",
+        "mnemonic": "fadd",
+        "operands": "s17, s17, s2"
+      },
+      {
+        "address": "0x7100219a94",
+        "mnemonic": "stp",
+        "operands": "s17, s0, [sp, #0x10]"
+      },
+      {
+        "address": "0x7100219a98",
+        "mnemonic": "fadd",
+        "operands": "s17, s1, s19"
+      },
+      {
+        "address": "0x7100219a9c",
+        "mnemonic": "fadd",
+        "operands": "s7, s1, s7"
+      },
+      {
+        "address": "0x7100219aa0",
+        "mnemonic": "stp",
+        "operands": "s1, s20, [sp, #0x24]"
+      },
+      {
+        "address": "0x7100219aa4",
+        "mnemonic": "str",
+        "operands": "s16, [sp, #0xc]"
+      },
+      {
+        "address": "0x7100219aa8",
+        "mnemonic": "fadd",
+        "operands": "s16, s2, s19"
+      },
+      {
+        "address": "0x7100219aac",
+        "mnemonic": "fadd",
+        "operands": "s4, s4, s1"
+      },
+      {
+        "address": "0x7100219ab0",
+        "mnemonic": "fadd",
+        "operands": "s3, s3, s1"
+      },
+      {
+        "address": "0x7100219ab4",
+        "mnemonic": "stp",
+        "operands": "s3, s20, [sp, #0xcc]"
+      },
+      {
+        "address": "0x7100219ab8",
+        "mnemonic": "fadd",
+        "operands": "s21, s1, s18"
+      },
+      {
+        "address": "0x7100219abc",
+        "mnemonic": "fadd",
+        "operands": "s6, s6, s1"
+      },
+      {
+        "address": "0x7100219ac0",
+        "mnemonic": "fadd",
+        "operands": "s5, s5, s1"
+      },
+      {
+        "address": "0x7100219ac4",
+        "mnemonic": "fadd",
+        "operands": "s18, s2, s18"
+      },
+      {
+        "address": "0x7100219ac8",
+        "mnemonic": "str",
+        "operands": "s21, [sp, #0x3c]"
+      },
+      {
+        "address": "0x7100219acc",
+        "mnemonic": "str",
+        "operands": "s17, [sp, #0x54]"
+      },
+      {
+        "address": "0x7100219ad0",
+        "mnemonic": "stp",
+        "operands": "s18, s0, [sp, #0x58]"
+      },
+      {
+        "address": "0x7100219ad4",
+        "mnemonic": "stp",
+        "operands": "s7, s2, [sp, #0x6c]"
+      },
+      {
+        "address": "0x7100219ad8",
+        "mnemonic": "stp",
+        "operands": "s6, s2, [sp, #0x84]"
+      },
+      {
+        "address": "0x7100219adc",
+        "mnemonic": "stp",
+        "operands": "s5, s18, [sp, #0x9c]"
+      },
+      {
+        "address": "0x7100219ae0",
+        "mnemonic": "stp",
+        "operands": "s4, s16, [sp, #0xb4]"
+      },
+      {
+        "address": "0x7100219ae4",
+        "mnemonic": "ldp",
+        "operands": "s3, s4, [x29, #-0x48]"
+      },
+      {
+        "address": "0x7100219ae8",
+        "mnemonic": "fadd",
+        "operands": "s4, s4, s2"
+      },
+      {
+        "address": "0x7100219aec",
+        "mnemonic": "fadd",
+        "operands": "s3, s3, s1"
+      },
+      {
+        "address": "0x7100219af0",
+        "mnemonic": "stp",
+        "operands": "s3, s4, [sp, #0xe4]"
+      },
+      {
+        "address": "0x7100219af4",
+        "mnemonic": "ldp",
+        "operands": "s3, s4, [x29, #-0x40]"
+      },
+      {
+        "address": "0x7100219af8",
+        "mnemonic": "fadd",
+        "operands": "s4, s4, s2"
+      },
+      {
+        "address": "0x7100219afc",
+        "mnemonic": "fadd",
+        "operands": "s3, s3, s1"
+      },
+      {
+        "address": "0x7100219b00",
+        "mnemonic": "stp",
+        "operands": "s3, s4, [sp, #0xfc]"
+      },
+      {
+        "address": "0x7100219b04",
+        "mnemonic": "bfi",
+        "operands": "w8, w5, #0x18, #8"
+      },
+      {
+        "address": "0x7100219b08",
+        "mnemonic": "ldp",
+        "operands": "s3, s4, [x29, #-0x38]"
+      },
+      {
+        "address": "0x7100219b0c",
+        "mnemonic": "fadd",
+        "operands": "s3, s3, s1"
+      },
+      {
+        "address": "0x7100219b10",
+        "mnemonic": "str",
+        "operands": "s3, [sp, #0x114]"
+      },
+      {
+        "address": "0x7100219b14",
+        "mnemonic": "fadd",
+        "operands": "s3, s4, s2"
+      },
+      {
+        "address": "0x7100219b18",
+        "mnemonic": "str",
+        "operands": "s3, [sp, #0x118]"
+      },
+      {
+        "address": "0x7100219b1c",
+        "mnemonic": "ldp",
+        "operands": "s3, s4, [x29, #-0x30]"
+      },
+      {
+        "address": "0x7100219b20",
+        "mnemonic": "fadd",
+        "operands": "s3, s3, s1"
+      },
+      {
+        "address": "0x7100219b24",
+        "mnemonic": "str",
+        "operands": "s3, [sp, #0x12c]"
+      },
+      {
+        "address": "0x7100219b28",
+        "mnemonic": "fadd",
+        "operands": "s3, s4, s2"
+      },
+      {
+        "address": "0x7100219b2c",
+        "mnemonic": "str",
+        "operands": "s3, [sp, #0x130]"
+      },
+      {
+        "address": "0x7100219b30",
+        "mnemonic": "ldp",
+        "operands": "s3, s4, [x29, #-0x28]"
+      },
+      {
+        "address": "0x7100219b34",
+        "mnemonic": "fadd",
+        "operands": "s3, s3, s1"
+      },
+      {
+        "address": "0x7100219b38",
+        "mnemonic": "str",
+        "operands": "s3, [sp, #0x144]"
+      },
+      {
+        "address": "0x7100219b3c",
+        "mnemonic": "fadd",
+        "operands": "s3, s4, s2"
+      },
+      {
+        "address": "0x7100219b40",
+        "mnemonic": "str",
+        "operands": "s3, [sp, #0x148]"
+      },
+      {
+        "address": "0x7100219b44",
+        "mnemonic": "ldp",
+        "operands": "s3, s4, [x29, #-0x20]"
+      },
+      {
+        "address": "0x7100219b48",
+        "mnemonic": "fadd",
+        "operands": "s3, s3, s1"
+      },
+      {
+        "address": "0x7100219b4c",
+        "mnemonic": "str",
+        "operands": "s3, [sp, #0x15c]"
+      },
+      {
+        "address": "0x7100219b50",
+        "mnemonic": "fadd",
+        "operands": "s3, s4, s2"
+      },
+      {
+        "address": "0x7100219b54",
+        "mnemonic": "str",
+        "operands": "s3, [sp, #0x160]"
+      },
+      {
+        "address": "0x7100219b58",
+        "mnemonic": "ldp",
+        "operands": "s3, s4, [x29, #-0x18]"
+      },
+      {
+        "address": "0x7100219b5c",
+        "mnemonic": "fadd",
+        "operands": "s3, s3, s1"
+      },
+      {
+        "address": "0x7100219b60",
+        "mnemonic": "str",
+        "operands": "s3, [sp, #0x174]"
+      },
+      {
+        "address": "0x7100219b64",
+        "mnemonic": "fadd",
+        "operands": "s3, s4, s2"
+      },
+      {
+        "address": "0x7100219b68",
+        "mnemonic": "str",
+        "operands": "s3, [sp, #0x178]"
+      },
+      {
+        "address": "0x7100219b6c",
+        "mnemonic": "ldp",
+        "operands": "s3, s4, [x29, #-0x10]"
+      },
+      {
+        "address": "0x7100219b70",
+        "mnemonic": "fadd",
+        "operands": "s3, s3, s1"
+      },
+      {
+        "address": "0x7100219b74",
+        "mnemonic": "str",
+        "operands": "s3, [sp, #0x18c]"
+      },
+      {
+        "address": "0x7100219b78",
+        "mnemonic": "fadd",
+        "operands": "s3, s4, s2"
+      },
+      {
+        "address": "0x7100219b7c",
+        "mnemonic": "str",
+        "operands": "s3, [sp, #0x190]"
+      },
+      {
+        "address": "0x7100219b80",
+        "mnemonic": "ldp",
+        "operands": "s3, s4, [x29, #-8]"
+      },
+      {
+        "address": "0x7100219b84",
+        "mnemonic": "fadd",
+        "operands": "s1, s3, s1"
+      },
+      {
+        "address": "0x7100219b88",
+        "mnemonic": "str",
+        "operands": "s1, [sp, #0x1a4]"
+      },
+      {
+        "address": "0x7100219b8c",
+        "mnemonic": "fadd",
+        "operands": "s1, s4, s2"
+      },
+      {
+        "address": "0x7100219b90",
+        "mnemonic": "bfxil",
+        "operands": "w8, w4, #0, #0x10"
+      },
+      {
+        "address": "0x7100219b94",
+        "mnemonic": "bfxil",
+        "operands": "w8, w4, #0, #8"
+      },
+      {
+        "address": "0x7100219b98",
+        "mnemonic": "mov",
+        "operands": "w0, #2"
+      },
+      {
+        "address": "0x7100219b9c",
+        "mnemonic": "mov",
+        "operands": "x1, xzr"
+      },
+      {
+        "address": "0x7100219ba0",
+        "mnemonic": "str",
+        "operands": "w8, [sp, #8]"
+      },
+      {
+        "address": "0x7100219ba4",
+        "mnemonic": "str",
+        "operands": "s0, [sp, #0x2c]"
+      },
+      {
+        "address": "0x7100219ba8",
+        "mnemonic": "str",
+        "operands": "w8, [sp, #0x20]"
+      },
+      {
+        "address": "0x7100219bac",
+        "mnemonic": "str",
+        "operands": "w8, [sp, #0x38]"
+      },
+      {
+        "address": "0x7100219bb0",
+        "mnemonic": "str",
+        "operands": "w8, [sp, #0x50]"
+      },
+      {
+        "address": "0x7100219bb4",
+        "mnemonic": "stp",
+        "operands": "s16, s0, [sp, #0x40]"
+      },
+      {
+        "address": "0x7100219bb8",
+        "mnemonic": "str",
+        "operands": "s0, [sp, #0x74]"
+      },
+      {
+        "address": "0x7100219bbc",
+        "mnemonic": "str",
+        "operands": "w8, [sp, #0x68]"
+      },
+      {
+        "address": "0x7100219bc0",
+        "mnemonic": "str",
+        "operands": "s0, [sp, #0x8c]"
+      },
+      {
+        "address": "0x7100219bc4",
+        "mnemonic": "str",
+        "operands": "w8, [sp, #0x80]"
+      },
+      {
+        "address": "0x7100219bc8",
+        "mnemonic": "str",
+        "operands": "s0, [sp, #0xa4]"
+      },
+      {
+        "address": "0x7100219bcc",
+        "mnemonic": "str",
+        "operands": "w8, [sp, #0x98]"
+      },
+      {
+        "address": "0x7100219bd0",
+        "mnemonic": "str",
+        "operands": "s0, [sp, #0xbc]"
+      },
+      {
+        "address": "0x7100219bd4",
+        "mnemonic": "str",
+        "operands": "w8, [sp, #0xb0]"
+      },
+      {
+        "address": "0x7100219bd8",
+        "mnemonic": "str",
+        "operands": "s0, [sp, #0xd4]"
+      },
+      {
+        "address": "0x7100219bdc",
+        "mnemonic": "str",
+        "operands": "w8, [sp, #0xc8]"
+      },
+      {
+        "address": "0x7100219be0",
+        "mnemonic": "str",
+        "operands": "s0, [sp, #0xec]"
+      },
+      {
+        "address": "0x7100219be4",
+        "mnemonic": "str",
+        "operands": "w8, [sp, #0xe0]"
+      },
+      {
+        "address": "0x7100219be8",
+        "mnemonic": "str",
+        "operands": "s0, [sp, #0x104]"
+      },
+      {
+        "address": "0x7100219bec",
+        "mnemonic": "str",
+        "operands": "w8, [sp, #0xf8]"
+      },
+      {
+        "address": "0x7100219bf0",
+        "mnemonic": "str",
+        "operands": "s0, [sp, #0x11c]"
+      },
+      {
+        "address": "0x7100219bf4",
+        "mnemonic": "str",
+        "operands": "w8, [sp, #0x110]"
+      },
+      {
+        "address": "0x7100219bf8",
+        "mnemonic": "str",
+        "operands": "s0, [sp, #0x134]"
+      },
+      {
+        "address": "0x7100219bfc",
+        "mnemonic": "str",
+        "operands": "w8, [sp, #0x128]"
+      },
+      {
+        "address": "0x7100219c00",
+        "mnemonic": "str",
+        "operands": "s0, [sp, #0x14c]"
+      },
+      {
+        "address": "0x7100219c04",
+        "mnemonic": "str",
+        "operands": "w8, [sp, #0x140]"
+      },
+      {
+        "address": "0x7100219c08",
+        "mnemonic": "str",
+        "operands": "s0, [sp, #0x164]"
+      },
+      {
+        "address": "0x7100219c0c",
+        "mnemonic": "str",
+        "operands": "w8, [sp, #0x158]"
+      },
+      {
+        "address": "0x7100219c10",
+        "mnemonic": "str",
+        "operands": "s0, [sp, #0x17c]"
+      },
+      {
+        "address": "0x7100219c14",
+        "mnemonic": "str",
+        "operands": "w8, [sp, #0x170]"
+      },
+      {
+        "address": "0x7100219c18",
+        "mnemonic": "str",
+        "operands": "s0, [sp, #0x194]"
+      },
+      {
+        "address": "0x7100219c1c",
+        "mnemonic": "str",
+        "operands": "w8, [sp, #0x188]"
+      },
+      {
+        "address": "0x7100219c20",
+        "mnemonic": "str",
+        "operands": "s0, [sp, #0x1ac]"
+      },
+      {
+        "address": "0x7100219c24",
+        "mnemonic": "str",
+        "operands": "w8, [sp, #0x1a0]"
+      },
+      {
+        "address": "0x7100219c28",
+        "mnemonic": "str",
+        "operands": "s1, [sp, #0x1a8]"
+      },
+      {
+        "address": "0x7100219c2c",
+        "mnemonic": "bl",
+        "operands": "#0x710033b5a0"
+      },
+      {
+        "address": "0x7100219c30",
+        "mnemonic": "mov",
+        "operands": "w1, #0x19e"
+      },
+      {
+        "address": "0x7100219c34",
+        "mnemonic": "movk",
+        "operands": "w1, #0x80, lsl #16"
+      },
+      {
+        "address": "0x7100219c38",
+        "mnemonic": "mov",
+        "operands": "w3, #0x12"
+      },
+      {
+        "address": "0x7100219c3c",
+        "mnemonic": "mov",
+        "operands": "x5, sp"
+      },
+      {
+        "address": "0x7100219c40",
+        "mnemonic": "mov",
+        "operands": "w0, #0x10000000"
+      },
+      {
+        "address": "0x7100219c44",
+        "mnemonic": "mov",
+        "operands": "w2, wzr"
+      },
+      {
+        "address": "0x7100219c48",
+        "mnemonic": "mov",
+        "operands": "x4, xzr"
+      },
+      {
+        "address": "0x7100219c4c",
+        "mnemonic": "mov",
+        "operands": "w6, #2"
+      },
+      {
+        "address": "0x7100219c50",
+        "mnemonic": "mov",
+        "operands": "w7, #0x18"
+      },
+      {
+        "address": "0x7100219c54",
+        "mnemonic": "bl",
+        "operands": "#0x71003938d0"
+      },
+      {
+        "address": "0x7100219c58",
+        "mnemonic": "add",
+        "operands": "sp, sp, #0x240"
+      },
+      {
+        "address": "0x7100219c5c",
+        "mnemonic": "ldr",
+        "operands": "x28, [sp, #0x10]"
+      },
+      {
+        "address": "0x7100219c60",
+        "mnemonic": "ldp",
+        "operands": "x29, x30, [sp], #0x20"
+      },
+      {
+        "address": "0x7100219c64",
+        "mnemonic": "ret",
+        "operands": ""
+      },
+      {
+        "address": "0x7100219c68",
+        "mnemonic": "udf",
+        "operands": "#0"
+      },
+      {
+        "address": "0x7100219c6c",
+        "mnemonic": "udf",
+        "operands": "#0"
+      }
+    ]
+  },
+  "structural_proof": [
+    "Oldandnative producer bothconstructexactordered18-pointcenter/closed17boundary mesh fromwidth,height,radius5shape,anduniformRGB/alpha,notjustacommonvertexcount. Nativeemitsactualfieldsdirectly;no144Bseed-copytableisusedinthisboundedproducer.",
+    "Staticoldfieldreconstruction fromactualELF144Bseedandall18sourceassignmentsoverdimensionvariables yieldsall36orderedlocalcoordinatepolynomials. Independent typeddef-use reconstruction ofactual boundedA64 stackwrites yieldsall54ordered nativeXYZ fields and18actualidenticalcolorfieldexpressions; it doesnotruninputs or gamecode. EveryvertexcoordinatewriterPCissealed.",
+    "For role comparison only, oldlocalconstruction is viewedatunit scale; nativeorigin/width/height/depth/color/pipeline orderandguards areactualsource andremain separate. This isnotwholefunction equivalence, a universalIEEEbitmatch, orpermissionto retainPS2transform/queuefeatures.",
+    "Matchingcompleteparameterizedfieldconstruction andactualcolor/positionpacketreadrole establish thesourcecodevalue. Modulelabel,numericalpointcloud/visualsimilarity,orfile searchmiss alone wouldnotclosearow."
+  ],
+  "native_vertex_field_trace": [
+    {
+      "vertex": 0,
+      "xyz_affine_symbols": [
+        "origin_x",
+        "origin_y",
+        "width",
+        "height",
+        "depth",
+        "constant"
+      ],
+      "actual_native_xyz": [
+        [
+          "1",
+          "0",
+          "1/2",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "1",
+          "0",
+          "1/2",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0",
+          "0",
+          "0",
+          "-1",
+          "65535"
+        ]
+      ],
+      "writer_instructions": [
+        "0x7100219aa4",
+        "0x7100219a94",
+        "0x7100219a94"
+      ]
+    },
+    {
+      "vertex": 1,
+      "xyz_affine_symbols": [
+        "origin_x",
+        "origin_y",
+        "width",
+        "height",
+        "depth",
+        "constant"
+      ],
+      "actual_native_xyz": [
+        [
+          "1",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "1",
+          "0",
+          "0",
+          "0",
+          "5"
+        ],
+        [
+          "0",
+          "0",
+          "0",
+          "0",
+          "-1",
+          "65535"
+        ]
+      ],
+      "writer_instructions": [
+        "0x7100219aa0",
+        "0x7100219aa0",
+        "0x7100219ba4"
+      ]
+    },
+    {
+      "vertex": 2,
+      "xyz_affine_symbols": [
+        "origin_x",
+        "origin_y",
+        "width",
+        "height",
+        "depth",
+        "constant"
+      ],
+      "actual_native_xyz": [
+        [
+          "1",
+          "0",
+          "0",
+          "0",
+          "0",
+          "1"
+        ],
+        [
+          "0",
+          "1",
+          "0",
+          "0",
+          "0",
+          "3"
+        ],
+        [
+          "0",
+          "0",
+          "0",
+          "0",
+          "-1",
+          "65535"
+        ]
+      ],
+      "writer_instructions": [
+        "0x7100219ac8",
+        "0x7100219bb4",
+        "0x7100219bb4"
+      ]
+    },
+    {
+      "vertex": 3,
+      "xyz_affine_symbols": [
+        "origin_x",
+        "origin_y",
+        "width",
+        "height",
+        "depth",
+        "constant"
+      ],
+      "actual_native_xyz": [
+        [
+          "1",
+          "0",
+          "0",
+          "0",
+          "0",
+          "3"
+        ],
+        [
+          "0",
+          "1",
+          "0",
+          "0",
+          "0",
+          "1"
+        ],
+        [
+          "0",
+          "0",
+          "0",
+          "0",
+          "-1",
+          "65535"
+        ]
+      ],
+      "writer_instructions": [
+        "0x7100219acc",
+        "0x7100219ad0",
+        "0x7100219ad0"
+      ]
+    },
+    {
+      "vertex": 4,
+      "xyz_affine_symbols": [
+        "origin_x",
+        "origin_y",
+        "width",
+        "height",
+        "depth",
+        "constant"
+      ],
+      "actual_native_xyz": [
+        [
+          "1",
+          "0",
+          "0",
+          "0",
+          "0",
+          "5"
+        ],
+        [
+          "0",
+          "1",
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0",
+          "0",
+          "0",
+          "-1",
+          "65535"
+        ]
+      ],
+      "writer_instructions": [
+        "0x7100219ad4",
+        "0x7100219ad4",
+        "0x7100219bb8"
+      ]
+    },
+    {
+      "vertex": 5,
+      "xyz_affine_symbols": [
+        "origin_x",
+        "origin_y",
+        "width",
+        "height",
+        "depth",
+        "constant"
+      ],
+      "actual_native_xyz": [
+        [
+          "1",
+          "0",
+          "1",
+          "0",
+          "0",
+          "-5"
+        ],
+        [
+          "0",
+          "1",
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0",
+          "0",
+          "0",
+          "-1",
+          "65535"
+        ]
+      ],
+      "writer_instructions": [
+        "0x7100219ad8",
+        "0x7100219ad8",
+        "0x7100219bc0"
+      ]
+    },
+    {
+      "vertex": 6,
+      "xyz_affine_symbols": [
+        "origin_x",
+        "origin_y",
+        "width",
+        "height",
+        "depth",
+        "constant"
+      ],
+      "actual_native_xyz": [
+        [
+          "1",
+          "0",
+          "1",
+          "0",
+          "0",
+          "-3"
+        ],
+        [
+          "0",
+          "1",
+          "0",
+          "0",
+          "0",
+          "1"
+        ],
+        [
+          "0",
+          "0",
+          "0",
+          "0",
+          "-1",
+          "65535"
+        ]
+      ],
+      "writer_instructions": [
+        "0x7100219adc",
+        "0x7100219adc",
+        "0x7100219bc8"
+      ]
+    },
+    {
+      "vertex": 7,
+      "xyz_affine_symbols": [
+        "origin_x",
+        "origin_y",
+        "width",
+        "height",
+        "depth",
+        "constant"
+      ],
+      "actual_native_xyz": [
+        [
+          "1",
+          "0",
+          "1",
+          "0",
+          "0",
+          "-1"
+        ],
+        [
+          "0",
+          "1",
+          "0",
+          "0",
+          "0",
+          "3"
+        ],
+        [
+          "0",
+          "0",
+          "0",
+          "0",
+          "-1",
+          "65535"
+        ]
+      ],
+      "writer_instructions": [
+        "0x7100219ae0",
+        "0x7100219ae0",
+        "0x7100219bd0"
+      ]
+    },
+    {
+      "vertex": 8,
+      "xyz_affine_symbols": [
+        "origin_x",
+        "origin_y",
+        "width",
+        "height",
+        "depth",
+        "constant"
+      ],
+      "actual_native_xyz": [
+        [
+          "1",
+          "0",
+          "1",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "1",
+          "0",
+          "0",
+          "0",
+          "5"
+        ],
+        [
+          "0",
+          "0",
+          "0",
+          "0",
+          "-1",
+          "65535"
+        ]
+      ],
+      "writer_instructions": [
+        "0x7100219ab4",
+        "0x7100219ab4",
+        "0x7100219bd8"
+      ]
+    },
+    {
+      "vertex": 9,
+      "xyz_affine_symbols": [
+        "origin_x",
+        "origin_y",
+        "width",
+        "height",
+        "depth",
+        "constant"
+      ],
+      "actual_native_xyz": [
+        [
+          "1",
+          "0",
+          "1",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "1",
+          "0",
+          "1",
+          "0",
+          "-5"
+        ],
+        [
+          "0",
+          "0",
+          "0",
+          "0",
+          "-1",
+          "65535"
+        ]
+      ],
+      "writer_instructions": [
+        "0x7100219af0",
+        "0x7100219af0",
+        "0x7100219be0"
+      ]
+    },
+    {
+      "vertex": 10,
+      "xyz_affine_symbols": [
+        "origin_x",
+        "origin_y",
+        "width",
+        "height",
+        "depth",
+        "constant"
+      ],
+      "actual_native_xyz": [
+        [
+          "1",
+          "0",
+          "1",
+          "0",
+          "0",
+          "-1"
+        ],
+        [
+          "0",
+          "1",
+          "0",
+          "1",
+          "0",
+          "-3"
+        ],
+        [
+          "0",
+          "0",
+          "0",
+          "0",
+          "-1",
+          "65535"
+        ]
+      ],
+      "writer_instructions": [
+        "0x7100219b00",
+        "0x7100219b00",
+        "0x7100219be8"
+      ]
+    },
+    {
+      "vertex": 11,
+      "xyz_affine_symbols": [
+        "origin_x",
+        "origin_y",
+        "width",
+        "height",
+        "depth",
+        "constant"
+      ],
+      "actual_native_xyz": [
+        [
+          "1",
+          "0",
+          "1",
+          "0",
+          "0",
+          "-3"
+        ],
+        [
+          "0",
+          "1",
+          "0",
+          "1",
+          "0",
+          "-1"
+        ],
+        [
+          "0",
+          "0",
+          "0",
+          "0",
+          "-1",
+          "65535"
+        ]
+      ],
+      "writer_instructions": [
+        "0x7100219b10",
+        "0x7100219b18",
+        "0x7100219bf0"
+      ]
+    },
+    {
+      "vertex": 12,
+      "xyz_affine_symbols": [
+        "origin_x",
+        "origin_y",
+        "width",
+        "height",
+        "depth",
+        "constant"
+      ],
+      "actual_native_xyz": [
+        [
+          "1",
+          "0",
+          "1",
+          "0",
+          "0",
+          "-5"
+        ],
+        [
+          "0",
+          "1",
+          "0",
+          "1",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0",
+          "0",
+          "0",
+          "-1",
+          "65535"
+        ]
+      ],
+      "writer_instructions": [
+        "0x7100219b24",
+        "0x7100219b2c",
+        "0x7100219bf8"
+      ]
+    },
+    {
+      "vertex": 13,
+      "xyz_affine_symbols": [
+        "origin_x",
+        "origin_y",
+        "width",
+        "height",
+        "depth",
+        "constant"
+      ],
+      "actual_native_xyz": [
+        [
+          "1",
+          "0",
+          "0",
+          "0",
+          "0",
+          "5"
+        ],
+        [
+          "0",
+          "1",
+          "0",
+          "1",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0",
+          "0",
+          "0",
+          "-1",
+          "65535"
+        ]
+      ],
+      "writer_instructions": [
+        "0x7100219b38",
+        "0x7100219b40",
+        "0x7100219c00"
+      ]
+    },
+    {
+      "vertex": 14,
+      "xyz_affine_symbols": [
+        "origin_x",
+        "origin_y",
+        "width",
+        "height",
+        "depth",
+        "constant"
+      ],
+      "actual_native_xyz": [
+        [
+          "1",
+          "0",
+          "0",
+          "0",
+          "0",
+          "3"
+        ],
+        [
+          "0",
+          "1",
+          "0",
+          "1",
+          "0",
+          "-1"
+        ],
+        [
+          "0",
+          "0",
+          "0",
+          "0",
+          "-1",
+          "65535"
+        ]
+      ],
+      "writer_instructions": [
+        "0x7100219b4c",
+        "0x7100219b54",
+        "0x7100219c08"
+      ]
+    },
+    {
+      "vertex": 15,
+      "xyz_affine_symbols": [
+        "origin_x",
+        "origin_y",
+        "width",
+        "height",
+        "depth",
+        "constant"
+      ],
+      "actual_native_xyz": [
+        [
+          "1",
+          "0",
+          "0",
+          "0",
+          "0",
+          "1"
+        ],
+        [
+          "0",
+          "1",
+          "0",
+          "1",
+          "0",
+          "-3"
+        ],
+        [
+          "0",
+          "0",
+          "0",
+          "0",
+          "-1",
+          "65535"
+        ]
+      ],
+      "writer_instructions": [
+        "0x7100219b60",
+        "0x7100219b68",
+        "0x7100219c10"
+      ]
+    },
+    {
+      "vertex": 16,
+      "xyz_affine_symbols": [
+        "origin_x",
+        "origin_y",
+        "width",
+        "height",
+        "depth",
+        "constant"
+      ],
+      "actual_native_xyz": [
+        [
+          "1",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "1",
+          "0",
+          "1",
+          "0",
+          "-5"
+        ],
+        [
+          "0",
+          "0",
+          "0",
+          "0",
+          "-1",
+          "65535"
+        ]
+      ],
+      "writer_instructions": [
+        "0x7100219b74",
+        "0x7100219b7c",
+        "0x7100219c18"
+      ]
+    },
+    {
+      "vertex": 17,
+      "xyz_affine_symbols": [
+        "origin_x",
+        "origin_y",
+        "width",
+        "height",
+        "depth",
+        "constant"
+      ],
+      "actual_native_xyz": [
+        [
+          "1",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "1",
+          "0",
+          "0",
+          "0",
+          "5"
+        ],
+        [
+          "0",
+          "0",
+          "0",
+          "0",
+          "-1",
+          "65535"
+        ]
+      ],
+      "writer_instructions": [
+        "0x7100219b88",
+        "0x7100219c28",
+        "0x7100219c20"
+      ]
+    }
+  ],
+  "polynomial_scope": "Rationalnormalizedcoefficients establish structuralorderedfieldroles only. Actualint/f32operationordering androunding aredefinedbysealednativeinstructions; donotreplaceitwithalgebraicallysimplifiedformulas forarbitrary32bitinputs.",
+  "rejected_leads": [
+    "Native219c70 is a different two-colorgradient producer withdifferentcorner construction; it isNOTacceptedastheoldwide-framecounterpart.0064e3b0 remainsOPEN.",
+    "335b90/335320/3355f0 process encodedtext/language,notroundedgeometry.",
+    "OrdinarySteam18-vertex/formatbyte leads1955d0/215400/36c8e0/496aa9 were notindependentlypairedtothisnativeABI/guard/constructor; noSteammatchclaimed andno.archdecoded.",
+    "Functioncachesplits219960prologueat21996c. Actualentry219960isusedhere; 219c7c isinteriorofthedifferentgradientproducer."
+  ],
+  "verification": {
+    "kind": "bounded static typeddef-use, not runtime/emulation",
+    "old_unit_local_field_polynomials": 36,
+    "actual_native_xyz_fields": 54,
+    "actual_native_shared_color_fields": 18,
+    "result": "PASS afternormalizingcapstoneFPregisteraliasfp/x29; initialguardeddecoderrefusalwasnotignored. FullsealedfunctionandwriterPCsallowindependentaudit.",
+    "image_hashes_recomputed_this_continuation": true
+  },
+  "required_seams": [
+    {
+      "owners": [
+        "func_00366380",
+        "sflDataDrawNarrowRoundedFrame",
+        "func_00189940",
+        "func_0027bf30",
+        "func_0027d620",
+        "func_002818e0",
+        "func_00282250",
+        "func_00283490"
+      ],
+      "action": "golden-native-driver:narrow-rounded-frame: retire the entire old144-byte template source inGolden mode and author the actual native eighteen-vertex constructor fromsealed219960code. No runtimeNSO/privatefile access,PS2template/coordinate fallback,orconstant-onlyarraycopiedoveroldwork. PreservePS2mode unchanged.",
+      "source_proof": "l1-narrow-rounded-frame-code-proof.json"
+    },
+    {
+      "owners": [
+        "func_00366380",
+        "sflDataDrawNarrowRoundedFrame",
+        "func_00189940",
+        "func_0027bf30",
+        "func_0027d620",
+        "func_002818e0",
+        "func_00282250",
+        "func_00283490"
+      ],
+      "action": "Bind all actual translated/native/inlined callers of the old narrow-frame producer to their actual Golden caller arguments and native producer/pipeline. OldABIincludes scale,rotation,queue/offset/mode concepts that this nativeABI doesnotgenericallytake; donotcastcallbacks,ignoreoldparameters,orretainoldtransform/queuecode as a shim. Qualifyactualnewcallerroute ratherthanpretendgeneralABImatch.",
+      "source_proof": "l1-narrow-rounded-frame-code-proof.json"
+    },
+    {
+      "owners": [
+        "func_00366380",
+        "sflDataDrawNarrowRoundedFrame",
+        "func_00189940",
+        "func_0027bf30",
+        "func_0027d620",
+        "func_002818e0",
+        "func_00282250",
+        "func_00283490"
+      ],
+      "action": "Preserve actual signedguards width>=10,height>=10,alpha>=1 and noDraw outside; actual low8alpha packing, integerdimension subtraction->f32 ordering, originalvertexorder,originaddition,65535-depthconversion and24-bytepacketlayout. Donot algebraicallysimplifyfloatingexpressions,clampalpha,oraddvalidation/retries notin source.",
+      "source_proof": "l1-narrow-rounded-frame-code-proof.json"
+    },
+    {
+      "owners": [
+        "func_00366380",
+        "sflDataDrawNarrowRoundedFrame",
+        "func_00189940",
+        "func_0027bf30",
+        "func_0027d620",
+        "func_002818e0",
+        "func_00282250",
+        "func_00283490"
+      ],
+      "action": "Use actual native statecall33b5a0(2,0) and packet3938d0 arguments, eighteenvertices/stride24,packedcolor+8/XYZ+12/+16/+20. Leading8bytes are not deliberatelyauthoredaspartofthiscolor/position source; donotinvent aUVtableorlayout equivalence. Real nativeSDKformat/state decoding andgeometry output are required, not a blank renderer or PS2P4SkyVertex.",
+      "source_proof": "l1-narrow-rounded-frame-code-proof.json"
+    },
+    {
+      "owners": [
+        "func_00366380",
+        "sflDataDrawNarrowRoundedFrame",
+        "func_00189940",
+        "func_0027bf30",
+        "func_0027d620",
+        "func_002818e0",
+        "func_00282250",
+        "func_00283490"
+      ],
+      "action": "GoldenM6b mustwitnessall realcaller/inline/native paths,guarded nodraw andvaliddraw,realcolor/depth/geometry andstate restoration,correctbounds/lifetimes,PS2unchangedandnohostpointerguestoverwrite. Source proof doesnotclose runtime. Wide-frame0064e3b0 and texturedquadUV0064e440 remainOPEN; nothing here inherits theirproof.",
+      "source_proof": "l1-narrow-rounded-frame-code-proof.json"
+    }
+  ],
+  "boundary": "PROVEN-code source-only. All144oldtemplatebytesretireandactualnativeconstructionvaluesmustbeauthored. NoRuntimeNSO,noPS2fallback,noABIshim,noGoldenWidemoduleorUVclaim,no binarymatch/runtimeclosure.",
+  "callsite_census": {
+    "limits": "Observed directcallercaches,notproofthatcomputedcalls donotexist; noordinalpairingofold/newcallersasserted.",
+    "ps2_callers": [
+      "0x189940",
+      "0x27bf30",
+      "0x27d620",
+      "0x2818e0",
+      "0x282250",
+      "0x283490"
+    ],
+    "native_callers": [
+      "0x710020f710",
+      "0x710020fd90",
+      "0x710021fe70",
+      "0x710022a5e0",
+      "0x710024e6f0"
+    ],
+    "binding": "Everyrealcaller/native-copyroute needsactualGoldenargument/rendererbinding,notagenericcastofoldAPI. Additionalcomputed/inlinedusesremainrequiredseams."
+  }
+}

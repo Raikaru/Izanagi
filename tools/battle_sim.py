@@ -25,8 +25,8 @@ OUTCOMES = {"win", "defeat", "escape", "scripted_conclusion", "action_limit",
 CENSORED = {"action_limit", "update_limit"}
 ERRORS = {"engine_error", "policy_error"}
 POLICIES = {"tape": 0, "greedy": 1, "cautious": 2, "typical": 3, "walk": 4, "attentive": 5, "attentive-affinity": 6, "technical": 7,
-            "strategic": 8}
-# The strategic candidate's native identity (session.c): a separately named hypothesis policy, never a validated expert.
+            "strategic": 8, "expert": 9}
+# The strategic candidate's native identity (session.zig): a separately named hypothesis policy, never a validated expert.
 STRATEGIC_IDENTITY = {"name": "strategic-player-candidate-v1",
                       "knowledge": "observed_damage_weakness_public_charge_guard_ailment_landings_buff_state_fixed_heal_amounts_"
                                    "owned_persona_skills"}
@@ -533,7 +533,7 @@ def write_mod_profile(profile, cohort):
 
 
 def validate_scenario(value):
-    object_fields(value, "scenario", ("schema", "entry", "encounter_id", "policy", "master_seed", "seed_start", "n", "options"), ("label", "runtime", "mods"))
+    object_fields(value, "scenario", ("schema", "entry", "encounter_id", "policy", "master_seed", "seed_start", "n", "options"), ("label", "runtime", "mods", "is_boss", "expected_prepared_state"))
     if "mods" in value:
         validate_mods(value["mods"])
         source = value["entry"]["source"] if isinstance(value.get("entry"), dict) and isinstance(value["entry"].get("source"), dict) else {}
@@ -546,6 +546,13 @@ def validate_scenario(value):
     if not isinstance(master, str) or re.fullmatch(r"[0-9a-fA-F]{32}", master) is None:
         raise ScenarioError("scenario.master_seed: expected exactly 32 hexadecimal digits")
     integer(value["encounter_id"], "scenario.encounter_id", maximum=65535)
+    if type(value.get("is_boss", False)) is not bool:
+        raise ScenarioError("scenario.is_boss: expected boolean")
+    if "expected_prepared_state" in value:
+        expected = value["expected_prepared_state"]
+        object_fields(expected, "scenario.expected_prepared_state", ("actors", "hero_personas", "companion_personas", "inventory"))
+        if any(not isinstance(expected[key], list) for key in ("actors", "hero_personas", "companion_personas", "inventory")):
+            raise ScenarioError("scenario.expected_prepared_state: expected actor, Persona and inventory lists")
     start = integer(value["seed_start"], "scenario.seed_start", maximum=2**64 - 1)
     count = integer(value["n"], "scenario.n", 1)
     if start + count > 2**64:
@@ -558,6 +565,8 @@ def validate_scenario(value):
     if not isinstance(source, dict):
         raise ScenarioError("entry.source: expected object")
     kind = choice(source.get("kind"), "entry.source.kind", ("save", "walker", "declarative"))
+    if "expected_prepared_state" in value and kind != "declarative":
+        raise ScenarioError("scenario.expected_prepared_state: requires declarative preparation")
     if kind == "declarative":
         object_fields(source, "entry.source", ("kind", "id", "definition"))
         text(source["id"], "entry.source.id")
@@ -568,10 +577,10 @@ def validate_scenario(value):
         if key in entry and not isinstance(entry[key], dict):
             raise ScenarioError("entry.%s: expected object" % key)
     policy = value["policy"]
-    object_fields(policy, "policy", ("kind", "version"), ("tape", "plan", "ratings"))
+    object_fields(policy, "policy", ("kind", "version"), ("tape", "plan", "ratings", "opening"))
     if not isinstance(policy["kind"], str) or policy["kind"] not in POLICIES:
         raise ScenarioError("policy.kind: expected tape, greedy, cautious, typical, walk, attentive, attentive-affinity, "
-                            "technical or strategic")
+                            "technical, strategic or expert")
     if policy["version"] != 1 or type(policy["version"]) is not int:
         raise ScenarioError("policy.version: expected 1")
     if policy["kind"] == "tape" and "tape" not in policy:
@@ -586,13 +595,23 @@ def validate_scenario(value):
         raise ScenarioError("policy.ratings: required for, and only valid with, the attentive-affinity policy")
     if "ratings" in policy:
         validate_ratings_reference(policy["ratings"])
+    if "opening" in policy:
+        if policy["kind"] not in ("strategic", "expert"):
+            raise ScenarioError("policy.opening: only strategic or expert may use a scripted opening")
+        lines = [line for line in validate_walk_plan(policy["opening"]).splitlines() if line]
+        if not lines or not lines[0].startswith("battle:") or any(not line.startswith("battleturn:") for line in lines[1:]):
+            raise ScenarioError("policy.opening: expected one battle: followed only by battleturn: lines")
     options = value["options"]
-    object_fields(options, "options", ("update_limit", "bootstrap_limit", "action_limit", "latency_updates", "fill_resources"), ("timeout_seconds",))
+    object_fields(options, "options", ("update_limit", "bootstrap_limit", "action_limit", "latency_updates", "fill_resources"), ("timeout_seconds", "trace_decisions"))
     for key in ("update_limit", "bootstrap_limit", "action_limit"):
         integer(options[key], "options." + key, 1)
     integer(options["latency_updates"], "options.latency_updates")
     if type(options["fill_resources"]) is not bool:
         raise ScenarioError("options.fill_resources: expected boolean (no implicit preparation)")
+    if "trace_decisions" in options and type(options["trace_decisions"]) is not bool:
+        raise ScenarioError("options.trace_decisions: expected boolean")
+    if options.get("trace_decisions", False) and policy["kind"] not in ("strategic", "expert"):
+        raise ScenarioError("options.trace_decisions: requires strategic or expert policy")
     timeout = options.get("timeout_seconds", 120)
     if type(timeout) not in (float, int) or not math.isfinite(timeout) or timeout <= 0:
         raise ScenarioError("options.timeout_seconds: expected positive finite seconds")
@@ -718,8 +737,11 @@ def compile_entry(scenario, save_image, seeds, *, rendered=False, ratings=None):
         raise ScenarioError("policy.ratings: the attentive-affinity policy, and only it, compiles a ratings payload")
     # The walk and attentive-affinity policies' +32 is their payload's byte count (plan text, ratings); it follows the
     # (empty) RNG block in place of a tape.
-    payload = policy["plan"].encode("ascii") if policy["kind"] == "walk" else ratings["payload"] if ratings else b""
-    flags = (0 if rendered else 1) | (4 if options["fill_resources"] else 0)
+    payload = (policy["plan"].encode("ascii") if policy["kind"] == "walk" else
+               ratings["payload"] if ratings else policy.get("opening", "").encode("ascii"))
+    flags = ((0 if rendered else 1) | (4 if options["fill_resources"] else 0) |
+             (8 if scenario.get("is_boss", False) else 0) | (16 if "opening" in policy else 0) |
+             (32 if options.get("trace_decisions", False) else 0))
     header = struct.pack("<8s14I", b"P4BSIM01", 64, flags, scenario["encounter_id"],
                          seeds["additive"], seeds["mt"], options["update_limit"], len(payload) if payload else len(tape),
                          len(save_image), 0, options["bootstrap_limit"], POLICIES[policy["kind"]],
@@ -1435,6 +1457,12 @@ def run_batch(scenario, base, worker, output, jobs=1, *, resume=False, admission
         save_image, preparation_info = prepare_entry(
             definition, save_image, worker, output, identity, resume=resume,
             prepared_from=prepared_from, admission=admission, wait=wait, runtime_environment=runtime_environment)
+        if "expected_prepared_state" in scenario:
+            actual = preparation_info["native_receipt"].get("native_prepared_state", {})
+            expected = scenario["expected_prepared_state"]
+            for key in ("actors", "hero_personas", "companion_personas", "inventory"):
+                if actual.get(key) != expected[key]:
+                    raise ScenarioError("native prepared %s does not match pinned fixture state" % key)
         identity = {**identity, "entry_sha256": digest(save_image),
                     "preparation": {key: preparation_info["frozen"]["identity"][key]
                                     for key in ("definition_sha256", "request_sha256", "classification")}}
@@ -1446,7 +1474,7 @@ def run_batch(scenario, base, worker, output, jobs=1, *, resume=False, admission
                                             "payload_sha256": ratings["payload_sha256"],
                                             "table_digest": ratings["table_digest"]}}
     payload_bytes = (len(scenario["policy"]["plan"]) if scenario["policy"]["kind"] == "walk" else
-                     len(ratings["payload"]) if ratings else 0)
+                     len(ratings["payload"]) if ratings else len(scenario["policy"].get("opening", "")))
     if 64 + len(save_image) + 12 * len(scenario["policy"].get("tape", [])) + payload_bytes > 8 * 1024 * 1024:
         raise ScenarioError("battle ENTRY exceeds native 8 MiB request limit; no seed workers launched")
     indices = [run_index] if run_index is not None else range(scenario["seed_start"], scenario["seed_start"] + scenario["n"])

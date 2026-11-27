@@ -74,8 +74,10 @@ actually changes. A base span that is not the retail layout is refused.
   only to a PS2 slot that has a name: Golden fills several unnamed PS2 slots
   (Vigor Song in 0x11F keeps PS2's unused row bytes), and those stay out.
 - **Skill rows.** Golden's 0x2C-byte row widens the flag byte at 0 to a word
-  and pads after bytes 1..3; only Golden-only skills use the widened bits.
-  Byte 1 (changed only on Healing Wave, with unmeasured meaning) stays PS2's.
+  and pads after bytes 1..3. The high flag byte is also nonzero on rows in the
+  PS2 ID range; its semantics are not yet established. Conversion refuses
+  rows whose widened flags or padding cannot be represented rather than
+  discarding them. The separate PS2 row byte 1 remains unchanged.
 
 | Group (setting) | Rows | Rules |
 | --- | --- | --- |

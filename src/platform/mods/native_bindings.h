@@ -51,6 +51,8 @@ void p4_lua_semantic_events_initialize(lua_State *state);
 void p4_lua_semantic_events_close(P4LuaMod *mod);
 void p4_lua_battle_decide_initialize(lua_State *state);
 void p4_lua_battle_decide_close(P4LuaMod *mod);
+void p4_lua_battle_execution_initialize(lua_State *state);
+void p4_lua_battle_execution_close(P4LuaMod *mod);
 void p4_lua_inventory_initialize(lua_State *state);
 void p4_lua_inventory_close(P4LuaMod *mod);
 void p4_lua_persona_initialize(lua_State *state);

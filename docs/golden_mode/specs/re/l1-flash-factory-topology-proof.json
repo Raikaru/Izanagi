@@ -1,0 +1,504 @@
+{
+  "proof_id": "L1-c6A-flash-factory-topology-20261113",
+  "class": "PROVEN",
+  "runtime_status": "pending-seam",
+  "scope": "Complete named flash factory callback/parameter bank, two triangle topology resources and one unit-scale quad. Four selected objects304 PS2 B. This does not qualify remaining713d18 homogeneous-constant pair or7611c0 angle constant, nor the whole effect renderer.",
+  "source_pins": {
+    "ps2_decomp_commit": "18016afe6",
+    "steam_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+    "switch_nso_sha256": "854c7a1e33de1619abf009fa7f32b8c012960d685c8bf1bf99a92a6a4d0bda1c",
+    "switch_mapped_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+    "method": "Static ELF/data, ordinary Steam .shared/.sdata/.xpdata and decompressed NSO code/data only. No .arch decode, game execution or runtime binding."
+  },
+  "parts": [
+    {
+      "address": "0x00714028",
+      "size": 232,
+      "ps2_live_bytes": 228,
+      "retained_ps2_tail_bytes": 4,
+      "kind": "semantic-native-six-callback-factory",
+      "switch_offset": 8850528,
+      "golden_size": 560,
+      "selection": "PS2+24 through physical record8 end; final4 zero alignment bytes retained; bind complete Golden10x56 bank semantically.",
+      "switch_address": "0x7100870c60",
+      "golden_sha256": "709c772c1a9036d6ecd7ae1e0a10b6087eb7dd67d402a59131dd27ef35fff7ad",
+      "ps2_live_sha256": "b76bd6214f541856ae9140057dbc7f639ca476fd855e3d8eb28e31f8f2231d37",
+      "ps2_tail_hex": "00000000"
+    },
+    {
+      "address": "0x007133a0",
+      "size": 32,
+      "ps2_live_bytes": 18,
+      "retained_ps2_tail_bytes": 14,
+      "kind": "typed-u16-triangle-topology",
+      "switch_offset": 8845792,
+      "golden_size": 18,
+      "indices": [
+        0,
+        3,
+        2,
+        0,
+        1,
+        3,
+        1,
+        4,
+        3
+      ],
+      "triangles_per_row": 3,
+      "vertices_per_row": 5,
+      "geometry_flags_argument": "0x48",
+      "paired_producers": [
+        "PS2 FlashRotatingAllocBlock0049a900 ->NSO710036ee90",
+        "PS2 FlashBoxAllocBlock0049fad0 ->NSO7100374790"
+      ],
+      "selection": "Only9 u16 indices live; no source suffix stitching.",
+      "switch_address": "0x710086f9e0",
+      "golden_sha256": "c7e636ef6ff0a0774d5613cd905d68e28e43003e194fe20216e827c997829a21",
+      "ps2_live_sha256": "c7e636ef6ff0a0774d5613cd905d68e28e43003e194fe20216e827c997829a21",
+      "ps2_tail_hex": "0000000000000000000000000000"
+    },
+    {
+      "address": "0x00713408",
+      "size": 24,
+      "ps2_live_bytes": 12,
+      "retained_ps2_tail_bytes": 12,
+      "kind": "typed-u16-triangle-topology",
+      "switch_offset": 8845882,
+      "golden_size": 12,
+      "indices": [
+        0,
+        1,
+        3,
+        0,
+        3,
+        2
+      ],
+      "triangles_per_row": 2,
+      "vertices_per_row": 4,
+      "geometry_flags_argument": "0x4c",
+      "paired_producers": [
+        "PS2 FlashEvolvingRadialAllocBlock0049d100 ->NSO7100371fb0: ensure parameter+70 nonzero,2/4 topology, optional resource/default texture path",
+        "PS2 remaining source consumers include texturing/aged/centered/screen-sprite constructors and must all route to this named topology."
+      ],
+      "selection": "Only6 u16 indices live; preserve12 zero tail.",
+      "switch_address": "0x710086fa3a",
+      "golden_sha256": "485b1ea5961e468609cf51f310ba93f21e7bd9a1e906655af438bfc8e18322c1",
+      "ps2_live_sha256": "485b1ea5961e468609cf51f310ba93f21e7bd9a1e906655af438bfc8e18322c1",
+      "ps2_tail_hex": "000000000000000000000000"
+    },
+    {
+      "address": "0x00713ce0",
+      "size": 16,
+      "ps2_live_bytes": 16,
+      "retained_ps2_tail_bytes": 0,
+      "kind": "typed-unit-scale-f32x4",
+      "switch_offset": 8845952,
+      "golden_size": 16,
+      "value_words": [
+        "0x3f800000",
+        "0x3f800000",
+        "0x3f800000",
+        "0x3f800000"
+      ],
+      "paired_producer": "PS2 FlashQuadCopyAlloc004a1660 copies entire quad into instance.scale; NSO7100377460 loads source via GOT8817c0 and stores all16 bytes to+20..2f of the new instance. Identity is actual scale-initialization role, not a search for ones.",
+      "selection": "All16 bytes live; other math/particle/geometry readers and native copies are explicit runtime routes.",
+      "switch_address": "0x710086fa80",
+      "golden_sha256": "f6bb1294da2f78cd935b01c7656280df5eaa0439e9d97bc03775825a41a508e4",
+      "ps2_live_sha256": "f6bb1294da2f78cd935b01c7656280df5eaa0439e9d97bc03775825a41a508e4",
+      "ps2_tail_hex": ""
+    }
+  ],
+  "factory": {
+    "ps2_base": "0x00714010",
+    "ps2_materialized_records": 9,
+    "ps2_record_stride": 28,
+    "ps2_record_fields": {
+      "initialize_instance": [
+        0,
+        4
+      ],
+      "allocate_child": [
+        4,
+        4
+      ],
+      "destroy_child": [
+        8,
+        4
+      ],
+      "optional_parent_constructor": [
+        12,
+        4
+      ],
+      "advance": [
+        16,
+        4
+      ],
+      "post_age_update": [
+        20,
+        4
+      ],
+      "parameter_bytes": [
+        24,
+        4
+      ]
+    },
+    "ps2_source_window_bytes": 252,
+    "ps2_source_window_sha256": "037fd2aa2254fd3aa6d4e197e713c1ebe7f2b132c173bb84e8cbf06aebbf6fdf",
+    "ps2_guard_upper_bound": 10,
+    "ps2_extent_warning": "The legacy guard checks kind<10, but the materialized bank has records0..8. Four zero alignment bytes follow, then the independently qualified effPolygonWind.c diagnostic at714110. Do not decode that filename as a valid old record9 or change old mode behavior by adding a new guard/fallback. Selection ends exactly714110.",
+    "golden_count": 10,
+    "golden_record_stride": 56,
+    "golden_record_fields": {
+      "initialize_instance": [
+        0,
+        8
+      ],
+      "allocate_child": [
+        8,
+        8
+      ],
+      "destroy_child": [
+        16,
+        8
+      ],
+      "optional_parent_constructor": [
+        24,
+        8
+      ],
+      "advance": [
+        32,
+        8
+      ],
+      "post_age_update": [
+        40,
+        8
+      ],
+      "parameter_bytes": [
+        48,
+        4
+      ],
+      "padding": [
+        52,
+        4
+      ]
+    },
+    "switch_base": "0x7100870c60",
+    "switch_size": 560,
+    "switch_got": "0x8817f8 ->0x870c60; do not use the unrelated0x8817d0 table",
+    "steam": {
+      "section": ".xpdata",
+      "rva": "0xae96c0",
+      "raw_offset": 11435712,
+      "size": 560,
+      "sha256": "6df4bc682885cc88a016e8445ba0b1ca13985b48485e99eca1cced4e1bb82d05",
+      "identity_check": "Unique complete10x56 parameter-size vector with native callback fields, corroborated by typed NSO factory and independent lifecycle readers. ISA-specific function addresses are normalized, not compared as bytes."
+    },
+    "records": [
+      {
+        "kind": 0,
+        "ps2_callbacks": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "ps2_parameter_bytes": 0,
+        "golden_parameter_bytes": 0,
+        "switch_callbacks": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "steam_callback_rvas": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      {
+        "kind": 1,
+        "ps2_callbacks": [
+          "0x49a810",
+          "0x49a900",
+          "0x49a9e0",
+          null,
+          "0x49aa30",
+          "0x49b2b0"
+        ],
+        "ps2_parameter_bytes": 128,
+        "golden_parameter_bytes": 128,
+        "switch_callbacks": [
+          "0x710036edf0",
+          "0x710036ee90",
+          "0x710036ef40",
+          null,
+          "0x710036ef70",
+          "0x710036f790"
+        ],
+        "steam_callback_rvas": [
+          "0x575ce0",
+          "0x575d50",
+          "0x575dc0",
+          null,
+          "0x575df0",
+          "0x576910"
+        ]
+      },
+      {
+        "kind": 2,
+        "ps2_callbacks": [
+          "0x49b470",
+          "0x49b560",
+          "0x49b640",
+          null,
+          "0x49b690",
+          "0x49bff0"
+        ],
+        "ps2_parameter_bytes": 140,
+        "golden_parameter_bytes": 140,
+        "switch_callbacks": [
+          "0x710036f980",
+          "0x710036fa20",
+          "0x710036fad0",
+          null,
+          "0x710036fb00",
+          "0x7100370a40"
+        ],
+        "steam_callback_rvas": [
+          "0x576a20",
+          "0x576a90",
+          "0x576b00",
+          null,
+          "0x576b30",
+          "0x5779b0"
+        ]
+      },
+      {
+        "kind": 3,
+        "ps2_callbacks": [
+          "0x49c1b0",
+          "0x49c2a0",
+          "0x49c380",
+          null,
+          "0x49c3d0",
+          "0x49cd10"
+        ],
+        "ps2_parameter_bytes": 156,
+        "golden_parameter_bytes": 156,
+        "switch_callbacks": [
+          "0x7100370c30",
+          "0x7100370cd0",
+          "0x7100370d80",
+          null,
+          "0x7100370db0",
+          "0x7100371d20"
+        ],
+        "steam_callback_rvas": [
+          "0x577ac0",
+          "0x577b30",
+          "0x577ba0",
+          null,
+          "0x577bd0",
+          "0x5789e0"
+        ]
+      },
+      {
+        "kind": 4,
+        "ps2_callbacks": [
+          "0x49ced0",
+          "0x49d100",
+          "0x49d310",
+          "0x49d230",
+          "0x49d360",
+          "0x49db20"
+        ],
+        "ps2_parameter_bytes": 128,
+        "golden_parameter_bytes": 128,
+        "switch_callbacks": [
+          "0x7100371f10",
+          "0x7100371fb0",
+          "0x7100372110",
+          "0x7100372140",
+          "0x7100372250",
+          "0x7100372a10"
+        ],
+        "steam_callback_rvas": [
+          "0x578af0",
+          "0x578c50",
+          "0x578de0",
+          "0x578d50",
+          "0x578e10",
+          "0x5798c0"
+        ]
+      },
+      {
+        "kind": 5,
+        "ps2_callbacks": [
+          "0x49dce0",
+          "0x49df10",
+          "0x49e100",
+          "0x49e030",
+          "0x49e150",
+          "0x49e920"
+        ],
+        "ps2_parameter_bytes": 136,
+        "golden_parameter_bytes": 136,
+        "switch_callbacks": [
+          "0x7100372c00",
+          "0x7100372ca0",
+          "0x7100372df0",
+          "0x7100372e20",
+          "0x7100372f20",
+          "0x7100373700"
+        ],
+        "steam_callback_rvas": [
+          "0x5799d0",
+          "0x579b20",
+          "0x579c90",
+          "0x579c10",
+          "0x579cc0",
+          "0x57a7d0"
+        ]
+      },
+      {
+        "kind": 6,
+        "ps2_callbacks": [
+          "0x49eae0",
+          "0x49ed10",
+          "0x49ef00",
+          "0x49ee30",
+          "0x49ef50",
+          "0x49f820"
+        ],
+        "ps2_parameter_bytes": 164,
+        "golden_parameter_bytes": 164,
+        "switch_callbacks": [
+          "0x71003738f0",
+          "0x7100373990",
+          "0x7100373ae0",
+          "0x7100373b10",
+          "0x7100373c10",
+          "0x7100374500"
+        ],
+        "steam_callback_rvas": [
+          "0x57a8e0",
+          "0x57aa30",
+          "0x57aba0",
+          "0x57ab20",
+          "0x57abd0",
+          "0x57b6b0"
+        ]
+      },
+      {
+        "kind": 7,
+        "ps2_callbacks": [
+          "0x49f9e0",
+          "0x49fad0",
+          "0x49fba0",
+          null,
+          "0x49fbf0",
+          "0x4a05f0"
+        ],
+        "ps2_parameter_bytes": 168,
+        "golden_parameter_bytes": 168,
+        "switch_callbacks": [
+          "0x71003746f0",
+          "0x7100374790",
+          "0x7100374830",
+          null,
+          "0x7100374860",
+          "0x7100375240"
+        ],
+        "steam_callback_rvas": [
+          "0x57b7c0",
+          "0x57b830",
+          "0x57b8a0",
+          null,
+          "0x57b8d0",
+          "0x57c4c0"
+        ]
+      },
+      {
+        "kind": 8,
+        "ps2_callbacks": [
+          "0x4a07b0",
+          "0x4a09e0",
+          "0x4a0bb0",
+          "0x4a0af0",
+          "0x4a0c00",
+          "0x4a14a0"
+        ],
+        "ps2_parameter_bytes": 152,
+        "golden_parameter_bytes": 152,
+        "switch_callbacks": [
+          "0x7100375430",
+          "0x71003754d0",
+          "0x7100375620",
+          "0x7100375650",
+          "0x7100375750",
+          "0x7100375fd0"
+        ],
+        "steam_callback_rvas": [
+          "0x57c5d0",
+          "0x57c720",
+          "0x57c890",
+          "0x57c810",
+          "0x57c8c0",
+          "0x57d4c0"
+        ]
+      },
+      {
+        "kind": 9,
+        "ps2_callbacks": null,
+        "ps2_parameter_bytes": null,
+        "golden_parameter_bytes": 264,
+        "switch_callbacks": [
+          "0x71003761c0",
+          "0x7100376260",
+          "0x7100376340",
+          "0x7100376370",
+          "0x7100376400",
+          "0x7100377270"
+        ],
+        "steam_callback_rvas": [
+          "0x57d5d0",
+          "0x57d8c0",
+          "0x57da30",
+          "0x57d9b0",
+          "0x57da60",
+          "0x57ee60"
+        ]
+      }
+    ],
+    "independent_consumers": [
+      "PS2 FlashQuadCopyAlloc004a1660 ->NSO377460: same u16 kind<10, parameter byte field+24/+48, allocate parameterBytes+80, parameters=instance+80, kind/color/frame initialization, unit-scale quad, two(0,0,0,1) quads, parameter copy.",
+      "PS2 FlashQuadCopyAllocFromParent004a1780 ->NSO377570: same source kind1/4 and resource-null branch, parameter resolver, common allocator, child allocator slot1 then instance initializer slot0.",
+      "PS2 mdlEffect.c FlashQuadDestroy ->NSO3776b0 uses slot2 to destroy child then frees outer instance.",
+      "PS2 optional parent-copy helper004a1950 ->NSO3776f0: optional slot3; preserve per-kind source-record/direct-parameter ABI rather than assuming one callback signature.",
+      "PS2 FlashQuadAdvance/Update/Combined ->NSO3777c0,377800,377880: slot4 advance then age, slot5 only after positive age. NSO377880 explicitly corroborates offsets32/40 at stride56."
+    ],
+    "delta": "Golden kind9 has six real callbacks and264 parameter bytes; no complete old record9 exists to retain. Native pointer widening and added record require a semantic whole-bank route, not selected-partition memcpy. Golden age is float and advances by timing getter277bb0 result*0.5, unlike old integer age++."
+  },
+  "topology_proof": {
+    "ps2_builder": "GeometryCreateTableGrid00482f70, src/Graphics/Effect/effGeometry.c:255..298. rows/vertices/triangles narrow16; read exactly trianglesPerRow*3 u16 entries, add per-row vertex offset.",
+    "golden_builder": "NSO710035fc40, worker output710035fc40-c6.txt: same named topology traversal, unsigned-short index loads, three indices per triangle and per-row vertex offset; native mesh/triangle layouts differ and are not qualified by this resource proof.",
+    "anchors": "3-triangle/5-vertex0x48 producers agree for7133a0;2-triangle/4-vertex0x4c with parameter+70/default-resource branch agrees for713408. These typed caller and consumer contracts prove exact18/12 live spans. Adjacent source bytes are other index patterns, not old padded32/24-byte source objects."
+  },
+  "required_seams": [
+    "Bind complete Golden10x56 flash factory semantically; normalize all six per-kind callable roles with their actual ABIs and real Golden implementations. No cross-ISA address casts, silent PS2 callback retention or560-byte guest overwrite.",
+    "Route factory parameter-size lookup, direct and source-record construction, optional parent constructor, destruction, advance/post-age update, and all native/inlined copies together. Golden kind9/264-byte parameters must have its real implementation.",
+    "Preserve Golden instance field/layout and float timing behavior: age+=277bb0()*0.5; do not retain PS2 integer age++ merely because header size80 is unchanged. Source proof does not certify renderer callback bodies.",
+    "Bind exactly18/12 bytes for the three/five and two/four topology resources; preserve14/12 old zero padding bytes. Resolve every observed constructor, including non-flash screen sprites and shared model helpers; preserve PS2 values and native index/vertex bounds.",
+    "Resolve the complete16-byte Golden unit-scale quad for every old713ce0 math/particle/flash/geometry consumer, initializer and constant-folded/native copy. Same bytes are positively qualified Golden values, not a cosmetic fallback.",
+    "Preserve4 trailing zero alignment bytes of selected714028 factory partition; the complete old materialized bank ends71410c and next independently owned diagnostic begins714110.",
+    "GoldenM6b must witness source selection at all consumers, callback lifecycle, floating age, mode isolation, live spans/tails and pointer-safe native routes. This is source proof only."
+  ]
+}

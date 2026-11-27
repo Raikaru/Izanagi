@@ -16,7 +16,6 @@
 #define P4PC_GMEM_H
 
 #include <stdint.h>
-#include <string.h>
 
 #include "p4pc/guest.h"
 

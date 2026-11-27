@@ -217,4 +217,23 @@ int p4_game_tables_items_equipment_get(const P4GameItems *items, uint32_t unit, 
 int p4_game_tables_items_equipment_set(P4GameItems *items, uint32_t unit, uint32_t slot, uint32_t id);
 int p4_game_tables_items_equipment_clear(P4GameItems *items, uint32_t unit, uint32_t slot);
 void p4_game_tables_items_state_clear(P4GameItems *items);
+/* Exact battle-retry capture of the mutable expanded state (every row's
+ * quantity and availability, and the equipment references). restore refuses,
+ * touching nothing, when the table is no longer the one captured (another
+ * view, revision or row layout); matches is the same test without the copy. */
+typedef struct P4GameItemsCapture P4GameItemsCapture;
+int p4_game_tables_items_capture(const P4GameItems *items, P4GameItemsCapture **out);
+int p4_game_tables_items_capture_matches(const P4GameItems *items, const P4GameItemsCapture *capture);
+int p4_game_tables_items_restore(P4GameItems *items, const P4GameItemsCapture *capture);
+void p4_game_tables_items_capture_free(P4GameItemsCapture *capture);
+/* FNV-1a 64 over the same fields, live and captured (NULL: 0), for witness logs. */
+uint64_t p4_game_tables_items_state_digest(const P4GameItems *items);
+uint64_t p4_game_tables_items_capture_digest(const P4GameItemsCapture *capture);
+/* The same over the active native table. capture stores *out = NULL and
+ * succeeds when no expanded table is active (nothing to restore); matches and
+ * restore then require that to still be so. */
+int p4_game_tables_items_battle_capture(P4GameItemsCapture **out);
+uint64_t p4_game_tables_items_battle_digest(void); /* the active table's live state, 0 when none */
+int p4_game_tables_items_battle_matches(const P4GameItemsCapture *capture);
+int p4_game_tables_items_battle_restore(const P4GameItemsCapture *capture);
 #endif

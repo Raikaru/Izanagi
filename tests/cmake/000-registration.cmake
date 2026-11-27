@@ -79,9 +79,15 @@ endfunction()
 
 add_test(NAME event_scene_state COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/event_scene_state_test.py")
 add_test(NAME input_guard COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/input_guard_test.py")
+add_test(NAME region_mad COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/region_mad_test.py")
 add_test(NAME gen_port_contracts COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/gen_port_test.py")
 set_tests_properties(gen_port_contracts PROPERTIES ENVIRONMENT "P4PC_TEST_DECOMP=${P4_DECOMP}")
 add_test(NAME live_argument_discovery COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/audit_live_args_test.py")
+add_test(NAME os_path_audit COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/os_path_audit_test.py" "${CMAKE_SOURCE_DIR}")
+# The build id (tools/build_id.py, include/p4pc/build_id.h): its values against a real git tree, and the shape of the one compiled into this build.
+add_test(NAME build_id COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/build_id_test.py")
+add_executable(build_id_test build_id_test.c "${P4_GEN}/p4_build_id.c")
+add_test(NAME build_id_compiled COMMAND build_id_test)
 # The Android dependency script serializes concurrent builds of one ABI with flock(1); the test needs a POSIX shell with it.
 find_program(P4_FLOCK flock)
 find_program(P4_SH sh)

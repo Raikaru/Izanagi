@@ -16,5 +16,5 @@ add_test(NAME battle_ai_leader COMMAND battle_ai_leader_test)
 
 # Verify the native turn-start counter for Yu and a projected leader.
 add_executable(battle_leader_turn_test battle_leader_turn_test.c)
-target_include_directories(battle_leader_turn_test PRIVATE "${CMAKE_SOURCE_DIR}/overrides")
+target_include_directories(battle_leader_turn_test PRIVATE "${CMAKE_SOURCE_DIR}/overrides" "${CMAKE_SOURCE_DIR}/include")
 add_test(NAME battle_leader_turn COMMAND battle_leader_turn_test)

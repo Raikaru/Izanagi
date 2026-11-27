@@ -40,6 +40,7 @@ TUNING = ROOT / "mods" / "p4pc.hardmode" / "files" / "DATA" / "HARDMODE" / "TUNI
 FIXTURE = ROOT / "tests" / "mod_hardmode_fixture.luau"
 SCRIPT = ROOT / "tests" / "mod_hardmode_lifecycle_test.luau"
 WINDOWS = ROOT / "mods" / "p4pc.hardmode" / "data" / "windows.xml"
+SIDE = ROOT / "mods" / "p4pc.hardmode" / "data" / "freezeshock.xml"
 
 EXPECTED = {
     "READY": "true",
@@ -69,6 +70,21 @@ def main(argv):
     if not runner:
         print(__doc__, file=sys.stderr)
         return 2
+    side = ET.parse(SIDE).getroot()
+    bosses = {258, 317, 269, 272, 273, *range(257, 268), *range(270, 275),
+              *range(288, 298), *range(304, 320)}
+    for boss in bosses:
+        for leaf in ("24", "25"):
+            rows = [row for row in side.findall("affinity")
+                    if row.get("entity") == str(boss) and row.get("element") == leaf]
+            assert rows and all(row.get("value") == "0x01000064" for row in rows), (boss, leaf)
+    burn = [row for row in side.findall("status-ailment") if row.get("element") == "26"]
+    assert len(burn) == 1 and burn[0].get("flags") == "54" and burn[0].get("default-from") == "1"
+    riders = {int(row.get("skill"), 0): int(row.get("rate"))
+              for row in side.findall("status-rider") if row.get("element") == "26"}
+    assert riders == {1: 10, 2: 12, 3: 15, 4: 6, 5: 8, 6: 10, 7: 10, 8: 60}, riders
+    assert all(row.get("id") != "27" for row in side.findall("element"))
+    assert all(row.get("element") != "27" for row in side.findall("status-ailment") + side.findall("status-rider"))
     rows = ET.parse(WINDOWS).getroot().findall("affinity")
     king = [row.attrib for row in rows if row.get("kind") == "1" and row.get("entity") == "304"]
     assert king == [{"kind": "1", "entity": "304", "profile": "304", "element": "15",

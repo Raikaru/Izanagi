@@ -19,6 +19,8 @@ int p4gl_readback_target_create(uint32_t w, uint32_t h, uint32_t virtualWidth, u
 
 /* The framebuffer object that target_create made and bound, 0 (the default framebuffer) when none. */
 unsigned p4gl_readback_framebuffer(void);
+/* The colour texture of that framebuffer, 0 when none. */
+unsigned p4gl_readback_texture(void);
 void p4gl_readback_virtual_size(uint32_t *w, uint32_t *h);
 
 

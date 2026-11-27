@@ -41,6 +41,12 @@ Pixels are linear; 8-bit palettes use the CSM1 entry order (entries 8..15 and
 native font calls (`p4.ui.page`, `p4.ui.status`, `p4.ui.overlay`), never
 rendered images.
 
+Golden mode uses its own native FNT cells and metric tables, not the PS2 RAW
+glyph stream or a system font. [Golden text](../golden_mode/text.md) describes
+the typed BMD/MSG parser and mode-gated RGBA rendering seam. M9 owns routing
+game UI consumers and executing dynamic message controls; these format APIs
+do not register a PS2 text adapter or remove the R8 consumer refusal.
+
 ## Families
 
 UI art is white on transparent, quantized to a short alpha ramp, and coloured

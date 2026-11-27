@@ -873,6 +873,50 @@ static void ptank_frame(P4RwRaster *tex, const P4TmxImage *img)
         expect_rgb(rgba, 8, 8, 0, 0, 0, "PTank particle leaves the corner");
     }
 
+    /* A billboard's corners are the picture's top-left, top-right, bottom-right and bottom-left ON THE SCREEN, as the texture coordinates and
+     * the four vertex colours name them. The camera's +x is the screen's left, so corners built in camera space were the mirror image: the
+     * notes over a character's head had their stems on the left and the sweat drops leaned in instead of spreading out (public issue #11).
+     * A positive rotation turns the sprite counter-clockwise on the screen: a quarter turn takes the top-left colour to the bottom-left. */
+    {
+        uint8_t (*corners)[4] = p4t_galloc(4 * sizeof *corners, 16);
+        static const uint8_t kCorner[4][4] = {{255, 0, 0, 255}, {0, 255, 0, 255}, {0, 0, 255, 255}, {255, 255, 255, 255}};
+        /* probes just inside the frame's top-left, top-right, bottom-right and bottom-left corners */
+        static const unsigned kProbe[4][2] = {{6u, 6u}, {249u, 6u}, {249u, 249u}, {6u, 249u}};
+
+        memcpy(corners, kCorner, sizeof kCorner);
+        put_u32(record, pd + 0x58, 0x1 | 0x4 | 0x40);            /* position, size, per-particle vertex colours */
+        put_u32(record, pd + 0x04 + 8 * 5, P4_H2G(corners));
+        put_u32(record, pd + 0x08 + 8 * 5, 4 * 4);
+        sizes[0][0] = sizes[0][1] = 4.0f;
+        for (int turn = 0; turn < 2; turn++) {
+            /* turn 0: upright. turn 1: +pi/2, where the colour of corner k appears at screen corner (k + 3) % 4 of the list above:
+             * red (top-left) at the bottom-left, green (top-right) at the top-left, blue at the top-right, white at the bottom-right. */
+            put_f32(record, pd + 0x78, turn ? 1.5707963f : 0.0f);
+            p4gl_glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            expect_int(func_003a8840(NULL, nodeParam), 1, "PTank vertex-colour draw");
+            if (p4gl_readback_rgba(FRAME, FRAME, rgba) == 0) {
+                for (int c = 0; c < 4; c++) {
+                    const int index = turn ? (c + 1) % 4 : c;
+                    const uint8_t *got = rgba + ((size_t)kProbe[c][1] * FRAME + kProbe[c][0]) * 4u;
+                    const uint8_t *want = kCorner[index];
+                    int ok = 1;
+
+                    for (int ch = 0; ch < 3; ch++) {
+                        /* the probe sits a few pixels in from the corner: the corner's colour dominates, it is not exact */
+                        ok &= want[ch] ? got[ch] > 190 : got[ch] < 70;
+                    }
+                    if (!ok) {
+                        fprintf(stderr, "render_smoke: PTank %s billboard corner %d: pixel (%u,%u) is %u %u %u, corner colour %u %u %u\n", turn ? "rotated" : "upright",
+                                c, kProbe[c][0], kProbe[c][1], got[0], got[1], got[2], want[0], want[1], want[2]);
+                        fail("PTank billboard corners are mirrored or turned the wrong way");
+                    }
+                }
+            }
+        }
+        put_f32(record, pd + 0x78, 0.0f);
+        put_u32(record, pd + 0x58, 0x1 | 0x2 | 0x4);
+    }
+
     /* A 4 x 1 particle is a horizontal band; rotated by a quarter turn it is a vertical band. */
     sizes[0][0] = 4.0f;
     sizes[0][1] = 1.0f;
@@ -1454,6 +1498,221 @@ static void atomic_date_frame(void)
 }
 
 
+/* RpMatFX UV transform (docs/renderer_port.md): the game's UVAnim interpolators rewrite a material's transform matrix every frame, and
+ * retail blinks, scrolls the TV portal and moves the battle arena textures by it. A four-row sheet (red, green, blue, yellow bands) is
+ * drawn with UVs inside band 0 through a matfx record of effect 5, and the matrix translation changes between draws: the frame sequence
+ * must show the band the translation picks, frame after frame, on the atomic path (characters, portal doors) and on the world sector
+ * path (arenas). The sequences are the temporal gates of the blink, portal and arena regressions. */
+#define SMOKE_MATFX_PLUGIN_ADDR 0x007646D0u
+#define SMOKE_MATFX_PLUGIN_OFFSET 0x30u
+
+static void put_u16(uint8_t *base, size_t off, uint16_t value)
+{
+    memcpy(base + off, &value, sizeof value);
+}
+
+/* The material shared by both drawables: the sheet texture (wrap, nearest) and a matfx record whose UV transform slot points at *matrix. */
+static uint8_t *matfx_material(P4RwRaster *raster, uint8_t *matrix)
+{
+    uint8_t *texture = p4t_galloc(0x60, 16);
+    uint8_t *material = p4t_galloc(0x40, 16);
+    uint8_t *record = p4t_galloc(0x90, 16);
+
+    memset(texture, 0, 0x60);
+    memset(material, 0, 0x40);
+    memset(record, 0, 0x90);
+    put_u32(texture, 0, P4_H2G(raster));
+    put_u32(texture, 80, 0x1101u); /* nearest, wrap U, wrap V */
+    put_u32(material, 0, P4_H2G(texture));
+    memset(material + 4, 0xff, 4);
+    put_f32(material, 12, 1.0f);
+    put_f32(material, 20, 1.0f);
+    put_u32(material, SMOKE_MATFX_PLUGIN_OFFSET, P4_H2G(record));
+    put_u32(record, 0, P4_H2G(matrix)); /* slot 0: baseTransform */
+    put_u32(record, 0x20, 5);           /* slot 0 type: UV transform */
+    put_u32(record, 0x80, 5);           /* effects: rpMATFXEFFECTUVTRANSFORM */
+    return material;
+}
+
+/* A quad over the whole frame at depth 2, UVs inside band 0 of the sheet. */
+static const float kMatfxXyz[12] = {-1.8f, -1.8f, 2.0f, 1.8f, -1.8f, 2.0f, 1.8f, 1.8f, 2.0f, -1.8f, 1.8f, 2.0f};
+static const float kMatfxUv[8] = {0.0f, 0.02f, 1.0f, 0.02f, 1.0f, 0.2f, 0.0f, 0.2f};
+static const uint16_t kMatfxTri[6] = {0, 1, 2, 0, 2, 3};
+
+static uint8_t *matfx_atomic(uint8_t *material)
+{
+    uint8_t *atomic = p4t_galloc(64, 16);
+    uint8_t *frame = p4t_galloc(256, 16);
+    uint8_t *geometry = p4t_galloc(128, 16);
+    uint8_t *morph = p4t_galloc(64, 16);
+    uint8_t *materials = p4t_galloc(4, 4);
+    uint8_t *tris = p4t_galloc(16, 4);
+    float *verts = p4t_galloc(sizeof kMatfxXyz, 4);
+    float *uv = p4t_galloc(sizeof kMatfxUv, 4);
+
+    memset(atomic, 0, 64);
+    memset(frame, 0, 256);
+    memset(geometry, 0, 128);
+    memset(morph, 0, 64);
+    memcpy(verts, kMatfxXyz, sizeof kMatfxXyz);
+    memcpy(uv, kMatfxUv, sizeof kMatfxUv);
+    put_f32(frame, 80, 1.0f); /* LTM right, up, at */
+    put_f32(frame, 100, 1.0f);
+    put_f32(frame, 120, 1.0f);
+    for (int t = 0; t < 2; t++) {
+        for (int k = 0; k < 3; k++) {
+            put_u16(tris, (size_t)t * 8 + (size_t)k * 2, kMatfxTri[t * 3 + k]);
+        }
+        put_u16(tris, (size_t)t * 8 + 6, 0);
+    }
+    put_u32(materials, 0, P4_H2G(material));
+    put_u32(morph, 20, P4_H2G(verts));
+    put_u32(geometry, 16, 2);
+    put_u32(geometry, 20, 4);
+    put_u32(geometry, 32, P4_H2G(materials));
+    put_u32(geometry, 36, 1);
+    put_u32(geometry, 44, P4_H2G(tris));
+    put_u32(geometry, 52, P4_H2G(uv));
+    put_u32(geometry, 92, P4_H2G(morph));
+    atomic[0] = 1;
+    put_u32(atomic, 4, P4_H2G(frame));
+    put_u32(atomic, 24, P4_H2G(geometry));
+    return atomic;
+}
+
+static uint8_t *matfx_sector(uint8_t *material)
+{
+    uint8_t *sector = p4t_galloc(144, 16);
+    uint8_t *mesh = p4t_galloc(28, 16);
+    float *verts = p4t_galloc(sizeof kMatfxXyz, 4);
+    float *uv = p4t_galloc(sizeof kMatfxUv, 4);
+    uint16_t *indices = p4t_galloc(sizeof kMatfxTri, 4);
+
+    memset(sector, 0, 144);
+    memset(mesh, 0, 28);
+    memcpy(verts, kMatfxXyz, sizeof kMatfxXyz);
+    memcpy(uv, kMatfxUv, sizeof kMatfxUv);
+    memcpy(indices, kMatfxTri, sizeof kMatfxTri);
+    sector[0] = 0xff;
+    put_u32(sector, 8, P4_H2G(verts));
+    put_u32(sector, 16, P4_H2G(uv));
+    put_u32(sector, 120, P4_H2G(mesh));
+    put_u16(sector, 130, 4);
+    put_u16(sector, 132, 2);
+    put_u16(mesh, 4, 1);
+    put_u32(mesh, 16, P4_H2G(indices));
+    put_u32(mesh, 20, 6);
+    put_u32(mesh, 24, P4_H2G(material));
+    return sector;
+}
+
+/* Draws the drawable once per translation and checks the centre pixel against the band the translation picks, then that the frames
+ * changed exactly where the bands do. */
+static void matfx_sequence(const char *name, uint8_t *camera, uint8_t *drawable, uint8_t *matrix, const float *offsets,
+                           const int *bands, int frames)
+{
+    static const uint8_t band[4][3] = {{255, 0, 0}, {0, 255, 0}, {0, 0, 255}, {255, 255, 0}};
+    uint8_t *rgba = malloc((size_t)FRAME * FRAME * 4u);
+    uint8_t previous[3] = {0, 0, 0};
+    int changes = 0;
+    int expected = 0;
+
+    if (!rgba) {
+        fail("matfx readback buffer");
+        return;
+    }
+    for (int f = 0; f < frames; f++) {
+        char what[96];
+        const uint8_t *px;
+
+        memset(matrix, 0, 64);
+        put_f32(matrix, 0, 1.0f);
+        put_f32(matrix, 20, 1.0f);
+        put_f32(matrix, 40, 1.0f);
+        put_f32(matrix, 52, offsets[f]); /* pos.y */
+        func_003f6a10(NULL, camera, 0);
+        p4gl_glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        p4gl_glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        expect_int(p4gl_atomic_draw(drawable), 1, name);
+        if (p4gl_readback_rgba(FRAME, FRAME, rgba) != 0) {
+            fail("matfx readback");
+            func_003f73d0(NULL, camera, 0);
+            continue;
+        }
+        snprintf(what, sizeof what, "%s frame %d (translation %.3f)", name, f, (double)offsets[f]);
+        expect_rgb(rgba, FRAME / 2u, FRAME / 2u, band[bands[f]][0], band[bands[f]][1], band[bands[f]][2], what);
+        px = rgba + ((size_t)(FRAME / 2u) * FRAME + FRAME / 2u) * 4u;
+        if (f > 0 && memcmp(previous, px, 3) != 0) {
+            changes++;
+        }
+        memcpy(previous, px, 3);
+        func_003f73d0(NULL, camera, 0);
+    }
+    free(rgba);
+    for (int f = 1; f < frames; f++) {
+        expected += bands[f] != bands[f - 1];
+    }
+    expect_int(changes, expected, name);
+    if (expected == 0) {
+        fail("matfx sequence never changes");
+    }
+}
+
+static void matfx_uv_frames(void)
+{
+    static const uint8_t band[4][3] = {{255, 0, 0}, {0, 255, 0}, {0, 0, 255}, {255, 255, 0}};
+    /* eyes: open, open, closed, closed, open, open (the face sheet steps a quarter of v per expression) */
+    static const float blinkOffsets[6] = {0.0f, 0.0f, 0.25f, 0.25f, 0.0f, 0.0f};
+    static const int blinkBands[6] = {0, 0, 1, 1, 0, 0};
+    /* portal doors and arena water: a scroll that starts at the game's large negative translation and runs past a repeat */
+    static const float scrollOffsets[10] = {-7.999f, -7.75f, -7.5f, -7.25f, -1.0f, -0.75f, -0.5f, 0.25f, 1.5f, 2.75f};
+    static const int scrollBands[10] = {0, 1, 2, 3, 0, 1, 2, 1, 2, 3};
+    uint8_t *camera = p4t_galloc(256, 16);
+    uint8_t *matrix = p4t_galloc(64, 16);
+    P4RwRaster *raster = p4t_galloc(sizeof *raster, 16);
+    P4TmxImage sheet = {4, 4, NULL};
+    uint8_t pixels[4 * 4 * 4];
+    uint32_t *plugin = (uint32_t *)P4_G2H(SMOKE_MATFX_PLUGIN_ADDR);
+    const uint32_t savedPlugin = *plugin;
+    uint8_t *material;
+
+    for (int y = 0; y < 4; y++) {
+        for (int x = 0; x < 4; x++) {
+            uint8_t *p = pixels + ((size_t)y * 4 + (size_t)x) * 4u;
+
+            p[0] = band[y][0];
+            p[1] = band[y][1];
+            p[2] = band[y][2];
+            p[3] = 255;
+        }
+    }
+    sheet.rgba = pixels;
+    if (!raster_upload(raster, &sheet)) {
+        return;
+    }
+    memset(camera, 0, 256);
+    put_f32(camera, 32, 1.0f);
+    put_f32(camera, 52, 1.0f);
+    put_f32(camera, 72, 1.0f);
+    put_f32(camera, 104, 1.0f);
+    put_f32(camera, 108, 1.0f);
+    put_f32(camera, 128, 0.5f);
+    put_f32(camera, 132, 50.0f);
+    *plugin = SMOKE_MATFX_PLUGIN_OFFSET;
+    material = matfx_material(raster, matrix);
+    func_003f6a10(NULL, camera, 0);
+    func_003f5070(P4GL_RS_TEXTURERASTER, 0);
+    func_003f5070(P4GL_RS_VERTEXALPHAENABLE, 0);
+    func_003f5070(P4GL_RS_ZTESTENABLE, 0);
+    func_003f5070(P4GL_RS_ZWRITEENABLE, 0);
+    func_003f5070(P4GL_RS_CULLMODE, 1);
+    func_003f73d0(NULL, camera, 0);
+    matfx_sequence("matfx blink (atomic)", camera, matfx_atomic(material), matrix, blinkOffsets, blinkBands, 6);
+    matfx_sequence("matfx portal scroll (atomic)", camera, matfx_atomic(material), matrix, scrollOffsets, scrollBands, 10);
+    matfx_sequence("matfx arena scroll (sector)", camera, matfx_sector(material), matrix, scrollOffsets, scrollBands, 10);
+    *plugin = savedPlugin;
+}
+
 /* Binds tex as TEXTURERASTER (nearest filter), draws a full-frame white-vertex Im2D quad with
  * UVs 0..1 into the readback FBO, reads it back, checks two texel-matched pixels and writes the
  * PNG. */
@@ -1528,6 +1787,7 @@ static void draw_frame(P4RwRaster *tex, const P4TmxImage *img, const char *png)
     im2d_fractional_frame();
     im2d_line_frame();
     atomic_date_frame();
+    matfx_uv_frames();
     free(rgba);
 }
 

@@ -78,6 +78,47 @@ static inline uint32_t p4pc_ee_add_bits(uint32_t a, uint32_t b)
 
 static inline uint32_t p4pc_ee_sub_bits(uint32_t a, uint32_t b) { return p4pc_ee_add_bits(a, b ^ 0x80000000u); }
 
+/* The same results from the host's own adder, for the EE float mode only (MXCSR/FPCR round toward zero, flush-to-zero, denormals-are-zero:
+ * p4pc_fpu_ee_mode, include/p4pc/hostmath.h; src/platform/ee_float.c switches it on once the thread is in that mode, P4PC_EE_ADD_HW=0 keeps p4pc_ee_add_bits).
+ *
+ * The hardware add under that mode already is the EE's add for every operand pair but one kind: it truncates the exact sum, and the EE adder truncates it
+ * after dropping the smaller operand's bits below one guard bit under the larger one's last place. Only a sum of opposite signs can see the difference (for
+ * the same sign the dropped bits lie below the truncation point of the result), and only when the exponents differ by two or more. So: order the operands
+ * by magnitude, clear the low (d - 1) mantissa bits of the smaller one (all of it when d - 1 >= 24, the sign stays), and let the hardware add. The cleared
+ * operand is representable, and the exact sum of the larger operand and it fits in 26 bits, so the hardware truncation of that sum is the EE's. Zero,
+ * denormal (read as zero under DAZ), overflow (RZ gives +-FLT_MAX), a flushed tiny result and the +0 of an exact cancellation come out of the hardware as the
+ * EE defines them; an exponent-255 operand makes the sum Inf or NaN, which is the one result this does not return: those operands (rare) take
+ * p4pc_ee_add_bits, which reads them as +-FLT_MAX. tests/ee_float_test.c compares this with p4pc_ee_add_bits on hundreds of millions of operand pairs
+ * (every exponent pair, denormals, 255, sparse and dense mantissas, the edge values). Not valid outside the EE mode: callers check the switch. */
+static inline uint32_t p4pc_ee_add_hw_bits(uint32_t a0, uint32_t b0)
+{
+    typedef float p4_ee_v4 __attribute__((vector_size(16)));
+    union {
+        uint32_t u;
+        float f;
+    } x, y;
+    const uint32_t swap = (a0 & 0x7FFFFFFFu) < (b0 & 0x7FFFFFFFu);
+    const uint32_t t = (a0 ^ b0) & (0u - swap);
+    const uint32_t hi = a0 ^ t;
+    const uint32_t lo = b0 ^ t;
+    const uint32_t d = ((hi >> 23) & 255u) - ((lo >> 23) & 255u);
+    const uint32_t s = d > 1u ? d - 1u : 0u;
+    const uint32_t cut = (lo >> (s & 31u)) << (s & 31u);
+
+    x.u = hi;
+    y.u = s >= 24u ? (lo & 0x80000000u) : cut;
+    {
+        /* a one-lane vector add: tools/ee_float_cc.py rewrites scalar float adds to p4pc_ee_add, which calls this */
+        const p4_ee_v4 sum = (p4_ee_v4){x.f, 0.0f, 0.0f, 0.0f} + (p4_ee_v4){y.f, 0.0f, 0.0f, 0.0f};
+
+        x.f = sum[0];
+    }
+    if (__builtin_expect((x.u & 0x7F800000u) == 0x7F800000u, 0)) {
+        return p4pc_ee_add_bits(a0, b0);
+    }
+    return x.u;
+}
+
 static inline float p4pc_ee_float_in(uint32_t x)
 {
     union {
@@ -342,6 +383,8 @@ static inline uint32_t p4pc_ee_sqrt_bits(uint32_t b)
 
 /* The same operations as functions (src/platform/ee_float.c) for port code that ports game code by hand; division and square root round to nearest (x87, not under
  * MXCSR control; the golden traces show the EE doing that), see tools/ee_float_cc.py. */
+/* src/crt.c, after the game thread entered the EE float mode: p4pc_ee_add/sub use the host adder (P4PC_EE_ADD_HW=0 keeps the integer one, =check compares). */
+void p4pc_ee_float_init(int mode);   /* 0 integer adder, 1 host adder, 2 host adder checked against the integer one */
 float p4pc_ee_add(float a, float b);
 float p4pc_ee_sub(float a, float b);
 float p4pc_ee_div(float a, float b);

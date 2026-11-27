@@ -1,0 +1,546 @@
+{
+  "proof_id": "L1-C3A-dungeon-preload-families-20261113",
+  "scope": "Four A-owned image objects/127PS2B: two task identities, complete effect preload archive/member family and dungeon BF source. Source PROVEN only; runtime pending-seam. No B or transferred structural-bank row is changed.",
+  "source_images": {
+    "steam": {
+      "build": 10836033,
+      "file": "P4G.exe",
+      "sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+      "data_section_bounds": {
+        "section": ".sdata",
+        "rva_start": "0x887000",
+        "size": 1674240,
+        "raw_start": 8936448
+      },
+      "code_witness_bounds": {
+        "section": ".shared",
+        "rva_start": "0x1000",
+        "size": 8934912,
+        "raw_start": 1536
+      },
+      "runtime_input": "Owned Steam install only; never require NSO or private research cache."
+    },
+    "switch": {
+      "version": "1.2",
+      "nso_sha256": "854c7a1e33de1619abf009fa7f32b8c012960d685c8bf1bf99a92a6a4d0bda1c",
+      "mapped_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+      "base": "0x7100000000",
+      "segments": [
+        {
+          "name": "text",
+          "file_offset": 257,
+          "mapped_offset": 0,
+          "decompressed_size": 5448752,
+          "compressed_size": 3719998,
+          "lz4_compressed": true
+        },
+        {
+          "name": "rodata",
+          "file_offset": 3720255,
+          "mapped_offset": 5451776,
+          "decompressed_size": 1870824,
+          "compressed_size": 990563,
+          "lz4_compressed": true
+        },
+        {
+          "name": "data",
+          "file_offset": 4710818,
+          "mapped_offset": 7323648,
+          "decompressed_size": 1606720,
+          "compressed_size": 439860,
+          "lz4_compressed": true
+        }
+      ],
+      "purpose": "Independent static structural witness, not runtime dependency."
+    }
+  },
+  "ps2_global_alias_proof": {
+    "source": "Original ELF.reginfo gp_value field at byte20",
+    "gp": "0x7690f0",
+    "reginfo_file_offset": 8620716,
+    "aliases": {
+      "D_00764334": "0x00764334",
+      "iGpffffb244": "0x00764334",
+      "iGpffffb218": "0x764308"
+    },
+    "purpose": "The begin/copy helpers and create/finish helpers use different decomp names for the same current step-task pointer. This equality is ABI metadata, not a module-label inference."
+  },
+  "formats_and_names": [
+    {
+      "name": "setup field resource",
+      "container": "P4G.exe",
+      "section": ".sdata",
+      "rva": "0x9303b0",
+      "offset": 693168,
+      "raw_offset": 9629616,
+      "size": 21,
+      "sha256": "38bd11718a94f127f52bc26be08d3d49553915f297fd81574f38c361c19a4a2a",
+      "mapping_proven": true,
+      "corroborating_nso_address": "0x71005d9229",
+      "nso_reader_envelopes": [
+        "0x71001be410"
+      ],
+      "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+      "source_build": 10836033
+    },
+    {
+      "name": "automatic dungeon ",
+      "container": "P4G.exe",
+      "section": ".sdata",
+      "rva": "0x9307c0",
+      "offset": 694208,
+      "raw_offset": 9630656,
+      "size": 19,
+      "sha256": "e0d38636dfd34d98adcb7eb8937b475528da395481351ff5881586ba051147c1",
+      "mapping_proven": true,
+      "corroborating_nso_address": "0x71005eeeef",
+      "nso_reader_envelopes": [
+        "0x71001cd1f0"
+      ],
+      "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+      "source_build": 10836033
+    },
+    {
+      "name": "field/fld_effect.bin",
+      "container": "P4G.exe",
+      "section": ".sdata",
+      "rva": "0x930808",
+      "offset": 694280,
+      "raw_offset": 9630728,
+      "size": 21,
+      "sha256": "af0c541c84868957ca842008c30773b3b7780932b90090a1214ceffca72bfd65",
+      "mapping_proven": true,
+      "corroborating_nso_address": "0x71005eef02",
+      "nso_reader_envelopes": [
+        "0x71001cd290"
+      ],
+      "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+      "source_build": 10836033
+    },
+    {
+      "name": "field/script/dungeon.bf",
+      "container": "P4G.exe",
+      "section": ".sdata",
+      "rva": "0x930870",
+      "offset": 694384,
+      "raw_offset": 9630832,
+      "size": 24,
+      "sha256": "b6d0cc0f8081bc0fdd2fa56105ab91e806b8ccc8e9d88d7fa42f16cb640047b3",
+      "mapping_proven": true,
+      "corroborating_nso_address": "0x7100609fee",
+      "nso_reader_envelopes": [
+        "0x71001cd290"
+      ],
+      "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+      "source_build": 10836033
+    },
+    {
+      "name": "field/ENCONT_N.EPL",
+      "container": "P4G.exe",
+      "section": ".sdata",
+      "rva": "0x9307f0",
+      "offset": 694256,
+      "raw_offset": 9630704,
+      "size": 19,
+      "sha256": "63a81d976b426db24f48f7b268b40eef7f4b8621df007bd2056b68f175f4b9fe",
+      "mapping_proven": true,
+      "corroborating_nso_address": "0x71005d6751",
+      "nso_reader_envelopes": [
+        "0x71001cf7b0"
+      ],
+      "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+      "source_build": 10836033
+    },
+    {
+      "name": "field/F_HAKEN.EPL",
+      "container": "P4G.exe",
+      "section": ".sdata",
+      "rva": "0x930838",
+      "offset": 694328,
+      "raw_offset": 9630776,
+      "size": 18,
+      "sha256": "685c8658d9cd8c2bea7e6c41bddb2696967cc00f3ec024c4b785de46f1290132",
+      "mapping_proven": true,
+      "corroborating_nso_address": "0x7100601b64",
+      "nso_reader_envelopes": [
+        "0x71001cf7b0"
+      ],
+      "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+      "source_build": 10836033
+    },
+    {
+      "name": "field/P_HAKEN.EPL",
+      "container": "P4G.exe",
+      "section": ".sdata",
+      "rva": "0x930820",
+      "offset": 694304,
+      "raw_offset": 9630752,
+      "size": 18,
+      "sha256": "50e0c37377a6a36bd4853d86608482723d5499a2cd5b985ee1958a655a75d801",
+      "mapping_proven": true,
+      "corroborating_nso_address": "0x7100611817",
+      "nso_reader_envelopes": [
+        "0x71001cf7b0"
+      ],
+      "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+      "source_build": 10836033
+    }
+  ],
+  "setup_task_correspondence": {
+    "ps2_constructor": "0x00156640",
+    "ps2_callback": "0x001561a0",
+    "golden_inlined_constructor": "0x71001be410",
+    "golden_callback": "0x71001bf210",
+    "proof": "Both clear a static setup work block (PS232B, Golden40B), register a priority15 child with setup/destroy callbacks, store field/room and request context, then open the primary field file. Both callbacks stage the per-field BF, counted HBN event entries and the independently paired scene loader144f60/2a0d60, then signal setup completion. Golden folds the constructor into the field-root state machine and changes stored context; work fields/behavior are not declared byte-compatible."
+  },
+  "automatic_dungeon_task": {
+    "ps2_constructor": "0x00159e90",
+    "golden_constructor": "0x71001cd1f0",
+    "golden_step": "0x71001cd290",
+    "proof": "Both allocate zeroed work (old72B, Golden128B), return0 on failure, create a priority15 child with dungeon update/destroy callbacks, store supplied stepIndex and entryValue, and clear game flag0xc25. The paired update family requests a missing shared dungeon BF, owns a complete size-based BF copy, starts effect preloads and dispatches the field-root constructor from a16B step-table entry. Expanded state/model setup is explicit, not a behavioral-equivalence claim.",
+    "flag_reset": {
+      "class": "PROVEN-code",
+      "flag": 3109,
+      "value": 0,
+      "source": "Golden1cd1f0 constructor"
+    }
+  },
+  "effect_preload_family": {
+    "ps2_literal_reader": "0x0015c210",
+    "ps2_related_consumers": [
+      "0x0015c280",
+      "0x0015c360"
+    ],
+    "golden_begin_inline": "0x71001cd290",
+    "golden_create": "0x71001cf7b0",
+    "golden_finish": "0x71001cf890",
+    "golden_task_constructor": "0x71001bd100",
+    "archive_source_index": 2,
+    "guards": "Only request the archive when the current step task exists, first preload task slot is null and shared archive handle is null. Request flag1. Missing archive returns ready1; a non-null archive is polled before creating children. Missing current step context follows the recorded assertion/error path, not an invented fallback.",
+    "ps2_members": [
+      {
+        "name": "field/ENCONT_N.EPL",
+        "third_argument": 30
+      },
+      {
+        "name": "field/F_HAKEN.EPL",
+        "third_argument": 20
+      }
+    ],
+    "complete_golden_members": [
+      {
+        "name": "field/ENCONT_N.EPL",
+        "source_index": 4,
+        "third_argument": 30,
+        "work_slot": "0x68"
+      },
+      {
+        "name": "field/F_HAKEN.EPL",
+        "source_index": 5,
+        "third_argument": 20,
+        "work_slot": "0x70"
+      },
+      {
+        "name": "field/P_HAKEN.EPL",
+        "source_index": 6,
+        "third_argument": 20,
+        "work_slot": "0x78"
+      }
+    ],
+    "constant_components": {
+      "class": "PROVEN-code",
+      "source": "Switch1cf7b0..1cf890",
+      "third_argument_values": [
+        30,
+        20,
+        20
+      ],
+      "meaning_limit": "Preserve the observed third constructor parameter; do not infer an unobserved asset/table ID from it."
+    },
+    "ownership": "Each child is parented to the current step task and receives the same shared archive handle. Constructor1bd100 stores that handle at work+8, marks borrowed/archive mode at+14, stores parameter3 at+10 and copies the FULL field/...EPL key at+f0. Do not strip field/ from these member names.",
+    "finish": "Poll all three non-null task slots using1bd530. While any is not ready return0. Once all are ready, release shared archive397cd0 once and clear its global handle; return1. The third P_HAKEN child is a positive Golden addition, not padding or an optional unknown.",
+    "scope_warning": "No three handles may be written into the old two-slot guest array. A Golden-aware provider must own the expanded set and preserve the borrowed archive and parsed effect lifetimes; archive/EPL payload decoding remains a runtime seam."
+  },
+  "dungeon_BF_family": {
+    "ps2_request": "0x0015c440",
+    "ps2_copy": "0x0015c4b0",
+    "golden_inline": "0x71001cd290",
+    "source_index": 3,
+    "proof": "Both request field/script/dungeon.bf with flag0 only when the current step context exists and its script buffer is absent. On readiness, allocate an owned buffer from full request size, copy all file bytes, store pointer+size together, release the request and clear its transient handle. Golden merges request/copy into update states1 and10; fields widen and offsets differ.",
+    "runtime_limit": "Source-key/ownership proof only, not proof that the Golden BF payload is byte-identical to PS2 or that native VM support is complete."
+  },
+  "code_witnesses": [
+    {
+      "platform": "Switch1.2",
+      "start": "0x71001be410",
+      "end": "0x71001bed90",
+      "size": 2432,
+      "sha256": "71a59557cc8bcb19bf07078f31ceaf9b2e24c05120d2acf38eab91e37a203403",
+      "runtime_policy": "Static structural/PROVEN-code evidence only; runtime uses sealed Steam source data plus authored constants, never the NSO/private cache."
+    },
+    {
+      "platform": "Switch1.2",
+      "start": "0x71001bf210",
+      "end": "0x71001bf830",
+      "size": 1568,
+      "sha256": "2a1f882bb3f353fde54657f7924b394a9ac76a5620ee76faeeef462170d6b0e6",
+      "runtime_policy": "Static structural/PROVEN-code evidence only; runtime uses sealed Steam source data plus authored constants, never the NSO/private cache."
+    },
+    {
+      "platform": "Switch1.2",
+      "start": "0x71001cd1f0",
+      "end": "0x71001cd290",
+      "size": 160,
+      "sha256": "ac94d94a88c949e9810da2898d135d92edd6d3397c63cbfc54a119d5e9a74b42",
+      "runtime_policy": "Static structural/PROVEN-code evidence only; runtime uses sealed Steam source data plus authored constants, never the NSO/private cache."
+    },
+    {
+      "platform": "Switch1.2",
+      "start": "0x71001cd290",
+      "end": "0x71001cd5b0",
+      "size": 800,
+      "sha256": "2cc3a751099de58cc38c7c2e77d64c98b85fd3956ec9619c86a381d225df0bd2",
+      "runtime_policy": "Static structural/PROVEN-code evidence only; runtime uses sealed Steam source data plus authored constants, never the NSO/private cache."
+    },
+    {
+      "platform": "Switch1.2",
+      "start": "0x71001cf7b0",
+      "end": "0x71001cf890",
+      "size": 224,
+      "sha256": "668470d713b8b7c0afb4910b9eb0c5e254164d133911ed9fcb12cfba632b23cf",
+      "runtime_policy": "Static structural/PROVEN-code evidence only; runtime uses sealed Steam source data plus authored constants, never the NSO/private cache."
+    },
+    {
+      "platform": "Switch1.2",
+      "start": "0x71001cf890",
+      "end": "0x71001cf920",
+      "size": 144,
+      "sha256": "fc9ae5ff3699b3d7ebf878296e24bf2a94292d846f928490b61769a263ee51f8",
+      "runtime_policy": "Static structural/PROVEN-code evidence only; runtime uses sealed Steam source data plus authored constants, never the NSO/private cache."
+    },
+    {
+      "platform": "Switch1.2",
+      "start": "0x71001bd100",
+      "end": "0x71001bd3e0",
+      "size": 736,
+      "sha256": "e1d1b437e4d86e1deda84aacbc2415bc37381060e86f4735b24818d73c56bb8b",
+      "runtime_policy": "Static structural/PROVEN-code evidence only; runtime uses sealed Steam source data plus authored constants, never the NSO/private cache."
+    }
+  ],
+  "admissions": [
+    {
+      "address": "0x005effe0",
+      "ps2_size": 31,
+      "ps2_live_size": 21,
+      "role": "task-identity-prefix",
+      "ps2_reader": "0x00156640",
+      "ps2_symbol": "FldLoadTaskCreate",
+      "all_ps2_table_users": [
+        "0x00156640"
+      ],
+      "related_ps2_required_roles": [],
+      "golden": {
+        "name": "setup field resource",
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x9303b0",
+        "offset": 693168,
+        "raw_offset": 9629616,
+        "size": 21,
+        "sha256": "38bd11718a94f127f52bc26be08d3d49553915f297fd81574f38c361c19a4a2a",
+        "mapping_proven": true,
+        "corroborating_nso_address": "0x71005d9229",
+        "nso_reader_envelopes": [
+          "0x71001be410"
+        ],
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "source_group": "L1-C3A-dungeon-preload-families-20261113"
+      },
+      "structural_correspondence": "Both clear a static setup work block (PS232B, Golden40B), register a priority15 child with setup/destroy callbacks, store field/room and request context, then open the primary field file. Both callbacks stage the per-field BF, counted HBN event entries and the independently paired scene loader144f60/2a0d60, then signal setup completion. Golden folds the constructor into the field-root state machine and changes stored context; work fields/behavior are not declared byte-compatible.",
+      "installation": {
+        "kind": "prefix-copy",
+        "live_size": 21,
+        "retain_ps2_tail": 10,
+        "requirement": "Bind FldLoadTaskCreate 0x00156640, every translated/inlined/native literal copy, and the related lifecycle roles recorded in this proof to the complete qualified Steam source. Preserve task identity/priority/callback relationships, current-step context, request readiness, full owned BF copies and shared archive lifetimes. No Golden host pointers/work sizes may be copied into guest structs and no payload/VM/renderer equivalence is implied. Install exactly21 NUL-terminated Golden prefix bytes and retain10PS2 tail bytes."
+      }
+    },
+    {
+      "address": "0x005f0650",
+      "ps2_size": 32,
+      "ps2_live_size": 19,
+      "role": "task-identity-prefix",
+      "ps2_reader": "0x00159e90",
+      "ps2_symbol": "FldStepTaskCreate",
+      "all_ps2_table_users": [
+        "0x00159e90"
+      ],
+      "related_ps2_required_roles": [],
+      "golden": {
+        "name": "automatic dungeon ",
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x9307c0",
+        "offset": 694208,
+        "raw_offset": 9630656,
+        "size": 19,
+        "sha256": "e0d38636dfd34d98adcb7eb8937b475528da395481351ff5881586ba051147c1",
+        "mapping_proven": true,
+        "corroborating_nso_address": "0x71005eeeef",
+        "nso_reader_envelopes": [
+          "0x71001cd1f0"
+        ],
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "source_group": "L1-C3A-dungeon-preload-families-20261113"
+      },
+      "structural_correspondence": "Both allocate zeroed work (old72B, Golden128B), return0 on failure, create a priority15 child with dungeon update/destroy callbacks, store supplied stepIndex and entryValue, and clear game flag0xc25. The paired update family requests a missing shared dungeon BF, owns a complete size-based BF copy, starts effect preloads and dispatches the field-root constructor from a16B step-table entry. Expanded state/model setup is explicit, not a behavioral-equivalence claim.",
+      "installation": {
+        "kind": "prefix-copy",
+        "live_size": 19,
+        "retain_ps2_tail": 13,
+        "requirement": "Bind FldStepTaskCreate 0x00159e90, every translated/inlined/native literal copy, and the related lifecycle roles recorded in this proof to the complete qualified Steam source. Preserve task identity/priority/callback relationships, current-step context, request readiness, full owned BF copies and shared archive lifetimes. No Golden host pointers/work sizes may be copied into guest structs and no payload/VM/renderer equivalence is implied. Install exactly19 NUL-terminated Golden prefix bytes and retain13PS2 tail bytes."
+      }
+    },
+    {
+      "address": "0x005f06c0",
+      "ps2_size": 32,
+      "ps2_live_size": 21,
+      "role": "semantic-effect-preload-family",
+      "ps2_reader": "0x0015c210",
+      "ps2_symbol": "FldStepPreloadBegin",
+      "all_ps2_table_users": [
+        "0x0015c210"
+      ],
+      "related_ps2_required_roles": [
+        "0x0015c280",
+        "0x0015c360"
+      ],
+      "golden": {
+        "container": "Steam-resource-name-family",
+        "source_build": 10836033,
+        "source_group": "L1-C3A-dungeon-preload-families-20261113",
+        "mapping_proven": true,
+        "source_count": 4,
+        "components": [
+          {
+            "name": "field/fld_effect.bin",
+            "container": "P4G.exe",
+            "section": ".sdata",
+            "rva": "0x930808",
+            "offset": 694280,
+            "raw_offset": 9630728,
+            "size": 21,
+            "sha256": "af0c541c84868957ca842008c30773b3b7780932b90090a1214ceffca72bfd65",
+            "mapping_proven": true,
+            "corroborating_nso_address": "0x71005eef02",
+            "nso_reader_envelopes": [
+              "0x71001cd290"
+            ],
+            "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+            "source_build": 10836033
+          },
+          {
+            "name": "field/ENCONT_N.EPL",
+            "container": "P4G.exe",
+            "section": ".sdata",
+            "rva": "0x9307f0",
+            "offset": 694256,
+            "raw_offset": 9630704,
+            "size": 19,
+            "sha256": "63a81d976b426db24f48f7b268b40eef7f4b8621df007bd2056b68f175f4b9fe",
+            "mapping_proven": true,
+            "corroborating_nso_address": "0x71005d6751",
+            "nso_reader_envelopes": [
+              "0x71001cf7b0"
+            ],
+            "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+            "source_build": 10836033
+          },
+          {
+            "name": "field/F_HAKEN.EPL",
+            "container": "P4G.exe",
+            "section": ".sdata",
+            "rva": "0x930838",
+            "offset": 694328,
+            "raw_offset": 9630776,
+            "size": 18,
+            "sha256": "685c8658d9cd8c2bea7e6c41bddb2696967cc00f3ec024c4b785de46f1290132",
+            "mapping_proven": true,
+            "corroborating_nso_address": "0x7100601b64",
+            "nso_reader_envelopes": [
+              "0x71001cf7b0"
+            ],
+            "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+            "source_build": 10836033
+          },
+          {
+            "name": "field/P_HAKEN.EPL",
+            "container": "P4G.exe",
+            "section": ".sdata",
+            "rva": "0x930820",
+            "offset": 694304,
+            "raw_offset": 9630752,
+            "size": 18,
+            "sha256": "50e0c37377a6a36bd4853d86608482723d5499a2cd5b985ee1958a655a75d801",
+            "mapping_proven": true,
+            "corroborating_nso_address": "0x7100611817",
+            "nso_reader_envelopes": [
+              "0x71001cf7b0"
+            ],
+            "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+            "source_build": 10836033
+          }
+        ],
+        "runtime_input": "Sealed Steam archive/member name spans plus authored PROVEN-code [30,20,20] parameters; no NSO dependency."
+      },
+      "structural_correspondence": "The current-step pointer aliases are ABI-proved. Both preload families guard the shared archive/current task, resolve the same first two named EPL children with parameters30/20 and release only after their parsed tasks are ready. Golden positively adds the third named P_HAKEN child/parameter20; all three creation/wait/release users are resolved, rather than retaining the PS2 two-slot lifecycle.",
+      "installation": {
+        "kind": "semantic-resource-key-family",
+        "retain_ps2_partition": true,
+        "ps2_live_size": 21,
+        "retain_ps2_tail": 11,
+        "requirement": "Bind FldStepPreloadBegin 0x0015c210, every translated/inlined/native literal copy, and the related lifecycle roles recorded in this proof to the complete qualified Steam source. Preserve task identity/priority/callback relationships, current-step context, request readiness, full owned BF copies and shared archive lifetimes. No Golden host pointers/work sizes may be copied into guest structs and no payload/VM/renderer equivalence is implied. Bind the COMPLETE three-member effect_preload_family, including15c280 creation and15c360 finish/native copies, not only this archive filename. Preserve full field/...EPL keys and explicit provider-owned three-slot backing; never overflow the guest two-slot array, snapshot live handles, invent retries/fallbacks, or release the borrowed archive before all three children parse. Retain the old guest partition and consume through the Golden semantic route."
+      }
+    },
+    {
+      "address": "0x005f0720",
+      "ps2_size": 32,
+      "ps2_live_size": 24,
+      "role": "BF-source-prefix",
+      "ps2_reader": "0x0015c440",
+      "ps2_symbol": "FldStepOpenDataFile",
+      "all_ps2_table_users": [
+        "0x0015c440"
+      ],
+      "related_ps2_required_roles": [
+        "0x0015c4b0"
+      ],
+      "golden": {
+        "name": "field/script/dungeon.bf",
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x930870",
+        "offset": 694384,
+        "raw_offset": 9630832,
+        "size": 24,
+        "sha256": "b6d0cc0f8081bc0fdd2fa56105ab91e806b8ccc8e9d88d7fa42f16cb640047b3",
+        "mapping_proven": true,
+        "corroborating_nso_address": "0x7100609fee",
+        "nso_reader_envelopes": [
+          "0x71001cd290"
+        ],
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "source_group": "L1-C3A-dungeon-preload-families-20261113"
+      },
+      "structural_correspondence": "Both request field/script/dungeon.bf with flag0 only when the current step context exists and its script buffer is absent. On readiness, allocate an owned buffer from full request size, copy all file bytes, store pointer+size together, release the request and clear its transient handle. Golden merges request/copy into update states1 and10; fields widen and offsets differ.",
+      "installation": {
+        "kind": "prefix-copy",
+        "live_size": 24,
+        "retain_ps2_tail": 8,
+        "requirement": "Bind FldStepOpenDataFile 0x0015c440, every translated/inlined/native literal copy, and the related lifecycle roles recorded in this proof to the complete qualified Steam source. Preserve task identity/priority/callback relationships, current-step context, request readiness, full owned BF copies and shared archive lifetimes. No Golden host pointers/work sizes may be copied into guest structs and no payload/VM/renderer equivalence is implied. Install exactly24 NUL-terminated Golden prefix bytes and retain8PS2 tail bytes."
+      }
+    }
+  ]
+}

@@ -1,0 +1,422 @@
+{
+  "proof_id": "L1-C3-fishing-BF-shop-20261113",
+  "scope": "Six owned cohort-3 rows; structural SOURCE proof only. No runtime L1 closure.",
+  "source_images": {
+    "steam": {
+      "build": 10836033,
+      "file": "P4G.exe",
+      "sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+      "data_section_bounds": {
+        "section": ".sdata",
+        "rva_start": "0x887000",
+        "size": 1674240,
+        "raw_start": 8936448
+      },
+      "code_witness_bounds": {
+        "section": ".shared",
+        "rva_start": "0x1000",
+        "size": 8934912,
+        "raw_start": 1536
+      },
+      "runtime_input": "Owned Steam install only; never require NSO or private research cache."
+    },
+    "switch": {
+      "version": "1.2",
+      "nso_sha256": "854c7a1e33de1619abf009fa7f32b8c012960d685c8bf1bf99a92a6a4d0bda1c",
+      "mapped_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+      "base": "0x7100000000",
+      "segments": [
+        {
+          "name": "text",
+          "file_offset": 257,
+          "mapped_offset": 0,
+          "decompressed_size": 5448752,
+          "compressed_size": 3719998,
+          "lz4_compressed": true
+        },
+        {
+          "name": "rodata",
+          "file_offset": 3720255,
+          "mapped_offset": 5451776,
+          "decompressed_size": 1870824,
+          "compressed_size": 990563,
+          "lz4_compressed": true
+        },
+        {
+          "name": "data",
+          "file_offset": 4710818,
+          "mapped_offset": 7323648,
+          "decompressed_size": 1606720,
+          "compressed_size": 439860,
+          "lz4_compressed": true
+        }
+      ],
+      "purpose": "Independent static structural witness, not runtime dependency."
+    }
+  },
+  "admissions": [
+    {
+      "address": "0x00635a40",
+      "ps2_size": 32,
+      "role": "fishing archive loader",
+      "ps2_reader": "0x0024b870",
+      "ps2_symbol": "cmmScriptLoadStep",
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "offset": 614096,
+        "rva": "0x91ced0",
+        "raw_offset": 9550544,
+        "size": 18,
+        "sha256": "1ef5bdda836d203036495a17206154a4711150e2a3c9b2abf00f70909c5f8d69",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true,
+        "structural_reader_platform": "Switch 1.2 NSO",
+        "structural_reader": "0x710012ee20",
+        "corroborating_nso_address": "0x710060e781"
+      },
+      "installation": {
+        "kind": "prefix-copy",
+        "live_size": 18,
+        "retain_ps2_tail": 14,
+        "requirement": "cmmScriptLoadStep (0x0024b870) and translated/inlined/native copies must read the installed NUL-terminated Golden prefix for this role; retain the exact remaining PS2 partition tail. No copy of neighbouring string or alignment bytes."
+      },
+      "structural_correspondence": "PS2 loader obtains task work, sets state2, acquires fishing archive, checks loaded and advances state. Golden loader uses state at+4/archive descriptor at+8; bit0 signals loaded and states3/4 extract named sprite members. Steam ordinary loader has the same state/descriptor/readiness graph. This identifies the archive role, not every fishing mechanic.",
+      "steam_reader": "0x1c62a0",
+      "all_ps2_table_users": [
+        "0x0024b870"
+      ]
+    },
+    {
+      "address": "0x0063e3f0",
+      "ps2_size": 48,
+      "role": "null script-work input diagnostic",
+      "ps2_reader": "0x0029d2f0",
+      "ps2_symbol": "scrCreateWork",
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "offset": 789608,
+        "rva": "0x947c68",
+        "raw_offset": 9726056,
+        "size": 37,
+        "sha256": "22dcb0c38fd04d907e4240a5a142fe11cc42b588ff51bce0d1b02e84d7b2df4e",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true,
+        "structural_reader_platform": "Switch 1.2 NSO",
+        "structural_reader": "0x71002e0370",
+        "corroborating_nso_address": "0x710061a0fb"
+      },
+      "installation": {
+        "kind": "prefix-copy",
+        "live_size": 37,
+        "retain_ps2_tail": 11,
+        "requirement": "scrCreateWork (0x0029d2f0) and translated/inlined/native copies must read the installed NUL-terminated Golden prefix for this role; retain the exact remaining PS2 partition tail. No copy of neighbouring string or alignment bytes."
+      },
+      "structural_correspondence": "PS2 and Golden require four non-null inputs: header, entries, procedure, instructions; invalid inputs pass this diagnostic as assertion argument0 and return null. Golden caller is independently identified scrCreateProcedureWork 0x71002dff50, with FLW0 magic, five entry types, header-relative offsets and stride16. The four null guards, eight-argument ABI and stride32 procedure copy establish correspondence; string similarity alone is not used.",
+      "steam_reader": null,
+      "all_ps2_table_users": [
+        "0x0029d2f0"
+      ]
+    },
+    {
+      "address": "0x0063e4d0",
+      "ps2_size": 32,
+      "role": "invalid FLW0 header diagnostic",
+      "ps2_reader": "0x0029d660",
+      "ps2_symbol": "scrCreateProcedureWork",
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "offset": 789784,
+        "rva": "0x947d18",
+        "raw_offset": 9726232,
+        "size": 23,
+        "sha256": "9312d420dc55c8edb248bb3e0c02636605914320ebb09d99b0984503819531e4",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true,
+        "structural_reader_platform": "Switch 1.2 NSO",
+        "structural_reader": "0x71002dff50",
+        "corroborating_nso_address": "0x710061a0e4"
+      },
+      "installation": {
+        "kind": "prefix-copy",
+        "live_size": 23,
+        "retain_ps2_tail": 9,
+        "requirement": "scrCreateProcedureWork (0x0029d660) and translated/inlined/native copies must read the installed NUL-terminated Golden prefix for this role; retain the exact remaining PS2 partition tail. No copy of neighbouring string or alignment bytes."
+      },
+      "structural_correspondence": "Both consumers compare header magic F/L/W/0 and fail with this diagnostic as assertion argument0, then return null. Golden four bytes are header+8..11; the PS2 five-content-kind/stride16/header-relative-offset walk is the independently established function identity.",
+      "steam_reader": null,
+      "all_ps2_table_users": [
+        "0x0029d660"
+      ]
+    },
+    {
+      "address": "0x0063e618",
+      "ps2_size": 24,
+      "role": "script child-task registration name",
+      "ps2_reader": "0x0029e8d0",
+      "ps2_symbol": "scrCreateScriptChildTask",
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "offset": 789880,
+        "rva": "0x947d78",
+        "raw_offset": 9726328,
+        "size": 13,
+        "sha256": "11a2d60070fb724521971d28f90780540e19f1ff217e857e96a0c0ce61933245",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true,
+        "structural_reader_platform": "Switch 1.2 NSO",
+        "structural_reader": "0x71002e0be0",
+        "corroborating_nso_address": "0x71006281f4"
+      },
+      "installation": {
+        "kind": "prefix-copy",
+        "live_size": 13,
+        "retain_ps2_tail": 11,
+        "requirement": "scrCreateScriptChildTask (0x0029e8d0) and translated/inlined/native copies must read the installed NUL-terminated Golden prefix for this role; retain the exact remaining PS2 partition tail. No copy of neighbouring string or alignment bytes."
+      },
+      "structural_correspondence": "PS2 allocates one 0x228 work and registers ScriptViewer at priority0xc9 with script-start and destroy callbacks. Golden allocates one 0x240 work, registers the same priority and callbacks, then links optional parent. Steam constructor0x468e40 shares alloc0x240, priority0xc9, callbacks468c90/468de0 and optional parent attachment. Steam947d78 is the structurally read occurrence, NOT the unreferenced same-text hit93f183.",
+      "steam_reader": "0x468e40",
+      "all_ps2_table_users": [
+        "0x0029e8d0"
+      ]
+    },
+    {
+      "address": "0x00635bb8",
+      "ps2_size": 24,
+      "role": "complete indexed fishing script return table",
+      "ps2_reader": "0x00250870",
+      "ps2_symbol": "cmmScriptReadIndexedValue",
+      "all_ps2_table_users": [
+        "0x00250870"
+      ],
+      "golden": {
+        "container": "composite-Steam-data-and-PROVEN-code",
+        "source_build": 10836033,
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true,
+        "size": 22,
+        "sha256": "5232d18ecec4dff7a4f70ce1db05b6f27824bfa53ba7e52a97c0de49ca9f5a0b",
+        "components": [
+          {
+            "kind": "data",
+            "container": "P4G.exe",
+            "section": ".sdata",
+            "rva": "0x9677c0",
+            "offset": 919488,
+            "raw_offset": 9855936,
+            "size": 16,
+            "sha256": "25cb33b6d11b36eb7f10056bf09ace7670eba947b291be7f50e833d614dea8e8",
+            "output_offset": 0
+          },
+          {
+            "kind": "authored-constants",
+            "class": "PROVEN-code",
+            "output_offset": 16,
+            "element_type": "s16-le",
+            "values": [
+              1007,
+              1014,
+              1006
+            ],
+            "count": 3,
+            "steam_instruction_witnesses": [
+              {
+                "rva": "0x1cec1c",
+                "raw_offset": 1892892,
+                "instruction_size": 8,
+                "instruction_sha256": "1e8976e5396ae1e471e9f78cdf797ceb79a0517f86b0e7a760b3055cf6579b61",
+                "constant_proof_class": "PROVEN-code"
+              },
+              {
+                "rva": "0x1cec2f",
+                "raw_offset": 1892911,
+                "instruction_size": 5,
+                "instruction_sha256": "b8a2f8d54b9765c83d654142328696d68634b0c2dc0c3bf00bb9d97e38627c0a",
+                "constant_proof_class": "PROVEN-code"
+              }
+            ]
+          }
+        ],
+        "corroborating_nso_address": "0x7100632574",
+        "nso_mapped_offset": 6497652,
+        "nso_span_size": 22,
+        "nso_span_sha256": "5232d18ecec4dff7a4f70ce1db05b6f27824bfa53ba7e52a97c0de49ca9f5a0b",
+        "runtime_input": "Steam-only first16B plus authored PROVEN-code constants; NSO not required."
+      },
+      "installation": {
+        "kind": "semantic-expanded-indexed-table",
+        "ps2_live_size": 12,
+        "ps2_alignment_tail": 12,
+        "ps2_rows": 6,
+        "golden_rows": 11,
+        "stride": 2,
+        "requirement": "Replace the Golden-only semantic getter, not the 24B guest image. Read the complete eleven signed halfwords with index0..10. Steam unsigned index>=11 returns -1; do not index beyond table or invent clamp. Re-read the same fishing data work override s32 at Golden+a8: when !=-1 it replaces the result without halfword truncation. Return the full sign-extended s32 through script return. Keep PS2 six-entry path and twelve alignment bytes unchanged. Implement an explicit Golden state producer/override transport seam rather than inventing PS2 work offsets; cover direct, translated, inlined and native copies."
+      },
+      "structural_correspondence": "PS2 copies six s16 values then indexes by fishing task choice and returns via script register. Golden reader12e840 selects the named cmmFishingDATA work, signed-halfword indexes eleven values, then applies optional s32 override. Steam1cebf0 constructs exactly the same complete22B table: first8 from data9677c0, two from dword immediate03f603ef, last from immediate03ee, then uses choice+80, unsigned bound11 and override+a8. This matches source role and changed layout, not byte-window voting. The previous 20/24-byte variant is not a full Golden span.",
+      "steam_reader": "0x1cebf0",
+      "switch_reader": "0x710012e840",
+      "owner_ruling": "Main 2026-11-13: PROVEN source may compose Steam data with authored PROVEN-code constants corroborated independently by NSO. Instruction bytes are static proof evidence, never runtime inputs."
+    },
+    {
+      "address": "0x0063f550",
+      "ps2_size": 16,
+      "role": "shop/facility persistent help message archive path",
+      "ps2_reader": "0x002bdf20",
+      "ps2_symbol": "fclShopLoadMessageResources",
+      "all_ps2_table_users": [
+        "0x002bdf20"
+      ],
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "offset": 683560,
+        "rva": "0x92de28",
+        "raw_offset": 9620008,
+        "size": 16,
+        "sha256": "67481579650a2c63a9dd096fe302f061e4af763a2cd194645abbeb02280dd45a",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true,
+        "structural_reader_platform": "Switch 1.2 NSO",
+        "structural_reader": "0x7100174430",
+        "corroborating_nso_address": "0x71006141a0"
+      },
+      "installation": {
+        "kind": "prefix-copy",
+        "live_size": 16,
+        "retain_ps2_tail": 0,
+        "requirement": "Golden-only help archive resolution in fclShopLoadMessageResources and native/inlined copies must request init/datMsg.pak, not help/datMsg.pak. Resource adapter must resolve members by Golden bank names, not interpret the old PS2 path prefix as an archive member. Cover the full nine original bank roles and expanded Golden registration graph; changing the path alone does not certify message parsing, namespace routing, or a bound runtime. Preserve PS2-mode routing."
+      },
+      "structural_correspondence": "PS2 loads help/datMsg.pak synchronously and registers exactly nine named help BMD resources at indices0..8. Golden facility loader174430 opens init/datMsg.pak alongside fclTable.bin, waits for readiness, then registers the same nine named help members in the same order through18b250. Four additional bank members occupy9..12. This loader/named-resource/registration graph closes the previous generic-stateful-task-only blocker. Steam248810 loads the identical qualified path; no arbitrary archive offset or numeric pointer mapping."
+    }
+  ],
+  "bank_family_research": {
+    "status": "Historical batch1 research; l1-cohort-3-field-bank-proof.json supersedes the bank0 initializer, selector-extent and contextual-bank identity findings",
+    "ps2_handle_object": {
+      "base": "0x0063f2b0",
+      "size": 52,
+      "rows": 13,
+      "type": "s32 runtime message handles",
+      "initial_value": -1,
+      "evidence": "Thirteen -1 words, followed by zero alignment, before6-entry category selector. Install2bc010 stores table[index], release2bc060 restores -1. These are mutable runtime state, NOT authored message IDs."
+    },
+    "ps2_selectors": [
+      {
+        "base": "0x0063f2f0",
+        "rows": 6,
+        "stride": 4,
+        "live_bytes": 24,
+        "tail_bytes": 8,
+        "role": "category -> persistent handle index",
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          5,
+          6
+        ]
+      },
+      {
+        "base": "0x0063f310",
+        "rows": 9,
+        "stride": 4,
+        "live_bytes": 36,
+        "tail_bytes": 12,
+        "role": "entry kind -> persistent handle index",
+        "values": [
+          0,
+          0,
+          0,
+          7,
+          9,
+          10,
+          8,
+          11,
+          12
+        ]
+      }
+    ],
+    "ps2_users": [
+      "0x002bc010 install",
+      "0x002bc060 release",
+      "0x002bc0e0 item/pair dispatch",
+      "0x002bc4b0 category draw",
+      "0x002bc7a0 direct-table draw",
+      "0x002bc7f0 queued draw",
+      "0x002bc860 whole-table slot6 alias"
+    ],
+    "golden_handle_object": {
+      "base": "0x7100764b84",
+      "rows": 15,
+      "stride": 4,
+      "size": 60,
+      "initial_value": -1,
+      "install": "0x710018b250",
+      "release": "0x710018b280",
+      "generic_table_reader": "0x710018b2c0",
+      "item_category_reader": "0x710018b390",
+      "direct_table_reader": "0x710018b510",
+      "entry_kind_selector": {
+        "base": "0x7100633830",
+        "live_words": 7,
+        "logical_extent_status": "PROVEN in the follow-on field-bank proof: positive kind6 read and adjacent independently consumed typed jump table bound the live object to seven words",
+        "stride": 4,
+        "values": [
+          0,
+          0,
+          0,
+          6,
+          13,
+          8,
+          14
+        ]
+      },
+      "category_bank_indices": [
+        0,
+        1,
+        2,
+        4,
+        5,
+        7,
+        9,
+        10,
+        11,
+        12
+      ]
+    },
+    "golden_install_callers": [
+      "0x71000de070 installs14 from11cf10",
+      "0x7100154bf0 installs13",
+      "0x7100174430 installs0..12",
+      "0x7100180cf0 installs13"
+    ],
+    "golden_release_callers": [
+      "0x71000e1a00",
+      "0x7100155d40",
+      "0x7100183000"
+    ],
+    "bank_members_0_through_12": [
+      "datWeaponHelp.bmd",
+      "datArmorHelp.bmd",
+      "datAccessoryHelp.bmd",
+      "datAddEffectHelp.bmd",
+      "datItemHelp.bmd",
+      "datEventItemHelp.bmd",
+      "datSkillHelp.bmd",
+      "datMaterialHelp.bmd",
+      "datQuestHelp.bmd",
+      "datSkillCardHelp.bmd",
+      "datDressHelp.bmd",
+      "datItem2Help.bmd",
+      "datWeapon2Help.bmd"
+    ],
+    "constructor_layout": {
+      "weapon": "0x71001b15d0 allocates0x170, descriptor7100764fe0, passes descriptor+28 as argument1 and descriptor as argument2 to1987f0",
+      "shop_base": "0x71001987f0 allocates0x8c0 plus descriptor-count-derived regions; counts u16 at+18,+1a,+1c; descriptor stored at work+860; pointer at work+868 points to first handle region work+8a0, followed by count-derived regions through pointers+870/+888/+890. Worker prototype omits third constructor argument; ordinary instructions1b1634..1654 prove x2 descriptor."
+    },
+    "blocker": "The follow-on proof qualifies bank0 initialization/reset and identifies both contextual bank13 producers plus bank14's member9 identity. It also proves the seven-word Golden selector extent. Remaining selector bindings must distinguish PS2 Flags from Kind, adapt changed generic-kind ordinals and preserve guest handle ownership/lifetime. No raw host-handle copying or selector-prefix copying is authorized; other cohort aliases retain their own decisions."
+  }
+}

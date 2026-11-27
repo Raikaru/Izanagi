@@ -3,6 +3,8 @@ get_target_property(_p4_table_boot_sources game_table_xml_test SOURCES)
 list(REMOVE_ITEM _p4_table_boot_sources game_table_xml_test.c
   "${CMAKE_CURRENT_SOURCE_DIR}/game_table_xml_test.c")
 list(APPEND _p4_table_boot_sources game_table_boot_test.c
+  golden_mode_image_ps2_stub.c
+  golden_ai_inactive_test.c
   "${CMAKE_SOURCE_DIR}/src/platform/mods/game_table_admission.c"
   "${CMAKE_SOURCE_DIR}/src/platform/mods/game_table_manifest.c"
   "${CMAKE_SOURCE_DIR}/src/platform/mods/game_table_boot.c"

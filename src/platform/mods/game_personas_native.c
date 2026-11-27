@@ -3,6 +3,8 @@
  * loads, and the `persona` completion participant relocates the six ID-indexed
  * banks at 0x0010d480. Without staging every query answers the retail domain. */
 #include "p4pc/game_personas.h"
+#include "p4pc/game_mode.h"
+#include "p4pc/golden_names_native.h"
 #include "p4pc/game_personas_native.h"
 #include "p4pc/game_tables_native.h"
 #include "p4pc/game_table_extents.h"
@@ -21,6 +23,11 @@ static const uint32_t strides[PERSONA_BANKS] = {
     P4_PERSONA_METADATA_SIZE, P4_PERSONA_GROWTH_SIZE, P4_PERSONA_MODEL_SIZE, P4_PERSONA_CANDIDATES_SIZE, P4_PERSONA_NAME_SIZE,
     P4_PERSONA_AFFINITY_SIZE
 };
+static uint32_t persona_stride(unsigned bank)
+{
+    return bank == 4 && p4_game_mode() == P4_GAME_MODE_GOLDEN ?
+        P4_GOLDEN_PERSONA_NAME_SIZE : strides[bank];
+}
 typedef struct PersonaStage {
     P4GamePersonas *personas;
     uint32_t prepared;
@@ -141,7 +148,7 @@ uint32_t p4_game_personas_packed_scan(const P4GameTablePackedBlock *blocks, unsi
         for (unsigned bank = 0; bank < PERSONA_BANKS; ++bank) {
             if (blocks[block].slot != slots[bank]) continue;
             /* The sealed source spans are exactly the retail rows. */
-            if (blocks[block].size != P4_PERSONA_RETAIL_ROWS * strides[bank]) refuse(P4_TABLE_INVALID);
+            if (blocks[block].size != P4_PERSONA_RETAIL_ROWS * persona_stride(bank)) refuse(P4_TABLE_INVALID);
             mask |= 1u << bank;
         }
     return mask;
@@ -161,7 +168,7 @@ static int prepare_complete(void *user)
     }
     uint32_t bases[PERSONA_BANKS], rows[PERSONA_BANKS];
     for (unsigned bank = 0; bank < PERSONA_BANKS; ++bank)
-        if (!p4_game_table_extent_rows(slots[bank], strides[bank], &bases[bank], &rows[bank])) return P4_TABLE_INVALID;
+        if (!p4_game_table_extent_rows(slots[bank], persona_stride(bank), &bases[bank], &rows[bank])) return P4_TABLE_INVALID;
     /* Semantic/source/name checks were completed by the early CPU seal. Only
      * copied-byte verification, allocation and binding remain. */
     int result = p4_game_personas_materialize(staged.personas,
@@ -169,7 +176,7 @@ static int prepare_complete(void *user)
         P4_GPTR(const uint8_t, bases[1]), (size_t)rows[1] * strides[1],
         P4_GPTR(const uint8_t, bases[2]), (size_t)rows[2] * strides[2],
         P4_GPTR(const uint8_t, bases[3]), (size_t)rows[3] * strides[3],
-        P4_GPTR(const uint8_t, bases[4]), (size_t)rows[4] * strides[4],
+        P4_GPTR(const uint8_t, bases[4]), (size_t)rows[4] * persona_stride(4),
         P4_GPTR(const uint8_t, bases[5]), (size_t)rows[5] * strides[5]);
     if (result) return result;
     for (unsigned bank = 0; bank < PERSONA_BANKS; ++bank) original[bank] = bases[bank];
@@ -183,7 +190,7 @@ static void commit_complete(void *user)
      * publishes its extent in the same step. */
     const uint32_t rows = p4_game_personas_limit(staged.personas);
     for (unsigned bank = 0; bank < PERSONA_BANKS; ++bank)
-        p4_game_table_slot_publish(slots[bank], relocated(staged.personas, bank), rows * strides[bank]);
+        p4_game_table_slot_publish(slots[bank], relocated(staged.personas, bank), rows * persona_stride(bank));
     active = staged.personas;
     p4_game_personas_native_compendium_clear();
 }
@@ -193,7 +200,7 @@ int p4_game_personas_session_end(int image_live)
         for (unsigned bank = 0; bank < PERSONA_BANKS; ++bank)
             if (P4_G32(slots[bank]) != relocated(active, bank)) return P4_TABLE_CONFLICT;
         for (unsigned bank = 0; bank < PERSONA_BANKS; ++bank)
-            p4_game_table_slot_publish(slots[bank], original[bank], P4_PERSONA_RETAIL_ROWS * strides[bank]);
+            p4_game_table_slot_publish(slots[bank], original[bank], P4_PERSONA_RETAIL_ROWS * persona_stride(bank));
     }
     active = NULL;
     staged = (PersonaStage){0};

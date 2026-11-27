@@ -14,6 +14,7 @@ local save = F.save
 local ROWS: {[string]: {[number]: {[string]: string}}} = {
     golden_off = {
         [310] = {physical = "null", light = "resist"},
+        [311] = {physical = "resist", light = "null", dark = "null"},
         [258] = {fire = "resist", electric = "drain"},
         [259] = {wind = "null", dark = "drain"},
         [269] = {wind = "weak", light = "resist"},
@@ -21,6 +22,7 @@ local ROWS: {[string]: {[number]: {[string]: string}}} = {
     },
     golden_on = {
         [310] = {physical = "null", ice = "weak", light = "resist"},
+        [311] = {physical = "resist", light = "null", dark = "null"},
         [258] = {fire = "resist", electric = "weak"},
         [259] = {wind = "null", dark = "drain"},
         [269] = {wind = "weak", light = "resist"},

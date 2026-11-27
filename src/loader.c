@@ -2,6 +2,7 @@
  * patches it, and enters the game through p4pc_start (src/crt.c). */
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "p4pc/crt.h"
 #include "p4pc/image.h"
@@ -16,9 +17,16 @@
 #include "p4pc/game_mode.h"
 #include "p4pc/game_table_boot.h"
 #include "platform/golden/golden_mode_sources.h"
+#include "platform/diag/p4diag.h"
+#include "platform/golden/golden_cpk_vfs.h"
 #include "p4pc/mod_bindings.h"
 #include "platform/mods/failure_native.h"
 #include "p4pc/content.h"
+#include "p4pc/guest.h"
+#include "p4pc/c03_guard.h"
+#include "p4pc/build_id.h"
+#include "platform/memcard/mod_save_transport.h"
+
 #if defined(_WIN32) || (defined(__linux__) && !defined(__ANDROID__)) || defined(__APPLE__)
 #include "platform/config/p4iso.h"
 #define P4PC_PLAYER_DISC 1
@@ -55,7 +63,7 @@ static int usage(const char *argv0)
         fprintf(stdout, "  %s %-40s %s\n", program, rows[i][0], rows[i][1]);
     }
     fprintf(stdout, "\nThe disc image is `iso` under [game] in p4pc.ini (or the P4PC_ISO environment variable).\n"
-            "p4pc.ini, p4pc.log and the saves are in %s.\n"
+            "p4pc.ini, the logs (p4pc.log, and p4pc.prev.log of the run before) and the saves are in %s.\n"
             "Mods: choose them in Config > MODS. To make one, see p4mod --help.\n", P4PC_HELP_FOLDER);
     return 0;
 }
@@ -77,8 +85,16 @@ static int is_help(const char *arg)
 }
 
 int main(int argc, char **argv) {
+#ifdef P4_GOLDEN_AI_QUALIFICATION
+    fprintf(stderr, "p4pc: test-only Golden AI qualification build refuses normal boot; use golden_ai_native_install64[w]\n");
+    return 2;
+#endif
     if (argc > 1 && is_help(argv[1])) return usage(argv[0]);
     if (p4_os_restart_init(argc, argv) != 0) return 1;
+    p4_os_crash_build_set(p4_build_id()); /* the native crash report names the build */
+#ifdef __ANDROID__
+    fprintf(stderr, "p4pc: build %s\n", p4_build_id()); /* the log is already redirected */
+#endif
     int import_status = p4save_import_cli(argc, argv);
     if (import_status >= 0) return import_status;
     const char *path = argc > 1 ? argv[1] : "SLUS_217.82";
@@ -90,18 +106,35 @@ int main(int argc, char **argv) {
         return 1;
     }
     if (mode == P4_GAME_MODE_GOLDEN) {
+#ifdef P4_GUEST64
+        if (p4_c03_guard_install_cleanup() || p4_guest_arena_factory(p4_c03_guard_reserve)) {
+            fprintf(stderr, "p4pc: Golden C03 arena could not be reserved; refusing to start\n");
+            return 1;
+        }
+#else
+        fprintf(stderr, "p4pc: Golden C03 protection requires a supported 64-bit runtime\n");
+        return 1;
+#endif
         if (p4_golden_mode_sources_register()) {
             fprintf(stderr, "p4pc: could not register Golden table sources\n");
             return 1;
         }
         p4_game_tables_boot_require_golden();
     }
+#if defined(P4PC_GOLDEN_VFS_WITNESS) && !defined(NDEBUG)
+    if (mode == P4_GAME_MODE_PS2 && p4_golden_cpk_vfs_dormant_requested() &&
+        p4_golden_cpk_vfs_start_dormant()) {
+        fprintf(stderr, "p4pc: dormant Golden VFS witness setup failed\n");
+        return 1;
+    }
+#endif
 #ifdef P4PC_PLAYER_DISC
     /* Started with no arguments, as a player does: the disc is the player's own (asked for once), and the executable is read from it. */
     char elf[1100];
 
     if (argc <= 1) {
         p4iso_player_log();
+        fprintf(stderr, "p4pc: build %s\n", p4_build_id()); /* first line of p4pc.log */
         if (p4iso_prepare(elf, sizeof elf) != 0) {
             return 1;
         }
@@ -122,9 +155,22 @@ int main(int argc, char **argv) {
             return 1;
         optional = 0;
     }
+    p4diag_startup(path); /* the log's header: build, system, settings, mods, the disc check (player runs only) */
     p4pc_trap_configure();
 
     uint32_t entry = p4pc_load_image(path);
+    if (mode == P4_GAME_MODE_GOLDEN) {
+#ifdef P4_GUEST64
+        if (p4_c03_guard_start() ||
+            p4_mod_save_transport_fence(p4_c03_guard_tainted) || p4_c03_guard_install_report()) {
+            fprintf(stderr, "p4pc: Golden C03 protection could not be established; refusing to start\n");
+            return 1;
+        }
+#else
+        fprintf(stderr, "p4pc: Golden C03 protection requires a supported 64-bit runtime\n");
+        return 1;
+#endif
+    }
     size_t patched = p4pc_apply_patches();
     fprintf(stderr, "p4pc: patched %zu function pointers\n", patched);
     if (mode != P4_GAME_MODE_GOLDEN)
@@ -147,6 +193,10 @@ int main(int argc, char **argv) {
     if (mode == P4_GAME_MODE_GOLDEN && !p4_game_tables_boot_golden_ready()) {
         if (optional) p4_package_registry_retire();
         fprintf(stderr, "p4pc: Golden mode requires all tables from one published verified Golden cache; refusing PS2 fallback\n");
+        return 1;
+    }
+    if (mode == P4_GAME_MODE_GOLDEN && p4_golden_cpk_vfs_start()) {
+        fprintf(stderr, "p4pc: cannot mount the verified Golden archives\n");
         return 1;
     }
     if (mode == P4_GAME_MODE_GOLDEN)

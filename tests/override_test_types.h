@@ -11,4 +11,8 @@ typedef unsigned int u32;
 typedef int s32;
 typedef float f32;
 
+/* Guest-width memcpy declaration used when libc_rename.h maps the override's
+ * memcpy call to the retail entry point (p4pc/ps2_libc.h). */
+void *func_0043f810(void *destination, const void *source, u32 count);
+
 #endif

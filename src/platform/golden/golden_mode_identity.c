@@ -1,5 +1,6 @@
 /* Canonical identities for Golden mode's eager table converters. */
 #include "golden_mode_identity.h"
+#include "golden_mode_literal_identity.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,19 +10,28 @@
 static const P4GoldenCacheIdentityEntry versions[] = {
     {"build:steam", "10836033"},
     {"converter:battle-encounter", "1"}, {"converter:battle-enemy", "1"},
-    {"converter:battle-item", "1"}, {"converter:battle-names", "1"},
-    {"converter:battle-persona", "1"}, {"converter:battle-skill", "1"},
-    {"converter:cache-publisher", "1"}, {"converter:cached-declarations", "1"},
+    {"converter:battle-item", "2"}, {"converter:battle-names", "1"},
+    {"converter:battle-persona", "1"}, {"converter:battle-skill", "3"},
+    {"converter:cache-publisher", "2"}, {"converter:cached-declarations", "1"},
     {"converter:cmm-rankup", "1"}, {"converter:declarations", "2"},
     {"converter:domain-map", "1"}, {"converter:exp-pe", "1"},
-    {"converter:fusion", "1"}, {"converter:inheritance", "1"},
-    {"converter:output-assembly", "1"}, {"converter:recipe", "1"},
-    {"converter:source-adapter", "2"}, {"converter:whole-projection", "1"},
-    {"producer:golden-mode", "3"},
-    {"schema:golden-tables", "2"}, {"spec:battle-tables", "1"},
+    {"converter:fusion", "1"}, {"converter:golden-ai", "1"},
+    {"converter:image-bind", "2"}, {"converter:inheritance", "1"},
+    {"converter:item-runtime", "1"}, {"converter:l1-ledger", "1"},
+    {"converter:level-source", "1"}, {"converter:model-rows", "1"},
+    {"converter:output-assembly", "4"}, {"converter:raw-battle-rows", "2"},
+    {"converter:recipe", "2"}, {"converter:skill-semantics", "1"},
+    {"converter:source-adapter", "4"}, {"converter:whole-projection", "2"},
+    {"producer:golden-mode", "5"}, {"schema:golden-tables", "3"},
+    {"spec:ai-commands", "1"}, {"spec:battle-tables", "2"},
     {"spec:cmm-tables", "1"}, {"spec:cmp-tables", "1"},
-    {"spec:containers", "1"}, {"spec:exp-pe", "1"},
-    {"spec:fcl-tables", "1"}, {"spec:golden-domains", "1"},
+    {"spec:containers", "1"}, {"spec:effect-fields", "1"}, {"spec:effect-target-state", "1"},
+    {"spec:exp-pe", "1"},
+    {"spec:fcl-tables", "2"}, {"spec:golden-domains", "1"},
+    {"spec:item-categories", "1"}, {"spec:item-categories-p10", "1"},
+    {"spec:l1-image-literals", P4_GOLDEN_LITERAL_MANIFEST_SHA256},
+    {"spec:level-table-source", "1"}, {"spec:model-fields", "1"},
+    {"spec:skill-flags", "1"},
 };
 static int fail(char *reason, size_t capacity, const char *text)
 {

@@ -1,6 +1,6 @@
 --!capability authorize.retry@1
 -- p4.authorize.on("retry"): allow or refuse a battle retry once per lost field battle, before the p4.battle.defeat handler is asked.
--- source: 1 for a field script's encounter, 0 for a shadow touched on the field.
+-- source: 1 for a field event's encounter, 2 for a story boss a script starts, 0 for a shadow touched on the field.
 export type P4RetryContext = { name: "retry", encounter: number, source: number }
 --!overload p4.authorize.on
 (operation: "retry", callback: (context: P4RetryContext) -> (boolean, ...string)) -> P4Subscription

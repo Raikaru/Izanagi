@@ -43,6 +43,9 @@ int32_t datCalcIsGuarding(uint16_t *unit) { return guarding[index_of(unit)]; }
 uint8_t datCalcGetBattleStat(void *unit, int32_t stat) { assert(stat == 4); return luck[index_of(unit)]; }
 int8_t datCalcGetBuffLevel(void *unit, int32_t buff) { assert(buff == 7); return (int8_t)exposed[index_of(unit)]; }
 int32_t datCalcHasSkill(void *unit, int32_t skill) { (void)unit; assert(skill == 0x21E); return boosted; }
+uint16_t datCalcMaxHp(void *unit) { (void)unit; return 1000; }
+static unsigned buff_advances;
+void datCalcAdvanceSecondaryBuffs(void *unit) { assert(unit); ++buff_advances; }
 uint32_t RpRandom(void) { assert(roll_next < roll_count); return rolls[roll_next++]; }
 /* Routing off: the retail skill element decides physical delivery. */
 static int32_t skill_elements[0x40];
@@ -60,7 +63,7 @@ void p4_game_elements_native_learn_leaf(void *defender, uint32_t leaf)
 int32_t p4_game_elements_native_presentation_leaf(void *unit, uint32_t skill_id) { (void)unit; (void)skill_id; abort(); }
 uint32_t p4_game_elements_native_affinity_leaf(void *unit, uint32_t leaf, uint32_t channel, uint32_t component)
 {
-    assert((leaf == 24 || leaf == 25) && channel == P4_CHANNEL_STATUS && component == P4_ACTION_COMPONENT_STATUS);
+    assert((leaf == 24 || leaf == 25 || leaf == 26) && channel == P4_CHANNEL_STATUS && component == P4_ACTION_COMPONENT_STATUS);
     return affinity[index_of(unit)];
 }
 static void script(uint32_t value) { rolls[0] = value; roll_count = 1; roll_next = 0; }
@@ -69,21 +72,24 @@ static unsigned drawn(void) { return roll_next; }
 static P4GameTables *tables_with_riders(void)
 {
     P4GameTables *tables = p4_game_tables_create(); assert(tables);
-    for (uint32_t leaf = 24; leaf <= 25; ++leaf) {
+    for (uint32_t leaf = 24; leaf <= 26; ++leaf) {
         P4ElementDesc d = {.id = leaf, .flags = P4_ELEMENT_AFFINITY | P4_ELEMENT_VISIBLE, .family = leaf,
             .order = leaf, .revision = 1, .display_name = "Ailment", .short_name = "Ail"};
-        strcpy(d.key, leaf == 24 ? "test:freeze" : "test:shock");
+        strcpy(d.key, leaf == 24 ? "test:freeze" : leaf == 25 ? "test:shock" : "test:burn");
         assert(p4_game_tables_element(tables, "test", &d) == P4_TABLE_OK);
     }
-    const P4SideAilmentDef freeze = {24, P4_SIDE_FLAGS, 0x16, 2, 100, 0, 0, 1, 1, "test:freeze-ailment"};
+    const P4SideAilmentDef freeze = {24, 15, 0x16, 2, 100, 0, 0, 1, 1, "test:freeze-ailment"};
     /* Shock halves an enemy's riders against the party (enemy_scale 50). */
     const P4SideAilmentDef shock = {25, P4_SIDE_LOSE_TURN, 0x16, 3, 100, 50, 50, 1, 1, "test:shock-ailment"};
+    const P4SideAilmentDef burn = {26, P4_SIDE_SINGLE_SLOT | P4_SIDE_SMTV_DECAY | P4_SIDE_END_TURN_TICK | P4_SIDE_NO_ENEMY_RIDER, 0x16, 1, 0, 0, 0, 1, 1, "test:burn-ailment"};
     assert(p4_game_tables_side_ailment(tables, "test", &freeze) == P4_TABLE_OK);
     assert(p4_game_tables_side_ailment(tables, "test", &shock) == P4_TABLE_OK);
+    assert(p4_game_tables_side_ailment(tables, "test", &burn) == P4_TABLE_OK);
     const P4SideRiderDesc rider_a = {0x34, 24, 10, 1, 1, "test:rider-a-freeze"};
     const P4SideRiderDesc rider_b = {0x35, 25, 10, 1, 1, "test:rider-b-shock"};
     const P4SideRiderDesc rider_c = {0x36, 25, 100, 1, 1, "test:rider-c-shock"};
     const P4SideRiderDesc rider_d = {0x37, 24, 100, 1, 1, "test:rider-d-freeze"};
+    const P4SideRiderDesc rider_e = {1, 26, 100, 1, 1, "test:rider-e-burn"};
     /* One skill with two riders: Freeze (single slot) first, then Shock. */
     const P4SideRiderDesc both_freeze = {0x38, 24, 50, 1, 1, "test:both-freeze"};
     const P4SideRiderDesc both_shock = {0x38, 25, 50, 1, 1, "test:both-shock"};
@@ -91,6 +97,7 @@ static P4GameTables *tables_with_riders(void)
     assert(p4_game_tables_side_rider(tables, "test", &rider_c) == P4_TABLE_OK);
     assert(p4_game_tables_side_rider(tables, "test", &both_shock) == P4_TABLE_OK);
     assert(p4_game_tables_side_rider(tables, "test", &rider_d) == P4_TABLE_OK);
+    assert(p4_game_tables_side_rider(tables, "test", &rider_e) == P4_TABLE_OK);
     assert(p4_game_tables_side_rider(tables, "test", &both_freeze) == P4_TABLE_OK);
     assert(p4_game_tables_side_rider(tables, "test", &rider_a) == P4_TABLE_OK);
     assert(!p4_game_tables_bind_runtime_use(tables, use, tables));
@@ -124,6 +131,8 @@ int main(void)
     p4_side_ailment_native_commit(target, 0xFF, 0, source, 0x34);
     p4_side_ailment_native_defeat(target);
     p4_side_ailment_native_turn_end(target);
+    p4_side_ailment_native_tick_end(target);
+    assert(!p4_side_ailment_native_leaf(target));
     p4_side_ailment_native_action_begin();
 
     P4GameTables *tables = tables_with_riders();
@@ -144,7 +153,43 @@ int main(void)
     p4_game_side_ailment_native_battle_end();
     assert(p4_side_ailment_set_enabled(1) == P4_TABLE_OK);
     p4_game_side_ailment_native_battle_begin();
+    /* Burn ticks twice, never kills, and boss ticks use the 3% cap. */
+    *(uint16_t *)(target + 8) = 1000;
+    assert(p4_side_ailment_set(gtarget, 26, P4_SIDE_REASON_MOD) == P4_TABLE_OK);
+    assert(p4_side_ailment_native_leaf(target) == 27);
+    p4_side_ailment_native_finish_turn(target);
+    assert(*(uint16_t *)(target + 8) == 900 && p4_side_ailment_native_leaf(target) == 27 && buff_advances == 1);
+    p4_side_ailment_native_finish_turn(target);
+    assert(*(uint16_t *)(target + 8) == 800 && !p4_side_ailment_native_leaf(target) && buff_advances == 2);
+    *(uint16_t *)target = 4;
+    *(uint16_t *)(target + 2) = 310;
+    *(uint16_t *)(target + 8) = 1000;
+    assert(p4_side_ailment_set(gtarget, 26, P4_SIDE_REASON_MOD) == P4_TABLE_OK);
+    p4_side_ailment_native_tick_end(target);
+    assert(*(uint16_t *)(target + 8) == 970);
+    *(uint16_t *)(target + 8) = 2;
+    p4_side_ailment_native_tick_end(target);
+    assert(*(uint16_t *)(target + 8) == 1 && !p4_side_ailment_native_leaf(target));
+    *(uint16_t *)target = 0;
+    *(uint16_t *)(target + 2) = 0;
+    assert(p4_side_ailment_set(gtarget, 26, P4_SIDE_REASON_MOD) == P4_TABLE_OK);
+    assert(!p4_side_ailment_native_spend_turn(target) && !p4_side_ailment_native_lose_turn(target));
+    assert(!p4_side_ailment_native_crit_bonus(target, 0));
+    p4_side_ailment_native_commit(target, 2, 0, source, 1);
+    assert(p4_side_ailment_native_leaf(target) == 27);
+    p4_side_ailment_native_commit(target, 0x16, 0, source, 1);
+    assert(!p4_side_ailment_native_leaf(target));
     assert(p4_side_ailment_active());
+
+    /* Enemy-to-party Burn riders are refused before any random draw. */
+    *(uint16_t *)source = 4;
+    script(0);
+    p4_side_ailment_native_riders(1, source, target, 1, 0, 0);
+    assert(!drawn() && !p4_side_ailment_landed(gtarget, &leaf));
+    *(uint16_t *)source = 0;
+    p4_side_ailment_native_riders(1, source, target, 1, 0, 0);
+    assert(p4_side_ailment_landed(gtarget, &leaf) && leaf == 26);
+    p4_side_ailment_native_action_begin();
 
     /* A skill without a rider draws nothing. */
     p4_side_ailment_native_riders(0x1B, source, target, 1, 0, 0);

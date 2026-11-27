@@ -22,6 +22,9 @@ case $arch in
 esac
 [ -f "$root/decomp/config/symbol_addrs.txt" ] || { echo "configure: the decomp submodule is not checked out (git submodule update --init)" >&2; exit 1; }
 [ -x "$deps/llvm/bin/clang" ] || { echo "configure: $deps is not a ci/macos/build_deps.sh prefix" >&2; exit 1; }
+zig_version=$(sh "$root/ci/zig/fetch_zig.sh" --print-version)
+zig="$deps/zig-$zig_version/zig"
+[ -x "$zig" ] || { echo "configure: $deps has no pinned Zig $zig_version (rerun ci/macos/build_deps.sh $deps)" >&2; exit 1; }
 launcher=
 command -v ccache >/dev/null && launcher="-DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
 # -fuse-ld=ld: Apple's linker (the clang release's own default is lld, which has no Mach-O driver in that package)
@@ -31,5 +34,5 @@ cmake -S "$root" -B "$build" -G Ninja \
   -DCMAKE_C_COMPILER_TARGET="$triple" -DCMAKE_CXX_COMPILER_TARGET="$triple" \
   -DCMAKE_OSX_SYSROOT="$(xcrun --sdk macosx --show-sdk-path)" -DCMAKE_OSX_DEPLOYMENT_TARGET="$deployment" \
   -DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=ld -DCMAKE_SHARED_LINKER_FLAGS=-fuse-ld=ld -DCMAKE_MODULE_LINKER_FLAGS=-fuse-ld=ld \
-  $launcher -DP4_DECOMP="$root/decomp" -DP4_MACOS_PREFIX="$deps" \
+  $launcher -DP4_DECOMP="$root/decomp" -DP4_MACOS_PREFIX="$deps" -DP4_ZIG="$zig" \
   -DP4_PORT64_ARCH="$port64arch" -DP4_PORT64=ON -DP4_PORT64_LINK=ON -DP4_PORT64_OPT=O2 -DP4_PORT64_JOBS="$(sysctl -n hw.ncpu)" -DP4_PORT64_WIN=OFF "$@"

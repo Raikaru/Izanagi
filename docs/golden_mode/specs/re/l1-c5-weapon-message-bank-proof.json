@@ -1,0 +1,1955 @@
+{
+  "proof_id": "L1-C5-weapon-message-bank-20261113",
+  "class": "PROVEN",
+  "runtime_status": "pending-seam",
+  "scope": "Ten selected partitions of the complete weapon-shop dialogue MSG1 bank, including Main-transferred645240/64732e. Structural source correspondence only, no runtime/visual equivalence claim.",
+  "ps2": {
+    "base": "0x00645240",
+    "size": 11421,
+    "entry_count": 32,
+    "magic": "MSG1",
+    "relocation_offset": 11324,
+    "relocation_size": 97,
+    "sha256": "e8676919a6c32c938d5ba944d3cce677d905b26b8ff5aaa0b9ebeae125f55c7c"
+  },
+  "golden": {
+    "container": "data_e.cpk",
+    "member_chain": "data_e.cpk::facility/weapon.arc::msg_weapon.bmd",
+    "offset": 0,
+    "size": 15057,
+    "sha256": "2042f076cd21585ab33753b709faf9fc81469ece8de9000832c7a3651b9772ea",
+    "member_size": 15072,
+    "member_sha256": "756760d5815016a0a092287dddd617c98fd74717c1a444dd7d30f515f916ff53",
+    "archive_tail_bytes": 15,
+    "source_build": 10836033,
+    "mapping_proven": true,
+    "locale": "English",
+    "kind": "complete-logical-MSG1-source",
+    "runtime_input": "Owned Steam archive member; no NSO/private files needed."
+  },
+  "golden_header": [
+    7,
+    15057,
+    826757965,
+    0,
+    14908,
+    149,
+    53
+  ],
+  "entry_count": 53,
+  "join": [
+    {
+      "label": "WSHOP_TALK000",
+      "ps2_index": 0,
+      "golden_index": 19,
+      "type": 0,
+      "pages": 8,
+      "ps2_entry_span": [
+        304,
+        980
+      ],
+      "golden_entry_span": [
+        2772,
+        3448
+      ]
+    },
+    {
+      "label": "WSHOP_TALK001",
+      "ps2_index": 1,
+      "golden_index": 20,
+      "type": 0,
+      "pages": 4,
+      "ps2_entry_span": [
+        980,
+        1328
+      ],
+      "golden_entry_span": [
+        3448,
+        3796
+      ]
+    },
+    {
+      "label": "WSHOP_TALK002",
+      "ps2_index": 2,
+      "golden_index": 21,
+      "type": 0,
+      "pages": 4,
+      "ps2_entry_span": [
+        1328,
+        1764
+      ],
+      "golden_entry_span": [
+        3796,
+        4220
+      ]
+    },
+    {
+      "label": "WSHOP_TALK003",
+      "ps2_index": 3,
+      "golden_index": 22,
+      "type": 0,
+      "pages": 3,
+      "ps2_entry_span": [
+        1764,
+        2132
+      ],
+      "golden_entry_span": [
+        4220,
+        4588
+      ]
+    },
+    {
+      "label": "WSHOP_TALK004",
+      "ps2_index": 4,
+      "golden_index": 23,
+      "type": 0,
+      "pages": 4,
+      "ps2_entry_span": [
+        2132,
+        2508
+      ],
+      "golden_entry_span": [
+        4588,
+        4964
+      ]
+    },
+    {
+      "label": "WSHOP_TALK005",
+      "ps2_index": 5,
+      "golden_index": 24,
+      "type": 0,
+      "pages": 4,
+      "ps2_entry_span": [
+        2508,
+        2948
+      ],
+      "golden_entry_span": [
+        4964,
+        5404
+      ]
+    },
+    {
+      "label": "WSHOP_TALK006",
+      "ps2_index": 6,
+      "golden_index": 25,
+      "type": 0,
+      "pages": 3,
+      "ps2_entry_span": [
+        2948,
+        3248
+      ],
+      "golden_entry_span": [
+        5404,
+        5704
+      ]
+    },
+    {
+      "label": "WSHOP_TALK007",
+      "ps2_index": 7,
+      "golden_index": 26,
+      "type": 0,
+      "pages": 3,
+      "ps2_entry_span": [
+        3248,
+        3532
+      ],
+      "golden_entry_span": [
+        5704,
+        5988
+      ]
+    },
+    {
+      "label": "WSHOP_TALK008",
+      "ps2_index": 8,
+      "golden_index": 27,
+      "type": 0,
+      "pages": 4,
+      "ps2_entry_span": [
+        3532,
+        3872
+      ],
+      "golden_entry_span": [
+        5988,
+        6328
+      ]
+    },
+    {
+      "label": "WSHOP_TALK009",
+      "ps2_index": 9,
+      "golden_index": 28,
+      "type": 0,
+      "pages": 3,
+      "ps2_entry_span": [
+        3872,
+        4168
+      ],
+      "golden_entry_span": [
+        6328,
+        6624
+      ]
+    },
+    {
+      "label": "WSHOP_TALK010",
+      "ps2_index": 10,
+      "golden_index": 29,
+      "type": 0,
+      "pages": 4,
+      "ps2_entry_span": [
+        4168,
+        4496
+      ],
+      "golden_entry_span": [
+        6624,
+        6952
+      ]
+    },
+    {
+      "label": "WSHOP_TALK011",
+      "ps2_index": 11,
+      "golden_index": 30,
+      "type": 0,
+      "pages": 4,
+      "ps2_entry_span": [
+        4496,
+        4844
+      ],
+      "golden_entry_span": [
+        6952,
+        7248
+      ]
+    },
+    {
+      "label": "WSHOP_TALK012",
+      "ps2_index": 12,
+      "golden_index": 31,
+      "type": 0,
+      "pages": 4,
+      "ps2_entry_span": [
+        4844,
+        5216
+      ],
+      "golden_entry_span": [
+        7248,
+        7620
+      ]
+    },
+    {
+      "label": "WSHOP_TALK013",
+      "ps2_index": 13,
+      "golden_index": 32,
+      "type": 0,
+      "pages": 4,
+      "ps2_entry_span": [
+        5216,
+        5684
+      ],
+      "golden_entry_span": [
+        7620,
+        8088
+      ]
+    },
+    {
+      "label": "WSHOP_TALK014",
+      "ps2_index": 14,
+      "golden_index": 33,
+      "type": 0,
+      "pages": 3,
+      "ps2_entry_span": [
+        5684,
+        5976
+      ],
+      "golden_entry_span": [
+        8088,
+        8380
+      ]
+    },
+    {
+      "label": "WSHOP_TALK015",
+      "ps2_index": 15,
+      "golden_index": 34,
+      "type": 0,
+      "pages": 3,
+      "ps2_entry_span": [
+        5976,
+        6248
+      ],
+      "golden_entry_span": [
+        8380,
+        8652
+      ]
+    },
+    {
+      "label": "WSHOP_TALK016",
+      "ps2_index": 16,
+      "golden_index": 35,
+      "type": 0,
+      "pages": 3,
+      "ps2_entry_span": [
+        6248,
+        6548
+      ],
+      "golden_entry_span": [
+        8652,
+        8952
+      ]
+    },
+    {
+      "label": "WSHOP_TALK017",
+      "ps2_index": 17,
+      "golden_index": 36,
+      "type": 0,
+      "pages": 4,
+      "ps2_entry_span": [
+        6548,
+        6912
+      ],
+      "golden_entry_span": [
+        8952,
+        9316
+      ]
+    },
+    {
+      "label": "WSHOP_TALK018",
+      "ps2_index": 18,
+      "golden_index": 37,
+      "type": 0,
+      "pages": 3,
+      "ps2_entry_span": [
+        6912,
+        7168
+      ],
+      "golden_entry_span": [
+        9316,
+        9572
+      ]
+    },
+    {
+      "label": "WSHOP_TALK019",
+      "ps2_index": 19,
+      "golden_index": 38,
+      "type": 0,
+      "pages": 4,
+      "ps2_entry_span": [
+        7168,
+        7512
+      ],
+      "golden_entry_span": [
+        9572,
+        9916
+      ]
+    },
+    {
+      "label": "WSHOP_TALK020",
+      "ps2_index": 20,
+      "golden_index": 39,
+      "type": 0,
+      "pages": 4,
+      "ps2_entry_span": [
+        7512,
+        7900
+      ],
+      "golden_entry_span": [
+        9916,
+        10304
+      ]
+    },
+    {
+      "label": "WSHOP_TALK021",
+      "ps2_index": 21,
+      "golden_index": 40,
+      "type": 0,
+      "pages": 4,
+      "ps2_entry_span": [
+        7900,
+        8284
+      ],
+      "golden_entry_span": [
+        10304,
+        10688
+      ]
+    },
+    {
+      "label": "WSHOP_TALK022",
+      "ps2_index": 22,
+      "golden_index": 41,
+      "type": 0,
+      "pages": 2,
+      "ps2_entry_span": [
+        8284,
+        8532
+      ],
+      "golden_entry_span": [
+        10688,
+        10936
+      ]
+    },
+    {
+      "label": "WSHOP_TALK023",
+      "ps2_index": 23,
+      "golden_index": 42,
+      "type": 0,
+      "pages": 3,
+      "ps2_entry_span": [
+        8532,
+        8764
+      ],
+      "golden_entry_span": [
+        10936,
+        11168
+      ]
+    },
+    {
+      "label": "WSHOP_TALK024",
+      "ps2_index": 24,
+      "golden_index": 43,
+      "type": 0,
+      "pages": 3,
+      "ps2_entry_span": [
+        8764,
+        9144
+      ],
+      "golden_entry_span": [
+        11168,
+        11548
+      ]
+    },
+    {
+      "label": "WSHOP_TALK025",
+      "ps2_index": 25,
+      "golden_index": 44,
+      "type": 0,
+      "pages": 4,
+      "ps2_entry_span": [
+        9144,
+        9576
+      ],
+      "golden_entry_span": [
+        11548,
+        11980
+      ]
+    },
+    {
+      "label": "WSHOP_TALK026",
+      "ps2_index": 26,
+      "golden_index": 45,
+      "type": 0,
+      "pages": 5,
+      "ps2_entry_span": [
+        9576,
+        9984
+      ],
+      "golden_entry_span": [
+        11980,
+        12388
+      ]
+    },
+    {
+      "label": "WSHOP_TALKCMM001",
+      "ps2_index": 27,
+      "golden_index": 51,
+      "type": 0,
+      "pages": 6,
+      "ps2_entry_span": [
+        9984,
+        10560
+      ],
+      "golden_entry_span": [
+        13968,
+        14544
+      ]
+    },
+    {
+      "label": "WSHOP_TALKCMM002",
+      "ps2_index": 28,
+      "golden_index": 52,
+      "type": 0,
+      "pages": 5,
+      "ps2_entry_span": [
+        10560,
+        10896
+      ],
+      "golden_entry_span": [
+        14544,
+        14908
+      ]
+    },
+    {
+      "label": "WSHOP_NO_MAKE",
+      "ps2_index": 29,
+      "golden_index": 15,
+      "type": 0,
+      "pages": 1,
+      "ps2_entry_span": [
+        10896,
+        11032
+      ],
+      "golden_entry_span": [
+        2276,
+        2416
+      ]
+    },
+    {
+      "label": "WSHOP_NO_MATERIAL",
+      "ps2_index": 30,
+      "golden_index": 16,
+      "type": 0,
+      "pages": 1,
+      "ps2_entry_span": [
+        11032,
+        11168
+      ],
+      "golden_entry_span": [
+        2416,
+        2556
+      ]
+    },
+    {
+      "label": "WSHOP_KEEP_MATERIAL",
+      "ps2_index": 31,
+      "golden_index": 17,
+      "type": 0,
+      "pages": 1,
+      "ps2_entry_span": [
+        11168,
+        11324
+      ],
+      "golden_entry_span": [
+        2556,
+        2688
+      ]
+    }
+  ],
+  "new_golden_entries": [
+    {
+      "index": 0,
+      "type": 1,
+      "label": "Y_FCL_DIALOG_MSG_EITHER",
+      "offset": 472,
+      "page_count": 0,
+      "speaker": 2
+    },
+    {
+      "index": 1,
+      "type": 0,
+      "label": "Y_FCLSHOP_BUY_MSG",
+      "offset": 536,
+      "page_count": 1,
+      "speaker": 65535
+    },
+    {
+      "index": 2,
+      "type": 0,
+      "label": "Y_FCLSHOP_SELL_MSG",
+      "offset": 612,
+      "page_count": 1,
+      "speaker": 65535
+    },
+    {
+      "index": 3,
+      "type": 0,
+      "label": "Y_FCLSHOP_ADD_LIST",
+      "offset": 692,
+      "page_count": 1,
+      "speaker": 65535
+    },
+    {
+      "index": 4,
+      "type": 0,
+      "label": "Y_FCLSHOP_EQUIP",
+      "offset": 796,
+      "page_count": 1,
+      "speaker": 65535
+    },
+    {
+      "index": 5,
+      "type": 0,
+      "label": "Y_FCLSHOP_TRADE",
+      "offset": 880,
+      "page_count": 1,
+      "speaker": 65535
+    },
+    {
+      "index": 6,
+      "type": 0,
+      "label": "Y_FCLSHOP_ALLSELL",
+      "offset": 992,
+      "page_count": 1,
+      "speaker": 65535
+    },
+    {
+      "index": 7,
+      "type": 0,
+      "label": "Y_FCLSHOP_HELP",
+      "offset": 1144,
+      "page_count": 1,
+      "speaker": 0
+    },
+    {
+      "index": 8,
+      "type": 0,
+      "label": "WSHOP_ADDNEW",
+      "offset": 1368,
+      "page_count": 1,
+      "speaker": 65535
+    },
+    {
+      "index": 9,
+      "type": 0,
+      "label": "WSHOP_HELLO",
+      "offset": 1420,
+      "page_count": 1,
+      "speaker": 1
+    },
+    {
+      "index": 10,
+      "type": 0,
+      "label": "WSHOP_HELLO_RAIN",
+      "offset": 1548,
+      "page_count": 2,
+      "speaker": 1
+    },
+    {
+      "index": 11,
+      "type": 0,
+      "label": "Y_FCLSHOP_ADD_MES",
+      "offset": 1760,
+      "page_count": 2,
+      "speaker": 1
+    },
+    {
+      "index": 12,
+      "type": 0,
+      "label": "Y_FCLSHOP_ADD_MES_RARE",
+      "offset": 1908,
+      "page_count": 2,
+      "speaker": 1
+    },
+    {
+      "index": 13,
+      "type": 0,
+      "label": "Y_FCLSHOP_ADD_MES2",
+      "offset": 2060,
+      "page_count": 1,
+      "speaker": 0
+    },
+    {
+      "index": 14,
+      "type": 0,
+      "label": "Y_FCLSHOP_ADD_MES3",
+      "offset": 2132,
+      "page_count": 1,
+      "speaker": 1
+    },
+    {
+      "index": 18,
+      "type": 0,
+      "label": "WSHOP_EXIT_CONF",
+      "offset": 2688,
+      "page_count": 1,
+      "speaker": 65535
+    },
+    {
+      "index": 46,
+      "type": 0,
+      "label": "WSHOP_TALK027",
+      "offset": 12388,
+      "page_count": 3,
+      "speaker": 1
+    },
+    {
+      "index": 47,
+      "type": 0,
+      "label": "WSHOP_TALK028",
+      "offset": 12704,
+      "page_count": 3,
+      "speaker": 1
+    },
+    {
+      "index": 48,
+      "type": 0,
+      "label": "WSHOP_TALK029",
+      "offset": 12996,
+      "page_count": 3,
+      "speaker": 1
+    },
+    {
+      "index": 49,
+      "type": 0,
+      "label": "WSHOP_TALK030",
+      "offset": 13284,
+      "page_count": 3,
+      "speaker": 1
+    },
+    {
+      "index": 50,
+      "type": 0,
+      "label": "WSHOP_TALK031",
+      "offset": 13636,
+      "page_count": 3,
+      "speaker": 1
+    }
+  ],
+  "actual_loader_proof": {
+    "descriptor": "0x7100764fe0",
+    "resource_name_table": "0x7100764f98",
+    "first_name_address": "0x7100609fd6",
+    "first_name": "facility/msg_weapon.bmd",
+    "archive_name_address": "0x7100764fc8",
+    "archive_name": "facility/weapon.arc",
+    "constructor": "0x71001b15d0",
+    "common_work_constructor": "0x71001987f0",
+    "resource_request_calls": [
+      "0x7100198a74",
+      "0x7100199c9c"
+    ],
+    "readiness_call": "0x7100198b34",
+    "copy_backing_call": "0x7100198b84",
+    "create_slot_call": "0x7100198b8c",
+    "store_slot": "0x7100198b94",
+    "select_message_call": "0x710019b8c4",
+    "slot_allocator": "0x71002c85b0",
+    "bmd_parser_calls": [
+      "0x71002c8690 ->2d8240",
+      "2d8240 ->2d8440"
+    ],
+    "independent_instruction_receipt": "Private c5-weapon-loader-instructions.txt; only supported pivotal loads/calls/arithmetic used, not decompiler type guesses."
+  },
+  "ps2_reader_proof": {
+    "weapon": "unplaced_inferred_00331980.c:72-149 actual BMD base645240, first-visit literal0, dated16-byte rows, CMM gift16-byte rows and flag/inventory publication; actual message slot status/release/destroy.",
+    "material": "Event/Fcl/y_fclTalk.c:166-194,198-304 base645240 for IDs29/30/31 with item/category substitutions and full material candidate state.",
+    "structural_correspondence": "Golden descriptor-selected first resource, actual request/wait/copy, slot allocation/parsing, date/flag/inventory/substitution message selectors and complete unique label/page joins establish same resource role. Names alone or partial text/byte equality are not the proof."
+  },
+  "selector_sources": [
+    {
+      "member": "data.cpk::init_free.bin::init/fclTable.bin::fclWeaponTalk.ftd",
+      "member_size": 544,
+      "header": [
+        528,
+        33,
+        0,
+        0
+      ],
+      "payload_size": 528,
+      "stride": 16,
+      "payload_sha256": "f5c2768d59c0cc61824ce0e1a11d9406c754c142e838a8ad382eef68f9738125",
+      "sha256": "a32e783888793c479a79cabeba85e60cd85b1a9b0aaa2e8948b8753d0ce21c8b",
+      "message_field_offset": 0,
+      "message_ids": [
+        19,
+        21,
+        25,
+        31,
+        34,
+        33,
+        45,
+        42,
+        20,
+        22,
+        23,
+        24,
+        26,
+        27,
+        28,
+        29,
+        30,
+        32,
+        33,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        43,
+        44,
+        46,
+        47,
+        48,
+        49,
+        50
+      ]
+    },
+    {
+      "member": "data.cpk::init_free.bin::init/fclTable.bin::fclWeaponTalkCmm.ftd",
+      "member_size": 64,
+      "header": [
+        40,
+        2,
+        0,
+        0
+      ],
+      "payload_size": 40,
+      "stride": 20,
+      "payload_sha256": "f51ccb67ee2fae9cb7f7562b336ea0c7a24aec2a6cabe71652cc577035d86a94",
+      "sha256": "bd72e798f25bc99ffeb3fa1cb710e3a897c2087c5a9654e6d4620d5a702062e7",
+      "message_field_offset": 4,
+      "message_ids": [
+        51,
+        52
+      ]
+    },
+    {
+      "member": "data.cpk::init_free.bin::init/fclTable.bin::fclWeaponTalkMat.ftd",
+      "member_size": 64,
+      "header": [
+        44,
+        11,
+        0,
+        0
+      ],
+      "payload_size": 44,
+      "stride": 4,
+      "payload_sha256": "4ad9a35d5c7cfe42facd170dcd992aefadebaadf9f68204268c381f02726f3dc",
+      "sha256": "79672be675759e92a6b52cd713ef394b82ffd240eec7cfbd64bd7c3c4db98da1",
+      "message_field_offset": null,
+      "message_ids": null
+    }
+  ],
+  "required_seams": [
+    {
+      "owner": "weaponShopTalkUpdate / weapon talk and material task family",
+      "ps2_addresses": [
+        "0x00331a20",
+        "0x00332370",
+        "0x00332520"
+      ],
+      "requirement": "Golden-only resource identity645240 must resolve to complete declared15057-byte/53-entry Golden MSG1 bank, not copy per-partition windows into guest RAM. Bind direct/translated/inlined/native nmMesWindowAcquire calls and retain PS2-mode bank. Preserve all label/page/message-body/relocation/speaker data together; allocate/parse native message work using actual32-to64-bit relocation-aware BMD manager, not store host pointers in image bytes or copy the larger file over11421-byte PS2 storage."
+    },
+    {
+      "owner": "legacy versus Golden message selector namespace",
+      "requirement": "Legacy PS2 message IDs0..26 map to Golden19..45;27/28 map51/52;29/30/31 map15/16/17. Preserve -1 no-message behavior. Golden fclWeaponTalk.ftd and fclWeaponTalkCmm.ftd already carry Golden IDs; DO NOT translate them again. Use explicit source namespace at call boundary, not numeric threshold heuristics. First-visit PS2 literal0 is WSHOP_TALK000 ->19, not new Golden selection-entry0. All32old labels join uniquely with matching entry kind and page count;21new Golden entries remain part of complete bank."
+    },
+    {
+      "owner": "Golden weapon resource descriptor / real message-handle producer and lifetime",
+      "requirement": "Constructor1b15d0 passes descriptor764fe0 to1987f0; descriptor+8 ->764f98 filenames, first609fd6 facility/msg_weapon.bmd, descriptor+16 ->764fc8 facility/weapon.arc. Common shop task198910 selects that descriptor, waits actual requests, copies first BMD request to work+878 then calls2c85b0, stores actual slot at work+0c.2c85b0->2d8240->2d8440 validates/parses MSG1 and widens offsets. Runtime adapter must preserve readiness, owned backing lifetime, valid slot creation/status/release and reload. No default0, fake handle, PS2 resource fallback or ordinary raw fragment copy. Whole-bank source supersedes selected image spans; no writes to unselected guest gaps."
+    },
+    {
+      "owner": "live date/flag/gift/material selector and substitutions",
+      "requirement": "Golden common shop case9 uses signed shop type0 from descriptor/constructor and the registered three weapon-table descriptors at9fd228/+10/+20:33x16 dated rows,2x20 gift rows and11x4 material windows. Date helpersc9d40/ca2a0, seen/required flags and polarity are live inputs. Dated row0 message19 has required flag1c0 false and seen flag1c0, explicitly replacing PS2 special first-visit path; Golden count33 is bounded, not PS2 sentinel scan. Gift rows message+4 supply51/52; item grant and set/clear/required flag fields must use real inventory/flag state. Material path uses actual candidate producer19ddb0, live quantity/availability and at most one RNG selection for positive candidate count; outputs15/16/17 with item-name substitution slot0 and category-name slot1. Do not treat BMD correspondence as proof that old PS2 selector tables/calendar/material arithmetic already implement Golden semantics. The named FTD payload/header hashes and ordinary reader structure are recorded as obligations; runtime binding must coordinate those producers, not author zero inputs."
+    },
+    {
+      "owner": "message-system status, choice/page/parameter and teardown consumers",
+      "requirement": "Common198910 calls2c8770 on the actual published slot; old talk/material tasks poll/release/destroy. Preserve complete message slot state and page transitions, supplied item/category strings and gift/item/flag side effects. Golden entry0 is a choice record whereas mapped legacy messages are all type0; full bank support must not compact/remove new entries or reinterpret numeric old IDs globally. Validate all32mapped entries, special IDs19/51/52/15/16/17, added46..50, both material substitution branches, first/repeated visits, date boundaries, gift grants, empty-material case and reload/destroy; source proof is not a playback/behavior test."
+    }
+  ],
+  "rejected_direct_reference": {
+    "ps2_function": "0x004c26a0",
+    "formed_value": "0x0064732e",
+    "instruction_pc": "0x004c26c4",
+    "classification": "packed .sd ASCII comparison constant, not an address or BMD consumer",
+    "proof": "LUI t4,0x64 and ORI t4,0x732e form little-endian bytes .sd\\0. LBU from caller-supplied buffer t6 plus shifts/OR form a separate four-byte value; BEQ a0,t4 at4c26f4 compares that value. Adjacent LUI/ORI646e732e compares .snd. Neither forms a memory dereference through64732e. Do not bind or rewrite this SDK literal."
+  },
+  "admissions": [
+    {
+      "address": "0x00645240",
+      "ps2_size": 3877,
+      "role": "partition of complete weapon-shop message bank",
+      "golden": {
+        "container": "data_e.cpk",
+        "member_chain": "data_e.cpk::facility/weapon.arc::msg_weapon.bmd",
+        "offset": 0,
+        "size": 15057,
+        "sha256": "2042f076cd21585ab33753b709faf9fc81469ece8de9000832c7a3651b9772ea",
+        "member_size": 15072,
+        "member_sha256": "756760d5815016a0a092287dddd617c98fd74717c1a444dd7d30f515f916ff53",
+        "archive_tail_bytes": 15,
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "locale": "English",
+        "kind": "complete-logical-MSG1-source",
+        "runtime_input": "Owned Steam archive member; no NSO/private files needed."
+      },
+      "layout": {
+        "kind": "semantic-expanded-relocated-message-bank",
+        "ps2_bank_offset": 0,
+        "ps2_partition_size": 3877,
+        "ps2_bank_size": 11421,
+        "golden_bank_size": 15057,
+        "ps2_entry_count": 32,
+        "golden_entry_count": 53,
+        "copy_policy": "do not copy a byte window; route complete resource and translate only legacy IDs by exact label identity",
+        "retained_tail": {
+          "offset": 3877,
+          "size": 0
+        },
+        "entry_coverage": [
+          {
+            "label": "WSHOP_TALK000",
+            "ps2_index": 0,
+            "golden_index": 19,
+            "ps2_intersection": [
+              304,
+              980
+            ],
+            "golden_entry_span": [
+              2772,
+              3448
+            ]
+          },
+          {
+            "label": "WSHOP_TALK001",
+            "ps2_index": 1,
+            "golden_index": 20,
+            "ps2_intersection": [
+              980,
+              1328
+            ],
+            "golden_entry_span": [
+              3448,
+              3796
+            ]
+          },
+          {
+            "label": "WSHOP_TALK002",
+            "ps2_index": 2,
+            "golden_index": 21,
+            "ps2_intersection": [
+              1328,
+              1764
+            ],
+            "golden_entry_span": [
+              3796,
+              4220
+            ]
+          },
+          {
+            "label": "WSHOP_TALK003",
+            "ps2_index": 3,
+            "golden_index": 22,
+            "ps2_intersection": [
+              1764,
+              2132
+            ],
+            "golden_entry_span": [
+              4220,
+              4588
+            ]
+          },
+          {
+            "label": "WSHOP_TALK004",
+            "ps2_index": 4,
+            "golden_index": 23,
+            "ps2_intersection": [
+              2132,
+              2508
+            ],
+            "golden_entry_span": [
+              4588,
+              4964
+            ]
+          },
+          {
+            "label": "WSHOP_TALK005",
+            "ps2_index": 5,
+            "golden_index": 24,
+            "ps2_intersection": [
+              2508,
+              2948
+            ],
+            "golden_entry_span": [
+              4964,
+              5404
+            ]
+          },
+          {
+            "label": "WSHOP_TALK006",
+            "ps2_index": 6,
+            "golden_index": 25,
+            "ps2_intersection": [
+              2948,
+              3248
+            ],
+            "golden_entry_span": [
+              5404,
+              5704
+            ]
+          },
+          {
+            "label": "WSHOP_TALK007",
+            "ps2_index": 7,
+            "golden_index": 26,
+            "ps2_intersection": [
+              3248,
+              3532
+            ],
+            "golden_entry_span": [
+              5704,
+              5988
+            ]
+          },
+          {
+            "label": "WSHOP_TALK008",
+            "ps2_index": 8,
+            "golden_index": 27,
+            "ps2_intersection": [
+              3532,
+              3872
+            ],
+            "golden_entry_span": [
+              5988,
+              6328
+            ]
+          },
+          {
+            "label": "WSHOP_TALK009",
+            "ps2_index": 9,
+            "golden_index": 28,
+            "ps2_intersection": [
+              3872,
+              3877
+            ],
+            "golden_entry_span": [
+              6328,
+              6624
+            ]
+          }
+        ]
+      },
+      "required_seams": [
+        {
+          "owner": "weaponShopTalkUpdate / weapon talk and material task family",
+          "ps2_addresses": [
+            "0x00331a20",
+            "0x00332370",
+            "0x00332520"
+          ],
+          "requirement": "Golden-only resource identity645240 must resolve to complete declared15057-byte/53-entry Golden MSG1 bank, not copy per-partition windows into guest RAM. Bind direct/translated/inlined/native nmMesWindowAcquire calls and retain PS2-mode bank. Preserve all label/page/message-body/relocation/speaker data together; allocate/parse native message work using actual32-to64-bit relocation-aware BMD manager, not store host pointers in image bytes or copy the larger file over11421-byte PS2 storage."
+        },
+        {
+          "owner": "legacy versus Golden message selector namespace",
+          "requirement": "Legacy PS2 message IDs0..26 map to Golden19..45;27/28 map51/52;29/30/31 map15/16/17. Preserve -1 no-message behavior. Golden fclWeaponTalk.ftd and fclWeaponTalkCmm.ftd already carry Golden IDs; DO NOT translate them again. Use explicit source namespace at call boundary, not numeric threshold heuristics. First-visit PS2 literal0 is WSHOP_TALK000 ->19, not new Golden selection-entry0. All32old labels join uniquely with matching entry kind and page count;21new Golden entries remain part of complete bank."
+        },
+        {
+          "owner": "Golden weapon resource descriptor / real message-handle producer and lifetime",
+          "requirement": "Constructor1b15d0 passes descriptor764fe0 to1987f0; descriptor+8 ->764f98 filenames, first609fd6 facility/msg_weapon.bmd, descriptor+16 ->764fc8 facility/weapon.arc. Common shop task198910 selects that descriptor, waits actual requests, copies first BMD request to work+878 then calls2c85b0, stores actual slot at work+0c.2c85b0->2d8240->2d8440 validates/parses MSG1 and widens offsets. Runtime adapter must preserve readiness, owned backing lifetime, valid slot creation/status/release and reload. No default0, fake handle, PS2 resource fallback or ordinary raw fragment copy. Whole-bank source supersedes selected image spans; no writes to unselected guest gaps."
+        },
+        {
+          "owner": "live date/flag/gift/material selector and substitutions",
+          "requirement": "Golden common shop case9 uses signed shop type0 from descriptor/constructor and the registered three weapon-table descriptors at9fd228/+10/+20:33x16 dated rows,2x20 gift rows and11x4 material windows. Date helpersc9d40/ca2a0, seen/required flags and polarity are live inputs. Dated row0 message19 has required flag1c0 false and seen flag1c0, explicitly replacing PS2 special first-visit path; Golden count33 is bounded, not PS2 sentinel scan. Gift rows message+4 supply51/52; item grant and set/clear/required flag fields must use real inventory/flag state. Material path uses actual candidate producer19ddb0, live quantity/availability and at most one RNG selection for positive candidate count; outputs15/16/17 with item-name substitution slot0 and category-name slot1. Do not treat BMD correspondence as proof that old PS2 selector tables/calendar/material arithmetic already implement Golden semantics. The named FTD payload/header hashes and ordinary reader structure are recorded as obligations; runtime binding must coordinate those producers, not author zero inputs."
+        },
+        {
+          "owner": "message-system status, choice/page/parameter and teardown consumers",
+          "requirement": "Common198910 calls2c8770 on the actual published slot; old talk/material tasks poll/release/destroy. Preserve complete message slot state and page transitions, supplied item/category strings and gift/item/flag side effects. Golden entry0 is a choice record whereas mapped legacy messages are all type0; full bank support must not compact/remove new entries or reinterpret numeric old IDs globally. Validate all32mapped entries, special IDs19/51/52/15/16/17, added46..50, both material substitution branches, first/repeated visits, date boundaries, gift grants, empty-material case and reload/destroy; source proof is not a playback/behavior test."
+        }
+      ]
+    },
+    {
+      "address": "0x0064616f",
+      "ps2_size": 1021,
+      "role": "partition of complete weapon-shop message bank",
+      "golden": {
+        "container": "data_e.cpk",
+        "member_chain": "data_e.cpk::facility/weapon.arc::msg_weapon.bmd",
+        "offset": 0,
+        "size": 15057,
+        "sha256": "2042f076cd21585ab33753b709faf9fc81469ece8de9000832c7a3651b9772ea",
+        "member_size": 15072,
+        "member_sha256": "756760d5815016a0a092287dddd617c98fd74717c1a444dd7d30f515f916ff53",
+        "archive_tail_bytes": 15,
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "locale": "English",
+        "kind": "complete-logical-MSG1-source",
+        "runtime_input": "Owned Steam archive member; no NSO/private files needed."
+      },
+      "layout": {
+        "kind": "semantic-expanded-relocated-message-bank",
+        "ps2_bank_offset": 3887,
+        "ps2_partition_size": 1021,
+        "ps2_bank_size": 11421,
+        "golden_bank_size": 15057,
+        "ps2_entry_count": 32,
+        "golden_entry_count": 53,
+        "copy_policy": "do not copy a byte window; route complete resource and translate only legacy IDs by exact label identity",
+        "retained_tail": {
+          "offset": 1021,
+          "size": 0
+        },
+        "entry_coverage": [
+          {
+            "label": "WSHOP_TALK009",
+            "ps2_index": 9,
+            "golden_index": 28,
+            "ps2_intersection": [
+              3887,
+              4168
+            ],
+            "golden_entry_span": [
+              6328,
+              6624
+            ]
+          },
+          {
+            "label": "WSHOP_TALK010",
+            "ps2_index": 10,
+            "golden_index": 29,
+            "ps2_intersection": [
+              4168,
+              4496
+            ],
+            "golden_entry_span": [
+              6624,
+              6952
+            ]
+          },
+          {
+            "label": "WSHOP_TALK011",
+            "ps2_index": 11,
+            "golden_index": 30,
+            "ps2_intersection": [
+              4496,
+              4844
+            ],
+            "golden_entry_span": [
+              6952,
+              7248
+            ]
+          },
+          {
+            "label": "WSHOP_TALK012",
+            "ps2_index": 12,
+            "golden_index": 31,
+            "ps2_intersection": [
+              4844,
+              4908
+            ],
+            "golden_entry_span": [
+              7248,
+              7620
+            ]
+          }
+        ]
+      },
+      "required_seams": [
+        {
+          "owner": "weaponShopTalkUpdate / weapon talk and material task family",
+          "ps2_addresses": [
+            "0x00331a20",
+            "0x00332370",
+            "0x00332520"
+          ],
+          "requirement": "Golden-only resource identity645240 must resolve to complete declared15057-byte/53-entry Golden MSG1 bank, not copy per-partition windows into guest RAM. Bind direct/translated/inlined/native nmMesWindowAcquire calls and retain PS2-mode bank. Preserve all label/page/message-body/relocation/speaker data together; allocate/parse native message work using actual32-to64-bit relocation-aware BMD manager, not store host pointers in image bytes or copy the larger file over11421-byte PS2 storage."
+        },
+        {
+          "owner": "legacy versus Golden message selector namespace",
+          "requirement": "Legacy PS2 message IDs0..26 map to Golden19..45;27/28 map51/52;29/30/31 map15/16/17. Preserve -1 no-message behavior. Golden fclWeaponTalk.ftd and fclWeaponTalkCmm.ftd already carry Golden IDs; DO NOT translate them again. Use explicit source namespace at call boundary, not numeric threshold heuristics. First-visit PS2 literal0 is WSHOP_TALK000 ->19, not new Golden selection-entry0. All32old labels join uniquely with matching entry kind and page count;21new Golden entries remain part of complete bank."
+        },
+        {
+          "owner": "Golden weapon resource descriptor / real message-handle producer and lifetime",
+          "requirement": "Constructor1b15d0 passes descriptor764fe0 to1987f0; descriptor+8 ->764f98 filenames, first609fd6 facility/msg_weapon.bmd, descriptor+16 ->764fc8 facility/weapon.arc. Common shop task198910 selects that descriptor, waits actual requests, copies first BMD request to work+878 then calls2c85b0, stores actual slot at work+0c.2c85b0->2d8240->2d8440 validates/parses MSG1 and widens offsets. Runtime adapter must preserve readiness, owned backing lifetime, valid slot creation/status/release and reload. No default0, fake handle, PS2 resource fallback or ordinary raw fragment copy. Whole-bank source supersedes selected image spans; no writes to unselected guest gaps."
+        },
+        {
+          "owner": "live date/flag/gift/material selector and substitutions",
+          "requirement": "Golden common shop case9 uses signed shop type0 from descriptor/constructor and the registered three weapon-table descriptors at9fd228/+10/+20:33x16 dated rows,2x20 gift rows and11x4 material windows. Date helpersc9d40/ca2a0, seen/required flags and polarity are live inputs. Dated row0 message19 has required flag1c0 false and seen flag1c0, explicitly replacing PS2 special first-visit path; Golden count33 is bounded, not PS2 sentinel scan. Gift rows message+4 supply51/52; item grant and set/clear/required flag fields must use real inventory/flag state. Material path uses actual candidate producer19ddb0, live quantity/availability and at most one RNG selection for positive candidate count; outputs15/16/17 with item-name substitution slot0 and category-name slot1. Do not treat BMD correspondence as proof that old PS2 selector tables/calendar/material arithmetic already implement Golden semantics. The named FTD payload/header hashes and ordinary reader structure are recorded as obligations; runtime binding must coordinate those producers, not author zero inputs."
+        },
+        {
+          "owner": "message-system status, choice/page/parameter and teardown consumers",
+          "requirement": "Common198910 calls2c8770 on the actual published slot; old talk/material tasks poll/release/destroy. Preserve complete message slot state and page transitions, supplied item/category strings and gift/item/flag side effects. Golden entry0 is a choice record whereas mapped legacy messages are all type0; full bank support must not compact/remove new entries or reinterpret numeric old IDs globally. Validate all32mapped entries, special IDs19/51/52/15/16/17, added46..50, both material substitution branches, first/repeated visits, date boundaries, gift grants, empty-material case and reload/destroy; source proof is not a playback/behavior test."
+        }
+      ]
+    },
+    {
+      "address": "0x00646673",
+      "ps2_size": 685,
+      "role": "partition of complete weapon-shop message bank",
+      "golden": {
+        "container": "data_e.cpk",
+        "member_chain": "data_e.cpk::facility/weapon.arc::msg_weapon.bmd",
+        "offset": 0,
+        "size": 15057,
+        "sha256": "2042f076cd21585ab33753b709faf9fc81469ece8de9000832c7a3651b9772ea",
+        "member_size": 15072,
+        "member_sha256": "756760d5815016a0a092287dddd617c98fd74717c1a444dd7d30f515f916ff53",
+        "archive_tail_bytes": 15,
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "locale": "English",
+        "kind": "complete-logical-MSG1-source",
+        "runtime_input": "Owned Steam archive member; no NSO/private files needed."
+      },
+      "layout": {
+        "kind": "semantic-expanded-relocated-message-bank",
+        "ps2_bank_offset": 5171,
+        "ps2_partition_size": 685,
+        "ps2_bank_size": 11421,
+        "golden_bank_size": 15057,
+        "ps2_entry_count": 32,
+        "golden_entry_count": 53,
+        "copy_policy": "do not copy a byte window; route complete resource and translate only legacy IDs by exact label identity",
+        "retained_tail": {
+          "offset": 685,
+          "size": 0
+        },
+        "entry_coverage": [
+          {
+            "label": "WSHOP_TALK012",
+            "ps2_index": 12,
+            "golden_index": 31,
+            "ps2_intersection": [
+              5171,
+              5216
+            ],
+            "golden_entry_span": [
+              7248,
+              7620
+            ]
+          },
+          {
+            "label": "WSHOP_TALK013",
+            "ps2_index": 13,
+            "golden_index": 32,
+            "ps2_intersection": [
+              5216,
+              5684
+            ],
+            "golden_entry_span": [
+              7620,
+              8088
+            ]
+          },
+          {
+            "label": "WSHOP_TALK014",
+            "ps2_index": 14,
+            "golden_index": 33,
+            "ps2_intersection": [
+              5684,
+              5856
+            ],
+            "golden_entry_span": [
+              8088,
+              8380
+            ]
+          }
+        ]
+      },
+      "required_seams": [
+        {
+          "owner": "weaponShopTalkUpdate / weapon talk and material task family",
+          "ps2_addresses": [
+            "0x00331a20",
+            "0x00332370",
+            "0x00332520"
+          ],
+          "requirement": "Golden-only resource identity645240 must resolve to complete declared15057-byte/53-entry Golden MSG1 bank, not copy per-partition windows into guest RAM. Bind direct/translated/inlined/native nmMesWindowAcquire calls and retain PS2-mode bank. Preserve all label/page/message-body/relocation/speaker data together; allocate/parse native message work using actual32-to64-bit relocation-aware BMD manager, not store host pointers in image bytes or copy the larger file over11421-byte PS2 storage."
+        },
+        {
+          "owner": "legacy versus Golden message selector namespace",
+          "requirement": "Legacy PS2 message IDs0..26 map to Golden19..45;27/28 map51/52;29/30/31 map15/16/17. Preserve -1 no-message behavior. Golden fclWeaponTalk.ftd and fclWeaponTalkCmm.ftd already carry Golden IDs; DO NOT translate them again. Use explicit source namespace at call boundary, not numeric threshold heuristics. First-visit PS2 literal0 is WSHOP_TALK000 ->19, not new Golden selection-entry0. All32old labels join uniquely with matching entry kind and page count;21new Golden entries remain part of complete bank."
+        },
+        {
+          "owner": "Golden weapon resource descriptor / real message-handle producer and lifetime",
+          "requirement": "Constructor1b15d0 passes descriptor764fe0 to1987f0; descriptor+8 ->764f98 filenames, first609fd6 facility/msg_weapon.bmd, descriptor+16 ->764fc8 facility/weapon.arc. Common shop task198910 selects that descriptor, waits actual requests, copies first BMD request to work+878 then calls2c85b0, stores actual slot at work+0c.2c85b0->2d8240->2d8440 validates/parses MSG1 and widens offsets. Runtime adapter must preserve readiness, owned backing lifetime, valid slot creation/status/release and reload. No default0, fake handle, PS2 resource fallback or ordinary raw fragment copy. Whole-bank source supersedes selected image spans; no writes to unselected guest gaps."
+        },
+        {
+          "owner": "live date/flag/gift/material selector and substitutions",
+          "requirement": "Golden common shop case9 uses signed shop type0 from descriptor/constructor and the registered three weapon-table descriptors at9fd228/+10/+20:33x16 dated rows,2x20 gift rows and11x4 material windows. Date helpersc9d40/ca2a0, seen/required flags and polarity are live inputs. Dated row0 message19 has required flag1c0 false and seen flag1c0, explicitly replacing PS2 special first-visit path; Golden count33 is bounded, not PS2 sentinel scan. Gift rows message+4 supply51/52; item grant and set/clear/required flag fields must use real inventory/flag state. Material path uses actual candidate producer19ddb0, live quantity/availability and at most one RNG selection for positive candidate count; outputs15/16/17 with item-name substitution slot0 and category-name slot1. Do not treat BMD correspondence as proof that old PS2 selector tables/calendar/material arithmetic already implement Golden semantics. The named FTD payload/header hashes and ordinary reader structure are recorded as obligations; runtime binding must coordinate those producers, not author zero inputs."
+        },
+        {
+          "owner": "message-system status, choice/page/parameter and teardown consumers",
+          "requirement": "Common198910 calls2c8770 on the actual published slot; old talk/material tasks poll/release/destroy. Preserve complete message slot state and page transitions, supplied item/category strings and gift/item/flag side effects. Golden entry0 is a choice record whereas mapped legacy messages are all type0; full bank support must not compact/remove new entries or reinterpret numeric old IDs globally. Validate all32mapped entries, special IDs19/51/52/15/16/17, added46..50, both material substitution branches, first/repeated visits, date boundaries, gift grants, empty-material case and reload/destroy; source proof is not a playback/behavior test."
+        }
+      ]
+    },
+    {
+      "address": "0x00646961",
+      "ps2_size": 768,
+      "role": "partition of complete weapon-shop message bank",
+      "golden": {
+        "container": "data_e.cpk",
+        "member_chain": "data_e.cpk::facility/weapon.arc::msg_weapon.bmd",
+        "offset": 0,
+        "size": 15057,
+        "sha256": "2042f076cd21585ab33753b709faf9fc81469ece8de9000832c7a3651b9772ea",
+        "member_size": 15072,
+        "member_sha256": "756760d5815016a0a092287dddd617c98fd74717c1a444dd7d30f515f916ff53",
+        "archive_tail_bytes": 15,
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "locale": "English",
+        "kind": "complete-logical-MSG1-source",
+        "runtime_input": "Owned Steam archive member; no NSO/private files needed."
+      },
+      "layout": {
+        "kind": "semantic-expanded-relocated-message-bank",
+        "ps2_bank_offset": 5921,
+        "ps2_partition_size": 768,
+        "ps2_bank_size": 11421,
+        "golden_bank_size": 15057,
+        "ps2_entry_count": 32,
+        "golden_entry_count": 53,
+        "copy_policy": "do not copy a byte window; route complete resource and translate only legacy IDs by exact label identity",
+        "retained_tail": {
+          "offset": 768,
+          "size": 0
+        },
+        "entry_coverage": [
+          {
+            "label": "WSHOP_TALK014",
+            "ps2_index": 14,
+            "golden_index": 33,
+            "ps2_intersection": [
+              5921,
+              5976
+            ],
+            "golden_entry_span": [
+              8088,
+              8380
+            ]
+          },
+          {
+            "label": "WSHOP_TALK015",
+            "ps2_index": 15,
+            "golden_index": 34,
+            "ps2_intersection": [
+              5976,
+              6248
+            ],
+            "golden_entry_span": [
+              8380,
+              8652
+            ]
+          },
+          {
+            "label": "WSHOP_TALK016",
+            "ps2_index": 16,
+            "golden_index": 35,
+            "ps2_intersection": [
+              6248,
+              6548
+            ],
+            "golden_entry_span": [
+              8652,
+              8952
+            ]
+          },
+          {
+            "label": "WSHOP_TALK017",
+            "ps2_index": 17,
+            "golden_index": 36,
+            "ps2_intersection": [
+              6548,
+              6689
+            ],
+            "golden_entry_span": [
+              8952,
+              9316
+            ]
+          }
+        ]
+      },
+      "required_seams": [
+        {
+          "owner": "weaponShopTalkUpdate / weapon talk and material task family",
+          "ps2_addresses": [
+            "0x00331a20",
+            "0x00332370",
+            "0x00332520"
+          ],
+          "requirement": "Golden-only resource identity645240 must resolve to complete declared15057-byte/53-entry Golden MSG1 bank, not copy per-partition windows into guest RAM. Bind direct/translated/inlined/native nmMesWindowAcquire calls and retain PS2-mode bank. Preserve all label/page/message-body/relocation/speaker data together; allocate/parse native message work using actual32-to64-bit relocation-aware BMD manager, not store host pointers in image bytes or copy the larger file over11421-byte PS2 storage."
+        },
+        {
+          "owner": "legacy versus Golden message selector namespace",
+          "requirement": "Legacy PS2 message IDs0..26 map to Golden19..45;27/28 map51/52;29/30/31 map15/16/17. Preserve -1 no-message behavior. Golden fclWeaponTalk.ftd and fclWeaponTalkCmm.ftd already carry Golden IDs; DO NOT translate them again. Use explicit source namespace at call boundary, not numeric threshold heuristics. First-visit PS2 literal0 is WSHOP_TALK000 ->19, not new Golden selection-entry0. All32old labels join uniquely with matching entry kind and page count;21new Golden entries remain part of complete bank."
+        },
+        {
+          "owner": "Golden weapon resource descriptor / real message-handle producer and lifetime",
+          "requirement": "Constructor1b15d0 passes descriptor764fe0 to1987f0; descriptor+8 ->764f98 filenames, first609fd6 facility/msg_weapon.bmd, descriptor+16 ->764fc8 facility/weapon.arc. Common shop task198910 selects that descriptor, waits actual requests, copies first BMD request to work+878 then calls2c85b0, stores actual slot at work+0c.2c85b0->2d8240->2d8440 validates/parses MSG1 and widens offsets. Runtime adapter must preserve readiness, owned backing lifetime, valid slot creation/status/release and reload. No default0, fake handle, PS2 resource fallback or ordinary raw fragment copy. Whole-bank source supersedes selected image spans; no writes to unselected guest gaps."
+        },
+        {
+          "owner": "live date/flag/gift/material selector and substitutions",
+          "requirement": "Golden common shop case9 uses signed shop type0 from descriptor/constructor and the registered three weapon-table descriptors at9fd228/+10/+20:33x16 dated rows,2x20 gift rows and11x4 material windows. Date helpersc9d40/ca2a0, seen/required flags and polarity are live inputs. Dated row0 message19 has required flag1c0 false and seen flag1c0, explicitly replacing PS2 special first-visit path; Golden count33 is bounded, not PS2 sentinel scan. Gift rows message+4 supply51/52; item grant and set/clear/required flag fields must use real inventory/flag state. Material path uses actual candidate producer19ddb0, live quantity/availability and at most one RNG selection for positive candidate count; outputs15/16/17 with item-name substitution slot0 and category-name slot1. Do not treat BMD correspondence as proof that old PS2 selector tables/calendar/material arithmetic already implement Golden semantics. The named FTD payload/header hashes and ordinary reader structure are recorded as obligations; runtime binding must coordinate those producers, not author zero inputs."
+        },
+        {
+          "owner": "message-system status, choice/page/parameter and teardown consumers",
+          "requirement": "Common198910 calls2c8770 on the actual published slot; old talk/material tasks poll/release/destroy. Preserve complete message slot state and page transitions, supplied item/category strings and gift/item/flag side effects. Golden entry0 is a choice record whereas mapped legacy messages are all type0; full bank support must not compact/remove new entries or reinterpret numeric old IDs globally. Validate all32mapped entries, special IDs19/51/52/15/16/17, added46..50, both material substitution branches, first/repeated visits, date boundaries, gift grants, empty-material case and reload/destroy; source proof is not a playback/behavior test."
+        }
+      ]
+    },
+    {
+      "address": "0x00646c61",
+      "ps2_size": 257,
+      "role": "partition of complete weapon-shop message bank",
+      "golden": {
+        "container": "data_e.cpk",
+        "member_chain": "data_e.cpk::facility/weapon.arc::msg_weapon.bmd",
+        "offset": 0,
+        "size": 15057,
+        "sha256": "2042f076cd21585ab33753b709faf9fc81469ece8de9000832c7a3651b9772ea",
+        "member_size": 15072,
+        "member_sha256": "756760d5815016a0a092287dddd617c98fd74717c1a444dd7d30f515f916ff53",
+        "archive_tail_bytes": 15,
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "locale": "English",
+        "kind": "complete-logical-MSG1-source",
+        "runtime_input": "Owned Steam archive member; no NSO/private files needed."
+      },
+      "layout": {
+        "kind": "semantic-expanded-relocated-message-bank",
+        "ps2_bank_offset": 6689,
+        "ps2_partition_size": 257,
+        "ps2_bank_size": 11421,
+        "golden_bank_size": 15057,
+        "ps2_entry_count": 32,
+        "golden_entry_count": 53,
+        "copy_policy": "do not copy a byte window; route complete resource and translate only legacy IDs by exact label identity",
+        "retained_tail": {
+          "offset": 257,
+          "size": 0
+        },
+        "entry_coverage": [
+          {
+            "label": "WSHOP_TALK017",
+            "ps2_index": 17,
+            "golden_index": 36,
+            "ps2_intersection": [
+              6689,
+              6912
+            ],
+            "golden_entry_span": [
+              8952,
+              9316
+            ]
+          },
+          {
+            "label": "WSHOP_TALK018",
+            "ps2_index": 18,
+            "golden_index": 37,
+            "ps2_intersection": [
+              6912,
+              6946
+            ],
+            "golden_entry_span": [
+              9316,
+              9572
+            ]
+          }
+        ]
+      },
+      "required_seams": [
+        {
+          "owner": "weaponShopTalkUpdate / weapon talk and material task family",
+          "ps2_addresses": [
+            "0x00331a20",
+            "0x00332370",
+            "0x00332520"
+          ],
+          "requirement": "Golden-only resource identity645240 must resolve to complete declared15057-byte/53-entry Golden MSG1 bank, not copy per-partition windows into guest RAM. Bind direct/translated/inlined/native nmMesWindowAcquire calls and retain PS2-mode bank. Preserve all label/page/message-body/relocation/speaker data together; allocate/parse native message work using actual32-to64-bit relocation-aware BMD manager, not store host pointers in image bytes or copy the larger file over11421-byte PS2 storage."
+        },
+        {
+          "owner": "legacy versus Golden message selector namespace",
+          "requirement": "Legacy PS2 message IDs0..26 map to Golden19..45;27/28 map51/52;29/30/31 map15/16/17. Preserve -1 no-message behavior. Golden fclWeaponTalk.ftd and fclWeaponTalkCmm.ftd already carry Golden IDs; DO NOT translate them again. Use explicit source namespace at call boundary, not numeric threshold heuristics. First-visit PS2 literal0 is WSHOP_TALK000 ->19, not new Golden selection-entry0. All32old labels join uniquely with matching entry kind and page count;21new Golden entries remain part of complete bank."
+        },
+        {
+          "owner": "Golden weapon resource descriptor / real message-handle producer and lifetime",
+          "requirement": "Constructor1b15d0 passes descriptor764fe0 to1987f0; descriptor+8 ->764f98 filenames, first609fd6 facility/msg_weapon.bmd, descriptor+16 ->764fc8 facility/weapon.arc. Common shop task198910 selects that descriptor, waits actual requests, copies first BMD request to work+878 then calls2c85b0, stores actual slot at work+0c.2c85b0->2d8240->2d8440 validates/parses MSG1 and widens offsets. Runtime adapter must preserve readiness, owned backing lifetime, valid slot creation/status/release and reload. No default0, fake handle, PS2 resource fallback or ordinary raw fragment copy. Whole-bank source supersedes selected image spans; no writes to unselected guest gaps."
+        },
+        {
+          "owner": "live date/flag/gift/material selector and substitutions",
+          "requirement": "Golden common shop case9 uses signed shop type0 from descriptor/constructor and the registered three weapon-table descriptors at9fd228/+10/+20:33x16 dated rows,2x20 gift rows and11x4 material windows. Date helpersc9d40/ca2a0, seen/required flags and polarity are live inputs. Dated row0 message19 has required flag1c0 false and seen flag1c0, explicitly replacing PS2 special first-visit path; Golden count33 is bounded, not PS2 sentinel scan. Gift rows message+4 supply51/52; item grant and set/clear/required flag fields must use real inventory/flag state. Material path uses actual candidate producer19ddb0, live quantity/availability and at most one RNG selection for positive candidate count; outputs15/16/17 with item-name substitution slot0 and category-name slot1. Do not treat BMD correspondence as proof that old PS2 selector tables/calendar/material arithmetic already implement Golden semantics. The named FTD payload/header hashes and ordinary reader structure are recorded as obligations; runtime binding must coordinate those producers, not author zero inputs."
+        },
+        {
+          "owner": "message-system status, choice/page/parameter and teardown consumers",
+          "requirement": "Common198910 calls2c8770 on the actual published slot; old talk/material tasks poll/release/destroy. Preserve complete message slot state and page transitions, supplied item/category strings and gift/item/flag side effects. Golden entry0 is a choice record whereas mapped legacy messages are all type0; full bank support must not compact/remove new entries or reinterpret numeric old IDs globally. Validate all32mapped entries, special IDs19/51/52/15/16/17, added46..50, both material substitution branches, first/repeated visits, date boundaries, gift grants, empty-material case and reload/destroy; source proof is not a playback/behavior test."
+        }
+      ]
+    },
+    {
+      "address": "0x00646d62",
+      "ps2_size": 208,
+      "role": "partition of complete weapon-shop message bank",
+      "golden": {
+        "container": "data_e.cpk",
+        "member_chain": "data_e.cpk::facility/weapon.arc::msg_weapon.bmd",
+        "offset": 0,
+        "size": 15057,
+        "sha256": "2042f076cd21585ab33753b709faf9fc81469ece8de9000832c7a3651b9772ea",
+        "member_size": 15072,
+        "member_sha256": "756760d5815016a0a092287dddd617c98fd74717c1a444dd7d30f515f916ff53",
+        "archive_tail_bytes": 15,
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "locale": "English",
+        "kind": "complete-logical-MSG1-source",
+        "runtime_input": "Owned Steam archive member; no NSO/private files needed."
+      },
+      "layout": {
+        "kind": "semantic-expanded-relocated-message-bank",
+        "ps2_bank_offset": 6946,
+        "ps2_partition_size": 208,
+        "ps2_bank_size": 11421,
+        "golden_bank_size": 15057,
+        "ps2_entry_count": 32,
+        "golden_entry_count": 53,
+        "copy_policy": "do not copy a byte window; route complete resource and translate only legacy IDs by exact label identity",
+        "retained_tail": {
+          "offset": 208,
+          "size": 0
+        },
+        "entry_coverage": [
+          {
+            "label": "WSHOP_TALK018",
+            "ps2_index": 18,
+            "golden_index": 37,
+            "ps2_intersection": [
+              6946,
+              7154
+            ],
+            "golden_entry_span": [
+              9316,
+              9572
+            ]
+          }
+        ]
+      },
+      "required_seams": [
+        {
+          "owner": "weaponShopTalkUpdate / weapon talk and material task family",
+          "ps2_addresses": [
+            "0x00331a20",
+            "0x00332370",
+            "0x00332520"
+          ],
+          "requirement": "Golden-only resource identity645240 must resolve to complete declared15057-byte/53-entry Golden MSG1 bank, not copy per-partition windows into guest RAM. Bind direct/translated/inlined/native nmMesWindowAcquire calls and retain PS2-mode bank. Preserve all label/page/message-body/relocation/speaker data together; allocate/parse native message work using actual32-to64-bit relocation-aware BMD manager, not store host pointers in image bytes or copy the larger file over11421-byte PS2 storage."
+        },
+        {
+          "owner": "legacy versus Golden message selector namespace",
+          "requirement": "Legacy PS2 message IDs0..26 map to Golden19..45;27/28 map51/52;29/30/31 map15/16/17. Preserve -1 no-message behavior. Golden fclWeaponTalk.ftd and fclWeaponTalkCmm.ftd already carry Golden IDs; DO NOT translate them again. Use explicit source namespace at call boundary, not numeric threshold heuristics. First-visit PS2 literal0 is WSHOP_TALK000 ->19, not new Golden selection-entry0. All32old labels join uniquely with matching entry kind and page count;21new Golden entries remain part of complete bank."
+        },
+        {
+          "owner": "Golden weapon resource descriptor / real message-handle producer and lifetime",
+          "requirement": "Constructor1b15d0 passes descriptor764fe0 to1987f0; descriptor+8 ->764f98 filenames, first609fd6 facility/msg_weapon.bmd, descriptor+16 ->764fc8 facility/weapon.arc. Common shop task198910 selects that descriptor, waits actual requests, copies first BMD request to work+878 then calls2c85b0, stores actual slot at work+0c.2c85b0->2d8240->2d8440 validates/parses MSG1 and widens offsets. Runtime adapter must preserve readiness, owned backing lifetime, valid slot creation/status/release and reload. No default0, fake handle, PS2 resource fallback or ordinary raw fragment copy. Whole-bank source supersedes selected image spans; no writes to unselected guest gaps."
+        },
+        {
+          "owner": "live date/flag/gift/material selector and substitutions",
+          "requirement": "Golden common shop case9 uses signed shop type0 from descriptor/constructor and the registered three weapon-table descriptors at9fd228/+10/+20:33x16 dated rows,2x20 gift rows and11x4 material windows. Date helpersc9d40/ca2a0, seen/required flags and polarity are live inputs. Dated row0 message19 has required flag1c0 false and seen flag1c0, explicitly replacing PS2 special first-visit path; Golden count33 is bounded, not PS2 sentinel scan. Gift rows message+4 supply51/52; item grant and set/clear/required flag fields must use real inventory/flag state. Material path uses actual candidate producer19ddb0, live quantity/availability and at most one RNG selection for positive candidate count; outputs15/16/17 with item-name substitution slot0 and category-name slot1. Do not treat BMD correspondence as proof that old PS2 selector tables/calendar/material arithmetic already implement Golden semantics. The named FTD payload/header hashes and ordinary reader structure are recorded as obligations; runtime binding must coordinate those producers, not author zero inputs."
+        },
+        {
+          "owner": "message-system status, choice/page/parameter and teardown consumers",
+          "requirement": "Common198910 calls2c8770 on the actual published slot; old talk/material tasks poll/release/destroy. Preserve complete message slot state and page transitions, supplied item/category strings and gift/item/flag side effects. Golden entry0 is a choice record whereas mapped legacy messages are all type0; full bank support must not compact/remove new entries or reinterpret numeric old IDs globally. Validate all32mapped entries, special IDs19/51/52/15/16/17, added46..50, both material substitution branches, first/repeated visits, date boundaries, gift grants, empty-material case and reload/destroy; source proof is not a playback/behavior test."
+        }
+      ]
+    },
+    {
+      "address": "0x00646e32",
+      "ps2_size": 47,
+      "role": "partition of complete weapon-shop message bank",
+      "golden": {
+        "container": "data_e.cpk",
+        "member_chain": "data_e.cpk::facility/weapon.arc::msg_weapon.bmd",
+        "offset": 0,
+        "size": 15057,
+        "sha256": "2042f076cd21585ab33753b709faf9fc81469ece8de9000832c7a3651b9772ea",
+        "member_size": 15072,
+        "member_sha256": "756760d5815016a0a092287dddd617c98fd74717c1a444dd7d30f515f916ff53",
+        "archive_tail_bytes": 15,
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "locale": "English",
+        "kind": "complete-logical-MSG1-source",
+        "runtime_input": "Owned Steam archive member; no NSO/private files needed."
+      },
+      "layout": {
+        "kind": "semantic-expanded-relocated-message-bank",
+        "ps2_bank_offset": 7154,
+        "ps2_partition_size": 47,
+        "ps2_bank_size": 11421,
+        "golden_bank_size": 15057,
+        "ps2_entry_count": 32,
+        "golden_entry_count": 53,
+        "copy_policy": "do not copy a byte window; route complete resource and translate only legacy IDs by exact label identity",
+        "retained_tail": {
+          "offset": 47,
+          "size": 0
+        },
+        "entry_coverage": [
+          {
+            "label": "WSHOP_TALK018",
+            "ps2_index": 18,
+            "golden_index": 37,
+            "ps2_intersection": [
+              7154,
+              7168
+            ],
+            "golden_entry_span": [
+              9316,
+              9572
+            ]
+          },
+          {
+            "label": "WSHOP_TALK019",
+            "ps2_index": 19,
+            "golden_index": 38,
+            "ps2_intersection": [
+              7168,
+              7201
+            ],
+            "golden_entry_span": [
+              9572,
+              9916
+            ]
+          }
+        ]
+      },
+      "required_seams": [
+        {
+          "owner": "weaponShopTalkUpdate / weapon talk and material task family",
+          "ps2_addresses": [
+            "0x00331a20",
+            "0x00332370",
+            "0x00332520"
+          ],
+          "requirement": "Golden-only resource identity645240 must resolve to complete declared15057-byte/53-entry Golden MSG1 bank, not copy per-partition windows into guest RAM. Bind direct/translated/inlined/native nmMesWindowAcquire calls and retain PS2-mode bank. Preserve all label/page/message-body/relocation/speaker data together; allocate/parse native message work using actual32-to64-bit relocation-aware BMD manager, not store host pointers in image bytes or copy the larger file over11421-byte PS2 storage."
+        },
+        {
+          "owner": "legacy versus Golden message selector namespace",
+          "requirement": "Legacy PS2 message IDs0..26 map to Golden19..45;27/28 map51/52;29/30/31 map15/16/17. Preserve -1 no-message behavior. Golden fclWeaponTalk.ftd and fclWeaponTalkCmm.ftd already carry Golden IDs; DO NOT translate them again. Use explicit source namespace at call boundary, not numeric threshold heuristics. First-visit PS2 literal0 is WSHOP_TALK000 ->19, not new Golden selection-entry0. All32old labels join uniquely with matching entry kind and page count;21new Golden entries remain part of complete bank."
+        },
+        {
+          "owner": "Golden weapon resource descriptor / real message-handle producer and lifetime",
+          "requirement": "Constructor1b15d0 passes descriptor764fe0 to1987f0; descriptor+8 ->764f98 filenames, first609fd6 facility/msg_weapon.bmd, descriptor+16 ->764fc8 facility/weapon.arc. Common shop task198910 selects that descriptor, waits actual requests, copies first BMD request to work+878 then calls2c85b0, stores actual slot at work+0c.2c85b0->2d8240->2d8440 validates/parses MSG1 and widens offsets. Runtime adapter must preserve readiness, owned backing lifetime, valid slot creation/status/release and reload. No default0, fake handle, PS2 resource fallback or ordinary raw fragment copy. Whole-bank source supersedes selected image spans; no writes to unselected guest gaps."
+        },
+        {
+          "owner": "live date/flag/gift/material selector and substitutions",
+          "requirement": "Golden common shop case9 uses signed shop type0 from descriptor/constructor and the registered three weapon-table descriptors at9fd228/+10/+20:33x16 dated rows,2x20 gift rows and11x4 material windows. Date helpersc9d40/ca2a0, seen/required flags and polarity are live inputs. Dated row0 message19 has required flag1c0 false and seen flag1c0, explicitly replacing PS2 special first-visit path; Golden count33 is bounded, not PS2 sentinel scan. Gift rows message+4 supply51/52; item grant and set/clear/required flag fields must use real inventory/flag state. Material path uses actual candidate producer19ddb0, live quantity/availability and at most one RNG selection for positive candidate count; outputs15/16/17 with item-name substitution slot0 and category-name slot1. Do not treat BMD correspondence as proof that old PS2 selector tables/calendar/material arithmetic already implement Golden semantics. The named FTD payload/header hashes and ordinary reader structure are recorded as obligations; runtime binding must coordinate those producers, not author zero inputs."
+        },
+        {
+          "owner": "message-system status, choice/page/parameter and teardown consumers",
+          "requirement": "Common198910 calls2c8770 on the actual published slot; old talk/material tasks poll/release/destroy. Preserve complete message slot state and page transitions, supplied item/category strings and gift/item/flag side effects. Golden entry0 is a choice record whereas mapped legacy messages are all type0; full bank support must not compact/remove new entries or reinterpret numeric old IDs globally. Validate all32mapped entries, special IDs19/51/52/15/16/17, added46..50, both material substitution branches, first/repeated visits, date boundaries, gift grants, empty-material case and reload/destroy; source proof is not a playback/behavior test."
+        }
+      ]
+    },
+    {
+      "address": "0x00646f47",
+      "ps2_size": 794,
+      "role": "partition of complete weapon-shop message bank",
+      "golden": {
+        "container": "data_e.cpk",
+        "member_chain": "data_e.cpk::facility/weapon.arc::msg_weapon.bmd",
+        "offset": 0,
+        "size": 15057,
+        "sha256": "2042f076cd21585ab33753b709faf9fc81469ece8de9000832c7a3651b9772ea",
+        "member_size": 15072,
+        "member_sha256": "756760d5815016a0a092287dddd617c98fd74717c1a444dd7d30f515f916ff53",
+        "archive_tail_bytes": 15,
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "locale": "English",
+        "kind": "complete-logical-MSG1-source",
+        "runtime_input": "Owned Steam archive member; no NSO/private files needed."
+      },
+      "layout": {
+        "kind": "semantic-expanded-relocated-message-bank",
+        "ps2_bank_offset": 7431,
+        "ps2_partition_size": 794,
+        "ps2_bank_size": 11421,
+        "golden_bank_size": 15057,
+        "ps2_entry_count": 32,
+        "golden_entry_count": 53,
+        "copy_policy": "do not copy a byte window; route complete resource and translate only legacy IDs by exact label identity",
+        "retained_tail": {
+          "offset": 794,
+          "size": 0
+        },
+        "entry_coverage": [
+          {
+            "label": "WSHOP_TALK019",
+            "ps2_index": 19,
+            "golden_index": 38,
+            "ps2_intersection": [
+              7431,
+              7512
+            ],
+            "golden_entry_span": [
+              9572,
+              9916
+            ]
+          },
+          {
+            "label": "WSHOP_TALK020",
+            "ps2_index": 20,
+            "golden_index": 39,
+            "ps2_intersection": [
+              7512,
+              7900
+            ],
+            "golden_entry_span": [
+              9916,
+              10304
+            ]
+          },
+          {
+            "label": "WSHOP_TALK021",
+            "ps2_index": 21,
+            "golden_index": 40,
+            "ps2_intersection": [
+              7900,
+              8225
+            ],
+            "golden_entry_span": [
+              10304,
+              10688
+            ]
+          }
+        ]
+      },
+      "required_seams": [
+        {
+          "owner": "weaponShopTalkUpdate / weapon talk and material task family",
+          "ps2_addresses": [
+            "0x00331a20",
+            "0x00332370",
+            "0x00332520"
+          ],
+          "requirement": "Golden-only resource identity645240 must resolve to complete declared15057-byte/53-entry Golden MSG1 bank, not copy per-partition windows into guest RAM. Bind direct/translated/inlined/native nmMesWindowAcquire calls and retain PS2-mode bank. Preserve all label/page/message-body/relocation/speaker data together; allocate/parse native message work using actual32-to64-bit relocation-aware BMD manager, not store host pointers in image bytes or copy the larger file over11421-byte PS2 storage."
+        },
+        {
+          "owner": "legacy versus Golden message selector namespace",
+          "requirement": "Legacy PS2 message IDs0..26 map to Golden19..45;27/28 map51/52;29/30/31 map15/16/17. Preserve -1 no-message behavior. Golden fclWeaponTalk.ftd and fclWeaponTalkCmm.ftd already carry Golden IDs; DO NOT translate them again. Use explicit source namespace at call boundary, not numeric threshold heuristics. First-visit PS2 literal0 is WSHOP_TALK000 ->19, not new Golden selection-entry0. All32old labels join uniquely with matching entry kind and page count;21new Golden entries remain part of complete bank."
+        },
+        {
+          "owner": "Golden weapon resource descriptor / real message-handle producer and lifetime",
+          "requirement": "Constructor1b15d0 passes descriptor764fe0 to1987f0; descriptor+8 ->764f98 filenames, first609fd6 facility/msg_weapon.bmd, descriptor+16 ->764fc8 facility/weapon.arc. Common shop task198910 selects that descriptor, waits actual requests, copies first BMD request to work+878 then calls2c85b0, stores actual slot at work+0c.2c85b0->2d8240->2d8440 validates/parses MSG1 and widens offsets. Runtime adapter must preserve readiness, owned backing lifetime, valid slot creation/status/release and reload. No default0, fake handle, PS2 resource fallback or ordinary raw fragment copy. Whole-bank source supersedes selected image spans; no writes to unselected guest gaps."
+        },
+        {
+          "owner": "live date/flag/gift/material selector and substitutions",
+          "requirement": "Golden common shop case9 uses signed shop type0 from descriptor/constructor and the registered three weapon-table descriptors at9fd228/+10/+20:33x16 dated rows,2x20 gift rows and11x4 material windows. Date helpersc9d40/ca2a0, seen/required flags and polarity are live inputs. Dated row0 message19 has required flag1c0 false and seen flag1c0, explicitly replacing PS2 special first-visit path; Golden count33 is bounded, not PS2 sentinel scan. Gift rows message+4 supply51/52; item grant and set/clear/required flag fields must use real inventory/flag state. Material path uses actual candidate producer19ddb0, live quantity/availability and at most one RNG selection for positive candidate count; outputs15/16/17 with item-name substitution slot0 and category-name slot1. Do not treat BMD correspondence as proof that old PS2 selector tables/calendar/material arithmetic already implement Golden semantics. The named FTD payload/header hashes and ordinary reader structure are recorded as obligations; runtime binding must coordinate those producers, not author zero inputs."
+        },
+        {
+          "owner": "message-system status, choice/page/parameter and teardown consumers",
+          "requirement": "Common198910 calls2c8770 on the actual published slot; old talk/material tasks poll/release/destroy. Preserve complete message slot state and page transitions, supplied item/category strings and gift/item/flag side effects. Golden entry0 is a choice record whereas mapped legacy messages are all type0; full bank support must not compact/remove new entries or reinterpret numeric old IDs globally. Validate all32mapped entries, special IDs19/51/52/15/16/17, added46..50, both material substitution branches, first/repeated visits, date boundaries, gift grants, empty-material case and reload/destroy; source proof is not a playback/behavior test."
+        }
+      ]
+    },
+    {
+      "address": "0x0064726f",
+      "ps2_size": 191,
+      "role": "partition of complete weapon-shop message bank",
+      "golden": {
+        "container": "data_e.cpk",
+        "member_chain": "data_e.cpk::facility/weapon.arc::msg_weapon.bmd",
+        "offset": 0,
+        "size": 15057,
+        "sha256": "2042f076cd21585ab33753b709faf9fc81469ece8de9000832c7a3651b9772ea",
+        "member_size": 15072,
+        "member_sha256": "756760d5815016a0a092287dddd617c98fd74717c1a444dd7d30f515f916ff53",
+        "archive_tail_bytes": 15,
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "locale": "English",
+        "kind": "complete-logical-MSG1-source",
+        "runtime_input": "Owned Steam archive member; no NSO/private files needed."
+      },
+      "layout": {
+        "kind": "semantic-expanded-relocated-message-bank",
+        "ps2_bank_offset": 8239,
+        "ps2_partition_size": 191,
+        "ps2_bank_size": 11421,
+        "golden_bank_size": 15057,
+        "ps2_entry_count": 32,
+        "golden_entry_count": 53,
+        "copy_policy": "do not copy a byte window; route complete resource and translate only legacy IDs by exact label identity",
+        "retained_tail": {
+          "offset": 191,
+          "size": 0
+        },
+        "entry_coverage": [
+          {
+            "label": "WSHOP_TALK021",
+            "ps2_index": 21,
+            "golden_index": 40,
+            "ps2_intersection": [
+              8239,
+              8284
+            ],
+            "golden_entry_span": [
+              10304,
+              10688
+            ]
+          },
+          {
+            "label": "WSHOP_TALK022",
+            "ps2_index": 22,
+            "golden_index": 41,
+            "ps2_intersection": [
+              8284,
+              8430
+            ],
+            "golden_entry_span": [
+              10688,
+              10936
+            ]
+          }
+        ]
+      },
+      "required_seams": [
+        {
+          "owner": "weaponShopTalkUpdate / weapon talk and material task family",
+          "ps2_addresses": [
+            "0x00331a20",
+            "0x00332370",
+            "0x00332520"
+          ],
+          "requirement": "Golden-only resource identity645240 must resolve to complete declared15057-byte/53-entry Golden MSG1 bank, not copy per-partition windows into guest RAM. Bind direct/translated/inlined/native nmMesWindowAcquire calls and retain PS2-mode bank. Preserve all label/page/message-body/relocation/speaker data together; allocate/parse native message work using actual32-to64-bit relocation-aware BMD manager, not store host pointers in image bytes or copy the larger file over11421-byte PS2 storage."
+        },
+        {
+          "owner": "legacy versus Golden message selector namespace",
+          "requirement": "Legacy PS2 message IDs0..26 map to Golden19..45;27/28 map51/52;29/30/31 map15/16/17. Preserve -1 no-message behavior. Golden fclWeaponTalk.ftd and fclWeaponTalkCmm.ftd already carry Golden IDs; DO NOT translate them again. Use explicit source namespace at call boundary, not numeric threshold heuristics. First-visit PS2 literal0 is WSHOP_TALK000 ->19, not new Golden selection-entry0. All32old labels join uniquely with matching entry kind and page count;21new Golden entries remain part of complete bank."
+        },
+        {
+          "owner": "Golden weapon resource descriptor / real message-handle producer and lifetime",
+          "requirement": "Constructor1b15d0 passes descriptor764fe0 to1987f0; descriptor+8 ->764f98 filenames, first609fd6 facility/msg_weapon.bmd, descriptor+16 ->764fc8 facility/weapon.arc. Common shop task198910 selects that descriptor, waits actual requests, copies first BMD request to work+878 then calls2c85b0, stores actual slot at work+0c.2c85b0->2d8240->2d8440 validates/parses MSG1 and widens offsets. Runtime adapter must preserve readiness, owned backing lifetime, valid slot creation/status/release and reload. No default0, fake handle, PS2 resource fallback or ordinary raw fragment copy. Whole-bank source supersedes selected image spans; no writes to unselected guest gaps."
+        },
+        {
+          "owner": "live date/flag/gift/material selector and substitutions",
+          "requirement": "Golden common shop case9 uses signed shop type0 from descriptor/constructor and the registered three weapon-table descriptors at9fd228/+10/+20:33x16 dated rows,2x20 gift rows and11x4 material windows. Date helpersc9d40/ca2a0, seen/required flags and polarity are live inputs. Dated row0 message19 has required flag1c0 false and seen flag1c0, explicitly replacing PS2 special first-visit path; Golden count33 is bounded, not PS2 sentinel scan. Gift rows message+4 supply51/52; item grant and set/clear/required flag fields must use real inventory/flag state. Material path uses actual candidate producer19ddb0, live quantity/availability and at most one RNG selection for positive candidate count; outputs15/16/17 with item-name substitution slot0 and category-name slot1. Do not treat BMD correspondence as proof that old PS2 selector tables/calendar/material arithmetic already implement Golden semantics. The named FTD payload/header hashes and ordinary reader structure are recorded as obligations; runtime binding must coordinate those producers, not author zero inputs."
+        },
+        {
+          "owner": "message-system status, choice/page/parameter and teardown consumers",
+          "requirement": "Common198910 calls2c8770 on the actual published slot; old talk/material tasks poll/release/destroy. Preserve complete message slot state and page transitions, supplied item/category strings and gift/item/flag side effects. Golden entry0 is a choice record whereas mapped legacy messages are all type0; full bank support must not compact/remove new entries or reinterpret numeric old IDs globally. Validate all32mapped entries, special IDs19/51/52/15/16/17, added46..50, both material substitution branches, first/repeated visits, date boundaries, gift grants, empty-material case and reload/destroy; source proof is not a playback/behavior test."
+        }
+      ]
+    },
+    {
+      "address": "0x0064732e",
+      "ps2_size": 802,
+      "role": "partition of complete weapon-shop message bank",
+      "golden": {
+        "container": "data_e.cpk",
+        "member_chain": "data_e.cpk::facility/weapon.arc::msg_weapon.bmd",
+        "offset": 0,
+        "size": 15057,
+        "sha256": "2042f076cd21585ab33753b709faf9fc81469ece8de9000832c7a3651b9772ea",
+        "member_size": 15072,
+        "member_sha256": "756760d5815016a0a092287dddd617c98fd74717c1a444dd7d30f515f916ff53",
+        "archive_tail_bytes": 15,
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "locale": "English",
+        "kind": "complete-logical-MSG1-source",
+        "runtime_input": "Owned Steam archive member; no NSO/private files needed."
+      },
+      "layout": {
+        "kind": "semantic-expanded-relocated-message-bank",
+        "ps2_bank_offset": 8430,
+        "ps2_partition_size": 802,
+        "ps2_bank_size": 11421,
+        "golden_bank_size": 15057,
+        "ps2_entry_count": 32,
+        "golden_entry_count": 53,
+        "copy_policy": "do not copy a byte window; route complete resource and translate only legacy IDs by exact label identity",
+        "retained_tail": {
+          "offset": 802,
+          "size": 0
+        },
+        "entry_coverage": [
+          {
+            "label": "WSHOP_TALK022",
+            "ps2_index": 22,
+            "golden_index": 41,
+            "ps2_intersection": [
+              8430,
+              8532
+            ],
+            "golden_entry_span": [
+              10688,
+              10936
+            ]
+          },
+          {
+            "label": "WSHOP_TALK023",
+            "ps2_index": 23,
+            "golden_index": 42,
+            "ps2_intersection": [
+              8532,
+              8764
+            ],
+            "golden_entry_span": [
+              10936,
+              11168
+            ]
+          },
+          {
+            "label": "WSHOP_TALK024",
+            "ps2_index": 24,
+            "golden_index": 43,
+            "ps2_intersection": [
+              8764,
+              9144
+            ],
+            "golden_entry_span": [
+              11168,
+              11548
+            ]
+          },
+          {
+            "label": "WSHOP_TALK025",
+            "ps2_index": 25,
+            "golden_index": 44,
+            "ps2_intersection": [
+              9144,
+              9232
+            ],
+            "golden_entry_span": [
+              11548,
+              11980
+            ]
+          }
+        ]
+      },
+      "required_seams": [
+        {
+          "owner": "weaponShopTalkUpdate / weapon talk and material task family",
+          "ps2_addresses": [
+            "0x00331a20",
+            "0x00332370",
+            "0x00332520"
+          ],
+          "requirement": "Golden-only resource identity645240 must resolve to complete declared15057-byte/53-entry Golden MSG1 bank, not copy per-partition windows into guest RAM. Bind direct/translated/inlined/native nmMesWindowAcquire calls and retain PS2-mode bank. Preserve all label/page/message-body/relocation/speaker data together; allocate/parse native message work using actual32-to64-bit relocation-aware BMD manager, not store host pointers in image bytes or copy the larger file over11421-byte PS2 storage."
+        },
+        {
+          "owner": "legacy versus Golden message selector namespace",
+          "requirement": "Legacy PS2 message IDs0..26 map to Golden19..45;27/28 map51/52;29/30/31 map15/16/17. Preserve -1 no-message behavior. Golden fclWeaponTalk.ftd and fclWeaponTalkCmm.ftd already carry Golden IDs; DO NOT translate them again. Use explicit source namespace at call boundary, not numeric threshold heuristics. First-visit PS2 literal0 is WSHOP_TALK000 ->19, not new Golden selection-entry0. All32old labels join uniquely with matching entry kind and page count;21new Golden entries remain part of complete bank."
+        },
+        {
+          "owner": "Golden weapon resource descriptor / real message-handle producer and lifetime",
+          "requirement": "Constructor1b15d0 passes descriptor764fe0 to1987f0; descriptor+8 ->764f98 filenames, first609fd6 facility/msg_weapon.bmd, descriptor+16 ->764fc8 facility/weapon.arc. Common shop task198910 selects that descriptor, waits actual requests, copies first BMD request to work+878 then calls2c85b0, stores actual slot at work+0c.2c85b0->2d8240->2d8440 validates/parses MSG1 and widens offsets. Runtime adapter must preserve readiness, owned backing lifetime, valid slot creation/status/release and reload. No default0, fake handle, PS2 resource fallback or ordinary raw fragment copy. Whole-bank source supersedes selected image spans; no writes to unselected guest gaps."
+        },
+        {
+          "owner": "live date/flag/gift/material selector and substitutions",
+          "requirement": "Golden common shop case9 uses signed shop type0 from descriptor/constructor and the registered three weapon-table descriptors at9fd228/+10/+20:33x16 dated rows,2x20 gift rows and11x4 material windows. Date helpersc9d40/ca2a0, seen/required flags and polarity are live inputs. Dated row0 message19 has required flag1c0 false and seen flag1c0, explicitly replacing PS2 special first-visit path; Golden count33 is bounded, not PS2 sentinel scan. Gift rows message+4 supply51/52; item grant and set/clear/required flag fields must use real inventory/flag state. Material path uses actual candidate producer19ddb0, live quantity/availability and at most one RNG selection for positive candidate count; outputs15/16/17 with item-name substitution slot0 and category-name slot1. Do not treat BMD correspondence as proof that old PS2 selector tables/calendar/material arithmetic already implement Golden semantics. The named FTD payload/header hashes and ordinary reader structure are recorded as obligations; runtime binding must coordinate those producers, not author zero inputs."
+        },
+        {
+          "owner": "message-system status, choice/page/parameter and teardown consumers",
+          "requirement": "Common198910 calls2c8770 on the actual published slot; old talk/material tasks poll/release/destroy. Preserve complete message slot state and page transitions, supplied item/category strings and gift/item/flag side effects. Golden entry0 is a choice record whereas mapped legacy messages are all type0; full bank support must not compact/remove new entries or reinterpret numeric old IDs globally. Validate all32mapped entries, special IDs19/51/52/15/16/17, added46..50, both material substitution branches, first/repeated visits, date boundaries, gift grants, empty-material case and reload/destroy; source proof is not a playback/behavior test."
+        }
+      ]
+    }
+  ],
+  "research_scripts": [
+    "c5_message_graph.py",
+    "c5_weapon_resources.py",
+    "c5_weapon_workers.py",
+    "c5_weapon_bank.py",
+    "c5_talk_pointer_users.py",
+    "c5_weapon_instructions.py",
+    "c5_weapon_selectors.py",
+    "c5_weapon_proof.py"
+  ],
+  "counts": {
+    "new_PROVEN": 10,
+    "new_ps2_partition_bytes": 8650,
+    "cohort_PROVEN": 34,
+    "cohort_proven_bytes": 55771,
+    "cohort_OPEN_retain": 43,
+    "cohort_open_bytes": 3495,
+    "assigned_objects": 77,
+    "assigned_ps2_bytes": 59266,
+    "PROVEN-code": 0,
+    "PROVEN-layout": 0,
+    "D10a": 0,
+    "D10b": 0,
+    "D10c": 0
+  }
+}

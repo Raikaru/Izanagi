@@ -192,6 +192,8 @@ void p4gl_frame_rasters_present(void);
 /* GL texture name of a raster uploaded through RASTERUNLOCK; 0 if it has none
  * (src/render/p4gl_raster.c). */
 uint32_t p4gl_raster_texture(const P4RwRaster *raster);
+/* The smallest and largest alpha byte of the raster's uploaded texture; 1 when the whole texture is known (see p4gl_raster.c), 0 for anything else. */
+int p4gl_raster_alpha_range(const P4RwRaster *raster, unsigned *lo, unsigned *hi);
 /* 1 for the draw and display frame rasters (their texture is a copy of the framebuffer). */
 int p4gl_raster_is_frame(const P4RwRaster *raster);
 /* Replaces level 0 of a raster with RGBA8 pixels, for rasters made without a CPU copy (movie frames). 0 or -1. */
@@ -243,6 +245,8 @@ int p4gl_texture_bind_sampler(uint32_t rasterValue, uint32_t sampler);
  * it, else the border emulation's packed wrap and filter modes (a context with no GL_CLAMP_TO_BORDER; src/render/p4gl_gl.c). A textured draw sets
  * its uBorder uniform from it right after the bind. */
 int p4gl_texture_border_mode(void);
+/* 1 when the texture the last bind bound reads transparent black outside its image (border addressing, hardware or shader). */
+int p4gl_texture_samples_border(void);
 
 /* Camera whose RwCameraBeginUpdate is open, NULL outside one (src/render/p4gl_camera.c). */
 const void *p4gl_camera_current(void);
@@ -305,6 +309,7 @@ void p4gl_sky_apply_blend(void);
 /* P4PC_DRAW_LOG=<first>[-<last>]: a line per draw (src/render/p4gl_state.c). bbox is x0, y0, x1, y1 in pixels or NULL; rgba a vertex colour (0..255) or NULL. */
 void p4gl_drawlog_frame(void);
 int p4gl_drawlog(const char *path, int primType, int numVerts, const float *bbox, const float *rgba, const char *extra); /* 0: leave this draw out (P4PC_DRAW_UPTO / P4PC_DRAW_SKIP) */
+int p4gl_drawlog_wanted(void); /* 1 when p4gl_drawlog would log or count this draw: format `extra` only then */
 int32_t p4gl_sky_alpha_func(void);
 int p4gl_sky_alpha_uses_source(void);
 int p4gl_sky_date(void);

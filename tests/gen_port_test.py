@@ -152,6 +152,29 @@ class MatchContractsTest(unittest.TestCase):
         plain = gen_port.MARKER_RE.sub("", text)
         self.assertIn("extern s32 D_00700000[];\nstatic s32 table[11];\nstatic s32 helper", plain)
 
+    def test_override_preserves_pragma_and_comment_prelude(self):
+        (self.root / "overrides").mkdir()
+        self.unit.write_text(
+            "// FUN_00100100\n#pragma push\n#pragma opt_lifetimes on\n"
+            "extern int helper(int);\n/* measured: preserve this\n * scoped prelude. */\n"
+            "int target(int v) { return v; }\n#pragma pop\n", encoding="utf-8")
+        (self.root / "overrides/00100100.c").write_text(
+            "int target(int v) { return helper(v); }\n", encoding="utf-8")
+        gen_port.apply_overrides(self.root, self.mirror, ["src/unit.c"])
+        text = self.unit.read_text(encoding="utf-8")
+        self.assertIn("#pragma push\n#pragma opt_lifetimes on\nextern int helper(int);", text)
+        self.assertIn("/* measured: preserve this\n * scoped prelude. */\nint target(int v) { return helper(v); }\n#pragma pop", text)
+        marker = gen_port.MARKER_RE.search(text)
+        self.assertEqual(gen_port.marker_definition_name(text, marker.end()), "target")
+
+    def test_override_prelude_does_not_borrow_next_marker(self):
+        (self.root / "overrides").mkdir()
+        self.unit.write_text("// FUN_00100100\n#pragma push\n/* absent */\n"
+                             "// FUN_00100200\nint other(void) { return 0; }\n#pragma pop\n", encoding="utf-8")
+        (self.root / "overrides/00100100.c").write_text("int target(void) { return 1; }\n", encoding="utf-8")
+        with self.assertRaises(SystemExit):
+            gen_port.apply_overrides(self.root, self.mirror, ["src/unit.c"])
+
     def test_override_without_an_identifiable_body_fails_the_mirror(self):
         (self.root / "overrides").mkdir()
         self.unit.write_text("// FUN_00100100\nint target(int v) { return v; }\n", encoding="utf-8")
@@ -203,12 +226,14 @@ class MatchContractsTest(unittest.TestCase):
         manifest = self.root / "abi-files.txt"
         manifest.write_text(str(live) + "\n", encoding="utf-8")
         output = self.root / "merged.json"
-        args = mock.Mock(abi_files=str(manifest), dir=str(directory), root=str(self.root),
+        decomp = self.root / "nested" / "decomp"
+        args = mock.Mock(abi_files=str(manifest), dir=str(directory), root=str(self.root), decomp=str(decomp),
                          gen=str(self.root / "build/gen"), out=str(output), clang="clang")
         with mock.patch.object(unit64.gr, "sigs_abi", return_value={}), \
                 mock.patch.object(unit64.gr, "collect_host_abi", return_value={}), \
-                mock.patch.object(gen_port, "retail_function_names", return_value={}):
+                mock.patch.object(gen_port, "retail_function_names", return_value={}) as names:
             unit64.cmd_merge(args)
+        self.assertEqual(names.call_args.args[0], decomp)
         merged = json.loads(output.read_text(encoding="utf-8"))
         self.assertEqual(set(merged), {"live"})
         self.assertTrue(stale.exists())
@@ -642,8 +667,10 @@ class MatchContractsTest(unittest.TestCase):
             "    return actual_frame_query(actor, &frames, &count);\n"
             "}\n", encoding="utf-8")
         before = self.unit.read_text()
-        with mock.patch.object(gen_port, "retail_function_names", return_value={}):
-            gen_port.prototype_unprototyped_declarations(self.mirror, self.root, self.root / "prototypes.txt")
+        decomp = self.root / "nested" / "decomp"
+        with mock.patch.object(gen_port, "retail_function_names", return_value={}) as names:
+            gen_port.prototype_unprototyped_declarations(self.mirror, self.root, decomp, self.root / "prototypes.txt")
+        self.assertEqual(names.call_args.args[0], decomp)
         self.assertEqual(self.unit.read_text(), before)
         self.assertNotIn("extern int actual_frame_query", self.unit.read_text())
 
@@ -1393,6 +1420,43 @@ int main(void) { return !prefix() || gauge_y(1.0f) != 410.0f; }
             subprocess.run(["clang", "-Wno-everything", "-x", "cpp-output", str(rewritten),
                             "-x", "c", str(main), "-o", str(executable)], check=True)
             subprocess.run([str(executable)], check=True)
+
+
+class WorkerBudgetTest(unittest.TestCase):
+    """A container sees every core of the host: pools are sized by its share (P4PC_JOBS, cpu.max) and by its memory."""
+
+    def test_p4pc_jobs_is_the_share_and_never_more_than_the_machine(self):
+        # (the machine's own limit includes the container's CPU quota when the test itself runs in a capped container)
+        with mock.patch.dict(os.environ):
+            os.environ.pop("P4PC_JOBS", None)
+            machine = gen_port.cpu_budget()
+        self.assertGreaterEqual(machine, 1)
+        with mock.patch.dict(os.environ, {"P4PC_JOBS": "3"}):
+            self.assertEqual(gen_port.cpu_budget(), min(3, machine))
+        with mock.patch.dict(os.environ, {"P4PC_JOBS": "1"}):
+            self.assertEqual(gen_port.cpu_budget(), 1)
+        with mock.patch.dict(os.environ, {"P4PC_JOBS": "4096"}):
+            self.assertEqual(gen_port.cpu_budget(), machine)
+        for bad in ("", "0", "x", "-2"):
+            with mock.patch.dict(os.environ, {"P4PC_JOBS": bad}):
+                self.assertEqual(gen_port.cpu_budget(), machine)
+
+    def test_memory_lowers_the_worker_count_to_half_the_budget(self):
+        with mock.patch.object(gen_port, "cpu_budget", return_value=16), \
+                mock.patch.object(gen_port, "memory_budget_mib", return_value=8192):
+            self.assertEqual(gen_port.worker_budget(1024), 4)   # 8 GiB / 2 / 1 GiB
+            self.assertEqual(gen_port.worker_budget(256), 16)
+            self.assertEqual(gen_port.worker_budget(0), 16)
+            self.assertEqual(gen_port.worker_budget(256, cap=61), 16)
+            self.assertEqual(gen_port.worker_budget(256, cap=2), 2)
+        with mock.patch.object(gen_port, "cpu_budget", return_value=16), \
+                mock.patch.object(gen_port, "memory_budget_mib", return_value=100):
+            self.assertEqual(gen_port.worker_budget(1024), 1)   # never zero
+
+    def test_the_pools_use_the_budget_not_the_core_count(self):
+        with mock.patch.object(gen_port, "worker_budget", return_value=1) as budget:
+            self.assertEqual(gen_port.map_in_order(abs, [(-n,) for n in range(100)]), list(range(100)))
+            budget.assert_called()
 
 
 if __name__ == "__main__":

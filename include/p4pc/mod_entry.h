@@ -34,6 +34,21 @@ int p4_mod_event_quit_request(void (*finish)(void));
 int p4_mod_authorize_battle_protection_item(int character, int item, int element);
 #define P4_MOD_AUTH_WEAPON_FUSION_BIT 8u
 #define P4_MOD_AUTH_RETRY_BIT 16u
+#define P4_MOD_AUTH_ITEM_USE_BIT 32u
+/* source: 0 field, 1 battle menu, 2 party revival, 3 custom field category,
+ * 4 party AI setter, 5 party READY action; effect only for 0. */
+int p4_mod_authorize_item_use(int source, int item, int effect);
+/* Scoped party AI pre-selection mutation tracking. */
+void p4_ai_item_begin(unsigned pc, const void *action, void *unit, int active);
+int p4_ai_item_before(unsigned pc, const void *action, unsigned command);
+void p4_ai_item_after(unsigned pc, const void *action);
+int p4_ai_item_prediction_before(unsigned pc, const void *action, void *target, unsigned command);
+void p4_ai_item_prediction_after(unsigned pc, const void *action);
+void p4_ai_item_deny(unsigned pc, const void *action);
+int p4_ai_item_denied(unsigned pc, const void *action);
+void p4_ai_item_forget(const void *action);
+int p4_ai_item_finish(unsigned pc, const void *action);
+extern unsigned p4_ai_item_conflicts;
 extern uint32_t p4_mod_authorize_mask;
 int p4_mod_authorize_fusion(int kind, int materials);
 /* Battle formation seam: the lineup's IDs one per byte in battle order. Returns

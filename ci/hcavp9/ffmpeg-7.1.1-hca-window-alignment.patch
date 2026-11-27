@@ -1,0 +1,14 @@
+Subject: [PATCH] avcodec/hca: align the window used by the float DSP
+License: LGPL-2.1-or-later (same as the modified FFmpeg source)
+Upstream-Status: Not submitted
+
+The SIMD vector_fmul_window implementation requires aligned input. The plain
+float array is only 8-byte aligned in the llvm-mingw i686 build and faults on
+movaps. Match the 32-byte alignment already used by HCA's channel arrays.
+No coefficients or arithmetic change.
+
+--- a/libavcodec/hca_data.h
++++ b/libavcodec/hca_data.h
+@@ -65 +65 @@
+-static const float window[128] =
++DECLARE_ALIGNED(32, static const float, window)[128] =

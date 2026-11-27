@@ -8,12 +8,13 @@
 #include <string.h>
 
 static const char *const names[P4_MOD_AUTH_COUNT] = {"fusion", "encounter", "battle_protection_item", "weapon_fusion",
-    "retry"};
+    "retry", "item_use"};
 _Static_assert(P4_MOD_AUTH_FUSION_BIT == 1u << P4_MOD_AUTH_FUSION &&
     P4_MOD_AUTH_ENCOUNTER_BIT == 1u << P4_MOD_AUTH_ENCOUNTER &&
     P4_MOD_AUTH_BATTLE_PROTECTION_ITEM_BIT == 1u << P4_MOD_AUTH_BATTLE_PROTECTION_ITEM &&
     P4_MOD_AUTH_WEAPON_FUSION_BIT == 1u << P4_MOD_AUTH_WEAPON_FUSION &&
-    P4_MOD_AUTH_RETRY_BIT == 1u << P4_MOD_AUTH_RETRY, "authorizer seam bits");
+    P4_MOD_AUTH_RETRY_BIT == 1u << P4_MOD_AUTH_RETRY &&
+    P4_MOD_AUTH_ITEM_USE_BIT == 1u << P4_MOD_AUTH_ITEM_USE, "authorizer seam bits");
 struct P4ModAuthorizer {
     size_t owner;
     int operation, enabled, removed;
@@ -139,6 +140,12 @@ int p4_mod_authorize_battle_protection_item(int character, int item, int element
 {
     P4ModEvent context = {"battle_protection_item", 3, {{"character", character}, {"item", item}, {"element", element}}};
     return p4_mod_authorize(P4_MOD_AUTH_BATTLE_PROTECTION_ITEM, &context, NULL, 0);
+}
+
+int p4_mod_authorize_item_use(int source, int item, int effect)
+{
+    P4ModEvent context = {"item_use", 3, {{"source", source}, {"item", item}, {"effect", effect}}};
+    return p4_mod_authorize(P4_MOD_AUTH_ITEM_USE, &context, NULL, 0);
 }
 
 int p4_mod_authorize_weapon_fusion(int stage, int character, int vessel, int persona, int signature,

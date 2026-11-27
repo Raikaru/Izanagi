@@ -1,0 +1,631 @@
+{
+  "proof_id": "L1-C3A-field-archive-families-20261113",
+  "scope": "Both32B owned primary/secondary field archive path objects, complete Golden named-key routing sources; source PROVEN only, runtime pending-seam. No preset/index-table or unrelated row is upgraded.",
+  "source_images": {
+    "steam": {
+      "build": 10836033,
+      "file": "P4G.exe",
+      "sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+      "data_section_bounds": {
+        "section": ".sdata",
+        "rva_start": "0x887000",
+        "size": 1674240,
+        "raw_start": 8936448
+      },
+      "code_witness_bounds": {
+        "section": ".shared",
+        "rva_start": "0x1000",
+        "size": 8934912,
+        "raw_start": 1536
+      },
+      "runtime_input": "Owned Steam install only; never require NSO or private research cache."
+    },
+    "switch": {
+      "version": "1.2",
+      "nso_sha256": "854c7a1e33de1619abf009fa7f32b8c012960d685c8bf1bf99a92a6a4d0bda1c",
+      "mapped_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+      "base": "0x7100000000",
+      "segments": [
+        {
+          "name": "text",
+          "file_offset": 257,
+          "mapped_offset": 0,
+          "decompressed_size": 5448752,
+          "compressed_size": 3719998,
+          "lz4_compressed": true
+        },
+        {
+          "name": "rodata",
+          "file_offset": 3720255,
+          "mapped_offset": 5451776,
+          "decompressed_size": 1870824,
+          "compressed_size": 990563,
+          "lz4_compressed": true
+        },
+        {
+          "name": "data",
+          "file_offset": 4710818,
+          "mapped_offset": 7323648,
+          "decompressed_size": 1606720,
+          "compressed_size": 439860,
+          "lz4_compressed": true
+        }
+      ],
+      "purpose": "Independent static structural witness, not runtime dependency."
+    }
+  },
+  "normalizers": {
+    "proof": "l1-cohort-3-field-bank-proof.json",
+    "proof_sha256": "892ca82475ab50c0a0aface97edd77513619395df7214d61404ffa376c2f1888",
+    "forward": {
+      "reader": "0x71001d7420",
+      "enabled_when": "Golden inclusive current-date range January1 through February29; false leaves field and room unchanged",
+      "input_output": "u16 field and room in/out; only room changes, all unlisted pairs unchanged",
+      "room_maps": [
+        [
+          1,
+          2,
+          1
+        ],
+        [
+          6,
+          18,
+          15
+        ],
+        [
+          6,
+          19,
+          14
+        ],
+        [
+          6,
+          20,
+          9
+        ],
+        [
+          7,
+          4,
+          1
+        ],
+        [
+          8,
+          12,
+          1
+        ],
+        [
+          8,
+          13,
+          2
+        ],
+        [
+          8,
+          14,
+          9
+        ],
+        [
+          9,
+          5,
+          1
+        ],
+        [
+          10,
+          5,
+          1
+        ],
+        [
+          10,
+          6,
+          2
+        ],
+        [
+          13,
+          9,
+          8
+        ],
+        [
+          17,
+          5,
+          1
+        ],
+        [
+          17,
+          6,
+          3
+        ]
+      ],
+      "code_witness": {
+        "platform": "Switch1.2",
+        "class": "PROVEN-code",
+        "address": "0x71001d7420",
+        "end": "0x71001d7550",
+        "size": 304,
+        "sha256": "524ae9e5c7c3ccfc3a6d03c06682aa77247d69a2645bf41cddae6c7e5c42c078",
+        "role": "complete winter-to-base room normalizer",
+        "runtime_policy": "Author the recorded constants/decision recipe in Golden mode; never read NSO code or data at runtime."
+      }
+    },
+    "inverse": {
+      "reader": "0x71001d7550",
+      "room_maps": [
+        [
+          1,
+          1,
+          2
+        ],
+        [
+          6,
+          15,
+          18
+        ],
+        [
+          6,
+          14,
+          19
+        ],
+        [
+          6,
+          9,
+          20
+        ],
+        [
+          7,
+          1,
+          4
+        ],
+        [
+          8,
+          1,
+          12
+        ],
+        [
+          8,
+          2,
+          13
+        ],
+        [
+          8,
+          9,
+          14
+        ],
+        [
+          9,
+          1,
+          5
+        ],
+        [
+          10,
+          1,
+          5
+        ],
+        [
+          10,
+          2,
+          6
+        ],
+        [
+          13,
+          8,
+          9
+        ],
+        [
+          17,
+          1,
+          5
+        ],
+        [
+          17,
+          3,
+          6
+        ]
+      ],
+      "enabled_when": "same January1..February29 predicate",
+      "code_witness": {
+        "platform": "Switch1.2",
+        "class": "PROVEN-code",
+        "address": "0x71001d7550",
+        "end": "0x71001d76a0",
+        "size": 336,
+        "sha256": "99ec9acf65b48fe00d760dd6813e66bde1883e61149288d53130b7fa0c658a94",
+        "role": "complete base-to-winter room normalizer",
+        "runtime_policy": "Author the recorded constants/decision recipe in Golden mode; never read NSO code or data at runtime."
+      }
+    },
+    "warning": "Apply the existing complete14-pair maps and their real calendar gates. Do not replace the source range helper by an invented month-only test or unify forward and inverse."
+  },
+  "formats": [
+    {
+      "name": "field/pack/fd%03d_%03d.arc",
+      "container": "P4G.exe",
+      "section": ".sdata",
+      "rva": "0x930bc8",
+      "offset": 695240,
+      "raw_offset": 9631688,
+      "size": 27,
+      "sha256": "af917414a062656069872bdb9b6ca772821b7f1b2f27eeb4a6caabd9d9e889cb",
+      "refs": [],
+      "mapping_proven": true,
+      "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+      "source_build": 10836033,
+      "corroborating_nso_address": "0x71005e40f0"
+    },
+    {
+      "name": "field/pack/f%03d_%03d.arc",
+      "container": "P4G.exe",
+      "section": ".sdata",
+      "rva": "0x930ba8",
+      "offset": 695208,
+      "raw_offset": 9631656,
+      "size": 26,
+      "sha256": "0ac5337f392f45d5c2e793b442b1983d08a35b492c2b4ca1e284152115f2100a",
+      "refs": [],
+      "mapping_proven": true,
+      "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+      "source_build": 10836033,
+      "corroborating_nso_address": "0x71005ff5ab"
+    },
+    {
+      "name": "field/pack/f%03d_%03d_rmd.arc",
+      "container": "P4G.exe",
+      "section": ".sdata",
+      "rva": "0x930c20",
+      "offset": 695328,
+      "raw_offset": 9631776,
+      "size": 30,
+      "sha256": "d85a4775ce04eb4c33e0ec2d0d0749c1ac021f190be489a4442e1f4c25af77d9",
+      "refs": [],
+      "mapping_proven": true,
+      "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+      "source_build": 10836033,
+      "corroborating_nso_address": "0x71005fc6b9"
+    }
+  ],
+  "scene_loader_correspondence": {
+    "ps2": "0x00144f60 fieldSceneLoadStep",
+    "golden": "0x71002a0d60",
+    "proof": "Both return ready if the scene resource manager is absent or flags low3bits equal1; state0 advances to1; state1 invokes primary request and queue initialization with current scene field/room, advances the state and returns not-ready; later states wait for part load and create the scene task once if absent. Golden adds lighting setup that is outside these filename admissions.",
+    "ps2_stage_calls": [
+      "0x0014eed0",
+      "0x0014efc0"
+    ],
+    "golden_stage_calls": [
+      "0x71001eb200",
+      "0x71001eb600"
+    ]
+  },
+  "queue_initializer_correspondence": {
+    "ps2": "0x0014efc0",
+    "golden": "0x71001eb600",
+    "request_split": "Golden1eb600 calls request-only1eb280 in the special queued and ordinary cases; do not pair old14efc0 solely with the request wrapper.",
+    "proof": "Both clear resource count/state and a64B major/minor queue, branch through two field-band predicates, subtract20 in the upper band and set bit31, use12B preset records with two count bytes, reverse-append selected minor IDs as paired16-bit keys or reuse loaded resources and set state4, and append one supplied field/room key outside those bands. Golden resource handles widen from4 to8B. Preset/index values are not declared identical or source-qualified by this filename proof."
+  },
+  "primary_request": {
+    "ps2_reader": "0x0014eed0",
+    "golden_reader": "0x71001eb200",
+    "pending_slot": "0x7100a113c0",
+    "rule": "If the primary pending handle is nonzero return unchanged. Otherwise copy supplied field/room into signed16-bit locals, apply forward winter-to-base normalizer1d7420, format the complete fd archive key and request397d20(key,0), storing the returned owned provider handle. PS2 guard/single pending handle are independently paired via the scene loader; old CDVD flags and host work layouts are not copied.",
+    "format_index": 0,
+    "readiness_reader": "0x71001eb520",
+    "readiness": "No primary handle is ready; otherwise return whether provider398080(handle) is nonzero."
+  },
+  "secondary_request": {
+    "ps2_reader": "0x0014efc0",
+    "golden_readers": [
+      "0x71001eb600",
+      "0x71001eb280"
+    ],
+    "original_input": "signed16 field F, unsigned16 room R; retain these original values separately from mutable local field f and room r",
+    "ordinary_pending_slots": [
+      "0x7100a113c8",
+      "0x7100a113d0",
+      "0x7100a113d8"
+    ],
+    "model_pending_slot": "0x7100a113e0",
+    "ordinary_format_index": 1,
+    "model_format_index": 2,
+    "recipe": [
+      "Initialize local f=F, r=R. If ordinary slot0 is nonzero, skip only the ordinary-request block, retaining the original local coordinates.",
+      "When ordinary slot0 is zero and u16(F-40)<30 (fields40..69), subtract20 from local f iff signed F>59; request ordinary-format(f,0), then(f,1), then(f,2), storing slots0,1,2 respectively. These are three fixed preload variants, not the supplied room. The local r remains unchanged.",
+      "When ordinary slot0 is zero outside fields40..69, obtain current encoded date; if range helper ca2a0(date,1,1,2,29)==1 apply inverse1d7550 to local f/r, else apply forward1d7420; request one ordinary-format(f,s16(r)) and store slot0.",
+      "Model requests are independent of whether the ordinary block ran. If model slot is nonzero, or ORIGINAL(F,R) matches one of the15 exact exclusion pairs, do nothing further.",
+      "Otherwise, if u16(F-60)<10, set local r=0. Apply forward1d7420 to the CURRENT MUTATED local f/r, format the model-rmd key and request397d20(key,0) into the model slot. Do not reset f/r to originals or blindly subtract20 again."
+    ],
+    "model_exclusion_components": {
+      "class": "PROVEN-code",
+      "source": "Switch ordinary1eb3c8..1eb4c8",
+      "pairs": [
+        [
+          4,
+          2
+        ],
+        [
+          14,
+          2
+        ],
+        [
+          11,
+          2
+        ],
+        [
+          8,
+          4
+        ],
+        [
+          8,
+          6
+        ],
+        [
+          15,
+          1
+        ],
+        [
+          16,
+          1
+        ],
+        [
+          16,
+          6
+        ],
+        [
+          17,
+          8
+        ],
+        [
+          17,
+          9
+        ],
+        [
+          100,
+          1
+        ],
+        [
+          100,
+          2
+        ],
+        [
+          100,
+          3
+        ],
+        [
+          248,
+          2
+        ],
+        [
+          248,
+          3
+        ]
+      ],
+      "positive_evidence": "Separate ordinary ARM64 branches, not the worker expression: field14/11 room2 and field8 (room&fffd)==4 are three distinct and/tbnz guards at1eb428..1eb43c; field100 usesu16(room-1)<3; field248 uses(room&fffe)==2.",
+      "worker_correction": "The worker nested field11/field8 Boolean expression incorrectly. Actual1eb438/1eb43c positively excludes field8 rooms4 and6. No source gate was weakened."
+    },
+    "stateful_warning": "The first ordinary preload can mutate f from60..69 to40..49; that same local feeds the subsequent model request. A later invocation with an existing ordinary handle skips that mutation. Preserve the actual stateful call order; do not invent retries/fallbacks or simplify to a universal coordinate normalizer.",
+    "readiness_reader": "0x71001eb560",
+    "readiness": "If ordinary slot0 is null, return ready1. Otherwise require its provider readiness and, for each non-null slot1/slot2/model, that slot readiness. Do not replace this observed default by an invented unconditional wait over every slot."
+  },
+  "filename_builders": {
+    "ordinary": {
+      "reader": "0x71001d76f0",
+      "rule": "For field40..69 replace room by low8bits of1cfbf0(); do NOT subtract20 here. Otherwise choose inverse versus forward by the same Jan1..Feb29 range helper. Format ordinary key from the resulting locals. Caller field/key domain must be preserved rather than unified with the preload wrapper."
+    },
+    "model": {
+      "reader": "0x71001d77a0",
+      "rule": "First apply forward1d7420. For original field60..69 subtract20 from the resulting local field and force room0. Then format the rmd key. This pure builder has a different local-mutation order from the request wrapper; do not substitute one for the other."
+    }
+  },
+  "code_witnesses": [
+    {
+      "platform": "Switch1.2",
+      "start": "0x71001eb200",
+      "end": "0x71001eb280",
+      "size": 128,
+      "sha256": "aa96b6e9bd8c83cab795a15d10e0773ffc24c693e15b3eb852694e7496e428d1",
+      "runtime_policy": "Static structural/PROVEN-code source witness only; runtime consumes sealed Steam strings plus authored Golden-mode selector constants, never NSO bytes."
+    },
+    {
+      "platform": "Switch1.2",
+      "start": "0x71001eb280",
+      "end": "0x71001eb520",
+      "size": 672,
+      "sha256": "68bc12c1a0ed922d9142ee6e34aef51f133c4e545b6c30c732f60059e694538b",
+      "runtime_policy": "Static structural/PROVEN-code source witness only; runtime consumes sealed Steam strings plus authored Golden-mode selector constants, never NSO bytes."
+    },
+    {
+      "platform": "Switch1.2",
+      "start": "0x71001eb520",
+      "end": "0x71001eb560",
+      "size": 64,
+      "sha256": "82a5fd7fa6ccd4a00b95fb7dcaddaa2103e2b284d26828881d7e2dc08e5ff806",
+      "runtime_policy": "Static structural/PROVEN-code source witness only; runtime consumes sealed Steam strings plus authored Golden-mode selector constants, never NSO bytes."
+    },
+    {
+      "platform": "Switch1.2",
+      "start": "0x71001eb560",
+      "end": "0x71001eb5d0",
+      "size": 112,
+      "sha256": "838640a4eaeae02a02d8cb1fb44dce33ba21f819620a7879c24438b2c9a39e50",
+      "runtime_policy": "Static structural/PROVEN-code source witness only; runtime consumes sealed Steam strings plus authored Golden-mode selector constants, never NSO bytes."
+    },
+    {
+      "platform": "Switch1.2",
+      "start": "0x71001eb600",
+      "end": "0x71001eb830",
+      "size": 560,
+      "sha256": "ada0cb95ac5ca41ec9e2df68a3115f36b48e98c3bae75c85ca973a7c697226a6",
+      "runtime_policy": "Static structural/PROVEN-code source witness only; runtime consumes sealed Steam strings plus authored Golden-mode selector constants, never NSO bytes."
+    },
+    {
+      "platform": "Switch1.2",
+      "start": "0x71002a0d60",
+      "end": "0x71002a1070",
+      "size": 784,
+      "sha256": "a5d2ae6525bd5e76adb80512b59f59be3a957a4d4992458f837799ed37c37a8a",
+      "runtime_policy": "Static structural/PROVEN-code source witness only; runtime consumes sealed Steam strings plus authored Golden-mode selector constants, never NSO bytes."
+    },
+    {
+      "platform": "Switch1.2",
+      "start": "0x71001d76f0",
+      "end": "0x71001d77a0",
+      "size": 176,
+      "sha256": "33f8978a94e38577a8da73d6e555ccb03d8e72086977713e1b071eda119ecb8f",
+      "runtime_policy": "Static structural/PROVEN-code source witness only; runtime consumes sealed Steam strings plus authored Golden-mode selector constants, never NSO bytes."
+    },
+    {
+      "platform": "Switch1.2",
+      "start": "0x71001d77a0",
+      "end": "0x71001d7820",
+      "size": 128,
+      "sha256": "f6d1c53fbab6a934000262be42bb33515f0b4b937727aadee70ae2cfecf3050f",
+      "runtime_policy": "Static structural/PROVEN-code source witness only; runtime consumes sealed Steam strings plus authored Golden-mode selector constants, never NSO bytes."
+    }
+  ],
+  "admissions": [
+    {
+      "address": "0x005efc60",
+      "ps2_size": 32,
+      "ps2_live_size": 26,
+      "role": "primary fd archive key",
+      "ps2_reader": "0x0014eed0",
+      "ps2_symbol": "FldResource_OpenPrimaryFile",
+      "all_ps2_table_users": [
+        "0x0014eed0"
+      ],
+      "golden": {
+        "container": "Steam-resource-name-family",
+        "source_build": 10836033,
+        "source_group": "L1-C3A-field-archive-families-20261113",
+        "mapping_proven": true,
+        "source_count": 1,
+        "components": [
+          {
+            "name": "field/pack/fd%03d_%03d.arc",
+            "container": "P4G.exe",
+            "section": ".sdata",
+            "rva": "0x930bc8",
+            "offset": 695240,
+            "raw_offset": 9631688,
+            "size": 27,
+            "sha256": "af917414a062656069872bdb9b6ca772821b7f1b2f27eeb4a6caabd9d9e889cb",
+            "refs": [],
+            "mapping_proven": true,
+            "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+            "source_build": 10836033,
+            "corroborating_nso_address": "0x71005e40f0"
+          }
+        ],
+        "runtime_input": "Hash-qualified Steam name data and authored PROVEN-code selector/normalizer constants; no NSO dependency."
+      },
+      "structural_correspondence": "The paired scene load-state machine calls primary request and queue initialization with the same field/room; the complete queue initializer has matching count/state clearing,12B presets, bit31 upper-band choice, reverse16-bit key queue and reuse/state4 branch. Golden splits request-only1eb280 from queue1eb600 and expands the source into fd,ordinary and optional-rmd named archives. Exact code-derived selection/mutation and independently sealed Steam formats establish these roles, not extension similarity.",
+      "installation": {
+        "kind": "semantic-resource-key-family",
+        "retain_ps2_partition": true,
+        "ps2_live_size": 26,
+        "retain_ps2_tail": 6,
+        "requirement": "Bind the complete Golden field archive-key route at FldResource_OpenPrimaryFile 0x0014eed0 and every translated/inlined/native literal copy. Retain the32B old guest partition and its tail; never overwrite it with multiple formats or a pointer. Use the qualified named Steam archive sources, complete14-pair calendar normalization maps, separate primary/ordinary/model pending slots, exact field-band/preload rules, stateful local mutation,15 model exclusions and recorded readiness/default behavior. Preserve both the scene-loader phase graph and the split queue initializer/request roles; new host handles, preset/index values and resource payload layouts are not compatible guest bytes. Bind the appropriate getter input domain rather than guessing one generic archive helper. No invented fallback/retry, PS2 sector offsets, live host pointers, no-reference absence claim, or runtime NSO/private-cache input. Filename-only installation is not runtime closure.",
+        "complete_golden_recipe": "Use primary_request or secondary_request plus normalizers, filename_builders and the scene/queue role records in this proof."
+      }
+    },
+    {
+      "address": "0x005efc90",
+      "ps2_size": 32,
+      "ps2_live_size": 26,
+      "role": "secondary ordinary/model archive key family",
+      "ps2_reader": "0x0014efc0",
+      "ps2_symbol": "FldResource_QueueFieldResources",
+      "all_ps2_table_users": [
+        "0x0014efc0"
+      ],
+      "golden": {
+        "container": "Steam-resource-name-family",
+        "source_build": 10836033,
+        "source_group": "L1-C3A-field-archive-families-20261113",
+        "mapping_proven": true,
+        "source_count": 2,
+        "components": [
+          {
+            "name": "field/pack/f%03d_%03d.arc",
+            "container": "P4G.exe",
+            "section": ".sdata",
+            "rva": "0x930ba8",
+            "offset": 695208,
+            "raw_offset": 9631656,
+            "size": 26,
+            "sha256": "0ac5337f392f45d5c2e793b442b1983d08a35b492c2b4ca1e284152115f2100a",
+            "refs": [],
+            "mapping_proven": true,
+            "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+            "source_build": 10836033,
+            "corroborating_nso_address": "0x71005ff5ab"
+          },
+          {
+            "name": "field/pack/f%03d_%03d_rmd.arc",
+            "container": "P4G.exe",
+            "section": ".sdata",
+            "rva": "0x930c20",
+            "offset": 695328,
+            "raw_offset": 9631776,
+            "size": 30,
+            "sha256": "d85a4775ce04eb4c33e0ec2d0d0749c1ac021f190be489a4442e1f4c25af77d9",
+            "refs": [],
+            "mapping_proven": true,
+            "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+            "source_build": 10836033,
+            "corroborating_nso_address": "0x71005fc6b9"
+          }
+        ],
+        "runtime_input": "Hash-qualified Steam name data and authored PROVEN-code selector/normalizer constants; no NSO dependency."
+      },
+      "structural_correspondence": "The paired scene load-state machine calls primary request and queue initialization with the same field/room; the complete queue initializer has matching count/state clearing,12B presets, bit31 upper-band choice, reverse16-bit key queue and reuse/state4 branch. Golden splits request-only1eb280 from queue1eb600 and expands the source into fd,ordinary and optional-rmd named archives. Exact code-derived selection/mutation and independently sealed Steam formats establish these roles, not extension similarity.",
+      "installation": {
+        "kind": "semantic-resource-key-family",
+        "retain_ps2_partition": true,
+        "ps2_live_size": 26,
+        "retain_ps2_tail": 6,
+        "requirement": "Bind the complete Golden field archive-key route at FldResource_QueueFieldResources 0x0014efc0 and every translated/inlined/native literal copy. Retain the32B old guest partition and its tail; never overwrite it with multiple formats or a pointer. Use the qualified named Steam archive sources, complete14-pair calendar normalization maps, separate primary/ordinary/model pending slots, exact field-band/preload rules, stateful local mutation,15 model exclusions and recorded readiness/default behavior. Preserve both the scene-loader phase graph and the split queue initializer/request roles; new host handles, preset/index values and resource payload layouts are not compatible guest bytes. Bind the appropriate getter input domain rather than guessing one generic archive helper. No invented fallback/retry, PS2 sector offsets, live host pointers, no-reference absence claim, or runtime NSO/private-cache input. Filename-only installation is not runtime closure.",
+        "complete_golden_recipe": "Use primary_request or secondary_request plus normalizers, filename_builders and the scene/queue role records in this proof."
+      }
+    }
+  ],
+  "identified_source_format_users": [
+    {
+      "format": "field/pack/fd%03d_%03d.arc",
+      "nso_address": "0x71005e40f0",
+      "materialized_sites": [
+        "0x71001d76d4",
+        "0x71001d7950",
+        "0x71001eb248"
+      ],
+      "function_envelopes": [
+        "0x71001d76a0",
+        "0x71001d78a0",
+        "0x71001eb200"
+      ],
+      "census_limit": "Identified static source uses only; no exhaustive liveness or absence conclusion. Each selected PS2 literal has its sole direct source reader and native copies recorded separately."
+    },
+    {
+      "format": "field/pack/f%03d_%03d.arc",
+      "nso_address": "0x71005ff5ab",
+      "materialized_sites": [
+        "0x71001d7778",
+        "0x71001eb2ec",
+        "0x71001eb3a0"
+      ],
+      "function_envelopes": [
+        "0x71001d76f0",
+        "0x71001eb280"
+      ],
+      "census_limit": "Identified static source uses only; no exhaustive liveness or absence conclusion. Each selected PS2 literal has its sole direct source reader and native copies recorded separately."
+    },
+    {
+      "format": "field/pack/f%03d_%03d_rmd.arc",
+      "nso_address": "0x71005fc6b9",
+      "materialized_sites": [
+        "0x71001d7800",
+        "0x71001eb4f0"
+      ],
+      "function_envelopes": [
+        "0x71001d77a0",
+        "0x71001eb280"
+      ],
+      "census_limit": "Identified static source uses only; no exhaustive liveness or absence conclusion. Each selected PS2 literal has its sole direct source reader and native copies recorded separately."
+    }
+  ]
+}

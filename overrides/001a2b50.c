@@ -5,6 +5,8 @@
  * decider this is the retail body. */
 #include "p4pc/guest.h"
 #include "p4pc/battle_decide.h"
+#include "p4pc/mod_entry.h"
+extern void btlAICommandSetActionCode(u8 *, u8 *, u16);
 
 void btlActionAiUpdate(u8 *action)
 {
@@ -14,6 +16,11 @@ void btlActionAiUpdate(u8 *action)
         btlAICommandSetUnitAction(action, action + 0x38);
     }
     if (btlAICommandTryReleaseProc(action + 0x38) != 0) {
+        if (((BtlAction *)action)->unit->genus == 0 &&
+            p4_ai_item_denied(((BtlAction *)action)->unit->charId, action)) {
+            if (p4_ai_item_finish(((BtlAction *)action)->unit->charId, action))
+                btlAICommandSetActionCode(action, action + 0x38, 0x8002);
+        }
         if (p4_battle_decide_interest)
             p4_battle_decide_ready(P4_H2G(action));
         battleFlags = ((BtlBattleState *)D_0076449C)->flags;

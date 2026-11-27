@@ -26,6 +26,8 @@
 #include "p4pc/settings.h"
 #include "../pad/pad_sdl.h"
 #include "../config/p4cfg.h"
+#include "../config/p4iso.h"
+#include "../diag/p4diag.h"
 
 /* Java's UI thread queues writes; p4cfg is owned by the game thread. */
 static pthread_mutex_t pad_layout_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -181,6 +183,7 @@ failed:
 extern void __real_exit(int status) __attribute__((noreturn));
 
 __attribute__((noreturn)) void __wrap_exit(int status) {
+    p4diag_shutdown(); /* the summary and the clean-exit line: the logger thread has only a moment after the status line */
     fprintf(stderr, "p4pc: exited with status %d\n", status);
     fflush(NULL);
     usleep(300000); /* the logger thread copies the pipe: give it the last lines */
@@ -202,6 +205,8 @@ static void *log_thread(void *arg) {
 
     (void)arg;
     if (path != NULL && path[0] != '\0') {
+        /* A player's boot.log keeps the previous run as boot.prev.log (boot.unclean.log when that run did not end by itself): the launcher exports them. */
+        if (p4cfg_player_run()) (void)p4iso_rotate_log(path);
         file = fopen(path, "w");
     }
     while ((got = read(sLogPipe[0], buf, sizeof buf)) > 0) {

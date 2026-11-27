@@ -9,6 +9,13 @@
 
 static int failures;
 
+/* A phone's window is the whole screen: the video settings come out fullscreen there (p4cfg.c readVideo), not on the desktop. */
+#ifdef __ANDROID__
+#define PHONE_FULLSCREEN 1
+#else
+#define PHONE_FULLSCREEN 0
+#endif
+
 #define CHECK(c)                                                         \
     do {                                                                 \
         if (!(c)) {                                                      \
@@ -48,6 +55,22 @@ int main(void)
     CHECK(strcmp(p4cfg_str("video.resolution", ""), "scale:4") == 0);
     CHECK(p4cfg_int("video.width", 640) == 640); /* malformed: the default */
 
+    /* Private audio setting: only the dedicated numeric API exposes it. */
+    uint64_t key;
+    p4cfg_parse_text("[golden]\nhca_key =\n");
+    CHECK(p4cfg_hca_key(&key) == 0 && key == 0);
+    p4cfg_parse_text("[GOLDEN]\nHCA_KEY = 0x123456789abcdef0\n");
+    CHECK(p4cfg_hca_key(&key) == 1 && key == UINT64_C(0x123456789abcdef0));
+    CHECK(!strcmp(p4cfg_get("golden.hca_key"), "[redacted]"));
+    CHECK(p4cfg_int("golden.hca_key", -1) == -1);
+    p4cfg_parse_text("[golden]\nhca_key = not-a-key\n");
+    CHECK(p4cfg_hca_key(&key) == -1 && key == 0);
+    p4cfg_parse_text("[golden]\nhca_key = 12345678901234567\n");
+    CHECK(p4cfg_hca_key(&key) == -1 && key == 0);
+    p4cfg_parse_text("[golden]\nhca_key = 0000000000000000\n");
+    CHECK(p4cfg_hca_key(&key) == 0 && key == 0);
+    p4cfg_parse_text("[video]\nresolution = scale:4\n");
+
     /* The environment overrides the file. */
     p4_os_setenv("P4PC_RESOLUTION", "1920x1080", 1);
     CHECK(strcmp(p4cfg_str("video.resolution", ""), "1920x1080") == 0);
@@ -67,7 +90,7 @@ int main(void)
     p4cfg_parse_text("");
     v = p4cfg_video();
 #if !defined(__ANDROID__)
-    CHECK(!v->blit && v->scale == 1 && !v->fullscreen && v->width == 640 && v->height == 448);
+    CHECK(!v->blit && v->scale == 1 && !!v->fullscreen == PHONE_FULLSCREEN && v->width == 640 && v->height == 448);
 #endif
     CHECK(v->vsync == 2);
     CHECK(v->aspect == P4CFG_ASPECT_4_3);
@@ -219,7 +242,7 @@ int main(void)
     CHECK(strcmp(p4cfg_str("input.pad.cross", ""), "south") == 0);
     CHECK(strcmp(p4cfg_str("input.kb.up", ""), "Up, W") == 0);
     v = p4cfg_video();
-    CHECK(v->blit && v->fit == P4CFG_FIT_4_3 && v->scale == 1 && !v->fullscreen);
+    CHECK(v->blit && v->fit == P4CFG_FIT_4_3 && v->scale == 1 && !!v->fullscreen == PHONE_FULLSCREEN);
     CHECK(v->aspect == P4CFG_ASPECT_4_3);
     CHECK(v->movieFit == P4CFG_MOVIE_BARS);
 

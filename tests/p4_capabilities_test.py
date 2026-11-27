@@ -1,4 +1,5 @@
 """The capability registry: fragments parse, compose into p4.d.luau and agree with the build's table."""
+import hashlib
 from pathlib import Path
 import re
 import sys
@@ -57,6 +58,25 @@ class Fragments(unittest.TestCase):
                         self.assertIn(line.strip(), composed, fragment.name)
         self.assertIn("capabilities@1", [f.name for f in fragments])
         self.assertIn("core@1", [f.name for f in fragments])
+        self.assertIn("battle.execution@1", [f.name for f in fragments])
+        self.assertIn("authorize.item_use@1", [f.name for f in fragments])
+
+    def test_item_action_capability_requires_boundary_review(self):
+        # Freeze the advertised surfaces, not just guessed item-use names:
+        # any newly advertised API must be reviewed for item-action creation.
+        # If one is added, its operation must pass authorize.item_use before
+        # effects or stock changes; update this fingerprint only after review.
+        # Reviewed at the second pin: stage.damage rev 4 (offense_policy), stage.enemy-reward
+        # (reward stage), story.dungeon_cleared rev 2 and the table-source sections (offense,
+        # status rev 4) landed after the first pin; none creates an item action or consumes stock.
+        # Reviewed at the third pin: the only advertised-surface change since the second pin is
+        # data.catalog's Golden-only read getters p4.data.fusion_recipe/fusion_recipes (fusion
+        # recipe rows: result and material ids, no stock, no action); they create no item action.
+        # Other landed paths that do not advertise a surface were read too (see the "Review of
+        # later main changes" section of docs/private/challenge_item_boundaries.md).
+        index = caps.index(caps.load())
+        self.assertEqual(hashlib.sha256(index.encode("utf-8")).hexdigest(),
+                         "01aa821153fb03b3b81e0ceb2b93f0bac04e702c40d33da6d6a73466885a29d5")
 
     def test_cmake_and_python_accept_the_same_headers(self):
         cmake = (ROOT / "cmake/sources/052-capabilities.cmake").read_text(encoding="utf-8")
@@ -143,6 +163,9 @@ class Fragments(unittest.TestCase):
         self.assertIn("p4.hook", repository["advanced"])
         self.assertIn("event:battle_end", repository["events.battle_end"])
         self.assertEqual(repository["capabilities"], ["p4.has", "p4.capabilities"])
+        self.assertEqual(set(repository["battle.execution"]), {
+            "p4.battle.execution.on", "p4.battle.execution.snapshot",
+            "p4.battle.execution.current", "p4.battle.execution.unit"})
         self.assertFalse([key for key, found in repository.items() if not found], "every key names what it covers")
 
 

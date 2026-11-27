@@ -47,7 +47,7 @@ int main(int argc, char **argv)
     CHECK(strstr(reason, "digest"));
     {
         const char *path = "golden_exp_synthetic_fixture.tmp";
-        uint8_t pe[1024] = {0};
+        uint8_t pe[1536] = {0};
         char exe_hash[65], actual_hash[65];
         pe[0] = 'M'; pe[1] = 'Z'; put32(pe + 60, 64);
         memcpy(pe + 64, "PE\0\0", 4);
@@ -64,6 +64,48 @@ int main(int argc, char **argv)
         CHECK(strstr(reason, "digest"));
         CHECK(p4_golden_exp_test_read(path, out, actual_hash, exe_hash, "wrong", reason, sizeof reason) == -1);
         CHECK(strstr(reason, "digest"));
+        /* Synthetic, independently hashed spans in both allowed data sections.
+         * Raw bytes beyond a section's virtual extent are never a supplier. */
+        pe[70] = 2;
+        put32(pe + 96, 512);
+        memcpy(pe + 128, ".xpdata", 7);
+        put32(pe + 136, 256); put32(pe + 144, 256); put32(pe + 148, 1024);
+        put32(pe + 164, 0x40000040);
+        for (unsigned i = 0; i < 8; ++i) pe[512 + 420 + i] = (uint8_t)(i + 71);
+        for (unsigned i = 0; i < 12; ++i) pe[1024 + 12 + i] = (uint8_t)(i + 91);
+        char first_hash[65], second_hash[65], wrong_hash[65];
+        uint8_t literal_bytes[20];
+        p4_content_digest(pe + 512 + 420, 8, first_hash);
+        p4_content_digest(pe + 1024 + 12, 12, second_hash);
+        P4GoldenPEDataSpan spans[] = {
+            {".sdata", first_hash, 420, 8, 0}, {".xpdata", second_hash, 12, 12, 8}
+        };
+        p4_content_digest(pe, sizeof pe, exe_hash);
+        CHECK(!fixture_write(path, pe, sizeof pe));
+        CHECK(!p4_golden_exp_test_image_read(path, out, actual_hash, exe_hash, digest,
+            spans, 2, literal_bytes, sizeof literal_bytes, reason, sizeof reason));
+        CHECK(!strcmp(actual_hash, exe_hash) && !memcmp(out, section + 4, sizeof out));
+        CHECK(!memcmp(literal_bytes, pe + 512 + 420, 8));
+        CHECK(!memcmp(literal_bytes + 8, pe + 1024 + 12, 12));
+        memset(wrong_hash, 'f', 64); wrong_hash[64] = 0;
+        spans[1].sha256 = wrong_hash;
+        CHECK(p4_golden_exp_test_image_read(path, out, actual_hash, exe_hash, digest,
+            spans, 2, literal_bytes, sizeof literal_bytes, reason, sizeof reason) == -1);
+        CHECK(strstr(reason, "digest")); spans[1].sha256 = second_hash;
+        spans[1].section = ".arch";
+        CHECK(p4_golden_exp_test_image_read(path, out, actual_hash, exe_hash, digest,
+            spans, 2, literal_bytes, sizeof literal_bytes, reason, sizeof reason) == -1);
+        spans[1].section = ".xpdata";
+        spans[1].output_offset = 4;
+        CHECK(p4_golden_exp_test_image_read(path, out, actual_hash, exe_hash, digest,
+            spans, 2, literal_bytes, sizeof literal_bytes, reason, sizeof reason) == -1);
+        spans[1].output_offset = 8;
+        put32(pe + 136, 16);
+        p4_content_digest(pe, sizeof pe, exe_hash);
+        CHECK(!fixture_write(path, pe, sizeof pe));
+        CHECK(p4_golden_exp_test_image_read(path, out, actual_hash, exe_hash, digest,
+            spans, 2, literal_bytes, sizeof literal_bytes, reason, sizeof reason) == -1);
+        CHECK(strstr(reason, "file-backed"));
         put32(pe + 124, 0x60000040);
         p4_content_digest(pe, sizeof pe, exe_hash);
         CHECK(!fixture_write(path, pe, sizeof pe));

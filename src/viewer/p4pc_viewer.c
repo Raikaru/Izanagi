@@ -27,9 +27,13 @@
 #include "p4pc/content.h"
 #include "p4pc/content_source.h"
 #include "p4pc/mod_models.h"
+#include "p4pc/golden_model.h"
+#include "p4pc/game_mode.h"
+#include "../platform/golden/golden_cpk_vfs.h"
 #include "../render/p4gl.h"
 #include "../render/p4gl_gl.h"
 #include "../render/p4gl_readback.h"
+#include "../render/p4gl_comparison_evidence.h"
 #include "p4png.h"
 #include "vfs.h"
 
@@ -353,8 +357,12 @@ static int check_reference(const uint8_t *rgba, uint32_t width, uint32_t height)
     if (refPath == NULL) {
         return 0;
     }
-    if (p4gl_reference_mad(rgba, width, height, refPath, &mad) != 0) return 1;
+    if (p4gl_reference_mad(rgba, width, height, refPath, &mad) != 0) {
+        p4gl_comparison_evidence(1, 0, -1.0, maxText);
+        return 1;
+    }
     fprintf(stderr, "p4pc_viewer: mean abs diff from %s = %.4f%%\n", refPath, mad);
+    p4gl_comparison_evidence(0, maxText == NULL || mad <= atof(maxText), mad, maxText);
     if (maxText != NULL && mad > atof(maxText)) {
         fprintf(stderr, "p4pc_viewer: FAIL: above the %s%% limit\n", maxText);
         return 1;
@@ -393,6 +401,35 @@ static int viewer_target_create(void) {
     uint32_t w = 0, h = 0;
     p4gl_readback_pixel_size(&w, &h);
     return p4gl_readback_configure(1, w ? w : VIEW_W, h ? h : VIEW_H);
+}
+
+/* Native Golden witness: the same RW camera, clump, atomic pipeline and PNG readback,
+ * but a genuinely Golden-owned hierarchy/source. Never enter the PS2 model loader. */
+static int render_golden(const char *path, const char *pngPath) {
+    char error[256] = "";
+    if (p4_game_mode() != P4_GAME_MODE_GOLDEN) {
+        fprintf(stderr, "p4pc_viewer: golden: requires Golden mode\n");
+        return 1;
+    }
+    p4gl_atomic_set_viewer_light(1);
+    void *clump = p4_golden_model_load(path, error, sizeof error);
+    if (!clump) {
+        fprintf(stderr, "p4pc_viewer: %s\n", error);
+        return 1;
+    }
+    int failed = 1;
+    void *camera = kwlnCameraCreate(VIEW_W, VIEW_H, 1);
+    if (!camera || p4gl_context_open() || viewer_target_create()) goto done;
+    frame_camera(camera, clump, NULL);
+    p4gl_glClearColor(0.25f, 0.3f, 0.4f, 1.0f);
+    p4gl_glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    if (!RwCameraBeginUpdate(camera)) goto done;
+    p4_golden_model_draw(clump);
+    RwCameraEndUpdate(camera);
+    failed = write_frame(pngPath) != 0;
+done:
+    p4_golden_model_destroy(clump);
+    return failed;
 }
 
 /* Loads the RMD, draws its clump into the readback FBO and writes the PNG. Returns 0 on
@@ -1128,6 +1165,11 @@ static int viewer_main(int argc, char **argv) {
     const int titleMode = strcmp(rmd, "title") == 0;
     const int fieldMode = strncmp(rmd, "field:", 6) == 0;
     const int worldMode = strncmp(rmd, "world:", 6) == 0;
+    const int goldenMode = strncmp(rmd, "golden:", 7) == 0;
+    if (goldenMode && (p4_game_mode() != P4_GAME_MODE_GOLDEN || p4_golden_cpk_vfs_start())) {
+        fprintf(stderr, "p4pc_viewer: Golden mode and verified Golden archives required\n");
+        return 1;
+    }
 
     /* Unported work is reported and skipped, so the run lists what is left. */
     p4_os_setenv("P4PC_TRAP_CONTINUE", "1", 0);
@@ -1150,7 +1192,8 @@ static int viewer_main(int argc, char **argv) {
 
     const int failed = titleMode ? render_title(png) != 0
         : fieldMode ? render_field(rmd, png) != 0
-        : worldMode ? render_world(rmd, png) != 0 : render_rmd(rmd, png) != 0;
+        : worldMode ? render_world(rmd, png) != 0
+        : goldenMode ? render_golden(rmd + 7, png) != 0 : render_rmd(rmd, png) != 0;
     {
         /* P4PC_DUMP_RAM=<file>: the PS2 RAM (0x00100000..0x02000000) after the render, to diff two builds' game state word by word (the first
          * differing word of a frame that differs names the code that computed it; tools/ram_diff.py). Host pointers in it differ by build. */

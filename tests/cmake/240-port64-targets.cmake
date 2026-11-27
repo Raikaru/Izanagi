@@ -6,7 +6,7 @@ foreach(t boot64 gl_open_failure64 port64_coro port64_task port64_task_retail po
   endif()
 endforeach()
 add_custom_target(p4_x64)
-foreach(t p4pc64 p4pc_viewer64 p4decomp64 port64_task64 port64_task_test battle_policy_items_test)
+foreach(t p4pc64 p4pc_viewer64 p4decomp64 port64_task64 port64_task_test battle_policy_items_test battle_expert_charge_zig_test battle_observation_test mod_scene_position_test64)
   if(TARGET ${t})
     add_dependencies(p4_x64 ${t})
   endif()
@@ -25,6 +25,21 @@ endforeach()
 if(P4_PORT64_OBJS)
   add_dependencies(p4_x64w p4_x64_abi)
 endif()
+# The fixture adapter is linked only into its test, never into production p4port.
+foreach(_p4_model IN ITEMS 64 64w)
+  if(TARGET p4port${_p4_model})
+    add_test(NAME battle_policy_no_test_exports${_p4_model}
+      COMMAND "${P4_PYTHON}" "${CMAKE_SOURCE_DIR}/tests/battle_policy_exports_test.py"
+        "${P4_CRT_NM}" "$<FILTER:$<TARGET_OBJECTS:p4port${_p4_model}>,INCLUDE,policy[.]zig[.]o$>"
+      COMMAND_EXPAND_LISTS)
+    if(_p4_model STREQUAL "64")
+      set_tests_properties(battle_policy_no_test_exports${_p4_model} PROPERTIES LABELS port64)
+    else()
+      set_tests_properties(battle_policy_no_test_exports${_p4_model} PROPERTIES LABELS port64win)
+    endif()
+  endif()
+endforeach()
+
 
 # The properties of the cloned full-game gates (add_test in the registration prelude): the i386 original's, labelled port64.
 get_property(P4_GATE_CLONES GLOBAL PROPERTY P4_GATE_CLONES)

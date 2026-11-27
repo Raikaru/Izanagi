@@ -1,0 +1,79 @@
+{
+  "schema": 1,
+  "proof_id": "L1-c12-shuffle-variants-reward",
+  "decision": "PROVEN",
+  "runtime_status": "pending-seam",
+  "source_boundary": "Steam P4G build10836033 ordinary .shared readers and file-backed .sdata/.xpdata; independent Switch1.2 ordinary NSO reward readers and RELATIVE relocations. Never decode .arch or execute the game. Source proof does not establish runtime binding.",
+  "steam_image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+  "sources": [
+    {
+      "address": "0x0064e670",
+      "ps2_size": 48,
+      "ps2_live_size": 40,
+      "ps2_retained_tail_size": 8,
+      "steam_rva": "0x90b3c8",
+      "steam_raw": 9478088,
+      "steam_live_size": 40,
+      "sha256": "00a575df7575af864d683846ce65c84b2457955ba16478520acc63d95ad7dc73",
+      "layout": "ten level-decade rows of four unsigned cumulative-selection weights; 40 logical bytes, not the48-byte M2 candidate window",
+      "weights": [[80,20,0,0],[80,20,0,0],[80,20,0,0],[70,20,10,0],[60,30,10,0],[40,30,20,10],[30,30,30,10],[20,30,30,20],[20,20,30,30],[20,20,20,40]],
+      "ps2_reader": "0036eb50 / btlShuffleRollFlagged: bytelevel0->1, >99->99, decade=(level-1)/10; pattern3 and flag1432 select base64e670+4*decade; draw randomBelow100 and accumulate unsigned bytes until roll<sum, at most4 entries.",
+      "steam_reader": "109090..10925a has the same level-byte clamp, decade, random%100, pattern dispatch and1431/1432/1433 gates. Pattern3 branch10919f..1091fa tests bit18 at flag-store+284 (flag1432), constructs image-relative base90b3c8 at1091b6..1091c7 and reads u8[4*decade+i] at1091d0, i<4 at1091e2. This is the four-column variant role, not the six-column pattern table.",
+      "extent": "Ten possible decade indices and four byte loads establish40 bytes. Steam90b3f0 immediately begins a separate pointer array, positively consumed by ec280/ec606; its first pointer is not an eighth tail byte of this source. PS2 next table begins64e6a0, leaving8 nonlogical selected tail bytes.",
+      "nso_limit": "The exact40-byte array has no occurrence in the inspected NSO. This does not negate a positive ordinary Steam reader/data proof and is not D10c. NSO a446c..a4578 inlines the normal producer's sixth-pattern path rather than a legacy1432-gated variant draw.",
+      "producer_delta": "Steam108ed0..108f62 still consumes the pattern random draw and reads six weights, but returns pattern5 at108f58. Flagged-selector109090 has an additional pattern5 branch109126..109139 returning negative original level byte; NSO a455c stores pattern5 at selection+10, consumes randomBelow100 at a456c, then stores negated encounter-level byte at+14 at a4578. Therefore retaining the old five-pattern producer, inventing pattern3 to exercise this table, or deleting the apparently unused RNG draw is not Golden behavior.",
+      "install": "Install the qualified40 bytes at64e670; leave selected+40..47 untouched as nonlogical tail. Native/inlined readers bind the same ten-by-four source. Never copy48 bytes from Steam into the48-byte PS2 partition.",
+      "required_seams": [
+        {"ps2_addresses":["0x0036eb50"],"action":"Bind translated/native/inlined four-column variant reads to this40-byte Golden source. Preserve byte-level clamp, actual1432 flag, pattern selector, RNG state/draw order and cumulative threshold semantics; no constant variant or dummy flag producer."},
+        {"ps2_addresses":["0x0036ee60","0x0036e920","0x0036ea00"],"action":"Bind the real Golden normal-shuffle producer: pattern5, signed negative original level byte as difficulty, and the observed consumed-but-unused random%100 draw in flagged selection. Preserve actual encounter-level input, pattern/card-count interaction and source-backed alternate selector branches. A static source admission does not qualify this gameplay producer cutover."}
+      ]
+    },
+    {
+      "address": "0x0064e7b8",
+      "ps2_size": 520,
+      "ps2_real_base": "0x0064e7b0",
+      "ps2_full_table_size": 528,
+      "steam_rva": "0xb059d0",
+      "steam_raw": 11551184,
+      "steam_full_size": 704,
+      "steam_full_sha256": "a729839c78e6a787952462af1b5f8af8ad0e396f1df218301a9c10b3e85d45d2",
+      "nso_base": "0x710073bd98",
+      "nso_full_size": 704,
+      "layout": "44 records. PS2 stride12: u32flag+0,u16kind+4,u16variant+6,u32callback+8. Golden stride16: same first8 bytes, pointer64+8. Selected PS2 row begins at the first callback, not the first descriptor.",
+      "exact_heads": "For i=0..43: flag=0x1404+i; kind=1+floor(i/2); variant=1-(i%2). All44 complete heads independently agree between Steam and NSO (and PS2); correspondence is established by the paired typed readers, not by that agreement alone.",
+      "callback_roles_by_kind": {"2":"skill-replacement","4":"party-HP","8":"persona-stat","9":"persona-stat","11":"persona-stat","12":"persona-stat","13":"persona-stat","16":"persona-replacement","21":"party-SP"},
+      "other_kinds": "Kinds1,3,5,6,7,10,14,15,17,18,19,20,22 have NULL callbacks for both variants. These26 cases deliberately defer application via flags, not a missing implementation or success fallback.",
+      "null_index_bitmap": "0x0cff3c0c3f33",
+      "ps2_reader": "0036f640:44 stride12 records; previous flagged reward and new selector match kind<<16|variant; callback column at64e7b8+12*i. This accounts for the full520 selected bytes:44 callback words plus43 subsequent8-byte heads, with no tail.",
+      "steam_reader": "109930..109a85: clears12-byte result; tests1403, scans at most44 stride16 records from b059d0 at109960, retrieves kind/variant and clears old reward/1403;1099ef..109a1d compares all44 packed selectors;109a28 loads pointer+8,109a30 tests NULL,109a45 calls actual non-NULL callback with(selector,result).",
+      "nso_reader": "a4790..a48d4: same full44 record domains and result initialization. Previous-reward scan advances16 to2c0 at a47e4..a47ec. New-selector scan compares44 at a4858. a4864..a4874 uses constant null-index bitmap0cff3c0c3f33 instead of loading/testing NULL; non-NULL pointer loads at a4878 and indirect call at a4884. Resolved RELATIVE relocation addends give the five code targets below. NULL bitmap agrees with all44 Steam pointer values.",
+      "dispatch_state": "Before selecting a new reward, if1403 is set scan actual flags1404..142f, return the previous packed selector and clear its flag plus1403. New NULL-callback selection stores result1 and sets its flag/1403 for deferred processing. Non-NULL callback result is stored and its flag/1403 cleared even when callback returns0. Matching a row clears script value16. Unmatched selectors leave the initialized result zero and return the previous selector; do not invent a generic success fallback.",
+      "result_layout": "12B: s32status+0,u16personaId+4,u16replacement+6,u16previous+8,pad+10. Skill replacement writes old skill at+8 and new at+6; persona replacement writes replacement ID at+8. Do not infer field order from misleading decomp helper names.",
+      "install": "Field-transcode, not byte-copy: for i0..43 bind Golden callback role to a real guest-ABI handler and emit its32-bit guest callable at selected+12*i. For i1..43 emit Golden8-byte head at selected+12*i-8. First head belongs to unselected preceding8 bytes: do not write outside this520-byte partition. Native readers use a coherent full44-entry Golden logical table. Source selected view is696B starting Steam b059d8 / NSO73bda0; raw pointer64 bytes are never guest pointers. No PS2 callback is retained by numeric-address similarity: each role requires the Golden implementation contract below.",
+      "required_seams": [
+        {"ps2_addresses":["0x0036f640"],"action":"Replace the callback-column/table aliases with coherent Golden44-record descriptors and five actual Golden guest-ABI/native handler bindings. Cover pointer normalization, first unselected head alias, all44 selectors, NULL-deferred versus non-NULL-immediate paths, previous reward and unmatched selectors. Never install Steam/NSO pointers or invoke the original PS2 algorithm merely because its symbol address is reused."},
+        {"action":"Preserve live reward flags1403..142f and script value16, actual packed kind/variant selector, result producer/consumer layout, roster/party progression and RNG state. Bind actual native and inlined callbacks, not just the guest indirect jump."},
+        {"action":"Skill/persona replacement must read actual loaded Golden PERSONA.TBL blocks4/5, published globals8856c0/8856c8; preserve their load/arena lifecycle, sentinels, ID/skill domains and column selection. The data are live input assets, not hardcoded-empty tables or NSO runtime reads. Actual progress-backed roster capacity6/8/10/12, active slots, lead slot, valid-member count, skills, persona levels/stats and membership lookup remain live producers."},
+        {"action":"HP/SP handlers require real protagonist and four party IDs, current HP/SP, max-HP/max-SP and Golden alive/status predicates. Preserve actual four-slot iteration including any repeated protagonist; do not substitute an always-alive list, fixed maxima or deduplicated set. Stat/skill/persona changes must reach the actual result and persistent game state."}
+      ]
+    }
+  ],
+  "callback_bindings": [
+    {"role":"skill-replacement","ps2":"0x0036f880","steam":"0x109a90","nso":"0x71000a48e0","contract":"Pick a random active roster persona, inspect8 skills, search loaded skill-pair first/second column according to selector low16, reject existing replacement skills, pick a random eligible pair and mutate exactly the old skill. No active persona or no eligible pair returns0. Fill personaId+4,newskill+6,oldskill+8 on success. Source witnesses Steam109b6e..109d0b and NSOa4978..a4bf0 include both search directions and actual mutation."},
+    {"role":"party-HP","ps2":"0x0036fbe0","steam":"0x109d40","nso":"0x71000a4c10","contract":"Selector low16 nonzero restores HP to actual maximum; zero sets HP1. Always process protagonist1, then the four actual nonzero living party IDs. Return1; no persona-result auxiliaries. Steam109d69..109dfe and NSOa4c1c..a4dc0 positively pair both branches and four party-slot paths."},
+    {"role":"persona-stat","ps2":"0x00370020","steam":"0x10a090","nso":"0x71000a4dd0","contract":"Kinds8,9,11,12,13 select stat indices3,0,4,1,2. Choose actual roster persona using random(validCount). Variant nonzero draws randomBelow3+1 and adds, bounded by actual buffed stat99; variant0 still consumes randomBelow1 then subtracts1 bounded by base stat1. Already saturated returns0. Write personaId+4 and change magnitude+8. Preserve different buffed/base-stat readers. Steam10a0d2..10a1ec and NSOa4de0..a4f20 establish mapping, saturation and actual mutation."},
+    {"role":"persona-replacement","ps2":"0x0036fd00","steam":"0x109e20","nso":"0x71000a4f40","contract":"Scan actual active roster excluding lead slot. Select variant-chosen PERSONA replacement column, reject zero/already-owned target, keep strictly lowest level<100 (first equal-level candidate wins). No candidate returns0. Remove selected persona, add actual replacement, emit oldpersona+4 and replacement+8. Steam109ea0..109f8d and NSOa4fa4..a50c8 pair both columns, membership checks, strict level and remove/add calls."},
+    {"role":"party-SP","ps2":"0x0036fed0","steam":"0x109fb0","nso":"0x71000a50f0","contract":"Selector low16 nonzero restores actual maxSP; zero halves current unsigned16 SP. Always protagonist1, then four nonzero living party IDs. Return1. Steam109fcd..10a075 and NSOa50fc..a52c4 pair both branches and the actual four-slot paths."}
+  ],
+  "live_table_producers": {
+    "filename":"battle/PERSONA.TBL",
+    "nso_filename":"0x710060135e",
+    "nso_records":["0x710071c578","0x710071cfb8","0x710071d9f8","0x710071e470"],
+    "generic_loader":"58aa0..58be0 reads descriptor filename at+0, registered destination slots at+8+16*blockIndex, and copies length-prefixed bodies with16B source/destination advancement. These are the same real asset-copy semantics documented in l1-aicalc-program-ownership-research.json, not a module-label inference.",
+    "block4":"registration pointers71c5c0/71d000/71da40/71e4b8 ->8856c0; GOT880880; u16 skill pairs stride4 with column-specific zero sentinel, actual readera49a0..a4bd4",
+    "block5":"registration pointers71c5d0/71d010/71da50/71e4c8 ->8856c8; GOT880888; persona-ID-indexed u16 replacement pairs stride4, actual readersa4fc4/a5050",
+    "boundary":"These producer/input contracts do not independently qualify every PERSONA.TBL payload or replace GoldenM6b asset staging/binding qualification. Do not confuse them with AICALC blocks9/10."
+  },
+  "reproduction":"Private l1c12_reward_descriptors.py, l1c12_reward_code.py, l1c12_reward_readers.py, l1c12_reward_producers.py, l1c12_variant.py and l1c12_variant_facts.py under <scratch>/GoldenRE-notes/l1. Exact44 head formula, null bitmap and complete40-byte source were checked against the original files. Section-dependent RVA/raw translation matters: .sdata delta1400hex; .xpdata delta1800hex. No instructions or game execution are packaged in this proof.",
+  "qualification":"All admissions remain runtime pending-seam. Equal table bytes are supporting observations, not the proof; actual paired typed readers, fixed domains, record ownership and callable-role contracts are the proof."
+}

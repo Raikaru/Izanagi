@@ -1,13 +1,23 @@
 <?xml version="1.0" encoding="us-ascii"?>
-<!-- Freeze and Shock (design 4.F). Enemy-to-party riders roll half the chance
-     (enemy-scale 50). Every boss row below is immune to both (the 0x01000000 null
-     flag): bosses cannot be frozen or shocked in v1 (guard F-G3), including
-     Shadow Yukiko, who keeps her Fear window instead. -->
+<!-- Freeze, Shock and Burn. Enemy Freeze/Shock riders roll half the chance;
+     enemy-to-party Burn riders are disabled. Boss Freeze and Shock rows below
+     are null (guard F-G3); Shadow Yukiko keeps her Fear window instead. -->
 <p4-tables schema="1">
 <element id="24" flags="4" family="24" order="24" key="p4pc.hardmode:freeze" display-name="Freeze" short-name="Frz"/>
 <element id="25" flags="4" family="25" order="25" key="p4pc.hardmode:shock" display-name="Shock" short-name="Shk"/>
+<element id="26" flags="4" family="26" order="26" key="p4pc.hardmode:burn" display-name="Burn" short-name="Brn"/>
 <status-ailment element="24" flags="15" cure-mask="0x16" default-from="2" crit-bonus="100" enemy-scale="50" key="p4pc.hardmode:freeze-ailment"/>
 <status-ailment element="25" flags="7" cure-mask="0x16" default-from="3" crit-bonus="100" transfer="25" enemy-scale="50" key="p4pc.hardmode:shock-ailment"/>
+<!-- Burn: two nonlethal end-of-turn ticks, no enemy-to-party riders. -->
+<status-ailment element="26" flags="54" cure-mask="0x16" default-from="1" crit-bonus="0" key="p4pc.hardmode:burn-ailment"/>
+<status-rider skill="0x001" element="26" rate="10" key="p4pc.hardmode:burn-agi"/>
+<status-rider skill="0x002" element="26" rate="12" key="p4pc.hardmode:burn-agilao"/>
+<status-rider skill="0x003" element="26" rate="15" key="p4pc.hardmode:burn-agidyne"/>
+<status-rider skill="0x004" element="26" rate="6" key="p4pc.hardmode:burn-maragi"/>
+<status-rider skill="0x005" element="26" rate="8" key="p4pc.hardmode:burn-maragion"/>
+<status-rider skill="0x006" element="26" rate="10" key="p4pc.hardmode:burn-maragidyne"/>
+<status-rider skill="0x007" element="26" rate="10" key="p4pc.hardmode:burn-single"/>
+<status-rider skill="0x008" element="26" rate="60" key="p4pc.hardmode:burn-ragnarok"/>
 <status-rider skill="0x01A" element="24" rate="10" key="p4pc.hardmode:freeze-bufu"/>
 <status-rider skill="0x01B" element="24" rate="12" key="p4pc.hardmode:freeze-bufula"/>
 <status-rider skill="0x01C" element="24" rate="15" key="p4pc.hardmode:freeze-bufudyne"/>

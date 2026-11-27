@@ -80,3 +80,81 @@ python tools/golden_mode/layouts.py --render <dir>/layouts/layouts.json
 
 Tests: `golden_mode_layouts` (synthetic tables) and `golden_mode_specs` (every spec's sections and
 synthetic vectors), in `tests/cmake/255-golden-mode-specs.cmake`.
+
+## Image-literal ledger (milestone 6b)
+
+`literal_inventory.py --typed <M2>/typed.jsonl --out <inventory.json>` freezes
+exactly the M2 `golden_check == true` set, retaining metadata only. The committed
+`l1-inventory.json` contains 1,043 objects / 249,428 bytes: data1 786 / 241,555
+bytes and data2 257 / 7,873 bytes. Inside this set there are 585 executable
+variant leads, 123 archive variant leads and 335 objects without a variant lead
+(8 partial leads and 327 with no lead), totaling 8,960 bytes. M2's headline
+586 + 128 variant count includes six objects outside `golden_check`; it is not
+the L1 denominator. A heuristic lead is never binding authority.
+
+`literal_ledger.py --inventory <inventory.json> --decisions <spec.jsonl>`
+checks exact address/size coverage, one reasoned decision per object and
+source/layout metadata for bound objects. `--registry-out <rows.inc>` emits
+same-shape copy rows for the existing image binder; unsupported conversions
+refuse rather than truncating or guessing. Missing, duplicate, unknown and
+unclassified objects refuse.
+
+Main's revised M6b acceptance permits the separate `OPEN-retain` class with a
+per-object proof path. It is **not** D10c or proof of Golden balance: the PS2
+value remains, must be named as `L1-open` at boot and must be resolved before
+M12. The validator reports all six runtime classes separately. `golden_mode_literal_ledger`
+tests synthetic decision/refusal cases and the complete immutable M2 inventory.
+
+The M6c-1 intake is frozen at specification commit
+`c8987ecc75e843c875bd1d5c3db19bc4c7d23ba7`, recorded in `l1-cut.json`.
+The source author's separate provenance-only sanitation commit
+`2dd82cb48cc7081971cac284dac450ff8c8e19c9` neutralizes private local paths and
+reseals affected proof references without admitting later rows or changing values.
+The canonical primary plus address-keyed archive supplement cover all 1,043
+objects. Runtime classification is 26 bound, 585 pending-seam, 219 D10c
+non-supplies and 213 OPEN-retain. A source admission alone never creates a
+runtime supplier. Missing implementations retain their exact required-seam
+contracts and named `pending:<owner>` blockers; D10c emits no runtime object.
+Regenerate authenticated metadata and the address-complete blocker census with:
+
+```sh
+python tools/golden_mode/literal_ledger.py \
+  --inventory tools/golden_mode/l1-inventory.json \
+  --decisions docs/golden_mode/specs/re/l1-image-literals.jsonl \
+  --supplement docs/golden_mode/specs/re/l1-image-literals-archive.jsonl \
+  --bindings tools/golden_mode/l1-bindings.json \
+  --registry-out src/platform/golden/golden_mode_literal_rows.inc \
+  --pending-out tools/golden_mode/l1-pending.json \
+  --manifest-c-out src/platform/golden/golden_mode_literal_manifest.inc \
+  --identity-out src/platform/golden/golden_mode_literal_identity.h
+```
+
+The generated manifest carries every reason, provenance record, candidate and
+proof path as metadata. The identity header pins its digest in the cache key.
+Completeness tests compare both generated files against the committed specs.
+
+The PE reader's `p4_golden_exp_image_read` reads EXP and explicitly specified
+`.sdata`/`.xpdata` spans in one allowlisted executable-hash pass. Each span has
+its own digest and must fit both raw and virtual section extents; executable
+sections, virtual-only tails, overlapping output ranges and wrong hashes refuse.
+The original EXP-only entry point remains unchanged for its existing callers.
+
+M6c-1 adds the `spec-constant` path: binding records identify a public committed
+JSON proof, its canonical LF SHA-256 and exact JSON-pointer evidence fields.
+Only explicitly code-authored values become little-endian constant suppliers;
+no executable instructions, NSO or private research files are runtime inputs.
+The shared positive path epsilon is installed at its guest address, so both
+actual direct and GP-relative readers see it. The type-3 event filter instead
+uses seven fixed cells plus four live record-derived cells through the sealed
+native constructor. It never reads or overwrites the legacy 48-byte partition
+in Golden mode. The PS2 branch and record/reference/task ownership are retained.
+
+The `spec-layout` path reads only an explicitly referenced, hash-pinned data
+span, with bounded guest-prefix or native-bank destinations. Synthetic tests
+exercise both policies and bad-proof refusal. No newly admitted semantic
+layout bank is declared runtime-bound by M6c-1: their full voice/name/location
+provider and consumer contracts remain pending for M6c-2 or the named owner.
+`l1-pending.json` reports non-disjoint blocker counts and exact address sets
+separately for the 585 pending supplies and the 219 non-supply obligations.
+It is not permission to treat a Steam-span dependency as consumer closure.
+`golden_exp` exercises both data sections using synthetic PE fixtures.

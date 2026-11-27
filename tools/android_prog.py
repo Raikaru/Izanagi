@@ -22,10 +22,12 @@ Environment: ANDROID_ADB (adb path, default adb), ANDROID_SERIAL (device), P4PC_
 Installing an APK also requires SDK build-tools aapt2 (ANDROID_AAPT2 or setup --aapt2 if it is not on PATH).
 """
 import argparse
+import hashlib
 import glob
 import os
 from pathlib import Path
 import re
+import secrets
 import shlex
 import subprocess
 import sys
@@ -54,16 +56,46 @@ def shell(cmd, **kw):
     return adb("shell", cmd, **kw)
 
 
-def device_size(path):
-    out = shell("stat -c %%s %s 2>/dev/null" % shlex.quote(path), check=False).strip()
-    return int(out) if out.isdigit() else -1
+def host_digest(path):
+    digest = hashlib.sha256()
+    with open(path, "rb") as stream:
+        for block in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def device_digest(path):
+    out = shell("sha256sum %s 2>/dev/null" % shlex.quote(path), check=False).strip()
+    match = re.fullmatch(r"([0-9a-f]{64})\s+.*", out)
+    return match.group(1) if match else None
 
 
 def push_if_changed(host, dev):
-    if device_size(dev) == os.path.getsize(host):
-        return
-    shell("mkdir -p %s" % shlex.quote(os.path.dirname(dev)))
-    adb("push", host, dev, timeout=3600)
+    before = host_digest(host)
+    if device_digest(dev) != before:
+        shell("mkdir -p %s" % shlex.quote(os.path.dirname(dev)))
+        adb("push", host, dev, timeout=3600)
+    if host_digest(host) != before or device_digest(dev) != before:
+        raise RuntimeError("android_prog: staging digest mismatch for " + host)
+
+
+def push_tree_verified(host, dev):
+    if os.path.islink(host) or not os.path.isdir(host):
+        raise ValueError("android_prog: expected non-symlink fixture directory: " + host)
+    for root, dirs, files in os.walk(host, followlinks=False):
+        dirs.sort()
+        files.sort()
+        relative = os.path.relpath(root, host)
+        target = dev if relative == "." else dev + "/" + relative.replace(os.sep, "/")
+        shell("mkdir -p %s" % shlex.quote(target))
+        for name in dirs:
+            if os.path.islink(os.path.join(root, name)):
+                raise ValueError("android_prog: fixture directory contains symlink: " + name)
+        for name in files:
+            source = os.path.join(root, name)
+            if os.path.islink(source) or not os.path.isfile(source):
+                raise ValueError("android_prog: fixture contains non-regular file: " + source)
+            push_if_changed(source, target + "/" + name)
 
 
 def validate_debug_apk(path, aapt2):
@@ -77,13 +109,23 @@ def validate_debug_apk(path, aapt2):
 
 
 def setup(args):
+    adb("wait-for-device")
+    lock = BASE + "/.gate-lock"
+    shell("mkdir -p %s && mkdir %s" % (shlex.quote(BASE), shlex.quote(lock)))
+    try:
+        setup_locked(args)
+    finally:
+        shell("rmdir %s" % shlex.quote(lock))
+
+
+def setup_locked(args):
     refs = args.refs or (os.path.join(os.path.dirname(args.iso), "refs") if args.iso else None)
     reference_files = sorted(glob.glob(os.path.join(refs, "*.rgb"))) if refs and os.path.isdir(refs) else []
     for path in reference_files:
         mod_witness.refuse_reference(path)
     if args.apk:
         validate_debug_apk(args.apk, args.aapt2)
-    adb("wait-for-device")
+        apk_digest = host_digest(args.apk)
     if args.apk:
         out = adb("install", "-r", "-t", args.apk, check=False, timeout=600)
         if "INSTALL_FAILED_UPDATE_INCOMPATIBLE" in out:
@@ -93,6 +135,11 @@ def setup(args):
             out = adb("install", "-t", args.apk, check=False, timeout=600)
         if "Success" not in out:
             raise SystemExit("android_prog: install failed: " + out.strip()[-300:])
+        paths = shell("pm path %s" % PKG).strip().splitlines()
+        if len(paths) != 1 or not paths[0].startswith("package:/"):
+            raise RuntimeError("android_prog: installed APK path is ambiguous")
+        if host_digest(args.apk) != apk_digest or device_digest(paths[0][8:]) != apk_digest:
+            raise RuntimeError("android_prog: installed APK digest mismatch")
         print("android_prog: installed " + os.path.basename(args.apk))
     shell("mkdir -p %s/refs %s/out" % (BASE, BASE))
     if args.iso:
@@ -108,6 +155,18 @@ def log_bytes(offset):
 
 
 def run(args):
+    # One debug package has one process and boot.log. Never let two shims
+    # force-stop or consume each other's output.
+    lock = BASE + "/.gate-lock"
+    shell("mkdir -p %s && mkdir %s" % (shlex.quote(BASE), shlex.quote(lock)))
+    run_base = BASE + "/runs/" + secrets.token_hex(16)
+    try:
+        return run_locked(args, run_base)
+    finally:
+        shell("rm -rf %s && rmdir %s" % (shlex.quote(run_base), shlex.quote(lock)))
+
+
+def run_locked(args, run_base):
     prog = args.prog
     env = dict(os.environ)
     env["P4PC_INPUT"] = "script"  # Standalone shim runs are automated too, not just gate-runner callers.
@@ -135,7 +194,7 @@ def run(args):
     extras = []
     cleanup_pulls = []  # (device path, host path, is_dir)
     shell("am force-stop %s" % PKG)
-    shell("rm -rf %s/out %s/save; mkdir -p %s/out %s/save" % (BASE, BASE, BASE, BASE))
+    shell("mkdir -p %s/out %s/save" % (run_base, run_base))
     shell("run-as %s rm -f files/boot.log" % PKG, check=False)
 
     def e(name, value):
@@ -149,16 +208,16 @@ def run(args):
     else:
         # A fixture's settings file and the per-mod settings beside it (mod-settings/<id>.ini) are
         # copied fresh; the app may rewrite them on the device, never the host copies.
-        shell("rm -rf %s/config; mkdir -p %s/config" % (BASE, BASE))
-        adb("push", config, BASE + "/config/" + os.path.basename(config), timeout=600)
+        shell("mkdir -p %s/config" % run_base)
+        push_if_changed(config, run_base + "/config/" + os.path.basename(config))
         settings = os.path.join(os.path.dirname(os.path.abspath(config)), "mod-settings")
         if os.path.isdir(settings):
-            adb("push", settings, BASE + "/config/mod-settings", timeout=600)
-        e("P4PC_CONFIG", BASE + "/config/" + os.path.basename(config))
+            push_tree_verified(settings, run_base + "/config/mod-settings")
+        e("P4PC_CONFIG", run_base + "/config/" + os.path.basename(config))
     if env.get("P4PC_MOD_DIR"):
-        shell("rm -rf %s/mods; mkdir -p %s/mods" % (BASE, BASE))
-        adb("push", env["P4PC_MOD_DIR"] + "/.", BASE + "/mods", timeout=600)
-        e("P4PC_MOD_DIR", BASE + "/mods")
+        shell("mkdir -p %s/mods" % run_base)
+        push_tree_verified(env["P4PC_MOD_DIR"], run_base + "/mods")
+        e("P4PC_MOD_DIR", run_base + "/mods")
     e("P4PC_LOGCAT", "0")  # boot.log is read here; logcat is slow when a game prints thousands of lines a second
     for name, value in sorted(env.items()):
         if name.startswith("P4PC_") and name not in NOT_FORWARDED:
@@ -169,35 +228,34 @@ def run(args):
             push_if_changed(env[name], dev)
             e(name, dev)
     if env.get("P4PC_WALK_SCRIPT"):
-        dev = BASE + "/walks/" + os.path.basename(env["P4PC_WALK_SCRIPT"])
+        dev = run_base + "/walks/" + os.path.basename(env["P4PC_WALK_SCRIPT"])
         push_if_changed(env["P4PC_WALK_SCRIPT"], dev)
         e("P4PC_WALK_SCRIPT", dev)
     if env.get("P4PC_CAPTURE_PNG"):
         host_dir, pattern = os.path.split(env["P4PC_CAPTURE_PNG"])
-        e("P4PC_CAPTURE_PNG", BASE + "/out/" + pattern)
-        cleanup_pulls.append((BASE + "/out/.", host_dir or ".", True))
+        e("P4PC_CAPTURE_PNG", run_base + "/out/" + pattern)
+        cleanup_pulls.append((run_base + "/out/.", host_dir or ".", True))
     if env.get("P4PC_CAPTURE_RGB"):
-        e("P4PC_CAPTURE_RGB", BASE + "/out/" + os.path.basename(env["P4PC_CAPTURE_RGB"]))
-        cleanup_pulls.append((BASE + "/out/" + os.path.basename(env["P4PC_CAPTURE_RGB"]), env["P4PC_CAPTURE_RGB"], False))
+        e("P4PC_CAPTURE_RGB", run_base + "/out/" + os.path.basename(env["P4PC_CAPTURE_RGB"]))
+        cleanup_pulls.append((run_base + "/out/" + os.path.basename(env["P4PC_CAPTURE_RGB"]), env["P4PC_CAPTURE_RGB"], False))
     if env.get("P4PC_DUMP_RAM"):
-        e("P4PC_DUMP_RAM", BASE + "/out/" + os.path.basename(env["P4PC_DUMP_RAM"]))
-        cleanup_pulls.append((BASE + "/out/" + os.path.basename(env["P4PC_DUMP_RAM"]), env["P4PC_DUMP_RAM"], False))
+        e("P4PC_DUMP_RAM", run_base + "/out/" + os.path.basename(env["P4PC_DUMP_RAM"]))
+        cleanup_pulls.append((run_base + "/out/" + os.path.basename(env["P4PC_DUMP_RAM"]), env["P4PC_DUMP_RAM"], False))
     if env.get("P4PC_SAVE_DIR"):
         host = env["P4PC_SAVE_DIR"]
         if os.path.isdir(host) and os.listdir(host):
             # Saving renames the previous generation, and Android refuses that on
             # a directory adb created: stage the seed, then copy it as the app.
-            shell("rm -rf %s/save-seed" % BASE)
-            adb("push", host + "/.", BASE + "/save-seed", timeout=600)
-            shell("run-as %s cp -r %s/save-seed/. %s/save && rm -rf %s/save-seed" % (PKG, BASE, BASE, BASE))
-        e("P4PC_SAVE_DIR", BASE + "/save")
-        cleanup_pulls.append((BASE + "/save/.", host, True))
+            push_tree_verified(host, run_base + "/save-seed")
+            shell("run-as %s cp -r %s/save-seed/. %s/save && rm -rf %s/save-seed" % (PKG, run_base, run_base, run_base))
+        e("P4PC_SAVE_DIR", run_base + "/save")
+        cleanup_pulls.append((run_base + "/save/.", host, True))
     words = []
     if prog == "p4pc_viewer":
         e("P4PC_PROGRAM", "viewer")
         for a in args.rest:
             if a.endswith(".png"):
-                dev = BASE + "/out/" + os.path.basename(a)
+                dev = run_base + "/out/" + os.path.basename(a)
                 cleanup_pulls.append((dev, a, False))
                 a = dev
             words.append(a)
@@ -255,10 +313,10 @@ def run(args):
     for dev, host, is_dir in cleanup_pulls:
         if is_dir:
             os.makedirs(host, exist_ok=True)
-            adb("pull", dev, host, check=False, timeout=600)
+            adb("pull", dev, host, timeout=600)
         else:
             os.makedirs(os.path.dirname(os.path.abspath(host)), exist_ok=True)
-            adb("pull", dev, host, check=False, timeout=600)
+            adb("pull", dev, host, timeout=600)
     if witness_root is not None:
         (witness_root / "boot.log").write_bytes(raw)
         mod_witness.finish(witness_root, status, environment=env, outcome="android-status")

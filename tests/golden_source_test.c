@@ -197,6 +197,10 @@ static int test_cpk(void)
     CHECK(!p4_golden_cpk_find(&cpk, "INIT/plain.bin", &entry) && entry.offset == 0x2000 && entry.size == 300);
     CHECK(!p4_golden_cpk_read(&cpk, &entry, &bytes, &size, reason, sizeof reason) && size == 300 && !memcmp(bytes, plain_entry, 300));
     free(bytes);
+    /* A mismatched extracted size must never expose unrecognized bytes as plain data. */
+    entry.extract++;
+    CHECK(p4_golden_cpk_read(&cpk, &entry, &bytes, &size, reason, sizeof reason) == -1);
+    CHECK(bytes == NULL && size == 0);
     CHECK(!p4_golden_cpk_find(&cpk, "packed.bin", &entry));
     CHECK(!p4_golden_cpk_read(&cpk, &entry, &bytes, &size, reason, sizeof reason) && size == 263);
     CHECK(!memcmp(bytes, prefix, 256) && !memcmp(bytes + 256, "golden!", 7));
@@ -205,6 +209,62 @@ static int test_cpk(void)
     p4_golden_cpk_close(&cpk);
     remove(path);
     CHECK(p4_golden_cpk_open(&cpk, path, reason, sizeof reason) == -1);
+    return 0;
+}
+
+/* ITOC low/high tables are sorted by numeric ID before aligned offsets are
+ * assigned; ETOC is a separate UTF packet. All fixture bytes are synthetic. */
+static int test_cpk_itoc(void)
+{
+    static uint8_t file[16384], packet[8192], low[8192], high[8192];
+    static const UtfCol hc[] = {{"ItocOffset", 6}, {"EtocOffset", 6},
+                                 {"ContentOffset", 6}, {"Align", 4}};
+    static const UtfCol ic[] = {{"FilesL", 4}, {"FilesH", 4}, {"DataL", 6}, {"DataH", 6}};
+    static const UtfCol dc[] = {{"ID", 4}, {"FileSize", 4}, {"ExtractSize", 4}};
+    static const UtfCol ec[] = {{"LocalDir", 0x0A}};
+    const uint64_t hn[] = {0x400, 0xc00, 0x1000, 16};
+    const uint64_t ln[] = {3, 3, 3}, xn[] = {1, 5, 5};
+    const char *es[] = {"unused"};
+    uint64_t in[4];
+    size_t a, b, n;
+    const char *path = "golden_itoc_test.cpk";
+    P4GoldenCpk cpk;
+    P4GoldenCpkEntry entry;
+    uint8_t *bytes;
+    size_t size;
+    char reason[128];
+    FILE *out;
+    memset(file, 0, sizeof file);
+    n = utf_build(packet, hc, 4, 1, NULL, hn, 0);
+    memcpy(file, "CPK ", 4); le32(file + 8, (uint32_t)n); memcpy(file + 16, packet, n);
+    a = utf_build(low, dc, 3, 1, NULL, ln, 0);
+    b = utf_build(high, dc, 3, 1, NULL, xn, 0);
+    in[0] = 1; in[1] = 1; in[2] = a; in[3] = ((uint64_t)a << 32) | b;
+    n = utf_build(packet, ic, 4, 1, NULL, in, 0);
+    packet[8 + 24 + 2 * 5] = 0x5b;
+    packet[8 + 24 + 3 * 5] = 0x5b;
+    memcpy(packet + n, low, a); memcpy(packet + n + a, high, b);
+    n += a + b; be32(packet + 4, (uint32_t)n - 8);
+    memcpy(file + 0x400, "ITOC", 4); le32(file + 0x408, (uint32_t)n);
+    memcpy(file + 0x410, packet, n);
+    n = utf_build(packet, ec, 1, 1, es, NULL, 0);
+    memcpy(file + 0xc00, "ETOC", 4); le32(file + 0xc08, (uint32_t)n);
+    memcpy(file + 0xc10, packet, n);
+    memcpy(file + 0x1000, "first", 5); memcpy(file + 0x1010, "xyz", 3);
+    CHECK((out = fopen(path, "wb")) != NULL);
+    CHECK(fwrite(file, 1, 0x1013, out) == 0x1013); fclose(out);
+    CHECK(!p4_golden_cpk_open(&cpk, path, reason, sizeof reason));
+    CHECK(cpk.etoc_utf.row_count == 1 && cpk.id_count == 2);
+    CHECK(!p4_golden_cpk_find(&cpk, "#1", &entry) && entry.offset == 0x1000);
+    CHECK(!p4_golden_cpk_find(&cpk, "#3", &entry) && entry.offset == 0x1010);
+    CHECK(!p4_golden_cpk_read(&cpk, &entry, &bytes, &size, reason, sizeof reason));
+    CHECK(size == 3 && !memcmp(bytes, "xyz", 3)); free(bytes);
+    CHECK(p4_golden_cpk_find(&cpk, "#2", &entry) == 1);
+    p4_golden_cpk_close(&cpk);
+    CHECK((out = fopen(path, "r+b")) != NULL && !fseek(out, 0xc00, SEEK_SET));
+    CHECK(fwrite("BAD!", 1, 4, out) == 4); fclose(out);
+    CHECK(p4_golden_cpk_open(&cpk, path, reason, sizeof reason) == -1);
+    remove(path);
     return 0;
 }
 
@@ -459,7 +519,7 @@ static int test_record_tables(void)
 
 int main(void)
 {
-    if (test_utf() || test_crilayla() || test_containers() || test_record_tables() || test_cpk() || test_translation()) return 1;
+    if (test_utf() || test_crilayla() || test_containers() || test_record_tables() || test_cpk() || test_cpk_itoc() || test_translation()) return 1;
     puts("golden_source: ok");
     return 0;
 }

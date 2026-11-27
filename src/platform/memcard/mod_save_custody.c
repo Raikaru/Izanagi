@@ -5,6 +5,7 @@
 #endif
 #include "mod_save_custody.h"
 #include "save_transaction.h"
+#include "p4pc/hostpath.h"
 #include "p4pc/os.h"
 #include <errno.h>
 #include <stdio.h>
@@ -67,7 +68,7 @@ static int absolute(char out[P4_SAVE_PATH_CAP],const char *path)
         if(strlen(path)>=P4_SAVE_PATH_CAP)return -1;
         strcpy(out,path);
     }else{
-        if(!getcwd(out,P4_SAVE_PATH_CAP))return -1;
+        if(!getcwd(out,P4_SAVE_PATH_CAP))return -1; /* path-audit-ok: POSIX-only branch */
         size_t n=strlen(out),m=strlen(path);
         if(n+1+m>=P4_SAVE_PATH_CAP)return -1;
         out[n++]='/';memcpy(out+n,path,m+1);
@@ -95,7 +96,7 @@ static int marker(const char *path)
 {
 #ifndef _WIN32
     struct stat info;
-    if(lstat(path,&info)==0)return S_ISREG(info.st_mode)?1:-1;
+    if(lstat(path,&info)==0)return S_ISREG(info.st_mode)?1:-1; /* path-audit-ok: POSIX-only branch */
     if(errno!=ENOENT)return -1;
 #else
     if(p4_os_is_file_nofollow(path))return 1;
@@ -114,7 +115,7 @@ static int marker(const char *path)
     size_t root=root_length(directory);
     if(at>root)directory[at-1]=0;else directory[root]=0;
 #ifndef _WIN32
-    return stat(directory,&info)==0&&S_ISDIR(info.st_mode)?0:-1;
+    return stat(directory,&info)==0&&S_ISDIR(info.st_mode)?0:-1; /* path-audit-ok: POSIX-only branch */
 #else
     if(p4_os_list_dir(directory,find,&probe)||probe.exists)return -1;
     return 0;
@@ -175,11 +176,11 @@ int p4_save_witness_mark(const char *directory,char *error,size_t cap)
     if(a<0||(size_t)a>=sizeof target||b<0||(size_t)b>=sizeof temporary||
        p4_os_extended_path(target,sizeof target)||p4_os_extended_path(temporary,sizeof temporary))
         return fail(error,cap,"Save witness marker path is too long");
-    FILE *file=fopen(temporary,"wbx");
+    FILE *file=p4_host_fopen(temporary,"wbx");
     if(!file)return fail(error,cap,"Cannot create save witness marker");
     int bad=fwrite(json,1,sizeof json-1,file)!=sizeof json-1;
     if(fclose(file))bad=1;
     if(!bad&&p4_os_replace_file(temporary,target))bad=1;
-    if(bad){remove(temporary);return fail(error,cap,"Cannot publish non-reference save custody marker");}
+    if(bad){p4_host_remove(temporary);return fail(error,cap,"Cannot publish non-reference save custody marker");}
     return 0;
 }

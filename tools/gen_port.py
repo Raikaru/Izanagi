@@ -1852,6 +1852,57 @@ def _scan_functions(stripped, td):
 
 # The per-text scans of the big passes run in forked workers, which inherit the pass's texts instead of receiving copies;
 # results come back in input order, so a pass sees exactly a serial run's facts. Without fork they run serially.
+def cpu_budget():
+    """How many worker processes this run may use: the container's share, not the host's core count.
+
+    A container started by tools/p4pc_run.sh sees every core of the host (os.cpu_count()) although --cpus caps it to a
+    fraction of them and P4PC_JOBS names that share. Pools sized by os.cpu_count() ran 16 workers per container on a
+    16-core host; ten cold x64w builds reaching the CRT audit together put 160 crt_guard workers (up to 0.9 GiB each) on a
+    31 GiB host and the kernel OOM killer took the rootless user manager and every container (2026-11-25 12:11Z).
+    Order: the CPUs the process may run on, the cgroup CPU quota (cpu.max), P4PC_JOBS; the smallest wins."""
+    cpus = os.cpu_count() or 1
+    try:
+        cpus = min(cpus, len(os.sched_getaffinity(0)))
+    except (AttributeError, OSError):
+        pass
+    try:
+        quota, period = Path("/sys/fs/cgroup/cpu.max").read_text(encoding="ascii").split()[:2]
+        if quota != "max" and int(period) > 0:
+            cpus = min(cpus, max(1, -(-int(quota) // int(period))))
+    except (OSError, ValueError):
+        pass
+    jobs = os.environ.get("P4PC_JOBS", "")
+    if jobs.isdigit() and int(jobs) > 0:
+        cpus = min(cpus, int(jobs))
+    return max(1, cpus)
+
+
+def memory_budget_mib():
+    """The memory this run may use in MiB: the container's memory limit when one is set, else what the host has available."""
+    limits = []
+    try:
+        value = Path("/sys/fs/cgroup/memory.max").read_text(encoding="ascii").strip()
+        if value.isdigit():
+            limits.append(int(value) // (1 << 20))
+    except OSError:
+        pass
+    try:
+        for line in Path("/proc/meminfo").read_text(encoding="ascii").splitlines():
+            if line.startswith("MemAvailable:"):
+                limits.append(int(line.split()[1]) // 1024)
+    except (OSError, ValueError, IndexError):
+        pass
+    return min(limits) if limits else 1 << 20
+
+
+def worker_budget(mib_per_worker=0, cap=None):
+    """cpu_budget(), lowered so that `mib_per_worker` MiB for each worker stays inside half the memory budget."""
+    workers = cpu_budget() if cap is None else min(cap, cpu_budget())
+    if mib_per_worker > 0:
+        workers = min(workers, memory_budget_mib() // 2 // mib_per_worker)
+    return max(1, workers)
+
+
 _FORK_JOB = None
 
 
@@ -1863,7 +1914,7 @@ def _fork_item(index):
 def map_in_order(fn, items):
     """[fn(*item) for item in items], on every core where the platform forks (Linux, so every CI build)."""
     global _FORK_JOB
-    workers = os.cpu_count() or 1
+    workers = worker_budget(256)
     if len(items) < 64 or workers < 2 or sys.platform != "linux":
         return [fn(*item) for item in items]
     import multiprocessing
@@ -2056,7 +2107,7 @@ def align_prototypes_with_definitions(mirror, defsig, td, own_defs, alias_target
     return retyped, reordered, calls_reordered, arity, ret_fixed, conflicts
 
 
-def prototype_unprototyped_declarations(mirror, root, report_path):
+def prototype_unprototyped_declarations(mirror, root, decomp, report_path):
     """Rewrites `T name();` declarations to the prototype of the function's definition (see above) and
     declares implicitly-declared callees. Returns (rewritten, files, implicit, ret_fixed, skipped)."""
     paths = sorted(list((mirror / "src").rglob("*.c")) + list((mirror / "src").rglob("*.h"))
@@ -2106,7 +2157,7 @@ def prototype_unprototyped_declarations(mirror, root, report_path):
             ret, params = next(iter(shapes))
             if not any(c in ("x", "?") for c in params) and ret not in ("x", "?"):
                 defsig[name] = (ret, list(params))
-    alias_names = retail_function_names(root / "decomp", mirror.parent, staged_texts=texts)
+    alias_names = retail_function_names(decomp, mirror.parent, staged_texts=texts)
     definition_aliases = add_alias_definition_signatures(defsig, alias_names, read_native_names(), read_unbound_natives())
     retyped, reordered, calls_reordered, arity_conf, ret_fixed2, align_conflicts = align_prototypes_with_definitions(
         mirror, defsig, td, own_defs, definition_aliases)
@@ -2770,6 +2821,27 @@ def apply_overrides(root, mirror_root, units):
             else:
                 close = definition_end(t, start)
                 if close is None:
+                    # Some markers precede a pragma scope and a block comment.
+                    # Preserve the historical splice unless it cannot find a body.
+                    while start < len(t):
+                        prelude = t[start:line_end(t, start)].strip()
+                        if not prelude or prelude.startswith("#pragma ") or (prelude.startswith("extern ") and prelude.endswith(";")):
+                            start = line_end(t, start)
+                        elif prelude.startswith("/*"):
+                            remaining = t[start:].lstrip(" \t")
+                            comment = re.match(r"/\*.*?\*/[ \t]*(?:\r?\n|$)", remaining, re.S)
+                            if not comment:
+                                break
+                            start += len(t[start:]) - len(remaining) + comment.end()
+                        elif prelude.startswith("//") and not MARKER_RE.match(prelude):
+                            start = line_end(t, start)
+                        else:
+                            break
+                    prelude = t[start:line_end(t, start)].strip()
+                    close = None if MARKER_RE.match(prelude) else definition_end(t, start)
+                    if close is None:
+                        die(f"{f.name}: no function definition follows FUN_{m[1].upper()} in {p.relative_to(mirror_root)}")
+                if MARKER_RE.search(t, start, close):
                     die(f"{f.name}: no function definition follows FUN_{m[1].upper()} in {p.relative_to(mirror_root)}")
                 end = line_end(t, close)
             replaced = marker_definition_name(t, mk_end)
@@ -3571,7 +3643,7 @@ def edit_facts_concurrently(pairs):
     if len(pairs) < 8:
         return [_edit_facts_bytes(pair) for pair in pairs]
     # (61: the most worker processes a Windows ProcessPoolExecutor accepts)
-    with concurrent.futures.ProcessPoolExecutor(max_workers=min(os.cpu_count() or 1, 61)) as pool:
+    with concurrent.futures.ProcessPoolExecutor(max_workers=worker_budget(256, cap=61)) as pool:
         return list(pool.map(_edit_facts_bytes, pairs))
 
 
@@ -3583,9 +3655,6 @@ def mirror_cache_inputs(decomp, build, mod_hooks):
                   for p in (ROOT / tree).rglob("*") if p.is_file()]
     port_paths += list((ROOT / "src").rglob("*.c")) + list((ROOT / "include").rglob("*.h"))
     port_paths += list((ROOT / RW_CLEAN_DIR).rglob("*.h"))
-    # Prototype aliases also read ROOT/decomp when --decomp names another tree.
-    if (ROOT / "decomp").resolve() != decomp.resolve():
-        port_paths += list((ROOT / "decomp/config").glob("*"))
     return {"decomp": str(decomp.resolve()), "build": str(build.resolve()),
             "mod_hooks": mod_hooks, "rw_clean": rw_clean_selected(build),
             "decomp_files": build_cache.input_files(decomp_paths, root=decomp),
@@ -3746,7 +3815,7 @@ def generate_mirror(a):
     print(f"gen_port: mirror: removed {len(asm_removed)} MWCC asm function blocks "
           f"(build/gen/asm_blocks.txt)")
     protos, proto_files, implicit, ret_fixed, proto_skipped, aligned = contracts.run(
-        prototype_unprototyped_declarations, stage, ROOT, build / "prototype_report.txt")
+        prototype_unprototyped_declarations, stage, ROOT, decomp, build / "prototype_report.txt")
     print(f"gen_port: mirror: aligned typed prototypes with their definitions: {aligned[0]} parameters retyped, "
           f"{aligned[1]} prototypes reordered ({aligned[2]} call sites), {aligned[4]} return classes fixed, "
           f"{aligned[3]} parameter-count disagreements reported")

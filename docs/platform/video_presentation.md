@@ -88,6 +88,34 @@ first tick to avoid accumulated drift. A tick missed by a whole period resynchro
 to now instead of replaying lost frames. When idle, the scheduler sleeps until 0.3 ms
 before the tick and spins the remainder.
 
+### Why a frame a little over one tick costs more than one tick
+
+The game paces itself with two waits per update, not one. The flip (`p4pc_vsync_wait`) waits for the next 60 Hz tick after the
+frame's work. The end-of-frame service task (`hMaestroUpdateServicesTask` -> `func_0050cd80` -> `func_004ccc98`) then calls
+`ADXM_WaitVsync`, a `SleepThread` that only the CRI server's VBLANK pass wakes (`func_004ccbf0`). The pass runs behind the game's
+field gate (`FldShadow_PollIntcBit13`), so on one VBLANK in two. An update therefore spans two ticks as long as its work and the
+flip's wait end before the next pass tick; if the pass fires while the thread is still working, the handshake is not armed, the
+pass wakes nobody, and the thread sleeps to the pass after it (`P4PC_KT_WHY=1` prints these waits per flip; the 3-4 tick flips are
+this). On the host clock the work is counted in real time, so a frame whose CPU work (game thread, plus any wait for the render
+thread or the swap) is over 16.7 ms drops from 30 to 15-20 fps while the average load is a third of a core. [INFERENCE: the
+console runs the same chain, so a retail frame that runs long steps down the same way; no retail trace of a heavy scene was
+taken.]
+
+### `P4PC_PACING`
+
+- `legacy` (`P4PC_PACING=legacy`): the scheduler clock is the host's, as above.
+- `carry` (`P4PC_PACING=carry`): the scheduler clock is the virtual clock's: it advances only when every thread waits, by jumping
+  to the next timer, so the game sees the tick sequence an infinitely fast CPU would see and every update spans two ticks. The
+  host paces it instead: a timer is served at `anchor + (scheduler time - anchor) * 4 / rate` and not before. A frame that needs up
+  to two ticks of host time still flips on time, and a slow frame is made up by the idle time of the frames after it. When a tick
+  is more than three ticks late (a hitch, a load, the app in the background) the anchor moves to now instead of replaying the lost
+  time. The guest's sequence of VBLANK handlers, thread switches and timer callbacks is the one of a `P4PC_VIRTUAL_CLOCK=1` run,
+  which the scene gates and lockstep already pin; only the real time between them changes. The audio device and movie clock are
+  the real ones in both modes. Practice speed (`p4.pace`) changes the anchor's rate.
+
+A virtual-clock or turbo run ignores the switch. Unset, a player run uses `carry`; test and harness runs
+(`p4cfg_player_run()` false) use `legacy`. `P4PC_PACE_LOG=1` adds a line with the carried time's sleeps, resyncs and lateness.
+
 VSync only holds a finished frame for the display's next blank. `auto` disables that
 wait below 59 Hz because a display period would otherwise slow the game. Tearing is
 then possible. A 60 Hz display and the scheduler are not phase locked; an occasional

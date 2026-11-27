@@ -177,6 +177,7 @@ extern void (P4GL_APIENTRY *p4gl_glBlendColor)(GLfloat red, GLfloat green, GLflo
 extern void (P4GL_APIENTRY *p4gl_glUniform3f)(GLint location, GLfloat v0, GLfloat v1, GLfloat v2);
 extern void (P4GL_APIENTRY *p4gl_glUniform3fv)(GLint location, GLsizei count, const GLfloat *value);
 extern void (P4GL_APIENTRY *p4gl_glUniform4f)(GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3);
+extern void (P4GL_APIENTRY *p4gl_glUniform4fv)(GLint location, GLsizei count, const GLfloat *value);
 extern void (P4GL_APIENTRY *p4gl_glUniformMatrix3fv)(GLint location, GLsizei count, GLboolean transpose,
                                        const GLfloat *value);
 extern void (P4GL_APIENTRY *p4gl_glUniformMatrix4fv)(GLint location, GLsizei count, GLboolean transpose,
@@ -234,6 +235,21 @@ int p4gl_gl_draw_enabled(void);
  * but explicit draw/GS observers and GL statistics keep the complete submission path. */
 int p4gl_gl_prepare_draw(void);
 void p4gl_gl_stats_report(unsigned frames, double swapMs, double presentMs); /* P4PC_GLSTATS */
+/* Optional features of the context, found once at start (p4gl_gl.c caps_scan): a renderer optimisation that wants one tests its bit and keeps its plain path without it. */
+enum {
+    P4GL_CAP_BUFFER_STORAGE = 1u << 0,    /* persistently mapped buffers (GL 4.4, EXT_buffer_storage) */
+    P4GL_CAP_FRAMEBUFFER_FETCH = 1u << 1, /* a fragment shader may read the framebuffer's colour */
+    P4GL_CAP_PARALLEL_COMPILE = 1u << 2,  /* shaders compile on driver threads (KHR_parallel_shader_compile) */
+    P4GL_CAP_TIMER_QUERY = 1u << 3,       /* GPU time queries */
+    P4GL_CAP_MULTI_DRAW = 1u << 4,        /* several draws in one call */
+    P4GL_CAP_BASE_VERTEX = 1u << 5,       /* glDrawElementsBaseVertex (GL 3.2, ES 3.2) */
+    P4GL_CAP_PROGRAM_BINARY = 1u << 6,    /* glGetProgramBinary (ES 3.0, GL 4.1) */
+    P4GL_CAP_INVALIDATE = 1u << 7,        /* glInvalidateFramebuffer (ES 3.0, GL 4.3) */
+    P4GL_CAP_ASTC = 1u << 8,
+    P4GL_CAP_ETC2 = 1u << 9
+};
+unsigned p4gl_gl_caps(void);
+int p4gl_gl_feature(const char *name); /* 1 unless the environment variable `name` is "0": the switch of one renderer optimisation */
 /* A render pass of this layer's own, in the middle of a frame (src/render/p4gl_yuv.c, the movie picture conversion). The draws around it
  * set the state they need only when the game's render state changes, so the pass saves what it touches and puts it back: the recorded
  * fixed-function state, viewport, program, vertex array and the textures of units 0..3 with the active unit. begin leaves blend, depth test,
@@ -256,5 +272,10 @@ void p4gl_raster_context_lost(void);
 int p4gl_gl_round_bias(void);
 /* Clears the bound framebuffer's colour to black, ignoring the colour mask the game recorded (the letterbox bars of the present blit). */
 void p4gl_gl_clear_black(void);
+/* 1 when the window framebuffer still sRGB-encodes what is written to it after GL_FRAMEBUFFER_SRGB was switched off (checked at p4gl_gl_load). */
+int p4gl_gl_window_srgb(void);
+/* The present blit for such a window: texture (w x h, the frame) to the window rectangle dx,dy,dw,dh, decoded from sRGB so that the window's own
+ * encoding stores the frame as it is. Returns 0 when the window does not encode (or the pass cannot run): the caller blits as usual. */
+int p4gl_gl_present_decoded(unsigned texture, int fw, int fh, int dx, int dy, int dw, int dh, int linear);
 
 #endif

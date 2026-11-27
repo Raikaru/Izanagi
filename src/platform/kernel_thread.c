@@ -38,6 +38,7 @@
 #include "p4pc/guest.h"
 #include "p4pc/platform.h"
 #include "p4pc/frame_alarm_seam.h"
+#include "p4pc/frame_timing.h"
 #include "p4pc/vblank_hook.h"
 #include "p4pc/pace.h"
 #ifdef P4_MOD_GAME_BINDINGS
@@ -143,6 +144,20 @@ static int kt_dispatch_disabled;
 static uint64_t kt_order;
 static uint64_t kt_incarnation;
 static uint64_t kt_vsync_next_ns;
+static uint32_t kt_flips; /* flips so far (p4pc_vsync_wait) */
+static void *kt_sleep_ra, *kt_wake_ra; /* P4PC_KT_WHY: who put the game thread to sleep and who woke it */
+static int kt_wake_intr;
+#define KT_BT 10
+static void *kt_sleep_bt[KT_BT];
+static void kt_capture_bt(void) {
+    memset(kt_sleep_bt, 0, sizeof kt_sleep_bt);
+#if defined(_WIN32)
+    extern unsigned short __stdcall RtlCaptureStackBackTrace(unsigned long, unsigned long, void **, unsigned long *);
+    RtlCaptureStackBackTrace(1, KT_BT, kt_sleep_bt, NULL); /* Windows only: the other hosts print the sleep's return address alone */
+#else
+    kt_sleep_bt[0] = kt_sleep_ra;
+#endif
+}
 
 static void kt_fatal(const char *why) {
     fprintf(stderr, "p4pc kernel: %s (thread %d)\n", why, (int)kt_cur);
@@ -157,6 +172,47 @@ static unsigned kt_virtual_polls;
 
 static int kt_virtual_clock(void) {
     return p4_os_virtual_clock();
+}
+
+/* Frame pacing of a real-time run (P4PC_PACING, docs/platform/video_presentation.md#pacing).
+ *
+ *   legacy  The scheduler clock is the host's. A thread that works longer than a tick lets the tick pass under it: the
+ *           game's sound-server handshake (ADXM_WaitVsync, which wakes only on a server pass, one VBLANK in two) then
+ *           misses its pass, and a frame whose CPU work is a little over 16.7 ms takes 3-4 ticks instead of 2.
+ *   carry   The scheduler clock is the virtual clock's (the run the gates and lockstep make): it advances only when every
+ *           thread waits, jumping to the next timer, so the game sees the tick sequence an infinitely fast CPU would. The
+ *           host paces it: a timer is not served before host time anchor + (scheduler time - anchor) * 4 / rate, so a frame
+ *           that needs up to two ticks of host time still flips every two ticks and a slow frame is made up by the idle
+ *           time of the ones after it. Lateness above KT_CARRY_MAX_NS resynchronises to now instead of replaying the
+ *           lost time (a hitch, a load). The audio is the real device's, as in legacy. */
+#define KT_CARRY_MAX_NS (3u * 16666667ull)
+extern int p4cfg_player_run(void) __attribute__((weak)); /* absent from the platform unit tests: they keep the host clock */
+static uint64_t kt_cy_host, kt_cy_sched; /* host time at which scheduler time kt_cy_sched is due */
+static uint64_t kt_cy_resyncs, kt_cy_late_max, kt_cy_sleeps;
+
+static int kt_carry(void) {
+    static int mode = -1;
+    if (mode < 0) {
+        const char *e = getenv("P4PC_PACING");
+#if defined(__APPLE__)
+        mode = 0; /* not tried on macOS and iOS */
+#else
+        mode = p4cfg_player_run != NULL && p4cfg_player_run(); /* a player run carries; test and harness runs keep the host clock */
+#endif
+        if (e != NULL && e[0] != '\0')
+            mode = strcmp(e, "carry") == 0 || strcmp(e, "1") == 0;
+        if (kt_virtual_clock())
+            mode = 0;
+        if (!kt_virtual_clock())
+            fprintf(stderr, "p4pc: frame pacing %s (P4PC_PACING=%s, player run %d, SDL_AUDIODRIVER=%s)\n", mode ? "carry" : "legacy", e != NULL && e[0] != '\0' ? e : "unset",
+                    p4cfg_player_run != NULL ? p4cfg_player_run() : -1, getenv("SDL_AUDIODRIVER") != NULL ? getenv("SDL_AUDIODRIVER") : "unset");
+    }
+    return mode;
+}
+
+/* The scheduler clock is virtual: the run's own (virtual clock) or carried (real-time play paced from it). */
+static int kt_vtime(void) {
+    return kt_virtual_clock() || kt_carry();
 }
 
 /* Practice speed (p4pc_pace_request, the mod services' p4.pace): real-time
@@ -176,13 +232,20 @@ static uint64_t kt_paced(uint64_t host) {
 }
 
 static uint64_t kt_now_ns(void) {
-    if (!kt_virtual_clock())
+    if (!kt_vtime())
         return kt_pace_quarters ? kt_paced(p4_os_now_ns()) : p4_os_now_ns();
     if (++kt_virtual_polls >= 4096u) {
         kt_virtual_polls = 0;
         kt_virtual_ns += 1000u;
     }
     return kt_virtual_ns;
+}
+
+static void (*kt_frame_timing_hook)(uint64_t);
+void p4pc_frame_timing_install(void (*publish)(uint64_t))
+{
+    kt_frame_timing_hook = publish;
+    if (publish != NULL) publish(kt_now_ns());
 }
 
 /* 1..16 quarters; refused (-1) on a virtual clock, where time is the run's. */
@@ -202,7 +265,7 @@ void (*p4pc_pace_audio_hook)(int frame_driven);
 /* At a VBLANK: the pending rate, anchored at the current scheduler time. */
 static void kt_pace_apply(void) {
     const uint64_t host = p4_os_now_ns();
-    const uint64_t sched = kt_pace_quarters ? kt_paced(host) : host;
+    const uint64_t sched = kt_carry() ? kt_virtual_ns : kt_pace_quarters ? kt_paced(host) : host;
     const unsigned before = kt_pace_quarters ? kt_pace_quarters : 4u;
     const unsigned after = kt_pace_pending;
     kt_pace_pending = 0;
@@ -211,6 +274,8 @@ static void kt_pace_apply(void) {
     kt_pace_host = host;
     kt_pace_sched = sched;
     kt_pace_quarters = after;
+    kt_cy_host = host; /* carried time: the new rate counts from here */
+    kt_cy_sched = sched;
     fprintf(stderr, "p4pc: practice speed %u/4 (was %u/4) at flip %u, paced VBLANK periods %llu\n", after, before,
             (unsigned)p4pc_flip_count(), (unsigned long long)kt_pace_periods);
     if ((before != 4u) != (after != 4u) && p4pc_pace_audio_hook != NULL)
@@ -333,6 +398,39 @@ static int kt_next_due(uint64_t *due) {
     return have;
 }
 
+/* Carried time: the host serves the scheduler time `due` at its anchored instant, and no earlier. Late by more than
+ * KT_CARRY_MAX_NS, or the first wait: anchor here. */
+static void kt_carry_wait(uint64_t due) {
+    const uint64_t spin = 300000u;
+    const uint64_t rate = kt_pace_quarters ? kt_pace_quarters : 4u;
+    uint64_t host = p4_os_now_ns();
+    uint64_t target;
+
+    if (kt_cy_host == 0) {
+        kt_cy_host = host;
+        kt_cy_sched = kt_virtual_ns;
+    }
+    target = kt_cy_host + (due - kt_cy_sched) * 4u / rate;
+    if (host < target) {
+        if (target - host > spin) {
+            p4_os_sleep_ns(target - host - spin);
+            kt_cy_sleeps++;
+        }
+        while (p4_os_now_ns() < target) {
+        }
+    } else {
+        const uint64_t late = host - target;
+        if (late > kt_cy_late_max)
+            kt_cy_late_max = late;
+        if (late > KT_CARRY_MAX_NS) {
+            kt_cy_host = host;
+            kt_cy_sched = due;
+            kt_cy_resyncs++;
+        }
+    }
+    kt_virtual_ns = due;
+}
+
 /* No thread is runnable: sleep until the next timer. With no timer pending, nothing can wake
  * the blocked thread, so that is a fatal deadlock. */
 static void kt_idle(void) {
@@ -344,6 +442,8 @@ static void kt_idle(void) {
     if (due > now) {
         if (kt_virtual_clock()) {
             kt_virtual_ns = due;
+        } else if (kt_carry()) {
+            kt_carry_wait(due);
         } else if (!kt_pace_quarters) {
             const uint64_t spin = 300000u;
             if (due - now > spin)
@@ -413,7 +513,7 @@ static void kt_service_timers(void) {
 
 /* Gives the CPU to the next READY thread. The caller has already set its own state. Returns
  * when the caller runs again, or never, for a thread that exited. */
-static void kt_switch_away(void) {
+static void kt_switch_away_raw(void) {
     if (kt_in_intr)
         kt_fatal("thread blocked inside an interrupt callback");
     for (;;) {
@@ -430,6 +530,44 @@ static void kt_switch_away(void) {
             return;
         }
         kt_idle();
+    }
+}
+
+static int kt_why_on(void) {
+    static int on = -1;
+    if (on < 0)
+        on = getenv("P4PC_KT_WHY") != NULL && !kt_virtual_clock();
+    return on;
+}
+
+/* P4PC_KT_WHY=1: every wait of the game thread that takes over 0.4 ms (what it waited on, how long) and, for a sleep, the host call chain that slept
+ * and what woke it (symbolise the addresses against the build's unstripped binary, relative to the printed anchor, p4pc_vsync_wait). */
+static void kt_switch_away(void) {
+    kt_thread *t;
+    uint64_t t0;
+    if (!kt_why_on() || kt_flips == 0 || kt_in_intr) {
+        kt_switch_away_raw();
+        return;
+    }
+    t = &kt_threads[kt_cur];
+    t0 = p4_os_now_ns();
+    {
+        const int32_t id = kt_cur;
+        const int sl = t->sleeping, ws = t->wait_sema, st = t->state;
+        const uint64_t wk = t->wake_ns, vn = kt_vsync_next_ns;
+        kt_switch_away_raw();
+        {
+            const uint64_t d = p4_os_now_ns() - t0;
+            if (d > 400000u && id == KT_MAIN_ID)
+                fprintf(stderr, "p4pc ktwhy: flip %u thr %d state %d sleeping %d sema %d wake_in %lld vsync_in %lld blocked %.2f ms\n", (unsigned)kt_flips, (int)id,
+                        st, sl, ws, wk ? (long long)(wk - t0) / 1000 : -1ll, (long long)(vn - t0) / 1000, (double)d / 1e6);
+            if (sl && d > 400000u && id == KT_MAIN_ID) {
+                int i;
+                fprintf(stderr, "p4pc ktwhy: anchor %p intr %d wake_ra %p bt", (void *)&p4pc_vsync_wait, kt_wake_intr, kt_wake_ra);
+                for (i = 0; i < KT_BT; i++) fprintf(stderr, " %p", kt_sleep_bt[i]);
+                fprintf(stderr, "\n");
+            }
+        }
     }
 }
 
@@ -461,7 +599,7 @@ static void kt_leave(void) {
 
 void p4pc_poll_devices(void) {
     kt_init();
-    if (kt_virtual_clock())
+    if (kt_vtime())
         kt_virtual_ns += 1000u;
     kt_service_timers();
     if (p4pc_frame_alarm_seam)
@@ -774,6 +912,9 @@ int32_t func_00421700(void) {
     t->state = KT_WAIT;
     t->sleeping = 1;
     t->order = ++kt_order;
+    kt_sleep_ra = __builtin_return_address(0);
+    if (kt_cur == KT_MAIN_ID && kt_flips != 0 && kt_why_on())
+        kt_capture_bt();
     kt_switch_away();
     return t->wait_result;
 }
@@ -783,9 +924,11 @@ static int32_t kt_wakeup(int32_t id) {
     kt_thread *t = kt_thr(id);
     if (t == NULL || t->state == KT_DORMANT)
         return -1;
-    if (t->state == KT_WAIT && t->sleeping)
+    if (t->state == KT_WAIT && t->sleeping) {
+        kt_wake_ra = __builtin_return_address(0);
+        kt_wake_intr = kt_in_intr;
         kt_make_ready(t, 0);
-    else
+    } else
         t->wakeup_count++;
     return 0;
 }
@@ -997,7 +1140,6 @@ int32_t func_00421830(int32_t id) {
  * async loaders, run meanwhile; with none ready the host sleeps until the tick. WakeupThread and
  * semaphore signals do not end the wait; ReleaseWaitThread does. Pacing the frame flip with this call is
  * what lets a game loop that never blocks otherwise (kwlnMainLoop) share the CPU with its workers. */
-static uint32_t kt_flips;
 
 uint32_t p4pc_flip_count(void) {
     return kt_flips;
@@ -1084,6 +1226,13 @@ static void kt_pace_note(void) {
         if (++n == 600u) {
             fprintf(stderr, "p4pc pace: flip %u, frame %.3f ms mean, %.3f ms longest, %u over 20 ms (of 600)\n", (unsigned)kt_flips, (double)sum / 600e6,
                     (double)max / 1e6, late);
+            if (kt_carry()) {
+                const uint64_t due = kt_cy_host + (kt_virtual_ns - kt_cy_sched) * 4u / (kt_pace_quarters ? kt_pace_quarters : 4u);
+
+                fprintf(stderr, "p4pc pace: carried time, %llu waits slept, %llu resyncs, a tick was %.3f ms late at most, %.3f ms behind the host now\n",
+                        (unsigned long long)kt_cy_sleeps, (unsigned long long)kt_cy_resyncs, (double)kt_cy_late_max / 1e6, (double)(int64_t)(now - due) / 1e6);
+                kt_cy_late_max = 0;
+            }
             sum = max = 0;
             n = late = 0;
         }
@@ -1144,6 +1293,9 @@ void p4pc_wait_frame_boundary(void) {
     kt_switch_away();
 }
 
+/* Player diagnostics (src/platform/diag/p4diag.c) times the flips from here; NULL, and never called, in every other run. */
+void (*p4pc_frame_hook)(unsigned flip);
+
 void p4pc_vsync_wait(void) {
     kt_flips++;
     kt_dump_tasks_at_flip(kt_flips);
@@ -1157,7 +1309,11 @@ void p4pc_vsync_wait(void) {
         t0 = now;
     }
     p4pc_wait_frame_boundary();
+    if (kt_frame_timing_hook != NULL)
+        kt_frame_timing_hook(kt_now_ns());
     kt_pace_note();
+    if (p4pc_frame_hook != NULL)
+        p4pc_frame_hook(kt_flips);
     #if defined(P4_MOD_GAME_BINDINGS) && defined(P4_MOD_GUARDS)
     if ((p4_mod_event_mask & P4_MOD_FRAME_START_BIT) | p4_mod_safe_point)
         p4_mod_event_frame(kt_flips);

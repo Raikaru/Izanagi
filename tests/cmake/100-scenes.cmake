@@ -61,7 +61,7 @@ add_test(NAME camp_menu COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/menu_gate.sh" $<
 set_tests_properties(camp_menu PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600)
 # A lit readback is not capture evidence when its PNG cannot be written.
 add_test(NAME camp_menu_write_failure COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/menu_gate.sh" $<TARGET_FILE:p4pc> --expect-write-failure)
-set_tests_properties(camp_menu_write_failure PROPERTIES SKIP_RETURN_CODE 77 LABELS gl TIMEOUT 600)
+set_tests_properties(camp_menu_write_failure PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600)
 # The save and load screens (src/platform/menu_harness.c, tests/save_gate.sh): a save made through the game's own save UI into the memory card
 # folder reloads through its load UI to the same game state, and the folder has the retail layout. Skipped (exit 77) without P4PC_ISO and P4PC_ELF.
 add_test(NAME save_load COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/save_gate.sh" $<TARGET_FILE:p4pc>)
@@ -96,7 +96,7 @@ add_test(NAME systems_game_1f COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/systems_ga
 set_tests_properties(systems_game_1f PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 1200 ENVIRONMENT "P4PC_BOARD_SEED=0x16bc")
 add_test(NAME systems_heaven_1f COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/systems_gate.sh" $<TARGET_FILE:p4pc> heaven1f)
 set_tests_properties(systems_heaven_1f PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 1200 ENVIRONMENT "P4PC_BOARD_SEED=0x1699")
-add_test(NAME systems_shop_daidara COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/systems_gate.sh" $<TARGET_FILE:p4pc> daidara)
+add_test(NAME systems_shop_daidara COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/systems_gate.sh" $<TARGET_FILE:p4pc> daidara 6.0 systems_daidara-sf)
 set_tests_properties(systems_shop_daidara PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 1200)
 add_test(NAME systems_shop_shiroku COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/systems_gate.sh" $<TARGET_FILE:p4pc> shiroku)
 set_tests_properties(systems_shop_shiroku PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 1200)
@@ -139,11 +139,11 @@ add_test(NAME scene_resolution_title1277_cells COMMAND sh "${CMAKE_CURRENT_SOURC
 set_tests_properties(scene_resolution_title1366_cells scene_resolution_title1277_cells
   PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600 ENVIRONMENT "P4PC_TITLE_EDGES=1")
 add_test(NAME scene_resolution_field1366 COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/scene_mad.sh" $<TARGET_FILE:p4pc_viewer>
-  "${CMAKE_BINARY_DIR}/resolution_field1366.png" field:7:2 p4-resolution-field1366 0.5
+  "${CMAKE_BINARY_DIR}/resolution_field1366.png" field:7:2 p4-resolution-field1366-sf 0.5
   P4PC_RESOLUTION=1366x768 P4PC_DRAW_WINDOW=4)
 set_tests_properties(scene_resolution_field1366 PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 600)
 add_test(NAME scene_resolution_fog4k COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/battle_mad.sh" $<TARGET_FILE:p4pc>
-  532 p4-resolution-fog4k 1700 0.5 "cross@360:2/150,start@500:2/300"
+  532 p4-resolution-fog4k-uv-sf 1700 0.5 "cross@360:2/150,start@500:2/300"
   P4PC_RESOLUTION=3840x2160 P4PC_VIRTUAL_CLOCK=1)
 set_tests_properties(scene_resolution_fog4k PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl;scenes" TIMEOUT 300 ENVIRONMENT "P4PC_FOG_SEAM=1")
 

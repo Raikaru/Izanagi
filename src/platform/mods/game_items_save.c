@@ -33,6 +33,8 @@ static int encode(const P4ModSaveContext *context, P4ModSaveWriter *writer, void
 {
     P4GameItemsSave *save = user;
     if (!ready(save)) return fail(context, "Expanded item state is not native-ready");
+    fprintf(stderr, "p4pc: mods: expanded item state saved, digest %016llx\n",
+            (unsigned long long)p4_game_tables_items_state_digest(save->items));
     uint32_t count = 0, equipment_count = 0;
     const size_t rows = p4_game_tables_items_count(save->items);
     for (size_t i = 0; i < rows; ++i) {
@@ -131,6 +133,8 @@ static void commit(void *opaque, void *user)
     if (staged)
         p4_game_tables_items_state_apply(save->items, staged->rows, staged->count, staged->equipment);
     else p4_game_tables_items_state_clear(save->items);
+    fprintf(stderr, "p4pc: mods: expanded item state loaded, digest %016llx\n",
+            (unsigned long long)p4_game_tables_items_state_digest(save->items));
     free(staged);
 }
 static void discard(void *staged, void *user)

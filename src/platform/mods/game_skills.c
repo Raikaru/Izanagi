@@ -1,4 +1,6 @@
 #include "p4pc/game_skills.h"
+#include "p4pc/game_mode.h"
+#include "p4pc/golden_names_native.h"
 #include "p4pc/game_elements_native.h"
 #include "p4pc/game_table_inputs.h"
 #include <stdlib.h>
@@ -206,14 +208,24 @@ int p4_game_skills_seal(P4GameSkills *skills,
         if (metadata_size % P4_SKILL_ROW_SIZE || elements_size % P4_SKILL_ELEMENT_SIZE ||
             presentation_size % 4u ||
             metadata_size < P4_SKILL_RETAIL_ACTIVE_COUNT * P4_SKILL_ROW_SIZE ||
-            metadata_size > P4_SKILL_RETAIL_COUNT * P4_SKILL_ROW_SIZE ||
+            metadata_size > (p4_game_mode() == P4_GAME_MODE_GOLDEN ?
+                p4_game_table_input_span_size(original_names) / P4_GOLDEN_SKILL_NAME_SIZE :
+                P4_SKILL_RETAIL_COUNT) * P4_SKILL_ROW_SIZE ||
             elements_size < P4_SKILL_RETAIL_ACTIVE_COUNT * P4_SKILL_ELEMENT_SIZE ||
-            elements_size > P4_SKILL_RETAIL_COUNT * P4_SKILL_ELEMENT_SIZE ||
+            elements_size > (p4_game_mode() == P4_GAME_MODE_GOLDEN ?
+                p4_game_table_input_span_size(original_names) / P4_GOLDEN_SKILL_NAME_SIZE :
+                P4_SKILL_RETAIL_COUNT) * P4_SKILL_ELEMENT_SIZE ||
             presentation_size < P4_SKILL_RETAIL_ACTIVE_COUNT * 4u ||
             presentation_size > P4_SKILL_RETAIL_COUNT * 4u ||
-            p4_game_table_input_span_size(original_names) != P4_SKILL_RETAIL_COUNT * 19u)
+            (p4_game_mode() == P4_GAME_MODE_GOLDEN ?
+                (p4_game_table_input_span_size(original_names) < P4_SKILL_RETAIL_COUNT * P4_GOLDEN_SKILL_NAME_SIZE ||
+                 p4_game_table_input_span_size(original_names) % P4_GOLDEN_SKILL_NAME_SIZE) :
+                p4_game_table_input_span_size(original_names) != P4_SKILL_RETAIL_COUNT * 19u))
             return P4_TABLE_INVALID;
     }
+    const size_t original_rows = p4_game_mode() == P4_GAME_MODE_GOLDEN && original_names ?
+        p4_game_table_input_span_size(original_names) / P4_GOLDEN_SKILL_NAME_SIZE : 0;
+    if (original_rows > P4_SKILL_MAX_ID + 1u) return P4_TABLE_INVALID;
     if (skills->count) {
         if (!p4_game_tables_revision(tables) || !p4_game_tables_text_semantic_revision(names) ||
             !p4_game_tables_text_semantic_revision(descriptions)) return P4_TABLE_NOT_READY;
@@ -237,11 +249,17 @@ int p4_game_skills_seal(P4GameSkills *skills,
             result = p4_game_tables_text_definition_find(descriptions, P4_TEXT_SKILL,
                 row->id, P4_TEXT_DESCRIPTION, &definition);
             if (result) return result;
-            if (!p4_game_tables_find_element(tables, row->element_id)) return P4_TABLE_NOT_FOUND;
+            /* Only the source-backed Golden passive cohort transports signed
+             * SKILL0 FF as NONE. Authored/non-Golden IDs still need a leaf. */
+            if (!(p4_game_mode() == P4_GAME_MODE_GOLDEN && !row->active &&
+                  row->element_id == UINT32_MAX && !strcmp(skills->rows[i].view.owner, "golden-mode")) &&
+                !p4_game_tables_find_element(tables, row->element_id)) return P4_TABLE_NOT_FOUND;
         }
+        if (skills->limit < original_rows) skills->limit = (uint32_t)original_rows;
         qsort(skills->rows, skills->count, sizeof *skills->rows, compare);
         skills->bytes = presentation_offset(skills) + skills->limit * 4u;
     }
+    if (!skills->count && skills->limit < original_rows) skills->limit = (uint32_t)original_rows;
     skills->metadata = metadata;
     skills->elements = elements;
     skills->presentation = presentation;
@@ -362,7 +380,8 @@ int p4_game_skills_definition_find(const P4GameSkills *skills, uint32_t id, P4Ga
         const SkillRow *row = find(skills, id);
         if (!row) return P4_TABLE_NOT_FOUND;
         result.authored = &row->view.desc;
-        result.metadata = row->view.desc.metadata;
+        result.metadata = p4_game_mode() == P4_GAME_MODE_GOLDEN && !row->view.desc.active ?
+            NULL : row->view.desc.metadata;
         result.active = row->view.desc.active;
     }
     *definition = result;

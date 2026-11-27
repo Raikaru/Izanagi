@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "proof_id": "L1-c12-scheduler-missing-procedure-replacement",
+  "address": "0x00637320",
+  "ps2_size": 40,
+  "decision": "D10c",
+  "runtime_status": "pending-seam",
+  "finding": "The PS2 missing-procedure printf format has no literal-role counterpart in the corresponding Golden error branch: Golden replaces the diagnostic/assertion path with explicit sequence10 failure routing and task termination. This is a positive, paired branch replacement proof, not a failed string search or a cosmetic-retention exemption.",
+  "ps2": {
+    "source": "decomp18016afe6 src/cldScheduler.c:118-150",
+    "reader": "0x00260020 cldSchedulerTaskUpdate",
+    "input_producers": "Current calendar day and phase produce sdl%02d_%02d_%s; loaded current-month scheduler BF supplies the script header.",
+    "branch": "scrFindPrcdIdxByName(scriptHeader,procedureName) returns-1. PS2 calls func00440b68(format637320,procedureName), sets procedureTask0, stores it and subsequently asserts through source6372b0. Otherwise it starts the named procedure at priority15.",
+    "object_role": "40-byte inventory partition containing a Japanese missing-procedure diagnostic format and alignment bytes; no numeric table or resource path. The sole recorded direct reader is the missing-name branch above."
+  },
+  "golden_steam": {
+    "image": "P4G.exe build10836033",
+    "code_scope": "ordinary .shared only",
+    "reader": "0x146000 scheduler state updater",
+    "evidence": [
+      {"address":"0x146753..0x146775","role":"formats procedure name, obtains live current-month script, calls named-procedure lookup468810"},
+      {"address":"0x14677a..0x146782","role":"lookup result-1 takes explicit branch; sets task handle0 and jumps14679b without formatting/logging a missing-name diagnostic"},
+      {"address":"0x146784..0x146796","role":"successful lookup resolves procedure through4682d0 and starts at priority15 through4684b0"},
+      {"address":"0x14679b..0x1467a2","role":"stores task handle; null goes1467cc"},
+      {"address":"0x1467cc..0x1467e3","role":"sets zero auxiliary args, selects sequence10, calls464a60 and returns-1 through the common epilogue"}
+    ]
+  },
+  "golden_switch": {
+    "image": "Switch1.2 ordinary NSO",
+    "reader": "0x71000d0fe0 scheduler state updater",
+    "evidence": [
+      {"address":"0x71000d1358..0x71000d13ac","role":"current day splitter, phase-label selection and procedure-name formatter"},
+      {"address":"0x71000d13d8..0x71000d13e8","role":"calls named lookup2e0ad0; result-1 branchesd148c"},
+      {"address":"0x71000d13ec..0x71000d13fc","role":"success starts named procedure priority15 and stores live task handle"},
+      {"address":"0x71000d148c..0x71000d1494","role":"failure stores task handle0; no diagnostic-format reference, formatter call or logging call in the fully enumerated failure branch"},
+      {"address":"0x71000d1498..0x71000d14b0","role":"w0=10,x1=0,w2=0,w3=0; call2de840, return-1 throughd14cc epilogue"}
+    ]
+  },
+  "correspondence_basis": "The paired live month/day/phase procedure-name producer, named BF lookup, -1 sentinel, success priority15, stored task handle and failure join establish the same control-flow role across all three builds. Both independent Golden builds positively enumerate a replacement branch without the PS2 format-consuming operation. Generic module attribution or no-reference search alone is not used.",
+  "disposition": "Drop the obsolete diagnostic object from the Golden supplier set only after the replacement scheduler branch is bound. There is no source byte copy or newly authored diagnostic. Preserve original PS2-mode diagnostics; pending Golden routing is not permanent PS2 retention.",
+  "balance_deviation": "Source-class exception is limited to the eliminated PS2 diagnostic representation. The Golden path intentionally differs: route sequence10 and terminate task on failed named procedure or null start handle; do not claim PS2 printf/assertion equivalence or infer that failure is unreachable.",
+  "required_seams": [
+    {"ps2_address":"0x00260020","action":"Golden-only scheduler missing-name result-1 sets stored procedure task handle0, requests sequence10 with zero auxiliary arguments, returns-1; also cover the null procedure-start handle join. Do not execute retained PS2 printf/assertion as Golden behavior."},
+    {"action":"Preserve current calendar day/phase producers and the actual loaded current-month scheduler BF/name lookup. Exercise a real failed-name fixture and a successful priority15 start; never replace the lookup by a constant success or make the branch a no-op."},
+    {"action":"Cover translated, inlined and native scheduler routes. Only after these branches are qualified may row637320 leave runtime L1-open. Original PS2-mode branch remains unchanged."}
+  ],
+  "qualification": "Static paired control-flow/source-role proof, not a runtime failure test. No game, emulator, build, unittest, BBV, or protected .arch decode. Private instruction receipts are l1c12-scheduler-code.txt and l1c12-steam-scheduler.txt."
+}

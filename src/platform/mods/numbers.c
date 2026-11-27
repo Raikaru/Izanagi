@@ -67,3 +67,21 @@ double p4_mod_f64_quiet(double value)
         (bits & UINT64_C(0x000fffffffffffff))) bits |= UINT64_C(0x0008000000000000);
     return from_bits(bits);
 }
+/* Write-side policy (docs/modding.md, "NaN at script-visible output"): the sign and payload of a NaN depend on the
+ * CPU that produced it, so every NaN a script sends to the host or to guest bytes becomes the canonical quiet NaN.
+ * Finite values, infinities and signed zeros are untouched. */
+static int is_nan_bits(double value)
+{
+    uint64_t bits;
+    memcpy(&bits, &value, sizeof bits);
+    return (bits & UINT64_C(0x7ff0000000000000)) == UINT64_C(0x7ff0000000000000) &&
+        (bits & UINT64_C(0x000fffffffffffff));
+}
+double p4_mod_f64_canonical(double value)
+{
+    return is_nan_bits(value) ? from_bits(UINT64_C(0x7ff8000000000000)) : value;
+}
+uint32_t p4_mod_f32_encode_canonical(double value)
+{
+    return is_nan_bits(value) ? UINT32_C(0x7fc00000) : p4_mod_f32_encode(value);
+}

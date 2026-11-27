@@ -1,14 +1,21 @@
 /* Real Core/VFS original inputs, registry/text compiler and guest allocation.
  * Synthetic banks do not prove native learn/battle/description/save behavior. */
 #include "p4pc/game_skills.h"
+#include "p4pc/game_mode.h"
 #include "p4pc/game_elements_native.h"
 #include "p4pc/game_table_inputs.h"
+#include "game_table_inputs_internal.h"
 #include "guest_test.h"
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
+static P4GameMode test_mode;
+P4GameMode p4_game_mode(void) { return test_mode; }
+
 static unsigned allocations, releases;
+static uint32_t last_allocation_size;
 static int fail_allocate;
 static struct Fixture {
     P4GameSkills *skills, *prefix;
@@ -22,6 +29,7 @@ static void *allocate(void *user, uint32_t size, uint32_t *guest)
 {
     (void)user;
     ++allocations;
+    last_allocation_size = size;
     if (fail_allocate) return NULL;
     void *host = p4t_galloc(size, 16);
     if (host) *guest = P4_H2G(host);
@@ -47,6 +55,149 @@ static void release_inputs(void)
     p4_game_table_input_destroy(fixture.message);
     fixture.skill = fixture.effect = fixture.unit = fixture.message = NULL;
 }
+/* Independently packed, cache-backed synthetic Golden banks. */
+static P4GameTableInput *golden_input(P4GameTableInputKind kind, const uint32_t *sizes, unsigned count)
+{
+    size_t length = 0;
+    for (unsigned i = 0; i < count; ++i) length = (length + 4u + sizes[i] + 15u) & ~(size_t)15u;
+    uint8_t *bytes = calloc(1, length);
+    assert(bytes);
+    size_t offset = 0;
+    for (unsigned i = 0; i < count; ++i) {
+        uint32_t n = sizes[i];
+        bytes[offset] = (uint8_t)n; bytes[offset + 1] = (uint8_t)(n >> 8);
+        bytes[offset + 2] = (uint8_t)(n >> 16); bytes[offset + 3] = (uint8_t)(n >> 24);
+        memset(bytes + offset + 4, (int)(0x30u + i), n);
+        offset = (offset + 4u + n + 15u) & ~(size_t)15u;
+    }
+    P4GameTableInput *input = p4_game_table_input_from_golden_cache(kind, bytes, length,
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+    free(bytes);
+    assert(input);
+    return input;
+}
+static int golden_wide_fixture(void)
+{
+    const uint32_t skill_sizes[] = {600u * 2u, 600u * 40u};
+    const uint32_t effect_sizes[] = {440u * 4u};
+    const uint32_t msg_sizes[] = {16, 600u * 23u, 16, 16, 16};
+    const uint32_t bad_names_sizes[] = {16, 600u * 23u - 1u, 16, 16, 16};
+    const uint32_t short_names_sizes[] = {16, 576u * 19u, 16, 16, 16};
+    const uint32_t too_many_sizes[] = {600u * 2u, 601u * 40u};
+    P4GameTableInput *skill = golden_input(P4_TABLE_INPUT_SKILL, skill_sizes, 2);
+    P4GameTableInput *effect = golden_input(P4_TABLE_INPUT_EFFECT, effect_sizes, 1);
+    P4GameTableInput *msg = golden_input(P4_TABLE_INPUT_MSG, msg_sizes, 5);
+    P4GameTableInput *bad = golden_input(P4_TABLE_INPUT_MSG, bad_names_sizes, 5);
+    P4GameTableInput *short_names = golden_input(P4_TABLE_INPUT_MSG, short_names_sizes, 5);
+    P4GameTableInput *too_many = golden_input(P4_TABLE_INPUT_SKILL, too_many_sizes, 2);
+    const P4GameTableInputSpan *metadata = p4_game_table_input_span(skill, 1);
+    const P4GameTableInputSpan *elements = p4_game_table_input_span(skill, 0);
+    const P4GameTableInputSpan *presentation = p4_game_table_input_span(effect, 0);
+    const P4GameTableInputSpan *names_span = p4_game_table_input_span(msg, 1);
+    P4GameTableAllocator allocator = {NULL, allocate, release};
+    P4GameTables *tables = p4_game_tables_create();
+    P4TextProfile raw = {P4_TEXT_ENCODING_US_RAW_NATIVE, P4_TEXT_FONT_US_NATIVE};
+    P4TextProfile message = {P4_TEXT_ENCODING_US_NATIVE, P4_TEXT_FONT_US_NATIVE};
+    P4GameText *names = p4_game_tables_text_create(&allocator, &raw);
+    P4GameText *descriptions = p4_game_tables_text_create(&allocator, &message);
+    P4GameSkills *skills = p4_game_skills_create(&allocator);
+    P4GameSkillDesc row = {.id = 576, .active = 1, .element_id = 6, .schema = 1,
+        .revision = 1, .key = "test:wide", .inheritance_rate = 4, .inheritance_group = 6};
+    assert(tables && names && descriptions && skills);
+    assert(!p4_game_tables_freeze(tables, 1));
+    assert(!p4_game_skills_register(skills, "test", &row));
+    register_text(names, row.id, P4_TEXT_NAME);
+    register_text(descriptions, row.id, P4_TEXT_DESCRIPTION);
+    assert(!p4_game_tables_text_seal(names, 1) && !p4_game_tables_text_seal(descriptions, 1));
+    assert(p4_game_skills_seal(skills, metadata, elements, presentation, p4_game_table_input_span(bad, 1),
+        tables, names, descriptions, 1) == P4_TABLE_INVALID);
+    assert(p4_game_skills_seal(skills, metadata, elements, presentation, p4_game_table_input_span(short_names, 1),
+        tables, names, descriptions, 1) == P4_TABLE_INVALID);
+    assert(p4_game_skills_seal(skills, p4_game_table_input_span(too_many, 1),
+        p4_game_table_input_span(too_many, 0), presentation, names_span,
+        tables, names, descriptions, 1) == P4_TABLE_INVALID);
+    assert(p4_game_skills_limit(skills) == 577 && !p4_game_skills_semantic_revision(skills));
+    assert(!p4_game_skills_seal(skills, metadata, elements, presentation, names_span,
+        tables, names, descriptions, 1));
+    assert(p4_game_skills_limit(skills) == 600);
+    assert(!p4_game_tables_text_materialize(names) && !p4_game_tables_text_materialize(descriptions));
+    assert(!p4_game_skills_materialize(skills,
+        p4_game_table_input_span_bytes(metadata), p4_game_table_input_span_size(metadata),
+        p4_game_table_input_span_bytes(elements), p4_game_table_input_span_size(elements),
+        p4_game_table_input_span_bytes(presentation), p4_game_table_input_span_size(presentation),
+        p4_game_table_input_span_bytes(names_span), p4_game_table_input_span_size(names_span)));
+    assert(last_allocation_size == 600u * 40u + 600u * 2u + 600u * 4u);
+    assert(((uint8_t *)P4_G2H(p4_game_skills_metadata(skills)))[599u * 40u] == 0x31);
+    assert(((uint8_t *)P4_G2H(p4_game_skills_elements(skills)))[599u * 2u] == 0x30);
+    p4_game_skills_destroy(skills);
+    p4_game_tables_text_destroy(descriptions); p4_game_tables_text_destroy(names);
+    p4_game_tables_destroy(tables);
+    p4_game_table_input_destroy(too_many); p4_game_table_input_destroy(short_names);
+    p4_game_table_input_destroy(bad); p4_game_table_input_destroy(msg);
+    p4_game_table_input_destroy(effect); p4_game_table_input_destroy(skill);
+    return 0;
+}
+/* R9: NONE is an explicit Golden-source passive sentinel, never a new leaf.
+ * Exercise the real semantic seal, including the old non-Golden refusal. */
+static void passive_none_fixture(void)
+{
+    P4GameMode saved = test_mode;
+    for (unsigned golden = 0; golden < 2; ++golden) {
+        test_mode = golden ? P4_GAME_MODE_GOLDEN : P4_GAME_MODE_PS2;
+        const uint32_t skill_sizes[] = {576u * 2u, 440u * 40u};
+        const uint32_t effect_sizes[] = {440u * 4u};
+        const uint32_t msg_sizes[] = {16, 576u * (golden ? 23u : 19u), 16, 16, 16};
+        P4GameTableInput *skill = golden_input(P4_TABLE_INPUT_SKILL, skill_sizes, 2);
+        P4GameTableInput *effect = golden_input(P4_TABLE_INPUT_EFFECT, effect_sizes, 1);
+        P4GameTableInput *msg = golden_input(P4_TABLE_INPUT_MSG, msg_sizes, 5);
+        P4GameTableAllocator allocator = {NULL, allocate, release};
+        P4TextProfile raw = {P4_TEXT_ENCODING_US_RAW_NATIVE, P4_TEXT_FONT_US_NATIVE};
+        P4TextProfile message = {P4_TEXT_ENCODING_US_NATIVE, P4_TEXT_FONT_US_NATIVE};
+        P4GameTables *tables = p4_game_tables_create();
+        P4GameText *names = p4_game_tables_text_create(&allocator, &raw);
+        P4GameText *descriptions = p4_game_tables_text_create(&allocator, &message);
+        assert(tables && names && descriptions && !p4_game_tables_freeze(tables, 1));
+        register_text(names, 600, P4_TEXT_NAME);
+        register_text(descriptions, 600, P4_TEXT_DESCRIPTION);
+        assert(!p4_game_tables_text_seal(names, 1) && !p4_game_tables_text_seal(descriptions, 1));
+        for (unsigned variant = 0; variant < 4; ++variant) {
+            P4GameSkills *skills = p4_game_skills_create(&allocator);
+            const char *owner = variant == 1 ? "test" : "golden-mode";
+            P4GameSkillDesc row = {.id = 600, .active = variant == 2,
+                .element_id = variant == 3 ? 255u : UINT32_MAX, .element_aux = 0xA5,
+                .schema = 1, .revision = 1};
+            snprintf(row.key, sizeof row.key, "%s:passive-none", owner);
+            assert(skills && !p4_game_skills_register(skills, owner, &row));
+            int result = p4_game_skills_seal(skills, p4_game_table_input_span(skill, 1),
+                p4_game_table_input_span(skill, 0), p4_game_table_input_span(effect, 0),
+                p4_game_table_input_span(msg, 1), tables, names, descriptions, 1);
+            if (golden && variant == 0) {
+                assert(!result);
+                assert(!p4_game_tables_text_materialize(names));
+                assert(!p4_game_tables_text_materialize(descriptions));
+                assert(!p4_game_skills_materialize(skills,
+                    p4_game_table_input_span_bytes(p4_game_table_input_span(skill, 1)), 440u * 40u,
+                    p4_game_table_input_span_bytes(p4_game_table_input_span(skill, 0)), 576u * 2u,
+                    p4_game_table_input_span_bytes(p4_game_table_input_span(effect, 0)), 440u * 4u,
+                    p4_game_table_input_span_bytes(p4_game_table_input_span(msg, 1)), msg_sizes[1]));
+                const uint8_t *parallel = P4_G2H(p4_game_skills_elements(skills));
+                assert(parallel[600u * 2u] == 0xFF && parallel[600u * 2u + 1u] == 0xA5);
+                P4GameSkillDefinition definition;
+                assert(!p4_game_skills_definition_find(skills, 600, &definition));
+                assert(!definition.active && !definition.metadata && definition.authored->element_id == UINT32_MAX);
+            } else assert(result == P4_TABLE_NOT_FOUND);
+            p4_game_skills_destroy(skills);
+        }
+        p4_game_tables_text_destroy(descriptions); p4_game_tables_text_destroy(names);
+        p4_game_tables_destroy(tables);
+        p4_game_table_input_destroy(msg); p4_game_table_input_destroy(effect);
+        p4_game_table_input_destroy(skill);
+    }
+    test_mode = saved;
+    allocations = releases = 0;
+    last_allocation_size = 0;
+}
+
 static int prepare(void *user)
 {
     assert(!user && !allocations);
@@ -263,7 +414,10 @@ static void rollback(void *user) { assert(!user); release_inputs(); }
 int main(int argc, char **argv)
 {
     if (argc != 2) return 2;
+    test_mode = !strcmp(argv[1], "golden") ? P4_GAME_MODE_GOLDEN : P4_GAME_MODE_PS2;
     if (p4t_guest_init()) return 77;
+    passive_none_fixture();
+    if (!strcmp(argv[1], "golden")) return golden_wide_fixture();
     P4GameTableAllocator allocator = {NULL, allocate, release};
     P4GameSkills *empty = p4_game_skills_create(&allocator);
     assert(empty && !p4_game_skills_native_admit(empty));

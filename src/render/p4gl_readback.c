@@ -86,6 +86,11 @@ unsigned p4gl_readback_framebuffer(void)
     return p4gl_rb_width != 0 ? p4gl_rb_framebuffer : 0;
 }
 
+unsigned p4gl_readback_texture(void)
+{
+    return p4gl_rb_width != 0 ? p4gl_rb_texture : 0;
+}
+
 
 int p4gl_readback_rgba(uint32_t w, uint32_t h, uint8_t *rgba)
 {

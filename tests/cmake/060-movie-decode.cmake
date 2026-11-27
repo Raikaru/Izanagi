@@ -20,7 +20,8 @@ foreach(colour_target IN LISTS movie_colour_targets)
   add_executable(${colour_target} movie_colour_test.c
     "${CMAKE_SOURCE_DIR}/src/movie/mpeg2_dec.c"
     "${CMAKE_SOURCE_DIR}/src/render/p4gl_gl.c"
-    "${CMAKE_SOURCE_DIR}/src/render/p4gl_profile.c")
+    "${CMAKE_SOURCE_DIR}/src/render/p4gl_rt.c"
+    "${CMAKE_SOURCE_DIR}/src/render/p4gl_profile.c" "${P4_OS_SRC}")
   target_include_directories(${colour_target} PRIVATE "${CMAKE_SOURCE_DIR}/src/movie"
     "${CMAKE_SOURCE_DIR}/src/render" "${P4_FFMPEG_INC}")
   target_link_libraries(${colour_target} ${P4_SDL3_LIB} ${P4_AVCODEC_LIB} ${P4_SWSCALE_LIB} ${P4_AVUTIL_LIB} m)

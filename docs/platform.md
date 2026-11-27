@@ -19,6 +19,8 @@ Repository-relative source paths in the pages identify the implementation owners
   library licences, private signing identity, migration and native crash logs.
 - [Movies](platform/movies.md): Sofdec seams, decoding and audio/video scheduling.
 - [Performance and profiling](platform/performance.md): optimized builds, draw windows and observers.
+- [Render thread](platform/render_thread.md): the GL driver calls and the swap on a thread of their own.
+- [Diagnostics and bug reports](platform/diagnostics.md): the log header, frame-time and audio statistics per area, where the logs are, Android's Export logs.
 - [Numeric determinism](platform/numeric_determinism.md): floating-point state and cross-target checks.
 - [Game CRT boundary](platform/crt_boundary.md): retail bindings, caller inventories, reviewed host
   adapters and fail-closed object guards.

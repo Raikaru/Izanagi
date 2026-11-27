@@ -45,7 +45,7 @@ def stage2_flags(flags):
     for f in flags:
         if skip:
             skip = False
-        elif f in ("-include", "-isystem", "-I", "-D", "-U", "-MF", "-MT", "-MQ", "-o"):
+        elif f in ("-include", "-isystem", "-idirafter", "-I", "-D", "-U", "-MF", "-MT", "-MQ", "-o"):
             skip = True
         elif f.startswith(("-I", "-D", "-U", "-include", "-MD", "-MMD", "-MF", "-MT", "-W", "-ferror-limit")) or f in ("-c", "-E", "-S"):
             continue
@@ -89,6 +89,7 @@ def load_ast(unit, flags, clang="clang"):
                 checksum = build_cache.file_digest(key_source)
         return {"source": os.path.abspath(unit), "preprocessed": checksum,
                 "flags": flags + lang, "compiler": build_cache.compiler_identity(clang),
+                "zig_cc": os.environ.get("P4PC_ZIG_CC") == "1",
                 "versions": build_cache.versions(__file__)}
     data = build_cache.run_bytes("ast", inputs, produce)
     if parsed:
@@ -2266,6 +2267,7 @@ def oracle_layouts(unit, flags, clang="clang", deps=None):
             data = build_cache.run_bytes("layout", {
                 "source": os.path.abspath(unit), "preprocessed": build_cache.file_digest(key_source),
                 "flags": LAYOUT_FLAGS + flags, "compiler": build_cache.compiler_identity(clang),
+                "zig_cc": os.environ.get("P4PC_ZIG_CC") == "1",
                 "versions": build_cache.versions(__file__)}, produce)
     else:
         with build_cache.timed("layout"):
@@ -2354,8 +2356,8 @@ def merge_abi(per_unit, sigs=None):
     return table, sorted(bad)
 
 
-def collect_abi(unit, flags, work, root, clang="clang", deps=None):
-    """the ABI of the non-static functions this unit defines (preprocess, parse, read the top-level definitions)"""
+def collect_abi(unit, flags, work, root, clang="clang", deps=None, declarations=None):
+    """Collect unit definitions, or exactly the named externally implemented declarations."""
     os.makedirs(work, exist_ok=True)
     ipath = os.path.join(work, os.path.basename(unit) + ".abi.i")
     preprocess(unit, flags, ipath, clang, deps)
@@ -2368,16 +2370,27 @@ def collect_abi(unit, flags, work, root, clang="clang", deps=None):
                 rw.index(ast)
                 out = {}
                 for top in ast.get("inner", ()):
-                    if isinstance(top, dict) and top.get("kind") == "FunctionDecl" and top.get("storageClass") != "static" and any(
-                            isinstance(c, dict) and c.get("kind") == "CompoundStmt" for c in top.get("inner", ())):
+                    if not isinstance(top, dict) or top.get("kind") != "FunctionDecl" or top.get("storageClass") == "static":
+                        continue
+                    name = top.get("name")
+                    if declarations is not None:
+                        if name in declarations:
+                            out[name] = rw.abi_of(top)
+                    elif any(isinstance(c, dict) and c.get("kind") == "CompoundStmt" for c in top.get("inner", ())):
                         sp = span(top)
                         if sp and rw.mine(sp[0], sp[1]):
-                            out[top["name"]] = rw.abi_of(top)
+                            out[name] = rw.abi_of(top)
+                if declarations is not None:
+                    missing = declarations - out.keys()
+                    if missing:
+                        raise ValueError("missing ABI declarations: " + ", ".join(sorted(missing)))
             parsed.append(out)
             return json.dumps(out, sort_keys=True).encode("utf-8")
         data = build_cache.run_bytes("abi", lambda: {
             "source": os.path.abspath(unit), "preprocessed": build_cache.file_digest(ipath),
             "flags": flags, "root": os.path.abspath(root), "compiler": build_cache.compiler_identity(clang),
+            "zig_cc": os.environ.get("P4PC_ZIG_CC") == "1",
+            "declarations": sorted(declarations) if declarations is not None else None,
             "versions": build_cache.versions(__file__)}, produce)
         _MAIN[0] = os.path.abspath(ipath)
         return parsed[0] if parsed else json.loads(data)
@@ -2435,13 +2448,13 @@ def compile_target(flags):
 
 def symbol_prefix(flags):
     """The C symbol prefix of the compile target in `flags`: `_` on Apple's Mach-O, none on ELF (the asm labels the rewriter writes
-    name symbols, not C names)."""
-    return "_" if re.search(r"-apple-|-darwin", compile_target(flags)) else ""
+    name symbols, not C names). Accept both Clang triples and Zig target spellings."""
+    return "_" if re.search(r"-apple-|-darwin|-macos(?:[.0-9-]|$)", compile_target(flags)) else ""
 
 
 def variadic_on_stack(flags):
-    """Apple's arm64 ABI (the compile target in `flags`) passes the variable arguments of a call on the stack, the fixed ones in registers."""
-    return bool(re.match(r"(?:arm64|aarch64)\w*-apple-", compile_target(flags)))
+    """Apple arm64 passes variable arguments on the stack, including Zig's aarch64-macos target spelling."""
+    return bool(re.match(r"(?:arm64|aarch64)\w*-(?:apple-|macos(?:[.0-9-]|$))", compile_target(flags)))
 
 
 

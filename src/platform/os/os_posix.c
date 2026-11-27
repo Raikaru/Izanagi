@@ -35,6 +35,7 @@
 #include <mach-o/loader.h>
 #endif
 
+#include "p4pc/hostpath.h"
 #include "p4pc/os.h"
 
 #ifndef MAP_FIXED_NOREPLACE
@@ -67,6 +68,13 @@ int p4_os_crash_marker_set(const char *bytes, size_t length)
     marker_slot = next;
     return 0;
 }
+static char crash_build[96];
+void p4_os_crash_build_set(const char *id)
+{
+    size_t n = 0;
+    while (id && id[n] && n < sizeof crash_build - 1) { crash_build[n] = id[n]; n++; }
+    crash_build[n] = 0;
+}
 /* Async-signal-safe: pwrite and fsync on a descriptor opened before the fault. */
 void p4_os_crash_marker_write(void)
 {
@@ -79,6 +87,18 @@ void p4_os_crash_marker_close(void)
 {
     if (marker_fd >= 0) close(marker_fd);
     marker_fd = -1;
+}
+
+static char crash_note[256];
+void p4_os_crash_note_set(const char *text)
+{
+    char next[sizeof crash_note];
+    size_t n = text != NULL ? strlen(text) : 0;
+
+    if (n >= sizeof next) n = sizeof next - 1;
+    if (n) memcpy(next, text, n);
+    memset(next + n, 0, sizeof next - n);
+    memcpy(crash_note, next, sizeof next); /* always ends in NUL: the last byte is never written non-zero */
 }
 
 static void crash_address(const char *kind, unsigned index, uintptr_t pc)
@@ -125,6 +145,16 @@ static void crash_handler(int sig, siginfo_t *info, void *context)
         write(STDERR_FILENO, prefix, sizeof prefix - 1);
     }
     dprintf(STDERR_FILENO, "p4pc: CRASH signal %d code %d, fault address %p\n", sig, info->si_code, info->si_addr);
+    if (crash_build[0]) dprintf(STDERR_FILENO, "p4pc: build %s\n", crash_build);
+    if (crash_note[0]) {
+        static const char head[] = "p4pc: context: ";
+        size_t n = 0;
+
+        while (n < sizeof crash_note - 1 && crash_note[n]) n++;
+        write(STDERR_FILENO, head, sizeof head - 1);
+        write(STDERR_FILENO, crash_note, n);
+        write(STDERR_FILENO, "\n", 1);
+    }
     if (p4_os_fault_note) p4_os_fault_note((uintptr_t)info->si_addr);
     ucontext_t *uc = context;
 #if defined(__linux__) && defined(__x86_64__)
@@ -447,15 +477,10 @@ int p4_os_resolved_path(const char *path,char *out,size_t capacity) {
 }
 
 int p4_os_mkdir(const char *path) { return mkdir(path, 0777); }
-FILE *p4_os_fopen_utf8(const char *path, const char *mode)
-{
-    if (!path || !mode || (strcmp(mode,"rb") && strcmp(mode,"wb"))) { errno = EINVAL; return NULL; }
-    return fopen(path,mode);
-}
+FILE *p4_os_fopen_utf8(const char *path, const char *mode) { return p4_host_fopen(path, mode); }
 int p4_os_mkdir_utf8(const char *path)
 { if (!path) { errno = EINVAL; return -1; } return p4_os_mkdir(path); }
-int p4_os_remove_utf8(const char *path)
-{ if (!path) { errno = EINVAL; return -1; } return remove(path); }
+int p4_os_remove_utf8(const char *path) { return p4_host_remove(path); }
 int p4_os_list_dir_utf8(const char *path, void (*visit)(const char *name, void *user), void *user)
 {
     if (!path || !visit) { errno = EINVAL; return -1; }

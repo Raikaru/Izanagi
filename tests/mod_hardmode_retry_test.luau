@@ -11,6 +11,7 @@ local save = F.save
 -- Fictional, weakness-free rows at the IDs selected by the mod.
 F.rows = {
     [310] = {affinities = {physical = "null", light = "resist"}},
+    [311] = {affinities = {physical = "resist", light = "null", dark = "null"}},
     [258] = {affinities = {fire = "resist", electric = "drain"}},
     [259] = {affinities = {wind = "null", dark = "drain"}},
     [304] = {affinities = {fire = "resist", wind = "drain"}},

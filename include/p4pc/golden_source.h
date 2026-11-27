@@ -52,6 +52,16 @@ int p4_golden_utf_u64(const P4GoldenUtf *utf, uint32_t row, const char *column, 
 /* String cell; *out points into the table. NULL-valued columns give "". */
 int p4_golden_utf_str(const P4GoldenUtf *utf, uint32_t row, const char *column, const char **out);
 
+/* Project named columns of an @UTF packet into the same reader. ACB headers
+ * may declare >64 columns and unused trailing work columns outside row_width;
+ * every selected column must still fit. NULL-terminated names, at most 64.
+ * The existing strict CPK opener and all value accessors are unchanged. */
+int p4_golden_utf_open_selected(P4GoldenUtf *utf, uint8_t *packet, size_t size,
+                                const char *const *names);
+/* Binary cell, borrowed from the caller's packet; zero-storage gives NULL/0. */
+int p4_golden_utf_blob(const P4GoldenUtf *utf, uint32_t row, const char *column,
+                       uint8_t **data, size_t *size);
+
 /* ---- CRILAYLA --------------------------------------------------------- */
 
 /* Uncompressed size of a CRILAYLA stream (header + 0x100-byte prefix), or 0
@@ -69,16 +79,26 @@ typedef struct P4GoldenCpkEntry {
     uint32_t extract; /* uncompressed bytes */
 } P4GoldenCpkEntry;
 
+typedef struct P4GoldenCpkIdEntry {
+    uint32_t id;
+    P4GoldenCpkEntry entry;
+} P4GoldenCpkIdEntry;
+
 typedef struct P4GoldenCpk {
     FILE *file;
     uint8_t *toc;     /* owned, unmasked TOC packet */
     P4GoldenUtf utf;
     uint64_t base;    /* added to FileOffset */
+    uint8_t *etoc;    /* owned ETOC packet, when present */
+    P4GoldenUtf etoc_utf;
+    P4GoldenCpkIdEntry *ids;
+    size_t id_count;
 } P4GoldenCpk;
 
-/* Opens and parses the header and table of contents. 0 or -1 (reason set). */
+/* Opens and parses the header and available TOC, ITOC and ETOC tables. */
 int p4_golden_cpk_open(P4GoldenCpk *cpk, const char *path, char *reason, size_t capacity);
-/* Case-insensitive "dir/name" lookup. 0 found, 1 absent, -1 malformed TOC. */
+/* Case-insensitive "dir/name" lookup; "#<decimal id>" addresses ITOC entries.
+ * 0 found, 1 absent, -1 malformed TOC. */
 int p4_golden_cpk_find(const P4GoldenCpk *cpk, const char *path, P4GoldenCpkEntry *out);
 /* Reads and, when compressed, decompresses one entry into a malloc'ed buffer
  * owned by the caller. 0 or -1 (reason set). */

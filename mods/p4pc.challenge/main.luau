@@ -1073,6 +1073,24 @@ p4.authorize.on("battle_protection_item", function(_context: P4BattleProtectionI
     return true
 end)
 
+
+-- These are operation admissions, not a generic inventory-debit policy.
+p4.authorize.on("item_use", function(context: P4ItemUseContext): (boolean, ...string)
+    if context.source == 0 then
+        if active("no_field_recovery") and restoresHpOrSp(context.effect) then
+            return false, "NO FIELD RECOVERY challenge rule"
+        end
+    elseif context.source == 3 then
+        -- Custom category callbacks have no declared effect summary. Fail
+        -- closed while field recovery is restricted, before invoking them.
+        if active("no_field_recovery") then
+            return false, "NO FIELD RECOVERY cannot classify custom item"
+        end
+    elseif (context.source == 1 or context.source == 2 or context.source == 4 or context.source == 5) and active("no_battle_items") then
+        return false, "NO ITEMS IN BATTLE challenge rule"
+    end
+    return true
+end)
 -- Both the Velvet offer and the forge's safe-point commit ask this authorizer.
 -- Persona fusion is a separate operation and remains independently configurable.
 p4.authorize.on("weapon_fusion", function(_context: P4WeaponFusionContext): (boolean, ...string)

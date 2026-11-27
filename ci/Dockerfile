@@ -19,7 +19,7 @@ RUN dpkg --add-architecture i386 \
       libavcodec-dev:i386 libavutil-dev:i386 libswscale-dev:i386 \
       libgl1-mesa-dri:i386 libglx-mesa0:i386 libegl-mesa0:i386 libgl1:i386 libegl1:i386 \
       xvfb xauth \
-      curl xz-utils make nasm \
+      curl xz-utils make nasm patch \
       wine wine32:i386 \
  && rm -rf /var/lib/apt/lists/*
 
@@ -37,8 +37,9 @@ RUN curl -fsSL -o /tmp/llvm-mingw.tar.xz \
 ENV P4PC_LLVM_MINGW=/opt/llvm-mingw
 
 # SDL3 and the LGPL FFmpeg subset for i686-w64-mingw32, as DLLs plus import libraries.
-COPY win32/build_deps.sh /usr/local/share/p4pc/build_deps.sh
-RUN sh /usr/local/share/p4pc/build_deps.sh /opt/p4win32 /opt/llvm-mingw \
+COPY win32/build_deps.sh /usr/local/share/p4pc/ci/win32/build_deps.sh
+COPY ffmpeg-7.1.1-hca-window-alignment.patch /usr/local/share/p4pc/ci/
+RUN sh /usr/local/share/p4pc/ci/win32/build_deps.sh /opt/p4win32 /opt/llvm-mingw \
  && rm -rf /opt/deps-build /opt/dl-cache
 
 # SDL3 and FFmpeg for x86_64 Linux (the 64-bit build, docs/port64.md), beside the i386 ones above. A layer of its own: a host that
@@ -52,7 +53,7 @@ RUN apt-get update \
 
 # SDL3 and FFmpeg for x86_64-w64-mingw32 (the Windows x64 build, docs/port64.md 2.13) and the 64-bit Wine that runs its tests. Layers of their
 # own, like the x86_64 Linux libraries above.
-RUN sh /usr/local/share/p4pc/build_deps.sh /opt/p4win64 /opt/llvm-mingw x86_64-w64-mingw32 \
+RUN sh /usr/local/share/p4pc/ci/win32/build_deps.sh /opt/p4win64 /opt/llvm-mingw x86_64-w64-mingw32 \
  && rm -rf /opt/deps-build /opt/dl-cache
 RUN apt-get update \
  && apt-get install -y --no-install-recommends wine64 \
@@ -74,6 +75,21 @@ RUN apt-get update \
 RUN apt-get update \
  && apt-get install -y --no-install-recommends file \
  && rm -rf /var/lib/apt/lists/*
+
+# The pinned Zig nightly of the battle simulator (cmake/zig/pin.cmake: keep the version and the x86_64-linux SHA-256 equal to it;
+# CMake refuses another version), the official ziglang.org/builds archive whose file name carries the version's "+". It
+# cross-compiles every profile's Zig objects (i386, x86_64, AArch64 Linux; i686/x86_64 mingw-w64, UCRT headers). Last, so the cached
+# toolchain and SDL/FFmpeg layers above survive a Zig update. ziglang.org/builds keeps only recent nightlies: the built image keeps
+# this one. A host overrides it without rebuilding the image: -DP4_ZIG=<zig> or P4_ZIG in the environment.
+ARG ZIG_VERSION=0.18.0-dev.935+ead8f5a7a
+ARG ZIG_SHA256=76258449f1088b6f80359944f9735a4c96e94246e553111155f0af6457ff8de4
+RUN curl -fsSL --proto '=https' --retry 6 --retry-all-errors --retry-delay 10 -o /tmp/zig.tar.xz https://ziglang.org/builds/zig-x86_64-linux-${ZIG_VERSION}.tar.xz \
+ && echo "${ZIG_SHA256}  /tmp/zig.tar.xz" | sha256sum -c - \
+ && mkdir -p /opt/zig-${ZIG_VERSION} \
+ && tar -xJf /tmp/zig.tar.xz -C /opt/zig-${ZIG_VERSION} --strip-components=1 \
+ && rm /tmp/zig.tar.xz \
+ && test "$(/opt/zig-${ZIG_VERSION}/zig version)" = "${ZIG_VERSION}"
+ENV P4_ZIG=/opt/zig-${ZIG_VERSION}/zig
 
 ENV CCACHE_DIR=/ccache
 WORKDIR /lane

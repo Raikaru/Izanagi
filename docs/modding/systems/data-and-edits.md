@@ -33,6 +33,14 @@ with the port.
 | `p4.data.item(query)` | an [item](#items) |
 | `p4.data.find(kind, filter)` | a list of refs (`{kind, id, key, name}`) |
 | `p4.data.all(kind)` | every named row of a kind, in ID order |
+| `p4.data.fusion_recipes()` | Golden mode only: special recipes in source order |
+| `p4.data.fusion_recipe(index)` | Golden mode only: one special recipe, using a one-based index |
+
+Each Golden special recipe has a numeric `result` Persona ID and an ordered
+`materials` array of Persona IDs, including all twelve when applicable.
+These functions report an error when the recipe bank is unavailable. Production
+publication is refused until the M6 image-table binder is available; PS2 mode
+does not register these functions.
 
 `kind` is `"skill"`, `"persona"`, `"enemy"` or `"item"`.
 
@@ -77,7 +85,8 @@ error, not an empty result.
 
 Every row has a key that never changes:
 
-- `p4:<kind>:<name>`, made from the name **on your disc**: `p4:skill:agilao`,
+- `p4:<kind>:<name>`, made from the unmodified name on your PS2 disc, or
+  from the verified Golden tables in Golden mode: `p4:skill:agilao`,
   `p4:item:revival-bead`, `p4:skill:gods-hand`. Words are joined with `-`;
   apostrophes and periods are dropped.
 - Repeated names get `-2`, `-3`, ... in ID order: `p4:skill:last-resort-2`.
@@ -96,10 +105,9 @@ names or IDs.
 synchronous UI callbacks. Reads never change the game, call game code or use
 the random number generator.
 
-The catalog is captured while the game starts, and only when at least one
-enabled mod has a `main.luau` or a data edit layer. If something prevents it
-(for example the disc's names can't be read), catalog lookups raise an error
-saying why.
+The catalog is captured during startup when a script or data-edit layer needs
+it. Golden mode captures names from the verified cache before edits; PS2 mode
+uses the disc. If the required names cannot be read, `p4.data` reports why.
 
 `p4.data.original_enemy_level(id)` requires `data.original-enemy-level@1`.
 It returns `{id, level, source, sha256}` for an original enemy ID in the
@@ -326,7 +334,7 @@ an error that tells you to move it to `data.luau`. From `main.luau`,
 
 | Kind | Field | Range |
 |---|---|---|
-| skill, enemy, Persona | `name` | printable ASCII, at most 18 (skill), 20 (enemy) or 16 (Persona) characters |
+| skill, enemy, Persona | `name` | printable ASCII, at most 18 (skill), 20 (enemy) or 16 (Persona) characters in PS2 mode; Golden mode permits 22 (skill), 20 (enemy) or 20 (Persona) |
 | skill | `power` | 0..9999 |
 | skill | `cost = { sp = n }` / `cost = { hp_percent = n }` | 0..999 SP / 0..100 % |
 | skill | `accuracy`, `critical` | 0..100 |
@@ -382,8 +390,8 @@ the never-sold mark off gear; dates and gates it already has stay. `false`
 marks it never sold. The game year runs from April to March, so a date is
 compared in that order.
 
-A renamed row keeps its key, and every mod can still find it by the name on
-the disc. Menus, shops and messages show the new name; a long one may not fit
+A renamed row keeps its key, and every mod can still find it by its original
+name. Menus, shops and messages show the new name; a long one may not fit
 every menu.
 
 A fusion Persona's learn levels count from its base level, so changing

@@ -46,12 +46,20 @@ target_link_libraries(game_table_overlay_test m)
 add_test(NAME game_table_overlay COMMAND game_table_overlay_test)
 set_tests_properties(game_table_overlay PROPERTIES SKIP_RETURN_CODE 77)
 
+# The battle simulator's Zig modules link here one object each, as in p4port (cmake/sources/187-battle-sim.cmake): each module is
+# its own root, so a test links exactly the modules it names. Their translated bindings reach headers by the src/platform path.
+set(_p4_battle_sim_dir "${CMAKE_SOURCE_DIR}/src/platform/battle_sim")
+set_source_files_properties("${_p4_battle_sim_dir}/entry.zig" "${_p4_battle_sim_dir}/prepare.zig"
+  "${_p4_battle_sim_dir}/result_prompt.zig" "${_p4_battle_sim_dir}/events.zig" "${_p4_battle_sim_dir}/strategy.zig"
+  "${_p4_battle_sim_dir}/live_entry.zig" "${_p4_battle_sim_dir}/policy_test_adapter.zig"
+  PROPERTIES INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/src/platform")
+
 # Canonical saves, preparation wire, extent-bounded encounter start and the
 # post-battle skill-offer decline input.
 add_executable(battle_sim_table_test battle_sim_table_test.c
-  "${CMAKE_SOURCE_DIR}/src/platform/battle_sim/entry.c"
-  "${CMAKE_SOURCE_DIR}/src/platform/battle_sim/prepare.c"
-  "${CMAKE_SOURCE_DIR}/src/platform/battle_sim/result_prompt.c"
+  "${_p4_battle_sim_dir}/entry.zig"
+  "${_p4_battle_sim_dir}/prepare.zig"
+  "${_p4_battle_sim_dir}/result_prompt.zig"
   "${CMAKE_SOURCE_DIR}/src/platform/mods/game_table_extents.c" ${P4_GUEST_TEST_SRC})
 target_include_directories(battle_sim_table_test PRIVATE "${CMAKE_SOURCE_DIR}/include")
 target_compile_definitions(battle_sim_table_test PRIVATE ${P4_PORT_DEFINES})
@@ -71,36 +79,97 @@ add_test(NAME battle_policy_items COMMAND battle_policy_items_test)
 set_tests_properties(battle_policy_items PROPERTIES LABELS port64)
 
 # Exercise the actual affinity policy's roster decision over synthetic guest records.
-add_executable(battle_policy_ratings_test battle_policy_ratings_test.c ${P4_GUEST_TEST_SRC})
+add_executable(battle_policy_ratings_test battle_policy_ratings_test.c
+  "${_p4_battle_sim_dir}/policy_test_adapter.zig" ${P4_GUEST_TEST_SRC})
 target_include_directories(battle_policy_ratings_test PRIVATE "${CMAKE_SOURCE_DIR}/include")
 target_compile_definitions(battle_policy_ratings_test PRIVATE ${P4_PORT_DEFINES})
-target_compile_options(battle_policy_ratings_test PRIVATE -ffunction-sections -fdata-sections)
+set_property(SOURCE "${_p4_battle_sim_dir}/policy_test_adapter.zig" APPEND PROPERTY COMPILE_OPTIONS
+  -ffunction-sections -fdata-sections)
 if(APPLE)
   target_link_options(battle_policy_ratings_test PRIVATE -Wl,-dead_strip)
 else()
   target_link_options(battle_policy_ratings_test PRIVATE -Wl,--gc-sections)
 endif()
 target_link_libraries(battle_policy_ratings_test m)
+if(P4_WIN32)
+  target_link_libraries(battle_policy_ratings_test ntdll)
+endif()
 p4_ps2_exe(battle_policy_ratings_test)
 add_test(NAME battle_policy_ratings COMMAND battle_policy_ratings_test)
 set_tests_properties(battle_policy_ratings PROPERTIES SKIP_RETURN_CODE 77)
 
 # Host C broker contracts only; synthetic packets do not qualify combat.
 add_executable(battle_events_test battle_events_test.c
-  "${CMAKE_SOURCE_DIR}/src/platform/battle_sim/events.c")
+  "${_p4_battle_sim_dir}/events.zig")
 target_include_directories(battle_events_test PRIVATE "${CMAKE_SOURCE_DIR}/include")
 add_test(NAME battle_events COMMAND battle_events_test)
 
-# The strategic candidate policy's (8) decision rules over the facts policy.c gathers.
+# Internal execution reducer and native scalar adapters; no combat/renderer.
+add_executable(battle_action_exec_test battle_action_exec_test.c
+  "${CMAKE_SOURCE_DIR}/src/platform/mods/battle_action_exec.c"
+  "${CMAKE_SOURCE_DIR}/src/platform/mods/battle_action_exec_native.c" ${P4_GUEST_TEST_SRC})
+target_include_directories(battle_action_exec_test PRIVATE "${CMAKE_SOURCE_DIR}/include")
+target_compile_definitions(battle_action_exec_test PRIVATE ${P4_PORT_DEFINES})
+p4_ps2_exe(battle_action_exec_test)
+add_test(NAME battle_action_exec COMMAND battle_action_exec_test)
+set_tests_properties(battle_action_exec PROPERTIES SKIP_RETURN_CODE 77 TIMEOUT 30)
+
+# The strategic candidate policy's (8) decision rules over the facts policy.zig gathers.
 add_executable(battle_strategy_test battle_strategy_test.c
-  "${CMAKE_SOURCE_DIR}/src/platform/battle_sim/strategy.c")
+  "${_p4_battle_sim_dir}/strategy.zig")
 target_include_directories(battle_strategy_test PRIVATE "${CMAKE_SOURCE_DIR}/include")
 add_test(NAME battle_strategy COMMAND battle_strategy_test)
 
+add_executable(battle_expert_test battle_expert_test.c
+  "${_p4_battle_sim_dir}/expert.zig"
+  "${_p4_battle_sim_dir}/strategy.zig")
+target_include_directories(battle_expert_test PRIVATE "${CMAKE_SOURCE_DIR}/include" "${CMAKE_SOURCE_DIR}/src/platform")
+add_test(NAME battle_expert COMMAND battle_expert_test)
+
+# The test body runs on a 64-bit host only. On the Linux i386 build its main just returns the skip code and the link drops policy.zig's
+# unreferenced sections, as in battle_policy_ratings_test; the 32-bit Windows link keeps them, so that build omits the test.
+if(NOT P4_WIN32)
+  add_executable(battle_expert_charge_zig_test battle_expert_charge_zig_test.c
+    "${_p4_battle_sim_dir}/policy.zig" "${_p4_battle_sim_dir}/expert.zig"
+    "${_p4_battle_sim_dir}/strategy.zig" "${CMAKE_SOURCE_DIR}/src/platform/guest.c" "${P4_OS_SRC}")
+  target_include_directories(battle_expert_charge_zig_test PRIVATE "${CMAKE_SOURCE_DIR}/include" "${CMAKE_SOURCE_DIR}/src/platform")
+  set_property(SOURCE "${_p4_battle_sim_dir}/policy.zig" APPEND PROPERTY COMPILE_OPTIONS -ffunction-sections -fdata-sections)
+  if(APPLE)
+    target_link_options(battle_expert_charge_zig_test PRIVATE -Wl,-dead_strip)
+  else()
+    target_link_options(battle_expert_charge_zig_test PRIVATE -Wl,--gc-sections)
+  endif()
+  # In p4_x64 like battle_policy_items_test: an AArch64 build directory on an x86_64 host builds it natively, linked as PIE.
+  target_compile_options(battle_expert_charge_zig_test PRIVATE -fPIE)
+  add_test(NAME battle_expert_charge_zig COMMAND battle_expert_charge_zig_test)
+  # port64: the 64-bit twin runs the body; the i386 original only skips, so it stays out of the hostunit shard (tools/hostunit.py OMIT).
+  set_tests_properties(battle_expert_charge_zig PROPERTIES SKIP_RETURN_CODE 77 LABELS port64)
+endif()
+
+add_executable(battle_observation_test battle_observation_test.c
+  "${CMAKE_SOURCE_DIR}/src/platform/battle_sim/observation.c"
+  "${_p4_battle_sim_dir}/expert.zig"
+  "${_p4_battle_sim_dir}/strategy.zig")
+target_include_directories(battle_observation_test PRIVATE "${CMAKE_SOURCE_DIR}/include" "${CMAKE_SOURCE_DIR}/src/platform")
+target_compile_definitions(battle_observation_test PRIVATE BSIM_EXTERNAL_GUEST=1)
+# In p4_x64 like battle_policy_items_test: an AArch64 build directory on an x86_64 host builds it natively, linked as PIE.
+if(NOT P4_WIN32)
+  target_compile_options(battle_observation_test PRIVATE -fPIE)
+endif()
+add_test(NAME battle_observation COMMAND battle_observation_test)
+# port64: the 64-bit twin runs the body; the i386 original only skips, so it stays out of the hostunit shard (tools/hostunit.py OMIT).
+set_tests_properties(battle_observation PROPERTIES SKIP_RETURN_CODE 77 LABELS port64)
+
+add_executable(battle_expert_parity_test battle_expert_parity_test.c battle_expert_c_reference.c
+  "${_p4_battle_sim_dir}/expert.zig" "${_p4_battle_sim_dir}/strategy.zig")
+target_include_directories(battle_expert_parity_test PRIVATE "${CMAKE_SOURCE_DIR}/include" "${CMAKE_SOURCE_DIR}/src/platform")
+add_test(NAME battle_expert_parity COMMAND battle_expert_parity_test)
+
 add_executable(battle_live_entry_test battle_live_entry_test.c
-  "${CMAKE_SOURCE_DIR}/src/platform/battle_sim/live_entry.c")
+  "${_p4_battle_sim_dir}/live_entry.zig")
 target_include_directories(battle_live_entry_test PRIVATE "${CMAKE_SOURCE_DIR}/include")
 add_test(NAME battle_live_entry COMMAND battle_live_entry_test)
+unset(_p4_battle_sim_dir)
 
 # Original-retail collision seam decoding with synthetic memory only.
 add_executable(lockstep_battle_boundary_test lockstep_battle_boundary_test.c)
@@ -220,19 +289,27 @@ add_test(NAME fpu_state COMMAND fpu_state_test)
 set_tests_properties(fpu_state PROPERTIES SKIP_RETURN_CODE 77)
 
 # The GL call filter tracks the driver's bindings through deletes (src/render/p4gl_gl.c; an offscreen context, skipped without one).
-add_executable(gl_cache_test gl_cache_test.c "${CMAKE_SOURCE_DIR}/src/render/p4gl_gl.c")
+add_executable(gl_cache_test gl_cache_test.c "${CMAKE_SOURCE_DIR}/src/render/p4gl_gl.c" "${CMAKE_SOURCE_DIR}/src/render/p4gl_rt.c" "${P4_OS_SRC}")
 target_sources(gl_cache_test PRIVATE "${CMAKE_SOURCE_DIR}/src/render/p4gl_profile.c")
 target_include_directories(gl_cache_test PRIVATE "${CMAKE_SOURCE_DIR}/src/render")
 target_link_libraries(gl_cache_test m ${P4_SDL3_LIB})
 
 add_executable(gpu_trace_test gpu_trace_test.c "${CMAKE_SOURCE_DIR}/src/render/p4gl_profile.c"
-  "${CMAKE_SOURCE_DIR}/src/render/p4gl_gl.c" "${P4_OS_SRC}")
+  "${CMAKE_SOURCE_DIR}/src/render/p4gl_gl.c" "${CMAKE_SOURCE_DIR}/src/render/p4gl_rt.c" "${P4_OS_SRC}")
 target_include_directories(gpu_trace_test PRIVATE "${CMAKE_SOURCE_DIR}/src/render")
 target_compile_definitions(gpu_trace_test PRIVATE SDL_GL_GetProcAddress=p4gpu_test_proc SDL_STATIC_LIB)
 target_link_libraries(gpu_trace_test m ${P4_SDL3_LIB})
 add_test(NAME gpu_trace COMMAND gpu_trace_test)
 add_test(NAME gl_cache COMMAND gl_cache_test)
 set_tests_properties(gl_cache PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl")
+# The same cases with the driver calls on the render thread, and that thread's command stream against a fake driver (no context, no window).
+add_test(NAME gl_cache_rt COMMAND "${CMAKE_COMMAND}" -E env P4PC_RENDER_THREAD=1 $<TARGET_FILE:gl_cache_test>)
+set_tests_properties(gl_cache_rt PROPERTIES SKIP_RETURN_CODE 77 LABELS "gl")
+add_executable(render_thread_test render_thread_test.c "${CMAKE_SOURCE_DIR}/src/render/p4gl_gl.c" "${CMAKE_SOURCE_DIR}/src/render/p4gl_rt.c"
+  "${CMAKE_SOURCE_DIR}/src/render/p4gl_profile.c" "${P4_OS_SRC}")
+target_include_directories(render_thread_test PRIVATE "${CMAKE_SOURCE_DIR}/src/render")
+target_link_libraries(render_thread_test m ${P4_SDL3_LIB})
+add_test(NAME render_thread COMMAND render_thread_test)
 
 # VU0 helper equivalence checks.
 add_executable(vu0_helpers_test vu0_helpers_test.c "${CMAKE_SOURCE_DIR}/src/vu0.c" "${CMAKE_SOURCE_DIR}/src/platform/ee_float.c")
@@ -246,6 +323,7 @@ target_link_libraries(memcard_test m)
 target_compile_definitions(memcard_test PRIVATE ${P4_PORT_DEFINES})
 add_test(NAME memcard_roundtrip COMMAND memcard_test "${CMAKE_BINARY_DIR}/memcard_test_save")
 add_test(NAME memcard_long_path COMMAND memcard_test "${CMAKE_BINARY_DIR}/memcard_long_path_save" --long-path)
+add_test(NAME memcard_utf8 COMMAND memcard_test "${CMAKE_BINARY_DIR}/memcard_utf8_save" --utf8)
 
 # Keyboard-to-pad: key array to snapshot to DualShock 2 packet (SDL is linked for pad_sdl.c).
 add_executable(pad_keyboard_test pad_keyboard_test.c
@@ -278,6 +356,13 @@ add_executable(config_test config_test.c "${CMAKE_SOURCE_DIR}/src/platform/confi
 target_link_libraries(config_test m ${P4_SDL3_LIB})
 target_compile_definitions(config_test PRIVATE ${P4_PORT_DEFINES})
 add_test(NAME config COMMAND config_test)
+# Host paths that are not ASCII (a Windows profile folder with an accented name): the host-path layer, the settings file and the loose-file layer.
+add_executable(utf8_path_test utf8_path_test.c "${CMAKE_SOURCE_DIR}/src/platform/config/p4cfg.c"
+  "${CMAKE_SOURCE_DIR}/src/platform/files/vfs.c" "${CMAKE_SOURCE_DIR}/src/platform/files/iso9660.c" "${P4_OS_SRC}")
+target_include_directories(utf8_path_test PRIVATE "${CMAKE_SOURCE_DIR}/src/platform/files")
+target_link_libraries(utf8_path_test m ${P4_SDL3_LIB})
+target_compile_definitions(utf8_path_test PRIVATE ${P4_PORT_DEFINES})
+add_test(NAME utf8_path COMMAND utf8_path_test "${CMAKE_BINARY_DIR}/utf8_path_scratch")
 
 # The player's disc: the settings file keeps its path, the executable is found on the image (P4PC_ISO, when set).
 add_executable(p4iso_test p4iso_test.c "${CMAKE_SOURCE_DIR}/src/platform/config/p4iso.c" "${CMAKE_SOURCE_DIR}/src/platform/config/p4cfg.c"
@@ -285,6 +370,12 @@ add_executable(p4iso_test p4iso_test.c "${CMAKE_SOURCE_DIR}/src/platform/config/
 target_link_libraries(p4iso_test m ${P4_SDL3_LIB})
 target_compile_definitions(p4iso_test PRIVATE ${P4_PORT_DEFINES})
 add_test(NAME p4iso COMMAND p4iso_test)
+# The player's diagnostics: frame statistics, the area tag, redaction, and the log a run writes (header, perf lines, summary, the clean-exit line).
+add_executable(p4diag_test p4diag_test.c "${CMAKE_SOURCE_DIR}/src/platform/diag/p4diag.c" "${CMAKE_SOURCE_DIR}/src/platform/config/p4cfg.c"
+  "${CMAKE_SOURCE_DIR}/src/platform/guest.c" "${P4_OS_SRC}")
+target_link_libraries(p4diag_test m ${P4_SDL3_LIB})
+target_compile_definitions(p4diag_test PRIVATE ${P4_PORT_DEFINES})
+add_test(NAME p4diag COMMAND p4diag_test)
 # The game's own --help: usage on stdout, before any disc, window or settings file is opened.
 if(NOT P4_WIN32)
   # This is a startup-only host test, not a GL/game gate. Register its 64-bit

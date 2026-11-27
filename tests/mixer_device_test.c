@@ -96,6 +96,157 @@ static int zero_pitch_test(void)
     return failed;
 }
 
+/* The device callback's diagnostics (p4snd.h, p4diag): a tick hook that sleeps 6 ms makes each 1024-frame callback take about 30 ms for 21 ms of audio, which the mixer must
+ * report as slow renders with events and a nominal device buffer; a run with no device reports none of it. */
+static volatile int slow_on = 1;
+static void slow_tick(double seconds)
+{
+    (void)seconds;
+    if (slow_on) SDL_Delay(6); /* not p4_os_sleep_ns: the other thread sleeps with it */
+}
+
+static int diag_test(void)
+{
+    P4SndDiag d;
+    P4SndVoice *v;
+    int failures = 0, i;
+    unsigned k, saw_slow = 0;
+
+    p4_os_setenv("P4PC_VIRTUAL_CLOCK", "0", 1);
+    p4_os_setenv("P4PC_TURBO", "0", 1);
+    p4_os_setenv("SDL_AUDIODRIVER", "dummy", 1);
+    p4snd_diag_poll(&d);
+    if (d.device || d.callbacks != 0 || d.nevents != 0) {
+        fprintf(stderr, "mixer_device_test: FAIL diagnostics before any device\n");
+        failures++;
+    }
+    v = p4snd_stream_create(1, RATE);
+    if (v == NULL) {
+        fprintf(stderr, "mixer_device_test: FAIL no stream voice\n");
+        return 1;
+    }
+    p4snd_add_tick_hook(slow_tick);
+    for (i = 0; i < 300 && !saw_slow; i++) {
+        sleep_ms(10);
+        p4snd_diag_poll(&d);
+        for (k = 0; k < d.nevents; k++) {
+            saw_slow |= d.events[k].kind == P4SND_DIAG_SLOW && d.events[k].a_us > d.events[k].b_us * 8 / 10 && d.events[k].b_us > 0;
+        }
+    }
+    fprintf(stderr, "mixer_device_test: diag device=%d period=%u us callbacks=%llu slow=%llu late=%llu events=%u render max %llu us\n", d.device, (unsigned)d.period_us,
+            (unsigned long long)d.callbacks, (unsigned long long)d.slow, (unsigned long long)d.late, d.nevents, (unsigned long long)(d.render_max_ns / 1000u));
+    if (!d.device || d.period_us < 500 || d.period_us > 500000 || d.callbacks == 0) {
+        fprintf(stderr, "mixer_device_test: FAIL the device's buffer or callbacks are not reported\n");
+        failures++;
+    }
+    if (d.slow == 0 || !saw_slow) {
+        fprintf(stderr, "mixer_device_test: FAIL a 30 ms render of 21 ms of audio was not reported\n");
+        failures++;
+    }
+    if (d.render_max_ns < 6000000u) {
+        fprintf(stderr, "mixer_device_test: FAIL the render time is not measured\n");
+        failures++;
+    }
+    slow_on = 0; /* destroying the stream while a slow callback runs waits on SDL's own stream/device locks: let a fast one be the last */
+    sleep_ms(150);
+    p4snd_shutdown();
+    if (failures == 0) {
+        printf("mixer_device_test: diag ok\n");
+    }
+    return failures != 0;
+}
+
+/* The output limiter: bit-exact under the knee, smooth and never above full scale over it, and the mixer's output (p4snd_render) obeys it while the diagnostics still
+ * count the samples the sum put past full scale. */
+static int limiter_test(void)
+{
+    static int16_t pcm[2400];
+    static float out[2400 * 2];
+    P4SndDiag d;
+    P4SndVoice *v;
+    float prev = 0.0f, top = 0.0f, quiet_lo = 2.0f, quiet_hi = 0.0f;
+    int failures = 0, i;
+
+    for (i = -900; i <= 900; i++) {
+        const float x = (float)i / 1000.0f;
+
+        if (p4snd_soft_limit(x) != x) {
+            fprintf(stderr, "mixer_device_test: FAIL the limiter changed %f under the knee\n", (double)x);
+            failures++;
+            break;
+        }
+    }
+    for (i = 0; i <= 8000; i++) {
+        const float x = (float)i / 1000.0f, y = p4snd_soft_limit(x);
+
+        if (y < prev || y > 1.0f || p4snd_soft_limit(-x) != -y) {
+            fprintf(stderr, "mixer_device_test: FAIL the limiter is not monotonic, bounded and odd at %f (%f after %f)\n", (double)x, (double)y, (double)prev);
+            failures++;
+            break;
+        }
+        prev = y;
+    }
+    {
+        const float slope = (p4snd_soft_limit(0.9001f) - 0.9f) / 0.0001f;
+        const float one = p4snd_soft_limit(1.0f);
+
+        if (slope < 0.98f || slope > 1.02f || one < 0.9757f || one > 0.9763f || p4snd_soft_limit(1000.0f) != 1.0f || p4snd_soft_limit(1.0f / 0.0f) != 1.0f) {
+            fprintf(stderr, "mixer_device_test: FAIL the limiter's knee or ceiling (slope %f, f(1) %f)\n", (double)slope, (double)one);
+            failures++;
+        }
+        if (p4snd_soft_limit(0.0f / 0.0f) == p4snd_soft_limit(0.0f / 0.0f)) {
+            fprintf(stderr, "mixer_device_test: FAIL a NaN must stay a NaN, as under the hard clamp\n");
+            failures++;
+        }
+    }
+    p4snd_use_offline();
+    v = p4snd_stream_create(1, RATE);
+    if (v == NULL) {
+        fprintf(stderr, "mixer_device_test: FAIL no stream voice\n");
+        return 1;
+    }
+    for (i = 0; i < 2400; i++) {
+        pcm[i] = 30000;
+    }
+    p4snd_voice_set_rate(v, RATE);
+    p4snd_voice_set_gain(v, 0, 1.5f, 1.5f); /* 1.37 of full scale: the sum of voices that used to be cut flat */
+    p4snd_stream_write(v, 0, 0, pcm, 2400);
+    p4snd_stream_commit(v, 2400);
+    p4snd_voice_play(v, 1);
+    p4snd_diag_poll(&d);
+    p4snd_render(out, 2400);
+    for (i = 1200 * 2; i < 2400 * 2; i++) { /* past the 5 ms gain ramp */
+        const float a = out[i] < 0.0f ? -out[i] : out[i];
+
+        top = a > top ? a : top;
+        quiet_lo = a < quiet_lo ? a : quiet_lo;
+    }
+    p4snd_diag_poll(&d);
+    if (top > 1.0f || quiet_lo < 0.99f || d.clipped_samples == 0 || d.peak < 1.3f) {
+        fprintf(stderr, "mixer_device_test: FAIL loud mix: out max %f min %f, counted %llu clipped, peak %f\n", (double)top, (double)quiet_lo, (unsigned long long)d.clipped_samples,
+                (double)d.peak);
+        failures++;
+    }
+    p4snd_stream_write(v, 0, 0, pcm, 2400); /* two renders' worth, so the second one (kept in out) is still fed */
+    p4snd_stream_write(v, 0, 2400, pcm, 2400);
+    p4snd_stream_commit(v, 4800);
+    p4snd_voice_set_gain(v, 0, 0.5f, 0.5f);
+    p4snd_render(out, 2400);
+    p4snd_render(out, 2400);
+    for (i = 1200 * 2; i < 2400 * 2; i++) {
+        quiet_hi = out[i] > quiet_hi ? out[i] : quiet_hi;
+    }
+    if (quiet_hi < 0.4577f || quiet_hi > 0.4579f) {
+        fprintf(stderr, "mixer_device_test: FAIL a quiet mix must pass unchanged (got %f, want 0.4578)\n", (double)quiet_hi);
+        failures++;
+    }
+    p4snd_shutdown();
+    if (failures == 0) {
+        printf("mixer_device_test: limiter ok\n");
+    }
+    return failures != 0;
+}
+
 int main(int argc, char **argv)
 {
     static int16_t pcm[RATE * 4];
@@ -107,6 +258,8 @@ int main(int argc, char **argv)
     int i, failures = 0;
 
     if (argc > 2 && strcmp(argv[2], "zero-pitch") == 0) return zero_pitch_test();
+    if (argc > 2 && strcmp(argv[2], "diag") == 0) return diag_test();
+    if (argc > 2 && strcmp(argv[2], "limiter") == 0) return limiter_test();
     const int live = argc > 2 && strcmp(argv[2], "live") == 0;
     const int virtual_clock = live || (argc > 2 && strcmp(argv[2], "virtual") == 0);
     p4_os_setenv("P4PC_VIRTUAL_CLOCK", virtual_clock ? "1" : "0", 1);

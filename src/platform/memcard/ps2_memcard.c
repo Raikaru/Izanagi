@@ -26,6 +26,7 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "p4pc/hostpath.h"
 #include "p4pc/os.h"
 #include "p4pc/mod_save_native.h"
 #include "mod_save_transport.h"
@@ -74,7 +75,7 @@ static int32_t sSaveFaultSocket = -1;
 
 static const char *saveRoot(void)
 {
-    const char *env = getenv("P4PC_SAVE_DIR");
+    const char *env = p4_host_getenv("P4PC_SAVE_DIR");
     return env && *env ? env : "p4pc_save";
 }
 
@@ -106,6 +107,16 @@ static int saveTarget(int32_t socket,const char *name,char slot[33],const char *
     memcpy(slot,name,n);slot[n]=0;
     if(p4_save_slot_index(slot)<0)return 0;
     *file=slash&&slash[1]?slash+1:NULL;
+    return 1;
+}
+
+static int refuseUnstagedSave(int32_t socket,const char *name)
+{
+    char slot[33],card[P4PC_MC_PATH_MAX];const char *file;
+    if(!saveTarget(socket,name,slot,&file))return 0;
+    if(!p4_mod_save_transport_requires_stage(NULL,NULL))return 0;
+    if(!cardPath(socket,card,sizeof card)&&!p4_mod_save_transport_requires_stage(card,slot))return 0;
+    p4_mod_save_transport_error("Cannot save game","Golden saves require an owned staged save transaction.");
     return 1;
 }
 
@@ -253,9 +264,9 @@ static void emptyDirEntry(const char *name, void *user)
         return;
     if (p4_os_is_dir_nofollow(path)) {
         emptyDir(path);
-        rmdir(path);
+        p4_os_rmdir(path);
     } else {
-        remove(path);
+        p4_host_remove(path);
     }
 }
 
@@ -323,7 +334,7 @@ int32_t func_00431d78(int32_t socket, const char *name, void *result)
 {
     char path[P4PC_MC_PATH_MAX];
     int32_t res;
-    struct stat st;
+    P4HostStat st;
 
     if (!validSocket(socket)) {
         return P4PC_MC_ERR_SOCKET;
@@ -332,11 +343,11 @@ int32_t func_00431d78(int32_t socket, const char *name, void *result)
     if (buildPath(socket, name, path, sizeof path) != 0) {
         return beginAsync(P4PC_MC_KIND_SEARCHFILE, P4PC_MC_FAIL(ENOENT));
     }
-    res = stat(path, &st) == 0 ? 0 : P4PC_MC_FAIL(ENOENT);
+    res = p4_host_stat(path, &st) == 0 ? 0 : P4PC_MC_FAIL(ENOENT);
     if (res == 0 && result != NULL) {
         uint8_t *e = (uint8_t *)result;
         const struct tm *tmv;
-        time_t mt = st.st_mtime;
+        time_t mt = st.mtime;
         const char *base = strrchr(name, '/');
         size_t k;
 
@@ -353,8 +364,8 @@ int32_t func_00431d78(int32_t socket, const char *name, void *result)
                 e[k * 8 + 7] = (uint8_t)((tmv->tm_year + 1900) >> 8);
             }
         }
-        *(uint32_t *)(e + 0x10) = S_ISDIR(st.st_mode) ? 0u : (uint32_t)st.st_size;
-        *(uint16_t *)(e + 0x14) = S_ISDIR(st.st_mode) ? 0x8427 : 0x8497;
+        *(uint32_t *)(e + 0x10) = st.is_dir ? 0u : (uint32_t)st.size;
+        *(uint16_t *)(e + 0x14) = st.is_dir ? 0x8427 : 0x8497;
         base = base != NULL ? base + 1 : name;
         strncpy((char *)e + 0x1E, base, 31);
     }
@@ -389,7 +400,7 @@ int32_t func_00431f28(int32_t socket, const char *name, void *buf, uint32_t offs
         p4_save_transaction_abort(&transaction);
         return beginAsync(P4PC_MC_KIND_READFILE,P4PC_MC_FAIL(EINVAL));
     }
-    f=fopen(path,"rb");
+    f=p4_host_fopen(path,"rb");
     if(!f){res=errnoResult();p4_save_transaction_abort(&transaction);return beginAsync(P4PC_MC_KIND_READFILE,res);}
     P4OSFileIdentity identity;
     int complete=full_candidate&&!p4_os_file_identity(f,&identity)&&identity.size==size;
@@ -419,14 +430,16 @@ int32_t func_00432288(int32_t socket, const char *name, const void *data, uint32
         return P4PC_MC_ERR_SOCKET;
     }
     if (sPending) return P4PC_MC_ERR_BUSY;
+    if (refuseUnstagedSave(socket,name))
+        return beginAsync(P4PC_MC_KIND_WRITEFILE,P4PC_MC_FAIL(EIO));
     if (buildPath(socket, name, path, sizeof path) != 0) {
         p4_mod_save_transport_abort();
         return beginAsync(P4PC_MC_KIND_WRITEFILE, P4PC_MC_FAIL(EINVAL));
     }
     /* r+b keeps the existing bytes outside [offset, offset+size); w+b creates. */
-    f = fopen(path, "r+b");
+    f = p4_host_fopen(path, "r+b");
     if (!f) {
-        f = fopen(path, "w+b");
+        f = p4_host_fopen(path, "w+b");
     }
     if (!f) {
         res=errnoResult();p4_mod_save_transport_abort();
@@ -462,16 +475,18 @@ int32_t func_004323a8(int32_t socket, const char *name)
         return P4PC_MC_ERR_SOCKET;
     }
     if (sPending) return P4PC_MC_ERR_BUSY;
+    if (refuseUnstagedSave(socket,name))
+        return beginAsync(P4PC_MC_KIND_CREATEFILE,P4PC_MC_FAIL(EIO));
     if (buildPath(socket, name, path, sizeof path) != 0) {
         p4_mod_save_transport_abort();
         return beginAsync(P4PC_MC_KIND_CREATEFILE, P4PC_MC_FAIL(EINVAL));
     }
-    f = fopen(path, "rb");
+    f = p4_host_fopen(path, "rb");
     if (f) {
         fclose(f);
         res = P4PC_MC_FAIL(EEXIST);
     } else {
-        f = fopen(path, "wb");
+        f = p4_host_fopen(path, "wb");
         res = f ? 0 : errnoResult();
         if (f) {
             if(fclose(f))res=P4PC_MC_FAIL(EIO);
@@ -490,6 +505,8 @@ int32_t func_004326b8(int32_t socket, const char *name)
         return P4PC_MC_ERR_SOCKET;
     }
     if (sPending) return P4PC_MC_ERR_BUSY;
+    if (refuseUnstagedSave(socket,name))
+        return beginAsync(P4PC_MC_KIND_MKDIR,P4PC_MC_FAIL(EIO));
     if (buildPath(socket, name, path, sizeof path) != 0) {
         p4_mod_save_transport_abort();
         return beginAsync(P4PC_MC_KIND_MKDIR, P4PC_MC_FAIL(EINVAL));
@@ -502,7 +519,7 @@ int32_t func_004326b8(int32_t socket, const char *name)
 int32_t func_004327b0(int32_t socket, const char *name)
 {
     char path[P4PC_MC_PATH_MAX];
-    struct stat st;
+    P4HostStat st;
     int32_t res = 0;
 
     if (!validSocket(socket)) {
@@ -519,7 +536,7 @@ int32_t func_004327b0(int32_t socket, const char *name)
     if (name[0] == '/') {
         name++;
     }
-    if (stat(path, &st) != 0 || !S_ISDIR(st.st_mode)) {
+    if (p4_host_stat(path, &st) != 0 || !st.is_dir) {
         res = P4PC_MC_FAIL(ENOENT);
     } else if (strlen(name) >= P4PC_MC_CWD_MAX) {
         res = P4PC_MC_FAIL(ENAMETOOLONG);

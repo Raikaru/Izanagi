@@ -587,35 +587,56 @@ void p4gl_drawlog_frame(void)
     sDrawNumber = 0;
 }
 
+static int sDrawParsed, sDrawFirst = -1, sDrawLast = -1, sDrawUpto = -1, sDrawSkip = -1;
+
+static void drawlog_parse(void)
+{
+    const char *e;
+
+    if (sDrawParsed) {
+        return;
+    }
+    sDrawParsed = 1;
+    e = getenv("P4PC_DRAW_LOG");
+    if (e != NULL) {
+        sDrawFirst = atoi(e);
+        sDrawLast = strchr(e, '-') != NULL ? atoi(strchr(e, '-') + 1) : sDrawFirst;
+        if (strcmp(e, "all") == 0) {
+            sDrawFirst = 0;
+            sDrawLast = 0x7fffffff; /* every draw the viewer's draw window lets through */
+        }
+    }
+    if (getenv("P4PC_DRAW_UPTO") != NULL) {
+        sDrawUpto = atoi(getenv("P4PC_DRAW_UPTO"));
+    }
+    if (getenv("P4PC_DRAW_SKIP") != NULL) {
+        sDrawSkip = atoi(getenv("P4PC_DRAW_SKIP"));
+    }
+}
+
+/* Whether p4gl_drawlog would log or count this draw: the callers format their `extra` text only then (an atomic's material line cost a snprintf per draw, a few
+ * percent of a phone's game thread in a crowd, for a log nobody had switched on). */
+int p4gl_drawlog_wanted(void)
+{
+    drawlog_parse();
+    return ((sDrawFirst >= 0 && (int)p4pc_flip_count() >= sDrawFirst && (int)p4pc_flip_count() <= sDrawLast) || p4pc_lockstep_draw_active()) && p4gl_gl_draw_enabled();
+}
+
 int p4gl_drawlog(const char *path, int primType, int numVerts, const float *bbox, const float *rgba, const char *extra)
 {
-    static int parsed, first = -1, last = -1, upto = -1, skip = -1;
-    unsigned long n;
     static uint32_t lastFlip = ~0u;
     const uint32_t tex = p4gl_render_state_or(P4GL_RS_TEXTURERASTER, 0u);
     char box[64] = "", col[24] = "", texs[96] = "untextured";
     char line[1024];
     int logThis;
+    int first, last, upto, skip;
+    unsigned long n;
 
-    if (!parsed) {
-        const char *e = getenv("P4PC_DRAW_LOG");
-
-        parsed = 1;
-        if (e != NULL) {
-            first = atoi(e);
-            last = strchr(e, '-') != NULL ? atoi(strchr(e, '-') + 1) : first;
-            if (strcmp(e, "all") == 0) {
-                first = 0;
-                last = 0x7fffffff; /* every draw the viewer's draw window lets through */
-            }
-        }
-        if (getenv("P4PC_DRAW_UPTO") != NULL) {
-            upto = atoi(getenv("P4PC_DRAW_UPTO"));
-        }
-        if (getenv("P4PC_DRAW_SKIP") != NULL) {
-            skip = atoi(getenv("P4PC_DRAW_SKIP"));
-        }
-    }
+    drawlog_parse();
+    first = sDrawFirst;
+    last = sDrawLast;
+    upto = sDrawUpto;
+    skip = sDrawSkip;
     logThis = first >= 0 && (int)p4pc_flip_count() >= first && (int)p4pc_flip_count() <= last;
     if ((!logThis && !p4pc_lockstep_draw_active()) || !p4gl_gl_draw_enabled()) {
         return 1; /* not a logged flip, or a frame the viewer's P4PC_DRAW_WINDOW does not draw */

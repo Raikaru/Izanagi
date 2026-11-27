@@ -1,6 +1,7 @@
 /* Host round-trip for the sceMc2 folder shim (src/platform/memcard/ps2_memcard.c).
  * Drives the entry points the way the game does: start an async op, then poll
- * sceMc2CheckAsync for the completion. Usage: memcard_test <save-root>. */
+ * sceMc2CheckAsync for the completion. Usage: memcard_test <save-root> [--long-path | --utf8]. --utf8 runs the same round trip in a root whose
+ * name is not ASCII (as a Windows profile folder with an accented name is), through the real P4PC_SAVE_DIR path. */
 #include <errno.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -8,7 +9,12 @@
 #include <unistd.h>
 #include <string.h>
 #include <sys/stat.h>
+#ifdef _WIN32
+#include <io.h>
+#include <wchar.h>
+#endif
 
+#include "p4pc/hostpath.h"
 #include "p4pc/os.h"
 
 int32_t func_004316a8(int32_t flag);
@@ -66,8 +72,8 @@ static void removeIfPresent(const char *path)
         CHECK(0);
         return;
     }
-    remove(host);
-    rmdir(host);
+    p4_host_remove(host);
+    p4_os_rmdir(host);
 }
 
 static void countEntry(const char *name, void *user)
@@ -106,6 +112,26 @@ int main(int argc, char **argv)
         }
         CHECK(strlen(longRoot) > 260);
         root = longRoot; /* Leave the SDK input unprefixed: it must normalize its own paths. */
+    }
+    if (argc > 2 && strcmp(argv[2], "--utf8") == 0) {
+        /* e-acute, n-tilde, two CJK characters and a four-byte character: 2, 2, 3+3 and 4 UTF-8 bytes. */
+        static const char suffix[] = "-\xc3\xa9\xc3\xb1-\xe6\x97\xa5\xe6\x9c\xac-\xf0\x9f\x8e\xb4";
+        P4HostStat made;
+        CHECK(snprintf(longRoot, sizeof longRoot, "%s", root) < (int)sizeof longRoot);
+        p4_host_mkdir(longRoot);
+        CHECK(snprintf(longRoot, sizeof longRoot, "%s%s", root, suffix) < (int)sizeof longRoot);
+        CHECK(p4_host_mkdir(longRoot) == 0 || errno == EEXIST);
+        CHECK(p4_host_stat(longRoot, &made) == 0 && made.is_dir);
+#ifdef _WIN32
+        {   /* Independent of the helper: the folder exists under exactly this wide name (an ANSI call would have made mojibake). */
+            wchar_t wide[512];
+            size_t n = 0;
+            for (const char *c = root; *c; c++) wide[n++] = (wchar_t)(unsigned char)(*c == '/' ? '\\' : *c);
+            wcscpy(wide + n, L"-\x00e9\x00f1-\x65e5\x672c-\xd83c\xdfb4");
+            CHECK(_waccess(wide, 0) == 0);
+        }
+#endif
+        root = longRoot;
     }
     p4_os_setenv("P4PC_SAVE_DIR", root, 1);
 
@@ -185,7 +211,7 @@ int main(int argc, char **argv)
     CHECK(finish(KIND_CREATEFILE) == 0);
     snprintf(path, sizeof path, "%s/mc0/SAVEDIR/IN.BIN", root);
     CHECK(p4_os_extended_path(path, sizeof path) == 0);
-    f = fopen(path, "rb");
+    f = p4_host_fopen(path, "rb");
     CHECK(f != NULL);
     if (f) {
         fclose(f);
@@ -245,7 +271,10 @@ int main(int argc, char **argv)
     CHECK(finish(KIND_SEARCHFILE) == MC_FAIL(ENOENT));
     snprintf(path, sizeof path, "%s/mc0/SAVEDIR", root);
     CHECK(p4_os_extended_path(path, sizeof path) == 0);
-    CHECK(access(path, F_OK) != 0);
+    {
+        P4HostStat gone;
+        CHECK(p4_host_stat(path, &gone) != 0);
+    }
 
     res = func_00432ee8(NULL, NULL);
     CHECK(res == -1); /* nothing in flight */

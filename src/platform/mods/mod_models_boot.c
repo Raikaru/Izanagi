@@ -7,6 +7,7 @@
 #include "p4pc/mod_models.h"
 #include "p4pc/mod_setting_gate.h"
 #include "p4pc/vfs_source.h"
+#include "p4pc/hostpath.h"
 #include "p4pc/os.h"
 #include "../config/p4cfg.h"
 #include "../models/p4model.h"
@@ -138,7 +139,7 @@ static char viewer_dir[1024];
 
 static int viewer_read_host(const char *path, uint8_t **data, size_t *size)
 {
-    FILE *f = fopen(path, "rb");
+    FILE *f = p4_host_fopen(path, "rb");
     long n = -1;
     if (!f) return -1;
     if (fseek(f, 0, SEEK_END) == 0) n = ftell(f);
@@ -386,7 +387,7 @@ static int read_package_file(void *user, const char *uri, uint8_t **data, size_t
 
 static const char *cache_directory(char out[1200])
 {
-    const char *env = getenv("P4PC_MODEL_CACHE");
+    const char *env = p4_host_getenv("P4PC_MODEL_CACHE");
     if (env && env[0]) {
         if (!strcmp(env, "none") || strlen(env) >= 1200) return NULL;
         strcpy(out, env);

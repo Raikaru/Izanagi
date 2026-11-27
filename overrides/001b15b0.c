@@ -5,6 +5,7 @@
 #include "p4pc/guest.h"
 #include "p4pc/battle_events.h"
 #include "p4pc/battle_events_native.h"
+#include "p4pc/battle_action_exec_native.h"
 
 extern u8 *D_0076449C;
 extern void btlActionSetState(BtlAction *action, u16 state);
@@ -43,6 +44,8 @@ void btlActionUpdateQueue(void)
         ((BtlAction *)action)->flags |= 4;
         activeAction = *(u8 **)actionSlot;
         dispatchedState = *(u16 *)&((BtlAction *)activeAction)->unk_16;
+        if (p4_action_exec_enabled)
+            p4_action_exec_resume(P4_H2G(activeAction));
         btlActionSetState((BtlAction *)activeAction, dispatchedState);
         countBattle = D_0076449C;
         ((BtlBattleState *)countBattle)->actionCount += 1;
@@ -95,6 +98,8 @@ after_count:
         *(s16 *)&((BtlAction *)*(u8 **)actionSlot)->state = 8;
     }
     action = *(u8 **)actionSlot;
+    if (p4_action_exec_enabled)
+        p4_action_exec_native_admit(P4_H2G(action));
     btlActionSetState((BtlAction *)action, 2);
     advanceBattle = D_0076449C;
     ((BtlBattleState *)advanceBattle)->queueFlags &= 0xFFF7;

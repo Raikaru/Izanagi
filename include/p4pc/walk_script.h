@@ -45,7 +45,7 @@
  *                      its end) with Cross. Units are walker frames. In the results phase (battle state 16) a level-up that offers a ninth skill
  *                      asks which to forget, and its Yes/No defaults to No, so Cross alone would loop: while that task (shdPersonaSkillSelectSeq)
  *                      reads input the driver declines the offer instead, Left to the offered skill (list slot 8), Cross, then Yes. A known skill
- *                      is never forgotten (the battle simulator's result_prompt.c makes the same choice).
+ *                      is never forgotten (the battle simulator's result_prompt.zig makes the same choice).
  *                      A key may be skill:ID (native skill ID, decimal or hex) with the acting character's Skill list open, or item:ID (native
  *                      item ID 0x301..0x3FF) with the Item list open: it presses Down or Up (the shorter way around the wrapping list; Down on a
  *                      tie) from the row the list opens on to that entry, 14 frames apart, then the next key follows (e.g.

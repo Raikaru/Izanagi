@@ -198,7 +198,8 @@ static int decode(const P4ModSaveContext *context, uint32_t schema, P4ModSaveRea
     for (uint32_t i = 0; i < count; ++i) {
         const NativeRecord *record = &history->records[i];
         if (matches_current(uses, record)) continue;
-        if (record->kind == NATIVE_GOLDEN_CACHE)
+        if (record->kind == NATIVE_GOLDEN_CACHE ||
+            (record->kind == NATIVE_COMPILED_MODE && !strncmp(record->key, "golden-image:", sizeof "golden-image:" - 1u)))
             return failure(context, "Golden table cache identity is unavailable or differs; cross-mode or mismatched loads are refused.");
         char message[768];
         if (record->kind == NATIVE_COMPILED_MODE)
@@ -260,6 +261,15 @@ int p4_game_table_native_uses_destroy(P4GameTableNativeUses *uses)
     size_t bytes = sizeof *uses + uses->modes_count * sizeof *uses->modes;
     free(uses); p4_packages_memory_release(bytes);
     return 0;
+}
+int p4_game_table_native_origin_use(P4GameTableNativeUses *uses, const P4TableSourceOrigin *origin)
+{
+    if (!uses || !origin || !p4_game_table_sources_is_sealed(uses->sources)) return -1;
+    for (size_t i = 0; i < uses->modes_count; ++i) if (uses->modes[i].origin == origin) {
+        uses->modes[i].used = 1;
+        return 0;
+    }
+    return -1;
 }
 static void package_use(const P4PackageProvider *provider)
 {

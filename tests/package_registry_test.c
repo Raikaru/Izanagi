@@ -50,6 +50,23 @@ static int installation(const P4PackageInstallation *entry, void *user)
     CHECK(prepares == 0 && publishes == 0 && p4_packages_count() == 0);
     return 0;
 }
+static char bundled_ids[4096];
+static int bundled_refused;
+static int bundled_installation(const P4PackageInstallation *entry, void *user)
+{
+    CHECK(user == &installations);
+    ++installations;
+    if (!entry->info) {
+        /* A bundled mod the game refuses is a release defect: name it and why. */
+        fprintf(stderr, "package_registry: bundled mod %s refused at line %u: %s\n", entry->folder, entry->line,
+            entry->diagnostic ? entry->diagnostic : "(no reason)");
+        ++bundled_refused;
+    } else if (strlen(bundled_ids) + strlen(entry->info->id) + 2 < sizeof bundled_ids) {
+        if (*bundled_ids) strcat(bundled_ids, ",");
+        strcat(bundled_ids, entry->info->id);
+    }
+    return 0;
+}
 static int prepare(void *user)
 {
     CHECK(user == &prepares);
@@ -464,6 +481,16 @@ int main(int argc, char **argv)
         CHECK(p4_packages_count() == 0); /* staged, not in the published catalog */
         p4_mod_fidelity_check_start();
         return 3; /* A surviving guard is a witness failure, not a success. */
+    }
+    if (!strcmp(mode, "bundled-manifests")) {
+        /* argv[2] is the repository's own mods folder: every shipped manifest must pass the real parser, and then stage. */
+        CHECK(p4_package_installations_scan(&mod_client, argv[2], bundled_installation, &installations) == 0);
+        CHECK(installations >= 8 && !bundled_refused);
+        CHECK(p4_package_registry_load_bundled(&mods, &mod_client, "absent-not-scanned", argv[2], bundled_ids) == 0);
+        CHECK(p4_package_registry_count(mods) == (size_t)installations);
+        p4_package_registry_retire();
+        printf("bundled manifests: %d scanned, %d refused, %s\n", installations, bundled_refused, failures ? "FAIL" : "PASS");
+        return failures ? 1 : 0;
     }
     if (!strcmp(mode, "catalog")) {
         CHECK(p4_package_registry_load(&mods, &mod_client, "absent-not-scanned", "") == 0);

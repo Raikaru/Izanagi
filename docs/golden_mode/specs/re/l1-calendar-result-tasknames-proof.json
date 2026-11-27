@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "proof_id": "L1-c12-calendar-result-task-identities",
+  "decision": "PROVEN",
+  "runtime_status": "pending-seam",
+  "basis": "Corresponding parent-owned task constructors, lifecycle callbacks, priority15 and initialized work fields establish source identity; equality of text is only corroboration. Golden work layouts are wider and not claimed identical.",
+  "sources": [
+    {
+      "address": "0x00638ef0",
+      "ps2_size": 32,
+      "live_size": 18,
+      "steam_section": ".sdata",
+      "steam_rva": "0x91b308",
+      "steam_raw": 9543432,
+      "nso_address": "0x71005e0cca",
+      "sha256": "ad93626dfe89bb8fc041099522e2af48e11d07e752f53c44fad6208cc1d81e0a",
+      "value": "cldDayChangeMonth",
+      "ps2_reader": "00266950 cldDayChangeStartStateTask;src/cldDayChange.c719..736",
+      "correspondence": "PS2 allocates36B zeroed work, state0, actual marker/render-list inputs, creates childpriority15 with update/destroy callbacks, then soundchannel3/10 transitions. Steam141470..14153d allocates56B, same taskname/priority, parent attachment, state0 and live render/state fields; creation additionally inlined13f5cb..13f64f. NSOcc518..cc5c4 allocates56B, creates childpriority15 withcd0f0/cd290 callbacks and initializes state/render-related fields, followed bychannel3/10 sound transitions.",
+      "required_seams": [
+        {
+          "ps2_addresses": [
+            "0x00266950"
+          ],
+          "action": "Bind the18-byte task-name argument, including inlined day-change construction and native copies; retain14PS2tailbytes. Preserve real parent task, loaded marker/render resources, callback registrations and task ownership. No Golden work-layout memcpy is authorized."
+        }
+      ]
+    },
+    {
+      "address": "0x006290f0",
+      "ps2_size": 32,
+      "live_size": 21,
+      "steam_section": ".xpdata",
+      "steam_rva": "0xb056a8",
+      "steam_raw": 11550376,
+      "nso_address": "0x710073bb1e",
+      "sha256": "123468bae006819bb9a641ad199638904daa9e3cae58fbebac6e8b4254de4d77",
+      "value": "battle_result_simple",
+      "ps2_reader": "002215c0 btlResultSimpleCreateTask;src/Battle/btlResultSimple.c1109..1129;00221910 existence query inunplaced_inferred_002218e0.c28..33",
+      "correspondence": "PS2 allocates1400B work, zeroes it, creates childpriority15 with update/destroy callbacks, stores parent result work and draw callback/work. Steam107d80..107e48 andNSOa1420..a14d4 allocate1568B, same name/priority and parent-result/draw callback/work roles. Steam108040..10806a andNSOa2170..a2190 query the same identity and returnnon-null. AdditionalSteam inlined name sites100643/1009e2 are witnesses, not new invented PS2 owners.",
+      "required_seams": [
+        {
+          "ps2_addresses": [
+            "0x002215c0",
+            "0x00221910"
+          ],
+          "action": "Bind21-byte simple-result taskname for creation and existence queries, including all translated/inlined/native copies; retain11PS2tailbytes. Keep live parent-result work, callbacks and task instance lifecycle. Original PS2 function labelbtlLogoTaskExists is misleading; the literal and actual paired constructor/query prove the simple-result identity."
+        }
+      ]
+    }
+  ],
+  "qualification": "Static source correspondence only, no runtime task or sound behavior tested. No game/emulator/build/unittest/BBV or .arch decode."
+}

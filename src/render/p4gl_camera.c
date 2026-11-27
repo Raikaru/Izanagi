@@ -22,6 +22,7 @@
 
 /* RwCamera fields (retail layout; decomp rwcore.h). */
 #define P4_CAMERA_PROJECTION 20   /* RwObjectHasFrame (including sync callback) is 20 bytes */
+#define P4_PROJECTION_PARALLEL 2u    /* RwCameraProjection rwPARALLEL; rwPERSPECTIVE is 1 */
 #define P4_CAMERA_VIEWWINDOW 104   /* RwCamera.viewWindow (RwV2d) */
 #define P4_CAMERA_NEAR 128         /* RwCamera.nearPlane */
 #define P4_CAMERA_FAR 132          /* RwCamera.farPlane */
@@ -170,6 +171,15 @@ static float camera_f32(const void *camera, size_t off)
     return value;
 }
 
+/* RwCamera.projectionType: rwPERSPECTIVE (1) or rwPARALLEL (2). */
+static uint32_t camera_projection(const void *camera)
+{
+    uint32_t projection;
+
+    memcpy(&projection, (const uint8_t *)camera + P4_CAMERA_PROJECTION, sizeof projection);
+    return projection;
+}
+
 /* PSC's 2D panel matrix normalises pixel aspect from viewWindow.y/x.
  * The live camera must stay Hor+ for projection and culling, but this layout
  * calculation needs the retail X or it squashes card heights by the width. */
@@ -266,13 +276,28 @@ int p4gl_camera_object_matrix(const void *ltm, const void *camera, float m[4][4]
             b *= fit;
         }
     }
-    bigA = (farPlane + nearPlane) / (farPlane - nearPlane);
-    bigB = -2.0f * farPlane * nearPlane / (farPlane - nearPlane);
-    for (c = 0; c < 4; c++) {
-        mvp[0][c] = a * m[0][c];
-        mvp[1][c] = b * m[1][c];
-        mvp[2][c] = bigA * m[2][c] + bigB * m[3][c];
-        mvp[3][c] = m[2][c];
+    if (camera_projection(camera) == P4_PROJECTION_PARALLEL) {
+        /* A parallel camera (the field's shadow camera: k_shadow.c FldShadow_CreateCaster, RwCameraSetProjectionType(camera, 2)) does not divide
+         * by depth: x and y are the camera-space coordinates over the view window, w stays 1 and depth is linear from the near to the far plane.
+         * Through the perspective rows below, the camera half a far plane from the player shrank the whole 128x128 shadow map to one texel. */
+        const float depthScale = 2.0f / (farPlane - nearPlane);
+        const float depthShift = -(farPlane + nearPlane) / (farPlane - nearPlane);
+
+        for (c = 0; c < 4; c++) {
+            mvp[0][c] = a * m[0][c];
+            mvp[1][c] = b * m[1][c];
+            mvp[2][c] = depthScale * m[2][c] + depthShift * m[3][c];
+            mvp[3][c] = m[3][c];
+        }
+    } else {
+        bigA = (farPlane + nearPlane) / (farPlane - nearPlane);
+        bigB = -2.0f * farPlane * nearPlane / (farPlane - nearPlane);
+        for (c = 0; c < 4; c++) {
+            mvp[0][c] = a * m[0][c];
+            mvp[1][c] = b * m[1][c];
+            mvp[2][c] = bigA * m[2][c] + bigB * m[3][c];
+            mvp[3][c] = m[2][c];
+        }
     }
     {
         int width = 0;

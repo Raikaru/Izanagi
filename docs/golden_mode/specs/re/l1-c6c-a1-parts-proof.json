@@ -1,0 +1,4098 @@
+{
+  "proof_id": "L1-c6C-A1-parts-dispatch-and-particle-code-20261114",
+  "scope": "Only11 exact Main/SPLIT3 A1C rows; no other shared coefficient is decided. Original114 and additional shop transfers are unchanged.",
+  "runtime_status": "pending-seam",
+  "source_pins": {
+    "steam_build": 10836033,
+    "steam_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+    "switch_mapped_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+    "switch_nso_sha256": "854c7a1e33de1619abf009fa7f32b8c012960d685c8bf1bf99a92a6a4d0bda1c",
+    "ps2_elf_sha256": "f90675b8a38138ddb5dc5cdf641550f41800fcb86bb499c586073e964fb41836",
+    "ps2_decomp_revision": "18016afe6"
+  },
+  "method": "Positive actual factory/release/clone consumers and complete relocated native dispatch; independently typed particle paths and actual code immediate definitions/uses. No label-only, no-reference or byte-similarity closure. Steam.shared only; no.arch decoding or game execution.",
+  "rows": [
+    {
+      "address": "0x00713480",
+      "size": 8,
+      "decision": "PROVEN",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "40ba63e27636c4f3d375d64bf04715f4b036d75c59f99d5229425ae4430aa045",
+        "readers": [
+          {
+            "function": "0x484570",
+            "name": "mdlEffectCreatePrimitiveRecord",
+            "file": "src/Graphics/Model/mdlEffect_inferred_00484570.c"
+          },
+          {
+            "function": "0x484bb0",
+            "name": "func_00484bb0",
+            "file": "src/Graphics/Model/mdlEffect_inferred_00484bb0.c"
+          },
+          {
+            "function": "0x485630",
+            "name": "mdlEffectCommitTreeFrame",
+            "file": "src/Graphics/Model/mdlEffect_inferred_00484bb0.c"
+          },
+          {
+            "function": "0x485870",
+            "name": "mdlEffectFlushTreeFrame",
+            "file": "src/Graphics/Model/mdlEffect_inferred_00484bb0.c"
+          },
+          {
+            "function": "0x485b20",
+            "name": "func_00485b20",
+            "file": "src/Graphics/Model/mdlEffect_inferred_00485b20.c"
+          },
+          {
+            "function": "0x485c80",
+            "name": "func_00485c80",
+            "file": "src/Graphics/Model/mdlEffect_inferred_00485b20.c"
+          },
+          {
+            "function": "0x485fe0",
+            "name": "func_00485fe0",
+            "file": "src/Graphics/Model/mdlEffect_inferred_00485b20.c"
+          },
+          {
+            "function": "0x486060",
+            "name": "func_00486060",
+            "file": "src/Graphics/Model/mdlEffect_inferred_00485b20.c"
+          },
+          {
+            "function": "0x4860f0",
+            "name": "func_004860f0",
+            "file": "src/Graphics/Model/mdlEffect_inferred_00485b20.c"
+          },
+          {
+            "function": "0x486180",
+            "name": "func_00486180",
+            "file": "src/Graphics/Model/mdlEffect_inferred_00485b20.c"
+          },
+          {
+            "function": "0x4861f0",
+            "name": "func_004861f0",
+            "file": "src/Graphics/Model/mdlEffect_inferred_00485b20.c"
+          },
+          {
+            "function": "0x486330",
+            "name": "func_00486330",
+            "file": "src/Graphics/Model/mdlEffect_inferred_00485b20.c"
+          },
+          {
+            "function": "0x486400",
+            "name": "func_00486400",
+            "file": "src/Graphics/Model/mdlEffect_inferred_00485b20.c"
+          },
+          {
+            "function": "0x4865c0",
+            "name": "func_004865c0",
+            "file": "src/Graphics/Model/mdlEffect_inferred_00485b20.c"
+          }
+        ]
+      },
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".xpdata",
+        "rva": "0xb2b370",
+        "raw_offset": 11705200,
+        "size": 4352,
+        "sha256": "892f1e6c9f689d6e7a2e3ed6c453a5df28b1a225ef80045d82eff3d12bc7e6c8",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "structural_correspondence": "Actual PS2 effParts record factory484570 indexes the33x64-byte16-callback table713480 by the u16 kind; release4846d0 independently indexes slot4 through713490, then releases owned source blocks and the record. Golden Steam.shared507090..50711e independently constructs50-hex-byte records, checks source tag<=DC and kind<=21hex, indexes completeB2B370 by kind<<7, calls slot0, and stores the native instance at+8. Native3636c0 independently consumes86fad0 with the same34-kind/128-byte stride constructor protocol. Native3637c0..363830 loads kind+4, calls [86fad0+kind*128+20hex] on instance+8, then frees the two owned source blocks and the record; this positively seals release slot4. Native363830 clones through slot5 at86faf8. Thus selected old kind0 slots correspond to the actual complete Golden typed bank, including its additional kind33, not merely similar function addresses or an adjacent data guess. Native default slot0 returns0 at365e40; slots1/4 are actual RET365e50. Steam corresponding defaults are507030/507010. Null and default callback distinctions throughout the bank are preserved.",
+      "required_seams": [
+        "parts-dispatch:replace all old713480/713490 computed factory/update/draw/clone/release/transform aliases with complete actual34-kind16-slot Golden dispatch and native callable ABI; include added kind33 and exact null/default distinctions",
+        "parts-dispatch:bind actual native50-byte instance/source ownership, tag validation, callbacks and cleanup; do not copy64-bit pointers into old32-bit slots or retain old33-kind64-byte dispatch"
+      ],
+      "selected_old_kind": 0,
+      "selected_slots": [
+        0,
+        1
+      ],
+      "ps2_live_bytes": 8,
+      "logical_bank": {
+        "records": 34,
+        "slots_per_record": 16,
+        "pointer_bytes": 8,
+        "stride": 128,
+        "steam_callbacks_rva": [
+          [
+            "0x507030",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507030",
+            "0x507020",
+            "0x507010",
+            "0x507020",
+            "0x507020",
+            "0x507050",
+            "0x507020",
+            "0x507060",
+            "0x507070",
+            "0x507070",
+            "0x507010"
+          ],
+          [
+            "0x562d10",
+            "0x565c70",
+            "0x565be0",
+            "0x565c30",
+            "0x563080",
+            "0x5632f0",
+            "0x5633c0",
+            "0x563bc0",
+            "0x565cd0",
+            "0x565d20",
+            "0x565da0",
+            null,
+            "0x565d70",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x569100",
+            "0x569eb0",
+            "0x569960",
+            "0x569d40",
+            "0x569470",
+            "0x5694e0",
+            null,
+            "0x569920",
+            "0x56a030",
+            "0x56a080",
+            "0x56a110",
+            null,
+            "0x56a0d0",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x507030",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507030",
+            "0x507020",
+            "0x507010",
+            "0x507020",
+            "0x507020",
+            "0x507050",
+            "0x507020",
+            "0x507060",
+            "0x507070",
+            "0x507070",
+            "0x507010"
+          ],
+          [
+            "0x53fb40",
+            "0x53fdc0",
+            "0x53fcc0",
+            "0x53fd40",
+            "0x53fbd0",
+            "0x53fc40",
+            null,
+            "0x53fc90",
+            "0x53fe70",
+            null,
+            "0x53fee0",
+            null,
+            "0x53feb0",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x540000",
+            "0x540360",
+            "0x540180",
+            "0x540200",
+            "0x540090",
+            "0x540100",
+            null,
+            "0x540150",
+            "0x540520",
+            null,
+            "0x540590",
+            null,
+            "0x540560",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x507030",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507030",
+            "0x507020",
+            "0x507010",
+            "0x507020",
+            "0x507020",
+            "0x507050",
+            "0x507020",
+            "0x507060",
+            "0x507070",
+            "0x507070",
+            "0x507010"
+          ],
+          [
+            "0x5825c0",
+            "0x5832b0",
+            "0x582b90",
+            "0x582bd0",
+            "0x582870",
+            "0x582980",
+            "0x582ac0",
+            "0x582b60",
+            "0x583300",
+            "0x583340",
+            "0x5833b0",
+            null,
+            "0x583380",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x507030",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507030",
+            "0x507020",
+            "0x507010",
+            "0x507020",
+            "0x507020",
+            "0x507050",
+            "0x507020",
+            "0x507060",
+            "0x507070",
+            "0x507070",
+            "0x507010"
+          ],
+          [
+            "0x55a730",
+            "0x55b2a0",
+            "0x55a800",
+            "0x55a840",
+            "0x55a770",
+            "0x55a7a0",
+            null,
+            "0x55a7d0",
+            "0x55b2e0",
+            null,
+            null,
+            null,
+            "0x55b320",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x57f0d0",
+            "0x57f300",
+            "0x57f260",
+            "0x57f2b0",
+            "0x57f150",
+            "0x57f190",
+            null,
+            "0x57f220",
+            "0x57f370",
+            "0x57f3b0",
+            "0x57f420",
+            "0x57f460",
+            "0x57f3f0",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x507030",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507030",
+            "0x507020",
+            "0x507010",
+            "0x507020",
+            "0x507020",
+            "0x507050",
+            "0x507020",
+            "0x507060",
+            "0x507070",
+            "0x507070",
+            "0x507010"
+          ],
+          [
+            "0x568010",
+            "0x5681c0",
+            "0x568120",
+            "0x568170",
+            "0x568070",
+            "0x5680b0",
+            null,
+            "0x5680e0",
+            "0x568230",
+            "0x568270",
+            "0x5682e0",
+            "0x568320",
+            "0x5682b0",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x561f80",
+            "0x562110",
+            "0x562090",
+            "0x5620d0",
+            "0x561fe0",
+            "0x562020",
+            null,
+            "0x562050",
+            "0x562170",
+            "0x5621b0",
+            "0x562220",
+            null,
+            "0x5621f0",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x507030",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507030",
+            "0x507020",
+            "0x507010",
+            "0x507020",
+            "0x507020",
+            "0x507050",
+            "0x507020",
+            "0x507060",
+            "0x507070",
+            "0x507070",
+            "0x507010"
+          ],
+          [
+            "0x5692c0",
+            "0x569eb0",
+            "0x569960",
+            "0x569d40",
+            "0x569470",
+            "0x569560",
+            null,
+            "0x569920",
+            "0x56a030",
+            "0x56a080",
+            "0x56a110",
+            null,
+            "0x56a0d0",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x570e20",
+            "0x5710a0",
+            "0x570fe0",
+            "0x571050",
+            "0x570ef0",
+            "0x570f30",
+            null,
+            "0x570fa0",
+            "0x571140",
+            "0x571180",
+            "0x5711f0",
+            "0x571230",
+            "0x5711c0",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x507030",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507030",
+            "0x507020",
+            "0x507010",
+            "0x507020",
+            "0x507020",
+            "0x507050",
+            "0x507020",
+            "0x507060",
+            "0x507070",
+            "0x507070",
+            "0x507010"
+          ],
+          [
+            "0x507030",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507030",
+            "0x507020",
+            "0x507010",
+            "0x507020",
+            "0x507020",
+            "0x507050",
+            "0x507020",
+            "0x507060",
+            "0x507070",
+            "0x507070",
+            "0x507010"
+          ],
+          [
+            "0x507030",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507030",
+            "0x507020",
+            "0x507010",
+            "0x507020",
+            "0x507020",
+            "0x507050",
+            "0x507020",
+            "0x507060",
+            "0x507070",
+            "0x507070",
+            "0x507010"
+          ],
+          [
+            "0x507030",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507030",
+            "0x507020",
+            "0x507010",
+            "0x507020",
+            "0x507020",
+            "0x507050",
+            "0x507020",
+            "0x507060",
+            "0x507070",
+            "0x507070",
+            "0x507010"
+          ],
+          [
+            "0x55b770",
+            "0x55b9f0",
+            "0x55b9a0",
+            "0x55b9e0",
+            "0x55b7e0",
+            "0x55b840",
+            null,
+            "0x55b890",
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          [
+            "0x507030",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507030",
+            "0x507020",
+            "0x507010",
+            "0x507020",
+            "0x507020",
+            "0x507050",
+            "0x507020",
+            "0x507060",
+            "0x507070",
+            "0x507070",
+            "0x507010"
+          ],
+          [
+            "0x571980",
+            "0x5728a0",
+            "0x572090",
+            "0x5720d0",
+            "0x571c10",
+            "0x571d20",
+            "0x571fc0",
+            "0x572060",
+            null,
+            null,
+            null,
+            null,
+            "0x5728e0",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x507030",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507030",
+            "0x507020",
+            "0x507010",
+            "0x507020",
+            "0x507020",
+            "0x507050",
+            "0x507020",
+            "0x507060",
+            "0x507070",
+            "0x507070",
+            "0x507010"
+          ],
+          [
+            "0x507030",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507030",
+            "0x507020",
+            "0x507010",
+            "0x507020",
+            "0x507020",
+            "0x507050",
+            "0x507020",
+            "0x507060",
+            "0x507070",
+            "0x507070",
+            "0x507010"
+          ],
+          [
+            "0x522b30",
+            "0x523170",
+            "0x522e20",
+            "0x523120",
+            "0x522c10",
+            "0x522c50",
+            "0x522d70",
+            "0x522df0",
+            "0x523210",
+            "0x523250",
+            "0x5232c0",
+            null,
+            "0x523290",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x56bb60",
+            "0x56c5f0",
+            "0x56c080",
+            "0x56c4c0",
+            "0x56bd20",
+            "0x56bda0",
+            "0x56be70",
+            "0x56c000",
+            "0x56c730",
+            "0x56c770",
+            "0x56c7e0",
+            null,
+            "0x56c7b0",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x580580",
+            "0x581cc0",
+            "0x580d80",
+            "0x581c40",
+            "0x580820",
+            "0x5808f0",
+            "0x580a30",
+            "0x580d40",
+            "0x581dd0",
+            "0x581e20",
+            "0x581ea0",
+            null,
+            "0x581e70",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x558470",
+            "0x559ba0",
+            "0x559460",
+            "0x559b20",
+            "0x558550",
+            "0x5585a0",
+            "0x558690",
+            "0x558780",
+            "0x559cf0",
+            "0x559d40",
+            "0x559dc0",
+            null,
+            "0x559d90",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x574e50",
+            "0x575000",
+            "0x574f60",
+            "0x574fb0",
+            "0x574eb0",
+            "0x574ef0",
+            null,
+            "0x574f20",
+            "0x575070",
+            null,
+            null,
+            null,
+            "0x5750b0",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x522120",
+            "0x522380",
+            "0x5222d0",
+            "0x522330",
+            "0x522190",
+            "0x5221e0",
+            null,
+            "0x522280",
+            "0x522410",
+            "0x522450",
+            "0x5224c0",
+            null,
+            "0x522490",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x523390",
+            "0x523e70",
+            "0x523640",
+            "0x523cb0",
+            "0x523450",
+            "0x523490",
+            "0x5235a0",
+            "0x523610",
+            "0x523fa0",
+            null,
+            null,
+            null,
+            "0x523fe0",
+            "0x524010",
+            "0x524090",
+            "0x5240c0"
+          ],
+          [
+            "0x55ba60",
+            "0x55bc50",
+            "0x55bbc0",
+            "0x55bc40",
+            "0x55bae0",
+            "0x55bb10",
+            null,
+            "0x55bb90",
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        ],
+        "switch_callbacks_relative": [
+          [
+            "0x365e40",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e40",
+            "0x365e60",
+            "0x365e50",
+            "0x365e60",
+            "0x365e60",
+            "0x365e70",
+            "0x365e60",
+            "0x365e80",
+            "0x365e90",
+            "0x365e90",
+            "0x365e50"
+          ],
+          [
+            "0x36bb70",
+            "0x36ed60",
+            "0x36ecf0",
+            "0x36ed30",
+            "0x36c3e0",
+            "0x36c570",
+            "0x36c820",
+            "0x36cba0",
+            "0x36edb0",
+            "0x36edc0",
+            "0x36ede0",
+            null,
+            "0x36edd0",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x37e6f0",
+            "0x3803a0",
+            "0x37f3e0",
+            "0x3802c0",
+            "0x37efb0",
+            "0x37f010",
+            null,
+            "0x37f3d0",
+            "0x3803d0",
+            "0x3803e0",
+            "0x380410",
+            null,
+            "0x3803f0",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x365e40",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e40",
+            "0x365e60",
+            "0x365e50",
+            "0x365e60",
+            "0x365e60",
+            "0x365e70",
+            "0x365e60",
+            "0x365e80",
+            "0x365e90",
+            "0x365e90",
+            "0x365e50"
+          ],
+          [
+            "0x352da0",
+            "0x353120",
+            "0x353060",
+            "0x3530d0",
+            "0x352f20",
+            "0x352fd0",
+            null,
+            "0x353050",
+            "0x3531a0",
+            null,
+            "0x3531e0",
+            null,
+            "0x3531d0",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x3537f0",
+            "0x353aa0",
+            "0x3539e0",
+            "0x353a50",
+            "0x3538a0",
+            "0x353950",
+            null,
+            "0x3539d0",
+            "0x353bc0",
+            null,
+            "0x353c00",
+            null,
+            "0x353bf0",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x365e40",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e40",
+            "0x365e60",
+            "0x365e50",
+            "0x365e60",
+            "0x365e60",
+            "0x365e70",
+            "0x365e60",
+            "0x365e80",
+            "0x365e90",
+            "0x365e90",
+            "0x365e50"
+          ],
+          [
+            "0x3794c0",
+            "0x379f80",
+            "0x379aa0",
+            "0x379ae0",
+            "0x379740",
+            "0x379820",
+            "0x379a10",
+            "0x379a90",
+            "0x379fc0",
+            "0x37a030",
+            "0x37a0a0",
+            null,
+            "0x37a090",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x365e40",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e40",
+            "0x365e60",
+            "0x365e50",
+            "0x365e60",
+            "0x365e60",
+            "0x365e70",
+            "0x365e60",
+            "0x365e80",
+            "0x365e90",
+            "0x365e90",
+            "0x365e50"
+          ],
+          [
+            "0x35d060",
+            "0x35d8d0",
+            "0x35d0d0",
+            "0x35d110",
+            "0x35d080",
+            "0x35d0b0",
+            null,
+            "0x35d0c0",
+            "0x35d910",
+            null,
+            null,
+            null,
+            "0x35d940",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x377570",
+            "0x377880",
+            "0x377800",
+            "0x377850",
+            "0x3776b0",
+            "0x3776f0",
+            null,
+            "0x3777c0",
+            "0x377900",
+            "0x377930",
+            "0x377970",
+            "0x377990",
+            "0x377960",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x365e40",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e40",
+            "0x365e60",
+            "0x365e50",
+            "0x365e60",
+            "0x365e60",
+            "0x365e70",
+            "0x365e60",
+            "0x365e80",
+            "0x365e90",
+            "0x365e90",
+            "0x365e50"
+          ],
+          [
+            "0x379190",
+            "0x379320",
+            "0x3792a0",
+            "0x3792f0",
+            "0x379210",
+            "0x379250",
+            null,
+            "0x379260",
+            "0x3793a0",
+            "0x379410",
+            "0x379480",
+            "0x3794a0",
+            "0x379470",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x37e400",
+            "0x37e590",
+            "0x37e510",
+            "0x37e560",
+            "0x37e480",
+            "0x37e4c0",
+            null,
+            "0x37e4d0",
+            "0x37e600",
+            "0x37e670",
+            "0x37e6e0",
+            null,
+            "0x37e6d0",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x365e40",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e40",
+            "0x365e60",
+            "0x365e50",
+            "0x365e60",
+            "0x365e60",
+            "0x365e70",
+            "0x365e60",
+            "0x365e80",
+            "0x365e90",
+            "0x365e90",
+            "0x365e50"
+          ],
+          [
+            "0x37ef60",
+            "0x3803a0",
+            "0x37f3e0",
+            "0x3802c0",
+            "0x37efb0",
+            "0x37f1b0",
+            null,
+            "0x37f3d0",
+            "0x3803d0",
+            "0x3803e0",
+            "0x380410",
+            null,
+            "0x3803f0",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x382e80",
+            "0x383280",
+            "0x3831d0",
+            "0x383250",
+            "0x382fc0",
+            "0x383000",
+            null,
+            "0x383190",
+            "0x383330",
+            "0x3833a0",
+            "0x383410",
+            "0x383430",
+            "0x383400",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x365e40",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e40",
+            "0x365e60",
+            "0x365e50",
+            "0x365e60",
+            "0x365e60",
+            "0x365e70",
+            "0x365e60",
+            "0x365e80",
+            "0x365e90",
+            "0x365e90",
+            "0x365e50"
+          ],
+          [
+            "0x365e40",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e40",
+            "0x365e60",
+            "0x365e50",
+            "0x365e60",
+            "0x365e60",
+            "0x365e70",
+            "0x365e60",
+            "0x365e80",
+            "0x365e90",
+            "0x365e90",
+            "0x365e50"
+          ],
+          [
+            "0x365e40",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e40",
+            "0x365e60",
+            "0x365e50",
+            "0x365e60",
+            "0x365e60",
+            "0x365e70",
+            "0x365e60",
+            "0x365e80",
+            "0x365e90",
+            "0x365e90",
+            "0x365e50"
+          ],
+          [
+            "0x365e40",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e40",
+            "0x365e60",
+            "0x365e50",
+            "0x365e60",
+            "0x365e60",
+            "0x365e70",
+            "0x365e60",
+            "0x365e80",
+            "0x365e90",
+            "0x365e90",
+            "0x365e50"
+          ],
+          [
+            "0x35dc40",
+            "0x35def0",
+            "0x35de00",
+            "0x35dee0",
+            "0x35dca0",
+            "0x35dce0",
+            null,
+            "0x35dd40",
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          [
+            "0x365e40",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e40",
+            "0x365e60",
+            "0x365e50",
+            "0x365e60",
+            "0x365e60",
+            "0x365e70",
+            "0x365e60",
+            "0x365e80",
+            "0x365e90",
+            "0x365e90",
+            "0x365e50"
+          ],
+          [
+            "0x366090",
+            "0x366a90",
+            "0x3664c0",
+            "0x366500",
+            "0x3662d0",
+            "0x366320",
+            "0x366430",
+            "0x3664b0",
+            null,
+            null,
+            null,
+            null,
+            "0x366ad0",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x365e40",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e40",
+            "0x365e60",
+            "0x365e50",
+            "0x365e60",
+            "0x365e60",
+            "0x365e70",
+            "0x365e60",
+            "0x365e80",
+            "0x365e90",
+            "0x365e90",
+            "0x365e50"
+          ],
+          [
+            "0x365e40",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e40",
+            "0x365e60",
+            "0x365e50",
+            "0x365e60",
+            "0x365e60",
+            "0x365e70",
+            "0x365e60",
+            "0x365e80",
+            "0x365e90",
+            "0x365e90",
+            "0x365e50"
+          ],
+          [
+            "0x361d70",
+            "0x362350",
+            "0x362010",
+            "0x362070",
+            "0x361e60",
+            "0x361e90",
+            "0x361f50",
+            "0x362000",
+            "0x3623c0",
+            "0x3623f0",
+            "0x362430",
+            null,
+            "0x362420",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x367fe0",
+            "0x3688d0",
+            "0x368480",
+            "0x3687c0",
+            "0x368200",
+            "0x368270",
+            "0x3682c0",
+            "0x368420",
+            "0x368900",
+            "0x368930",
+            "0x368970",
+            null,
+            "0x368960",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x36a420",
+            "0x36b9d0",
+            "0x36ac50",
+            "0x36b980",
+            "0x36a770",
+            "0x36a820",
+            "0x36a910",
+            "0x36ac40",
+            "0x36bab0",
+            "0x36bac0",
+            "0x36bae0",
+            null,
+            "0x36bad0",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x366ae0",
+            "0x3675c0",
+            "0x367080",
+            "0x367570",
+            "0x366d30",
+            "0x366d80",
+            "0x366ef0",
+            "0x367070",
+            "0x3676b0",
+            "0x3676c0",
+            "0x3676e0",
+            null,
+            "0x3676d0",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x3691c0",
+            "0x369350",
+            "0x3692d0",
+            "0x369320",
+            "0x369240",
+            "0x369280",
+            null,
+            "0x369290",
+            "0x3693d0",
+            null,
+            null,
+            null,
+            "0x369440",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x34f890",
+            "0x34fc20",
+            "0x34fb50",
+            "0x34fbc0",
+            "0x34f980",
+            "0x34f9e0",
+            null,
+            "0x34faf0",
+            "0x34fcd0",
+            "0x34fd00",
+            "0x34fd40",
+            null,
+            "0x34fd30",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x362440",
+            "0x362ae0",
+            "0x362760",
+            "0x362880",
+            "0x362570",
+            "0x3625a0",
+            "0x362620",
+            "0x362750",
+            "0x362b10",
+            null,
+            null,
+            null,
+            "0x362b30",
+            "0x362b40",
+            "0x362bd0",
+            "0x362be0"
+          ],
+          [
+            "0x367de0",
+            "0x367f50",
+            "0x367eb0",
+            "0x367f40",
+            "0x367e80",
+            "0x367e90",
+            null,
+            "0x367ea0",
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        ],
+        "switch_relocations": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x7100533048",
+          "size": 616704,
+          "sha256": "385d3e8cf3af3b0048d3b0a59b4497be4aac02ea6069a528bf99eba0ec1cedef",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+        },
+        "switch_raw_table": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x710086fad0",
+          "size": 4352,
+          "sha256": "6fc74890c52aef57c0b98ace4a7dec52972c8498fbe56e84e68d40b7c8087e4e",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+        },
+        "representation": "Resolve NSO R_AARCH64_RELATIVE relocation addends; raw mapped pointer cells are zero. Normalize native callable references by (kind,slot), never transplant host pointers into a PS2 table."
+      },
+      "steam_constructor": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".shared",
+        "rva": "0x507090",
+        "raw_offset": 5269136,
+        "size": 142,
+        "sha256": "cd679bb0660c9dd55cb97c5a9341c9fd8d53ad400eb4a8413815d47f2081243f",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "switch_constructor": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x71003636c0",
+        "size": 256,
+        "sha256": "76a7fb268f33a465360d1e7004dfbe71c2818ab6ad98bee0851e617f4e585fbf",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "switch_release": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x71003637c0",
+        "size": 112,
+        "sha256": "fa8a0d5da277e43cfa0a0fe77e049a9f17da2d7343f61ebf2326ae68e4f766b2",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "switch_clone": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x7100363830",
+        "size": 224,
+        "sha256": "206468ef9c4abe9b5b3e0bfecbd2882752c53e551f1d4da4d5135bb4986eb953",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      }
+    },
+    {
+      "address": "0x00713490",
+      "size": 4,
+      "decision": "PROVEN",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "aa6a8e491e6584f489dc77103feb1dc16efbc4b92043922963a7eb50f352c377",
+        "readers": [
+          {
+            "function": "0x4846d0",
+            "name": "mdlEffectDestroyPrimitiveRecord",
+            "file": "src/Graphics/Model/mdlEffect_inferred_00484570.c"
+          }
+        ]
+      },
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".xpdata",
+        "rva": "0xb2b370",
+        "raw_offset": 11705200,
+        "size": 4352,
+        "sha256": "892f1e6c9f689d6e7a2e3ed6c453a5df28b1a225ef80045d82eff3d12bc7e6c8",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "structural_correspondence": "Actual PS2 effParts record factory484570 indexes the33x64-byte16-callback table713480 by the u16 kind; release4846d0 independently indexes slot4 through713490, then releases owned source blocks and the record. Golden Steam.shared507090..50711e independently constructs50-hex-byte records, checks source tag<=DC and kind<=21hex, indexes completeB2B370 by kind<<7, calls slot0, and stores the native instance at+8. Native3636c0 independently consumes86fad0 with the same34-kind/128-byte stride constructor protocol. Native3637c0..363830 loads kind+4, calls [86fad0+kind*128+20hex] on instance+8, then frees the two owned source blocks and the record; this positively seals release slot4. Native363830 clones through slot5 at86faf8. Thus selected old kind0 slots correspond to the actual complete Golden typed bank, including its additional kind33, not merely similar function addresses or an adjacent data guess. Native default slot0 returns0 at365e40; slots1/4 are actual RET365e50. Steam corresponding defaults are507030/507010. Null and default callback distinctions throughout the bank are preserved.",
+      "required_seams": [
+        "parts-dispatch:replace all old713480/713490 computed factory/update/draw/clone/release/transform aliases with complete actual34-kind16-slot Golden dispatch and native callable ABI; include added kind33 and exact null/default distinctions",
+        "parts-dispatch:bind actual native50-byte instance/source ownership, tag validation, callbacks and cleanup; do not copy64-bit pointers into old32-bit slots or retain old33-kind64-byte dispatch"
+      ],
+      "selected_old_kind": 0,
+      "selected_slots": [
+        4
+      ],
+      "ps2_live_bytes": 4,
+      "logical_bank": {
+        "records": 34,
+        "slots_per_record": 16,
+        "pointer_bytes": 8,
+        "stride": 128,
+        "steam_callbacks_rva": [
+          [
+            "0x507030",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507030",
+            "0x507020",
+            "0x507010",
+            "0x507020",
+            "0x507020",
+            "0x507050",
+            "0x507020",
+            "0x507060",
+            "0x507070",
+            "0x507070",
+            "0x507010"
+          ],
+          [
+            "0x562d10",
+            "0x565c70",
+            "0x565be0",
+            "0x565c30",
+            "0x563080",
+            "0x5632f0",
+            "0x5633c0",
+            "0x563bc0",
+            "0x565cd0",
+            "0x565d20",
+            "0x565da0",
+            null,
+            "0x565d70",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x569100",
+            "0x569eb0",
+            "0x569960",
+            "0x569d40",
+            "0x569470",
+            "0x5694e0",
+            null,
+            "0x569920",
+            "0x56a030",
+            "0x56a080",
+            "0x56a110",
+            null,
+            "0x56a0d0",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x507030",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507030",
+            "0x507020",
+            "0x507010",
+            "0x507020",
+            "0x507020",
+            "0x507050",
+            "0x507020",
+            "0x507060",
+            "0x507070",
+            "0x507070",
+            "0x507010"
+          ],
+          [
+            "0x53fb40",
+            "0x53fdc0",
+            "0x53fcc0",
+            "0x53fd40",
+            "0x53fbd0",
+            "0x53fc40",
+            null,
+            "0x53fc90",
+            "0x53fe70",
+            null,
+            "0x53fee0",
+            null,
+            "0x53feb0",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x540000",
+            "0x540360",
+            "0x540180",
+            "0x540200",
+            "0x540090",
+            "0x540100",
+            null,
+            "0x540150",
+            "0x540520",
+            null,
+            "0x540590",
+            null,
+            "0x540560",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x507030",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507030",
+            "0x507020",
+            "0x507010",
+            "0x507020",
+            "0x507020",
+            "0x507050",
+            "0x507020",
+            "0x507060",
+            "0x507070",
+            "0x507070",
+            "0x507010"
+          ],
+          [
+            "0x5825c0",
+            "0x5832b0",
+            "0x582b90",
+            "0x582bd0",
+            "0x582870",
+            "0x582980",
+            "0x582ac0",
+            "0x582b60",
+            "0x583300",
+            "0x583340",
+            "0x5833b0",
+            null,
+            "0x583380",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x507030",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507030",
+            "0x507020",
+            "0x507010",
+            "0x507020",
+            "0x507020",
+            "0x507050",
+            "0x507020",
+            "0x507060",
+            "0x507070",
+            "0x507070",
+            "0x507010"
+          ],
+          [
+            "0x55a730",
+            "0x55b2a0",
+            "0x55a800",
+            "0x55a840",
+            "0x55a770",
+            "0x55a7a0",
+            null,
+            "0x55a7d0",
+            "0x55b2e0",
+            null,
+            null,
+            null,
+            "0x55b320",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x57f0d0",
+            "0x57f300",
+            "0x57f260",
+            "0x57f2b0",
+            "0x57f150",
+            "0x57f190",
+            null,
+            "0x57f220",
+            "0x57f370",
+            "0x57f3b0",
+            "0x57f420",
+            "0x57f460",
+            "0x57f3f0",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x507030",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507030",
+            "0x507020",
+            "0x507010",
+            "0x507020",
+            "0x507020",
+            "0x507050",
+            "0x507020",
+            "0x507060",
+            "0x507070",
+            "0x507070",
+            "0x507010"
+          ],
+          [
+            "0x568010",
+            "0x5681c0",
+            "0x568120",
+            "0x568170",
+            "0x568070",
+            "0x5680b0",
+            null,
+            "0x5680e0",
+            "0x568230",
+            "0x568270",
+            "0x5682e0",
+            "0x568320",
+            "0x5682b0",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x561f80",
+            "0x562110",
+            "0x562090",
+            "0x5620d0",
+            "0x561fe0",
+            "0x562020",
+            null,
+            "0x562050",
+            "0x562170",
+            "0x5621b0",
+            "0x562220",
+            null,
+            "0x5621f0",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x507030",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507030",
+            "0x507020",
+            "0x507010",
+            "0x507020",
+            "0x507020",
+            "0x507050",
+            "0x507020",
+            "0x507060",
+            "0x507070",
+            "0x507070",
+            "0x507010"
+          ],
+          [
+            "0x5692c0",
+            "0x569eb0",
+            "0x569960",
+            "0x569d40",
+            "0x569470",
+            "0x569560",
+            null,
+            "0x569920",
+            "0x56a030",
+            "0x56a080",
+            "0x56a110",
+            null,
+            "0x56a0d0",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x570e20",
+            "0x5710a0",
+            "0x570fe0",
+            "0x571050",
+            "0x570ef0",
+            "0x570f30",
+            null,
+            "0x570fa0",
+            "0x571140",
+            "0x571180",
+            "0x5711f0",
+            "0x571230",
+            "0x5711c0",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x507030",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507030",
+            "0x507020",
+            "0x507010",
+            "0x507020",
+            "0x507020",
+            "0x507050",
+            "0x507020",
+            "0x507060",
+            "0x507070",
+            "0x507070",
+            "0x507010"
+          ],
+          [
+            "0x507030",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507030",
+            "0x507020",
+            "0x507010",
+            "0x507020",
+            "0x507020",
+            "0x507050",
+            "0x507020",
+            "0x507060",
+            "0x507070",
+            "0x507070",
+            "0x507010"
+          ],
+          [
+            "0x507030",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507030",
+            "0x507020",
+            "0x507010",
+            "0x507020",
+            "0x507020",
+            "0x507050",
+            "0x507020",
+            "0x507060",
+            "0x507070",
+            "0x507070",
+            "0x507010"
+          ],
+          [
+            "0x507030",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507030",
+            "0x507020",
+            "0x507010",
+            "0x507020",
+            "0x507020",
+            "0x507050",
+            "0x507020",
+            "0x507060",
+            "0x507070",
+            "0x507070",
+            "0x507010"
+          ],
+          [
+            "0x55b770",
+            "0x55b9f0",
+            "0x55b9a0",
+            "0x55b9e0",
+            "0x55b7e0",
+            "0x55b840",
+            null,
+            "0x55b890",
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          [
+            "0x507030",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507030",
+            "0x507020",
+            "0x507010",
+            "0x507020",
+            "0x507020",
+            "0x507050",
+            "0x507020",
+            "0x507060",
+            "0x507070",
+            "0x507070",
+            "0x507010"
+          ],
+          [
+            "0x571980",
+            "0x5728a0",
+            "0x572090",
+            "0x5720d0",
+            "0x571c10",
+            "0x571d20",
+            "0x571fc0",
+            "0x572060",
+            null,
+            null,
+            null,
+            null,
+            "0x5728e0",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x507030",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507030",
+            "0x507020",
+            "0x507010",
+            "0x507020",
+            "0x507020",
+            "0x507050",
+            "0x507020",
+            "0x507060",
+            "0x507070",
+            "0x507070",
+            "0x507010"
+          ],
+          [
+            "0x507030",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507010",
+            "0x507030",
+            "0x507020",
+            "0x507010",
+            "0x507020",
+            "0x507020",
+            "0x507050",
+            "0x507020",
+            "0x507060",
+            "0x507070",
+            "0x507070",
+            "0x507010"
+          ],
+          [
+            "0x522b30",
+            "0x523170",
+            "0x522e20",
+            "0x523120",
+            "0x522c10",
+            "0x522c50",
+            "0x522d70",
+            "0x522df0",
+            "0x523210",
+            "0x523250",
+            "0x5232c0",
+            null,
+            "0x523290",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x56bb60",
+            "0x56c5f0",
+            "0x56c080",
+            "0x56c4c0",
+            "0x56bd20",
+            "0x56bda0",
+            "0x56be70",
+            "0x56c000",
+            "0x56c730",
+            "0x56c770",
+            "0x56c7e0",
+            null,
+            "0x56c7b0",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x580580",
+            "0x581cc0",
+            "0x580d80",
+            "0x581c40",
+            "0x580820",
+            "0x5808f0",
+            "0x580a30",
+            "0x580d40",
+            "0x581dd0",
+            "0x581e20",
+            "0x581ea0",
+            null,
+            "0x581e70",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x558470",
+            "0x559ba0",
+            "0x559460",
+            "0x559b20",
+            "0x558550",
+            "0x5585a0",
+            "0x558690",
+            "0x558780",
+            "0x559cf0",
+            "0x559d40",
+            "0x559dc0",
+            null,
+            "0x559d90",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x574e50",
+            "0x575000",
+            "0x574f60",
+            "0x574fb0",
+            "0x574eb0",
+            "0x574ef0",
+            null,
+            "0x574f20",
+            "0x575070",
+            null,
+            null,
+            null,
+            "0x5750b0",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x522120",
+            "0x522380",
+            "0x5222d0",
+            "0x522330",
+            "0x522190",
+            "0x5221e0",
+            null,
+            "0x522280",
+            "0x522410",
+            "0x522450",
+            "0x5224c0",
+            null,
+            "0x522490",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x523390",
+            "0x523e70",
+            "0x523640",
+            "0x523cb0",
+            "0x523450",
+            "0x523490",
+            "0x5235a0",
+            "0x523610",
+            "0x523fa0",
+            null,
+            null,
+            null,
+            "0x523fe0",
+            "0x524010",
+            "0x524090",
+            "0x5240c0"
+          ],
+          [
+            "0x55ba60",
+            "0x55bc50",
+            "0x55bbc0",
+            "0x55bc40",
+            "0x55bae0",
+            "0x55bb10",
+            null,
+            "0x55bb90",
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        ],
+        "switch_callbacks_relative": [
+          [
+            "0x365e40",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e40",
+            "0x365e60",
+            "0x365e50",
+            "0x365e60",
+            "0x365e60",
+            "0x365e70",
+            "0x365e60",
+            "0x365e80",
+            "0x365e90",
+            "0x365e90",
+            "0x365e50"
+          ],
+          [
+            "0x36bb70",
+            "0x36ed60",
+            "0x36ecf0",
+            "0x36ed30",
+            "0x36c3e0",
+            "0x36c570",
+            "0x36c820",
+            "0x36cba0",
+            "0x36edb0",
+            "0x36edc0",
+            "0x36ede0",
+            null,
+            "0x36edd0",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x37e6f0",
+            "0x3803a0",
+            "0x37f3e0",
+            "0x3802c0",
+            "0x37efb0",
+            "0x37f010",
+            null,
+            "0x37f3d0",
+            "0x3803d0",
+            "0x3803e0",
+            "0x380410",
+            null,
+            "0x3803f0",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x365e40",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e40",
+            "0x365e60",
+            "0x365e50",
+            "0x365e60",
+            "0x365e60",
+            "0x365e70",
+            "0x365e60",
+            "0x365e80",
+            "0x365e90",
+            "0x365e90",
+            "0x365e50"
+          ],
+          [
+            "0x352da0",
+            "0x353120",
+            "0x353060",
+            "0x3530d0",
+            "0x352f20",
+            "0x352fd0",
+            null,
+            "0x353050",
+            "0x3531a0",
+            null,
+            "0x3531e0",
+            null,
+            "0x3531d0",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x3537f0",
+            "0x353aa0",
+            "0x3539e0",
+            "0x353a50",
+            "0x3538a0",
+            "0x353950",
+            null,
+            "0x3539d0",
+            "0x353bc0",
+            null,
+            "0x353c00",
+            null,
+            "0x353bf0",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x365e40",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e40",
+            "0x365e60",
+            "0x365e50",
+            "0x365e60",
+            "0x365e60",
+            "0x365e70",
+            "0x365e60",
+            "0x365e80",
+            "0x365e90",
+            "0x365e90",
+            "0x365e50"
+          ],
+          [
+            "0x3794c0",
+            "0x379f80",
+            "0x379aa0",
+            "0x379ae0",
+            "0x379740",
+            "0x379820",
+            "0x379a10",
+            "0x379a90",
+            "0x379fc0",
+            "0x37a030",
+            "0x37a0a0",
+            null,
+            "0x37a090",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x365e40",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e40",
+            "0x365e60",
+            "0x365e50",
+            "0x365e60",
+            "0x365e60",
+            "0x365e70",
+            "0x365e60",
+            "0x365e80",
+            "0x365e90",
+            "0x365e90",
+            "0x365e50"
+          ],
+          [
+            "0x35d060",
+            "0x35d8d0",
+            "0x35d0d0",
+            "0x35d110",
+            "0x35d080",
+            "0x35d0b0",
+            null,
+            "0x35d0c0",
+            "0x35d910",
+            null,
+            null,
+            null,
+            "0x35d940",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x377570",
+            "0x377880",
+            "0x377800",
+            "0x377850",
+            "0x3776b0",
+            "0x3776f0",
+            null,
+            "0x3777c0",
+            "0x377900",
+            "0x377930",
+            "0x377970",
+            "0x377990",
+            "0x377960",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x365e40",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e40",
+            "0x365e60",
+            "0x365e50",
+            "0x365e60",
+            "0x365e60",
+            "0x365e70",
+            "0x365e60",
+            "0x365e80",
+            "0x365e90",
+            "0x365e90",
+            "0x365e50"
+          ],
+          [
+            "0x379190",
+            "0x379320",
+            "0x3792a0",
+            "0x3792f0",
+            "0x379210",
+            "0x379250",
+            null,
+            "0x379260",
+            "0x3793a0",
+            "0x379410",
+            "0x379480",
+            "0x3794a0",
+            "0x379470",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x37e400",
+            "0x37e590",
+            "0x37e510",
+            "0x37e560",
+            "0x37e480",
+            "0x37e4c0",
+            null,
+            "0x37e4d0",
+            "0x37e600",
+            "0x37e670",
+            "0x37e6e0",
+            null,
+            "0x37e6d0",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x365e40",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e40",
+            "0x365e60",
+            "0x365e50",
+            "0x365e60",
+            "0x365e60",
+            "0x365e70",
+            "0x365e60",
+            "0x365e80",
+            "0x365e90",
+            "0x365e90",
+            "0x365e50"
+          ],
+          [
+            "0x37ef60",
+            "0x3803a0",
+            "0x37f3e0",
+            "0x3802c0",
+            "0x37efb0",
+            "0x37f1b0",
+            null,
+            "0x37f3d0",
+            "0x3803d0",
+            "0x3803e0",
+            "0x380410",
+            null,
+            "0x3803f0",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x382e80",
+            "0x383280",
+            "0x3831d0",
+            "0x383250",
+            "0x382fc0",
+            "0x383000",
+            null,
+            "0x383190",
+            "0x383330",
+            "0x3833a0",
+            "0x383410",
+            "0x383430",
+            "0x383400",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x365e40",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e40",
+            "0x365e60",
+            "0x365e50",
+            "0x365e60",
+            "0x365e60",
+            "0x365e70",
+            "0x365e60",
+            "0x365e80",
+            "0x365e90",
+            "0x365e90",
+            "0x365e50"
+          ],
+          [
+            "0x365e40",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e40",
+            "0x365e60",
+            "0x365e50",
+            "0x365e60",
+            "0x365e60",
+            "0x365e70",
+            "0x365e60",
+            "0x365e80",
+            "0x365e90",
+            "0x365e90",
+            "0x365e50"
+          ],
+          [
+            "0x365e40",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e40",
+            "0x365e60",
+            "0x365e50",
+            "0x365e60",
+            "0x365e60",
+            "0x365e70",
+            "0x365e60",
+            "0x365e80",
+            "0x365e90",
+            "0x365e90",
+            "0x365e50"
+          ],
+          [
+            "0x365e40",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e40",
+            "0x365e60",
+            "0x365e50",
+            "0x365e60",
+            "0x365e60",
+            "0x365e70",
+            "0x365e60",
+            "0x365e80",
+            "0x365e90",
+            "0x365e90",
+            "0x365e50"
+          ],
+          [
+            "0x35dc40",
+            "0x35def0",
+            "0x35de00",
+            "0x35dee0",
+            "0x35dca0",
+            "0x35dce0",
+            null,
+            "0x35dd40",
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          [
+            "0x365e40",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e40",
+            "0x365e60",
+            "0x365e50",
+            "0x365e60",
+            "0x365e60",
+            "0x365e70",
+            "0x365e60",
+            "0x365e80",
+            "0x365e90",
+            "0x365e90",
+            "0x365e50"
+          ],
+          [
+            "0x366090",
+            "0x366a90",
+            "0x3664c0",
+            "0x366500",
+            "0x3662d0",
+            "0x366320",
+            "0x366430",
+            "0x3664b0",
+            null,
+            null,
+            null,
+            null,
+            "0x366ad0",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x365e40",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e40",
+            "0x365e60",
+            "0x365e50",
+            "0x365e60",
+            "0x365e60",
+            "0x365e70",
+            "0x365e60",
+            "0x365e80",
+            "0x365e90",
+            "0x365e90",
+            "0x365e50"
+          ],
+          [
+            "0x365e40",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e50",
+            "0x365e40",
+            "0x365e60",
+            "0x365e50",
+            "0x365e60",
+            "0x365e60",
+            "0x365e70",
+            "0x365e60",
+            "0x365e80",
+            "0x365e90",
+            "0x365e90",
+            "0x365e50"
+          ],
+          [
+            "0x361d70",
+            "0x362350",
+            "0x362010",
+            "0x362070",
+            "0x361e60",
+            "0x361e90",
+            "0x361f50",
+            "0x362000",
+            "0x3623c0",
+            "0x3623f0",
+            "0x362430",
+            null,
+            "0x362420",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x367fe0",
+            "0x3688d0",
+            "0x368480",
+            "0x3687c0",
+            "0x368200",
+            "0x368270",
+            "0x3682c0",
+            "0x368420",
+            "0x368900",
+            "0x368930",
+            "0x368970",
+            null,
+            "0x368960",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x36a420",
+            "0x36b9d0",
+            "0x36ac50",
+            "0x36b980",
+            "0x36a770",
+            "0x36a820",
+            "0x36a910",
+            "0x36ac40",
+            "0x36bab0",
+            "0x36bac0",
+            "0x36bae0",
+            null,
+            "0x36bad0",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x366ae0",
+            "0x3675c0",
+            "0x367080",
+            "0x367570",
+            "0x366d30",
+            "0x366d80",
+            "0x366ef0",
+            "0x367070",
+            "0x3676b0",
+            "0x3676c0",
+            "0x3676e0",
+            null,
+            "0x3676d0",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x3691c0",
+            "0x369350",
+            "0x3692d0",
+            "0x369320",
+            "0x369240",
+            "0x369280",
+            null,
+            "0x369290",
+            "0x3693d0",
+            null,
+            null,
+            null,
+            "0x369440",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x34f890",
+            "0x34fc20",
+            "0x34fb50",
+            "0x34fbc0",
+            "0x34f980",
+            "0x34f9e0",
+            null,
+            "0x34faf0",
+            "0x34fcd0",
+            "0x34fd00",
+            "0x34fd40",
+            null,
+            "0x34fd30",
+            null,
+            null,
+            null
+          ],
+          [
+            "0x362440",
+            "0x362ae0",
+            "0x362760",
+            "0x362880",
+            "0x362570",
+            "0x3625a0",
+            "0x362620",
+            "0x362750",
+            "0x362b10",
+            null,
+            null,
+            null,
+            "0x362b30",
+            "0x362b40",
+            "0x362bd0",
+            "0x362be0"
+          ],
+          [
+            "0x367de0",
+            "0x367f50",
+            "0x367eb0",
+            "0x367f40",
+            "0x367e80",
+            "0x367e90",
+            null,
+            "0x367ea0",
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        ],
+        "switch_relocations": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x7100533048",
+          "size": 616704,
+          "sha256": "385d3e8cf3af3b0048d3b0a59b4497be4aac02ea6069a528bf99eba0ec1cedef",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+        },
+        "switch_raw_table": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x710086fad0",
+          "size": 4352,
+          "sha256": "6fc74890c52aef57c0b98ace4a7dec52972c8498fbe56e84e68d40b7c8087e4e",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+        },
+        "representation": "Resolve NSO R_AARCH64_RELATIVE relocation addends; raw mapped pointer cells are zero. Normalize native callable references by (kind,slot), never transplant host pointers into a PS2 table."
+      },
+      "steam_constructor": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".shared",
+        "rva": "0x507090",
+        "raw_offset": 5269136,
+        "size": 142,
+        "sha256": "cd679bb0660c9dd55cb97c5a9341c9fd8d53ad400eb4a8413815d47f2081243f",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "switch_constructor": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x71003636c0",
+        "size": 256,
+        "sha256": "76a7fb268f33a465360d1e7004dfbe71c2818ab6ad98bee0851e617f4e585fbf",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "switch_release": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x71003637c0",
+        "size": 112,
+        "sha256": "fa8a0d5da277e43cfa0a0fe77e049a9f17da2d7343f61ebf2326ae68e4f766b2",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "switch_clone": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x7100363830",
+        "size": 224,
+        "sha256": "206468ef9c4abe9b5b3e0bfecbd2882752c53e551f1d4da4d5135bb4986eb953",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      }
+    },
+    {
+      "address": "0x00761190",
+      "size": 4,
+      "decision": "PROVEN-code",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "85552af8a6135cf71f7059eae5fcace95c1ac333fb8d0d862b59ead80eeaa35a",
+        "readers": [
+          {
+            "function": "0x487fb0",
+            "name": "effParticleProjectVertices",
+            "file": "src/Graphics/Effect/effParticle.c"
+          }
+        ]
+      },
+      "source": {
+        "kind": "authored-Golden-code-constant",
+        "logical_u32": "0xc0490fdb",
+        "logical_f32": -3.1415927410125732,
+        "switch_code_envelope": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x710036d1c0",
+          "size": 4364,
+          "sha256": "675db15f5fde288fee724c2ff555ce2771150bd3b9ca64da9431de6dce0ed414",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+        },
+        "immediate_definitions": [
+          {
+            "owner": "0x36d1c0",
+            "register": "w9",
+            "bits": "0x40490fdb",
+            "value": 3.1415927410125732,
+            "instructions": [
+              "0x710036d348 mov w9, #0xfdb",
+              "0x710036d34c movk w9, #0x4049, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w10",
+            "bits": "0xc0c90fdb",
+            "value": -6.2831854820251465,
+            "instructions": [
+              "0x710036d350 mov w10, #0xfdb",
+              "0x710036d354 movk w10, #0xc0c9, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w11",
+            "bits": "0xc0490fdb",
+            "value": -3.1415927410125732,
+            "instructions": [
+              "0x710036d358 mov w11, #0xfdb",
+              "0x710036d35c movk w11, #0xc049, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w12",
+            "bits": "0x40c90fdb",
+            "value": 6.2831854820251465,
+            "instructions": [
+              "0x710036d360 mov w12, #0xfdb",
+              "0x710036d364 movk w12, #0x40c9, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w22",
+            "bits": "0x40490fdb",
+            "value": 3.1415927410125732,
+            "instructions": [
+              "0x710036d524 mov w22, #0xfdb",
+              "0x710036d528 movk w22, #0x4049, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w27",
+            "bits": "0xc0c90fdb",
+            "value": -6.2831854820251465,
+            "instructions": [
+              "0x710036d52c mov w27, #0xfdb",
+              "0x710036d530 movk w27, #0xc0c9, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w28",
+            "bits": "0xc0490fdb",
+            "value": -3.1415927410125732,
+            "instructions": [
+              "0x710036d534 mov w28, #0xfdb",
+              "0x710036d538 movk w28, #0xc049, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w21",
+            "bits": "0x40c90fdb",
+            "value": 6.2831854820251465,
+            "instructions": [
+              "0x710036d53c mov w21, #0xfdb",
+              "0x710036d540 movk w21, #0x40c9, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w6",
+            "bits": "0x40490fdb",
+            "value": 3.1415927410125732,
+            "instructions": [
+              "0x710036dac4 mov w6, #0xfdb",
+              "0x710036dac8 movk w6, #0x4049, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w7",
+            "bits": "0xc0c90fdb",
+            "value": -6.2831854820251465,
+            "instructions": [
+              "0x710036dad0 mov w7, #0xfdb",
+              "0x710036dad4 movk w7, #0xc0c9, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w21",
+            "bits": "0xc0490fdb",
+            "value": -3.1415927410125732,
+            "instructions": [
+              "0x710036dadc mov w21, #0xfdb",
+              "0x710036dae0 movk w21, #0xc049, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w22",
+            "bits": "0x40c90fdb",
+            "value": 6.2831854820251465,
+            "instructions": [
+              "0x710036dae8 mov w22, #0xfdb",
+              "0x710036daec movk w22, #0x40c9, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w20",
+            "bits": "0x40490fdb",
+            "value": 3.1415927410125732,
+            "instructions": [
+              "0x710036ddf4 mov w20, #0xfdb",
+              "0x710036ddf8 movk w20, #0x4049, lsl #16"
+            ]
+          }
+        ],
+        "ordinary_wrap_block": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x710036d420",
+          "size": 72,
+          "sha256": "fb9ea055ac6393a181e1d43d5d3c255cd1c71e685efdc3d7696c5d2f5895da8e",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+        },
+        "live_dispatch_wrappers": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x710036ed30",
+          "size": 128,
+          "sha256": "4f65b7e60a58ea541c86e25fe2b44b0b1822ba0a6c65d79fd209cec8e63b12aa",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+        }
+      },
+      "structural_correspondence": "Old487fb0 projects ordinary, transformed, animated and animated-transformed particle samples and wraps angles at +/-PI using this selected lower-bound or full-turn literal. Actual Golden36d1c0 preserves those four typed projection paths: kind1/4 ordinary and kind2 animated, emitter+68/header count+8/particles+20,58-hex-byte samples with float age+30 and angle+4c, lock masks1/2/4/20, and animated UV mask80. Native36ed30 and36ed60 are actual kind1 dispatch slots3/1 in86fad0 and tail-call36d1c0 at36ed54/36eda4, establishing live dispatch independently of names. Immediate MOV/MOVK sequences36d348..36d364 construct PI40490fdb, negative full-turnc0c90fdb, negativePIc0490fdb, positive full-turn40c90fdb. First actual angle loop36d420..36d460 compares upperPI, adds negative full-turn above it, compares negativePI, and adds positive full-turn below it; animated and transformed paths repeat the corresponding loop. Positive old full-turn denotes the logical positive step: Golden subtracts it by adding the separately proven negative step. The exact Golden logical bits are authored from code, not retained because old bytes happen to agree. This is not a supposed table slot11 projector: that native kind1 slot is null.",
+      "required_seams": [
+        "particle-angle-wrap:author exact Golden PI/negativePI/positive-and-negative-full-turn IEEE754 bits and preserve actual native branch/operator order, including nonfinite/NaN comparison behavior; never read NSO at runtime",
+        "particle-angle-wrap:migrate every ordinary/transformed/animated/animated-transformed old487fb0 and inlined alias to actual Golden sample/header/float-age layout, transform staging, locks, UV/color/geometry and live queue/dispatch lifecycle; do not combine Golden literals with old20-byte samples or old PS2 projection"
+      ],
+      "logical_role": "negative-PI lower bound",
+      "live_native_calls": [
+        "36ed54->36d1c0",
+        "36eda4->36d1c0"
+      ]
+    },
+    {
+      "address": "0x00761194",
+      "size": 4,
+      "decision": "PROVEN-code",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "12d85026b5109a3119231704608d5991a63d8d397d2867a9fc522305810ddb76",
+        "readers": [
+          {
+            "function": "0x487fb0",
+            "name": "effParticleProjectVertices",
+            "file": "src/Graphics/Effect/effParticle.c"
+          }
+        ]
+      },
+      "source": {
+        "kind": "authored-Golden-code-constant",
+        "logical_u32": "0x40c90fdb",
+        "logical_f32": 6.2831854820251465,
+        "switch_code_envelope": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x710036d1c0",
+          "size": 4364,
+          "sha256": "675db15f5fde288fee724c2ff555ce2771150bd3b9ca64da9431de6dce0ed414",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+        },
+        "immediate_definitions": [
+          {
+            "owner": "0x36d1c0",
+            "register": "w9",
+            "bits": "0x40490fdb",
+            "value": 3.1415927410125732,
+            "instructions": [
+              "0x710036d348 mov w9, #0xfdb",
+              "0x710036d34c movk w9, #0x4049, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w10",
+            "bits": "0xc0c90fdb",
+            "value": -6.2831854820251465,
+            "instructions": [
+              "0x710036d350 mov w10, #0xfdb",
+              "0x710036d354 movk w10, #0xc0c9, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w11",
+            "bits": "0xc0490fdb",
+            "value": -3.1415927410125732,
+            "instructions": [
+              "0x710036d358 mov w11, #0xfdb",
+              "0x710036d35c movk w11, #0xc049, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w12",
+            "bits": "0x40c90fdb",
+            "value": 6.2831854820251465,
+            "instructions": [
+              "0x710036d360 mov w12, #0xfdb",
+              "0x710036d364 movk w12, #0x40c9, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w22",
+            "bits": "0x40490fdb",
+            "value": 3.1415927410125732,
+            "instructions": [
+              "0x710036d524 mov w22, #0xfdb",
+              "0x710036d528 movk w22, #0x4049, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w27",
+            "bits": "0xc0c90fdb",
+            "value": -6.2831854820251465,
+            "instructions": [
+              "0x710036d52c mov w27, #0xfdb",
+              "0x710036d530 movk w27, #0xc0c9, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w28",
+            "bits": "0xc0490fdb",
+            "value": -3.1415927410125732,
+            "instructions": [
+              "0x710036d534 mov w28, #0xfdb",
+              "0x710036d538 movk w28, #0xc049, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w21",
+            "bits": "0x40c90fdb",
+            "value": 6.2831854820251465,
+            "instructions": [
+              "0x710036d53c mov w21, #0xfdb",
+              "0x710036d540 movk w21, #0x40c9, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w6",
+            "bits": "0x40490fdb",
+            "value": 3.1415927410125732,
+            "instructions": [
+              "0x710036dac4 mov w6, #0xfdb",
+              "0x710036dac8 movk w6, #0x4049, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w7",
+            "bits": "0xc0c90fdb",
+            "value": -6.2831854820251465,
+            "instructions": [
+              "0x710036dad0 mov w7, #0xfdb",
+              "0x710036dad4 movk w7, #0xc0c9, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w21",
+            "bits": "0xc0490fdb",
+            "value": -3.1415927410125732,
+            "instructions": [
+              "0x710036dadc mov w21, #0xfdb",
+              "0x710036dae0 movk w21, #0xc049, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w22",
+            "bits": "0x40c90fdb",
+            "value": 6.2831854820251465,
+            "instructions": [
+              "0x710036dae8 mov w22, #0xfdb",
+              "0x710036daec movk w22, #0x40c9, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w20",
+            "bits": "0x40490fdb",
+            "value": 3.1415927410125732,
+            "instructions": [
+              "0x710036ddf4 mov w20, #0xfdb",
+              "0x710036ddf8 movk w20, #0x4049, lsl #16"
+            ]
+          }
+        ],
+        "ordinary_wrap_block": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x710036d420",
+          "size": 72,
+          "sha256": "fb9ea055ac6393a181e1d43d5d3c255cd1c71e685efdc3d7696c5d2f5895da8e",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+        },
+        "live_dispatch_wrappers": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x710036ed30",
+          "size": 128,
+          "sha256": "4f65b7e60a58ea541c86e25fe2b44b0b1822ba0a6c65d79fd209cec8e63b12aa",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+        }
+      },
+      "structural_correspondence": "Old487fb0 projects ordinary, transformed, animated and animated-transformed particle samples and wraps angles at +/-PI using this selected lower-bound or full-turn literal. Actual Golden36d1c0 preserves those four typed projection paths: kind1/4 ordinary and kind2 animated, emitter+68/header count+8/particles+20,58-hex-byte samples with float age+30 and angle+4c, lock masks1/2/4/20, and animated UV mask80. Native36ed30 and36ed60 are actual kind1 dispatch slots3/1 in86fad0 and tail-call36d1c0 at36ed54/36eda4, establishing live dispatch independently of names. Immediate MOV/MOVK sequences36d348..36d364 construct PI40490fdb, negative full-turnc0c90fdb, negativePIc0490fdb, positive full-turn40c90fdb. First actual angle loop36d420..36d460 compares upperPI, adds negative full-turn above it, compares negativePI, and adds positive full-turn below it; animated and transformed paths repeat the corresponding loop. Positive old full-turn denotes the logical positive step: Golden subtracts it by adding the separately proven negative step. The exact Golden logical bits are authored from code, not retained because old bytes happen to agree. This is not a supposed table slot11 projector: that native kind1 slot is null.",
+      "required_seams": [
+        "particle-angle-wrap:author exact Golden PI/negativePI/positive-and-negative-full-turn IEEE754 bits and preserve actual native branch/operator order, including nonfinite/NaN comparison behavior; never read NSO at runtime",
+        "particle-angle-wrap:migrate every ordinary/transformed/animated/animated-transformed old487fb0 and inlined alias to actual Golden sample/header/float-age layout, transform staging, locks, UV/color/geometry and live queue/dispatch lifecycle; do not combine Golden literals with old20-byte samples or old PS2 projection"
+      ],
+      "logical_role": "positive full-turn logical wrap step",
+      "live_native_calls": [
+        "36ed54->36d1c0",
+        "36eda4->36d1c0"
+      ]
+    },
+    {
+      "address": "0x00761198",
+      "size": 4,
+      "decision": "PROVEN-code",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "85552af8a6135cf71f7059eae5fcace95c1ac333fb8d0d862b59ead80eeaa35a",
+        "readers": [
+          {
+            "function": "0x487fb0",
+            "name": "effParticleProjectVertices",
+            "file": "src/Graphics/Effect/effParticle.c"
+          }
+        ]
+      },
+      "source": {
+        "kind": "authored-Golden-code-constant",
+        "logical_u32": "0xc0490fdb",
+        "logical_f32": -3.1415927410125732,
+        "switch_code_envelope": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x710036d1c0",
+          "size": 4364,
+          "sha256": "675db15f5fde288fee724c2ff555ce2771150bd3b9ca64da9431de6dce0ed414",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+        },
+        "immediate_definitions": [
+          {
+            "owner": "0x36d1c0",
+            "register": "w9",
+            "bits": "0x40490fdb",
+            "value": 3.1415927410125732,
+            "instructions": [
+              "0x710036d348 mov w9, #0xfdb",
+              "0x710036d34c movk w9, #0x4049, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w10",
+            "bits": "0xc0c90fdb",
+            "value": -6.2831854820251465,
+            "instructions": [
+              "0x710036d350 mov w10, #0xfdb",
+              "0x710036d354 movk w10, #0xc0c9, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w11",
+            "bits": "0xc0490fdb",
+            "value": -3.1415927410125732,
+            "instructions": [
+              "0x710036d358 mov w11, #0xfdb",
+              "0x710036d35c movk w11, #0xc049, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w12",
+            "bits": "0x40c90fdb",
+            "value": 6.2831854820251465,
+            "instructions": [
+              "0x710036d360 mov w12, #0xfdb",
+              "0x710036d364 movk w12, #0x40c9, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w22",
+            "bits": "0x40490fdb",
+            "value": 3.1415927410125732,
+            "instructions": [
+              "0x710036d524 mov w22, #0xfdb",
+              "0x710036d528 movk w22, #0x4049, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w27",
+            "bits": "0xc0c90fdb",
+            "value": -6.2831854820251465,
+            "instructions": [
+              "0x710036d52c mov w27, #0xfdb",
+              "0x710036d530 movk w27, #0xc0c9, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w28",
+            "bits": "0xc0490fdb",
+            "value": -3.1415927410125732,
+            "instructions": [
+              "0x710036d534 mov w28, #0xfdb",
+              "0x710036d538 movk w28, #0xc049, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w21",
+            "bits": "0x40c90fdb",
+            "value": 6.2831854820251465,
+            "instructions": [
+              "0x710036d53c mov w21, #0xfdb",
+              "0x710036d540 movk w21, #0x40c9, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w6",
+            "bits": "0x40490fdb",
+            "value": 3.1415927410125732,
+            "instructions": [
+              "0x710036dac4 mov w6, #0xfdb",
+              "0x710036dac8 movk w6, #0x4049, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w7",
+            "bits": "0xc0c90fdb",
+            "value": -6.2831854820251465,
+            "instructions": [
+              "0x710036dad0 mov w7, #0xfdb",
+              "0x710036dad4 movk w7, #0xc0c9, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w21",
+            "bits": "0xc0490fdb",
+            "value": -3.1415927410125732,
+            "instructions": [
+              "0x710036dadc mov w21, #0xfdb",
+              "0x710036dae0 movk w21, #0xc049, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w22",
+            "bits": "0x40c90fdb",
+            "value": 6.2831854820251465,
+            "instructions": [
+              "0x710036dae8 mov w22, #0xfdb",
+              "0x710036daec movk w22, #0x40c9, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w20",
+            "bits": "0x40490fdb",
+            "value": 3.1415927410125732,
+            "instructions": [
+              "0x710036ddf4 mov w20, #0xfdb",
+              "0x710036ddf8 movk w20, #0x4049, lsl #16"
+            ]
+          }
+        ],
+        "ordinary_wrap_block": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x710036d420",
+          "size": 72,
+          "sha256": "fb9ea055ac6393a181e1d43d5d3c255cd1c71e685efdc3d7696c5d2f5895da8e",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+        },
+        "live_dispatch_wrappers": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x710036ed30",
+          "size": 128,
+          "sha256": "4f65b7e60a58ea541c86e25fe2b44b0b1822ba0a6c65d79fd209cec8e63b12aa",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+        }
+      },
+      "structural_correspondence": "Old487fb0 projects ordinary, transformed, animated and animated-transformed particle samples and wraps angles at +/-PI using this selected lower-bound or full-turn literal. Actual Golden36d1c0 preserves those four typed projection paths: kind1/4 ordinary and kind2 animated, emitter+68/header count+8/particles+20,58-hex-byte samples with float age+30 and angle+4c, lock masks1/2/4/20, and animated UV mask80. Native36ed30 and36ed60 are actual kind1 dispatch slots3/1 in86fad0 and tail-call36d1c0 at36ed54/36eda4, establishing live dispatch independently of names. Immediate MOV/MOVK sequences36d348..36d364 construct PI40490fdb, negative full-turnc0c90fdb, negativePIc0490fdb, positive full-turn40c90fdb. First actual angle loop36d420..36d460 compares upperPI, adds negative full-turn above it, compares negativePI, and adds positive full-turn below it; animated and transformed paths repeat the corresponding loop. Positive old full-turn denotes the logical positive step: Golden subtracts it by adding the separately proven negative step. The exact Golden logical bits are authored from code, not retained because old bytes happen to agree. This is not a supposed table slot11 projector: that native kind1 slot is null.",
+      "required_seams": [
+        "particle-angle-wrap:author exact Golden PI/negativePI/positive-and-negative-full-turn IEEE754 bits and preserve actual native branch/operator order, including nonfinite/NaN comparison behavior; never read NSO at runtime",
+        "particle-angle-wrap:migrate every ordinary/transformed/animated/animated-transformed old487fb0 and inlined alias to actual Golden sample/header/float-age layout, transform staging, locks, UV/color/geometry and live queue/dispatch lifecycle; do not combine Golden literals with old20-byte samples or old PS2 projection"
+      ],
+      "logical_role": "negative-PI lower bound",
+      "live_native_calls": [
+        "36ed54->36d1c0",
+        "36eda4->36d1c0"
+      ]
+    },
+    {
+      "address": "0x0076119c",
+      "size": 4,
+      "decision": "PROVEN-code",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "12d85026b5109a3119231704608d5991a63d8d397d2867a9fc522305810ddb76",
+        "readers": [
+          {
+            "function": "0x487fb0",
+            "name": "effParticleProjectVertices",
+            "file": "src/Graphics/Effect/effParticle.c"
+          }
+        ]
+      },
+      "source": {
+        "kind": "authored-Golden-code-constant",
+        "logical_u32": "0x40c90fdb",
+        "logical_f32": 6.2831854820251465,
+        "switch_code_envelope": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x710036d1c0",
+          "size": 4364,
+          "sha256": "675db15f5fde288fee724c2ff555ce2771150bd3b9ca64da9431de6dce0ed414",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+        },
+        "immediate_definitions": [
+          {
+            "owner": "0x36d1c0",
+            "register": "w9",
+            "bits": "0x40490fdb",
+            "value": 3.1415927410125732,
+            "instructions": [
+              "0x710036d348 mov w9, #0xfdb",
+              "0x710036d34c movk w9, #0x4049, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w10",
+            "bits": "0xc0c90fdb",
+            "value": -6.2831854820251465,
+            "instructions": [
+              "0x710036d350 mov w10, #0xfdb",
+              "0x710036d354 movk w10, #0xc0c9, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w11",
+            "bits": "0xc0490fdb",
+            "value": -3.1415927410125732,
+            "instructions": [
+              "0x710036d358 mov w11, #0xfdb",
+              "0x710036d35c movk w11, #0xc049, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w12",
+            "bits": "0x40c90fdb",
+            "value": 6.2831854820251465,
+            "instructions": [
+              "0x710036d360 mov w12, #0xfdb",
+              "0x710036d364 movk w12, #0x40c9, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w22",
+            "bits": "0x40490fdb",
+            "value": 3.1415927410125732,
+            "instructions": [
+              "0x710036d524 mov w22, #0xfdb",
+              "0x710036d528 movk w22, #0x4049, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w27",
+            "bits": "0xc0c90fdb",
+            "value": -6.2831854820251465,
+            "instructions": [
+              "0x710036d52c mov w27, #0xfdb",
+              "0x710036d530 movk w27, #0xc0c9, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w28",
+            "bits": "0xc0490fdb",
+            "value": -3.1415927410125732,
+            "instructions": [
+              "0x710036d534 mov w28, #0xfdb",
+              "0x710036d538 movk w28, #0xc049, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w21",
+            "bits": "0x40c90fdb",
+            "value": 6.2831854820251465,
+            "instructions": [
+              "0x710036d53c mov w21, #0xfdb",
+              "0x710036d540 movk w21, #0x40c9, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w6",
+            "bits": "0x40490fdb",
+            "value": 3.1415927410125732,
+            "instructions": [
+              "0x710036dac4 mov w6, #0xfdb",
+              "0x710036dac8 movk w6, #0x4049, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w7",
+            "bits": "0xc0c90fdb",
+            "value": -6.2831854820251465,
+            "instructions": [
+              "0x710036dad0 mov w7, #0xfdb",
+              "0x710036dad4 movk w7, #0xc0c9, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w21",
+            "bits": "0xc0490fdb",
+            "value": -3.1415927410125732,
+            "instructions": [
+              "0x710036dadc mov w21, #0xfdb",
+              "0x710036dae0 movk w21, #0xc049, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w22",
+            "bits": "0x40c90fdb",
+            "value": 6.2831854820251465,
+            "instructions": [
+              "0x710036dae8 mov w22, #0xfdb",
+              "0x710036daec movk w22, #0x40c9, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w20",
+            "bits": "0x40490fdb",
+            "value": 3.1415927410125732,
+            "instructions": [
+              "0x710036ddf4 mov w20, #0xfdb",
+              "0x710036ddf8 movk w20, #0x4049, lsl #16"
+            ]
+          }
+        ],
+        "ordinary_wrap_block": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x710036d420",
+          "size": 72,
+          "sha256": "fb9ea055ac6393a181e1d43d5d3c255cd1c71e685efdc3d7696c5d2f5895da8e",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+        },
+        "live_dispatch_wrappers": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x710036ed30",
+          "size": 128,
+          "sha256": "4f65b7e60a58ea541c86e25fe2b44b0b1822ba0a6c65d79fd209cec8e63b12aa",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+        }
+      },
+      "structural_correspondence": "Old487fb0 projects ordinary, transformed, animated and animated-transformed particle samples and wraps angles at +/-PI using this selected lower-bound or full-turn literal. Actual Golden36d1c0 preserves those four typed projection paths: kind1/4 ordinary and kind2 animated, emitter+68/header count+8/particles+20,58-hex-byte samples with float age+30 and angle+4c, lock masks1/2/4/20, and animated UV mask80. Native36ed30 and36ed60 are actual kind1 dispatch slots3/1 in86fad0 and tail-call36d1c0 at36ed54/36eda4, establishing live dispatch independently of names. Immediate MOV/MOVK sequences36d348..36d364 construct PI40490fdb, negative full-turnc0c90fdb, negativePIc0490fdb, positive full-turn40c90fdb. First actual angle loop36d420..36d460 compares upperPI, adds negative full-turn above it, compares negativePI, and adds positive full-turn below it; animated and transformed paths repeat the corresponding loop. Positive old full-turn denotes the logical positive step: Golden subtracts it by adding the separately proven negative step. The exact Golden logical bits are authored from code, not retained because old bytes happen to agree. This is not a supposed table slot11 projector: that native kind1 slot is null.",
+      "required_seams": [
+        "particle-angle-wrap:author exact Golden PI/negativePI/positive-and-negative-full-turn IEEE754 bits and preserve actual native branch/operator order, including nonfinite/NaN comparison behavior; never read NSO at runtime",
+        "particle-angle-wrap:migrate every ordinary/transformed/animated/animated-transformed old487fb0 and inlined alias to actual Golden sample/header/float-age layout, transform staging, locks, UV/color/geometry and live queue/dispatch lifecycle; do not combine Golden literals with old20-byte samples or old PS2 projection"
+      ],
+      "logical_role": "positive full-turn logical wrap step",
+      "live_native_calls": [
+        "36ed54->36d1c0",
+        "36eda4->36d1c0"
+      ]
+    },
+    {
+      "address": "0x007611a0",
+      "size": 4,
+      "decision": "PROVEN-code",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "85552af8a6135cf71f7059eae5fcace95c1ac333fb8d0d862b59ead80eeaa35a",
+        "readers": [
+          {
+            "function": "0x487fb0",
+            "name": "effParticleProjectVertices",
+            "file": "src/Graphics/Effect/effParticle.c"
+          }
+        ]
+      },
+      "source": {
+        "kind": "authored-Golden-code-constant",
+        "logical_u32": "0xc0490fdb",
+        "logical_f32": -3.1415927410125732,
+        "switch_code_envelope": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x710036d1c0",
+          "size": 4364,
+          "sha256": "675db15f5fde288fee724c2ff555ce2771150bd3b9ca64da9431de6dce0ed414",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+        },
+        "immediate_definitions": [
+          {
+            "owner": "0x36d1c0",
+            "register": "w9",
+            "bits": "0x40490fdb",
+            "value": 3.1415927410125732,
+            "instructions": [
+              "0x710036d348 mov w9, #0xfdb",
+              "0x710036d34c movk w9, #0x4049, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w10",
+            "bits": "0xc0c90fdb",
+            "value": -6.2831854820251465,
+            "instructions": [
+              "0x710036d350 mov w10, #0xfdb",
+              "0x710036d354 movk w10, #0xc0c9, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w11",
+            "bits": "0xc0490fdb",
+            "value": -3.1415927410125732,
+            "instructions": [
+              "0x710036d358 mov w11, #0xfdb",
+              "0x710036d35c movk w11, #0xc049, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w12",
+            "bits": "0x40c90fdb",
+            "value": 6.2831854820251465,
+            "instructions": [
+              "0x710036d360 mov w12, #0xfdb",
+              "0x710036d364 movk w12, #0x40c9, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w22",
+            "bits": "0x40490fdb",
+            "value": 3.1415927410125732,
+            "instructions": [
+              "0x710036d524 mov w22, #0xfdb",
+              "0x710036d528 movk w22, #0x4049, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w27",
+            "bits": "0xc0c90fdb",
+            "value": -6.2831854820251465,
+            "instructions": [
+              "0x710036d52c mov w27, #0xfdb",
+              "0x710036d530 movk w27, #0xc0c9, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w28",
+            "bits": "0xc0490fdb",
+            "value": -3.1415927410125732,
+            "instructions": [
+              "0x710036d534 mov w28, #0xfdb",
+              "0x710036d538 movk w28, #0xc049, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w21",
+            "bits": "0x40c90fdb",
+            "value": 6.2831854820251465,
+            "instructions": [
+              "0x710036d53c mov w21, #0xfdb",
+              "0x710036d540 movk w21, #0x40c9, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w6",
+            "bits": "0x40490fdb",
+            "value": 3.1415927410125732,
+            "instructions": [
+              "0x710036dac4 mov w6, #0xfdb",
+              "0x710036dac8 movk w6, #0x4049, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w7",
+            "bits": "0xc0c90fdb",
+            "value": -6.2831854820251465,
+            "instructions": [
+              "0x710036dad0 mov w7, #0xfdb",
+              "0x710036dad4 movk w7, #0xc0c9, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w21",
+            "bits": "0xc0490fdb",
+            "value": -3.1415927410125732,
+            "instructions": [
+              "0x710036dadc mov w21, #0xfdb",
+              "0x710036dae0 movk w21, #0xc049, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w22",
+            "bits": "0x40c90fdb",
+            "value": 6.2831854820251465,
+            "instructions": [
+              "0x710036dae8 mov w22, #0xfdb",
+              "0x710036daec movk w22, #0x40c9, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w20",
+            "bits": "0x40490fdb",
+            "value": 3.1415927410125732,
+            "instructions": [
+              "0x710036ddf4 mov w20, #0xfdb",
+              "0x710036ddf8 movk w20, #0x4049, lsl #16"
+            ]
+          }
+        ],
+        "ordinary_wrap_block": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x710036d420",
+          "size": 72,
+          "sha256": "fb9ea055ac6393a181e1d43d5d3c255cd1c71e685efdc3d7696c5d2f5895da8e",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+        },
+        "live_dispatch_wrappers": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x710036ed30",
+          "size": 128,
+          "sha256": "4f65b7e60a58ea541c86e25fe2b44b0b1822ba0a6c65d79fd209cec8e63b12aa",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+        }
+      },
+      "structural_correspondence": "Old487fb0 projects ordinary, transformed, animated and animated-transformed particle samples and wraps angles at +/-PI using this selected lower-bound or full-turn literal. Actual Golden36d1c0 preserves those four typed projection paths: kind1/4 ordinary and kind2 animated, emitter+68/header count+8/particles+20,58-hex-byte samples with float age+30 and angle+4c, lock masks1/2/4/20, and animated UV mask80. Native36ed30 and36ed60 are actual kind1 dispatch slots3/1 in86fad0 and tail-call36d1c0 at36ed54/36eda4, establishing live dispatch independently of names. Immediate MOV/MOVK sequences36d348..36d364 construct PI40490fdb, negative full-turnc0c90fdb, negativePIc0490fdb, positive full-turn40c90fdb. First actual angle loop36d420..36d460 compares upperPI, adds negative full-turn above it, compares negativePI, and adds positive full-turn below it; animated and transformed paths repeat the corresponding loop. Positive old full-turn denotes the logical positive step: Golden subtracts it by adding the separately proven negative step. The exact Golden logical bits are authored from code, not retained because old bytes happen to agree. This is not a supposed table slot11 projector: that native kind1 slot is null.",
+      "required_seams": [
+        "particle-angle-wrap:author exact Golden PI/negativePI/positive-and-negative-full-turn IEEE754 bits and preserve actual native branch/operator order, including nonfinite/NaN comparison behavior; never read NSO at runtime",
+        "particle-angle-wrap:migrate every ordinary/transformed/animated/animated-transformed old487fb0 and inlined alias to actual Golden sample/header/float-age layout, transform staging, locks, UV/color/geometry and live queue/dispatch lifecycle; do not combine Golden literals with old20-byte samples or old PS2 projection"
+      ],
+      "logical_role": "negative-PI lower bound",
+      "live_native_calls": [
+        "36ed54->36d1c0",
+        "36eda4->36d1c0"
+      ]
+    },
+    {
+      "address": "0x007611a4",
+      "size": 4,
+      "decision": "PROVEN-code",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "12d85026b5109a3119231704608d5991a63d8d397d2867a9fc522305810ddb76",
+        "readers": [
+          {
+            "function": "0x487fb0",
+            "name": "effParticleProjectVertices",
+            "file": "src/Graphics/Effect/effParticle.c"
+          }
+        ]
+      },
+      "source": {
+        "kind": "authored-Golden-code-constant",
+        "logical_u32": "0x40c90fdb",
+        "logical_f32": 6.2831854820251465,
+        "switch_code_envelope": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x710036d1c0",
+          "size": 4364,
+          "sha256": "675db15f5fde288fee724c2ff555ce2771150bd3b9ca64da9431de6dce0ed414",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+        },
+        "immediate_definitions": [
+          {
+            "owner": "0x36d1c0",
+            "register": "w9",
+            "bits": "0x40490fdb",
+            "value": 3.1415927410125732,
+            "instructions": [
+              "0x710036d348 mov w9, #0xfdb",
+              "0x710036d34c movk w9, #0x4049, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w10",
+            "bits": "0xc0c90fdb",
+            "value": -6.2831854820251465,
+            "instructions": [
+              "0x710036d350 mov w10, #0xfdb",
+              "0x710036d354 movk w10, #0xc0c9, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w11",
+            "bits": "0xc0490fdb",
+            "value": -3.1415927410125732,
+            "instructions": [
+              "0x710036d358 mov w11, #0xfdb",
+              "0x710036d35c movk w11, #0xc049, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w12",
+            "bits": "0x40c90fdb",
+            "value": 6.2831854820251465,
+            "instructions": [
+              "0x710036d360 mov w12, #0xfdb",
+              "0x710036d364 movk w12, #0x40c9, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w22",
+            "bits": "0x40490fdb",
+            "value": 3.1415927410125732,
+            "instructions": [
+              "0x710036d524 mov w22, #0xfdb",
+              "0x710036d528 movk w22, #0x4049, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w27",
+            "bits": "0xc0c90fdb",
+            "value": -6.2831854820251465,
+            "instructions": [
+              "0x710036d52c mov w27, #0xfdb",
+              "0x710036d530 movk w27, #0xc0c9, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w28",
+            "bits": "0xc0490fdb",
+            "value": -3.1415927410125732,
+            "instructions": [
+              "0x710036d534 mov w28, #0xfdb",
+              "0x710036d538 movk w28, #0xc049, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w21",
+            "bits": "0x40c90fdb",
+            "value": 6.2831854820251465,
+            "instructions": [
+              "0x710036d53c mov w21, #0xfdb",
+              "0x710036d540 movk w21, #0x40c9, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w6",
+            "bits": "0x40490fdb",
+            "value": 3.1415927410125732,
+            "instructions": [
+              "0x710036dac4 mov w6, #0xfdb",
+              "0x710036dac8 movk w6, #0x4049, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w7",
+            "bits": "0xc0c90fdb",
+            "value": -6.2831854820251465,
+            "instructions": [
+              "0x710036dad0 mov w7, #0xfdb",
+              "0x710036dad4 movk w7, #0xc0c9, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w21",
+            "bits": "0xc0490fdb",
+            "value": -3.1415927410125732,
+            "instructions": [
+              "0x710036dadc mov w21, #0xfdb",
+              "0x710036dae0 movk w21, #0xc049, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w22",
+            "bits": "0x40c90fdb",
+            "value": 6.2831854820251465,
+            "instructions": [
+              "0x710036dae8 mov w22, #0xfdb",
+              "0x710036daec movk w22, #0x40c9, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w20",
+            "bits": "0x40490fdb",
+            "value": 3.1415927410125732,
+            "instructions": [
+              "0x710036ddf4 mov w20, #0xfdb",
+              "0x710036ddf8 movk w20, #0x4049, lsl #16"
+            ]
+          }
+        ],
+        "ordinary_wrap_block": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x710036d420",
+          "size": 72,
+          "sha256": "fb9ea055ac6393a181e1d43d5d3c255cd1c71e685efdc3d7696c5d2f5895da8e",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+        },
+        "live_dispatch_wrappers": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x710036ed30",
+          "size": 128,
+          "sha256": "4f65b7e60a58ea541c86e25fe2b44b0b1822ba0a6c65d79fd209cec8e63b12aa",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+        }
+      },
+      "structural_correspondence": "Old487fb0 projects ordinary, transformed, animated and animated-transformed particle samples and wraps angles at +/-PI using this selected lower-bound or full-turn literal. Actual Golden36d1c0 preserves those four typed projection paths: kind1/4 ordinary and kind2 animated, emitter+68/header count+8/particles+20,58-hex-byte samples with float age+30 and angle+4c, lock masks1/2/4/20, and animated UV mask80. Native36ed30 and36ed60 are actual kind1 dispatch slots3/1 in86fad0 and tail-call36d1c0 at36ed54/36eda4, establishing live dispatch independently of names. Immediate MOV/MOVK sequences36d348..36d364 construct PI40490fdb, negative full-turnc0c90fdb, negativePIc0490fdb, positive full-turn40c90fdb. First actual angle loop36d420..36d460 compares upperPI, adds negative full-turn above it, compares negativePI, and adds positive full-turn below it; animated and transformed paths repeat the corresponding loop. Positive old full-turn denotes the logical positive step: Golden subtracts it by adding the separately proven negative step. The exact Golden logical bits are authored from code, not retained because old bytes happen to agree. This is not a supposed table slot11 projector: that native kind1 slot is null.",
+      "required_seams": [
+        "particle-angle-wrap:author exact Golden PI/negativePI/positive-and-negative-full-turn IEEE754 bits and preserve actual native branch/operator order, including nonfinite/NaN comparison behavior; never read NSO at runtime",
+        "particle-angle-wrap:migrate every ordinary/transformed/animated/animated-transformed old487fb0 and inlined alias to actual Golden sample/header/float-age layout, transform staging, locks, UV/color/geometry and live queue/dispatch lifecycle; do not combine Golden literals with old20-byte samples or old PS2 projection"
+      ],
+      "logical_role": "positive full-turn logical wrap step",
+      "live_native_calls": [
+        "36ed54->36d1c0",
+        "36eda4->36d1c0"
+      ]
+    },
+    {
+      "address": "0x007611a8",
+      "size": 4,
+      "decision": "PROVEN-code",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "85552af8a6135cf71f7059eae5fcace95c1ac333fb8d0d862b59ead80eeaa35a",
+        "readers": [
+          {
+            "function": "0x487fb0",
+            "name": "effParticleProjectVertices",
+            "file": "src/Graphics/Effect/effParticle.c"
+          }
+        ]
+      },
+      "source": {
+        "kind": "authored-Golden-code-constant",
+        "logical_u32": "0xc0490fdb",
+        "logical_f32": -3.1415927410125732,
+        "switch_code_envelope": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x710036d1c0",
+          "size": 4364,
+          "sha256": "675db15f5fde288fee724c2ff555ce2771150bd3b9ca64da9431de6dce0ed414",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+        },
+        "immediate_definitions": [
+          {
+            "owner": "0x36d1c0",
+            "register": "w9",
+            "bits": "0x40490fdb",
+            "value": 3.1415927410125732,
+            "instructions": [
+              "0x710036d348 mov w9, #0xfdb",
+              "0x710036d34c movk w9, #0x4049, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w10",
+            "bits": "0xc0c90fdb",
+            "value": -6.2831854820251465,
+            "instructions": [
+              "0x710036d350 mov w10, #0xfdb",
+              "0x710036d354 movk w10, #0xc0c9, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w11",
+            "bits": "0xc0490fdb",
+            "value": -3.1415927410125732,
+            "instructions": [
+              "0x710036d358 mov w11, #0xfdb",
+              "0x710036d35c movk w11, #0xc049, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w12",
+            "bits": "0x40c90fdb",
+            "value": 6.2831854820251465,
+            "instructions": [
+              "0x710036d360 mov w12, #0xfdb",
+              "0x710036d364 movk w12, #0x40c9, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w22",
+            "bits": "0x40490fdb",
+            "value": 3.1415927410125732,
+            "instructions": [
+              "0x710036d524 mov w22, #0xfdb",
+              "0x710036d528 movk w22, #0x4049, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w27",
+            "bits": "0xc0c90fdb",
+            "value": -6.2831854820251465,
+            "instructions": [
+              "0x710036d52c mov w27, #0xfdb",
+              "0x710036d530 movk w27, #0xc0c9, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w28",
+            "bits": "0xc0490fdb",
+            "value": -3.1415927410125732,
+            "instructions": [
+              "0x710036d534 mov w28, #0xfdb",
+              "0x710036d538 movk w28, #0xc049, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w21",
+            "bits": "0x40c90fdb",
+            "value": 6.2831854820251465,
+            "instructions": [
+              "0x710036d53c mov w21, #0xfdb",
+              "0x710036d540 movk w21, #0x40c9, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w6",
+            "bits": "0x40490fdb",
+            "value": 3.1415927410125732,
+            "instructions": [
+              "0x710036dac4 mov w6, #0xfdb",
+              "0x710036dac8 movk w6, #0x4049, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w7",
+            "bits": "0xc0c90fdb",
+            "value": -6.2831854820251465,
+            "instructions": [
+              "0x710036dad0 mov w7, #0xfdb",
+              "0x710036dad4 movk w7, #0xc0c9, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w21",
+            "bits": "0xc0490fdb",
+            "value": -3.1415927410125732,
+            "instructions": [
+              "0x710036dadc mov w21, #0xfdb",
+              "0x710036dae0 movk w21, #0xc049, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w22",
+            "bits": "0x40c90fdb",
+            "value": 6.2831854820251465,
+            "instructions": [
+              "0x710036dae8 mov w22, #0xfdb",
+              "0x710036daec movk w22, #0x40c9, lsl #16"
+            ]
+          },
+          {
+            "owner": "0x36d1c0",
+            "register": "w20",
+            "bits": "0x40490fdb",
+            "value": 3.1415927410125732,
+            "instructions": [
+              "0x710036ddf4 mov w20, #0xfdb",
+              "0x710036ddf8 movk w20, #0x4049, lsl #16"
+            ]
+          }
+        ],
+        "ordinary_wrap_block": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x710036d420",
+          "size": 72,
+          "sha256": "fb9ea055ac6393a181e1d43d5d3c255cd1c71e685efdc3d7696c5d2f5895da8e",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+        },
+        "live_dispatch_wrappers": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x710036ed30",
+          "size": 128,
+          "sha256": "4f65b7e60a58ea541c86e25fe2b44b0b1822ba0a6c65d79fd209cec8e63b12aa",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+        }
+      },
+      "structural_correspondence": "Old487fb0 projects ordinary, transformed, animated and animated-transformed particle samples and wraps angles at +/-PI using this selected lower-bound or full-turn literal. Actual Golden36d1c0 preserves those four typed projection paths: kind1/4 ordinary and kind2 animated, emitter+68/header count+8/particles+20,58-hex-byte samples with float age+30 and angle+4c, lock masks1/2/4/20, and animated UV mask80. Native36ed30 and36ed60 are actual kind1 dispatch slots3/1 in86fad0 and tail-call36d1c0 at36ed54/36eda4, establishing live dispatch independently of names. Immediate MOV/MOVK sequences36d348..36d364 construct PI40490fdb, negative full-turnc0c90fdb, negativePIc0490fdb, positive full-turn40c90fdb. First actual angle loop36d420..36d460 compares upperPI, adds negative full-turn above it, compares negativePI, and adds positive full-turn below it; animated and transformed paths repeat the corresponding loop. Positive old full-turn denotes the logical positive step: Golden subtracts it by adding the separately proven negative step. The exact Golden logical bits are authored from code, not retained because old bytes happen to agree. This is not a supposed table slot11 projector: that native kind1 slot is null.",
+      "required_seams": [
+        "particle-angle-wrap:author exact Golden PI/negativePI/positive-and-negative-full-turn IEEE754 bits and preserve actual native branch/operator order, including nonfinite/NaN comparison behavior; never read NSO at runtime",
+        "particle-angle-wrap:migrate every ordinary/transformed/animated/animated-transformed old487fb0 and inlined alias to actual Golden sample/header/float-age layout, transform staging, locks, UV/color/geometry and live queue/dispatch lifecycle; do not combine Golden literals with old20-byte samples or old PS2 projection"
+      ],
+      "logical_role": "negative-PI lower bound",
+      "live_native_calls": [
+        "36ed54->36d1c0",
+        "36eda4->36d1c0"
+      ]
+    },
+    {
+      "address": "0x00761178",
+      "size": 4,
+      "decision": "PROVEN-code",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "ebacf6c4f9768eaa9b399cd9c7f6d8a8a3c2344e21cefbf511060ff0b1cb6109",
+        "readers": [
+          {
+            "function": "0x490c40",
+            "name": "mdlEffectUpdateBoundedEmitter",
+            "file": "src/Graphics/Model/mdlEffect_inferred_00490c40.c"
+          }
+        ]
+      },
+      "source": {
+        "kind": "authored-Golden-code-constant",
+        "logical_u32": "0x3d99999a",
+        "logical_f32": 0.07500000298023224,
+        "switch_code": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x71003595d0",
+          "size": 3088,
+          "sha256": "82ad3abd35dcd04740223f6e6b7d7d5721070f318ec96ea684383c0032fe45e1",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+        },
+        "immediate_definitions": [
+          {
+            "owner": "0x3595d0",
+            "register": "w8",
+            "bits": "0x3d99999a",
+            "value": 0.07500000298023224,
+            "instructions": [
+              "0x7100359eec mov w8, #0x999a",
+              "0x7100359ef0 movk w8, #0x3d99, lsl #16"
+            ]
+          }
+        ],
+        "typed_behavior_proof": "docs/golden_mode/specs/re/l1-effect-behavior-bank-proof.json"
+      },
+      "structural_correspondence": "Old490c40 bounded-orbit emitter uses random*0.075+0.925 in its spherical-boundary velocity reflection. Independently frozen behavior-bank proof pairs actual kind9 callback490c40 with Native3595d0/Steam58ae60 through12x24-byte bank86f808/AE98F0 and its real allocator/advance/scale protocol. Actual Native3595d0 preserves the typed spherical-boundary/RNG/dot-product/reflection operation, with exact immediate0.075bits3d99999a at359eec/359ef0 and0.925bits3f6ccccd at359ef8/359efc. These are code-authored Golden values, not an identical-byte vote or a label-only emitter correspondence.",
+      "required_seams": [
+        "bounded-emitter-reflection:author exact Golden0.075/0.925 IEEE754 literals and real kind9 RNG/dot-product/doubled-reflection ordering; never read NSO at runtime",
+        "bounded-emitter-reflection:bind complete actual kind9 factory/advance/scale/lifetime plus Golden58-byte sample/50-byte header and float-age semantics from frozen behavior proof; replace all old490c40 aliases, not only constants"
+      ]
+    },
+    {
+      "address": "0x0076117c",
+      "size": 4,
+      "decision": "PROVEN-code",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "4fb1c5117f63dd035ca07e132083733f71aedbff2a8678dd2c420f34b9c75591",
+        "readers": [
+          {
+            "function": "0x490c40",
+            "name": "mdlEffectUpdateBoundedEmitter",
+            "file": "src/Graphics/Model/mdlEffect_inferred_00490c40.c"
+          }
+        ]
+      },
+      "source": {
+        "kind": "authored-Golden-code-constant",
+        "logical_u32": "0x3f6ccccd",
+        "logical_f32": 0.925000011920929,
+        "switch_code": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x71003595d0",
+          "size": 3088,
+          "sha256": "82ad3abd35dcd04740223f6e6b7d7d5721070f318ec96ea684383c0032fe45e1",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+        },
+        "immediate_definitions": [
+          {
+            "owner": "0x3595d0",
+            "register": "w8",
+            "bits": "0x3f6ccccd",
+            "value": 0.925000011920929,
+            "instructions": [
+              "0x7100359ef8 mov w8, #0xcccd",
+              "0x7100359efc movk w8, #0x3f6c, lsl #16"
+            ]
+          }
+        ],
+        "typed_behavior_proof": "docs/golden_mode/specs/re/l1-effect-behavior-bank-proof.json"
+      },
+      "structural_correspondence": "Old490c40 bounded-orbit emitter uses random*0.075+0.925 in its spherical-boundary velocity reflection. Independently frozen behavior-bank proof pairs actual kind9 callback490c40 with Native3595d0/Steam58ae60 through12x24-byte bank86f808/AE98F0 and its real allocator/advance/scale protocol. Actual Native3595d0 preserves the typed spherical-boundary/RNG/dot-product/reflection operation, with exact immediate0.075bits3d99999a at359eec/359ef0 and0.925bits3f6ccccd at359ef8/359efc. These are code-authored Golden values, not an identical-byte vote or a label-only emitter correspondence.",
+      "required_seams": [
+        "bounded-emitter-reflection:author exact Golden0.075/0.925 IEEE754 literals and real kind9 RNG/dot-product/doubled-reflection ordering; never read NSO at runtime",
+        "bounded-emitter-reflection:bind complete actual kind9 factory/advance/scale/lifetime plus Golden58-byte sample/50-byte header and float-age semantics from frozen behavior proof; replace all old490c40 aliases, not only constants"
+      ]
+    }
+  ]
+}

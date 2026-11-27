@@ -48,6 +48,18 @@ static u32 expected_status_mask;
 static unsigned enabled, random_calls, source_calls, native_affinity_calls, legacy_affinity_calls;
 static u32 random_state, affinity, ko_light, ko_dark, attack_element, guard, fixed_skill, equip_property, counter_property, current_skill = 10;
 static u32 requested_skill;
+static unsigned golden_enabled, golden_lookups;
+static u32 golden_flags, golden_selected;
+static DatUnit *golden_units;
+int p4_golden_battle_rows_enabled(void) { return (int)golden_enabled; }
+uint32_t p4_golden_skill_flags(uint32_t id) { assert(id == current_skill); return golden_flags; }
+uint32_t p4_golden_skill_selector(uint32_t id) { return (p4_golden_skill_flags(id) >> 9) & 15u; }
+uint32_t p4_golden_skill_unit_guest(uint32_t selector)
+{
+    assert(selector > 0 && selector <= 15);
+    ++golden_lookups; golden_selected = selector;
+    return (uint32_t)(uintptr_t)&golden_units[selector - 1];
+}
 static u16 listed_skills[8];
 static u32 held_count;
 static u16 rescue_character = 1, social_rank;
@@ -265,6 +277,7 @@ int main(void)
     iGpffffb3b8 = metadata = arena;
     iGpffffb3b4 = elements = arena + 0xb000;
     iGpffffb3c4 = enemy_rows = arena + 0xc000;
+    golden_units = (DatUnit *)(arena + 0x1e000);
     for (u32 family = 0; family < 19; ++family) {
         const u32 flags = (family < 16 ? P4_ELEMENT_AFFINITY : 0) | (family == 0 ? P4_ELEMENT_PHYSICAL : 0) | (family < 8 ? P4_ELEMENT_OFFENSIVE : 0);
         for (u32 mode = 0; mode < 7; ++mode) {
@@ -532,6 +545,39 @@ int main(void)
             assert(critical.result == (f == 0 ? plain_critical.result : f == 1 ? 1 : 2));
         }
         assert(p4_game_hit_unregister(handle) == P4_DAMAGE_OK && !p4_game_hit_native_active());
+    }
+    {
+        static const u32 flags[] = {0, 0x100, 0x200, 0x400, 0x800, 0x1000, 0x1e00, 0x80001000u};
+        current_skill = 10;
+        (void)status_case(1, 0x20, 9, 9, P4_ELEMENT_AFFINITY, 100, 1, 100, 1);
+        golden_enabled = 1;
+        for (size_t i = 0; i < sizeof flags / sizeof flags[0]; ++i) {
+            golden_flags = flags[i];
+            const u32 selector = (golden_flags >> 9) & 15u;
+            expected_action_source = selector ? &golden_units[selector - 1] : &source_unit;
+            golden_lookups = golden_selected = 0; source_calls = 0;
+            assert(datCalcInflictStatus((u16)current_skill, &source_unit, &target_unit, 1) == 0x20);
+            assert(source_calls == 1 && golden_lookups == (unsigned)(selector != 0) && golden_selected == selector);
+        }
+        expected_action_source = NULL; golden_enabled = golden_flags = 0;
+        (void)run(1, 0, 0, P4_ELEMENT_AFFINITY, 0, 0, 100, 0, 0, 0, 1, 0);
+        golden_flags = 0x400; golden_enabled = 1;
+        target_unit.flags = 1; enemy_rows[target_unit.id * 0x3c] = 4;
+        source_calls = random_calls = 0;
+        assert(datCalcResolveSkillHit((u8 *)&source_unit, (u8 *)&target_unit, 10, 1) == 0x100);
+        assert(!source_calls && !random_calls); /* No enemy-bit-4 requirement on the unit. */
+        target_unit.flags = 0; source_calls = 0;
+        (void)datCalcResolveSkillHit((u8 *)&source_unit, (u8 *)&target_unit, 10, 1);
+        assert(source_calls == 1);
+        target_unit.flags = 1; enemy_rows[target_unit.id * 0x3c] = 0; source_calls = 0;
+        (void)datCalcResolveSkillHit((u8 *)&source_unit, (u8 *)&target_unit, 10, 1);
+        assert(source_calls == 1);
+        enemy_rows[target_unit.id * 0x3c] = 4; golden_enabled = 0; source_calls = 0;
+        (void)datCalcResolveSkillHit((u8 *)&source_unit, (u8 *)&target_unit, 10, 1);
+        assert(source_calls == 1); /* PS2 does not take the Golden-only early result. */
+        golden_enabled = 1; metadata[10 * 40 + 0x24] = 7; target_unit.flags = 0x1001; source_calls = 0;
+        assert(datCalcResolveSkillHit((u8 *)&source_unit, (u8 *)&target_unit, 10, 1) == 4 && !source_calls);
+        golden_enabled = golden_flags = 0;
     }
     puts("game_elements_hit: actual hit, critical, applicability, status, chance-stage and hit-stage retail/tagged probes passed; not native gameplay qualification");
     return 0;

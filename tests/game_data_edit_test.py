@@ -60,7 +60,7 @@ REFUSALS = {
     "rates": ('<encounters id="0" normal-rate="0"/>', "the three rates cannot all be 0"),
     "slot": ('<encounters id="1"><special slot="6" formation="1"/></encounters>', "<special> needs a slot from 1 to 5"),
 }
-MODES = ("good", "none", "session", "original", *REFUSALS)
+MODES = ("good", "none", "session", "original", "golden-capture", *REFUSALS)
 
 
 def encount_blocks():
@@ -165,7 +165,11 @@ def package(root, name, xml=None, luau=None):
 class DataEditBoot(unittest.TestCase):
     def test_edit_layers(self):
         for mode in MODES:
-            with self.subTest(mode=mode), tempfile.TemporaryDirectory(prefix="p4-data-edit-") as temporary:
+            # Windows uses the isolated build directory; POSIX CI builds may
+            # live inside a checkout, so use the system temporary directory.
+            with self.subTest(mode=mode), tempfile.TemporaryDirectory(
+                prefix="p4-data-edit-", dir=os.getcwd() if mode == "golden-capture" and os.name == "nt" else None
+            ) as temporary:
                 root = Path(temporary)
                 enabled = "edits.one"
                 if mode == "good":
@@ -174,7 +178,7 @@ class DataEditBoot(unittest.TestCase):
                     enabled = "edits.one,edits.two"
                 elif mode == "none":
                     package(root, "one")
-                elif mode in ("session", "original"):
+                elif mode in ("session", "original", "golden-capture"):
                     package(root, "one", GOOD_ONE)
                 elif mode == "schema":
                     package(root, "one", '<p4-edits schema="2"><skill name="Vex" power="1"/></p4-edits>\n')

@@ -1,0 +1,214 @@
+{
+  "proof_id": "L1-c6C-A1-object-particle-unit-scale-20261114",
+  "scope": "Only713d20/713d24/713d28 exact A1C rows.",
+  "runtime_status": "pending-seam",
+  "source_pins": {
+    "steam_build": 10836033,
+    "steam_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+    "switch_mapped_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+    "switch_nso_sha256": "854c7a1e33de1619abf009fa7f32b8c012960d685c8bf1bf99a92a6a4d0bda1c",
+    "ps2_elf_sha256": "f90675b8a38138ddb5dc5cdf641550f41800fcb86bb499c586073e964fb41836",
+    "ps2_decomp_revision": "18016afe6"
+  },
+  "method": "Actual independent Steam scale-load/multiplication consumers plus Native corresponding complete object-render data/control flow and resolved vector GOT relocation. No adjacency/name/byte-vote/absence closure; no.arch or game execution.",
+  "rows": [
+    {
+      "address": "0x00713d20",
+      "size": 4,
+      "decision": "PROVEN",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "e00e5eb9444182f352323374ef4e08ebcb784725fdd4fd612d7730540b3e0c8c",
+        "readers": [
+          {
+            "function": "0x4aed70",
+            "name": "effObjectParticleDraw",
+            "file": "src/Graphics/Effect/effObjectParticle.c"
+          }
+        ]
+      },
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".xpdata",
+        "rva": "0xad9970",
+        "raw_offset": 11370864,
+        "size": 4,
+        "sha256": "e00e5eb9444182f352323374ef4e08ebcb784725fdd4fd612d7730540b3e0c8c",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "structural_correspondence": "Old4aed70 ObjectParticleDraw applies the selected default unit-axis coefficient to the particle size, or size times reciprocal instance field8 when field30 is nonzero, before matrix scale/translation in both emitter-transform branches. Actual Native36ad00 is the complete corresponding kind3 object-particle draw: emitter+68, count+8, particles+20,58-byte float-age samples,18-byte object records, per-particle RGBA/palette modulation, angularVelocity*age+half*ageSquared*instanceAcceleration, optional base transform, scale/translation and actual native model-render submission. Both branches multiply their selected size by three scalar fields of the vector reached through GOT8817e0; exact R_AARCH64_RELATIVE relocation maps that pointer to86fac4, whose three floats are1,1,1. Independently, actual ordinary Steam.shared581900..58193a tests instance field30, loads sample size at+10, optionally multiplies its reciprocal factor, then multiplies the three axis values from AD9970/AD9974/AD9978 at58191c/581932/58192a. This typed control/data flow proves actual Steam XYZ coefficient correspondence; identical vector bytes are only corroboration. AD9990 is a different four-component color/default vector and is explicitly rejected as this source. Golden native model/RHI ownership differs from old RpClump rendering.",
+      "required_seams": [
+        "object-particle-unit-scale:bind exact Golden XYZ1.0 coefficient fields AD9970/+4/+8 (Native86fac4/+4/+8) in both transformed and untransformed size/reciprocal-scale branches and every old4aed70 alias",
+        "object-particle-unit-scale:replace complete old RpClump transform/color/draw path with actual native float-age58-byte samples,18-byte object records, emitter flags, acceleration/rotation/matrix and model/RHI lifetime/queue protocol; do not retain PS2 callbacks or merely change scale data"
+      ],
+      "axis": "x",
+      "switch": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x710086fac4",
+        "size": 4,
+        "sha256": "e00e5eb9444182f352323374ef4e08ebcb784725fdd4fd612d7730540b3e0c8c",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "steam_scale_code": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".shared",
+        "rva": "0x581900",
+        "raw_offset": 5771008,
+        "size": 58,
+        "sha256": "dea64e1318ff247021d3729da80ae148075ab4fd187b46ee6f123b286abb1144",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "native_code_envelope": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x710036ad00",
+        "size": 2576,
+        "sha256": "13192bf6557ed9b3fb4c5dfaad392c4c34130685f8a5ffc10a59fed22d18aa42",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "native_GOT": {
+        "cell": "8817e0",
+        "relocation_type": "R_AARCH64_RELATIVE",
+        "addend": "86fac4"
+      },
+      "ps2_live_bytes": 4,
+      "ps2_alignment_tail_bytes": 0,
+      "tail_policy": "The selected Z row has4 live bytes plus4 inert PS2 zero alignment; never source the adjacent native dispatch-table pointer as a fourth vector lane."
+    },
+    {
+      "address": "0x00713d24",
+      "size": 4,
+      "decision": "PROVEN",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "e00e5eb9444182f352323374ef4e08ebcb784725fdd4fd612d7730540b3e0c8c",
+        "readers": [
+          {
+            "function": "0x4aed70",
+            "name": "effObjectParticleDraw",
+            "file": "src/Graphics/Effect/effObjectParticle.c"
+          }
+        ]
+      },
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".xpdata",
+        "rva": "0xad9974",
+        "raw_offset": 11370868,
+        "size": 4,
+        "sha256": "e00e5eb9444182f352323374ef4e08ebcb784725fdd4fd612d7730540b3e0c8c",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "structural_correspondence": "Old4aed70 ObjectParticleDraw applies the selected default unit-axis coefficient to the particle size, or size times reciprocal instance field8 when field30 is nonzero, before matrix scale/translation in both emitter-transform branches. Actual Native36ad00 is the complete corresponding kind3 object-particle draw: emitter+68, count+8, particles+20,58-byte float-age samples,18-byte object records, per-particle RGBA/palette modulation, angularVelocity*age+half*ageSquared*instanceAcceleration, optional base transform, scale/translation and actual native model-render submission. Both branches multiply their selected size by three scalar fields of the vector reached through GOT8817e0; exact R_AARCH64_RELATIVE relocation maps that pointer to86fac4, whose three floats are1,1,1. Independently, actual ordinary Steam.shared581900..58193a tests instance field30, loads sample size at+10, optionally multiplies its reciprocal factor, then multiplies the three axis values from AD9970/AD9974/AD9978 at58191c/581932/58192a. This typed control/data flow proves actual Steam XYZ coefficient correspondence; identical vector bytes are only corroboration. AD9990 is a different four-component color/default vector and is explicitly rejected as this source. Golden native model/RHI ownership differs from old RpClump rendering.",
+      "required_seams": [
+        "object-particle-unit-scale:bind exact Golden XYZ1.0 coefficient fields AD9970/+4/+8 (Native86fac4/+4/+8) in both transformed and untransformed size/reciprocal-scale branches and every old4aed70 alias",
+        "object-particle-unit-scale:replace complete old RpClump transform/color/draw path with actual native float-age58-byte samples,18-byte object records, emitter flags, acceleration/rotation/matrix and model/RHI lifetime/queue protocol; do not retain PS2 callbacks or merely change scale data"
+      ],
+      "axis": "y",
+      "switch": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x710086fac8",
+        "size": 4,
+        "sha256": "e00e5eb9444182f352323374ef4e08ebcb784725fdd4fd612d7730540b3e0c8c",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "steam_scale_code": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".shared",
+        "rva": "0x581900",
+        "raw_offset": 5771008,
+        "size": 58,
+        "sha256": "dea64e1318ff247021d3729da80ae148075ab4fd187b46ee6f123b286abb1144",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "native_code_envelope": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x710036ad00",
+        "size": 2576,
+        "sha256": "13192bf6557ed9b3fb4c5dfaad392c4c34130685f8a5ffc10a59fed22d18aa42",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "native_GOT": {
+        "cell": "8817e0",
+        "relocation_type": "R_AARCH64_RELATIVE",
+        "addend": "86fac4"
+      },
+      "ps2_live_bytes": 4,
+      "ps2_alignment_tail_bytes": 0,
+      "tail_policy": "The selected Z row has4 live bytes plus4 inert PS2 zero alignment; never source the adjacent native dispatch-table pointer as a fourth vector lane."
+    },
+    {
+      "address": "0x00713d28",
+      "size": 8,
+      "decision": "PROVEN",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "434b26042aff3fb844a4c4c6be0d81a079b0ce84cfb8190679024404e5dc4822",
+        "readers": [
+          {
+            "function": "0x4aed70",
+            "name": "effObjectParticleDraw",
+            "file": "src/Graphics/Effect/effObjectParticle.c"
+          }
+        ]
+      },
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".xpdata",
+        "rva": "0xad9978",
+        "raw_offset": 11370872,
+        "size": 4,
+        "sha256": "e00e5eb9444182f352323374ef4e08ebcb784725fdd4fd612d7730540b3e0c8c",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "structural_correspondence": "Old4aed70 ObjectParticleDraw applies the selected default unit-axis coefficient to the particle size, or size times reciprocal instance field8 when field30 is nonzero, before matrix scale/translation in both emitter-transform branches. Actual Native36ad00 is the complete corresponding kind3 object-particle draw: emitter+68, count+8, particles+20,58-byte float-age samples,18-byte object records, per-particle RGBA/palette modulation, angularVelocity*age+half*ageSquared*instanceAcceleration, optional base transform, scale/translation and actual native model-render submission. Both branches multiply their selected size by three scalar fields of the vector reached through GOT8817e0; exact R_AARCH64_RELATIVE relocation maps that pointer to86fac4, whose three floats are1,1,1. Independently, actual ordinary Steam.shared581900..58193a tests instance field30, loads sample size at+10, optionally multiplies its reciprocal factor, then multiplies the three axis values from AD9970/AD9974/AD9978 at58191c/581932/58192a. This typed control/data flow proves actual Steam XYZ coefficient correspondence; identical vector bytes are only corroboration. AD9990 is a different four-component color/default vector and is explicitly rejected as this source. Golden native model/RHI ownership differs from old RpClump rendering.",
+      "required_seams": [
+        "object-particle-unit-scale:bind exact Golden XYZ1.0 coefficient fields AD9970/+4/+8 (Native86fac4/+4/+8) in both transformed and untransformed size/reciprocal-scale branches and every old4aed70 alias",
+        "object-particle-unit-scale:replace complete old RpClump transform/color/draw path with actual native float-age58-byte samples,18-byte object records, emitter flags, acceleration/rotation/matrix and model/RHI lifetime/queue protocol; do not retain PS2 callbacks or merely change scale data"
+      ],
+      "axis": "z",
+      "switch": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x710086facc",
+        "size": 4,
+        "sha256": "e00e5eb9444182f352323374ef4e08ebcb784725fdd4fd612d7730540b3e0c8c",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "steam_scale_code": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".shared",
+        "rva": "0x581900",
+        "raw_offset": 5771008,
+        "size": 58,
+        "sha256": "dea64e1318ff247021d3729da80ae148075ab4fd187b46ee6f123b286abb1144",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "native_code_envelope": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x710036ad00",
+        "size": 2576,
+        "sha256": "13192bf6557ed9b3fb4c5dfaad392c4c34130685f8a5ffc10a59fed22d18aa42",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "native_GOT": {
+        "cell": "8817e0",
+        "relocation_type": "R_AARCH64_RELATIVE",
+        "addend": "86fac4"
+      },
+      "ps2_live_bytes": 4,
+      "ps2_alignment_tail_bytes": 4,
+      "tail_policy": "The selected Z row has4 live bytes plus4 inert PS2 zero alignment; never source the adjacent native dispatch-table pointer as a fourth vector lane."
+    }
+  ]
+}

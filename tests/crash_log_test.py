@@ -16,7 +16,8 @@ with tempfile.TemporaryDirectory(prefix='p4pc-crash-') as tmp:
         # The handler wrote the last staged marker, whole, before anything else.
         assert marker.read_bytes() == b'P4PC-CRASH 1 session=7\ntest.mod\tR1:B3\n', (sig, marker.read_bytes())
         assert result.returncode == 128 + sig.value, (sig, result.returncode, report)
-        for expected in ('CRASH signal ' + str(sig.value), 'fault address', 'instruction 0:', 'frame 0:'):
+        for expected in ('CRASH signal ' + str(sig.value), 'fault address', 'instruction 0:', 'frame 0:',
+                         'p4pc: context: build=v9.9-test area=f12:r3 ev 176.1.0 t=42s flip=2520\n'):
             assert expected in report, (sig, expected, report)
         if sig == signal.SIGSEGV:
             assert 'guest address 0xdeadbeef' in report, report

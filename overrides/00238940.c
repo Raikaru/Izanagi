@@ -7,18 +7,17 @@
 #include "p4pc/game_skills_native.h"
 #include "p4pc/game_afflictions_native.h"
 #include "p4pc/game_chance_stage_native.h"
+#include "p4pc/golden_battle_rows_native.h"
+#include "p4pc/guest.h"
 /* The chance stage reports a party source's active persona record. */
 extern u16 datPersonaGetRecordId(u16 partyId);
 extern u8 datPersonaGetLevelByPcId(u16 pcId);
 #pragma push
 /* measured: retail hoists loop invariants in this function. */
 #pragma opt_loop_invariants on
-s32 datCalcInflictStatus(skillId, source, target, options)
-u16 skillId;
-DatUnit *source;
-DatUnit *target;
-s32 options;
+s32 datCalcInflictStatus(s32 rawSkillId, DatUnit *source, DatUnit *target, s32 options)
 {
+    u16 skillId = (u16)rawSkillId; /* K&R's promoted ABI, with its original narrowing. */
     u16 choices[24];
     s32 offset;
     u8 *entry;
@@ -46,6 +45,10 @@ s32 options;
 
     if (!p4_game_skill_registered(skillId & 0xFFFF)) {
         kAssertFail(D_00635938, 0xA30);
+    }
+    if (p4_golden_battle_rows_enabled() && p4_game_skill_active(skillId)) {
+        u32 selector = p4_golden_skill_selector(skillId);
+        if (selector) source = (DatUnit *)P4_G2H(p4_golden_skill_unit_guest(selector));
     }
     offset = (u32)(u16)skillId * 0x28;
     entry = iGpffffb3b8 + offset;

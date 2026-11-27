@@ -119,6 +119,54 @@ int main(void)
         remove(path);
     }
 
+    /* The previous run's log is kept: p4pc.prev.log always, p4pc.unclean.log too when it lacks the clean-exit line. */
+    {
+        char log[512], prev[512], unclean[512];
+        const char *names[3];
+
+        snprintf(log, sizeof log, "p4iso_test_%d.log", (int)(size_t)&failures & 0xffff);
+        snprintf(prev, sizeof prev, "p4iso_test_%d.prev.log", (int)(size_t)&failures & 0xffff);
+        snprintf(unclean, sizeof unclean, "p4iso_test_%d.unclean.log", (int)(size_t)&failures & 0xffff);
+        names[0] = log;
+        names[1] = prev;
+        names[2] = unclean;
+        remove(log);
+        remove(prev);
+        remove(unclean);
+        CHECK(p4iso_rotate_log(log) == 0); /* nothing yet */
+        CHECK(slurp(prev) == NULL);
+        f = fopen(log, "wb");
+        fputs("first run\ncrashed here\n", f);
+        fclose(f);
+        CHECK(p4iso_rotate_log(log) == 0);
+        CHECK(slurp(log) == NULL); /* moved, so the next run starts an empty file */
+        t = slurp(prev);
+        CHECK(t != NULL && strcmp(t, "first run\ncrashed here\n") == 0);
+        free(t);
+        t = slurp(unclean);
+        CHECK(t != NULL && strcmp(t, "first run\ncrashed here\n") == 0);
+        free(t);
+        f = fopen(log, "wb");
+        fputs("second run\n" P4_LOG_CLEAN_EXIT "\n", f);
+        fclose(f);
+        CHECK(p4iso_rotate_log(log) == 0);
+        t = slurp(prev);
+        CHECK(t != NULL && strncmp(t, "second run\n", 11) == 0); /* the previous run, replacing the older one */
+        free(t);
+        t = slurp(unclean);
+        CHECK(t != NULL && strcmp(t, "first run\ncrashed here\n") == 0); /* the crashed run is still there */
+        free(t);
+        f = fopen(log, "wb"); /* an empty log is not worth keeping over a real one */
+        fclose(f);
+        CHECK(p4iso_rotate_log(log) == 0);
+        t = slurp(prev);
+        CHECK(t != NULL && strncmp(t, "second run\n", 11) == 0);
+        free(t);
+        for (size_t i = 0; i < 3; i++) {
+            remove(names[i]);
+        }
+    }
+
     CHECK(p4iso_locate_elf("no such file.iso", &off, &size) == -1);
     if (iso != NULL && iso[0] != '\0') {
         CHECK(p4iso_locate_elf(iso, &off, &size) == 0 && size > 1000000 && off > 0);

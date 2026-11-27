@@ -40,6 +40,67 @@ precedence = "override"
 SPDX-FileCopyrightText = "2019-2026 Roblox Corporation; 1994-2019 Lua.org, PUC-Rio"
 SPDX-License-Identifier = "MIT"
 
+# Zig Luau implementation: project adaptations of the pinned Luau/Lua sources.
+# Host-only State, main, root, p4pc, build and witness files keep project terms.
+[[annotations]]
+path = [
+  "luau-zig/src/compiler.zig",
+  "luau-zig/src/compiler/**",
+  "luau-zig/src/vm.zig",
+  "luau-zig/src/vm/**",
+  "luau-zig/src/stdlib.zig",
+  "luau-zig/src/stdlib/**",
+  "luau-zig/src/require.zig",
+  "luau-zig/src/require/**",
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = ["2026 Izanagi contributors", "2019-2026 Roblox Corporation", "1994-2019 Lua.org, PUC-Rio"]
+SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = ["luau-zig/tests/upstream-0.744/Sources.cmake", "luau-zig/tests/upstream-0.744/tests/**"]
+precedence = "override"
+SPDX-FileCopyrightText = ["2019-2026 Roblox Corporation", "1994-2019 Lua.org, PUC-Rio"]
+SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = "luau-zig/tests/upstream-0.744/LICENSE.txt"
+precedence = "override"
+SPDX-FileCopyrightText = ["2019-2026 Roblox Corporation", "1994-2019 Lua.org, PUC-Rio"]
+SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = "luau-zig/tests/upstream-0.744/lua_LICENSE.txt"
+precedence = "override"
+SPDX-FileCopyrightText = "1994-2019 Lua.org, PUC-Rio"
+SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = "luau-zig/tests/upstream-0.744/extern/doctest.h"
+precedence = "override"
+# The header identifies Catch and lest code but not its upstream revisions or
+# complete copyright holders. Keep its own notices; do not invent those details.
+SPDX-FileCopyrightText = "2016-2021 Viktor Kirilov"
+SPDX-License-Identifier = "MIT AND BSL-1.0"
+
+[[annotations]]
+path = "luau-zig/tests/upstream-0.744/extern/doctest_LICENSE.txt"
+precedence = "override"
+SPDX-FileCopyrightText = "2016-2021 Viktor Kirilov"
+SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = "third_party/luau/Ast/src/Confusables.cpp"
+precedence = "override"
+SPDX-FileCopyrightText = ["2019-2026 Roblox Corporation", "1994-2019 Lua.org, PUC-Rio", "2017 Unicode, Inc."]
+SPDX-License-Identifier = "MIT AND Unicode-DFS-2016"
+
+[[annotations]]
+path = "luau-zig/src/compiler/confusables.zig"
+precedence = "override"
+SPDX-FileCopyrightText = ["2026 Izanagi contributors", "2019-2026 Roblox Corporation", "1994-2019 Lua.org, PUC-Rio", "2017 Unicode, Inc."]
+SPDX-License-Identifier = "MIT AND Unicode-DFS-2016"
+
 [[annotations]]
 path = "third_party/miniz/**"
 precedence = "override"
@@ -61,4 +122,10 @@ SPDX-License-Identifier = "MIT"
 path = "third_party/cgltf/**"
 precedence = "override"
 SPDX-FileCopyrightText = "2018-2021 Johannes Kuhlmann; 2010 Serge A. Zaitsev (bundled jsmn)"
+SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = ["third_party/bcdec/**", "third_party/licenses/bcdec-MIT.txt"]
+precedence = "override"
+SPDX-FileCopyrightText = "2022 Sergii Kudlai"
 SPDX-License-Identifier = "MIT"

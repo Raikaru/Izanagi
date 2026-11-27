@@ -104,6 +104,20 @@ static int write_fixture_cpk(const char *path)
     int ok = fwrite(file, 1, sizeof file, out) == sizeof file;
     return fclose(out) || !ok ? -1 : 0;
 }
+static unsigned captures, capture_rollbacks;
+static int capture_failure;
+int p4_data_catalog_capture_golden(const uint8_t *msg, size_t msg_size,
+                                    const uint8_t *items, size_t items_size)
+{
+    CHECK(msg && msg_size == 80 && items && items_size == 1);
+    CHECK(msg[4] == 0 && items[0] == 42); /* cache hit ignores mutated sources */
+    ++captures;
+    return capture_failure ? -1 : 0;
+}
+void p4_data_catalog_golden_rollback(void) { ++capture_rollbacks; }
+static int reject_declarations(void *context, P4GameTablesDefinitionBuilder *builder,
+    const P4GoldenCacheTable *extra, size_t count, char *reason, size_t capacity)
+{ (void)context; (void)builder; (void)extra; (void)count; (void)reason; (void)capacity; return -1; }
 static unsigned callbacks, rollbacks;
 static int convert(void *context, char *reason, size_t capacity)
 { (void)reason; (void)capacity; if (!context) return -1; ++callbacks; return 0; }
@@ -149,6 +163,7 @@ int main(int argc, char **argv)
     static uint8_t banks[P4_TABLE_INPUT_COUNT][176];
     static uint8_t aux[577], elements[577 * 4], groups[577], metadata[577 * P4_SKILL_ROW_SIZE];
     static uint8_t presentation[577 * 4], rates[577], experience[396];
+    static uint8_t item_names[] = {42};
     static const unsigned blocks[] = {1,2,3,5,6,5,1,3,11};
     char root[1024], pref[1100], install[1100], program[1100], reason[192] = "";
     (void)argv;
@@ -175,38 +190,56 @@ int main(int argc, char **argv)
                         1,0,0,0, 0x40,2,0,0, 1,0,0,0, 2,0,0,0, 'y',0};
     P4GoldenCacheTable extra[] = {
         {"decl/experience", NULL, 0},
+        {"decl/item-names", NULL, 0},
         {"decl/skill-aux", NULL, 0}, {"decl/skill-elements", NULL, 0}, {"decl/skill-groups", NULL, 0},
         {"decl/skill-metadata", NULL, 0}, {"decl/skill-presentation", NULL, 0}, {"decl/skill-rates", NULL, 0},
         {"decl/text", NULL, 0}
     };
-    P4GoldenCacheTable tables[P4_TABLE_INPUT_COUNT + 8];
+    P4GoldenCacheTable tables[P4_TABLE_INPUT_COUNT + 9];
     for (unsigned i = 0; i < P4_TABLE_INPUT_COUNT; ++i)
         tables[i] = (P4GoldenCacheTable){p4_game_table_input_label((P4GameTableInputKind)i), banks[i], blocks[i] * 16u};
     tables[9] = (P4GoldenCacheTable){extra[0].name, experience, sizeof experience};
-    tables[10] = (P4GoldenCacheTable){extra[1].name, aux, sizeof aux};
-    tables[11] = (P4GoldenCacheTable){extra[2].name, elements, sizeof elements};
-    tables[12] = (P4GoldenCacheTable){extra[3].name, groups, sizeof groups};
-    tables[13] = (P4GoldenCacheTable){extra[4].name, metadata, sizeof metadata};
-    tables[14] = (P4GoldenCacheTable){extra[5].name, presentation, sizeof presentation};
-    tables[15] = (P4GoldenCacheTable){extra[6].name, rates, sizeof rates};
-    tables[16] = (P4GoldenCacheTable){extra[7].name, text, sizeof text};
+    tables[10] = (P4GoldenCacheTable){extra[1].name, item_names, sizeof item_names};
+    tables[11] = (P4GoldenCacheTable){extra[2].name, aux, sizeof aux};
+    tables[12] = (P4GoldenCacheTable){extra[3].name, elements, sizeof elements};
+    tables[13] = (P4GoldenCacheTable){extra[4].name, groups, sizeof groups};
+    tables[14] = (P4GoldenCacheTable){extra[5].name, metadata, sizeof metadata};
+    tables[15] = (P4GoldenCacheTable){extra[6].name, presentation, sizeof presentation};
+    tables[16] = (P4GoldenCacheTable){extra[7].name, rates, sizeof rates};
+    tables[17] = (P4GoldenCacheTable){extra[8].name, text, sizeof text};
     qsort(tables, sizeof tables / sizeof tables[0], sizeof tables[0], table_compare);
     P4GoldenModeCachePlan plan = {&paths, &identity, tables, sizeof tables / sizeof tables[0], extra,
                                   sizeof extra / sizeof extra[0], p4_golden_mode_declare_cached, &map};
     P4GoldenModeAdapter entries[] = {
-        {"verified sources and projections", project_skill}, {"EFFECT0 conversion (472x12 to 440x4)", convert},
-        {"MODEL0 conversion (11x382 to 11x332)", convert},
+        {"verified sources and projections", project_skill}, {"EFFECT0 Golden rows (472x12)", convert},
+        {"MODEL0 Golden rows (11x382)", convert},
         {"AICALC9/10 compatibility", convert}, {"expanded enemy model sources", convert},
-        {"expanded item icon sources", convert}, {"expanded item categories, actions and models", convert},
+        {"expanded item icon sources", convert}, {"expanded item categories and actions", convert},
+        {"expanded item models", convert},
         {"expanded entity names and descriptions", convert}, {"passive skill semantic elements", convert},
-        {"widened skill flags", convert}, {"skill and persona name widths", convert}, {"image-table binding", convert}
+        {"widened skill flags", convert}, {"skill and persona name widths", convert},
+        {"R2 EFFECT0 packet timing", convert}, {"M8f-res:battle-common-14A8-1490", convert},
+        {"image supplier ledger", convert},
+        {"R7a-dep:M11-skill-card-UI-U1-U4", convert},
+        {"R7a-dep:M11-return-field-flow", convert},
+        {"R7a-dep:shop-permissions-context-flags-U2-U3-U5", convert},
+        {"P10-dep:E2-forced-retry-liveness", convert},
+        {"Golden BF command compatibility", convert},
+        {"Golden script feature compatibility", convert},
+        {"native Golden asset families", convert},
+        {"M6 image-table cache binder (chart, gate, recipe, EXP, inheritance)", convert}
     };
     P4GoldenModeAdapters adapters = {entries, sizeof entries / sizeof entries[0], publish, rollback, &plan};
     for (unsigned pass = 0; pass < 2; ++pass) {
         P4GameTablesDefinitionBuilder builder = {0};
         builder.tables = (P4GameTables *)(uintptr_t)3; builder.sources = (P4GameTableSources *)(uintptr_t)2;
         builder.registry_revision = 1;
-        if (pass) banks[P4_TABLE_INPUT_SKILL][4] = 0x55; /* cache hit must ignore modified source bytes */
+        builder.input_mask = (1u << P4_TABLE_INPUT_MSG) | (1u << P4_TABLE_INPUT_ITEM);
+        if (pass) {
+            banks[P4_TABLE_INPUT_SKILL][4] = 0x55;
+            banks[P4_TABLE_INPUT_MSG][4] = 0x55;
+            item_names[0] = 99;
+        }
         if (p4_golden_mode_boot_prepare(P4_GAME_MODE_GOLDEN, &builder, &adapters, reason, sizeof reason)) {
             fprintf(stderr,"Golden boot pass %u: %s (pref=%s)\n",pass,reason,pref);
             return 1;
@@ -219,6 +252,26 @@ int main(int argc, char **argv)
         for (size_t i = 0; i < builder.input_count; ++i) p4_game_table_input_destroy(builder.inputs[i]);
     }
     CHECK(!rollbacks && callbacks == 2u * (sizeof entries / sizeof entries[0]));
+    CHECK(captures == 2 && !capture_rollbacks);
+    {
+        P4GameTablesDefinitionBuilder builder = {0};
+        builder.tables = (P4GameTables *)(uintptr_t)3; builder.sources = (P4GameTableSources *)(uintptr_t)2;
+        builder.registry_revision = 1;
+        capture_failure = 1;
+        CHECK(p4_golden_mode_cache_publish(&plan, &builder, reason, sizeof reason));
+        CHECK(captures == 3 && capture_rollbacks == 1 && registrations == 2);
+        for (size_t i = 0; i < builder.input_count; ++i) p4_game_table_input_destroy(builder.inputs[i]);
+    }
+    {
+        P4GameTablesDefinitionBuilder builder = {0};
+        builder.tables = (P4GameTables *)(uintptr_t)3; builder.sources = (P4GameTableSources *)(uintptr_t)2;
+        builder.registry_revision = 1;
+        capture_failure = 0;
+        plan.declare = reject_declarations;
+        CHECK(p4_golden_mode_cache_publish(&plan, &builder, reason, sizeof reason));
+        CHECK(captures == 4 && capture_rollbacks == 2);
+        for (size_t i = 0; i < builder.input_count; ++i) p4_game_table_input_destroy(builder.inputs[i]);
+    }
     CHECK(!p4_os_list_dir_utf8(root, cleanup_entry, root) && !p4_os_rmdir(root));
     puts("golden_mode_pipeline: real synthetic cache build, verified reload and M4 declaration sink passed"); return 0;
 }

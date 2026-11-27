@@ -88,7 +88,7 @@ add_executable(game_amount_stages_test game_amount_stages_test.c ${_p4_amount_st
   "${CMAKE_SOURCE_DIR}/src/platform/mods/game_reward_stage.c"
   "${CMAKE_SOURCE_DIR}/src/platform/mods/game_unit_stage.c"
   "${CMAKE_SOURCE_DIR}/src/platform/mods/game_afflictions.c"
-  "${CMAKE_SOURCE_DIR}/src/platform/battle_sim/events.c")
+  "${CMAKE_SOURCE_DIR}/src/platform/battle_sim/events.zig")
 target_compile_definitions(game_amount_stages_test PRIVATE ${P4_PORT_DEFINES})
 target_link_libraries(game_amount_stages_test m)
 add_test(NAME game_amount_stages COMMAND game_amount_stages_test)

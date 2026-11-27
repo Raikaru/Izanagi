@@ -6,9 +6,11 @@
 #   sh ci/android/build_deps.sh <prefix> [abi]        abi: x86 (default), x86_64, arm64-v8a, armeabi-v7a
 #
 # <prefix>/<abi> receives include/ and lib/; <prefix>/sdl-java holds SDL's android-project (the Java classes). Needs the NDK
-# (ANDROID_NDK_HOME), curl, tar, xz, cmake, ninja, make, python3, flock and, for FFmpeg on x86 and x86_64, nothing else (asm is off:
+# (ANDROID_NDK_HOME), curl, tar, xz, cmake, ninja, make, git, python3, flock and, for FFmpeg on x86 and x86_64, nothing else (asm is off:
 # it needs text relocations on 32-bit x86, which Android refuses for apps).
 set -eu
+recipe_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+hca_patch=$recipe_dir/../ffmpeg-7.1.1-hca-window-alignment.patch
 
 prefix=${1:?usage: build_deps.sh <prefix> [abi]}
 abi=${2:-x86}
@@ -60,12 +62,14 @@ if [ ! -f "$out/lib/libSDL3.so" ]; then
   rm -rf "$prefix/sdl-java" && cp -r "$work/sdl/android-project" "$prefix/sdl-java"
 fi
 
-# ---- FFmpeg (LGPL): mpeg2video + its parser (src/movie/mpeg2_dec.c), adpcm_adx (src/movie/adx_dec.c), libswscale.
-FFMPEG_OPTS="--enable-decoder=mpeg2video --enable-parser=mpegvideo --enable-decoder=adpcm_adx"
-if [ ! -f "$out/lib/libavcodec.so" ] || [ "$(cat "$out/ffmpeg.opts" 2>/dev/null)" != "$FFMPEG_OPTS" ]; then
+# ---- FFmpeg (LGPL): MPEG-2/parser, ADX, Golden HCA, libswscale; no libavformat.
+FFMPEG_OPTS="--enable-decoder=mpeg2video --enable-parser=mpegvideo --enable-decoder=adpcm_adx --enable-decoder=hca"
+if [ ! -f "$out/lib/libavcodec.so" ] || [ "$(cat "$out/ffmpeg.opts" 2>/dev/null)" != "$FFMPEG_OPTS" ] ||
+   ! cmp -s "$hca_patch" "$out/ffmpeg-7.1.1-hca-window-alignment.patch"; then
   rm -f "$out"/lib/libavcodec-*.so "$out"/lib/libavutil-*.so "$out"/lib/libswscale-*.so # an earlier version of this script renamed them
   fetch "$FFMPEG_URL" "$FFMPEG_SHA" ffmpeg-$FFMPEG_VER.tar.xz
   rm -rf "$work/ffmpeg" && mkdir -p "$work/ffmpeg" && tar -xJf "$dl/ffmpeg-$FFMPEG_VER.tar.xz" -C "$work/ffmpeg" --strip-components=1
+  (cd "$work/ffmpeg" && git apply --unidiff-zero "$hca_patch")
   cc=$tc/bin/$triple$api-clang
   (cd "$work/ffmpeg" && ./configure \
     --prefix="$out" --arch=$arch --target-os=android --enable-cross-compile --enable-pic \
@@ -76,6 +80,7 @@ if [ ! -f "$out/lib/libavcodec.so" ] || [ "$(cat "$out/ffmpeg.opts" 2>/dev/null)
     --enable-shared --disable-static --disable-debug --extra-cflags="-O2" \
   && make -j"$(nproc)" && make install) || { echo "build_deps: FFmpeg failed" >&2; exit 1; }
   printf '%s' "$FFMPEG_OPTS" > "$out/ffmpeg.opts"
+  cp "$hca_patch" "$out/ffmpeg-7.1.1-hca-window-alignment.patch"
 fi
 
 echo "build_deps: SDL3 and FFmpeg for $abi are in $out"

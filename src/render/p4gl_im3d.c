@@ -399,6 +399,15 @@ static int draw_common(GLenum mode, const P4ClipVertex *verts, uint32_t numVerts
     int virtualWidth = 0, virtualHeight = 0, pixelWidth = 0, pixelHeight = 0;
     const int colorFail = p4gl_gs_alpha_color_fail(dp->own ? dp->test : p4gl_sky_test_raw(),
                                                 &failFunc, &failRef);
+    static int cullEnabled = -1;
+    int never;
+
+    /* ATST NEVER with a failure mode that writes colour: the first draw discards every fragment, so only the second one is drawn, and its test (inverted NEVER) cannot
+     * discard anything, so it runs with the alpha function off (the same exact shortcut as the atomic and Im2D draws; P4PC_PASSCULL=0 keeps both). */
+    if (cullEnabled < 0) {
+        cullEnabled = p4gl_gl_feature("P4PC_PASSCULL");
+    }
+    never = colorFail && failFunc == 8 && cullEnabled;
 
     if (!p4gl_gl_prepare_draw()) {
         return 1;
@@ -447,8 +456,8 @@ static int draw_common(GLenum mode, const P4ClipVertex *verts, uint32_t numVerts
     }
     p4gl_glUniform1i(sLocAlphaInvert, 0);
     if (colorFail) {
-        p4gl_glUniform1i(sLocAlphaFunc, failFunc);
-        p4gl_glUniform1f(sLocAlphaRef, failRef);
+        p4gl_glUniform1i(sLocAlphaFunc, never ? 0 : failFunc);
+        p4gl_glUniform1f(sLocAlphaRef, never ? 0.0f : failRef);
     }
     p4gl_frame_mask_apply();
     if (dp->own) {
@@ -486,17 +495,21 @@ static int draw_common(GLenum mode, const P4ClipVertex *verts, uint32_t numVerts
         indexType = GL_UNSIGNED_INT;
         count = visible * 6;
     }
-    if (indices == NULL) {
-        p4gl_glDrawArrays(mode, 0, (GLsizei)numVerts);
-    } else {
+    if (indices != NULL) {
         p4gl_glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, scaledLine ? sLineEbo : sEbo);
         if (!scaledLine)
             p4gl_glBufferData(GL_ELEMENT_ARRAY_BUFFER, (GLsizeiptr)count * (GLsizeiptr)indexSize,
                               indices, GL_STREAM_DRAW);
-        p4gl_glDrawElements(mode, count, indexType, NULL);
+    }
+    if (!never) {
+        if (indices == NULL) {
+            p4gl_glDrawArrays(mode, 0, (GLsizei)numVerts);
+        } else {
+            p4gl_glDrawElements(mode, count, indexType, NULL);
+        }
     }
     if (colorFail) {
-        p4gl_glUniform1i(sLocAlphaInvert, 1);
+        if (!never) p4gl_glUniform1i(sLocAlphaInvert, 1);
         p4gl_glDepthMask(GL_FALSE);
         if (colorFail == 3) {
             p4gl_frame_mask_rgb_only();
@@ -506,7 +519,7 @@ static int draw_common(GLenum mode, const P4ClipVertex *verts, uint32_t numVerts
         } else {
             p4gl_glDrawElements(mode, count, indexType, NULL);
         }
-        p4gl_glUniform1i(sLocAlphaInvert, 0);
+        if (!never) p4gl_glUniform1i(sLocAlphaInvert, 0);
     }
 
     p4gl_frame_mask_restore();

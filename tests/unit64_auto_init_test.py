@@ -2,6 +2,7 @@
 """Rewritten-mirror compiler flags, generation-only output and census contracts."""
 from contextlib import redirect_stderr, redirect_stdout
 import io
+import json
 import os
 from pathlib import Path
 import sys
@@ -41,7 +42,7 @@ class AutoInitTest(unittest.TestCase):
             directory = Path(work)
             original = directory / "preprocessed.i"
             original.write_text("float f(void) { float yaw; return yaw; }\n", encoding="utf-8")
-            args = SimpleNamespace(gen=work, root=str(ROOT), unit="sample.c", out=str(directory / "sample.o"),
+            args = SimpleNamespace(gen=work, root=str(ROOT), decomp=None, unit="sample.c", out=str(directory / "sample.o"),
                                    abi=None, check=True, launcher="", clang="clang", opt="O2", auto_init=mode, keep_i=False,
                                    src=None, cflag=[], generate_only=False)
             rewritten = {"unsupported": "", "census": "", "text": original.read_text()}
@@ -82,7 +83,7 @@ class AutoInitTest(unittest.TestCase):
             original = directory / "preprocessed.i"
             text = "int sample(void) { return 0; }\n"
             original.write_text(text, encoding="utf-8")
-            args = SimpleNamespace(gen=work, root=str(ROOT), unit="sample.c", out=str(directory / "sample.c.64.o"),
+            args = SimpleNamespace(gen=work, root=str(ROOT), decomp=None, unit="sample.c", out=str(directory / "sample.c.64.o"),
                                    abi=None, check=True, launcher="", clang="clang", opt="O2", auto_init=None, keep_i=False,
                                    src=None, cflag=[], generate_only=True)
             rewritten = {"unsupported": "", "census": "pointer%20load=2\n", "text": text}
@@ -143,6 +144,30 @@ class AutoInitTest(unittest.TestCase):
                 unit64.cmd_report(args)
             self.assertIn("new.c", baseline.read_text(encoding="utf-8"))
 
+
+
+class CensusTerminalTest(unittest.TestCase):
+    def test_census_publishes_exact_comparison_once(self):
+        with tempfile.TemporaryDirectory() as work:
+            path = Path(work) / "census.json"
+            env = {"P4PC_CENSUS_RECORD": str(path), "P4PC_CENSUS_TEST_ID": "census_macos_arm64",
+                   "P4PC_CENSUS_SCOPE": "macos-arm64"}
+            with patch.dict(os.environ, env):
+                unit64.publish_census_record({"a": 1}, {"a": 2}, ["a"])
+                record = json.loads(path.read_text())
+                self.assertEqual((record["outcome"], record["test"], record["scope"], record["drift_count"]),
+                                 ("candidate_fail", "census_macos_arm64", "macos-arm64", 1))
+                self.assertNotEqual(record["baseline_sha256"], record["observed_sha256"])
+                with self.assertRaises(FileExistsError):
+                    unit64.publish_census_record({"a": 1}, {"a": 1}, [])
+                self.assertEqual(json.loads(path.read_text()), record)
+
+    def test_census_rejects_mismatched_identity(self):
+        with tempfile.TemporaryDirectory() as work, patch.dict(os.environ, {
+                "P4PC_CENSUS_RECORD": str(Path(work) / "census.json"),
+                "P4PC_CENSUS_TEST_ID": "census_macos_arm64", "P4PC_CENSUS_SCOPE": "macos-x86_64"}):
+            with self.assertRaises(ValueError):
+                unit64.publish_census_record({}, {}, [])
 
 
 if __name__ == "__main__":

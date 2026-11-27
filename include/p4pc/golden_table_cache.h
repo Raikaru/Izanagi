@@ -8,8 +8,8 @@
  * Extra names must be unique and sorted. On success extra receives allocated
  * non-native tables owned by the caller; release them with p4_golden_cache_free.
  * On failure extra data is NULL.
- * The builder owns its inputs until destruction. Valid only in Golden mode,
- * before requesting or sealing inputs. */
+ * The builder owns its inputs until destruction. Valid only in Golden mode
+ * before inputs are loaded or sealed; prior input requests are preserved. */
 int p4_game_tables_builder_golden_cache(P4GameTablesDefinitionBuilder *builder,
     const P4GoldenCachePaths *paths, const P4GoldenCacheIdentity *identity,
     P4GoldenCacheTable *extra, size_t extra_count, char *reason, size_t capacity);

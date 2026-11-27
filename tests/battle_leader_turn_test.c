@@ -65,6 +65,8 @@ u8 *btlEffectFindUnitByIdAndStatus(s32 id, s32 side, s32 status) {
             return (u8 *)a;
     return NULL;
 }
+static unsigned eligible_starts;
+void p4_golden_ai_native_eligible_start(void *action) { CHECK(action != NULL); ++eligible_starts; }
 #include "001a06d0.c"
 
 static void init(BtlAction *a, BtlUnit *u, u8 side, u16 id) {
@@ -75,6 +77,7 @@ static void init(BtlAction *a, BtlUnit *u, u8 side, u16 id) {
 static void reset(void) {
     memset(&battle, 0, sizeof(battle)); battle.unkA70 = -1;
     guard = skill_mask = window_open = bad_status = dead = delayed = 0;
+    eligible_starts = 0;
 }
 static void turn(BtlAction *a) { btlActionStartInit(a); }
 int main(void) {
@@ -86,6 +89,7 @@ int main(void) {
     yu.next = &yosuke; yosuke.next = &chie; chie.next = &enemy;
     battle.actions = (u8 *)&yu; battle.selectedAction = (u8 *)&yu;
     turn(&yosuke); turn(&enemy); CHECK(battle.protagonistTurns == 0);
+    CHECK(eligible_starts == 2);
     turn(&yu); turn(&yu); CHECK(battle.protagonistTurns == 2);
     /* Even if a caller points selectedAction at an ally while Yu is active,
      * the retail character-1 count is unchanged. */

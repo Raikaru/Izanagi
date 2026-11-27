@@ -9,6 +9,8 @@ add_test(NAME kernel_threads COMMAND kernel_threads_test)
 set_tests_properties(kernel_threads PROPERTIES ENVIRONMENT "P4PC_VIRTUAL_CLOCK=1;P4PC_TURBO=0" TIMEOUT 60)
 add_test(NAME kernel_threads_paced COMMAND kernel_threads_test)
 set_tests_properties(kernel_threads_paced PROPERTIES ENVIRONMENT "P4PC_VIRTUAL_CLOCK=0;P4PC_TURBO=0" TIMEOUT 60)
+add_test(NAME kernel_threads_carry COMMAND kernel_threads_test)
+set_tests_properties(kernel_threads_carry PROPERTIES ENVIRONMENT "P4PC_VIRTUAL_CLOCK=0;P4PC_TURBO=0;P4PC_PACING=carry" TIMEOUT 60)
 
 add_executable(capture_state_test capture_state_test.c ${P4_GUEST_TEST_SRC})
 target_include_directories(capture_state_test PRIVATE "${CMAKE_SOURCE_DIR}/include" "${CMAKE_CURRENT_SOURCE_DIR}")

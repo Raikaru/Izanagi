@@ -28,6 +28,7 @@ int p4_save_transaction_tagged(const P4SaveTransaction *);
 /* Records intent BEFORE any stage payload is written. Plain pristine game
  * writes may hold only begin's lock and keep their original byte/I/O path. */
 int p4_save_transaction_stage(P4SaveTransaction *,const P4SavePairBinding *,char *error,size_t error_capacity);
+int p4_save_transaction_staged(const P4SaveTransaction *);
 /* Preserve bounded extra regular files; the three rewritten game files and old
  * .p4mods pair are excluded. Links/subdirectories refuse, never silently drop. */
 int p4_save_transaction_clone_extra(P4SaveTransaction *,char *error,size_t error_capacity);

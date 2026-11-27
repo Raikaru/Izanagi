@@ -3,7 +3,7 @@
  * only from the scheduler frame boundary, never inside a task or hook:
  *   field    K_Cmd_CALL_FIELD       00176450: sequence 9 with a 0x1C record
  *   battle   btlScriptStartEncounter 001932f0 through the shared adapter
- *            (src/platform/battle_sim/entry.c): sequence 6 with a 0x3C setup
+ *            (src/platform/battle_sim/entry.zig): sequence 6 with a 0x3C setup
  *   calendar K_Cmd_CALL_TV          00176320: sequence 25, CALENDAR MAIN, whose
  *            calendarStepTimeSlot (00120f70) applies the staged next slot and
  *            starts the period's scheduler procedure (cldSchedulerStart)

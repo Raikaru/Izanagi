@@ -79,6 +79,23 @@ void p4_game_knowledge_native_discard(void)
     prepared_tables = active_tables = NULL;
 }
 P4GameKnowledge *p4_game_knowledge_native_active(void) { return active; }
+int p4_game_knowledge_battle_capture(P4GameKnowledgeCapture **out)
+{
+    if (!out) return P4_TABLE_INVALID;
+    *out = NULL;
+    return active ? p4_game_knowledge_capture(active, out) : P4_TABLE_OK;
+}
+uint64_t p4_game_knowledge_battle_digest(void) { return p4_game_knowledge_state_digest(active); }
+int p4_game_knowledge_battle_matches(const P4GameKnowledgeCapture *capture)
+{
+    if (!active) return capture ? P4_TABLE_CONFLICT : P4_TABLE_OK;
+    return p4_game_knowledge_capture_matches(active, capture);
+}
+int p4_game_knowledge_battle_restore(const P4GameKnowledgeCapture *capture)
+{
+    if (!active) return capture ? P4_TABLE_CONFLICT : P4_TABLE_OK;
+    return p4_game_knowledge_restore(active, capture);
+}
 const P4GameTables *p4_game_knowledge_native_snapshot(void) { return active_tables; }
 
 /* Where the native affinity resolver answers this frame for this defender, and

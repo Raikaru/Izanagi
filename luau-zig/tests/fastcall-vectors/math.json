@@ -1,0 +1,1671 @@
+{
+  "version": 1,
+  "cases": [
+    {
+      "id": 2,
+      "path": "fast",
+      "name": "2-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return math.abs(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 2,
+      "path": "fallback",
+      "name": "2-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return math.abs(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 3,
+      "path": "fast",
+      "name": "3-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return math.acos(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 3,
+      "path": "fallback",
+      "name": "3-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return math.acos(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 4,
+      "path": "fast",
+      "name": "4-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return math.asin(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 4,
+      "path": "fallback",
+      "name": "4-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return math.asin(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 5,
+      "path": "fast",
+      "name": "5-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return math.atan2(x, y)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 5,
+      "path": "fallback",
+      "name": "5-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return math.atan2(x, y)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 6,
+      "path": "fast",
+      "name": "6-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return math.atan(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 6,
+      "path": "fallback",
+      "name": "6-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return math.atan(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 7,
+      "path": "fast",
+      "name": "7-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return math.ceil(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 7,
+      "path": "fallback",
+      "name": "7-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return math.ceil(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 8,
+      "path": "fast",
+      "name": "8-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return math.cosh(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 8,
+      "path": "fallback",
+      "name": "8-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return math.cosh(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 9,
+      "path": "fast",
+      "name": "9-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return math.cos(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 9,
+      "path": "fallback",
+      "name": "9-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return math.cos(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 10,
+      "path": "fast",
+      "name": "10-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return math.deg(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 10,
+      "path": "fallback",
+      "name": "10-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return math.deg(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 11,
+      "path": "fast",
+      "name": "11-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return math.exp(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 11,
+      "path": "fallback",
+      "name": "11-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return math.exp(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 12,
+      "path": "fast",
+      "name": "12-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return math.floor(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 12,
+      "path": "fallback",
+      "name": "12-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return math.floor(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 13,
+      "path": "fast",
+      "name": "13-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return math.fmod(x, y)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 13,
+      "path": "fallback",
+      "name": "13-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return math.fmod(x, y)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 14,
+      "path": "fast",
+      "name": "14-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return math.frexp(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 14,
+      "path": "fallback",
+      "name": "14-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return math.frexp(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 15,
+      "path": "fast",
+      "name": "15-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return math.ldexp(x, y)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 15,
+      "path": "fallback",
+      "name": "15-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return math.ldexp(x, y)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 16,
+      "path": "fast",
+      "name": "16-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return math.log10(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 16,
+      "path": "fallback",
+      "name": "16-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return math.log10(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 17,
+      "path": "fast",
+      "name": "17-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return math.log(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 17,
+      "path": "fallback",
+      "name": "17-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return math.log(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 18,
+      "path": "fast",
+      "name": "18-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return math.max(x, y)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 18,
+      "path": "fallback",
+      "name": "18-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return math.max(x, y)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 19,
+      "path": "fast",
+      "name": "19-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return math.min(x, y)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 19,
+      "path": "fallback",
+      "name": "19-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return math.min(x, y)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 20,
+      "path": "fast",
+      "name": "20-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return math.modf(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 20,
+      "path": "fallback",
+      "name": "20-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return math.modf(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 21,
+      "path": "fast",
+      "name": "21-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return math.pow(x, y)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 21,
+      "path": "fallback",
+      "name": "21-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return math.pow(x, y)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 22,
+      "path": "fast",
+      "name": "22-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return math.rad(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 22,
+      "path": "fallback",
+      "name": "22-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return math.rad(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 23,
+      "path": "fast",
+      "name": "23-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return math.sinh(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 23,
+      "path": "fallback",
+      "name": "23-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return math.sinh(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 24,
+      "path": "fast",
+      "name": "24-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return math.sin(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 24,
+      "path": "fallback",
+      "name": "24-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return math.sin(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 25,
+      "path": "fast",
+      "name": "25-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return math.sqrt(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 25,
+      "path": "fallback",
+      "name": "25-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return math.sqrt(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 26,
+      "path": "fast",
+      "name": "26-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return math.tanh(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 26,
+      "path": "fallback",
+      "name": "26-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return math.tanh(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 27,
+      "path": "fast",
+      "name": "27-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return math.tan(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 27,
+      "path": "fallback",
+      "name": "27-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return math.tan(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 28,
+      "path": "fast",
+      "name": "28-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return bit32.arshift(x, y)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 28,
+      "path": "fallback",
+      "name": "28-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return bit32.arshift(x, y)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 29,
+      "path": "fast",
+      "name": "29-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return bit32.band(x, y)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 29,
+      "path": "fallback",
+      "name": "29-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return bit32.band(x, y)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 30,
+      "path": "fast",
+      "name": "30-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return bit32.bnot(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 30,
+      "path": "fallback",
+      "name": "30-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return bit32.bnot(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 31,
+      "path": "fast",
+      "name": "31-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return bit32.bor(x, y)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 31,
+      "path": "fallback",
+      "name": "31-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return bit32.bor(x, y)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 32,
+      "path": "fast",
+      "name": "32-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return bit32.bxor(x, y)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 32,
+      "path": "fallback",
+      "name": "32-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return bit32.bxor(x, y)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 33,
+      "path": "fast",
+      "name": "33-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return bit32.btest(x, y)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 33,
+      "path": "fallback",
+      "name": "33-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return bit32.btest(x, y)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 34,
+      "path": "fast",
+      "name": "34-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return bit32.extract(x, y, z)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 34,
+      "path": "fallback",
+      "name": "34-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return bit32.extract(x, y, z)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 35,
+      "path": "fast",
+      "name": "35-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return bit32.lrotate(x, y)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 35,
+      "path": "fallback",
+      "name": "35-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return bit32.lrotate(x, y)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 36,
+      "path": "fast",
+      "name": "36-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return bit32.lshift(x, y)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 36,
+      "path": "fallback",
+      "name": "36-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return bit32.lshift(x, y)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 37,
+      "path": "fast",
+      "name": "37-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return bit32.replace(x, y, z)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 37,
+      "path": "fallback",
+      "name": "37-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return bit32.replace(x, y, z)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 38,
+      "path": "fast",
+      "name": "38-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return bit32.rrotate(x, y)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 38,
+      "path": "fallback",
+      "name": "38-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return bit32.rrotate(x, y)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 39,
+      "path": "fast",
+      "name": "39-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return bit32.rshift(x, y)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 39,
+      "path": "fallback",
+      "name": "39-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return bit32.rshift(x, y)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 46,
+      "path": "fast",
+      "name": "46-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return math.clamp(x, y, z)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 46,
+      "path": "fallback",
+      "name": "46-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return math.clamp(x, y, z)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 47,
+      "path": "fast",
+      "name": "47-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return math.sign(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 47,
+      "path": "fallback",
+      "name": "47-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return math.sign(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 48,
+      "path": "fast",
+      "name": "48-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return math.round(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 48,
+      "path": "fallback",
+      "name": "48-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return math.round(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 55,
+      "path": "fast",
+      "name": "55-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return bit32.countlz(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 55,
+      "path": "fallback",
+      "name": "55-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return bit32.countlz(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 56,
+      "path": "fast",
+      "name": "56-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return bit32.countrz(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 56,
+      "path": "fallback",
+      "name": "56-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return bit32.countrz(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 59,
+      "path": "fast",
+      "name": "59-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return bit32.extract(x, 1, 2)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 59,
+      "path": "fallback",
+      "name": "59-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return bit32.extract(x, 1, 2)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 64,
+      "path": "fast",
+      "name": "64-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return bit32.byteswap(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 64,
+      "path": "fallback",
+      "name": "64-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return bit32.byteswap(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 89,
+      "path": "fast",
+      "name": "89-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return math.lerp(x, y, z)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 89,
+      "path": "fallback",
+      "name": "89-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return math.lerp(x, y, z)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 91,
+      "path": "fast",
+      "name": "91-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return math.isnan(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 91,
+      "path": "fallback",
+      "name": "91-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return math.isnan(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 92,
+      "path": "fast",
+      "name": "92-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return math.isinf(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 92,
+      "path": "fallback",
+      "name": "92-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return math.isinf(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 93,
+      "path": "fast",
+      "name": "93-fast",
+      "setup": "x = 4; y = 2; z = 3",
+      "source": "return math.isfinite(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 93,
+      "path": "fallback",
+      "name": "93-fallback",
+      "setup": "x = '4'; y = 2; z = 3",
+      "source": "return math.isfinite(x)",
+      "observe": [
+        "x",
+        "y",
+        "z"
+      ],
+      "compiler_flags": []
+    },
+{"id":2,"path":"fast","name":"2-dense-0","setup":"x = 0.7875; y = 2; z = 3","source":"return math.abs(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":2,"path":"fast","name":"2-dense-1","setup":"x = 0.7139; y = 2; z = 3","source":"return math.abs(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":2,"path":"fast","name":"2-dense-2","setup":"x = 0.6736; y = 2; z = 3","source":"return math.abs(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":2,"path":"fast","name":"2-dense-3","setup":"x = -0.4703; y = 2; z = 3","source":"return math.abs(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":2,"path":"fast","name":"2-dense-4","setup":"x = -0.4398; y = 2; z = 3","source":"return math.abs(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":2,"path":"fast","name":"2-dense-5","setup":"x = 0.6287; y = 2; z = 3","source":"return math.abs(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":2,"path":"fast","name":"2-dense-6","setup":"x = 0.6323; y = 2; z = 3","source":"return math.abs(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":2,"path":"fast","name":"2-dense-7","setup":"x = 0.4822; y = 2; z = 3","source":"return math.abs(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":3,"path":"fast","name":"3-dense-0","setup":"x = 0.9195; y = 2; z = 3","source":"return math.acos(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":3,"path":"fast","name":"3-dense-1","setup":"x = -0.2059; y = 2; z = 3","source":"return math.acos(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":3,"path":"fast","name":"3-dense-2","setup":"x = 0.4431; y = 2; z = 3","source":"return math.acos(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":3,"path":"fast","name":"3-dense-3","setup":"x = 0.6875; y = 2; z = 3","source":"return math.acos(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":3,"path":"fast","name":"3-dense-4","setup":"x = -0.2352; y = 2; z = 3","source":"return math.acos(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":3,"path":"fast","name":"3-dense-5","setup":"x = 0.4975; y = 2; z = 3","source":"return math.acos(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":3,"path":"fast","name":"3-dense-6","setup":"x = -0.7849; y = 2; z = 3","source":"return math.acos(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":3,"path":"fast","name":"3-dense-7","setup":"x = -0.3145; y = 2; z = 3","source":"return math.acos(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":4,"path":"fast","name":"4-dense-0","setup":"x = -0.942; y = 2; z = 3","source":"return math.asin(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":4,"path":"fast","name":"4-dense-1","setup":"x = -0.1001; y = 2; z = 3","source":"return math.asin(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":4,"path":"fast","name":"4-dense-2","setup":"x = 0.0025; y = 2; z = 3","source":"return math.asin(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":4,"path":"fast","name":"4-dense-3","setup":"x = -0.1675; y = 2; z = 3","source":"return math.asin(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":4,"path":"fast","name":"4-dense-4","setup":"x = 0.18; y = 2; z = 3","source":"return math.asin(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":4,"path":"fast","name":"4-dense-5","setup":"x = -0.0114; y = 2; z = 3","source":"return math.asin(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":4,"path":"fast","name":"4-dense-6","setup":"x = -0.8674; y = 2; z = 3","source":"return math.asin(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":4,"path":"fast","name":"4-dense-7","setup":"x = -0.7292; y = 2; z = 3","source":"return math.asin(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":5,"path":"fast","name":"5-dense-0","setup":"x = 0.1886; y = 2; z = 3","source":"return math.atan2(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":5,"path":"fast","name":"5-dense-1","setup":"x = 0.6523; y = 2; z = 3","source":"return math.atan2(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":5,"path":"fast","name":"5-dense-2","setup":"x = -0.4446; y = 2; z = 3","source":"return math.atan2(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":5,"path":"fast","name":"5-dense-3","setup":"x = 0.7755; y = 2; z = 3","source":"return math.atan2(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":5,"path":"fast","name":"5-dense-4","setup":"x = -0.7049; y = 2; z = 3","source":"return math.atan2(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":5,"path":"fast","name":"5-dense-5","setup":"x = -0.4412; y = 2; z = 3","source":"return math.atan2(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":5,"path":"fast","name":"5-dense-6","setup":"x = -0.5446; y = 2; z = 3","source":"return math.atan2(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":5,"path":"fast","name":"5-dense-7","setup":"x = -0.1472; y = 2; z = 3","source":"return math.atan2(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":6,"path":"fast","name":"6-dense-0","setup":"x = 0.891; y = 2; z = 3","source":"return math.atan(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":6,"path":"fast","name":"6-dense-1","setup":"x = -0.7543; y = 2; z = 3","source":"return math.atan(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":6,"path":"fast","name":"6-dense-2","setup":"x = -0.6657; y = 2; z = 3","source":"return math.atan(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":6,"path":"fast","name":"6-dense-3","setup":"x = -0.4492; y = 2; z = 3","source":"return math.atan(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":6,"path":"fast","name":"6-dense-4","setup":"x = -0.9156; y = 2; z = 3","source":"return math.atan(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":6,"path":"fast","name":"6-dense-5","setup":"x = 0.4648; y = 2; z = 3","source":"return math.atan(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":6,"path":"fast","name":"6-dense-6","setup":"x = -0.3057; y = 2; z = 3","source":"return math.atan(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":6,"path":"fast","name":"6-dense-7","setup":"x = 0.5281; y = 2; z = 3","source":"return math.atan(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":7,"path":"fast","name":"7-dense-0","setup":"x = 0.1292; y = 2; z = 3","source":"return math.ceil(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":7,"path":"fast","name":"7-dense-1","setup":"x = 0.4086; y = 2; z = 3","source":"return math.ceil(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":7,"path":"fast","name":"7-dense-2","setup":"x = 0.6265; y = 2; z = 3","source":"return math.ceil(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":7,"path":"fast","name":"7-dense-3","setup":"x = -0.4481; y = 2; z = 3","source":"return math.ceil(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":7,"path":"fast","name":"7-dense-4","setup":"x = -0.9226; y = 2; z = 3","source":"return math.ceil(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":7,"path":"fast","name":"7-dense-5","setup":"x = 0.3439; y = 2; z = 3","source":"return math.ceil(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":7,"path":"fast","name":"7-dense-6","setup":"x = -0.8018; y = 2; z = 3","source":"return math.ceil(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":7,"path":"fast","name":"7-dense-7","setup":"x = -0.5293; y = 2; z = 3","source":"return math.ceil(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":8,"path":"fast","name":"8-dense-0","setup":"x = 0.8284; y = 2; z = 3","source":"return math.cosh(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":8,"path":"fast","name":"8-dense-1","setup":"x = 0.493; y = 2; z = 3","source":"return math.cosh(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":8,"path":"fast","name":"8-dense-2","setup":"x = 0.8352; y = 2; z = 3","source":"return math.cosh(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":8,"path":"fast","name":"8-dense-3","setup":"x = -0.0385; y = 2; z = 3","source":"return math.cosh(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":8,"path":"fast","name":"8-dense-4","setup":"x = 0.5765; y = 2; z = 3","source":"return math.cosh(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":8,"path":"fast","name":"8-dense-5","setup":"x = -0.8719; y = 2; z = 3","source":"return math.cosh(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":8,"path":"fast","name":"8-dense-6","setup":"x = -0.195; y = 2; z = 3","source":"return math.cosh(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":8,"path":"fast","name":"8-dense-7","setup":"x = -0.2106; y = 2; z = 3","source":"return math.cosh(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":9,"path":"fast","name":"9-dense-0","setup":"x = 0.2614; y = 2; z = 3","source":"return math.cos(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":9,"path":"fast","name":"9-dense-1","setup":"x = -0.9248; y = 2; z = 3","source":"return math.cos(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":9,"path":"fast","name":"9-dense-2","setup":"x = 0.9086; y = 2; z = 3","source":"return math.cos(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":9,"path":"fast","name":"9-dense-3","setup":"x = -0.5421; y = 2; z = 3","source":"return math.cos(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":9,"path":"fast","name":"9-dense-4","setup":"x = -0.3158; y = 2; z = 3","source":"return math.cos(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":9,"path":"fast","name":"9-dense-5","setup":"x = 0.0908; y = 2; z = 3","source":"return math.cos(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":9,"path":"fast","name":"9-dense-6","setup":"x = 0.3192; y = 2; z = 3","source":"return math.cos(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":9,"path":"fast","name":"9-dense-7","setup":"x = 0.3114; y = 2; z = 3","source":"return math.cos(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":10,"path":"fast","name":"10-dense-0","setup":"x = 0.083; y = 2; z = 3","source":"return math.deg(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":10,"path":"fast","name":"10-dense-1","setup":"x = -0.1653; y = 2; z = 3","source":"return math.deg(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":10,"path":"fast","name":"10-dense-2","setup":"x = -0.9247; y = 2; z = 3","source":"return math.deg(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":10,"path":"fast","name":"10-dense-3","setup":"x = -0.5941; y = 2; z = 3","source":"return math.deg(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":10,"path":"fast","name":"10-dense-4","setup":"x = -0.253; y = 2; z = 3","source":"return math.deg(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":10,"path":"fast","name":"10-dense-5","setup":"x = 0.2487; y = 2; z = 3","source":"return math.deg(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":10,"path":"fast","name":"10-dense-6","setup":"x = -0.1343; y = 2; z = 3","source":"return math.deg(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":10,"path":"fast","name":"10-dense-7","setup":"x = -0.6176; y = 2; z = 3","source":"return math.deg(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":11,"path":"fast","name":"11-dense-0","setup":"x = -0.6549; y = 2; z = 3","source":"return math.exp(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":11,"path":"fast","name":"11-dense-1","setup":"x = -0.8548; y = 2; z = 3","source":"return math.exp(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":11,"path":"fast","name":"11-dense-2","setup":"x = -0.7924; y = 2; z = 3","source":"return math.exp(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":11,"path":"fast","name":"11-dense-3","setup":"x = -0.1173; y = 2; z = 3","source":"return math.exp(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":11,"path":"fast","name":"11-dense-4","setup":"x = -0.5891; y = 2; z = 3","source":"return math.exp(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":11,"path":"fast","name":"11-dense-5","setup":"x = 0.7775; y = 2; z = 3","source":"return math.exp(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":11,"path":"fast","name":"11-dense-6","setup":"x = 0.645; y = 2; z = 3","source":"return math.exp(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":11,"path":"fast","name":"11-dense-7","setup":"x = 0.4368; y = 2; z = 3","source":"return math.exp(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":12,"path":"fast","name":"12-dense-0","setup":"x = -0.6462; y = 2; z = 3","source":"return math.floor(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":12,"path":"fast","name":"12-dense-1","setup":"x = 0.0456; y = 2; z = 3","source":"return math.floor(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":12,"path":"fast","name":"12-dense-2","setup":"x = -0.6204; y = 2; z = 3","source":"return math.floor(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":12,"path":"fast","name":"12-dense-3","setup":"x = 0.7087; y = 2; z = 3","source":"return math.floor(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":12,"path":"fast","name":"12-dense-4","setup":"x = 0.0165; y = 2; z = 3","source":"return math.floor(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":12,"path":"fast","name":"12-dense-5","setup":"x = 0.9026; y = 2; z = 3","source":"return math.floor(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":12,"path":"fast","name":"12-dense-6","setup":"x = 0.6921; y = 2; z = 3","source":"return math.floor(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":12,"path":"fast","name":"12-dense-7","setup":"x = 0.594; y = 2; z = 3","source":"return math.floor(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":13,"path":"fast","name":"13-dense-0","setup":"x = -0.5069; y = 2; z = 3","source":"return math.fmod(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":13,"path":"fast","name":"13-dense-1","setup":"x = 0.5453; y = 2; z = 3","source":"return math.fmod(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":13,"path":"fast","name":"13-dense-2","setup":"x = -0.8382; y = 2; z = 3","source":"return math.fmod(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":13,"path":"fast","name":"13-dense-3","setup":"x = 0.8851; y = 2; z = 3","source":"return math.fmod(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":13,"path":"fast","name":"13-dense-4","setup":"x = 0.1862; y = 2; z = 3","source":"return math.fmod(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":13,"path":"fast","name":"13-dense-5","setup":"x = 0.4801; y = 2; z = 3","source":"return math.fmod(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":13,"path":"fast","name":"13-dense-6","setup":"x = -0.8681; y = 2; z = 3","source":"return math.fmod(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":13,"path":"fast","name":"13-dense-7","setup":"x = -0.334; y = 2; z = 3","source":"return math.fmod(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":14,"path":"fast","name":"14-dense-0","setup":"x = 0.8848; y = 2; z = 3","source":"return math.frexp(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":14,"path":"fast","name":"14-dense-1","setup":"x = -0.111; y = 2; z = 3","source":"return math.frexp(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":14,"path":"fast","name":"14-dense-2","setup":"x = 0.2313; y = 2; z = 3","source":"return math.frexp(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":14,"path":"fast","name":"14-dense-3","setup":"x = -0.3783; y = 2; z = 3","source":"return math.frexp(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":14,"path":"fast","name":"14-dense-4","setup":"x = 0.122; y = 2; z = 3","source":"return math.frexp(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":14,"path":"fast","name":"14-dense-5","setup":"x = -0.6208; y = 2; z = 3","source":"return math.frexp(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":14,"path":"fast","name":"14-dense-6","setup":"x = -0.8328; y = 2; z = 3","source":"return math.frexp(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":14,"path":"fast","name":"14-dense-7","setup":"x = -0.1314; y = 2; z = 3","source":"return math.frexp(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":15,"path":"fast","name":"15-dense-0","setup":"x = 0.9122; y = 2; z = 3","source":"return math.ldexp(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":15,"path":"fast","name":"15-dense-1","setup":"x = -0.2772; y = 2; z = 3","source":"return math.ldexp(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":15,"path":"fast","name":"15-dense-2","setup":"x = -0.8572; y = 2; z = 3","source":"return math.ldexp(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":15,"path":"fast","name":"15-dense-3","setup":"x = -0.7624; y = 2; z = 3","source":"return math.ldexp(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":15,"path":"fast","name":"15-dense-4","setup":"x = 0.5159; y = 2; z = 3","source":"return math.ldexp(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":15,"path":"fast","name":"15-dense-5","setup":"x = -0.1711; y = 2; z = 3","source":"return math.ldexp(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":15,"path":"fast","name":"15-dense-6","setup":"x = 0.8648; y = 2; z = 3","source":"return math.ldexp(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":15,"path":"fast","name":"15-dense-7","setup":"x = -0.4776; y = 2; z = 3","source":"return math.ldexp(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":16,"path":"fast","name":"16-dense-0","setup":"x = -0.4656; y = 2; z = 3","source":"return math.log10(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":16,"path":"fast","name":"16-dense-1","setup":"x = 0.727; y = 2; z = 3","source":"return math.log10(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":16,"path":"fast","name":"16-dense-2","setup":"x = 0.1708; y = 2; z = 3","source":"return math.log10(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":16,"path":"fast","name":"16-dense-3","setup":"x = 0.1002; y = 2; z = 3","source":"return math.log10(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":16,"path":"fast","name":"16-dense-4","setup":"x = 0.1815; y = 2; z = 3","source":"return math.log10(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":16,"path":"fast","name":"16-dense-5","setup":"x = -0.1599; y = 2; z = 3","source":"return math.log10(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":16,"path":"fast","name":"16-dense-6","setup":"x = 0.9177; y = 2; z = 3","source":"return math.log10(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":16,"path":"fast","name":"16-dense-7","setup":"x = 0.0016; y = 2; z = 3","source":"return math.log10(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":17,"path":"fast","name":"17-dense-0","setup":"x = 0.2903; y = 2; z = 3","source":"return math.log(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":17,"path":"fast","name":"17-dense-1","setup":"x = -0.1752; y = 2; z = 3","source":"return math.log(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":17,"path":"fast","name":"17-dense-2","setup":"x = -0.8198; y = 2; z = 3","source":"return math.log(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":17,"path":"fast","name":"17-dense-3","setup":"x = -0.2773; y = 2; z = 3","source":"return math.log(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":17,"path":"fast","name":"17-dense-4","setup":"x = -0.5582; y = 2; z = 3","source":"return math.log(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":17,"path":"fast","name":"17-dense-5","setup":"x = -0.9332; y = 2; z = 3","source":"return math.log(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":17,"path":"fast","name":"17-dense-6","setup":"x = -0.4881; y = 2; z = 3","source":"return math.log(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":17,"path":"fast","name":"17-dense-7","setup":"x = -0.7222; y = 2; z = 3","source":"return math.log(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":18,"path":"fast","name":"18-dense-0","setup":"x = 0.1378; y = 2; z = 3","source":"return math.max(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":18,"path":"fast","name":"18-dense-1","setup":"x = -0.247; y = 2; z = 3","source":"return math.max(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":18,"path":"fast","name":"18-dense-2","setup":"x = -0.8257; y = 2; z = 3","source":"return math.max(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":18,"path":"fast","name":"18-dense-3","setup":"x = 0.6667; y = 2; z = 3","source":"return math.max(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":18,"path":"fast","name":"18-dense-4","setup":"x = 0.2353; y = 2; z = 3","source":"return math.max(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":18,"path":"fast","name":"18-dense-5","setup":"x = -0.2258; y = 2; z = 3","source":"return math.max(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":18,"path":"fast","name":"18-dense-6","setup":"x = 0.7401; y = 2; z = 3","source":"return math.max(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":18,"path":"fast","name":"18-dense-7","setup":"x = 0.5346; y = 2; z = 3","source":"return math.max(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":19,"path":"fast","name":"19-dense-0","setup":"x = 0.6869; y = 2; z = 3","source":"return math.min(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":19,"path":"fast","name":"19-dense-1","setup":"x = 0.3104; y = 2; z = 3","source":"return math.min(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":19,"path":"fast","name":"19-dense-2","setup":"x = 0.4658; y = 2; z = 3","source":"return math.min(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":19,"path":"fast","name":"19-dense-3","setup":"x = -0.1722; y = 2; z = 3","source":"return math.min(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":19,"path":"fast","name":"19-dense-4","setup":"x = 0.8604; y = 2; z = 3","source":"return math.min(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":19,"path":"fast","name":"19-dense-5","setup":"x = 0.8851; y = 2; z = 3","source":"return math.min(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":19,"path":"fast","name":"19-dense-6","setup":"x = -0.6526; y = 2; z = 3","source":"return math.min(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":19,"path":"fast","name":"19-dense-7","setup":"x = -0.2746; y = 2; z = 3","source":"return math.min(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":20,"path":"fast","name":"20-dense-0","setup":"x = 0.719; y = 2; z = 3","source":"return math.modf(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":20,"path":"fast","name":"20-dense-1","setup":"x = 0.2223; y = 2; z = 3","source":"return math.modf(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":20,"path":"fast","name":"20-dense-2","setup":"x = -0.0447; y = 2; z = 3","source":"return math.modf(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":20,"path":"fast","name":"20-dense-3","setup":"x = 0.084; y = 2; z = 3","source":"return math.modf(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":20,"path":"fast","name":"20-dense-4","setup":"x = 0.4818; y = 2; z = 3","source":"return math.modf(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":20,"path":"fast","name":"20-dense-5","setup":"x = 0.5367; y = 2; z = 3","source":"return math.modf(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":20,"path":"fast","name":"20-dense-6","setup":"x = 0.926; y = 2; z = 3","source":"return math.modf(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":20,"path":"fast","name":"20-dense-7","setup":"x = -0.3974; y = 2; z = 3","source":"return math.modf(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":21,"path":"fast","name":"21-dense-0","setup":"x = 0.4711; y = 2; z = 3","source":"return math.pow(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":21,"path":"fast","name":"21-dense-1","setup":"x = -0.4962; y = 2; z = 3","source":"return math.pow(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":21,"path":"fast","name":"21-dense-2","setup":"x = 0.9291; y = 2; z = 3","source":"return math.pow(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":21,"path":"fast","name":"21-dense-3","setup":"x = -0.8586; y = 2; z = 3","source":"return math.pow(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":21,"path":"fast","name":"21-dense-4","setup":"x = 0.4323; y = 2; z = 3","source":"return math.pow(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":21,"path":"fast","name":"21-dense-5","setup":"x = -0.3755; y = 2; z = 3","source":"return math.pow(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":21,"path":"fast","name":"21-dense-6","setup":"x = -0.3423; y = 2; z = 3","source":"return math.pow(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":21,"path":"fast","name":"21-dense-7","setup":"x = -0.9046; y = 2; z = 3","source":"return math.pow(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":22,"path":"fast","name":"22-dense-0","setup":"x = 0.5326; y = 2; z = 3","source":"return math.rad(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":22,"path":"fast","name":"22-dense-1","setup":"x = -0.8872; y = 2; z = 3","source":"return math.rad(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":22,"path":"fast","name":"22-dense-2","setup":"x = -0.2601; y = 2; z = 3","source":"return math.rad(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":22,"path":"fast","name":"22-dense-3","setup":"x = -0.8233; y = 2; z = 3","source":"return math.rad(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":22,"path":"fast","name":"22-dense-4","setup":"x = -0.1812; y = 2; z = 3","source":"return math.rad(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":22,"path":"fast","name":"22-dense-5","setup":"x = 0.2989; y = 2; z = 3","source":"return math.rad(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":22,"path":"fast","name":"22-dense-6","setup":"x = -0.6086; y = 2; z = 3","source":"return math.rad(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":22,"path":"fast","name":"22-dense-7","setup":"x = -0.5728; y = 2; z = 3","source":"return math.rad(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":23,"path":"fast","name":"23-dense-0","setup":"x = -0.6652; y = 2; z = 3","source":"return math.sinh(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":23,"path":"fast","name":"23-dense-1","setup":"x = -0.6698; y = 2; z = 3","source":"return math.sinh(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":23,"path":"fast","name":"23-dense-2","setup":"x = 0.2362; y = 2; z = 3","source":"return math.sinh(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":23,"path":"fast","name":"23-dense-3","setup":"x = -0.8283; y = 2; z = 3","source":"return math.sinh(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":23,"path":"fast","name":"23-dense-4","setup":"x = -0.5986; y = 2; z = 3","source":"return math.sinh(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":23,"path":"fast","name":"23-dense-5","setup":"x = -0.5084; y = 2; z = 3","source":"return math.sinh(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":23,"path":"fast","name":"23-dense-6","setup":"x = -0.3111; y = 2; z = 3","source":"return math.sinh(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":23,"path":"fast","name":"23-dense-7","setup":"x = 0.731; y = 2; z = 3","source":"return math.sinh(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":24,"path":"fast","name":"24-dense-0","setup":"x = 0.3767; y = 2; z = 3","source":"return math.sin(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":24,"path":"fast","name":"24-dense-1","setup":"x = -0.77; y = 2; z = 3","source":"return math.sin(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":24,"path":"fast","name":"24-dense-2","setup":"x = -0.8313; y = 2; z = 3","source":"return math.sin(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":24,"path":"fast","name":"24-dense-3","setup":"x = 0.5984; y = 2; z = 3","source":"return math.sin(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":24,"path":"fast","name":"24-dense-4","setup":"x = -0.0691; y = 2; z = 3","source":"return math.sin(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":24,"path":"fast","name":"24-dense-5","setup":"x = 0.7613; y = 2; z = 3","source":"return math.sin(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":24,"path":"fast","name":"24-dense-6","setup":"x = 0.453; y = 2; z = 3","source":"return math.sin(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":24,"path":"fast","name":"24-dense-7","setup":"x = 0.5377; y = 2; z = 3","source":"return math.sin(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":25,"path":"fast","name":"25-dense-0","setup":"x = 0.7113; y = 2; z = 3","source":"return math.sqrt(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":25,"path":"fast","name":"25-dense-1","setup":"x = 0.4484; y = 2; z = 3","source":"return math.sqrt(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":25,"path":"fast","name":"25-dense-2","setup":"x = -0.6032; y = 2; z = 3","source":"return math.sqrt(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":25,"path":"fast","name":"25-dense-3","setup":"x = -0.5322; y = 2; z = 3","source":"return math.sqrt(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":25,"path":"fast","name":"25-dense-4","setup":"x = -0.921; y = 2; z = 3","source":"return math.sqrt(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":25,"path":"fast","name":"25-dense-5","setup":"x = -0.0403; y = 2; z = 3","source":"return math.sqrt(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":25,"path":"fast","name":"25-dense-6","setup":"x = 0.0511; y = 2; z = 3","source":"return math.sqrt(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":25,"path":"fast","name":"25-dense-7","setup":"x = -0.4708; y = 2; z = 3","source":"return math.sqrt(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":26,"path":"fast","name":"26-dense-0","setup":"x = -0.8944; y = 2; z = 3","source":"return math.tanh(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":26,"path":"fast","name":"26-dense-1","setup":"x = 0.6679; y = 2; z = 3","source":"return math.tanh(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":26,"path":"fast","name":"26-dense-2","setup":"x = -0.1248; y = 2; z = 3","source":"return math.tanh(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":26,"path":"fast","name":"26-dense-3","setup":"x = -0.6703; y = 2; z = 3","source":"return math.tanh(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":26,"path":"fast","name":"26-dense-4","setup":"x = 0.0306; y = 2; z = 3","source":"return math.tanh(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":26,"path":"fast","name":"26-dense-5","setup":"x = 0.4118; y = 2; z = 3","source":"return math.tanh(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":26,"path":"fast","name":"26-dense-6","setup":"x = 0.8261; y = 2; z = 3","source":"return math.tanh(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":26,"path":"fast","name":"26-dense-7","setup":"x = -0.2333; y = 2; z = 3","source":"return math.tanh(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":27,"path":"fast","name":"27-dense-0","setup":"x = 0.482; y = 2; z = 3","source":"return math.tan(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":27,"path":"fast","name":"27-dense-1","setup":"x = -0.7679; y = 2; z = 3","source":"return math.tan(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":27,"path":"fast","name":"27-dense-2","setup":"x = 0.0371; y = 2; z = 3","source":"return math.tan(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":27,"path":"fast","name":"27-dense-3","setup":"x = -0.5845; y = 2; z = 3","source":"return math.tan(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":27,"path":"fast","name":"27-dense-4","setup":"x = -0.5121; y = 2; z = 3","source":"return math.tan(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":27,"path":"fast","name":"27-dense-5","setup":"x = 0.479; y = 2; z = 3","source":"return math.tan(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":27,"path":"fast","name":"27-dense-6","setup":"x = 0.1683; y = 2; z = 3","source":"return math.tan(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":27,"path":"fast","name":"27-dense-7","setup":"x = 0.8118; y = 2; z = 3","source":"return math.tan(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":28,"path":"fast","name":"28-dense-0","setup":"x = -988; y = 2; z = 3","source":"return bit32.arshift(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":28,"path":"fast","name":"28-dense-1","setup":"x = -683; y = 2; z = 3","source":"return bit32.arshift(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":28,"path":"fast","name":"28-dense-2","setup":"x = -174; y = 2; z = 3","source":"return bit32.arshift(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":28,"path":"fast","name":"28-dense-3","setup":"x = 937; y = 2; z = 3","source":"return bit32.arshift(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":28,"path":"fast","name":"28-dense-4","setup":"x = 543; y = 2; z = 3","source":"return bit32.arshift(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":28,"path":"fast","name":"28-dense-5","setup":"x = -895; y = 2; z = 3","source":"return bit32.arshift(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":28,"path":"fast","name":"28-dense-6","setup":"x = -810; y = 2; z = 3","source":"return bit32.arshift(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":28,"path":"fast","name":"28-dense-7","setup":"x = -216; y = 2; z = 3","source":"return bit32.arshift(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":29,"path":"fast","name":"29-dense-0","setup":"x = -44; y = 2; z = 3","source":"return bit32.band(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":29,"path":"fast","name":"29-dense-1","setup":"x = 54; y = 2; z = 3","source":"return bit32.band(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":29,"path":"fast","name":"29-dense-2","setup":"x = 484; y = 2; z = 3","source":"return bit32.band(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":29,"path":"fast","name":"29-dense-3","setup":"x = -125; y = 2; z = 3","source":"return bit32.band(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":29,"path":"fast","name":"29-dense-4","setup":"x = -884; y = 2; z = 3","source":"return bit32.band(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":29,"path":"fast","name":"29-dense-5","setup":"x = -110; y = 2; z = 3","source":"return bit32.band(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":29,"path":"fast","name":"29-dense-6","setup":"x = -390; y = 2; z = 3","source":"return bit32.band(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":29,"path":"fast","name":"29-dense-7","setup":"x = 263; y = 2; z = 3","source":"return bit32.band(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":30,"path":"fast","name":"30-dense-0","setup":"x = -178; y = 2; z = 3","source":"return bit32.bnot(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":30,"path":"fast","name":"30-dense-1","setup":"x = 124; y = 2; z = 3","source":"return bit32.bnot(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":30,"path":"fast","name":"30-dense-2","setup":"x = 568; y = 2; z = 3","source":"return bit32.bnot(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":30,"path":"fast","name":"30-dense-3","setup":"x = -825; y = 2; z = 3","source":"return bit32.bnot(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":30,"path":"fast","name":"30-dense-4","setup":"x = 174; y = 2; z = 3","source":"return bit32.bnot(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":30,"path":"fast","name":"30-dense-5","setup":"x = -484; y = 2; z = 3","source":"return bit32.bnot(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":30,"path":"fast","name":"30-dense-6","setup":"x = 495; y = 2; z = 3","source":"return bit32.bnot(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":30,"path":"fast","name":"30-dense-7","setup":"x = 841; y = 2; z = 3","source":"return bit32.bnot(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":31,"path":"fast","name":"31-dense-0","setup":"x = 454; y = 2; z = 3","source":"return bit32.bor(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":31,"path":"fast","name":"31-dense-1","setup":"x = 54; y = 2; z = 3","source":"return bit32.bor(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":31,"path":"fast","name":"31-dense-2","setup":"x = 688; y = 2; z = 3","source":"return bit32.bor(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":31,"path":"fast","name":"31-dense-3","setup":"x = 945; y = 2; z = 3","source":"return bit32.bor(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":31,"path":"fast","name":"31-dense-4","setup":"x = 31; y = 2; z = 3","source":"return bit32.bor(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":31,"path":"fast","name":"31-dense-5","setup":"x = 249; y = 2; z = 3","source":"return bit32.bor(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":31,"path":"fast","name":"31-dense-6","setup":"x = -374; y = 2; z = 3","source":"return bit32.bor(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":31,"path":"fast","name":"31-dense-7","setup":"x = 915; y = 2; z = 3","source":"return bit32.bor(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":32,"path":"fast","name":"32-dense-0","setup":"x = 868; y = 2; z = 3","source":"return bit32.bxor(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":32,"path":"fast","name":"32-dense-1","setup":"x = -56; y = 2; z = 3","source":"return bit32.bxor(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":32,"path":"fast","name":"32-dense-2","setup":"x = 95; y = 2; z = 3","source":"return bit32.bxor(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":32,"path":"fast","name":"32-dense-3","setup":"x = 98; y = 2; z = 3","source":"return bit32.bxor(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":32,"path":"fast","name":"32-dense-4","setup":"x = -352; y = 2; z = 3","source":"return bit32.bxor(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":32,"path":"fast","name":"32-dense-5","setup":"x = 159; y = 2; z = 3","source":"return bit32.bxor(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":32,"path":"fast","name":"32-dense-6","setup":"x = -757; y = 2; z = 3","source":"return bit32.bxor(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":32,"path":"fast","name":"32-dense-7","setup":"x = 161; y = 2; z = 3","source":"return bit32.bxor(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":33,"path":"fast","name":"33-dense-0","setup":"x = 1009; y = 2; z = 3","source":"return bit32.btest(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":33,"path":"fast","name":"33-dense-1","setup":"x = -884; y = 2; z = 3","source":"return bit32.btest(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":33,"path":"fast","name":"33-dense-2","setup":"x = 325; y = 2; z = 3","source":"return bit32.btest(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":33,"path":"fast","name":"33-dense-3","setup":"x = -41; y = 2; z = 3","source":"return bit32.btest(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":33,"path":"fast","name":"33-dense-4","setup":"x = -419; y = 2; z = 3","source":"return bit32.btest(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":33,"path":"fast","name":"33-dense-5","setup":"x = 230; y = 2; z = 3","source":"return bit32.btest(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":33,"path":"fast","name":"33-dense-6","setup":"x = -912; y = 2; z = 3","source":"return bit32.btest(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":33,"path":"fast","name":"33-dense-7","setup":"x = 349; y = 2; z = 3","source":"return bit32.btest(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":34,"path":"fast","name":"34-dense-0","setup":"x = -322; y = 2; z = 3","source":"return bit32.extract(x, y, z)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":34,"path":"fast","name":"34-dense-1","setup":"x = -73; y = 2; z = 3","source":"return bit32.extract(x, y, z)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":34,"path":"fast","name":"34-dense-2","setup":"x = -570; y = 2; z = 3","source":"return bit32.extract(x, y, z)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":34,"path":"fast","name":"34-dense-3","setup":"x = -232; y = 2; z = 3","source":"return bit32.extract(x, y, z)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":34,"path":"fast","name":"34-dense-4","setup":"x = 375; y = 2; z = 3","source":"return bit32.extract(x, y, z)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":34,"path":"fast","name":"34-dense-5","setup":"x = -762; y = 2; z = 3","source":"return bit32.extract(x, y, z)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":34,"path":"fast","name":"34-dense-6","setup":"x = -493; y = 2; z = 3","source":"return bit32.extract(x, y, z)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":34,"path":"fast","name":"34-dense-7","setup":"x = -470; y = 2; z = 3","source":"return bit32.extract(x, y, z)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":35,"path":"fast","name":"35-dense-0","setup":"x = -47; y = 2; z = 3","source":"return bit32.lrotate(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":35,"path":"fast","name":"35-dense-1","setup":"x = 375; y = 2; z = 3","source":"return bit32.lrotate(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":35,"path":"fast","name":"35-dense-2","setup":"x = 360; y = 2; z = 3","source":"return bit32.lrotate(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":35,"path":"fast","name":"35-dense-3","setup":"x = 171; y = 2; z = 3","source":"return bit32.lrotate(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":35,"path":"fast","name":"35-dense-4","setup":"x = 209; y = 2; z = 3","source":"return bit32.lrotate(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":35,"path":"fast","name":"35-dense-5","setup":"x = -34; y = 2; z = 3","source":"return bit32.lrotate(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":35,"path":"fast","name":"35-dense-6","setup":"x = -766; y = 2; z = 3","source":"return bit32.lrotate(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":35,"path":"fast","name":"35-dense-7","setup":"x = 124; y = 2; z = 3","source":"return bit32.lrotate(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":36,"path":"fast","name":"36-dense-0","setup":"x = 588; y = 2; z = 3","source":"return bit32.lshift(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":36,"path":"fast","name":"36-dense-1","setup":"x = -936; y = 2; z = 3","source":"return bit32.lshift(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":36,"path":"fast","name":"36-dense-2","setup":"x = 713; y = 2; z = 3","source":"return bit32.lshift(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":36,"path":"fast","name":"36-dense-3","setup":"x = 68; y = 2; z = 3","source":"return bit32.lshift(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":36,"path":"fast","name":"36-dense-4","setup":"x = 23; y = 2; z = 3","source":"return bit32.lshift(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":36,"path":"fast","name":"36-dense-5","setup":"x = 112; y = 2; z = 3","source":"return bit32.lshift(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":36,"path":"fast","name":"36-dense-6","setup":"x = -869; y = 2; z = 3","source":"return bit32.lshift(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":36,"path":"fast","name":"36-dense-7","setup":"x = -859; y = 2; z = 3","source":"return bit32.lshift(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":37,"path":"fast","name":"37-dense-0","setup":"x = 24; y = 2; z = 3","source":"return bit32.replace(x, y, z)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":37,"path":"fast","name":"37-dense-1","setup":"x = -795; y = 2; z = 3","source":"return bit32.replace(x, y, z)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":37,"path":"fast","name":"37-dense-2","setup":"x = 731; y = 2; z = 3","source":"return bit32.replace(x, y, z)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":37,"path":"fast","name":"37-dense-3","setup":"x = -838; y = 2; z = 3","source":"return bit32.replace(x, y, z)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":37,"path":"fast","name":"37-dense-4","setup":"x = 779; y = 2; z = 3","source":"return bit32.replace(x, y, z)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":37,"path":"fast","name":"37-dense-5","setup":"x = 680; y = 2; z = 3","source":"return bit32.replace(x, y, z)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":37,"path":"fast","name":"37-dense-6","setup":"x = 612; y = 2; z = 3","source":"return bit32.replace(x, y, z)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":37,"path":"fast","name":"37-dense-7","setup":"x = -531; y = 2; z = 3","source":"return bit32.replace(x, y, z)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":38,"path":"fast","name":"38-dense-0","setup":"x = 720; y = 2; z = 3","source":"return bit32.rrotate(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":38,"path":"fast","name":"38-dense-1","setup":"x = -629; y = 2; z = 3","source":"return bit32.rrotate(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":38,"path":"fast","name":"38-dense-2","setup":"x = -162; y = 2; z = 3","source":"return bit32.rrotate(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":38,"path":"fast","name":"38-dense-3","setup":"x = -968; y = 2; z = 3","source":"return bit32.rrotate(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":38,"path":"fast","name":"38-dense-4","setup":"x = 11; y = 2; z = 3","source":"return bit32.rrotate(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":38,"path":"fast","name":"38-dense-5","setup":"x = 90; y = 2; z = 3","source":"return bit32.rrotate(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":38,"path":"fast","name":"38-dense-6","setup":"x = 805; y = 2; z = 3","source":"return bit32.rrotate(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":38,"path":"fast","name":"38-dense-7","setup":"x = -802; y = 2; z = 3","source":"return bit32.rrotate(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":39,"path":"fast","name":"39-dense-0","setup":"x = 490; y = 2; z = 3","source":"return bit32.rshift(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":39,"path":"fast","name":"39-dense-1","setup":"x = 697; y = 2; z = 3","source":"return bit32.rshift(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":39,"path":"fast","name":"39-dense-2","setup":"x = -869; y = 2; z = 3","source":"return bit32.rshift(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":39,"path":"fast","name":"39-dense-3","setup":"x = -339; y = 2; z = 3","source":"return bit32.rshift(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":39,"path":"fast","name":"39-dense-4","setup":"x = 992; y = 2; z = 3","source":"return bit32.rshift(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":39,"path":"fast","name":"39-dense-5","setup":"x = 649; y = 2; z = 3","source":"return bit32.rshift(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":39,"path":"fast","name":"39-dense-6","setup":"x = -188; y = 2; z = 3","source":"return bit32.rshift(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":39,"path":"fast","name":"39-dense-7","setup":"x = 986; y = 2; z = 3","source":"return bit32.rshift(x, y)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":46,"path":"fast","name":"46-dense-0","setup":"x = -0.8151; y = 2; z = 3","source":"return math.clamp(x, y, z)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":46,"path":"fast","name":"46-dense-1","setup":"x = -0.1747; y = 2; z = 3","source":"return math.clamp(x, y, z)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":46,"path":"fast","name":"46-dense-2","setup":"x = -0.6555; y = 2; z = 3","source":"return math.clamp(x, y, z)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":46,"path":"fast","name":"46-dense-3","setup":"x = 0.0958; y = 2; z = 3","source":"return math.clamp(x, y, z)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":46,"path":"fast","name":"46-dense-4","setup":"x = -0.4177; y = 2; z = 3","source":"return math.clamp(x, y, z)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":46,"path":"fast","name":"46-dense-5","setup":"x = 0.5858; y = 2; z = 3","source":"return math.clamp(x, y, z)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":46,"path":"fast","name":"46-dense-6","setup":"x = 0.069; y = 2; z = 3","source":"return math.clamp(x, y, z)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":46,"path":"fast","name":"46-dense-7","setup":"x = -0.9089; y = 2; z = 3","source":"return math.clamp(x, y, z)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":47,"path":"fast","name":"47-dense-0","setup":"x = -0.024; y = 2; z = 3","source":"return math.sign(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":47,"path":"fast","name":"47-dense-1","setup":"x = 0.288; y = 2; z = 3","source":"return math.sign(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":47,"path":"fast","name":"47-dense-2","setup":"x = 0.0091; y = 2; z = 3","source":"return math.sign(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":47,"path":"fast","name":"47-dense-3","setup":"x = 0.3645; y = 2; z = 3","source":"return math.sign(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":47,"path":"fast","name":"47-dense-4","setup":"x = 0.3917; y = 2; z = 3","source":"return math.sign(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":47,"path":"fast","name":"47-dense-5","setup":"x = 0.5592; y = 2; z = 3","source":"return math.sign(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":47,"path":"fast","name":"47-dense-6","setup":"x = 0.0316; y = 2; z = 3","source":"return math.sign(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":47,"path":"fast","name":"47-dense-7","setup":"x = 0.0337; y = 2; z = 3","source":"return math.sign(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":48,"path":"fast","name":"48-dense-0","setup":"x = -0.5416; y = 2; z = 3","source":"return math.round(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":48,"path":"fast","name":"48-dense-1","setup":"x = 0.629; y = 2; z = 3","source":"return math.round(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":48,"path":"fast","name":"48-dense-2","setup":"x = 0.0298; y = 2; z = 3","source":"return math.round(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":48,"path":"fast","name":"48-dense-3","setup":"x = -0.7546; y = 2; z = 3","source":"return math.round(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":48,"path":"fast","name":"48-dense-4","setup":"x = 0.5932; y = 2; z = 3","source":"return math.round(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":48,"path":"fast","name":"48-dense-5","setup":"x = -0.2479; y = 2; z = 3","source":"return math.round(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":48,"path":"fast","name":"48-dense-6","setup":"x = -0.2041; y = 2; z = 3","source":"return math.round(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":48,"path":"fast","name":"48-dense-7","setup":"x = -0.2678; y = 2; z = 3","source":"return math.round(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":55,"path":"fast","name":"55-dense-0","setup":"x = -368; y = 2; z = 3","source":"return bit32.countlz(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":55,"path":"fast","name":"55-dense-1","setup":"x = 67; y = 2; z = 3","source":"return bit32.countlz(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":55,"path":"fast","name":"55-dense-2","setup":"x = -844; y = 2; z = 3","source":"return bit32.countlz(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":55,"path":"fast","name":"55-dense-3","setup":"x = -811; y = 2; z = 3","source":"return bit32.countlz(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":55,"path":"fast","name":"55-dense-4","setup":"x = 133; y = 2; z = 3","source":"return bit32.countlz(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":55,"path":"fast","name":"55-dense-5","setup":"x = 690; y = 2; z = 3","source":"return bit32.countlz(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":55,"path":"fast","name":"55-dense-6","setup":"x = -894; y = 2; z = 3","source":"return bit32.countlz(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":55,"path":"fast","name":"55-dense-7","setup":"x = -758; y = 2; z = 3","source":"return bit32.countlz(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":56,"path":"fast","name":"56-dense-0","setup":"x = -646; y = 2; z = 3","source":"return bit32.countrz(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":56,"path":"fast","name":"56-dense-1","setup":"x = -560; y = 2; z = 3","source":"return bit32.countrz(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":56,"path":"fast","name":"56-dense-2","setup":"x = -840; y = 2; z = 3","source":"return bit32.countrz(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":56,"path":"fast","name":"56-dense-3","setup":"x = 473; y = 2; z = 3","source":"return bit32.countrz(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":56,"path":"fast","name":"56-dense-4","setup":"x = 303; y = 2; z = 3","source":"return bit32.countrz(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":56,"path":"fast","name":"56-dense-5","setup":"x = -778; y = 2; z = 3","source":"return bit32.countrz(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":56,"path":"fast","name":"56-dense-6","setup":"x = -5; y = 2; z = 3","source":"return bit32.countrz(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":56,"path":"fast","name":"56-dense-7","setup":"x = -83; y = 2; z = 3","source":"return bit32.countrz(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":59,"path":"fast","name":"59-dense-0","setup":"x = 825; y = 2; z = 3","source":"return bit32.extract(x, 1, 2)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":59,"path":"fast","name":"59-dense-1","setup":"x = 945; y = 2; z = 3","source":"return bit32.extract(x, 1, 2)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":59,"path":"fast","name":"59-dense-2","setup":"x = -390; y = 2; z = 3","source":"return bit32.extract(x, 1, 2)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":59,"path":"fast","name":"59-dense-3","setup":"x = -234; y = 2; z = 3","source":"return bit32.extract(x, 1, 2)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":59,"path":"fast","name":"59-dense-4","setup":"x = 409; y = 2; z = 3","source":"return bit32.extract(x, 1, 2)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":59,"path":"fast","name":"59-dense-5","setup":"x = 589; y = 2; z = 3","source":"return bit32.extract(x, 1, 2)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":59,"path":"fast","name":"59-dense-6","setup":"x = -447; y = 2; z = 3","source":"return bit32.extract(x, 1, 2)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":59,"path":"fast","name":"59-dense-7","setup":"x = -341; y = 2; z = 3","source":"return bit32.extract(x, 1, 2)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":64,"path":"fast","name":"64-dense-0","setup":"x = -551; y = 2; z = 3","source":"return bit32.byteswap(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":64,"path":"fast","name":"64-dense-1","setup":"x = -736; y = 2; z = 3","source":"return bit32.byteswap(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":64,"path":"fast","name":"64-dense-2","setup":"x = -687; y = 2; z = 3","source":"return bit32.byteswap(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":64,"path":"fast","name":"64-dense-3","setup":"x = 605; y = 2; z = 3","source":"return bit32.byteswap(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":64,"path":"fast","name":"64-dense-4","setup":"x = 637; y = 2; z = 3","source":"return bit32.byteswap(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":64,"path":"fast","name":"64-dense-5","setup":"x = 548; y = 2; z = 3","source":"return bit32.byteswap(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":64,"path":"fast","name":"64-dense-6","setup":"x = 989; y = 2; z = 3","source":"return bit32.byteswap(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":64,"path":"fast","name":"64-dense-7","setup":"x = 573; y = 2; z = 3","source":"return bit32.byteswap(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":89,"path":"fast","name":"89-dense-0","setup":"x = -0.5226; y = 2; z = 3","source":"return math.lerp(x, y, z)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":89,"path":"fast","name":"89-dense-1","setup":"x = 0.3548; y = 2; z = 3","source":"return math.lerp(x, y, z)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":89,"path":"fast","name":"89-dense-2","setup":"x = 0.2946; y = 2; z = 3","source":"return math.lerp(x, y, z)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":89,"path":"fast","name":"89-dense-3","setup":"x = -0.6078; y = 2; z = 3","source":"return math.lerp(x, y, z)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":89,"path":"fast","name":"89-dense-4","setup":"x = -0.1277; y = 2; z = 3","source":"return math.lerp(x, y, z)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":89,"path":"fast","name":"89-dense-5","setup":"x = -0.2845; y = 2; z = 3","source":"return math.lerp(x, y, z)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":89,"path":"fast","name":"89-dense-6","setup":"x = 0.079; y = 2; z = 3","source":"return math.lerp(x, y, z)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":89,"path":"fast","name":"89-dense-7","setup":"x = 0.0604; y = 2; z = 3","source":"return math.lerp(x, y, z)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":91,"path":"fast","name":"91-dense-0","setup":"x = -0.0358; y = 2; z = 3","source":"return math.isnan(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":91,"path":"fast","name":"91-dense-1","setup":"x = 0.3356; y = 2; z = 3","source":"return math.isnan(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":91,"path":"fast","name":"91-dense-2","setup":"x = 0.9089; y = 2; z = 3","source":"return math.isnan(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":91,"path":"fast","name":"91-dense-3","setup":"x = 0.4735; y = 2; z = 3","source":"return math.isnan(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":91,"path":"fast","name":"91-dense-4","setup":"x = 0.0983; y = 2; z = 3","source":"return math.isnan(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":91,"path":"fast","name":"91-dense-5","setup":"x = -0.2578; y = 2; z = 3","source":"return math.isnan(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":91,"path":"fast","name":"91-dense-6","setup":"x = -0.206; y = 2; z = 3","source":"return math.isnan(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":91,"path":"fast","name":"91-dense-7","setup":"x = -0.198; y = 2; z = 3","source":"return math.isnan(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":92,"path":"fast","name":"92-dense-0","setup":"x = 0.0973; y = 2; z = 3","source":"return math.isinf(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":92,"path":"fast","name":"92-dense-1","setup":"x = 0.6807; y = 2; z = 3","source":"return math.isinf(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":92,"path":"fast","name":"92-dense-2","setup":"x = 0.2184; y = 2; z = 3","source":"return math.isinf(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":92,"path":"fast","name":"92-dense-3","setup":"x = 0.8388; y = 2; z = 3","source":"return math.isinf(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":92,"path":"fast","name":"92-dense-4","setup":"x = -0.7547; y = 2; z = 3","source":"return math.isinf(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":92,"path":"fast","name":"92-dense-5","setup":"x = -0.5483; y = 2; z = 3","source":"return math.isinf(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":92,"path":"fast","name":"92-dense-6","setup":"x = 0.393; y = 2; z = 3","source":"return math.isinf(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":92,"path":"fast","name":"92-dense-7","setup":"x = -0.8727; y = 2; z = 3","source":"return math.isinf(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":93,"path":"fast","name":"93-dense-0","setup":"x = 0.5595; y = 2; z = 3","source":"return math.isfinite(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":93,"path":"fast","name":"93-dense-1","setup":"x = -0.2924; y = 2; z = 3","source":"return math.isfinite(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":93,"path":"fast","name":"93-dense-2","setup":"x = 0.6243; y = 2; z = 3","source":"return math.isfinite(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":93,"path":"fast","name":"93-dense-3","setup":"x = -0.3092; y = 2; z = 3","source":"return math.isfinite(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":93,"path":"fast","name":"93-dense-4","setup":"x = 0.803; y = 2; z = 3","source":"return math.isfinite(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":93,"path":"fast","name":"93-dense-5","setup":"x = 0.3994; y = 2; z = 3","source":"return math.isfinite(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":93,"path":"fast","name":"93-dense-6","setup":"x = 0.9013; y = 2; z = 3","source":"return math.isfinite(x)","observe":["x","y","z"],"compiler_flags":[]},
+{"id":93,"path":"fast","name":"93-dense-7","setup":"x = -0.8496; y = 2; z = 3","source":"return math.isfinite(x)","observe":["x","y","z"],"compiler_flags":[]}
+  ]
+}

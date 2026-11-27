@@ -1,0 +1,627 @@
+{
+  "version": 1,
+  "cases": [
+    {
+      "id": 41,
+      "path": "fast",
+      "name": "builtin-41-fast",
+      "setup": "x=\"abc\"; y=2",
+      "source": "return string.byte(x,y)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 41,
+      "path": "fallback",
+      "name": "builtin-41-fallback",
+      "setup": "x=\"abc\"; y=0",
+      "source": "return string.byte(x,y)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 42,
+      "path": "fast",
+      "name": "builtin-42-fast",
+      "setup": "x=65",
+      "source": "return string.char(x)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 42,
+      "path": "fallback",
+      "name": "builtin-42-fallback",
+      "setup": "x=256",
+      "source": "return string.char(x)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 43,
+      "path": "fast",
+      "name": "builtin-43-fast",
+      "setup": "x=\"abc\"",
+      "source": "return string.len(x)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 43,
+      "path": "fallback",
+      "name": "builtin-43-fallback",
+      "setup": "x=42",
+      "source": "return string.len(x)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 45,
+      "path": "fast",
+      "name": "builtin-45-fast",
+      "setup": "x=\"abc\"; y=1; z=2",
+      "source": "return string.sub(x,y,z)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 45,
+      "path": "fallback",
+      "name": "builtin-45-fallback",
+      "setup": "x=\"abc\"; y=-1; z=2",
+      "source": "return string.sub(x,y,z)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 49,
+      "path": "fast",
+      "name": "builtin-49-fast",
+      "setup": "x={}; y=\"k\"; z=5",
+      "source": "return rawset(x,y,z)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 49,
+      "path": "fallback",
+      "name": "builtin-49-fallback",
+      "setup": "x={}; y=nil; z=5",
+      "source": "return rawset(x,y,z)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 50,
+      "path": "fast",
+      "name": "builtin-50-fast",
+      "setup": "x={k=5}; y=\"k\"",
+      "source": "return rawget(x,y)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 50,
+      "path": "fallback",
+      "name": "builtin-50-fallback",
+      "setup": "x=3; y=\"k\"",
+      "source": "return rawget(x,y)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 52,
+      "path": "fast",
+      "name": "builtin-52-fast",
+      "setup": "x={}; y=3",
+      "source": "table.insert(x,y)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 52,
+      "path": "fallback",
+      "name": "builtin-52-fallback",
+      "setup": "x=table.freeze({}); y=3",
+      "source": "table.insert(x,y)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 58,
+      "path": "fast",
+      "name": "builtin-58-fast",
+      "setup": "x=\"abc\"",
+      "source": "return rawlen(x)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 58,
+      "path": "fallback",
+      "name": "builtin-58-fallback",
+      "setup": "x=3",
+      "source": "return rawlen(x)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 61,
+      "path": "fast",
+      "name": "builtin-61-fast",
+      "setup": "x={}; y={}",
+      "source": "return setmetatable(x,y)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 61,
+      "path": "fallback",
+      "name": "builtin-61-fallback",
+      "setup": "x={}; y=nil",
+      "source": "return setmetatable(x,y)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 63,
+      "path": "fast",
+      "name": "builtin-63-fast",
+      "setup": "x=42",
+      "source": "return tostring(x)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 63,
+      "path": "fallback",
+      "name": "builtin-63-fallback",
+      "setup": "x=setmetatable({}, {__tostring=function() return \"x\" end})",
+      "source": "return tostring(x)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 65,
+      "path": "fast",
+      "name": "readi8-fast",
+      "setup": "x=buffer.create(1); y=0",
+      "source": "return buffer.readi8(x,y)",
+      "observe": [
+        "x"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 65,
+      "path": "fallback",
+      "name": "readi8-fallback",
+      "setup": "x=buffer.create(1); y=1",
+      "source": "return buffer.readi8(x,y)",
+      "observe": [
+        "x"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 66,
+      "path": "fast",
+      "name": "readu8-fast",
+      "setup": "x=buffer.create(1); y=0",
+      "source": "return buffer.readu8(x,y)",
+      "observe": [
+        "x"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 66,
+      "path": "fallback",
+      "name": "readu8-fallback",
+      "setup": "x=buffer.create(1); y=1",
+      "source": "return buffer.readu8(x,y)",
+      "observe": [
+        "x"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 67,
+      "path": "fast",
+      "name": "writei8-fast",
+      "setup": "x=buffer.create(1); y=0; z=7",
+      "source": "buffer.writei8(x,y,z)",
+      "observe": [
+        "x"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 67,
+      "path": "fallback",
+      "name": "writei8-fallback",
+      "setup": "x=buffer.create(1); y=1; z=7",
+      "source": "buffer.writei8(x,y,z)",
+      "observe": [
+        "x"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 68,
+      "path": "fast",
+      "name": "readi16-fast",
+      "setup": "x=buffer.create(2); y=0",
+      "source": "return buffer.readi16(x,y)",
+      "observe": [
+        "x"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 68,
+      "path": "fallback",
+      "name": "readi16-fallback",
+      "setup": "x=buffer.create(2); y=2",
+      "source": "return buffer.readi16(x,y)",
+      "observe": [
+        "x"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 69,
+      "path": "fast",
+      "name": "readu16-fast",
+      "setup": "x=buffer.create(2); y=0",
+      "source": "return buffer.readu16(x,y)",
+      "observe": [
+        "x"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 69,
+      "path": "fallback",
+      "name": "readu16-fallback",
+      "setup": "x=buffer.create(2); y=2",
+      "source": "return buffer.readu16(x,y)",
+      "observe": [
+        "x"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 70,
+      "path": "fast",
+      "name": "writei16-fast",
+      "setup": "x=buffer.create(2); y=0; z=7",
+      "source": "buffer.writei16(x,y,z)",
+      "observe": [
+        "x"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 70,
+      "path": "fallback",
+      "name": "writei16-fallback",
+      "setup": "x=buffer.create(2); y=2; z=7",
+      "source": "buffer.writei16(x,y,z)",
+      "observe": [
+        "x"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 71,
+      "path": "fast",
+      "name": "readi32-fast",
+      "setup": "x=buffer.create(4); y=0",
+      "source": "return buffer.readi32(x,y)",
+      "observe": [
+        "x"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 71,
+      "path": "fallback",
+      "name": "readi32-fallback",
+      "setup": "x=buffer.create(4); y=4",
+      "source": "return buffer.readi32(x,y)",
+      "observe": [
+        "x"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 72,
+      "path": "fast",
+      "name": "readu32-fast",
+      "setup": "x=buffer.create(4); y=0",
+      "source": "return buffer.readu32(x,y)",
+      "observe": [
+        "x"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 72,
+      "path": "fallback",
+      "name": "readu32-fallback",
+      "setup": "x=buffer.create(4); y=4",
+      "source": "return buffer.readu32(x,y)",
+      "observe": [
+        "x"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 73,
+      "path": "fast",
+      "name": "writei32-fast",
+      "setup": "x=buffer.create(4); y=0; z=7",
+      "source": "buffer.writei32(x,y,z)",
+      "observe": [
+        "x"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 73,
+      "path": "fallback",
+      "name": "writei32-fallback",
+      "setup": "x=buffer.create(4); y=4; z=7",
+      "source": "buffer.writei32(x,y,z)",
+      "observe": [
+        "x"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 74,
+      "path": "fast",
+      "name": "readf32-fast",
+      "setup": "x=buffer.create(4); y=0",
+      "source": "return buffer.readf32(x,y)",
+      "observe": [
+        "x"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 74,
+      "path": "fallback",
+      "name": "readf32-fallback",
+      "setup": "x=buffer.create(4); y=4",
+      "source": "return buffer.readf32(x,y)",
+      "observe": [
+        "x"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 75,
+      "path": "fast",
+      "name": "writef32-fast",
+      "setup": "x=buffer.create(4); y=0; z=7",
+      "source": "buffer.writef32(x,y,z)",
+      "observe": [
+        "x"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 75,
+      "path": "fallback",
+      "name": "writef32-fallback",
+      "setup": "x=buffer.create(4); y=4; z=7",
+      "source": "buffer.writef32(x,y,z)",
+      "observe": [
+        "x"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 76,
+      "path": "fast",
+      "name": "readf64-fast",
+      "setup": "x=buffer.create(8); y=0",
+      "source": "return buffer.readf64(x,y)",
+      "observe": [
+        "x"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 76,
+      "path": "fallback",
+      "name": "readf64-fallback",
+      "setup": "x=buffer.create(8); y=8",
+      "source": "return buffer.readf64(x,y)",
+      "observe": [
+        "x"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 77,
+      "path": "fast",
+      "name": "writef64-fast",
+      "setup": "x=buffer.create(8); y=0; z=7",
+      "source": "buffer.writef64(x,y,z)",
+      "observe": [
+        "x"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 77,
+      "path": "fallback",
+      "name": "writef64-fallback",
+      "setup": "x=buffer.create(8); y=8; z=7",
+      "source": "buffer.writef64(x,y,z)",
+      "observe": [
+        "x"
+      ],
+      "compiler_flags": []
+    },
+    {
+      "id": 131,
+      "path": "fast",
+      "name": "readinteger-fast",
+      "setup": "x=buffer.create(8); y=0",
+      "source": "return buffer.readinteger(x,y)",
+      "observe": [
+        "x"
+      ],
+      "compiler_flags": ["LuauIntegerLibrary", "LuauIntegerFastcalls", "LuauIntegerBufferFastcalls"]
+    },
+    {
+      "id": 131,
+      "path": "fallback",
+      "name": "readinteger-fallback",
+      "setup": "x=buffer.create(8); y=8",
+      "source": "return buffer.readinteger(x,y)",
+      "observe": [
+        "x"
+      ],
+      "compiler_flags": ["LuauIntegerLibrary", "LuauIntegerFastcalls", "LuauIntegerBufferFastcalls"]
+    },
+    {
+      "id": 132,
+      "path": "fast",
+      "name": "writeinteger-fast",
+      "setup": "x=buffer.create(8); y=0; z=integer.create(7)",
+      "source": "buffer.writeinteger(x,y,z)",
+      "observe": [
+        "x"
+      ],
+      "compiler_flags": ["LuauIntegerLibrary", "LuauIntegerFastcalls", "LuauIntegerBufferFastcalls"]
+    },
+    {
+      "id": 132,
+      "path": "fallback",
+      "name": "writeinteger-fallback",
+      "setup": "x=buffer.create(8); y=8; z=integer.create(7)",
+      "source": "buffer.writeinteger(x,y,z)",
+      "observe": [
+        "x"
+      ],
+      "compiler_flags": ["LuauIntegerLibrary", "LuauIntegerFastcalls", "LuauIntegerBufferFastcalls"]
+    },
+    {
+      "id": 133,
+      "path": "fast",
+      "name": "builtin-133-fast",
+      "setup": "x=3; y=7",
+      "source": "return table.create(x,y)",
+      "observe": [],
+      "compiler_flags": ["LuauCompileTableBuiltinsCreateClear"]
+    },
+    {
+      "id": 133,
+      "path": "fallback",
+      "name": "builtin-133-fallback",
+      "setup": "x=-1; y=7",
+      "source": "return table.create(x,y)",
+      "observe": [],
+      "compiler_flags": ["LuauCompileTableBuiltinsCreateClear"]
+    },
+    {
+      "id": 134,
+      "path": "fast",
+      "name": "builtin-134-fast",
+      "setup": "x={1,2}",
+      "source": "table.clear(x)",
+      "observe": [],
+      "compiler_flags": ["LuauCompileTableBuiltinsCreateClear"]
+    },
+    {
+      "id": 134,
+      "path": "fallback",
+      "name": "builtin-134-fallback",
+      "setup": "x=table.freeze({1,2})",
+      "source": "table.clear(x)",
+      "observe": [],
+      "compiler_flags": ["LuauCompileTableBuiltinsCreateClear"]
+    },
+    {
+      "id": 53,
+      "path": "fast",
+      "name": "builtin-53-fast",
+      "setup": "x={1,2}",
+      "source": "return table.unpack(x)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 53,
+      "path": "fallback",
+      "name": "builtin-53-fallback",
+      "setup": "x=3",
+      "source": "return table.unpack(x)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 51,
+      "path": "fast",
+      "name": "builtin-51-fast",
+      "setup": "x=2; y=2",
+      "source": "return rawequal(x,y)",
+      "reference_opcode": "FASTCALL2 51 R1 R2 L0",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 51,
+      "path": "fallback",
+      "name": "builtin-51-fallback",
+      "setup": "",
+      "source": "return rawequal(x)",
+      "reference_opcode": "FASTCALL1 51 R1 L0",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 60,
+      "path": "fast",
+      "name": "builtin-60-fast",
+      "setup": "x={}",
+      "source": "return getmetatable(x)",
+      "reference_opcode": "FASTCALL1 60 R1 L0",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 60,
+      "path": "fallback",
+      "name": "builtin-60-fallback",
+      "setup": "",
+      "source": "return getmetatable()",
+      "reference_opcode": "FASTCALL 60 L0",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 62,
+      "path": "fast",
+      "name": "builtin-62-fast",
+      "setup": "x=\"42\"",
+      "source": "return tonumber(x)",
+      "observe": [],
+      "compiler_flags": []
+    },
+    {
+      "id": 62,
+      "path": "fallback",
+      "name": "builtin-62-fallback",
+      "setup": "x=\"42\"; y=10",
+      "source": "return tonumber(x,y)",
+      "observe": [],
+      "compiler_flags": []
+    }
+  ]
+}

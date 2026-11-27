@@ -3,6 +3,7 @@
  * projected lineup without Yu instead has a selectedAction leader, so count
  * that action under the same turn-start gates. A present Yu retains retail's
  * identity rule; extra turns, blocked turns and enemies remain uncounted. */
+#include "p4pc/golden_ai_native.h"
 void btlActionStartInit(BtlAction *action) {
     extern u8 *btlEffectFindUnitByIdAndStatus(s32, s32, s32);
     BtlAction *otherAction;
@@ -85,6 +86,7 @@ void btlActionStartInit(BtlAction *action) {
         canAct = 0;
     }
     if (canAct != 0) {
+        p4_golden_ai_native_eligible_start(action);
         if ((action->unit->genus == 0) &&
             (action->unk_28 == 0) && (action->unk_29 == 0) &&
             (action->unit->charId == 1 ||

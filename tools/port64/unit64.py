@@ -3,6 +3,7 @@
 the work is parallel and incremental:
 
   unit64.py abi   --gen G --root R --unit U --out U.abi.json     the ABI of the non-static functions U defines
+  unit64.py abi   --zig-header H --zig-source Z...               ABI declarations for the actual Zig function exports
   unit64.py merge --root R --abi-files FILE --out abi.json       one table from CMake's live ABI inputs (plus sigs.txt), written
                                                                  only when it changed so Ninja does not rebuild every unit
   unit64.py build --gen G --root R --unit U --abi abi.json --out U.64.o [--opt O0] [--check]
@@ -14,7 +15,7 @@ the work is parallel and incremental:
   unit64.py report --dir D                                       what the rewriter left unsupported, from the *.unsup files
 
 G is the build's gen/ directory (decomp/ mirror and units.txt), R the repository."""
-import argparse, json, os, re, shlex, shutil, subprocess, sys
+import argparse, hashlib, json, os, re, shlex, shutil, subprocess, sys, tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
@@ -31,6 +32,10 @@ T64 = shlex.split(os.environ.get("P4_PORT64_TARGET", "--target=x86_64-linux-gnu"
 def default_t32(t64):
     """The i386 layout oracle's target for the 64-bit target `t64`: i386 Linux, or for an Apple target i686 macOS against the same SDK (its i386
     headers are the x86_64 ones; the oracle is only compiled to its record layouts, never linked) without Apple's blocks, as the 64-bit side."""
+    if os.environ.get("P4PC_ZIG_CC") == "1":
+        if gr.symbol_prefix(t64):
+            raise ValueError("P4_PORT32_TARGET is required for a Zig macOS layout oracle")
+        return ["--target=x86-linux-gnu"]
     if gr.symbol_prefix(t64):
         sysroot = next((t64[i:i + 2] for i, f in enumerate(t64) if f == "-isysroot"), [])
         return ["--target=i686-apple-macos10.13", *sysroot, "-fno-blocks"]
@@ -65,10 +70,98 @@ def write_if_changed(path, text):
     os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
     open(path, "w").write(text)
 
+def _zig_export_class(typ):
+    """Register class of a directly exported Zig C-ABI type; reject unknowns."""
+    typ = typ.strip()
+    if typ == "void":
+        return None
+    if typ.startswith(("*", "?", "[*")):
+        return "ptr"
+    if re.fullmatch(r"(?:[iu](?:8|16|32|64|128)|[iu]size|c_(?:char|short|ushort|int|uint|long|ulong|longlong|ulonglong))", typ):
+        return "int"
+    if typ in ("f32", "f64"):
+        return "float"
+    raise ValueError(f"unsupported Zig export ABI type: {typ}")
+
+def _zig_export_type_matches(typ, ctype):
+    typ, ctype = typ.strip(), ctype.strip()
+    if _zig_export_class(typ) == "ptr":
+        return ctype == "void *"  # collect_abi intentionally canonicalizes object pointers
+    names = {
+        "void": {"void"}, "u8": {"unsigned char"}, "i8": {"signed char"},
+        "u16": {"unsigned short"}, "i16": {"short"},
+        "u32": {"unsigned int"}, "i32": {"int"},
+        "u64": {"uint64_t", "unsigned long", "unsigned long long"},
+        "i64": {"int64_t", "long", "long long"},
+        "usize": {"size_t"}, "isize": {"ptrdiff_t", "ssize_t"},
+        "c_char": {"char"}, "c_short": {"short"}, "c_ushort": {"unsigned short"},
+        "c_int": {"int"}, "c_uint": {"unsigned int"},
+        "c_long": {"long"}, "c_ulong": {"unsigned long"},
+        "c_longlong": {"long long"}, "c_ulonglong": {"unsigned long long"},
+        "f32": {"float"}, "f64": {"double"},
+    }
+    return ctype in names.get(typ, set())
+
+
+def _zig_explicit_exports(text, source):
+    """Read direct @export declarations and their referenced C-ABI functions."""
+    matches = list(re.finditer(
+        r'@export\s*\(\s*&([A-Za-z_]\w*)\s*,\s*\.\{\s*\.name\s*=\s*"([A-Za-z_]\w*)"\s*,?\s*\}\s*\)', text))
+    if len(matches) != len(re.findall(r"@export\s*\(", text)):
+        raise ValueError(f"unsupported @export declaration in {source}")
+    result = {}
+    for match in matches:
+        function, name = match.groups()
+        declaration = re.findall(
+            rf"(?m)^\s*(?:pub\s+)?fn\s+{re.escape(function)}\s*\(([^()]*)\)\s*callconv\s*\(\s*\.c\s*\)\s*(.*?)\s*\{{",
+            text)
+        if len(declaration) != 1:
+            raise ValueError(f"@export {name} must reference one C-ABI function {function} in {source}")
+        args, ret = declaration[0]
+        params = []
+        for arg in filter(None, (part.strip() for part in args.split(","))):
+            if ":" not in arg:
+                raise ValueError(f"unsupported Zig export parameter: {arg}")
+            params.append(arg.split(":", 1)[1].strip())
+        if name in result:
+            raise ValueError(f"duplicate Zig function exports in {source}")
+        result[name] = (ret.strip(), params)
+    return result
+
 
 def cmd_abi(a):
     work = os.path.dirname(os.path.abspath(a.out))
-    if a.src:
+    if a.zig_header:
+        if a.src or a.unit or not a.zig_source:
+            raise ValueError("--zig-header requires --zig-source and excludes --src/--unit")
+        exports = set()
+        explicit = {}
+        for source in a.zig_source:
+            with open(source, encoding="utf-8") as stream:
+                text = stream.read()
+            names = re.findall(r"(?m)^(?:pub\s+)?export\s+fn\s+([A-Za-z_][A-Za-z_0-9]*)\s*\(", text)
+            direct = _zig_explicit_exports(text, source)
+            names.extend(direct)
+            if not names:
+                raise ValueError(f"no exported functions in {source}")
+            if exports.intersection(names) or len(names) != len(set(names)):
+                raise ValueError(f"duplicate Zig function exports in {source}")
+            exports.update(names)
+            explicit.update(direct)
+        flags = ["-DP4_PC=1", "-include", "p4pc/compat.h", f"-I{a.root}/include"] + a.cflag
+        defs = gr.collect_abi(os.path.abspath(a.zig_header), T64 + flags, work,
+                              os.path.abspath(a.root), a.clang, deps=(a.out + ".d", a.out),
+                              declarations=exports)
+        for name, (ret, params) in explicit.items():
+            declared = defs[name]
+            if (declared["skip"] or len(params) != len(declared["params"]) or
+                    not _zig_export_type_matches(ret, declared["rt"]) or
+                    any(not p or not _zig_export_type_matches(typ, p["ct"])
+                        for typ, p in zip(params, declared["params"]))):
+                raise ValueError(f"Zig export ABI signature mismatch: {name}")
+    elif a.zig_source:
+        raise ValueError("--zig-source requires --zig-header")
+    elif a.src:
         # a port source (src/...): its non-static definitions are natives the decomp calls, and their ABI is what the decomp's call sites follow
         flags = ["-DP4_PC=1", "-include", "p4pc/compat.h", f"-I{a.root}/include"] + a.cflag
         defs = gr.collect_abi(os.path.abspath(a.src), T64 + flags, work, os.path.join(os.path.abspath(a.root), "src"), a.clang,
@@ -97,7 +190,7 @@ def cmd_merge(a):
     sys.path.insert(0, os.path.join(a.root, "tools"))
     import gen_port
     from pathlib import Path
-    names = gen_port.retail_function_names(Path(a.root) / "decomp", Path(os.path.abspath(a.gen)))
+    names = gen_port.retail_function_names(Path(a.decomp or Path(a.root) / "decomp"), Path(os.path.abspath(a.gen)))
     by_addr = {}
     for n, addr in names.items():
         by_addr.setdefault(addr, []).append(n)
@@ -163,6 +256,7 @@ def rewrite_outputs(path, flags, work, root, syms, oracle_flags, clang, abi, dep
         "flags": flags, "root": os.path.abspath(root), "oracle_flags": oracle_flags,
         "layouts": layouts, "symbol_rows": sym_rows, "abi_rows": abi_rows,
         "compiler": build_cache.compiler_identity(clang),
+        "zig_cc": os.environ.get("P4PC_ZIG_CC") == "1",
         "versions": build_cache.versions(__file__, gr.__file__, gen_port.__file__)}, produce)
     return ipath, parsed[0] if parsed else json.loads(data)
 
@@ -203,7 +297,7 @@ def cmd_build(a):
     syms = {}
     sys.path.insert(0, os.path.join(a.root, "tools"))
     from pathlib import Path
-    syms = gen_port.read_symbols(Path(a.root) / "decomp")
+    syms = gen_port.read_symbols(Path(a.decomp or Path(a.root) / "decomp"))
     syms.update(gen_port.read_port_symbols())
     extra = ["-DP4_GUEST_CHECK=1"] if a.check else []
     dependency_target = a.out + ".i" if a.generate_only else a.out
@@ -290,6 +384,39 @@ def read_census(dir_):
                 unit = os.path.relpath(os.path.join(dp, f[:-len(".64.o.census")]), dir_).replace("\\", "/")
                 out[unit] = {k: int(v) for k, _, v in (w.rpartition("=") for w in open(os.path.join(dp, f)).read().split())}
     return out
+
+
+def publish_census_record(baseline, observed, drift):
+    """Optionally publish the completed comparison, never a verdict inferred from build output."""
+    path = os.environ.get("P4PC_CENSUS_RECORD")
+    if not path:
+        return
+    test = os.environ.get("P4PC_CENSUS_TEST_ID", "")
+    scope = os.environ.get("P4PC_CENSUS_SCOPE", "")
+    if not re.fullmatch(r"census_macos_(arm64|x86_64)", test) or scope != "macos-" + test.removeprefix("census_macos_"):
+        raise ValueError("invalid census test identity")
+    def digest(value):
+        data = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode("ascii")
+        return hashlib.sha256(data).hexdigest()
+    record = {"schema": 1, "kind": "census_comparison", "producer": "unit64_census", "scope": scope,
+              "test": test, "outcome": "candidate_fail" if drift else "pass", "phase_complete": True,
+              "baseline_sha256": digest(baseline), "observed_sha256": digest(observed), "drift_count": len(drift)}
+    parent = os.path.dirname(os.path.abspath(path))
+    fd, temporary = tempfile.mkstemp(prefix=".census-", dir=parent)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as stream:
+            json.dump(record, stream, sort_keys=True, separators=(",", ":"))
+            stream.write("\n")
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.link(temporary, path)  # exclusive: a conflicting second result is never overwritten
+        directory = os.open(parent, os.O_RDONLY)
+        try:
+            os.fsync(directory)
+        finally:
+            os.close(directory)
+    finally:
+        os.unlink(temporary)
 
 
 def cmd_report(a):
@@ -392,6 +519,7 @@ def cmd_report(a):
                         print(f"  {u}: changed by the RenderWare clean switch ({len(diff)} rule counts), not compared")
                         continue
                     drift += diff
+            publish_census_record(base, now, drift)
             if drift:
                 print(f"{len(drift)} rewriter rule counts differ from {path}:")
                 for d in drift[:60]:
@@ -418,11 +546,15 @@ def main():
         s = sub.add_parser(name)
         s.add_argument("--gen", required=True)
         s.add_argument("--root", required=True)
+        s.add_argument("--decomp", help="decomp checkout (default: root/decomp)")
         s.add_argument("--unit", default="")
         s.add_argument("--out", required=True)
         s.add_argument("--clang", default="clang")
         s.add_argument("--cflag", action="append", default=[])
         s.add_argument("--src", default="", help="a standalone source instead of a mirror unit")
+        if name == "abi":
+            s.add_argument("--zig-header", default="", help="header declaring Zig function exports")
+            s.add_argument("--zig-source", action="append", default=[], help="Zig source whose exports must be declared")
         if name == "build":
             s.add_argument("--abi")
             s.add_argument("--opt", default="O0")
@@ -435,6 +567,7 @@ def main():
     s.add_argument("--clang", default="clang")
     s.add_argument("--gen", required=True)
     s.add_argument("--root", required=True)
+    s.add_argument("--decomp", help="decomp checkout (default: root/decomp)")
     s.add_argument("--abi-files", required=True, help="one live per-source ABI JSON path per line; stale build-directory files are not inputs")
     s.add_argument("--out", required=True)
     s = sub.add_parser("report")

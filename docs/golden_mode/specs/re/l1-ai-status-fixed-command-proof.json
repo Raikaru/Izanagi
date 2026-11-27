@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "proof_id": "L1-c12-AI-status2-fixed-command",
+  "decision": "PROVEN",
+  "runtime_status": "pending-seam",
+  "address": "0x007635c0",
+  "ps2_size": 8,
+  "layout": "one8-byte weighted-command record: u8weight+0,u8padding+1,u16command+2,u32packedTargetCondition+4; not a double/float constant",
+  "values": {"weight":100,"padding":0,"command":"0x8000","target_condition":"0x00000000"},
+  "steam": {"container":"P4G.exe","section":".xpdata","rva":"0xaf9790","raw_offset":11501456,"section_offset":890768,"size":8,"sha256":"b2f7b99853762ca40934b176f03eb0c2ee5f929ff92c559d1793550898a6e0a3"},
+  "nso": {"base":"0x710062a600","size":8,"sha256":"b2f7b99853762ca40934b176f03eb0c2ee5f929ff92c559d1793550898a6e0a3"},
+  "ps2_reader": "Original1eb4a0:1eb500/504 mask incoming status to low20 bits;1eb514/518 compare2;1eb678 sets entry=gp-5b30=7635c0. Table pointer remainsNULL, so1eb690 jumps over all five-weight summing/RNG logic.1eb768 loads commandu16+2,1eb774 loads targetu32+4; upperbyte selects target callback, low24 bits are forwarded argument. The original ELF instructions establish ownership, not an inferred C body alone.",
+  "steam_reader": "Ordinary .shared783c0..78615 clears actual command work, masks status low20 at783fc;78439/43c selects mode2;785aa sets entryaf9790;785b1 readscommandu16+2 and785c1 readstargetu32+4.785bc calls real command setter697f0;785d1/785d5 split target index/argument;785de invokes actual target callback, with fallback callback on zero result. Four other status modes and the complete five-record weighted path positively establish the descriptor role.",
+  "nso_reader": "Ordinary NSO2c870..2cb30:2c8b4 masks low20,2c8c4/c8 compares2;2c95c/960 sets entry62a600 and2c964 jumps directly to2cad0.2cad0 readscommand+2 and2cae0 target+4;2cadc calls1d200,2cae4..2cb00 decode/dispatch packed target,2cb1c..2cb30 invoke fallback1c680 on zero. Mode2 consumes no RNG despite record weight100.",
+  "source_selection": "Eight bytes agree independently in Steam, NSO and PS2. That agreement is supporting evidence, not the proof. The earlier identical Steam data ataf95a8 is consumed by69d65, NOT the status2 owner; the selected source is specificallyaf9790 reached by785aa. Full40-byte PS2 status-table rows at609e50/609ef0/609f90/60a030 additionally locate the same typed NSO status function through62b828/62b8c8/62b968/62ba08. No first-match byte-window admission.",
+  "extent": "The fixed descriptor is exactly8 bytes under the independently paired8-byte weighted-command schema; typed loads+2/u16 and+4/u32 bound its consumed fields. The complete selected8-byte PS2 partition receives this8-byte Golden record, with no tail or widened pointer fields.",
+  "required_seams": [
+    {"ps2_addresses":["0x001eb4a0"],"action":"Bind this fixed record at7635c0 and any translated/native/inlined status2 entry aliases to the qualified8-byte Golden source. Do not treat it as f64, infer it from generic100/0/8000 values, or substitute the unrelated identicalaf95a8 record."},
+    {"action":"Preserve the actual acting unit/action and forwarded live status producer: select this record iff(status&0xfffff)==2. Do not route every ailment here. This direct branch bypasses weighted-table summing and consumes NO RNG. Other modes retain actual genus/character ID, enemy metadata, money/ability state, five-weight table and RNG producers; those tables are not newly admitted by this one-row proof."},
+    {"action":"Send command8000 through the actual Golden-aware action-command setter, then dispatch packed target index0/argument0 through the real target callback and its zero-result fallback. Do not invent a successful target, empty target list or always-return1 callback. Actual command work/result field projection and initialization must match Golden's widened work layout rather than memcpy a Golden command object into guest PS2 memory."}
+  ],
+  "source_boundary": "Steam build10836033 ordinary .shared and file-backed .xpdata, Switch1.2 ordinary NSO, original PS2 ELF. No .arch decoding, game/emulator execution, runtime qualification or objdiff match claim.",
+  "reproduction": "Private l1c12_ai_status.py, l1c12_ai_status_reader.py, l1c12_ai_status_steam.py and l1c12_ai_status_proof.py. Complete8-byte source equality/hash and original branch/field accesses were observed. Generic Capstone misnames R5900 SQ/LQ save opcodes; proof uses only ordinary branch/shift/GP-address/lhu/lw instructions, not those unsupported save mnemonics."
+}

@@ -540,15 +540,18 @@
           "p4gl_atomic_draw"
         ],
         "memset": [
+          "bind_material",
           "p4gl_atomic_draw"
         ],
         "snprintf": [
+          "bind_material",
           "p4gl_atomic_draw"
         ],
         "stderr": [
           "p4gl_atomic_draw"
         ],
         "strlen": [
+          "bind_material",
           "p4gl_atomic_draw"
         ]
       }
@@ -584,7 +587,7 @@
       }
     },
     "src/render/p4gl_context.c": {
-      "reason": "Native SDL/context, presentation, capture paths and host-only renderer settings. Parsers affect presentation controls, not guest numeric fields. resolutionAdjust uses strcmp and compiler-emitted bcmp/memcmp only for equality against fixed resolution strings, so comparison magnitude is never observed. Capture storage and formatter results remain native; guest RAM is read only for requested dumps. Android internal-storage lookup selects only the host PNG capture directory, and its error path prints/exits on the host. Bionic's pass_object_size formatter retains those same native destinations. Retained ELF32 pattern-init memset sites in p4gl_context_present fill only inlined captureFrame path[512]/dpath[512] and captureWindow path[600] native stack buffers with 0xff before bounded formatting and host file/PNG output. The no-device early return also causes O2 to outline captureWindow, swapWindow and p4gl_api_explicit: captureWindow frees only capturePixels' host malloc storage and formats a native path; PNG failure diagnostics/exit, SDL swap/error queries and API environment selection remain the same host boundaries. p4gl_context_open_device, the RenderWare device's OPEN, only prints the failure, shows it in a message box on a player's run and exits on the host when no GL context opens.",
+      "reason": "p4gl_comparison_evidence (from p4gl_comparison_evidence.h) writes the scene-comparison evidence observation to a host file named by P4PC_COMPARISON_EVIDENCE: host getenv/atof/strtod, FILE access and formatting of the native MAD result only; no guest value is read or written. Native SDL/context, presentation, capture paths and host-only renderer settings. Parsers affect presentation controls, not guest numeric fields. resolutionAdjust uses strcmp and compiler-emitted bcmp/memcmp only for equality against fixed resolution strings, so comparison magnitude is never observed. Capture storage and formatter results remain native; guest RAM is read only for requested dumps. Android internal-storage lookup selects only the host PNG capture directory, and its error path prints/exits on the host. Bionic's pass_object_size formatter retains those same native destinations. Retained ELF32 pattern-init memset sites in p4gl_context_present fill only inlined captureFrame path[512]/dpath[512] and captureWindow path[600] native stack buffers with 0xff before bounded formatting and host file/PNG output. The no-device early return also causes O2 to outline captureWindow, swapWindow and p4gl_api_explicit: captureWindow frees only capturePixels' host malloc storage and formats a native path; PNG failure diagnostics/exit, SDL swap/error queries and API environment selection remain the same host boundaries. p4gl_context_open_device, the RenderWare device's OPEN, only prints the failure, shows it in a message box on a player's run and exits on the host when no GL context opens.",
       "calls": {
         "__stderrp": ["applySettings", "capturePixels", "captureWindow", "context_recover", "p4gl_context_open", "p4gl_context_open_device", "p4gl_context_present", "setSwapInterval"],
         "SDL_GetAndroidInternalStoragePath": ["writeCapturePng"],
@@ -600,14 +603,16 @@
           "setSwapInterval"
         ],
         "atof": [
-          "p4gl_context_present"
+          "p4gl_context_present",
+          "p4gl_comparison_evidence"
         ],
         "atoi": [
           "p4gl_context_open",
           "p4gl_context_present"
         ],
         "fopen": [
-          "p4gl_context_present"
+          "p4gl_context_present",
+          "p4gl_comparison_evidence"
         ],
         "sscanf": [
           "p4gl_context_present"
@@ -718,6 +723,7 @@
         "__isoc99_sscanf": [
           "p4gl_context_present"
         ],
+        "fputs": ["p4gl_comparison_evidence"],
         "exit": [
           "captureWindow",
           "p4gl_context_open_device",
@@ -726,13 +732,15 @@
           "writeCapturePng"
         ],
         "fclose": [
-          "p4gl_context_present"
+          "p4gl_context_present",
+          "p4gl_comparison_evidence"
         ],
         "fflush": [
           "p4gl_context_present"
         ],
         "fopen64": [
-          "p4gl_context_present"
+          "p4gl_context_present",
+          "p4gl_comparison_evidence"
         ],
         "fprintf": [
           "applySettings",
@@ -743,7 +751,8 @@
           "p4gl_context_open_device",
           "p4gl_context_present",
           "setSwapInterval",
-          "writeCapturePng"
+          "writeCapturePng",
+          "p4gl_comparison_evidence"
         ],
         "free": [
           "capturePixels",
@@ -755,7 +764,8 @@
           "p4gl_context_open",
           "p4gl_context_open_device",
           "p4gl_context_present",
-          "settingsPresent"
+          "settingsPresent",
+          "p4gl_comparison_evidence"
         ],
         "getenv": [
           "applySettings",
@@ -763,7 +773,8 @@
           "p4gl_api_wants_es",
           "p4gl_context_open",
           "p4gl_context_present",
-          "setSwapInterval"
+          "setSwapInterval",
+          "p4gl_comparison_evidence"
         ],
         "malloc": [
           "capturePixels"
@@ -811,7 +822,8 @@
           "swapWindow"
         ],
         "strtod": [
-          "p4gl_context_present"
+          "p4gl_context_present",
+          "p4gl_comparison_evidence"
         ],
         "strtol": [
           "p4gl_context_open",
@@ -843,10 +855,29 @@
     "src/render/p4gl_gl.c": {
       "reason": "Native GL capability strings, shader configuration and host diagnostics. sscanf reads driver version or bounded host gate-file tokens; no retail input uses this parser. Bionic checked strchr/strlen read the same bounded native gate-file strings, and its snprintf wrapper writes only native shader diagnostics. Pattern-init memset in p4gl_gl_compile_shader fills native GLchar log[1024]; the same bounded stack buffer goes to GetShaderInfoLog. Compiler-emitted bcmp compares native cached GL state for equality, never exposing its magnitude to guest state. Observed232164a4 Win64 draw/buffer/clear/copy/blit/flush/readback/error wrapper fprintf calls record opt-in elapsed API time only; stream results never control GL calls, return values or pixels. The5913dc4a Linux ELF64 fopen64 boundary in p4gl_gl_load opens only that operator-selected diagnostic CSV.",
       "calls": {
-        "__stderrp": ["p4gl_gate_limit", "p4gl_gl_compile_shader", "p4gl_gl_load", "p4gl_gl_stats_report", "probe_edge_rule", "probe_output_rounding", "xBlitFramebuffer", "xClear", "xCopyTexSubImage2D", "xDrawArrays", "xDrawArraysInstanced", "xDrawElements", "xTexImage2D", "xTexSubImage2D"],
+        "__stderrp": [
+          "caps_scan",
+          "context_probe",
+          "p4gl_gate_limit",
+          "p4gl_gl_compile_shader",
+          "p4gl_gl_load",
+          "p4gl_gl_stats_report",
+          "probe_edge_rule",
+          "probe_output_rounding",
+          "xBlitFramebuffer",
+          "xClear",
+          "xCopyTexSubImage2D",
+          "xDrawArrays",
+          "xDrawArraysInstanced",
+          "xDrawElements",
+          "xTexImage2D",
+          "xTexSubImage2D"
+        ],
         "__strchr_chk": ["p4gl_gate_limit"],
         "__vsnprintf_chk": ["_ZL8snprintfPcU17pass_object_size1mPKcz"],
         "__acrt_iob_func": [
+          "caps_scan",
+          "context_probe",
           "p4gl_gate_limit",
           "p4gl_gl_compile_shader",
           "p4gl_gl_load",
@@ -898,17 +929,19 @@
           "cBlitFramebuffer",
           "cBufferData",
           "cClear",
+          "cCompileShader",
           "cCopyTexSubImage2D",
           "cDrawArrays",
           "cDrawArraysInstanced",
           "cDrawElements",
           "cFlush",
           "cGetError",
-          "cReadPixels",
-          "cCompileShader",
           "cLinkProgram",
+          "cReadPixels",
           "cTexImage2D",
           "cTexSubImage2D",
+          "caps_scan",
+          "context_probe",
           "p4gl_gate_limit",
           "p4gl_gl_compile_shader",
           "p4gl_gl_hitch_api",
@@ -930,6 +963,7 @@
         ],
         "getenv": [
           "p4gl_gate_limit",
+          "p4gl_gl_feature",
           "p4gl_gl_load",
           "p4gl_gl_prepare_draw",
           "probe_output_rounding"
@@ -946,6 +980,8 @@
           "p4gl_gl_load"
         ],
         "stderr": [
+          "caps_scan",
+          "context_probe",
           "p4gl_gate_limit",
           "p4gl_gl_compile_shader",
           "p4gl_gl_load",
@@ -965,6 +1001,8 @@
           "p4gl_gate_limit"
         ],
         "strcmp": [
+          "caps_scan",
+          "context_probe",
           "p4gl_gate_limit",
           "p4gl_gl_load",
           "probe_output_rounding"
@@ -1299,6 +1337,156 @@
         ]
       }
     },
+    "src/render/p4gl_rt.c": {
+      "reason": "Render thread command stream (docs/platform/render_thread.md): host-only GL driver call replay. SDL thread, mutex, condition and GL window calls own the thread and context; calloc/malloc/free own native command chunks and the call records storage, never guest allocation slots; memset/memmove clear and compact those native buffers; strstr reads the window system error text; getenv reads the P4PC_RENDER_THREAD* switches; atexit/exit end the thread with the process or on out-of-memory; stderr/fprintf/fwrite are ignored diagnostics. Nothing read here, returned or written into guest state; the thread only replays GL calls the game thread already made.",
+      "calls": {
+        "realloc": ["merge_draw_run"],
+        "SDL_BroadcastCondition": [
+          "p4gl_rt_stop",
+          "p4gl_rt_stop_at_exit",
+          "render_main",
+          "rpc_exec"
+        ],
+        "SDL_CreateCondition": ["start_common", "sync_init"],
+        "SDL_CreateMutex": ["start_common", "sync_init"],
+        "SDL_CreateThreadRuntime": ["start_thread"],
+        "SDL_GL_GetCurrentContext": ["p4gl_rt_start"],
+        "SDL_GL_MakeCurrent": [
+          "exec_chunk",
+          "p4gl_rt_start",
+          "p4gl_rt_stop",
+          "render_main"
+        ],
+        "SDL_GL_SetSwapInterval": ["exec_chunk", "render_main"],
+        "SDL_GL_SwapWindow": ["do_swap", "render_main"],
+        "SDL_GetAtomicInt": ["rpc"],
+        "SDL_GetError": ["do_swap", "render_main"],
+        "SDL_GetTicksNS": [
+          "chunk_acquire",
+          "do_swap",
+          "exec_chunk",
+          "p4gl_rt_frame_end",
+          "render_main",
+          "rpc"
+        ],
+        "SDL_LockMutex": [
+          "chunk_acquire",
+          "exec_chunk",
+          "gen_names",
+          "p4gl_rt_frame_end",
+          "p4gl_rt_stop",
+          "p4gl_rt_stop_at_exit",
+          "pool_refill",
+          "rec",
+          "render_main",
+          "rpc",
+          "rpc_exec",
+          "start_thread",
+          "submit_cur"
+        ],
+        "SDL_SetAtomicInt": ["render_main", "rpc", "rpc_exec"],
+        "SDL_SetCurrentThreadPriority": ["render_main"],
+        "SDL_SignalCondition": [
+          "gen_names",
+          "p4gl_rt_frame_end",
+          "p4gl_rt_stop",
+          "rec",
+          "rpc",
+          "submit_cur"
+        ],
+        "SDL_UnlockMutex": [
+          "chunk_acquire",
+          "exec_chunk",
+          "gen_names",
+          "p4gl_rt_frame_end",
+          "p4gl_rt_stop",
+          "p4gl_rt_stop_at_exit",
+          "pool_refill",
+          "rec",
+          "render_main",
+          "rpc",
+          "rpc_exec",
+          "start_thread",
+          "submit_cur"
+        ],
+        "SDL_WaitCondition": ["render_main", "start_thread"],
+        "SDL_WaitConditionTimeout": ["chunk_acquire", "p4gl_rt_frame_end", "rpc"],
+        "SDL_WaitThread": ["p4gl_rt_stop", "p4gl_rt_stop_at_exit", "start_thread"],
+        "SDL_getenv": ["p4gl_rt_wanted", "render_main", "start_common"],
+        "__acrt_iob_func": [
+          "chunk_acquire",
+          "exec_chunk",
+          "merge_draw_run",
+          "p4gl_rt_frame_end",
+          "p4gl_rt_start",
+          "p4gl_rt_wanted",
+          "rpc"
+        ],
+        "__stderrp": [
+          "chunk_acquire",
+          "exec_chunk",
+          "merge_draw_run",
+          "p4gl_rt_frame_end",
+          "p4gl_rt_start",
+          "p4gl_rt_wanted",
+          "rpc"
+        ],
+        "_beginthreadex": ["start_thread"],
+        "_endthreadex": ["start_thread"],
+        "atexit": ["start_thread"],
+        "calloc": ["chunk_acquire", "start_common", "sync_init"],
+        "exit": ["chunk_acquire"],
+        "fprintf": [
+          "chunk_acquire",
+          "exec_chunk",
+          "merge_draw_run",
+          "p4gl_rt_frame_end",
+          "p4gl_rt_start",
+          "p4gl_rt_wanted"
+        ],
+        "fputc": [
+          "chunk_acquire",
+          "p4gl_rt_frame_end",
+          "p4gl_rt_start",
+          "p4gl_rt_wanted",
+          "rpc"
+        ],
+        "fputs": [
+          "chunk_acquire",
+          "p4gl_rt_frame_end",
+          "p4gl_rt_start",
+          "p4gl_rt_wanted",
+          "rpc"
+        ],
+        "free": [
+          "chunk_acquire",
+          "render_main",
+          "start_common",
+          "sync_init"
+        ],
+        "fwrite": [
+          "chunk_acquire",
+          "p4gl_rt_frame_end",
+          "p4gl_rt_start",
+          "p4gl_rt_wanted",
+          "rpc"
+        ],
+        "malloc": ["chunk_acquire", "start_common", "sync_init"],
+        "memcpy": ["merge_draw_run", "pool_refill", "rec"],
+        "memmove": ["pool_refill"],
+        "memset": ["p4gl_rt_frame_end", "p4gl_rt_install", "rec"],
+        "stderr": [
+          "chunk_acquire",
+          "exec_chunk",
+          "merge_draw_run",
+          "p4gl_rt_frame_end",
+          "p4gl_rt_start",
+          "p4gl_rt_wanted",
+          "rpc"
+        ],
+        "strstr": ["do_swap"]
+      }
+    },
     "src/render/p4gl_state.c": {
       "reason": "Native draw logging, capture controls and host-authored environment ranges only. String/parser/formatter results select or describe native diagnostics, never retail parser results. Bionic's pass_object_size snprintf helper writes that same native draw-log buffer through checked vsnprintf. Pattern-init memset in p4gl_drawlog fills only native line[1024] with 0xff; retained ELF32 disassembly shows the same stack buffer passed to bounded snprintf and the native draw-line logger.",
       "calls": {
@@ -1310,6 +1498,7 @@
           "p4gl_gs_log_draw"
         ],
         "atoi": [
+          "drawlog_parse",
           "p4gl_drawlog"
         ],
         "fprintf": [
@@ -1321,6 +1510,7 @@
           "p4gl_drawlog"
         ],
         "getenv": [
+          "drawlog_parse",
           "p4gl_drawlog",
           "p4gl_gs_log_on",
           "p4gl_gs_skip"
@@ -1337,12 +1527,15 @@
           "p4gl_gs_log_draw"
         ],
         "strchr": [
+          "drawlog_parse",
           "p4gl_drawlog"
         ],
         "strcmp": [
+          "drawlog_parse",
           "p4gl_drawlog"
         ],
         "strtol": [
+          "drawlog_parse",
           "p4gl_drawlog",
           "p4gl_gs_skip"
         ],
@@ -1429,31 +1622,32 @@
       }
     },
     "src/viewer/p4pc_viewer.c": {
-      "reason": "Standalone developer model-viewer frontend: host capture names, diagnostics and native draw-window/MAD controls only. Numeric values entering guest fields, dates, player/camera coordinates or guest-frame counts use the retail parsers; the synthetic camera's radius uses retail sqrtf. AArch64 frame_camera zeroes its native Bounds stack object and inlines f32_at as three four-byte copies from the guest camera view window into native stack floats. Host malloc is restricted to native input/capture scratch; bytes may be copied into guest allocations, never host pointers. Explicit main pairs cover the same operations when i386 inlines viewer_main. UCRT FILE access serves those same diagnostics, and compiler-emitted __main initializes the native process constructors. UCRT atoi/atof are only the existing native draw-window and MAD controls; fopen opens the same host viewer input as glibc fopen64.",
+      "reason": "p4gl_comparison_evidence (from p4gl_comparison_evidence.h) writes the scene-comparison evidence observation to a host file named by P4PC_COMPARISON_EVIDENCE: host getenv/atof/strtod, FILE access and formatting of the native MAD result only; no guest value is read or written. Standalone developer model-viewer frontend: host capture names, diagnostics and native draw-window/MAD controls only. Numeric values entering guest fields, dates, player/camera coordinates or guest-frame counts use the retail parsers; the synthetic camera's radius uses retail sqrtf. AArch64 frame_camera zeroes its native Bounds stack object and inlines f32_at as three four-byte copies from the guest camera view window into native stack floats. Host malloc is restricted to native input/capture scratch; bytes may be copied into guest allocations, never host pointers. Explicit main pairs cover the same operations when i386 inlines viewer_main. UCRT FILE access serves those same diagnostics, and compiler-emitted __main initializes the native process constructors. UCRT atoi/atof are only the existing native draw-window and MAD controls; fopen opens the same host viewer input as glibc fopen64.",
       "calls": {
-        "__stderrp": ["frame_camera", "main", "make_ptank", "viewer_main", "write_frame"],
-        "__acrt_iob_func": ["frame_camera", "main", "make_ptank", "viewer_main", "write_frame"],
+        "__stderrp": ["frame_camera", "main", "make_ptank", "render_golden", "viewer_main", "write_frame"],
+        "__acrt_iob_func": ["frame_camera", "main", "make_ptank", "render_golden", "viewer_main", "write_frame"],
         "__main": ["main"],
         "__vsnprintf_chk": ["_ZL8snprintfPcU17pass_object_size1mPKcz"],
-        "atof": ["write_frame"],
+        "atof": ["write_frame", "p4gl_comparison_evidence"],
         "atoi": ["drawWindow"],
+        "fputs": ["p4gl_comparison_evidence"],
         "exit": ["viewer_entry"],
-        "fclose": ["main", "viewer_main"],
-        "fopen": ["main", "viewer_main"],
-        "fopen64": ["main", "viewer_main"],
-        "fprintf": ["frame_camera", "main", "make_ptank", "p4pc_viewer_main", "viewer_main", "write_frame"],
+        "fclose": ["main", "viewer_main", "p4gl_comparison_evidence"],
+        "fopen": ["main", "viewer_main", "p4gl_comparison_evidence"],
+        "fopen64": ["main", "viewer_main", "p4gl_comparison_evidence"],
+        "fprintf": ["frame_camera", "main", "make_ptank", "p4pc_viewer_main", "render_golden", "viewer_main", "write_frame", "p4gl_comparison_evidence"],
         "free": ["main", "viewer_main", "write_frame"],
-        "fwrite": ["main", "viewer_main"],
-        "getenv": ["drawWindow", "main", "viewer_main", "write_frame"],
+        "fwrite": ["main", "viewer_main", "p4gl_comparison_evidence"],
+        "getenv": ["drawWindow", "main", "viewer_main", "write_frame", "p4gl_comparison_evidence"],
         "malloc": ["main", "viewer_main", "write_frame"],
         "memcpy": ["bounds_atomic", "frame_camera", "main", "make_ptank", "ptr_at", "viewer_main"],
         "memset": ["frame_camera", "main", "viewer_main"],
         "snprintf": ["main", "viewer_main"],
-        "stderr": ["frame_camera", "main", "make_ptank", "p4pc_viewer_main", "viewer_main", "write_frame"],
+        "stderr": ["frame_camera", "main", "make_ptank", "p4pc_viewer_main", "render_golden", "viewer_main", "write_frame"],
         "strchr": ["main", "viewer_main"],
         "strcmp": ["main", "viewer_main"],
         "strncmp": ["main", "viewer_main"],
-        "strtod": ["write_frame"],
+        "strtod": ["write_frame", "p4gl_comparison_evidence"],
         "strtol": ["drawWindow"]
       }
     },

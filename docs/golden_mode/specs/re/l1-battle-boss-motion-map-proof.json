@@ -1,0 +1,139 @@
+{
+  "schema": 1,
+  "proof_id": "L1-c12-boss-formation-motion-map",
+  "decision": "PROVEN",
+  "runtime_status": "pending-seam",
+  "address": "0x006355a0",
+  "ps2_size": 32,
+  "ps2": {
+    "base": "0x006355a0",
+    "live_size": 30,
+    "element_width": 1,
+    "columns": 30,
+    "sha256": "10b69a483607afb17226cab98d7a1ce88be71e95d425dc0d7dc73f7f2751fff3",
+    "retained_tail": {
+      "offset": 30,
+      "size": 2,
+      "observed": "0000"
+    }
+  },
+  "steam": {
+    "container": "P4G.exe",
+    "section": ".xpdata",
+    "rva": "0xaecbd8",
+    "raw_offset": 11449304,
+    "offset": 838616,
+    "size": 34,
+    "sha256": "271923a5a8e7838aa313bfb15af2d254a6498fb3991f4c9ebeff2c3b9c4426e0",
+    "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+    "source_build": 10836033,
+    "mapping_proven": true
+  },
+  "nso": {
+    "address": "0x71006ffa74",
+    "size": 34,
+    "sha256": "271923a5a8e7838aa313bfb15af2d254a6498fb3991f4c9ebeff2c3b9c4426e0"
+  },
+  "golden_values": [
+    0,
+    3,
+    2,
+    1,
+    4,
+    4,
+    0,
+    4,
+    5,
+    8,
+    9,
+    10,
+    7,
+    12,
+    13,
+    14,
+    15,
+    17,
+    1,
+    11,
+    0,
+    0,
+    0,
+    16,
+    12,
+    0,
+    6,
+    18,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "shape": {
+    "rows": 1,
+    "golden_columns": 34,
+    "old_columns": 30,
+    "element_width": 1,
+    "role": "Genus1 loaded boss/formation logical-motion-to-model-slot map, separate from the generic3x34 genus fallback map."
+  },
+  "changed_values": [
+    {
+      "logical_motion": 27,
+      "ps2": 0,
+      "golden": 18
+    }
+  ],
+  "identity_and_extent": "Original encounter initializer22bd60 publishes6355a0 as actual bossSlotTable in applicable encounter branches; original motion resolver1990d0 calls22cb90 for genus1. Ordinary Steam3f517/3f5f7/3f65c publish actualaecbd8 into battle+11c8, exactly the pointer consumed by the fully paired c6a30 dynamic formation motion resolver. Independent NSO2090 initializer publishes6ffa74 into battle+11e0 at2128/221c/2320/2374; complete23a0..2438 loads that exact field and indexes u8 by low16motion. NSO type100 callback6b3b0 accepts0..33, while original199e70 accepts0..29; the corresponding override initializers reset exactly30old/34Golden bytes. These actual publishers/readers/domain widths establish full34B Golden source and30B old live map; exact full spans uniquely agree acrossGoldenimages.32B selected contains2nonlogical old alignment bytes, not32logical motions.",
+  "producer_state": {
+    "original": "Pinned btlEncounterInitGlobals22bd60 assigns actual bossSlotTable in selected encounter cases, sets bossPhase0 in206 and resets30 signed override bytes to-1. Actual original table state must not be replaced by an unconditional mapping in every encounter.",
+    "steam": "Ordinary.shared3f420..3f6a9 selects from real encounter producer, sets real battle flags and camera/script bank, and publishes qualified motion map11c8 in the indicated branches;206-like branch at3f527 clears actual mode word11d0. Common3f670..3f69c writes four64-bit all-ones words and final16-bitffff: actual34-byte signed override array at11a0..11c1. Do not retain the old30-byte reset or clear the map/phase in branches that do not.",
+    "nso": "Complete2090..239c independently publishes applicable map/bank/flag state.221c/2220 map publication and mode0 store are separate from common34-byte override reset237c..2394 at11b8..11d9. Other bossPhase and per-motion override writers remain live producer/lifecycle contracts; no claimed constant phase3 or permanent all-ff state."
+  },
+  "reader_state": {
+    "steam": "Actualc6a7b..c6b14 consumes battle+11c8; absent pointer falls through to generic3x34 bank. Genus1 unit IDs10d/110/111 directly load map[motion]. Other IDs use nonnegative signed override byte11a0+motion or map byte if negative. ID10f on motion0/12hex returns0b when phaseword11d0!=3, otherwise map. Returnedffff fallback and u8 values must retain their actual widths.",
+    "nso": "Complete23a0..2438 confirms corresponding battle+11e0/map, signed override11b8+motion and phase11e8 fields, exact special IDs/0-or12hex/phase3 behavior andffff missing-map return. Real unit genusA2/ID A4 and actual encounter/formation state feed it, not guessed table selection.",
+    "related_source": "l1-battle-motion-id-map-proof.json proves separate generic3x34 fallback and all observed inlined native consumers. This map is not that bank and must remain the actual loaded map. l1-boss-camera-banks-proof.json establishes the related actual encounter/camera bank producer graph without admitting this independent motion map beforehand."
+  },
+  "layout": {
+    "kind": "prefix-copy",
+    "ps2_rows": 1,
+    "ps2_columns": 30,
+    "golden_rows": 1,
+    "golden_columns": 34,
+    "element_width": 1,
+    "live_size": 30,
+    "retained_tail": {
+      "offset": 30,
+      "size": 2
+    },
+    "copy_policy": "Copy first30 qualified Golden map bytes into6355a0,retain+30..31. Native/direct/inlined/translated formation map references must resolve the full34B source and true motion domain0..33, not the32B image probe or truncated30-byte copy; no34B overwrite or foreign host pointer."
+  },
+  "required_seams": [
+    {
+      "owner": "Applicable encounter map pointer and source supplier",
+      "ps2_addresses": [
+        "0x0022bd60",
+        "0x0022cb90",
+        "0x001990d0"
+      ],
+      "requirement": "Pin exact Steam image and full34B payload/hash; refuse mismatch. Author full34u8 formation map, with logical27->18 and real new30..33 entries, and only project30B into selected old32B view with2retainedtail. Bind actual encounter-ID/flags/boss bank source and applicable map publications (Steam11c8/NSO11e0) to qualified source; preserve branches that leave the field unchanged. No generic3x34 fallback substitution, always-on boss pointer, host pointer memcpy or old32B M2window."
+    },
+    {
+      "owner": "Real signed overrides and boss phase producers",
+      "requirement": "Actual common encounter initializer resets34 signed override bytes toff (Steam11a0..11c1,NSO11b8..11d9), not30. Bind actual per-motion override setters, bossPhase/mode word (Steam11d0/NSO11e8), script/event/packet writers and creation/reset/reselection/teardown lifetime. Only observed206-like branch resets phase0 here; retain actual other writers and conditions, never constant0/3, permanentlyff array or synthetic state. Route direct/native/compiled-inline aliases consistently."
+    },
+    {
+      "owner": "Unit/motion resolver and model/packet semantics",
+      "requirement": "Preserve actual genusA2/ID A4 and logical low16motion producers0..33; loaded-map presence, signed override>=0 selection,ffff missing-map fallback to the separate qualified3x34 bank, special IDs10d/10f/110/111 and exact phase-dependent0/12hex->0b branch. Keep actual model/motion row counts, rates/flags and queue/dependency/work lifetime described in the generic map/model-fields contracts. Exercise old/new logical IDs including changed27 and new30..33, missing/present mapping, negative/nonnegative overrides, each special ID and phase==3/!=3 with genuine state; no clamping, fake success or unchanged-PS2 consumer assumptions before runtime qualification."
+    }
+  ],
+  "source_verification": {
+    "script": "<scratch>/GoldenRE-notes/l1/l1c12_boss_motion_proof.py",
+    "observed_result": "exit0; BOSS_MOTION_SOURCE_PASS34/30/retain2/changed27to18 and BOSS_MOTION_PRODUCER_PASS",
+    "checks": "Pinned Steam image hash, unique complete34B payload/hash equality in both Golden images, every source byte, exact section/RVA/raw coordinates, original30B live hash and2zero tail bytes, four actual NSO map publications and34-byte ff reset/getter instructions; original ELF14 materializations of6355a0 and reset loop bound30 at22c414.",
+    "scope": "Static source/value and producer correspondence, not runtime or full boss/motion implementation equivalence."
+  },
+  "source_boundary": "Actual original source context, ordinary Steam.shared complete encounter initializer/typed resolver and file-backed.xpdata data, ordinary NSO complete initializer/resolver and static source. No.arch decode, game/emulator execution, byte-similarity admission or runtime/function-body equivalence claim.",
+  "reproduction": "Private l1c12_formation_motion_map.py/readers.py; complete34B source and30B old view, publisher sites and reset width, actual common resolver/source identity. Separate source verifier assertions seal source spans/values/coordinates and critical publisher/reset instructions."
+}

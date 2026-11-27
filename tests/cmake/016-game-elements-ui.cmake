@@ -11,7 +11,7 @@ add_test(NAME game_elements_ui COMMAND game_elements_ui_test)
 set_tests_properties(game_elements_ui PROPERTIES SKIP_RETURN_CODE 77 LABELS host)
 
 # Exercise the real native Analyze column selector without a graphics device.
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Android")
   add_executable(game_elements_ui_ailments_test game_elements_ui_ailments_test.c)
   target_compile_definitions(game_elements_ui_ailments_test PRIVATE ${P4_PORT_DEFINES})
   target_compile_options(game_elements_ui_ailments_test PRIVATE -ffunction-sections -fdata-sections)

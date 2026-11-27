@@ -1,0 +1,14 @@
+# Private candidate only; never build this over a shared reviewed alias.
+# podman build --build-arg P4PC_BASE_IMAGE=sha256:<reviewed-id> \
+#   --label org.opencontainers.image.revision=<source-sha> \
+#   -f ci/Dockerfile.hca -t p4pc-ci-hca-<source-sha> ci/
+# Native Linux development FFmpeg remains the reviewed distro build; shipping
+# Linux deps use this same pinned recipe with triple x86_64-linux-gnu.
+ARG P4PC_BASE_IMAGE
+FROM ${P4PC_BASE_IMAGE}
+COPY win32/build_deps.sh /usr/local/share/p4pc/ci/win32/build_deps.sh
+COPY ffmpeg-7.1.1-hca-window-alignment.patch /usr/local/share/p4pc/ci/
+RUN apt-get update && apt-get install -y --no-install-recommends patch && rm -rf /var/lib/apt/lists/* \
+ && sh /usr/local/share/p4pc/ci/win32/build_deps.sh /opt/p4win32 /opt/llvm-mingw i686-w64-mingw32 \
+ && sh /usr/local/share/p4pc/ci/win32/build_deps.sh /opt/p4win64 /opt/llvm-mingw x86_64-w64-mingw32 \
+ && rm -rf /opt/deps-build-i686-w64-mingw32 /opt/deps-build-x86_64-w64-mingw32 /opt/dl-cache

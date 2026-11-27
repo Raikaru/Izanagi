@@ -52,6 +52,8 @@ def fake_preparation(args):
                "source_sha256": sim.digest(source), "effective_image_sha256": sim.digest(effective),
                "effective_image_bytes": len(effective), "effective_image_native_valid": True,
                "classification": "source_attested" if struct.unpack_from("<I", request, 36)[0] == 1 else "synthetic_lab"}
+    receipt["native_prepared_state"] = {"actors": [{"id": 1}], "hero_personas": [],
+                                        "companion_personas": [], "inventory": []}
     if mode.startswith("prep_bad_"):
         key = mode[len("prep_bad_"):]
         if key == "effective_image_native_valid":
@@ -429,6 +431,53 @@ class BattleSimTest(unittest.TestCase):
         self.assertEqual(binary[64:64 + len(image)], image)
         self.assertEqual(struct.unpack("<III", binary[64 + len(image):]), (3, 0x4000, 2))
 
+    def test_scenario_boss_context_is_explicit(self):
+        seeds = sim.derive_seeds(self.scenario["master_seed"], 0)
+        image = self.image.read_bytes()
+        self.assertEqual(struct.unpack_from("<I", sim.compile_entry(self.scenario, image, seeds), 12)[0] & 8, 0)
+        self.scenario["is_boss"] = True
+        sim.validate_scenario(self.scenario)
+        self.assertEqual(struct.unpack_from("<I", sim.compile_entry(self.scenario, image, seeds), 12)[0] & 8, 8)
+        self.scenario["is_boss"] = 1
+        with self.assertRaisesRegex(sim.ScenarioError, "scenario.is_boss"):
+            sim.validate_scenario(self.scenario)
+
+    def test_named_policy_opening_envelope(self):
+        opening = "battle:plan=circle,cross,cross;skip=0;delay=80\nbattleturn:circle,down,cross,skill:14,cross,cross\n"
+        seeds = sim.derive_seeds(self.scenario["master_seed"], 0)
+        image = self.image.read_bytes()
+        for kind in ("strategic", "expert"):
+            self.scenario["policy"] = {"kind": kind, "version": 1, "opening": opening}
+            sim.validate_scenario(self.scenario)
+            blob = sim.compile_entry(self.scenario, image, seeds)
+            fields = struct.unpack("<8s14I", blob[:64])
+            self.assertEqual(fields[2] & 16, 16)
+            self.assertEqual(fields[7], len(opening))
+            self.assertEqual(blob[64 + len(image):], opening.encode("ascii"))
+        self.scenario["policy"]["kind"] = "cautious"
+        with self.assertRaisesRegex(sim.ScenarioError, "policy.opening"):
+            sim.validate_scenario(self.scenario)
+        self.scenario["policy"] = {"kind": "expert", "version": 1, "opening": "battleturn:cross"}
+        with self.assertRaisesRegex(sim.ScenarioError, "policy.opening"):
+            sim.validate_scenario(self.scenario)
+
+    def test_decision_trace_envelope(self):
+        seeds = sim.derive_seeds(self.scenario["master_seed"], 0)
+        image = self.image.read_bytes()
+        for kind in ("strategic", "expert"):
+            self.scenario["policy"] = {"kind": kind, "version": 1}
+            self.scenario["options"]["trace_decisions"] = True
+            sim.validate_scenario(self.scenario)
+            blob = sim.compile_entry(self.scenario, image, seeds)
+            self.assertEqual(struct.unpack_from("<I", blob, 12)[0] & 32, 32)
+        self.scenario["options"]["trace_decisions"] = 1
+        with self.assertRaisesRegex(sim.ScenarioError, "trace_decisions"):
+            sim.validate_scenario(self.scenario)
+        self.scenario["options"]["trace_decisions"] = True
+        self.scenario["policy"]["kind"] = "cautious"
+        with self.assertRaisesRegex(sim.ScenarioError, "trace_decisions"):
+            sim.validate_scenario(self.scenario)
+
     def walk_policy(self, plan="battle:plan=circle,cross,cross;guard=261\nbattlerule:dead@1=circle,down,down,down,cross,cross,cross\n"):
         self.scenario["policy"] = {"kind": "walk", "version": 1, "plan": plan}
         return plan
@@ -509,13 +558,17 @@ class BattleSimTest(unittest.TestCase):
             change(value["party_policy"])
             with self.subTest(policy=value["party_policy"]), self.assertRaises(sim.ScenarioError):
                 sim.validate_result(value)
-        # Older policies keep their own reported identity: the pin covers the candidate only.
+        # Other policies retain their own reported identity.
         technical = copy.deepcopy(base)
         technical["party_policy"].update(id=7, name="technical-player-v1",
                                          knowledge="observed_damage_weakness_public_charge_guard_ailment_landings")
         sim.validate_result(technical)
+        expert = copy.deepcopy(base)
+        expert["party_policy"].update(id=9, name="expert-player-v1",
+                                      knowledge="visible_observation_observed_hits_scenario_boss_context")
+        sim.validate_result(expert)
         with self.assertRaises(sim.ScenarioError):
-            sim.validate_result(dict(base, party_policy=dict(base["party_policy"], id=9)))
+            sim.validate_result(dict(base, party_policy=dict(base["party_policy"], id=10)))
 
     def ratings_table(self, split=False):
         def row(base):
@@ -1268,6 +1321,22 @@ class BattleSimTest(unittest.TestCase):
                 else:
                     with self.assertRaisesRegex(sim.ScenarioError, "persona_id"):
                         sim.validate_definition(definition)
+
+    def test_pinned_preparation_state_is_checked_before_seed_workers(self):
+        self.declarative()
+        self.scenario["expected_prepared_state"] = {"actors": [{"id": 1}], "hero_personas": [],
+                                                     "companion_personas": [], "inventory": []}
+        report = self.batch()
+        self.assertEqual(report["requested"], 4)
+
+    def test_changed_pinned_preparation_state_stops_before_seed_workers(self):
+        self.declarative()
+        self.scenario["expected_prepared_state"] = {"actors": [{"id": 2}], "hero_personas": [],
+                                                     "companion_personas": [], "inventory": []}
+        with self.assertRaisesRegex(sim.ScenarioError, "native prepared actors"):
+            self.batch()
+        self.assertEqual(self.admissions, 1)
+        self.assertFalse(list((self.root / "out").glob("run-*")))
 
     def test_preparation_freezes_once_before_all_seed_workers(self):
         definition = self.declarative()

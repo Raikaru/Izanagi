@@ -12,6 +12,10 @@ list(REMOVE_ITEM _p4_data_edit_sources game_table_derived_test.c
 list(APPEND _p4_data_edit_sources game_data_edit_test.c
   "${CMAKE_SOURCE_DIR}/src/platform/mods/game_data.c"
   "${CMAKE_SOURCE_DIR}/src/platform/mods/game_data_catalog.c"
+  "${CMAKE_SOURCE_DIR}/src/platform/golden/golden_names_native.c"
+  "${CMAKE_SOURCE_DIR}/src/platform/golden/golden_mode_cache_publish.c"
+  "${CMAKE_SOURCE_DIR}/src/platform/golden/golden_table_cache.c"
+  "${CMAKE_SOURCE_DIR}/src/platform/golden/golden_cache.c"
   "${CMAKE_SOURCE_DIR}/src/platform/mods/game_data_edit.c"
   "${CMAKE_SOURCE_DIR}/src/platform/mods/game_data_edit_xml.c"
   "${CMAKE_SOURCE_DIR}/src/platform/mods/game_data_session.c")

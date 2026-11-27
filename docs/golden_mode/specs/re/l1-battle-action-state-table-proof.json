@@ -1,0 +1,1224 @@
+{
+  "schema": 1,
+  "proof_id": "L1-c12-battle-action-state-table",
+  "decision": "PROVEN",
+  "runtime_status": "pending-seam",
+  "address": "0x005f6e20",
+  "ps2_size": 456,
+  "scope": "One selected complete38-record action callback/name table. Reuse the established c5 typed bank and state identity map; do not recount its seven label admissions or the separate encounter table. This proves literal descriptor values and field/namespace correspondence, NOT byte-exact or semantic matches of84 callback implementations.",
+  "existing_source_proof": "l1-c5-action-encounter-labels-proof.json#/banks/action",
+  "steam": {
+    "container": "P4G.exe",
+    "section": ".xpdata",
+    "rva": "0xa24c10",
+    "raw_offset": 10630160,
+    "offset": 19472,
+    "size": 1008,
+    "sha256": "2bf0369c34e717c95880fa5747272df1dc2d5bc40c4c442263063e244c5f007d",
+    "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+    "source_build": 10836033,
+    "mapping_proven": true
+  },
+  "nso": {
+    "base": "0x7100709a40",
+    "got": "0x7100880590",
+    "size": 1008,
+    "sha256": "a9e080790cc3b9e7a988324b4ec1cc1432a8f43cf897c78318943a0670f171f6",
+    "representation": "Raw file span hash is separate from RELATIVE relocation values. Callback/name pointers below are statically normalized targets, not a runtime NSO read."
+  },
+  "ps2": {
+    "base": "0x005f6e20",
+    "size": 456,
+    "sha256": "d0c6567ac6a842baa35843386bed022c51dcf3a3742296e0e4d1a5045880074f",
+    "records": 38,
+    "stride": 12,
+    "fields": {
+      "init": 0,
+      "update": 4,
+      "name": 8
+    },
+    "following_typed_object": "5f6fe8 battle.h source-tag string actually used by original allocator1b0930; not another callback triple."
+  },
+  "golden_shape": {
+    "records": 42,
+    "stride": 24,
+    "fields": {
+      "init": 0,
+      "update": 8,
+      "name": 16
+    },
+    "extent_evidence": "Independent complete Steam and relocated NSO parsing gives42 contiguous typed init/update/name triples through TEST41, with all38 original named roles as the same ordered subsequence plus four positively present inserted roles. Following Steam data are float records; following NSO relocated words do not form another valid callback/name triple. Established c5 receipts independently record both physical next-record failures and complete table hashes. Count/role proof is corroborated by actual indexed init/update consumers, not names alone."
+  },
+  "records": [
+    {
+      "golden_index": 0,
+      "name": "NON",
+      "steam": {
+        "record_rva": "0xa24c10",
+        "init_rva": "0x48480",
+        "update_rva": "0x48490",
+        "name_rva": "0x90a780"
+      },
+      "nso": {
+        "record": "0x7100709a40",
+        "init": "0x710000ac20",
+        "update": "0x710000ac30",
+        "name": "0x71005fbb38"
+      }
+    },
+    {
+      "golden_index": 1,
+      "name": "STANDBY",
+      "steam": {
+        "record_rva": "0xa24c28",
+        "init_rva": "0x484a0",
+        "update_rva": "0x484b0",
+        "name_rva": "0x90a788"
+      },
+      "nso": {
+        "record": "0x7100709a58",
+        "init": "0x710000ac40",
+        "update": "0x710000ac50",
+        "name": "0x71005d5a34"
+      }
+    },
+    {
+      "golden_index": 2,
+      "name": "START",
+      "steam": {
+        "record_rva": "0xa24c40",
+        "init_rva": "0x48540",
+        "update_rva": "0x48970",
+        "name_rva": "0x90a790"
+      },
+      "nso": {
+        "record": "0x7100709a70",
+        "init": "0x710000acc0",
+        "update": "0x710000b0e0",
+        "name": "0x71005e62f6"
+      }
+    },
+    {
+      "golden_index": 3,
+      "name": "START HOME",
+      "steam": {
+        "record_rva": "0xa24c58",
+        "init_rva": "0x48df0",
+        "update_rva": "0x48fb0",
+        "name_rva": "0x90a798"
+      },
+      "nso": {
+        "record": "0x7100709a88",
+        "init": "0x710000b540",
+        "update": "0x710000b6b0",
+        "name": "0x7100618ebb"
+      }
+    },
+    {
+      "golden_index": 4,
+      "name": "CHANGE FORMATION",
+      "steam": {
+        "record_rva": "0xa24c70",
+        "init_rva": "0x49090",
+        "update_rva": "0x493c0",
+        "name_rva": "0x90a7a8"
+      },
+      "nso": {
+        "record": "0x7100709aa0",
+        "init": "0x710000b760",
+        "update": "0x710000b920",
+        "name": "0x71006162f1"
+      }
+    },
+    {
+      "golden_index": 5,
+      "name": "COMMAND",
+      "steam": {
+        "record_rva": "0xa24c88",
+        "init_rva": "0x49410",
+        "update_rva": "0x49970",
+        "name_rva": "0x90a7c0"
+      },
+      "nso": {
+        "record": "0x7100709ab8",
+        "init": "0x710000b980",
+        "update": "0x710000bc50",
+        "name": "0x710061ed37"
+      }
+    },
+    {
+      "golden_index": 6,
+      "name": "TARGET",
+      "steam": {
+        "record_rva": "0xa24ca0",
+        "init_rva": "0x49dd0",
+        "update_rva": "0x4a050",
+        "name_rva": "0x90a7c8"
+      },
+      "nso": {
+        "record": "0x7100709ad0",
+        "init": "0x710000c060",
+        "update": "0x710000c1c0",
+        "name": "0x71005fed4c"
+      }
+    },
+    {
+      "golden_index": 7,
+      "name": "ANALYZE",
+      "steam": {
+        "record_rva": "0xa24cb8",
+        "init_rva": "0x4a710",
+        "update_rva": "0x4a740",
+        "name_rva": "0x90a7d0"
+      },
+      "nso": {
+        "record": "0x7100709ae8",
+        "init": "0x710000c750",
+        "update": "0x710000c760",
+        "name": "0x71005d2d5c"
+      }
+    },
+    {
+      "golden_index": 8,
+      "name": "AI",
+      "steam": {
+        "record_rva": "0xa24cd0",
+        "init_rva": "0x4b010",
+        "update_rva": "0x4b0a0",
+        "name_rva": "0x90a7d8"
+      },
+      "nso": {
+        "record": "0x7100709b00",
+        "init": "0x710000cce0",
+        "update": "0x710000cd60",
+        "name": "0x7100610e39"
+      }
+    },
+    {
+      "golden_index": 9,
+      "name": "AUTO",
+      "steam": {
+        "record_rva": "0xa24ce8",
+        "init_rva": "0x4b220",
+        "update_rva": "0x4b2c0",
+        "name_rva": "0x90a7dc"
+      },
+      "nso": {
+        "record": "0x7100709b18",
+        "init": "0x710000ce30",
+        "update": "0x710000ce80",
+        "name": "0x71005f67e9"
+      }
+    },
+    {
+      "golden_index": 10,
+      "name": "SUPPORT",
+      "steam": {
+        "record_rva": "0xa24d00",
+        "init_rva": "0x4b3b0",
+        "update_rva": "0x4b3c0",
+        "name_rva": "0x90a7e8"
+      },
+      "nso": {
+        "record": "0x7100709b30",
+        "init": "0x710000cf60",
+        "update": "0x710000cf70",
+        "name": "0x71005e62fc"
+      }
+    },
+    {
+      "golden_index": 11,
+      "name": "BAD",
+      "steam": {
+        "record_rva": "0xa24d18",
+        "init_rva": "0x4b7c0",
+        "update_rva": "0x4b7f0",
+        "name_rva": "0x90a7f0"
+      },
+      "nso": {
+        "record": "0x7100709b48",
+        "init": "0x710000d240",
+        "update": "0x710000d270",
+        "name": "0x7100618ec6"
+      }
+    },
+    {
+      "golden_index": 12,
+      "name": "COOPERATE",
+      "steam": {
+        "record_rva": "0xa24d30",
+        "init_rva": "0x4c320",
+        "update_rva": "0x4c990",
+        "name_rva": "0x90a7f8"
+      },
+      "nso": {
+        "record": "0x7100709b60",
+        "init": "0x710000d790",
+        "update": "0x710000dc50",
+        "name": "0x71005ee534"
+      }
+    },
+    {
+      "golden_index": 13,
+      "name": "PURSUIT_MES",
+      "steam": {
+        "record_rva": "0xa24d48",
+        "init_rva": "0x4ca40",
+        "update_rva": "0x4cc10",
+        "name_rva": "0x90a808"
+      },
+      "nso": {
+        "record": "0x7100709b78",
+        "init": "0x710000dce0",
+        "update": "0x710000de30",
+        "name": "0x71005e92e8"
+      }
+    },
+    {
+      "golden_index": 14,
+      "name": "PURSUIT",
+      "steam": {
+        "record_rva": "0xa24d60",
+        "init_rva": "0x4d090",
+        "update_rva": "0x4d0a0",
+        "name_rva": "0x90a818"
+      },
+      "nso": {
+        "record": "0x7100709b90",
+        "init": "0x710000e1c0",
+        "update": "0x710000e1d0",
+        "name": "0x71005e3779"
+      }
+    },
+    {
+      "golden_index": 15,
+      "name": "UNION",
+      "steam": {
+        "record_rva": "0xa24d78",
+        "init_rva": "0x4f7a0",
+        "update_rva": "0x51050",
+        "name_rva": "0x90a820"
+      },
+      "nso": {
+        "record": "0x7100709ba8",
+        "init": "0x710000e540",
+        "update": "0x710000f860",
+        "name": "0x71005d2d64"
+      }
+    },
+    {
+      "golden_index": 16,
+      "name": "BIKE_PURSUIT",
+      "steam": {
+        "record_rva": "0xa24d90",
+        "init_rva": "0x4d510",
+        "update_rva": "0x4d800",
+        "name_rva": "0x90a828"
+      },
+      "nso": {
+        "record": "0x7100709bc0",
+        "init": "0x710000f9c0",
+        "update": "0x710000fcc0",
+        "name": "0x71005ee53e"
+      }
+    },
+    {
+      "golden_index": 17,
+      "name": "READY",
+      "steam": {
+        "record_rva": "0xa24da8",
+        "init_rva": "0x51120",
+        "update_rva": "0x51130",
+        "name_rva": "0x90a838"
+      },
+      "nso": {
+        "record": "0x7100709bd8",
+        "init": "0x7100010f70",
+        "update": "0x7100010f80",
+        "name": "0x710060bd6a"
+      }
+    },
+    {
+      "golden_index": 18,
+      "name": "MOVE TARGET",
+      "steam": {
+        "record_rva": "0xa24dc0",
+        "init_rva": "0x515b0",
+        "update_rva": "0x51e10",
+        "name_rva": "0x90a840"
+      },
+      "nso": {
+        "record": "0x7100709bf0",
+        "init": "0x71000113c0",
+        "update": "0x71000119d0",
+        "name": "0x71005f15a7"
+      }
+    },
+    {
+      "golden_index": 19,
+      "name": "MOVE HOME",
+      "steam": {
+        "record_rva": "0xa24dd8",
+        "init_rva": "0x51e70",
+        "update_rva": "0x52040",
+        "name_rva": "0x90a850"
+      },
+      "nso": {
+        "record": "0x7100709c08",
+        "init": "0x7100011a60",
+        "update": "0x7100011c00",
+        "name": "0x7100618eca"
+      }
+    },
+    {
+      "golden_index": 20,
+      "name": "ATTACK",
+      "steam": {
+        "record_rva": "0xa24df0",
+        "init_rva": "0x520a0",
+        "update_rva": "0x520b0",
+        "name_rva": "0x90a85c"
+      },
+      "nso": {
+        "record": "0x7100709c20",
+        "init": "0x7100011c90",
+        "update": "0x7100011ca0",
+        "name": "0x710060974a"
+      }
+    },
+    {
+      "golden_index": 21,
+      "name": "SKILL",
+      "steam": {
+        "record_rva": "0xa24e08",
+        "init_rva": "0x54150",
+        "update_rva": "0x54160",
+        "name_rva": "0x90a864"
+      },
+      "nso": {
+        "record": "0x7100709c38",
+        "init": "0x7100013340",
+        "update": "0x7100013350",
+        "name": "0x71005fbb3c"
+      }
+    },
+    {
+      "golden_index": 22,
+      "name": "SUMMON",
+      "steam": {
+        "record_rva": "0xa24e20",
+        "init_rva": "0x581d0",
+        "update_rva": "0x581e0",
+        "name_rva": "0x90a86c"
+      },
+      "nso": {
+        "record": "0x7100709c50",
+        "init": "0x7100016d60",
+        "update": "0x7100016d70",
+        "name": "0x71005d2d6a"
+      }
+    },
+    {
+      "golden_index": 23,
+      "name": "ASSIST",
+      "steam": {
+        "record_rva": "0xa24e38",
+        "init_rva": "0x592d0",
+        "update_rva": "0x5a000",
+        "name_rva": "0x90a874"
+      },
+      "nso": {
+        "record": "0x7100709c68",
+        "init": "0x7100017470",
+        "update": "0x7100017af0",
+        "name": "0x71005e3781"
+      }
+    },
+    {
+      "golden_index": 24,
+      "name": "ANALYZESKILL",
+      "steam": {
+        "record_rva": "0xa24e50",
+        "init_rva": "0x58d70",
+        "update_rva": "0x59270",
+        "name_rva": "0x90a880"
+      },
+      "nso": {
+        "record": "0x7100709c80",
+        "init": "0x7100017b70",
+        "update": "0x7100017d90",
+        "name": "0x710061ed3f"
+      }
+    },
+    {
+      "golden_index": 25,
+      "name": "YELL",
+      "steam": {
+        "record_rva": "0xa24e68",
+        "init_rva": "0x5a060",
+        "update_rva": "0x5a200",
+        "name_rva": "0x90a890"
+      },
+      "nso": {
+        "record": "0x7100709c98",
+        "init": "0x7100017e10",
+        "update": "0x7100017f10",
+        "name": "0x71005e6304"
+      }
+    },
+    {
+      "golden_index": 26,
+      "name": "EVENT",
+      "steam": {
+        "record_rva": "0xa24e80",
+        "init_rva": "0x5a320",
+        "update_rva": "0x5a340",
+        "name_rva": "0x90a898"
+      },
+      "nso": {
+        "record": "0x7100709cb0",
+        "init": "0x7100018010",
+        "update": "0x7100018080",
+        "name": "0x7100606c1a"
+      }
+    },
+    {
+      "golden_index": 27,
+      "name": "ERROR",
+      "steam": {
+        "record_rva": "0xa24e98",
+        "init_rva": "0x5a3a0",
+        "update_rva": "0x5a3b0",
+        "name_rva": "0x90a8a0"
+      },
+      "nso": {
+        "record": "0x7100709cc8",
+        "init": "0x71000180e0",
+        "update": "0x71000180f0",
+        "name": "0x710060403d"
+      }
+    },
+    {
+      "golden_index": 28,
+      "name": "ENDURE",
+      "steam": {
+        "record_rva": "0xa24eb0",
+        "init_rva": "0x5a7b0",
+        "update_rva": "0x5a850",
+        "name_rva": "0x90a8a8"
+      },
+      "nso": {
+        "record": "0x7100709ce0",
+        "init": "0x71000183b0",
+        "update": "0x7100018430",
+        "name": "0x7100610e3c"
+      }
+    },
+    {
+      "golden_index": 29,
+      "name": "WAIT",
+      "steam": {
+        "record_rva": "0xa24ec8",
+        "init_rva": "0x5ac40",
+        "update_rva": "0x5ac50",
+        "name_rva": "0x90a8b0"
+      },
+      "nso": {
+        "record": "0x7100709cf8",
+        "init": "0x7100018700",
+        "update": "0x7100018710",
+        "name": "0x71005f67ee"
+      }
+    },
+    {
+      "golden_index": 30,
+      "name": "PERSONA",
+      "steam": {
+        "record_rva": "0xa24ee0",
+        "init_rva": "0x5bc50",
+        "update_rva": "0x5bf00",
+        "name_rva": "0x90a8b8"
+      },
+      "nso": {
+        "record": "0x7100709d10",
+        "init": "0x71000189d0",
+        "update": "0x7100018b80",
+        "name": "0x71005dae2d"
+      }
+    },
+    {
+      "golden_index": 31,
+      "name": "BAD DAMAGE",
+      "steam": {
+        "record_rva": "0xa24ef8",
+        "init_rva": "0x5bfc0",
+        "update_rva": "0x5bfd0",
+        "name_rva": "0x90a8c0"
+      },
+      "nso": {
+        "record": "0x7100709d28",
+        "init": "0x7100018c40",
+        "update": "0x7100018c50",
+        "name": "0x7100616302"
+      }
+    },
+    {
+      "golden_index": 32,
+      "name": "ESCAPE_MES",
+      "steam": {
+        "record_rva": "0xa24f10",
+        "init_rva": "0x5b030",
+        "update_rva": "0x5b210",
+        "name_rva": "0x90a8d0"
+      },
+      "nso": {
+        "record": "0x7100709d40",
+        "init": "0x7100018f20",
+        "update": "0x7100019030",
+        "name": "0x71005fed53"
+      }
+    },
+    {
+      "golden_index": 33,
+      "name": "ESCAPE",
+      "steam": {
+        "record_rva": "0xa24f28",
+        "init_rva": "0x5b490",
+        "update_rva": "0x5b4a0",
+        "name_rva": "0x90a8dc"
+      },
+      "nso": {
+        "record": "0x7100709d58",
+        "init": "0x7100019160",
+        "update": "0x7100019170",
+        "name": "0x7100621ee1"
+      }
+    },
+    {
+      "golden_index": 34,
+      "name": "ROUNDUP_MES",
+      "steam": {
+        "record_rva": "0xa24f40",
+        "init_rva": "0x5c470",
+        "update_rva": "0x5c910",
+        "name_rva": "0x90a8e8"
+      },
+      "nso": {
+        "record": "0x7100709d70",
+        "init": "0x7100019690",
+        "update": "0x7100019990",
+        "name": "0x71005f92af"
+      }
+    },
+    {
+      "golden_index": 35,
+      "name": "ROUNDUP",
+      "steam": {
+        "record_rva": "0xa24f58",
+        "init_rva": "0x5cec0",
+        "update_rva": "0x5d0d0",
+        "name_rva": "0x90a8f8"
+      },
+      "nso": {
+        "record": "0x7100709d88",
+        "init": "0x7100019da0",
+        "update": "0x7100019f00",
+        "name": "0x71005d89b6"
+      }
+    },
+    {
+      "golden_index": 36,
+      "name": "PACKET",
+      "steam": {
+        "record_rva": "0xa24f70",
+        "init_rva": "0x5ecc0",
+        "update_rva": "0x5ecd0",
+        "name_rva": "0x90a900"
+      },
+      "nso": {
+        "record": "0x7100709da0",
+        "init": "0x710001ada0",
+        "update": "0x710001adb0",
+        "name": "0x71005dddd1"
+      }
+    },
+    {
+      "golden_index": 37,
+      "name": "END",
+      "steam": {
+        "record_rva": "0xa24f88",
+        "init_rva": "0x5ed20",
+        "update_rva": "0x5ee10",
+        "name_rva": "0x90a908"
+      },
+      "nso": {
+        "record": "0x7100709db8",
+        "init": "0x710001ae10",
+        "update": "0x710001af20",
+        "name": "0x7100606c20"
+      }
+    },
+    {
+      "golden_index": 38,
+      "name": "END HOME",
+      "steam": {
+        "record_rva": "0xa24fa0",
+        "init_rva": "0x5f400",
+        "update_rva": "0x5f5e0",
+        "name_rva": "0x90a910"
+      },
+      "nso": {
+        "record": "0x7100709dd0",
+        "init": "0x710001b320",
+        "update": "0x710001b4f0",
+        "name": "0x71005d2d71"
+      }
+    },
+    {
+      "golden_index": 39,
+      "name": "DEAD",
+      "steam": {
+        "record_rva": "0xa24fb8",
+        "init_rva": "0x5f6d0",
+        "update_rva": "0x5f820",
+        "name_rva": "0x90a91c"
+      },
+      "nso": {
+        "record": "0x7100709de8",
+        "init": "0x710001b5a0",
+        "update": "0x710001b6f0",
+        "name": "0x71005fbb42"
+      }
+    },
+    {
+      "golden_index": 40,
+      "name": "EXIT",
+      "steam": {
+        "record_rva": "0xa24fd0",
+        "init_rva": "0x5f960",
+        "update_rva": "0x5f9a0",
+        "name_rva": "0x90a924"
+      },
+      "nso": {
+        "record": "0x7100709e00",
+        "init": "0x710001b800",
+        "update": "0x710001b820",
+        "name": "0x71005ee54b"
+      }
+    },
+    {
+      "golden_index": 41,
+      "name": "TEST",
+      "steam": {
+        "record_rva": "0xa24fe8",
+        "init_rva": "0x5fbb0",
+        "update_rva": "0x5fbc0",
+        "name_rva": "0x90a92c"
+      },
+      "nso": {
+        "record": "0x7100709e18",
+        "init": "0x710001b9b0",
+        "update": "0x710001b9c0",
+        "name": "0x7100621ee8"
+      }
+    }
+  ],
+  "old_to_golden_projection": [
+    {
+      "ps2_index": 0,
+      "golden_index": 0,
+      "name": "NON",
+      "guest_record_offset": 0,
+      "source_record_offset": 0,
+      "ps2_init": "0x1a0640",
+      "ps2_update": "0x1a0650",
+      "ps2_name": "0x7631ac"
+    },
+    {
+      "ps2_index": 1,
+      "golden_index": 1,
+      "name": "STANDBY",
+      "guest_record_offset": 12,
+      "source_record_offset": 24,
+      "ps2_init": "0x1a0660",
+      "ps2_update": "0x1a0670",
+      "ps2_name": "0x7631b0"
+    },
+    {
+      "ps2_index": 2,
+      "golden_index": 2,
+      "name": "START",
+      "guest_record_offset": 24,
+      "source_record_offset": 48,
+      "ps2_init": "0x1a06d0",
+      "ps2_update": "0x1a0b00",
+      "ps2_name": "0x7631b8"
+    },
+    {
+      "ps2_index": 3,
+      "golden_index": 3,
+      "name": "START HOME",
+      "guest_record_offset": 36,
+      "source_record_offset": 72,
+      "ps2_init": "0x1a0f40",
+      "ps2_update": "0x1a1100",
+      "ps2_name": "0x5f6d68"
+    },
+    {
+      "ps2_index": 4,
+      "golden_index": 4,
+      "name": "CHANGE FORMATION",
+      "guest_record_offset": 48,
+      "source_record_offset": 96,
+      "ps2_init": "0x1a1190",
+      "ps2_update": "0x1a13e0",
+      "ps2_name": "0x5f6d80"
+    },
+    {
+      "ps2_index": 5,
+      "golden_index": 5,
+      "name": "COMMAND",
+      "guest_record_offset": 60,
+      "source_record_offset": 120,
+      "ps2_init": "0x1a1450",
+      "ps2_update": "0x1a17d0",
+      "ps2_name": "0x7631c0"
+    },
+    {
+      "ps2_index": 6,
+      "golden_index": 6,
+      "name": "TARGET",
+      "guest_record_offset": 72,
+      "source_record_offset": 144,
+      "ps2_init": "0x1a1c80",
+      "ps2_update": "0x1a1ea0",
+      "ps2_name": "0x7631c8"
+    },
+    {
+      "ps2_index": 7,
+      "golden_index": 7,
+      "name": "ANALYZE",
+      "guest_record_offset": 84,
+      "source_record_offset": 168,
+      "ps2_init": "0x1a24a0",
+      "ps2_update": "0x1a24b0",
+      "ps2_name": "0x7631d0"
+    },
+    {
+      "ps2_index": 8,
+      "golden_index": 8,
+      "name": "AI",
+      "guest_record_offset": 96,
+      "source_record_offset": 192,
+      "ps2_init": "0x1a2ad0",
+      "ps2_update": "0x1a2b50",
+      "ps2_name": "0x7631d8"
+    },
+    {
+      "ps2_index": 9,
+      "golden_index": 9,
+      "name": "AUTO",
+      "guest_record_offset": 108,
+      "source_record_offset": 216,
+      "ps2_init": "0x1a2c10",
+      "ps2_update": "0x1a2c70",
+      "ps2_name": "0x7631e0"
+    },
+    {
+      "ps2_index": 10,
+      "golden_index": 10,
+      "name": "SUPPORT",
+      "guest_record_offset": 120,
+      "source_record_offset": 240,
+      "ps2_init": "0x1a2d60",
+      "ps2_update": "0x1a2d70",
+      "ps2_name": "0x7631e8"
+    },
+    {
+      "ps2_index": 11,
+      "golden_index": 11,
+      "name": "BAD",
+      "guest_record_offset": 132,
+      "source_record_offset": 264,
+      "ps2_init": "0x1a31a0",
+      "ps2_update": "0x1a31e0",
+      "ps2_name": "0x7631f0"
+    },
+    {
+      "ps2_index": 12,
+      "golden_index": 12,
+      "name": "COOPERATE",
+      "guest_record_offset": 144,
+      "source_record_offset": 288,
+      "ps2_init": "0x1a3840",
+      "ps2_update": "0x1a3d50",
+      "ps2_name": "0x5f6d98"
+    },
+    {
+      "ps2_index": 13,
+      "golden_index": 13,
+      "name": "PURSUIT_MES",
+      "guest_record_offset": 156,
+      "source_record_offset": 312,
+      "ps2_init": "0x1a3df0",
+      "ps2_update": "0x1a3f90",
+      "ps2_name": "0x5f6da8"
+    },
+    {
+      "ps2_index": 14,
+      "golden_index": 14,
+      "name": "PURSUIT",
+      "guest_record_offset": 168,
+      "source_record_offset": 336,
+      "ps2_init": "0x1a4390",
+      "ps2_update": "0x1a43a0",
+      "ps2_name": "0x7631f8"
+    },
+    {
+      "ps2_index": 15,
+      "golden_index": 17,
+      "name": "READY",
+      "guest_record_offset": 180,
+      "source_record_offset": 408,
+      "ps2_init": "0x1a47f0",
+      "ps2_update": "0x1a4800",
+      "ps2_name": "0x763200"
+    },
+    {
+      "ps2_index": 16,
+      "golden_index": 18,
+      "name": "MOVE TARGET",
+      "guest_record_offset": 192,
+      "source_record_offset": 432,
+      "ps2_init": "0x1a4c80",
+      "ps2_update": "0x1a55a0",
+      "ps2_name": "0x5f6db8"
+    },
+    {
+      "ps2_index": 17,
+      "golden_index": 19,
+      "name": "MOVE HOME",
+      "guest_record_offset": 204,
+      "source_record_offset": 456,
+      "ps2_init": "0x1a5650",
+      "ps2_update": "0x1a58e0",
+      "ps2_name": "0x5f6dc8"
+    },
+    {
+      "ps2_index": 18,
+      "golden_index": 20,
+      "name": "ATTACK",
+      "guest_record_offset": 216,
+      "source_record_offset": 480,
+      "ps2_init": "0x1a5990",
+      "ps2_update": "0x1a59a0",
+      "ps2_name": "0x763208"
+    },
+    {
+      "ps2_index": 19,
+      "golden_index": 21,
+      "name": "SKILL",
+      "guest_record_offset": 228,
+      "source_record_offset": 504,
+      "ps2_init": "0x1a7710",
+      "ps2_update": "0x1a7720",
+      "ps2_name": "0x763210"
+    },
+    {
+      "ps2_index": 20,
+      "golden_index": 22,
+      "name": "SUMMON",
+      "guest_record_offset": 240,
+      "source_record_offset": 528,
+      "ps2_init": "0x1abba0",
+      "ps2_update": "0x1abbb0",
+      "ps2_name": "0x763218"
+    },
+    {
+      "ps2_index": 21,
+      "golden_index": 23,
+      "name": "ASSIST",
+      "guest_record_offset": 252,
+      "source_record_offset": 552,
+      "ps2_init": "0x1ac500",
+      "ps2_update": "0x1ac5b0",
+      "ps2_name": "0x763220"
+    },
+    {
+      "ps2_index": 22,
+      "golden_index": 26,
+      "name": "EVENT",
+      "guest_record_offset": 264,
+      "source_record_offset": 624,
+      "ps2_init": "0x1ac620",
+      "ps2_update": "0x1ac6a0",
+      "ps2_name": "0x763228"
+    },
+    {
+      "ps2_index": 23,
+      "golden_index": 27,
+      "name": "ERROR",
+      "guest_record_offset": 276,
+      "source_record_offset": 648,
+      "ps2_init": "0x1ac6f0",
+      "ps2_update": "0x1ac700",
+      "ps2_name": "0x763230"
+    },
+    {
+      "ps2_index": 24,
+      "golden_index": 28,
+      "name": "ENDURE",
+      "guest_record_offset": 288,
+      "source_record_offset": 672,
+      "ps2_init": "0x1acb10",
+      "ps2_update": "0x1acbb0",
+      "ps2_name": "0x763238"
+    },
+    {
+      "ps2_index": 25,
+      "golden_index": 29,
+      "name": "WAIT",
+      "guest_record_offset": 300,
+      "source_record_offset": 696,
+      "ps2_init": "0x1acf40",
+      "ps2_update": "0x1acf50",
+      "ps2_name": "0x763240"
+    },
+    {
+      "ps2_index": 26,
+      "golden_index": 30,
+      "name": "PERSONA",
+      "guest_record_offset": 312,
+      "source_record_offset": 720,
+      "ps2_init": "0x1adb80",
+      "ps2_update": "0x1ade10",
+      "ps2_name": "0x763248"
+    },
+    {
+      "ps2_index": 27,
+      "golden_index": 31,
+      "name": "BAD DAMAGE",
+      "guest_record_offset": 324,
+      "source_record_offset": 744,
+      "ps2_init": "0x1ade90",
+      "ps2_update": "0x1adea0",
+      "ps2_name": "0x5f6dd8"
+    },
+    {
+      "ps2_index": 28,
+      "golden_index": 32,
+      "name": "ESCAPE_MES",
+      "guest_record_offset": 336,
+      "source_record_offset": 768,
+      "ps2_init": "0x1ad280",
+      "ps2_update": "0x1ad3e0",
+      "ps2_name": "0x5f6de8"
+    },
+    {
+      "ps2_index": 29,
+      "golden_index": 33,
+      "name": "ESCAPE",
+      "guest_record_offset": 348,
+      "source_record_offset": 792,
+      "ps2_init": "0x1ad540",
+      "ps2_update": "0x1ad550",
+      "ps2_name": "0x763250"
+    },
+    {
+      "ps2_index": 30,
+      "golden_index": 34,
+      "name": "ROUNDUP_MES",
+      "guest_record_offset": 360,
+      "source_record_offset": 816,
+      "ps2_init": "0x1ae3d0",
+      "ps2_update": "0x1ae800",
+      "ps2_name": "0x5f6df8"
+    },
+    {
+      "ps2_index": 31,
+      "golden_index": 35,
+      "name": "ROUNDUP",
+      "guest_record_offset": 372,
+      "source_record_offset": 840,
+      "ps2_init": "0x1aec20",
+      "ps2_update": "0x1aed50",
+      "ps2_name": "0x763258"
+    },
+    {
+      "ps2_index": 32,
+      "golden_index": 36,
+      "name": "PACKET",
+      "guest_record_offset": 384,
+      "source_record_offset": 864,
+      "ps2_init": "0x1af9d0",
+      "ps2_update": "0x1af9e0",
+      "ps2_name": "0x763260"
+    },
+    {
+      "ps2_index": 33,
+      "golden_index": 37,
+      "name": "END",
+      "guest_record_offset": 396,
+      "source_record_offset": 888,
+      "ps2_init": "0x1afa50",
+      "ps2_update": "0x1afb50",
+      "ps2_name": "0x763268"
+    },
+    {
+      "ps2_index": 34,
+      "golden_index": 38,
+      "name": "END HOME",
+      "guest_record_offset": 408,
+      "source_record_offset": 912,
+      "ps2_init": "0x1b0020",
+      "ps2_update": "0x1b0260",
+      "ps2_name": "0x5f6e08"
+    },
+    {
+      "ps2_index": 35,
+      "golden_index": 39,
+      "name": "DEAD",
+      "guest_record_offset": 420,
+      "source_record_offset": 936,
+      "ps2_init": "0x1b0300",
+      "ps2_update": "0x1b0460",
+      "ps2_name": "0x763270"
+    },
+    {
+      "ps2_index": 36,
+      "golden_index": 40,
+      "name": "EXIT",
+      "guest_record_offset": 432,
+      "source_record_offset": 960,
+      "ps2_init": "0x1b0590",
+      "ps2_update": "0x1b05d0",
+      "ps2_name": "0x763278"
+    },
+    {
+      "ps2_index": 37,
+      "golden_index": 41,
+      "name": "TEST",
+      "guest_record_offset": 444,
+      "source_record_offset": 984,
+      "ps2_init": "0x1b07c0",
+      "ps2_update": "0x1b07d0",
+      "ps2_name": "0x763280"
+    }
+  ],
+  "inserted_states": [
+    {
+      "golden_index": 15,
+      "name": "UNION",
+      "steam": {
+        "record_rva": "0xa24d78",
+        "init_rva": "0x4f7a0",
+        "update_rva": "0x51050",
+        "name_rva": "0x90a820"
+      },
+      "nso": {
+        "record": "0x7100709ba8",
+        "init": "0x710000e540",
+        "update": "0x710000f860",
+        "name": "0x71005d2d64"
+      }
+    },
+    {
+      "golden_index": 16,
+      "name": "BIKE_PURSUIT",
+      "steam": {
+        "record_rva": "0xa24d90",
+        "init_rva": "0x4d510",
+        "update_rva": "0x4d800",
+        "name_rva": "0x90a828"
+      },
+      "nso": {
+        "record": "0x7100709bc0",
+        "init": "0x710000f9c0",
+        "update": "0x710000fcc0",
+        "name": "0x71005ee53e"
+      }
+    },
+    {
+      "golden_index": 24,
+      "name": "ANALYZESKILL",
+      "steam": {
+        "record_rva": "0xa24e50",
+        "init_rva": "0x58d70",
+        "update_rva": "0x59270",
+        "name_rva": "0x90a880"
+      },
+      "nso": {
+        "record": "0x7100709c80",
+        "init": "0x7100017b70",
+        "update": "0x7100017d90",
+        "name": "0x710061ed3f"
+      }
+    },
+    {
+      "golden_index": 25,
+      "name": "YELL",
+      "steam": {
+        "record_rva": "0xa24e68",
+        "init_rva": "0x5a060",
+        "update_rva": "0x5a200",
+        "name_rva": "0x90a890"
+      },
+      "nso": {
+        "record": "0x7100709c98",
+        "init": "0x7100017e10",
+        "update": "0x7100017f10",
+        "name": "0x71005e6304"
+      }
+    }
+  ],
+  "reader_correspondence": {
+    "original": "Actual original1b0808..1b0838 reads currentu16+c, writes old+10/current+c, resets u32 elapsed+1c, forms(state&ffff)*12 and loads init+0 from5f6e20.1b085c branches on delay:zero clears pending+e/delay+12 and immediately dispatches init; nonzero stores u16 pending+e/delay+12. Actual1b0930 creates458hex, clears it, publishes real UID/ID/RNG and list links, initializes current0 and invokes table init0 at1b0a40. Pinned original listupdate1b0a60 confirms delayed init/current update+4 and integer elapsed+=2.",
+    "steam_immediate": "Ordinary.shared5fc40..5fc87: inputstate is low16, old+10=current+c, current+c=state, elapsed+24 zeroed;5fc6b forms a24c10 and5fc87 jumps through init at table+24*state. No bounds clamp is present.",
+    "steam_deferred": "Ordinary.shared5fc90..5fcd4 always stores low16 state into pending+e, converts low16 delay to f32 and stores+14. Unlike original1b0850, this body has NO zero-delay immediate-init branch. Do not retain the old helper body under a new table.",
+    "steam_create_update": "Ordinary.shared5fd50..5fe9a allocates528hex, clears state/target buffers, initializes actual UID/wrappingID/RNG delay and previous518/next520, publishes battle.actions+1c0, selects current0 and invokes init0.5ff20..60091 walks real list; pending+e plus positive float delay+14 gates countdown; elapsed expiry commits state and init+0, then clears pending. Flag20 bit2 blocks update; callback1c bit0 invokes current update+8; otherwise flag20 bit1 unlinks/frees with saved next.5ff55 obtains actual a24c10 table and5fff7 uses24*current+8.",
+    "nso": "Completea490..a588 independently allocates/clears528hex, initializes real UID/ID/RNG(60), list links518/520 and current0, then invokes init0 through880590->709a40. Actuala590..a5b8 is the immediate low16 state setter with stride24/field0. Complete1b9f0..1bb2c mirrors typed pending/current, init/update offsets, float clocks, flags and list release; TEST41 update1b9c0..1b9e0 inlines real transition to COMMAND5.",
+    "clock_and_field_delta": "Original pending delay+12 is u16 and elapsed+1c is u32; Golden delay+14 and elapsed+24 are f32. Steam loads live clockf32 b2b310 (file initializer1.0 is NOT a runtime constant) and literal0.5 at964c38. NSO277bb0 loads actual double clock4a4bf00 and converts to f32. Countdown subtracts f32(clock*0.5); elapsed adds that same f32 product doubled via floating add, then accumulates. Preserve actual operation order/rounding; do not replace real clock with1/2, integer ticks or assumed seconds. NSO277b90 is another half-clock getter, not a discovered clock writer."
+  },
+  "layout": {
+    "kind": "semantic-expanded-callback-table",
+    "ps2_records": 38,
+    "ps2_stride": 12,
+    "golden_records": 42,
+    "golden_stride": 24,
+    "selected_live_size": 456,
+    "retained_tail_size": 0,
+    "copy_policy": "Normalize full42-record Golden source to authored callback/name identities; old selected456B is only the38-role projected guest view, each12-byte record derived from its explicit Golden index. Emit actual guest-ABI callback/name aliases, never host/Steam/NSO code addresses and never1008B over456B. Golden runtime dispatch must use the coherent42-state semantic source, not index the38-slot projection with Golden indices."
+  },
+  "required_seams": [
+    {
+      "owner": "Golden action table and expanded state namespace",
+      "ps2_addresses": [
+        "0x001b0800",
+        "0x001b0850",
+        "0x001b0930",
+        "0x001b0a60"
+      ],
+      "requirement": "Seal the complete1008B pinned Steam source/hash and normalize all42 init/update/name triples. Explicit old-to-Golden state map:0..14 unchanged;15..21 add2;22..37 add4. Golden inserted15UNION,16BIKE_PURSUIT,24ANALYZESKILL,25YELL are real roles, not unused padding. Migrate every actual immediate/deferred/current/pending/resume-state producer, script/packet/callback consumer and native/inlined/translated table alias to one coherent Golden domain. Do not reinterpret old15READY as Golden15UNION or truncate native dispatch to38; do not merely copy legacy image bytes and leave compiled PS2 tables active."
+    },
+    {
+      "owner": "Actual callback implementations and guest/source identity projection",
+      "requirement": "Bind all84 actual Golden init/update callback identities and42 exact qualified names, including the four new states, through real native/guest-ABI adapters. The38 projected old slots retain role correspondence only; this is not a second Golden enum or permission for mixed-domain transitions. Every callback must run its actual Golden implementation and real game-state effects; keep no unchanged-PS2-body assumptions, null/no-op substitutes, hardcoded success or foreign host code pointers. Callback body equivalence/ports are NOT proven by matching labels or this data admission; refuse runtime-bound status until real callback semantics and all direct/native/inline consumers are qualified. Preserve original PS2 mode separately."
+    },
+    {
+      "owner": "Action allocation, live inputs and list lifecycle",
+      "requirement": "Use actual528hex Golden action model and real unit/selected action references, UID generation, wrapping actionID, real RNG(60), target work, previous518/next520 and battle.actions+1c0. Preserve current+c/pending+e/old+10 u16 states, callbackflags1c and ownership/releaseflags20, actual producer writes and clear/set lifecycles. Native work fields widen/move versus458hex PS2 object; no whole-object memcpy or fabricated static action samples. Cover construction/init0, blocked/enabled/waiting/expired/released paths, saved-next iteration, unlink/free and destroy-all."
+    },
+    {
+      "owner": "Real clock and changed immediate/deferred timer semantics",
+      "requirement": "Bind the actual shared Golden engine clock producer and its update/pause/reset/lifetime contract: Steam livef32 b2b310; NSO evidence is actual f64 storage4a4bf00->277bb0 f32 getter. Do not read NSO at runtime, use the file initializer as a runtime constant, invent frame/second units or retain integer elapsed+=2/decrement1. Use f32 delay+14 and elapsed+24 with observed0.5 product, doubled-product elapsed accumulation and operation order. Preserve actual low16 delay conversion and actual deferred5fc90 body, including its lack of original zero-delay immediate fallback; pending delay<=0 skips the expiry-init branch in the actual updater. Caller validity/domain and all high-level clock/state producer qualification remain required, not guessed clamps or zero defaults."
+    }
+  ],
+  "source_verification": {
+    "script": "<scratch>/GoldenRE-notes/l1/l1c12_action_proof.py",
+    "observed_result": "exit0;42 DESCRIPTOR_PASS plus ACTION_TABLE_PASS38/42/456/1008",
+    "checks": "Pinned Steam image hash, unique full1008B Steam source and full NSO/PS2 table hashes; all84 Steam and relocated NSO callback identities; all42 exact NUL label values; all38 original pointer triples and explicit shifted role mappings; four inserted states; actual section/RVA/raw coordinates.",
+    "scope": "Static descriptor/value assertions only; no callback-body semantic match, native runtime qualification, builds, verify, objdiff, unittest or CI."
+  },
+  "source_boundary": "Static ordinary Steam.shared dispatch/allocator/update and file-backed.xpdata table; independent ordinary NSO code/static relocations; actual original ELF and pinned typed source. Steam instrumentation calls881a04 were not followed into protected code. No.arch decoding, game/emulator execution, callback body-match claim or runtime qualification.",
+  "reproduction": "Private l1c12_action_states.py/dispatch.py/fields.py/clock.py and prior c5 typed source proof. Complete42-table discovery/hashes, original38 field identities and executable typed init/update/lifecycle consumers were observed. Source verifier receipt is recorded separately after assertions."
+}

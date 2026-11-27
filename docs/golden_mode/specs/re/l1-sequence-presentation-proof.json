@@ -1,0 +1,1197 @@
+{
+  "proof_id": "L1-c6-sequence-presentation-20261113",
+  "class": "PROVEN",
+  "runtime_status": "pending-seam",
+  "scope": "Two typed scheduler task-name resources and the complete logical sequence callback registry selected by the 0x005dcc6c partition. No raw guest/host pointer interchange or old/new sequence ordinal equivalence is authorized.",
+  "sources": {
+    "ps2_decomp_commit": "18016afe6",
+    "steam_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+    "switch_nso_sha256": "854c7a1e33de1619abf009fa7f32b8c012960d685c8bf1bf99a92a6a4d0bda1c",
+    "switch_mapped_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+    "method": "Static ELF/data, ordinary Steam .shared/.sdata/.xpdata and decompressed NSO code/data only. No .arch decode, game execution or runtime binding."
+  },
+  "task_names": [
+    {
+      "address": "0x005dcaf8",
+      "size": 24,
+      "ps2_live_bytes": 9,
+      "retained_ps2_tail_bytes": 15,
+      "value": "clear ot",
+      "golden_switch_address": "0x71005ea297",
+      "mapped_offset": 6202007,
+      "size_including_nul": 9,
+      "sha256": "83a9e600d9f62f7ac92a2a9241e73320d51adf96fd1114705a499bfa53fea51a",
+      "ps2_consumer": "mainDrawStartClearOt 0x00102490, src/Main/mainDraw.c:554; task constructor name argument, priority10, two update-node callbacks, work0x60.",
+      "golden_consumer": "0x71002dd410 allocates work0xc0 and calls scheduler constructor0x710039ef90 with name x0, priority10 and callback0x71002dd4b0. Two embedded callback nodes at+0x10/+0x70 replace PS2+0x08/+0x38.",
+      "steam_equal_cstring": {
+        "section": ".sdata",
+        "rva": "0x947a48",
+        "raw_offset": 9725512,
+        "size": 9
+      },
+      "structural_proof": "Same clear-order-table task producer: allocator tuple(1,size,0x40000), priority10, two node callbacks and task update callback. This is a typed name argument, not a directory record or a generic byte hit."
+    },
+    {
+      "address": "0x005dcb98",
+      "size": 24,
+      "ps2_live_bytes": 11,
+      "retained_ps2_tail_bytes": 13,
+      "value": "debug menu",
+      "golden_switch_address": "0x71005d6db8",
+      "mapped_offset": 6122936,
+      "size_including_nul": 11,
+      "sha256": "6654a33a5e25db5eb83800375de3407aaa7fff248094f862aaa1af4ed5fa0b3f",
+      "ps2_consumers": [
+        "0x00102d30 SeqDebugMenu_IsRunning: task lookup !=0",
+        "0x00102d60 SeqDebugMenu_End: lookup, missing-task assertion, hierarchy destroy"
+      ],
+      "golden_consumers": [
+        "0x7100277f10: lookup0x710039f3b0(name), bool !=0",
+        "0x7100277f40: same lookup, missing-task assertion, tail branch0x710039f530 hierarchy destroy",
+        "0x71002c4c80: scheduler constructor0x710039ef90 creates named task, priority15, work16, callbacks0x71002c4ce0/0x71002c4e50"
+      ],
+      "structural_proof": "Paired query and teardown consumers have the same name-keyed scheduler lifecycle; positive Golden producer confirms the same resource. Tail branch0x7100277f6c to hierarchy destroy must not be mistaken for decompiler-inlined unrelated text."
+    }
+  ],
+  "registry": {
+    "address": "0x005dcc6c",
+    "size": 2404,
+    "ps2_complete_base": "0x005dcc20",
+    "ps2_complete_size": 2480,
+    "ps2_partition_offset": 76,
+    "ps2_partition_live_bytes": 2404,
+    "retained_ps2_tail_bytes": 0,
+    "ps2_complete_sha256": "2fb51185274ebe4adc7884d4d9ab206c0b7260e837e8c084e424ef4fa44fae8f",
+    "ps2_record_count": 31,
+    "ps2_record_stride": 80,
+    "ps2_fields": {
+      "name": [
+        0,
+        64
+      ],
+      "flags": [
+        64,
+        4
+      ],
+      "start_callback": [
+        68,
+        4
+      ],
+      "query_callback": [
+        72,
+        4
+      ],
+      "destroy_callback": [
+        76,
+        4
+      ]
+    },
+    "golden_record_count": 22,
+    "golden_record_stride": 96,
+    "golden_fields": {
+      "name": [
+        0,
+        64
+      ],
+      "flags": [
+        64,
+        4
+      ],
+      "padding": [
+        68,
+        4
+      ],
+      "start_callback": [
+        72,
+        8
+      ],
+      "query_callback": [
+        80,
+        8
+      ],
+      "destroy_callback": [
+        88,
+        8
+      ]
+    },
+    "golden_switch": {
+      "base": "0x7100790260",
+      "mapped_offset": 7930464,
+      "size": 2112,
+      "sha256": "da7132d6f228ad3fc8d22ec8261e4a8235bddd76c2a62b2bddfbfec791dbaa2c",
+      "callback_encoding": "ELF RELA relative relocations: exact resolved targets recorded per field; zero on-disk pointer words are not null callbacks.",
+      "provider": "0x7100277ef0 tailcalls0x71002dea10 with base0x7100790260 and count22. Setter stores table at0x7104a89298 and count at0x7104a89288.",
+      "readers": [
+        "0x71002de7f0 table+index*96 getter",
+        "0x71002dea00 count getter",
+        "0x71002de840 sequence request: query+80==1 before destroy+88, then immediate start+72 or pending payload/delay",
+        "0x71002de6c0 pending update: dispatch start+72, free payload, clear pending flag"
+      ]
+    },
+    "golden_steam": {
+      "section": ".xpdata",
+      "rva": "0xb15ca0",
+      "raw_offset": 11617440,
+      "size": 2112,
+      "sha256": "5f4f8f9cbd7a83d6b4467af43ed49cac01b890c42319d9a56736ee0bc747ad32",
+      "provider": "ordinary .shared0x464bc0 materializes base0xb15ca0 and count22; stores at globals0x49da9a0/0x49da990.",
+      "cross_image_check": "All22 ordered complete64-byte names and u32 flags agree with NSO. Pointer words differ across ISA and require callable normalization, never byte equality."
+    },
+    "structural_correspondence": {
+      "ps2_request": "0x001029a0 in src/Main/sequence.c: same nonnegative-ID/pending guards, previous=current transition, query result==1 before destroy, current=-1 reset, immediate start vs pending allocated payload. Callback offsets+68/+72/+76 with stride80 directly identify the selected partition as the sequence registry, not a code-address list by appearance.",
+      "golden_request": "0x71002de840 repeats that higher-order control flow against the registered96-byte descriptors and callback offsets+72/+80/+88. The provider fixes base and count; getter and pending updater independently corroborate stride and phase roles.",
+      "independent_task_anchor": "Record0 is the debug-menu start/query/destroy triple. Its name-keyed query and destroy pair is independently qualified above in PS2 and Golden. Names alone are not the correspondence proof.",
+      "extent": "22*96=2112 from actual registered count. The next bytes belong to mc_panel and are not sequence records. PS2 selection starts at row0 destroy field, not at a guessed structure boundary."
+    },
+    "ps2_records": [
+      {
+        "index": 0,
+        "name": "",
+        "flags": 0,
+        "callbacks": [
+          {
+            "address": "0x102d10",
+            "ps2_name": "func_00102d10"
+          },
+          {
+            "address": "0x102d30",
+            "ps2_name": "func_00102d30"
+          },
+          {
+            "address": "0x102d60",
+            "ps2_name": "func_00102d60"
+          }
+        ]
+      },
+      {
+        "index": 1,
+        "name": "",
+        "flags": 0,
+        "callbacks": [
+          {
+            "address": "0x102b90",
+            "ps2_name": "func_00102b90"
+          },
+          {
+            "address": "0x102bb0",
+            "ps2_name": "func_00102bb0"
+          },
+          {
+            "address": "0x102be0",
+            "ps2_name": "func_00102be0"
+          }
+        ]
+      },
+      {
+        "index": 2,
+        "name": "FIELD (EVENT) VIEW",
+        "flags": 1,
+        "callbacks": [
+          {
+            "address": "0x170570",
+            "ps2_name": "func_00170570"
+          },
+          {
+            "address": "0x1705a0",
+            "ps2_name": "func_001705a0"
+          },
+          {
+            "address": "0x1705d0",
+            "ps2_name": "func_001705d0"
+          }
+        ]
+      },
+      {
+        "index": 3,
+        "name": "DUNGEON VIEW",
+        "flags": 1,
+        "callbacks": [
+          {
+            "address": "0x170630",
+            "ps2_name": "func_00170630"
+          },
+          {
+            "address": "0x170660",
+            "ps2_name": "func_00170660"
+          },
+          {
+            "address": "0x170690",
+            "ps2_name": "func_00170690"
+          }
+        ]
+      },
+      {
+        "index": 4,
+        "name": "DUNGEON EDITOR",
+        "flags": 1,
+        "callbacks": [
+          {
+            "address": "0x1706f0",
+            "ps2_name": "func_001706f0"
+          },
+          {
+            "address": "0x170720",
+            "ps2_name": "func_00170720"
+          },
+          {
+            "address": "0x170750",
+            "ps2_name": "func_00170750"
+          }
+        ]
+      },
+      {
+        "index": 5,
+        "name": "LARGE MAP DEBUG",
+        "flags": 1,
+        "callbacks": [
+          {
+            "address": "0x1707e0",
+            "ps2_name": "func_001707e0"
+          },
+          {
+            "address": "0x170810",
+            "ps2_name": "func_00170810"
+          },
+          {
+            "address": "0x170840",
+            "ps2_name": "func_00170840"
+          }
+        ]
+      },
+      {
+        "index": 6,
+        "name": "BATTLE",
+        "flags": 0,
+        "callbacks": [
+          {
+            "address": "0x102e70",
+            "ps2_name": "K_Fldrc_DestroyArchives"
+          },
+          {
+            "address": "0x102ea0",
+            "ps2_name": "func_00102ea0"
+          },
+          {
+            "address": "0x102ed0",
+            "ps2_name": "func_00102ed0"
+          }
+        ]
+      },
+      {
+        "index": 7,
+        "name": "SCRIPT VIEWER",
+        "flags": 1,
+        "callbacks": [
+          {
+            "address": "0x102f10",
+            "ps2_name": "func_00102f10"
+          },
+          {
+            "address": "0x102f50",
+            "ps2_name": "func_00102f50"
+          },
+          {
+            "address": "0x102f80",
+            "ps2_name": "func_00102f80"
+          }
+        ]
+      },
+      {
+        "index": 8,
+        "name": "EVENT",
+        "flags": 1,
+        "callbacks": [
+          {
+            "address": "0x102fe0",
+            "ps2_name": "func_00102fe0"
+          },
+          {
+            "address": "0x103010",
+            "ps2_name": "func_00103010"
+          },
+          {
+            "address": "0x103040",
+            "ps2_name": "func_00103040"
+          }
+        ]
+      },
+      {
+        "index": 9,
+        "name": "FIELD\uff9e",
+        "flags": 0,
+        "callbacks": [
+          {
+            "address": "0x170220",
+            "ps2_name": "func_00170220"
+          },
+          {
+            "address": "0x170310",
+            "ps2_name": "func_00170310"
+          },
+          {
+            "address": "0x1702c0",
+            "ps2_name": "func_001702c0"
+          }
+        ]
+      },
+      {
+        "index": 10,
+        "name": "TOOL EVENT",
+        "flags": 0,
+        "callbacks": [
+          {
+            "address": "0x170350",
+            "ps2_name": "func_00170350"
+          },
+          {
+            "address": "0x170440",
+            "ps2_name": "func_00170440"
+          },
+          {
+            "address": "0x1703f0",
+            "ps2_name": "func_001703f0"
+          }
+        ]
+      },
+      {
+        "index": 11,
+        "name": "DUNGEON",
+        "flags": 0,
+        "callbacks": [
+          {
+            "address": "0x1704a0",
+            "ps2_name": "func_001704a0"
+          },
+          {
+            "address": "0x170520",
+            "ps2_name": "func_00170520"
+          },
+          {
+            "address": "0x1704e0",
+            "ps2_name": "func_001704e0"
+          }
+        ]
+      },
+      {
+        "index": 12,
+        "name": "LARGE MAP",
+        "flags": 0,
+        "callbacks": [
+          {
+            "address": "0x1707b0",
+            "ps2_name": "func_001707b0"
+          },
+          {
+            "address": "0x170810",
+            "ps2_name": "func_00170810"
+          },
+          {
+            "address": "0x170840",
+            "ps2_name": "func_00170840"
+          }
+        ]
+      },
+      {
+        "index": 13,
+        "name": "FOOD COURT",
+        "flags": 1,
+        "callbacks": [
+          {
+            "address": "0x1708a0",
+            "ps2_name": "func_001708a0"
+          },
+          {
+            "address": "0x1708d0",
+            "ps2_name": "func_001708d0"
+          },
+          {
+            "address": "0x170900",
+            "ps2_name": "func_00170900"
+          }
+        ]
+      },
+      {
+        "index": 14,
+        "name": "KOSAKA",
+        "flags": 1,
+        "callbacks": [
+          {
+            "address": "0x18e340",
+            "ps2_name": "kTestMenuCreate"
+          },
+          {
+            "address": "0x18e3c0",
+            "ps2_name": "kTestMenuIsActive"
+          },
+          {
+            "address": "0x18e3f0",
+            "ps2_name": "kTestMenuClose"
+          }
+        ]
+      },
+      {
+        "index": 15,
+        "name": "TOHYAMA (MOVIE)",
+        "flags": 1,
+        "callbacks": [
+          {
+            "address": "0x143b70",
+            "ps2_name": "niidaSequenceStartNoop"
+          },
+          {
+            "address": "0x143b80",
+            "ps2_name": "niidaSequencePollNoop"
+          },
+          {
+            "address": "0x143b90",
+            "ps2_name": "niidaSequenceStopNoop"
+          }
+        ]
+      },
+      {
+        "index": 16,
+        "name": "NIIDA",
+        "flags": 1,
+        "callbacks": [
+          {
+            "address": "0x246620",
+            "ps2_name": "func_00246620"
+          },
+          {
+            "address": "0x246640",
+            "ps2_name": "func_00246640"
+          },
+          {
+            "address": "0x246670",
+            "ps2_name": "func_00246670"
+          }
+        ]
+      },
+      {
+        "index": 17,
+        "name": "YAJI",
+        "flags": 1,
+        "callbacks": [
+          {
+            "address": "0x1030a0",
+            "ps2_name": "func_001030a0"
+          },
+          {
+            "address": "0x1030c0",
+            "ps2_name": "func_001030c0"
+          },
+          {
+            "address": "0x1030f0",
+            "ps2_name": "func_001030f0"
+          }
+        ]
+      },
+      {
+        "index": 18,
+        "name": "NOWATARI",
+        "flags": 1,
+        "callbacks": [
+          {
+            "address": "0x103150",
+            "ps2_name": "func_00103150"
+          },
+          {
+            "address": "0x103170",
+            "ps2_name": "func_00103170"
+          },
+          {
+            "address": "0x1031a0",
+            "ps2_name": "func_001031a0"
+          }
+        ]
+      },
+      {
+        "index": 19,
+        "name": "MIWA",
+        "flags": 1,
+        "callbacks": [
+          {
+            "address": "0x2466d0",
+            "ps2_name": "imanishiStaffStartNoop"
+          },
+          {
+            "address": "0x2466e0",
+            "ps2_name": "imanishiStaffPollNoop"
+          },
+          {
+            "address": "0x2466f0",
+            "ps2_name": "imanishiStaffStopNoop"
+          }
+        ]
+      },
+      {
+        "index": 20,
+        "name": "IMANISHI (STAFF)",
+        "flags": 1,
+        "callbacks": [
+          {
+            "address": "0x38dd60",
+            "ps2_name": "edScrollStartNoop"
+          },
+          {
+            "address": "0x38dd70",
+            "ps2_name": "edScrollPollNoop"
+          },
+          {
+            "address": "0x38dd80",
+            "ps2_name": "edScrollStopNoop"
+          }
+        ]
+      },
+      {
+        "index": 21,
+        "name": "SAMPLE",
+        "flags": 1,
+        "callbacks": [
+          {
+            "address": "0x102dc0",
+            "ps2_name": "func_00102dc0"
+          },
+          {
+            "address": "0x102de0",
+            "ps2_name": "func_00102de0"
+          },
+          {
+            "address": "0x102e10",
+            "ps2_name": "func_00102e10"
+          }
+        ]
+      },
+      {
+        "index": 22,
+        "name": "WEAPON STORE",
+        "flags": 0,
+        "callbacks": [
+          {
+            "address": "0x103200",
+            "ps2_name": "func_00103200"
+          },
+          {
+            "address": "0x103230",
+            "ps2_name": "func_00103230"
+          },
+          {
+            "address": "0x103260",
+            "ps2_name": "func_00103260"
+          }
+        ]
+      },
+      {
+        "index": 23,
+        "name": "ITEM STORE",
+        "flags": 0,
+        "callbacks": [
+          {
+            "address": "0x1032c0",
+            "ps2_name": "func_001032c0"
+          },
+          {
+            "address": "0x1032f0",
+            "ps2_name": "func_001032f0"
+          },
+          {
+            "address": "0x103320",
+            "ps2_name": "func_00103320"
+          }
+        ]
+      },
+      {
+        "index": 24,
+        "name": "COMBINE",
+        "flags": 0,
+        "callbacks": [
+          {
+            "address": "0x103380",
+            "ps2_name": "func_00103380"
+          },
+          {
+            "address": "0x1033b0",
+            "ps2_name": "func_001033b0"
+          },
+          {
+            "address": "0x1033e0",
+            "ps2_name": "func_001033e0"
+          }
+        ]
+      },
+      {
+        "index": 25,
+        "name": "CALENDAR MAIN",
+        "flags": 0,
+        "callbacks": [
+          {
+            "address": "0x1211b0",
+            "ps2_name": "func_001211b0"
+          },
+          {
+            "address": "0x121280",
+            "ps2_name": "func_00121280"
+          },
+          {
+            "address": "0x1212b0",
+            "ps2_name": "func_001212b0"
+          }
+        ]
+      },
+      {
+        "index": 26,
+        "name": "CALENDAR (RESTART)",
+        "flags": 0,
+        "callbacks": [
+          {
+            "address": "0x121a20",
+            "ps2_name": "func_00121a20"
+          },
+          {
+            "address": "0x121280",
+            "ps2_name": "func_00121280"
+          },
+          {
+            "address": "0x1212b0",
+            "ps2_name": "func_001212b0"
+          }
+        ]
+      },
+      {
+        "index": 27,
+        "name": "START GAME",
+        "flags": 1,
+        "callbacks": [
+          {
+            "address": "0x124240",
+            "ps2_name": "func_00124240"
+          },
+          {
+            "address": "0x1242c0",
+            "ps2_name": "func_001242c0"
+          },
+          {
+            "address": "0x1242f0",
+            "ps2_name": "func_001242f0"
+          }
+        ]
+      },
+      {
+        "index": 28,
+        "name": "NAME ENTRY",
+        "flags": 0,
+        "callbacks": [
+          {
+            "address": "0x103510",
+            "ps2_name": "func_00103510"
+          },
+          {
+            "address": "0x103540",
+            "ps2_name": "func_00103540"
+          },
+          {
+            "address": "0x103570",
+            "ps2_name": "func_00103570"
+          }
+        ]
+      },
+      {
+        "index": 29,
+        "name": "MOVIE",
+        "flags": 0,
+        "callbacks": [
+          {
+            "address": "0x103440",
+            "ps2_name": "func_00103440"
+          },
+          {
+            "address": "0x103480",
+            "ps2_name": "func_00103480"
+          },
+          {
+            "address": "0x1034b0",
+            "ps2_name": "func_001034b0"
+          }
+        ]
+      },
+      {
+        "index": 30,
+        "name": "MEMORY CARD BOOT CHECK",
+        "flags": 0,
+        "callbacks": [
+          {
+            "address": "0x102c50",
+            "ps2_name": "func_00102c50"
+          },
+          {
+            "address": "0x102c80",
+            "ps2_name": "func_00102c80"
+          },
+          {
+            "address": "0x102cb0",
+            "ps2_name": "func_00102cb0"
+          }
+        ]
+      }
+    ],
+    "golden_records": [
+      {
+        "index": 0,
+        "name": "DEBUG MENU",
+        "flags": 0,
+        "callbacks": [
+          "0x7100277f00",
+          "0x7100277f10",
+          "0x7100277f40"
+        ]
+      },
+      {
+        "index": 1,
+        "name": "initread",
+        "flags": 0,
+        "callbacks": [
+          "0x7100277f90",
+          "0x7100277fa0",
+          "0x7100277fd0"
+        ]
+      },
+      {
+        "index": 2,
+        "name": "startread",
+        "flags": 0,
+        "callbacks": [
+          "0x7100278020",
+          "0x7100278030",
+          "0x7100278060"
+        ]
+      },
+      {
+        "index": 3,
+        "name": "BATTLE",
+        "flags": 0,
+        "callbacks": [
+          "0x71002780b0",
+          "0x71002780d0",
+          "0x71002780f0"
+        ]
+      },
+      {
+        "index": 4,
+        "name": "SCRIPT VIEWER",
+        "flags": 1,
+        "callbacks": [
+          "0x7100278110",
+          "0x7100278140",
+          "0x7100278170"
+        ]
+      },
+      {
+        "index": 5,
+        "name": "EVENT",
+        "flags": 1,
+        "callbacks": [
+          "0x71002781c0",
+          "0x71002781e0",
+          "0x7100278200"
+        ]
+      },
+      {
+        "index": 6,
+        "name": "FIELD",
+        "flags": 0,
+        "callbacks": [
+          "0x71001f7660",
+          "0x71001f7720",
+          "0x71001f76f0"
+        ]
+      },
+      {
+        "index": 7,
+        "name": "TOOL EVENT",
+        "flags": 0,
+        "callbacks": [
+          "0x71001f7750",
+          "0x71001f7810",
+          "0x71001f77e0"
+        ]
+      },
+      {
+        "index": 8,
+        "name": "DUNGEON",
+        "flags": 0,
+        "callbacks": [
+          "0x71001f7850",
+          "0x71001f78c0",
+          "0x71001f7880"
+        ]
+      },
+      {
+        "index": 9,
+        "name": "FOODCOAT",
+        "flags": 1,
+        "callbacks": [
+          "0x71001f7990",
+          "0x71001f79a0",
+          "0x71001f79d0"
+        ]
+      },
+      {
+        "index": 10,
+        "name": "calendar",
+        "flags": 0,
+        "callbacks": [
+          "0x71000c9240",
+          "0x71000c92f0",
+          "0x71000c9320"
+        ]
+      },
+      {
+        "index": 11,
+        "name": "calendar_restert",
+        "flags": 0,
+        "callbacks": [
+          "0x71000c9c80",
+          "0x71000c92f0",
+          "0x71000c9320"
+        ]
+      },
+      {
+        "index": 12,
+        "name": "TITLE",
+        "flags": 1,
+        "callbacks": [
+          "0x7100262410",
+          "0x7100262480",
+          "0x71002624b0"
+        ]
+      },
+      {
+        "index": 13,
+        "name": "NAME ENTRY",
+        "flags": 0,
+        "callbacks": [
+          "0x7100278250",
+          "0x7100278260",
+          "0x7100278280"
+        ]
+      },
+      {
+        "index": 14,
+        "name": "WEAPON SHOP",
+        "flags": 0,
+        "callbacks": [
+          "0x7100278290",
+          "0x71002782a0",
+          "0x71002782c0"
+        ]
+      },
+      {
+        "index": 15,
+        "name": "ITEM SHOP",
+        "flags": 0,
+        "callbacks": [
+          "0x71002782d0",
+          "0x71002782e0",
+          "0x7100278300"
+        ]
+      },
+      {
+        "index": 16,
+        "name": "COMBINE",
+        "flags": 0,
+        "callbacks": [
+          "0x7100278310",
+          "0x7100278320",
+          "0x7100278340"
+        ]
+      },
+      {
+        "index": 17,
+        "name": "LMAP",
+        "flags": 0,
+        "callbacks": [
+          "0x71001f7900",
+          "0x71001f7910",
+          "0x71001f7940"
+        ]
+      },
+      {
+        "index": 18,
+        "name": "MOVIE",
+        "flags": 0,
+        "callbacks": [
+          "0x7100278350",
+          "0x7100278360",
+          "0x7100278380"
+        ]
+      },
+      {
+        "index": 19,
+        "name": "TRADE SHOP",
+        "flags": 0,
+        "callbacks": [
+          "0x7100278390",
+          "0x71002783a0",
+          "0x71002783c0"
+        ]
+      },
+      {
+        "index": 20,
+        "name": "COSTUME SHOP",
+        "flags": 0,
+        "callbacks": [
+          "0x71002783d0",
+          "0x71002783e0",
+          "0x7100278400"
+        ]
+      },
+      {
+        "index": 21,
+        "name": "SNOW HUT",
+        "flags": 0,
+        "callbacks": [
+          "0x71001f7a20",
+          "0x71001f7a30",
+          "0x71001f7a60"
+        ]
+      }
+    ],
+    "golden_steam_records": [
+      {
+        "index": 0,
+        "name": "DEBUG MENU",
+        "flags": 0,
+        "callbacks": [
+          "0x3db350",
+          "0x3db3b0",
+          "0x3db3e0"
+        ]
+      },
+      {
+        "index": 1,
+        "name": "initread",
+        "flags": 0,
+        "callbacks": [
+          "0x3db410",
+          "0x3db470",
+          "0x3db4a0"
+        ]
+      },
+      {
+        "index": 2,
+        "name": "startread",
+        "flags": 0,
+        "callbacks": [
+          "0x3db4d0",
+          "0x3db550",
+          "0x3db580"
+        ]
+      },
+      {
+        "index": 3,
+        "name": "BATTLE",
+        "flags": 0,
+        "callbacks": [
+          "0x3db5b0",
+          "0x3db5f0",
+          "0x3db630"
+        ]
+      },
+      {
+        "index": 4,
+        "name": "SCRIPT VIEWER",
+        "flags": 1,
+        "callbacks": [
+          "0x3db670",
+          "0x3db6e0",
+          "0x3db710"
+        ]
+      },
+      {
+        "index": 5,
+        "name": "EVENT",
+        "flags": 1,
+        "callbacks": [
+          "0x3db740",
+          "0x3db760",
+          "0x3db790"
+        ]
+      },
+      {
+        "index": 6,
+        "name": "FIELD",
+        "flags": 0,
+        "callbacks": [
+          "0x31ed20",
+          "0x31ede0",
+          "0x31eda0"
+        ]
+      },
+      {
+        "index": 7,
+        "name": "TOOL EVENT",
+        "flags": 0,
+        "callbacks": [
+          "0x31ee10",
+          "0x31ef20",
+          "0x31eee0"
+        ]
+      },
+      {
+        "index": 8,
+        "name": "DUNGEON",
+        "flags": 0,
+        "callbacks": [
+          "0x31ef60",
+          "0x31f050",
+          "0x31f010"
+        ]
+      },
+      {
+        "index": 9,
+        "name": "FOODCOAT",
+        "flags": 1,
+        "callbacks": [
+          "0x31f120",
+          "0x31f180",
+          "0x31f1b0"
+        ]
+      },
+      {
+        "index": 10,
+        "name": "calendar",
+        "flags": 0,
+        "callbacks": [
+          "0x13aed0",
+          "0x13af00",
+          "0x13af30"
+        ]
+      },
+      {
+        "index": 11,
+        "name": "calendar_restert",
+        "flags": 0,
+        "callbacks": [
+          "0x13b7a0",
+          "0x13af00",
+          "0x13af30"
+        ]
+      },
+      {
+        "index": 12,
+        "name": "TITLE",
+        "flags": 1,
+        "callbacks": [
+          "0x3bb2f0",
+          "0x3bb430",
+          "0x3bb460"
+        ]
+      },
+      {
+        "index": 13,
+        "name": "NAME ENTRY",
+        "flags": 0,
+        "callbacks": [
+          "0x3db7c0",
+          "0x3db7e0",
+          "0x3db810"
+        ]
+      },
+      {
+        "index": 14,
+        "name": "WEAPON SHOP",
+        "flags": 0,
+        "callbacks": [
+          "0x3db870",
+          "0x3db900",
+          "0x3db930"
+        ]
+      },
+      {
+        "index": 15,
+        "name": "ITEM SHOP",
+        "flags": 0,
+        "callbacks": [
+          "0x3db970",
+          "0x3dba00",
+          "0x3dba30"
+        ]
+      },
+      {
+        "index": 16,
+        "name": "COMBINE",
+        "flags": 0,
+        "callbacks": [
+          "0x3dba70",
+          "0x3dba90",
+          "0x3dbae0"
+        ]
+      },
+      {
+        "index": 17,
+        "name": "LMAP",
+        "flags": 0,
+        "callbacks": [
+          "0x31f090",
+          "0x31f0c0",
+          "0x31f0f0"
+        ]
+      },
+      {
+        "index": 18,
+        "name": "MOVIE",
+        "flags": 0,
+        "callbacks": [
+          "0x3dbb20",
+          "0x3dbb60",
+          "0x3dbb90"
+        ]
+      },
+      {
+        "index": 19,
+        "name": "TRADE SHOP",
+        "flags": 0,
+        "callbacks": [
+          "0x3dbbb0",
+          "0x3dbc40",
+          "0x3dbc70"
+        ]
+      },
+      {
+        "index": 20,
+        "name": "COSTUME SHOP",
+        "flags": 0,
+        "callbacks": [
+          "0x3dbcb0",
+          "0x3dbd40",
+          "0x3dbd70"
+        ]
+      },
+      {
+        "index": 21,
+        "name": "SNOW HUT",
+        "flags": 0,
+        "callbacks": [
+          "0x31f1e0",
+          "0x31f240",
+          "0x31f270"
+        ]
+      }
+    ],
+    "semantic_deltas": [
+      "31 PS2 records become22 Golden records with reordered/renamed/added entries. No positional or label-only old-to-Golden ID map is proven here; a PS2 ordinal must not index this Golden table.",
+      "Normalized callable identity must be registry entry plus start/query/destroy phase, resolved to a ported implementation. Neither preferred Steam VAs nor NSO code pointers are executable guest values.",
+      "Golden sequence work grows24->32 bytes: flags+0, current+4, previous+8, float delay+12, auxiliary+16, native payload pointer+24. PS2 delay is integer and payload pointer+20.",
+      "Golden request converts incoming integer delay to float and, for delayed requests, allocates/copies even when parameter size is zero. PS2 allocation is conditional on nonzero size.",
+      "Golden pending updater subtracts the0x7100277bb0 float-result getter scaled by0.5; do not retain PS2 integer countdown or invent frame/second units."
+    ]
+  },
+  "required_seams": [
+    "Resolve both task names at scheduler constructor/lookup/destroy consumers, including native copies/inlines; preserve PS2-mode values and old zero tails.",
+    "Bind one complete Golden sequence registry semantic resource, not a2112-byte overwrite at old2404-byte partition or raw pointers copied into guest memory. Route every registry getter, request, count consumer, pending updater and cached/native copy.",
+    "Migrate sequence IDs by proved caller/controller identity with explicit input namespace. No positional table mapping, label-only translation, absent-index fallback or silent PS2 callback retention. Qualify every new Golden entry implementation and its start/query/destroy contract before binding.",
+    "Normalize function pointers to mode-selected callable adapters with the existing query==1 and lifecycle contracts; no cross-ISA address casts.",
+    "Port Golden work layout, payload lifetime, request allocation/copy behavior and floating delay/update semantics together; bind the actual0x7100277bb0 timing source rather than a guessed constant.",
+    "GoldenM6b runtime witnesses must demonstrate Golden selection, PS2 unchanged, all consumers/inlines/native copies, bounds, no host-pointer guest overwrite, and whole-module lifecycle. Source proof is not runtime qualification."
+  ]
+}

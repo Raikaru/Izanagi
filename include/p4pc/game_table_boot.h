@@ -3,6 +3,7 @@
 #include "p4pc/game_table_builder.h"
 #define P4_GAME_TABLES_BOOT_PROVIDER "game-tables.sources"
 struct P4GameTableNativeUses;
+struct P4GoldenAiProduct;
 /* Host-only typed product of the sole package handler above, never an active
  * global fallback. Each pass explicitly provides its own borrowed product;
  * NULL means no authored table cohort. The owner retains the exact products.
@@ -29,6 +30,7 @@ typedef struct P4GameTablesBootProduct {
     const P4GameText *names, *descriptions;
     P4GameTableInput *const *inputs; /* Stable owner array, borrowed, never destroy. */
     size_t input_count;
+    const struct P4GoldenAiProduct *golden_ai; /* Exact cache cohort, source-owner lifetime. */
 } P4GameTablesBootProduct;
 /* Trusted compiled native declarations only, before the CPU seal. The sole
  * source handler owns these objects; caller registers rows AND explicit origin

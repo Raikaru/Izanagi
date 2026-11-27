@@ -148,7 +148,7 @@ class CampaignBattles(unittest.TestCase):
         self.assertIn("513   no-escape Shadow A", text)
         self.assertIn("516   escapable Shadow B", text)
         self.assertIn("811   no-escape Knight", text)
-        self.assertIn("unit checks: UnitIsIdOnSide(0,1)", text)
+        self.assertIn("unit checks: QueryFrId(expression) UnitIsIdOnSide(0,1)", text)
 
     def test_unknown_commands_invalidate_stack_and_bad_arity_fails(self):
         table = battles.command_table(elf_with_commands())
@@ -167,6 +167,48 @@ class CampaignBattles(unittest.TestCase):
         result = battles.inventory(battles.flowscripts(FakeDisc()), battles.command_table(elf_with_commands()),
                                    lambda encounter: None)
         self.assertIn("513   unknown", battles.summary(result))
+
+    def test_explicit_actor_queries_and_handler_provenance(self):
+        # Dispatch arities/roles from 001e1530/1620/1710/1940/4bb0/5a20/
+        # 65f0/66c0/68c0/6930; synthetic code, not extracted campaign bytes.
+        queries = {
+            0x2032: ("unit",),
+            0x205A: ("unit", "condition"), 0x205B: ("unit", "condition"),
+            0x205C: ("unit", "condition"), 0x205E: ("unit", "buffs"),
+            0x2075: ("action", "condition"), 0x2076: ("action", "buffs"),
+            0x2079: ("action", "argument1"), 0x2098: ("unit",),
+            0x209C: ("action", "condition"),
+        }
+        for command, roles in queries.items():
+            with self.subTest(command=hex(command)):
+                arguments = list(range(1, len(roles) + 1))
+                code = [(PUSHIS, value) for value in reversed(arguments)]
+                code += [(COMM, command), (END, 0)]
+                script = battles.parse_flowscript(flowscript([("actor_check", code)]))
+                table = {command: (0x123400 + command, len(roles))}
+                result = battles.inventory([("BTL/BATTLE/BOSS/E201.BIN", None, script)], table,
+                                           lambda encounter: None)
+                row, = result["boss_unit_checks"]
+                self.assertEqual(row["arguments"], dict(zip(roles, arguments)))
+                self.assertEqual(row["handler"], "0x%08X" % (0x123400 + command))
+                self.assertEqual(row["encounter"], 0x201)
+                self.assertIn("boss script only", battles.summary(result))
+
+    def test_summary_keeps_kind_action_and_dynamic_actor_selectors(self):
+        script = battles.parse_flowscript(flowscript([("selectors", [
+            (PUSHIS, 4), (PUSHIS, 0), (COMM, 0x207B),
+            (PUSHIS, 8), (PUSHLIX, 3), (COMM, 0x2076),
+            (PUSHLIX, 5), (COMM, 0x200E), (END, 0),
+        ])]))
+        table = {0x207B: (0x1E6D20, 2), 0x2076: (0x1E66C0, 2), 0x200E: (0x1DFCB0, 1)}
+        result = battles.inventory([("BTL/BATTLE/BOSS/E201.BIN", None, script)], table,
+                                   lambda encounter: None)
+        checks = result["boss_unit_checks"]
+        self.assertEqual(checks[1]["arguments"]["action"], {"kind": "variable", "scope": "local", "index": 3})
+        text = battles.summary(result)
+        self.assertIn("PickUnitByKind(0,4)", text)
+        self.assertIn("IdScriptQueryHasBuff(variable,8)", text)
+        self.assertIn("QueryFrId(variable)", text)
 
     def test_output_paths_and_exclusive_creation(self):
         with tempfile.TemporaryDirectory() as directory:

@@ -42,9 +42,11 @@ PS2 row's size and field positions; Golden adds rows past PS2's domain.
 | 0 | element by skill ID | 576 x 2 | 624 x 2 | `u8 element` (0 Phys, 1 Fire, 2 Ice, 3 Elec, 4 Wind, 5 Almighty, 6 Light, 7 Dark, 8..15 ailment/status classes, 16 Healing, 17 Support, 18 Analysis/special, 0xFF passive or blank), `u8` second byte (meaning unspecified; copy) |
 | 1 | active skill metadata by active ID | 440 x 40 | 472 x 44 | Golden row below |
 
-Golden active row (44 bytes). PS2's 40-byte row is Golden bytes `0`, `4..6`, `8..43` in that order
-(PS2 byte 0 = Golden 0; PS2 1..3 = Golden 4..6; PS2 4..39 = Golden 8..43). Golden bytes 1..3 widen the
-flag byte at 0 to a word and byte 7 is padding; they are non-zero only on Golden-only skills.
+Golden active row (44 bytes). The candidate PS2 projection uses Golden bytes `0`, `4..6`, `8..43`
+(PS2 byte 0 = Golden 0; PS2 1..3 = Golden 4..6; PS2 4..39 = Golden 8..43). Golden bytes 1..3
+widen the flag byte at 0 to a word and byte 7 is padding. Byte 1 is nonzero in 29 rows within
+the PS2 ID range as well as in Golden-only rows; its semantics are not established. Conversion
+refuses nonzero widened flags or padding rather than dropping them.
 
 | Golden offset | Type | Field |
 |---|---|---|

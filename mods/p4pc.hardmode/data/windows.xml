@@ -13,4 +13,6 @@
 <affinity kind="1" entity="259" profile="259" element="11" channel="2" value="100" scalar="100"/>
 <!-- Contrarian King: Silence. -->
 <affinity kind="1" entity="304" profile="304" element="15" channel="2" value="100" scalar="100"/>
+<!-- Daring Gigas: Fear; the execution guard vetoes normal and guaranteed attempts. -->
+<affinity kind="1" entity="311" profile="311" element="10" channel="2" value="100" scalar="100"/>
 </p4-tables>

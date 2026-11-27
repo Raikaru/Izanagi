@@ -7,7 +7,8 @@
 typedef enum P4VfsOriginKind {
     P4_VFS_DISC = 0,
     P4_VFS_MOD = 1,
-    P4_VFS_DEVELOPER = 2
+    P4_VFS_DEVELOPER = 2,
+    P4_VFS_GOLDEN = 3
 } P4VfsOriginKind;
 
 typedef struct P4VfsOrigin {
@@ -15,6 +16,8 @@ typedef struct P4VfsOrigin {
     uint32_t rank;          /* disc 0, enabled mods 1..N, developer N+1 */
     const char *provider;   /* "disc", manifest id, or "developer" */
     const char *key;        /* uppercase container-qualified key, or NULL for raw sectors */
+    const char *chain;      /* Golden archive/member chain, otherwise NULL */
+    const char *sha256;     /* SHA-256 of the selected object, otherwise NULL */
 } P4VfsOrigin;
 
 /* Returns 0, or -1 for an invalid descriptor. Strings are immutable until the

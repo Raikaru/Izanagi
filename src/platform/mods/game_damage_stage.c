@@ -112,7 +112,7 @@ void game_amount_bracket(uint32_t skill, GameAmountContext *out)
 int32_t p4_game_damage_native_amount(uint32_t skill, uint32_t source_enemy, uint32_t source_id,
     uint32_t source_status, uint32_t target_enemy, uint32_t target_id, uint32_t target_status,
     uint32_t hit_kind, uint32_t element_valid, uint32_t element_id, int32_t stock,
-    uint32_t source_persona, uint32_t source_persona_level)
+    uint32_t source_persona, uint32_t source_persona_level, uint32_t target_side_leaf)
 {
     GameAmountContext context;
     game_amount_bracket(skill, &context);
@@ -122,6 +122,7 @@ int32_t p4_game_damage_native_amount(uint32_t skill, uint32_t source_enemy, uint
         .source_status = source_status,
         .target_side = target_enemy ? P4_DAMAGE_SIDE_ENEMY : P4_DAMAGE_SIDE_PARTY, .target_id = target_id,
         .target_status = target_status,
+        .target_side_leaf = target_side_leaf,
         .hit_kind = hit_kind, .element_valid = element_valid ? 1u : 0u, .element_id = element_id,
         .resolved = context.resolved, .stock = stock, .origin = context.origin,
     };

@@ -6,6 +6,7 @@
 #include "p4pc/game_hit_stage_native.h"
 #include "p4pc/game_skills_native.h"
 #include "p4pc/game_side_ailment_native.h"
+#include "p4pc/golden_battle_rows_native.h"
 s32 datCalcResolveSkillHit(source, target, skillId, options)
 u8 *source;
 u8 *target;
@@ -91,6 +92,9 @@ s32 options;
             return 4;
         }
     }
+    if (p4_golden_battle_rows_enabled() && (p4_golden_skill_flags(skillId) & 0x400u) &&
+        (targetFlags & 1u) && (iGpffffb3c4[targetRecord->id * 0x3Cu] & 4u))
+        return 0x100;
     hasActionFrame = p4_game_elements_native_enabled();
     if (hasActionFrame) {
         p4_game_elements_native_primary_frame(source, skill, (u32)options, &actionFrame);

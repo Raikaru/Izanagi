@@ -1,6 +1,8 @@
 /* Real Core/VFS original inputs, CPU seal and guest materialization of the six
  * persona banks. Synthetic banks do not prove native battle/model/AI behavior. */
 #include "p4pc/game_personas.h"
+#include "p4pc/game_mode.h"
+#include "p4pc/golden_names_native.h"
 #include "p4pc/game_table_inputs.h"
 #include "guest_test.h"
 #include <assert.h>
@@ -8,6 +10,10 @@
 #include <string.h>
 
 #define RETAIL P4_PERSONA_RETAIL_ROWS
+static P4GameMode game_mode;
+P4GameMode p4_game_mode(void) { return game_mode; }
+static size_t name_stride(void)
+{ return game_mode == P4_GAME_MODE_GOLDEN ? P4_GOLDEN_PERSONA_NAME_SIZE : P4_PERSONA_NAME_SIZE; }
 static unsigned allocations, releases, original_uses, authored_uses;
 static int fail_allocate, use_status;
 static struct Fixture {
@@ -17,9 +23,10 @@ static struct Fixture {
     const char *mode;
     unsigned published;
 } fixture;
+static int valid_case(void) { return !strcmp(fixture.mode, "valid") || !strcmp(fixture.mode, "golden"); }
 static uint8_t metadata[RETAIL * P4_PERSONA_METADATA_SIZE], growth[RETAIL * P4_PERSONA_GROWTH_SIZE];
 static uint8_t model[RETAIL * P4_PERSONA_MODEL_SIZE], candidates[RETAIL * P4_PERSONA_CANDIDATES_SIZE];
-static uint8_t names[RETAIL * P4_PERSONA_NAME_SIZE], affinity[RETAIL * P4_PERSONA_AFFINITY_SIZE];
+static uint8_t names[RETAIL * P4_GOLDEN_PERSONA_NAME_SIZE], affinity[RETAIL * P4_PERSONA_AFFINITY_SIZE];
 static void *allocate(void *user, uint32_t size, uint32_t *guest)
 {
     (void)user;
@@ -97,7 +104,7 @@ static int prepare(void *user)
     const P4GameTableInputSpan *msg3 = p4_game_table_input_span(fixture.message, 3);
     const P4GameTableInputSpan *unit2 = p4_game_table_input_span(fixture.unit, 2);
     P4GamePersonas *personas = fixture.personas;
-    if (strcmp(fixture.mode, "valid")) {
+    if (!valid_case()) {
         assert(p4_game_personas_seal(personas, persona0, persona1, model2, persona5, msg3, unit2, fixture.names, 8) == P4_TABLE_INVALID);
         assert(p4_game_personas_seal(fixture.empty, persona0, persona1, model2, persona5, msg3, unit2, NULL, 8) == P4_TABLE_INVALID);
         assert(!allocations && !p4_game_personas_semantic_revision(personas));
@@ -134,9 +141,9 @@ static int prepare(void *user)
     assert(p4_game_personas_seal(personas, persona0, persona1, model2, persona5, msg3, unit2, text, 8) == P4_TABLE_NOT_READY);
     assert(p4_game_personas_seal(personas, persona0, persona1, model2, persona5, msg3, unit2, NULL, 8) == P4_TABLE_NOT_READY);
     p4_game_tables_text_destroy(text);
-    /* The MSG3 stride is 17 bytes including NUL. */
+    /* Names longer than the selected mode's fixed row are refused. */
     text = p4_game_tables_text_create(NULL, &raw);
-    register_name(text, RETAIL, P4_PERSONA_NAME_SIZE + 1u);
+    register_name(text, RETAIL, name_stride() + 1u);
     assert(text && !p4_game_tables_text_seal(text, 1));
     P4GamePersonas *other = p4_game_personas_create(NULL);
     P4GamePersonaDesc row = persona(RETAIL, 1, "test:long-name");
@@ -194,7 +201,7 @@ static void rollback(void *user) { assert(!user); release_inputs(); }
 static int materialize(P4GamePersonas *personas)
 {
     return p4_game_personas_materialize(personas, metadata, sizeof metadata, growth, sizeof growth,
-        model, sizeof model, candidates, sizeof candidates, names, sizeof names, affinity, sizeof affinity);
+        model, sizeof model, candidates, sizeof candidates, names, RETAIL * name_stride(), affinity, sizeof affinity);
 }
 static void check_guest(void)
 {
@@ -204,7 +211,7 @@ static void check_guest(void)
         p4_game_personas_affinity(personas)};
     const uint8_t *retail[6] = {metadata, growth, model, candidates, names, affinity};
     const size_t strides[6] = {P4_PERSONA_METADATA_SIZE, P4_PERSONA_GROWTH_SIZE, P4_PERSONA_MODEL_SIZE,
-        P4_PERSONA_CANDIDATES_SIZE, P4_PERSONA_NAME_SIZE, P4_PERSONA_AFFINITY_SIZE};
+        P4_PERSONA_CANDIDATES_SIZE, name_stride(), P4_PERSONA_AFFINITY_SIZE};
     for (unsigned bank = 0; bank < 6; ++bank) {
         assert(bases[bank] && !(bases[bank] & 15u));
         assert(!memcmp(P4_G2H(bases[bank]), retail[bank], RETAIL * strides[bank]));
@@ -216,15 +223,17 @@ static void check_guest(void)
             assert(!memcmp((const uint8_t *)P4_G2H(bases[bank]) + row->id * strides[bank], added[bank], strides[bank]));
         assert(!memcmp((const uint8_t *)P4_G2H(bases[5]) + row->id * P4_PERSONA_AFFINITY_SIZE, row->affinity,
             P4_PERSONA_AFFINITY_SIZE));
-        const char *name = (const char *)P4_G2H(bases[4]) + row->id * P4_PERSONA_NAME_SIZE;
-        const size_t length = i == 1 ? 1u : P4_PERSONA_NAME_SIZE - 1u;
+        const char *name = (const char *)P4_G2H(bases[4]) + row->id * name_stride();
+        const size_t length = i == 1 ? 1u : name_stride() - 1u;
         assert(strlen(name) == length && name[0] == 'A' + (char)(row->id % 26u));
-        for (size_t tail = length; tail < P4_PERSONA_NAME_SIZE; ++tail) assert(!name[tail]);
+        for (size_t tail = length; tail < name_stride(); ++tail) assert(!name[tail]);
     }
 }
 int main(int argc, char **argv)
+    /* Each driver invocation is a fresh mode, matching process-wide selection. */
 {
     if (argc != 2) return 2;
+    game_mode = !strcmp(argv[1], "golden") ? P4_GAME_MODE_GOLDEN : P4_GAME_MODE_PS2;
     if (p4t_guest_init()) return 77;
     P4GameTableAllocator allocator = {NULL, allocate, release};
     /* Declarations before any source exists. */
@@ -260,9 +269,9 @@ int main(int argc, char **argv)
     P4TextProfile raw = {P4_TEXT_ENCODING_US_RAW_NATIVE, P4_TEXT_FONT_US_NATIVE};
     fixture.names = p4_game_tables_text_create(NULL, &raw);
     assert(fixture.names && !p4_game_tables_text_bind_runtime_use(fixture.names, text_use, &fixture));
-    register_name(fixture.names, RETAIL, P4_PERSONA_NAME_SIZE);
+    register_name(fixture.names, RETAIL, name_stride());
     register_name(fixture.names, RETAIL + 1u, 2);
-    register_name(fixture.names, RETAIL + 2u, P4_PERSONA_NAME_SIZE);
+    register_name(fixture.names, RETAIL + 2u, name_stride());
     assert(!p4_game_tables_text_seal(fixture.names, 1));
     fixture.personas = p4_game_personas_create(&allocator);
     fixture.empty = p4_game_personas_create(&allocator);
@@ -284,7 +293,7 @@ int main(int argc, char **argv)
         .publish = publish, .rollback = rollback, .boot_phase = P4_PACKAGE_BOOT_TABLES};
     assert(!p4_package_handler_register(&handler));
     int result = p4_package_registry_publish();
-    if (strcmp(fixture.mode, "valid")) {
+    if (!valid_case()) {
         assert(result && !fixture.published && !allocations && !p4_game_personas_semantic_revision(fixture.personas));
     } else {
         assert(!result && fixture.published == 1 && !allocations);
@@ -299,14 +308,14 @@ int main(int argc, char **argv)
         /* Loaded banks that differ from the sealed source refuse before allocating. */
         uint8_t *banks[6] = {metadata, growth, model, candidates, names, affinity};
         const size_t last[6] = {sizeof metadata - 1, sizeof growth - 1, sizeof model - 1,
-            sizeof candidates - 1, sizeof names - 1, sizeof affinity - 1};
+            sizeof candidates - 1, RETAIL * name_stride() - 1, sizeof affinity - 1};
         for (unsigned bank = 0; bank < 6; ++bank) {
             banks[bank][last[bank]] ^= 1;
             assert(materialize(fixture.personas) == P4_TABLE_CONFLICT);
             banks[bank][last[bank]] ^= 1;
         }
         assert(p4_game_personas_materialize(fixture.personas, metadata, sizeof metadata - 1, growth,
-            sizeof growth, model, sizeof model, candidates, sizeof candidates, names, sizeof names,
+            sizeof growth, model, sizeof model, candidates, sizeof candidates, names, RETAIL * name_stride(),
             affinity, sizeof affinity) == P4_TABLE_CONFLICT);
         assert(!allocations && !p4_game_personas_revision(fixture.personas));
         fail_allocate = 1;
@@ -336,7 +345,7 @@ int main(int argc, char **argv)
     p4_game_tables_text_destroy(fixture.names);
     p4_package_registry_retire();
     release_inputs();
-    assert(releases == (strcmp(fixture.mode, "valid") ? 0u : 1u));
+    assert(releases == (valid_case() ? 1u : 0u));
     puts("game_personas: real CPU source seal/row proof and guest bank copy exercised; not native gameplay acceptance");
     return 0;
 }

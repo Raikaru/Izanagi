@@ -1,5 +1,6 @@
 /* Port session identity and crash markers for mods (include/p4pc/mod_lifecycle.h). */
 #include "p4pc/mod_lifecycle.h"
+#include "p4pc/hostpath.h"
 #include "p4pc/os.h"
 #include <errno.h>
 #include <inttypes.h>
@@ -62,7 +63,7 @@ int p4_mod_lifecycle_root(const char *directory)
 /* Reads a whole small file: its size, or -1 (missing: errno ENOENT). */
 static long read_small(const char *path, char *out, size_t capacity)
 {
-    FILE *stream = fopen(path, "rb");
+    FILE *stream = p4_host_fopen(path, "rb");
     if (!stream) return -1;
     size_t size = fread(out, 1, capacity, stream);
     int bad = ferror(stream);
@@ -79,13 +80,13 @@ static int write_replace(const char *path, const char *bytes, size_t length)
     char temporary[PATH_CAP];
     int n = snprintf(temporary, sizeof temporary, "%s.tmp", path);
     if (n <= 0 || n >= PATH_CAP) return -1;
-    FILE *stream = fopen(temporary, "wb");
+    FILE *stream = p4_host_fopen(temporary, "wb");
     if (!stream) return -1;
     int bad = fwrite(bytes, 1, length, stream) != length;
     if (p4_os_sync_file(stream)) bad = 1;
     if (fclose(stream)) bad = 1;
     if (bad || p4_os_replace_file_durable(temporary, path)) {
-        remove(temporary);
+        p4_host_remove(temporary);
         return -1;
     }
     return 0;
@@ -114,13 +115,13 @@ static void prune_visit(const char *name, void *user)
     if (strcmp(end, ".marker") || id == session) return;
     char path[PATH_CAP], bytes[8];
     if (marker_path(id, path)) return;
-    FILE *stream = fopen(path, "rb");
+    FILE *stream = p4_host_fopen(path, "rb");
     if (!stream) return;
     size_t size = fread(bytes, 1, sizeof bytes, stream);
     fclose(stream);
     /* Empty: that session ended without a crash record. */
     if (!size) {
-        remove(path);
+        p4_host_remove(path);
         return;
     }
     /* Keep the newest recorded crashes; the oldest beyond the bound goes. */
@@ -131,7 +132,7 @@ static void prune_visit(const char *name, void *user)
     }
     prune->kept[at] = id;
     if (++prune->count > P4_MOD_LIFECYCLE_KEPT) {
-        if (!marker_path(prune->kept[0], path)) remove(path);
+        if (!marker_path(prune->kept[0], path)) p4_host_remove(path);
         memmove(prune->kept, prune->kept + 1, P4_MOD_LIFECYCLE_KEPT * sizeof prune->kept[0]);
         --prune->count;
     }
@@ -266,7 +267,7 @@ int p4_mod_lifecycle_consume(uint64_t id, const char *mod_id, char *reason, size
     if (marker_path(id, path)) return fail(reason, capacity, "Lifecycle path is too long");
     /* The last mod's record consumed: the marker goes. */
     if (!strchr(strchr(bytes, '\n') + 1, '\n')) {
-        if (remove(path) && errno != ENOENT) return fail(reason, capacity, "Cannot delete crash marker %" PRIu64, id);
+        if (p4_host_remove(path) && errno != ENOENT) return fail(reason, capacity, "Cannot delete crash marker %" PRIu64, id);
         return 0;
     }
     if (line && write_replace(path, bytes, strlen(bytes))) return fail(reason, capacity, "Cannot rewrite crash marker %" PRIu64, id);

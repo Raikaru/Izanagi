@@ -1,0 +1,122 @@
+{
+  "proof_id": "L1-c6-persona-voice-bank-20261113",
+  "class": "PROVEN",
+  "runtime_status": "pending-seam",
+  "scope": "Selected1022-byte partition00624b22 of complete256x4 primary/secondary persona voice selector bank00624b20. Source correspondence only, not audio playback or resource-loader compatibility.",
+  "source_build": 10836033,
+  "steam_image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+  "metadata": {
+    "steam_rva": "0xa305f0",
+    "raw_offset": 10677744,
+    "full_source_bytes": 1024,
+    "sha256": "3ab8a38b5e490dda7594e95c8d5ce30f3daeda6b69dab6213bd8d2695251bb40",
+    "switch_base": "0x710071fa98",
+    "partition_rva": "0xa305f2",
+    "partition_bytes": 1022,
+    "partition_sha256": "862abbad786f053dfe6dc4904647148d658b28f0039f7eec643f3b1b2c69c077",
+    "ps2_logical_base": "0x00624b20",
+    "ps2_next_independent_object": "0x00624f20",
+    "ps2_full_sha256": "5e954c26a47efd5c16a396ec506e17276243fb2a31cc66a1a630680337bbc465",
+    "records": 256,
+    "stride": 4,
+    "fields": [
+      {
+        "offset": 0,
+        "type": "u16-le",
+        "role": "primary voice slot"
+      },
+      {
+        "offset": 2,
+        "type": "u16-le",
+        "role": "secondary voice slot"
+      }
+    ],
+    "changed_records": 22,
+    "changed_bytes": 25,
+    "normalization_kind_subtractions": [
+      0,
+      256,
+      512,
+      768,
+      1024,
+      1280,
+      1536,
+      1792,
+      1792,
+      2048
+    ]
+  },
+  "ps2_readers": [
+    {
+      "address": "0x001f7830",
+      "name": "btlSoundGetPrimaryVoiceSlots",
+      "source": "src/Battle/btlSound_inferred_001f7650.c:156-183",
+      "access": "primaryPersonaId &0xffff; table+4*id+0; genus0; char7/special/action3 yields -1/-1; other genera -1/-1"
+    },
+    {
+      "address": "0x001f7910",
+      "name": "btlSoundGetSecondaryVoiceSlots",
+      "source": "src/Battle/btlSound_inferred_001f7650.c:185-232",
+      "access": "secondary at+4*id+2; bank0; special overrides for char4(action<2),char6(action1/2),char7(action3); other genera char0x109 slot8 else0"
+    }
+  ],
+  "steam_readers": [
+    {
+      "address": "0xbc830",
+      "access": "primary: genus atunit+a2, persona fromdatUnit, normalize19f440, char7/special/action3 suppression, sourcea305f0+4*index+0"
+    },
+    {
+      "address": "0xbc910",
+      "access": "secondary: same normalized index, sourcea305f0+4*index+2, special overrideschar6/7; PS2 char4 override absent. Other genera char0x109 slot8 else0."
+    }
+  ],
+  "switch_readers": [
+    {
+      "address": "0x7100062fd0",
+      "access": "primary:Call71000787e0 obtains persona,112330 normalizes, GOT8806b8 source71fa98, index*4+0; samechar7 gate."
+    },
+    {
+      "address": "0x7100063060",
+      "access": "secondary: same source/normalizer; +4*index+2; char6 and7 specialoverride4; othergenus109->8 else0."
+    }
+  ],
+  "normalization": {
+    "steam": "0x19f440",
+    "switch": "0x7100112330",
+    "formula": "Sign-extend persona ID as s16, load kind u32 from loaded persona records[ID] at stride0x44; kinds0..9 subtract the corresponding normalization_kind_subtractions entry. Kind>9 returns0 (Switch asserts first). Switch additionally asserts signedID<0xa00.",
+    "critical": "kind7 andkind8 BOTH subtract0x700; kind9 subtract0x800. Do not invent kind*256 or maskID&255 as a substitute. The loaded kind-record source/binder is a runtime dependency, not qualified as another L1 literal by this receipt.",
+    "namespace": "Establish incoming Golden persona-ID namespace before normalization; never apply Golden kind indexing blindly to an already normalized PS2 index."
+  },
+  "extent_proof": "PS2 independent next object00624f20 bounds full1024B256x4 table; both PS2 readers distinguish halfword+0/+2. Corresponding ordinary Steam and Switch primary/secondary readers independently locate their same complete256x4 source; full1024-byte Steam interval equals unique Switch interval. Selected object begins at+2, not a new independent1022-byte array.",
+  "changes": "Golden full table changes22 records /25 bytes. These are observed source deltas, not tested audio changes. Golden secondary control also drops the PS2char4 specialoverride; byte installation alone does not reproduce that control difference.",
+  "required_seams": [
+    {
+      "owners": [
+        "btlSoundGetPrimaryVoiceSlots",
+        "btlSoundGetSecondaryVoiceSlots"
+      ],
+      "ps2_addresses": [
+        "0x001f7830",
+        "0x001f7910"
+      ],
+      "action": "Service both halfword columns from the same full1024-byte sealed Golden bank for native/direct/inlined/transformed routes. Selected guest partition00624b22 copies1022 bytes fromSteam RVAa305f2/raw10677746; no tail. Do not overwrite unselected head00624b20 without its supplier ownership."
+    },
+    {
+      "action": "Implement/qualify Golden persona namespace normalization exactly as above, including loaded kind-record dependency; do not claim a guest copy implements this. Preserve PS2 mode."
+    },
+    {
+      "action": "Golden-mode secondary special override is onlychar6 actions1/2 orchar7 action3, withspecial nonzero; nochar4 shortcut. Primarychar7 suppression and non-player default routes remain as observed. Qualify actual sound-bank/slot namespace loading and every compiled native static copy before markingbound."
+    }
+  ],
+  "research_scripts": [
+    "c6_voice_bank.py",
+    "c6_voice_normalize.py",
+    "c6_voice_complete.py"
+  ],
+  "private_receipts": [
+    "c6-voice-bank-readers.txt",
+    "c6-voice-normalize.txt",
+    "c6-voice-bank-complete.json"
+  ],
+  "evidence_boundary": "Static ordinary.shared/AArch64 dataflow and image/source metadata only. No .arch decoding, original game execution, sound playback, build, verify, unittest or runtime binding."
+}

@@ -10,6 +10,7 @@
 #include "p4gl_gl.h"
 #include "p4gl_win.h"
 #include "p4gl_profile.h"
+#include "p4gl_rt.h"
 
 void (P4GL_APIENTRY *p4gl_glGenTextures)(GLsizei n, GLuint *textures);
 void (P4GL_APIENTRY *p4gl_glDeleteTextures)(GLsizei n, const GLuint *textures);
@@ -92,6 +93,7 @@ void (P4GL_APIENTRY *p4gl_glBlendColor)(GLfloat red, GLfloat green, GLfloat blue
 void (P4GL_APIENTRY *p4gl_glUniform3f)(GLint location, GLfloat v0, GLfloat v1, GLfloat v2);
 void (P4GL_APIENTRY *p4gl_glUniform3fv)(GLint location, GLsizei count, const GLfloat *value);
 void (P4GL_APIENTRY *p4gl_glUniform4f)(GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3);
+void (P4GL_APIENTRY *p4gl_glUniform4fv)(GLint location, GLsizei count, const GLfloat *value);
 void (P4GL_APIENTRY *p4gl_glUniformMatrix3fv)(GLint location, GLsizei count, GLboolean transpose, const GLfloat *value);
 void (P4GL_APIENTRY *p4gl_glUniformMatrix4fv)(GLint location, GLsizei count, GLboolean transpose, const GLfloat *value);
 const GLubyte *(P4GL_APIENTRY *p4gl_glGetString)(GLenum name);
@@ -180,7 +182,8 @@ int p4gl_gl_round_bias(void)
     return sRoundBias;
 }
 
-GLuint p4gl_gl_compile_shader(GLenum stage, const char *body, const char *what)
+/* Not inlined: the CRT guard names a host call (this function's fprintf) after the function that holds it, and the reviewed caller list (config/crt_host_adapters.json) must not depend on a compiler's inlining. */
+__attribute__((noinline)) GLuint p4gl_gl_compile_shader(GLenum stage, const char *body, const char *what)
 {
     const GLchar *sources[6];
     GLint count = 0;
@@ -211,6 +214,75 @@ GLuint p4gl_gl_compile_shader(GLenum stage, const char *body, const char *what)
         return 0;
     }
     return shader;
+}
+
+/* Optional features of the context (P4GL_CAP_*), found once by context_probe. Nothing is required: a renderer optimisation that wants one asks p4gl_gl_caps()
+ * and keeps its plain path when the bit is missing. */
+static unsigned sCaps;
+
+unsigned p4gl_gl_caps(void)
+{
+    return sCaps;
+}
+
+static const struct { unsigned bit; const char *name; } kCapNames[] = {
+    {P4GL_CAP_BUFFER_STORAGE, "buffer_storage"}, {P4GL_CAP_FRAMEBUFFER_FETCH, "framebuffer_fetch"}, {P4GL_CAP_PARALLEL_COMPILE, "parallel_compile"},
+    {P4GL_CAP_TIMER_QUERY, "timer_query"}, {P4GL_CAP_MULTI_DRAW, "multi_draw"}, {P4GL_CAP_BASE_VERTEX, "base_vertex"},
+    {P4GL_CAP_PROGRAM_BINARY, "program_binary"}, {P4GL_CAP_INVALIDATE, "invalidate"}, {P4GL_CAP_ASTC, "astc"}, {P4GL_CAP_ETC2, "etc2"}};
+
+static void caps_scan(int es, int major, int minor)
+{
+    static const struct { const char *ext; unsigned bit; } kExt[] = {
+        {"GL_EXT_buffer_storage", P4GL_CAP_BUFFER_STORAGE}, {"GL_ARB_buffer_storage", P4GL_CAP_BUFFER_STORAGE},
+        {"GL_EXT_shader_framebuffer_fetch", P4GL_CAP_FRAMEBUFFER_FETCH}, {"GL_ARM_shader_framebuffer_fetch", P4GL_CAP_FRAMEBUFFER_FETCH},
+        {"GL_KHR_parallel_shader_compile", P4GL_CAP_PARALLEL_COMPILE}, {"GL_ARB_parallel_shader_compile", P4GL_CAP_PARALLEL_COMPILE},
+        {"GL_EXT_disjoint_timer_query", P4GL_CAP_TIMER_QUERY}, {"GL_ARB_timer_query", P4GL_CAP_TIMER_QUERY},
+        {"GL_EXT_multi_draw_arrays", P4GL_CAP_MULTI_DRAW}, {"GL_ANGLE_multi_draw", P4GL_CAP_MULTI_DRAW}, {"GL_EXT_multi_draw_indirect", P4GL_CAP_MULTI_DRAW},
+        {"GL_ARB_multi_draw_indirect", P4GL_CAP_MULTI_DRAW},
+        {"GL_EXT_draw_elements_base_vertex", P4GL_CAP_BASE_VERTEX}, {"GL_OES_draw_elements_base_vertex", P4GL_CAP_BASE_VERTEX},
+        {"GL_ARB_draw_elements_base_vertex", P4GL_CAP_BASE_VERTEX},
+        {"GL_ARB_get_program_binary", P4GL_CAP_PROGRAM_BINARY}, {"GL_OES_get_program_binary", P4GL_CAP_PROGRAM_BINARY},
+        {"GL_ARB_invalidate_subdata", P4GL_CAP_INVALIDATE},
+        {"GL_KHR_texture_compression_astc_ldr", P4GL_CAP_ASTC}, {"GL_ARB_ES3_compatibility", P4GL_CAP_ETC2}};
+    int n = 0, i;
+    unsigned k;
+
+    sCaps = 0;
+    if (es) {
+        sCaps |= P4GL_CAP_PROGRAM_BINARY | P4GL_CAP_INVALIDATE | P4GL_CAP_ETC2; /* core in OpenGL ES 3.0 */
+        if (major > 3 || (major == 3 && minor >= 2)) {
+            sCaps |= P4GL_CAP_BASE_VERTEX | P4GL_CAP_ASTC;
+        }
+    } else {
+        if (major > 4 || (major == 4 && minor >= 1)) {
+            sCaps |= P4GL_CAP_PROGRAM_BINARY;
+        }
+        if (major > 4 || (major == 4 && minor >= 3)) {
+            sCaps |= P4GL_CAP_INVALIDATE | P4GL_CAP_ETC2;
+        }
+        if (major > 4 || (major == 4 && minor >= 4)) {
+            sCaps |= P4GL_CAP_BUFFER_STORAGE;
+        }
+        if (major > 3 || (major == 3 && minor >= 2)) {
+            sCaps |= P4GL_CAP_BASE_VERTEX;
+        }
+        if (major > 3 || (major == 3 && minor >= 3)) {
+            sCaps |= P4GL_CAP_TIMER_QUERY; /* ARB_timer_query is core in 3.3 */
+        }
+    }
+    if (p4gl_glGetIntegerv == NULL || p4gl_glGetStringi == NULL) {
+        return;
+    }
+    p4gl_glGetIntegerv(GL_NUM_EXTENSIONS, &n);
+    for (i = 0; i < n; i++) {
+        const char *e = (const char *)p4gl_glGetStringi(GL_EXTENSIONS, (GLuint)i);
+
+        for (k = 0; e != NULL && k < sizeof kExt / sizeof kExt[0]; k++) {
+            if (strcmp(e, kExt[k].ext) == 0) {
+                sCaps |= kExt[k].bit;
+            }
+        }
+    }
 }
 
 /* Reads the context's identity (ES or desktop, its version, whether a texture border is available) once the entry points are loaded. */
@@ -248,6 +320,17 @@ static void context_probe(void)
     }
     fprintf(stderr, "p4gl: %s, %s, %s (%s, texture border %s)\n", version, renderer != NULL ? renderer : "?", vendor != NULL ? vendor : "?",
             sIsEs ? "OpenGL ES" : "desktop OpenGL", sBorderNative ? "hardware" : "shader");
+    caps_scan(sIsEs, major, minor);
+    {
+        char line[240];
+        size_t len = 0;
+        unsigned k;
+
+        for (k = 0; k < sizeof kCapNames / sizeof kCapNames[0] && len < sizeof line; k++) {
+            len += (size_t)snprintf(line + len, sizeof line - len, " %s=%d", kCapNames[k].name, (sCaps & kCapNames[k].bit) != 0);
+        }
+        fprintf(stderr, "p4gl: optional features:%s\n", line);
+    }
 }
 
 /* Exact comparisons for the CI policy. The i386 build rejects game-side libc references the
@@ -666,6 +749,14 @@ static void errcheck_install(void)
     eTexSubImage2D = p4gl_glTexSubImage2D; p4gl_glTexSubImage2D = xTexSubImage2D;
 }
 
+/* A renderer optimisation's switch: on unless the environment variable of that name is "0" (for A/B captures and for diagnosing a driver). Callers read it once. */
+int p4gl_gl_feature(const char *name)
+{
+    const char *v = getenv(name);
+
+    return v == NULL || v[0] != '0';
+}
+
 /* Per-frame averages since the last report, with the time the caller spent in the swap and in the whole present. */
 void p4gl_gl_stats_report(unsigned frames, double swapMs, double presentMs)
 {
@@ -932,7 +1023,8 @@ static void P4GL_APIENTRY wClear(GLbitfield m) { sync_state(); kClear(m); }
 static void P4GL_APIENTRY wCopyTexSubImage2D(GLenum t, GLint l, GLint xo, GLint yo, GLint x, GLint y, GLsizei w, GLsizei h) { sync_state(); kCopyTexSubImage2D(t, l, xo, yo, x, y, w, h); }
 static void P4GL_APIENTRY wBlitFramebuffer(GLint a, GLint b, GLint c, GLint d, GLint e, GLint f, GLint g, GLint h, GLbitfield m, GLenum fl) { sync_state(); kBlitFramebuffer(a, b, c, d, e, f, g, h, m, fl); }
 
-static void cache_install(void)
+/* Always inlined into p4gl_gl_load, where the guard's reviewed memset caller is listed (a compiler that kept it apart made a new caller). */
+static inline __attribute__((always_inline)) void cache_install(void)
 {
     memset(sTexParams, 0xFF, sizeof sTexParams);
     sUnit = 0;
@@ -1208,6 +1300,172 @@ static void probe_edge_rule(void)
     fprintf(stderr, "p4gl: a pixel centre on a quad's edge %s\n", sTieBias ? "falls on the other side than the GS's (vertices move 1/128 pixel up and left)" : "falls as the GS's top-left rule has it");
 }
 
+/* The window's framebuffer must store what the renderer writes. A driver that gives the window an sRGB-capable pixel format and encodes writes to
+ * it (AMD's WGL, whose ES contexts have no GL_FRAMEBUFFER_SRGB switch to find off) turns the present blit's 8-bit picture, which already holds the
+ * game's display values, into sRGB a second time: black 25 reads 88 and the whole scene looks washed out, while pure black and white are untouched
+ * (a loading screen looks right). The fix has three layers: the attribute requested with the window (p4gl_api.h), GL_FRAMEBUFFER_SRGB switched off
+ * here, and the check below, which clears the window to 25/255 and 128/255 and reads back what it stored (88 and 188 when it still encodes).
+ * A window that still encodes after the switch gets the present blit through p4gl_gl_present_decoded, which undoes it. P4PC_WINDOW_SRGB=off skips
+ * all of it, P4PC_WINDOW_SRGB=decode forces the decoding blit (tests). */
+#define P4GL_FRAMEBUFFER_SRGB 0x8DB9u
+static int sWindowSrgb;
+static int sWindowSrgbWas, sWindowSrgbFirst[2]; /* what the window did before GL_FRAMEBUFFER_SRGB was switched off: encoded, 25/255 and 128/255 as stored (p4gl_gl_load reports) */
+static GLuint sPresentProgram, sPresentVao;
+static GLint sPresentLoc[4];
+
+int p4gl_gl_window_srgb(void)
+{
+    return sWindowSrgb;
+}
+
+/* 1 when the context may switch window sRGB writes off: always on desktop OpenGL, with EXT_sRGB_write_control on ES. */
+static int srgb_write_control(void)
+{
+    GLint n = 0, i;
+
+    if (!sIsEs) {
+        return 1;
+    }
+    p4gl_glGetIntegerv(GL_NUM_EXTENSIONS, &n);
+    for (i = 0; i < n; i++) {
+        const char *e = (const char *)p4gl_glGetStringi(GL_EXTENSIONS, (GLuint)i);
+
+        if (e != NULL && strcmp(e, "GL_EXT_sRGB_write_control") == 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+/* The red value the window's framebuffer holds after a clear to value/255, -1 when GL reports an error. */
+static int window_stored(int value)
+{
+    unsigned char px[4] = {0, 0, 0, 0};
+
+    p4gl_glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    p4gl_glColorMask(1, 1, 1, 1);
+    p4gl_glClearColor((float)value / 255.0f, (float)value / 255.0f, (float)value / 255.0f, 1.0f);
+    p4gl_glClear(GL_COLOR_BUFFER_BIT);
+    p4gl_glReadPixels(0, 0, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, px);
+    p4gl_glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    return p4gl_glGetError() == GL_NO_ERROR ? (int)px[0] : -1;
+}
+
+static int stored_near(int got, int want)
+{
+    return got >= want - 4 && got <= want + 4;
+}
+
+/* 1 when the window stores sRGB-encoded writes (25 as 88, 128 as 188). Needs the default framebuffer bound. */
+static int window_encodes(int *low, int *high)
+{
+    *low = window_stored(25);
+    *high = window_stored(128);
+    return stored_near(*low, 88) && stored_near(*high, 188);
+}
+
+static void probe_window_srgb(void)
+{
+    const char *force = getenv("P4PC_WINDOW_SRGB");
+    int low = 0, high = 0;
+
+    sWindowSrgb = 0;
+    sWindowSrgbWas = 0;
+    sPresentProgram = sPresentVao = 0; /* a new context holds none of the old context's objects */
+    if (force != NULL && strcmp(force, "off") == 0) {
+        return;
+    }
+    p4gl_glGetError();
+    sWindowSrgbWas = window_encodes(&sWindowSrgbFirst[0], &sWindowSrgbFirst[1]);
+    if (srgb_write_control()) {
+        p4gl_glDisable(P4GL_FRAMEBUFFER_SRGB);
+        p4gl_glGetError();
+    }
+    sWindowSrgb = window_encodes(&low, &high);
+    if (force != NULL && strcmp(force, "decode") == 0) {
+        sWindowSrgb = 1;
+    }
+    p4gl_glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+static const char kPresentVertex[] =
+    "const vec2 kCorner[6] = vec2[6](vec2(-1.0, -1.0), vec2(1.0, -1.0), vec2(-1.0, 1.0), vec2(-1.0, 1.0), vec2(1.0, -1.0), vec2(1.0, 1.0));\n"
+    "void main() {\n"
+    "    gl_Position = vec4(kCorner[gl_VertexID], 0.0, 1.0);\n"
+    "}\n";
+
+/* The present blit of a window that encodes sRGB on write: the frame's texels, filtered as glBlitFramebuffer filters them (nearest, or the
+ * bilinear mean of the four texels around the sample point), decoded from sRGB, so that the window's encoding stores them as they are. */
+static const char kPresentFragment[] =
+    "uniform sampler2D uSrc;\n"
+    "uniform vec2 uSrcSize;\n"
+    "uniform vec4 uRect;\n"
+    "uniform int uLinear;\n"
+    "out vec4 o;\n"
+    "vec4 texel(ivec2 i) {\n"
+    "    return texelFetch(uSrc, clamp(i, ivec2(0), ivec2(uSrcSize) - ivec2(1)), 0);\n"
+    "}\n"
+    "void main() {\n"
+    "    vec2 p = (gl_FragCoord.xy - uRect.xy) / uRect.zw * uSrcSize;\n"
+    "    vec4 c;\n"
+    "    if (uLinear != 0) {\n"
+    "        vec2 s = p - vec2(0.5);\n"
+    "        ivec2 i = ivec2(floor(s));\n"
+    "        vec2 f = s - floor(s);\n"
+    "        c = mix(mix(texel(i), texel(i + ivec2(1, 0)), f.x), mix(texel(i + ivec2(0, 1)), texel(i + ivec2(1, 1)), f.x), f.y);\n"
+    "    } else {\n"
+    "        c = texel(ivec2(floor(p)));\n"
+    "    }\n"
+    "    vec3 hi = pow((c.rgb + vec3(0.055)) / 1.055, vec3(2.4));\n"
+    "    o = vec4(mix(c.rgb / 12.92, hi, step(vec3(0.04045), c.rgb)), c.a);\n"
+    "}\n";
+
+int p4gl_gl_present_decoded(unsigned texture, int fw, int fh, int dx, int dy, int dw, int dh, int linear)
+{
+    if (!sWindowSrgb || texture == 0 || fw <= 0 || fh <= 0 || dw <= 0 || dh <= 0 || !p4gl_gl_pass_begin()) {
+        return 0;
+    }
+    if (sPresentProgram == 0) {
+        GLuint vs = p4gl_gl_compile_shader(GL_VERTEX_SHADER, kPresentVertex, "present decode");
+        GLuint fs = vs != 0 ? p4gl_gl_compile_shader(GL_FRAGMENT_SHADER, kPresentFragment, "present decode") : 0;
+        GLuint program;
+        GLint linked = GL_FALSE;
+
+        if (vs == 0 || fs == 0) {
+            p4gl_gl_pass_end();
+            return 0;
+        }
+        program = p4gl_glCreateProgram();
+        p4gl_glAttachShader(program, vs);
+        p4gl_glAttachShader(program, fs);
+        p4gl_glLinkProgram(program);
+        p4gl_glGetProgramiv(program, GL_LINK_STATUS, &linked);
+        if (linked != GL_TRUE) {
+            p4gl_gl_pass_end();
+            return 0;
+        }
+        sPresentProgram = program;
+        sPresentLoc[0] = p4gl_glGetUniformLocation(program, "uSrc");
+        sPresentLoc[1] = p4gl_glGetUniformLocation(program, "uSrcSize");
+        sPresentLoc[2] = p4gl_glGetUniformLocation(program, "uRect");
+        sPresentLoc[3] = p4gl_glGetUniformLocation(program, "uLinear");
+        p4gl_glGenVertexArrays(1, &sPresentVao);
+    }
+    p4gl_glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    p4gl_glViewport(dx, dy, dw, dh);
+    p4gl_glUseProgram(sPresentProgram);
+    p4gl_glActiveTexture(GL_TEXTURE0);
+    p4gl_glBindTexture(GL_TEXTURE_2D, texture);
+    p4gl_glUniform1i(sPresentLoc[0], 0);
+    p4gl_glUniform2f(sPresentLoc[1], (float)fw, (float)fh);
+    p4gl_glUniform4f(sPresentLoc[2], (float)dx, (float)dy, (float)dw, (float)dh);
+    p4gl_glUniform1i(sPresentLoc[3], linear != 0);
+    p4gl_glBindVertexArray(sPresentVao);
+    p4gl_glDrawArrays(GL_TRIANGLES, 0, 6);
+    p4gl_gl_pass_end();
+    return 1;
+}
+
 int p4gl_gl_load(void)
 {
     int missing = 0;
@@ -1283,6 +1541,7 @@ int p4gl_gl_load(void)
     missing |= p4gl_resolve((void **)&p4gl_glUniform3f, "glUniform3f");
     missing |= p4gl_resolve((void **)&p4gl_glUniform3fv, "glUniform3fv");
     missing |= p4gl_resolve((void **)&p4gl_glUniform4f, "glUniform4f");
+    missing |= p4gl_resolve((void **)&p4gl_glUniform4fv, "glUniform4fv");
     missing |= p4gl_resolve((void **)&p4gl_glUniformMatrix3fv, "glUniformMatrix3fv");
     missing |= p4gl_resolve((void **)&p4gl_glUniformMatrix4fv, "glUniformMatrix4fv");
     if (!missing) {
@@ -1334,7 +1593,18 @@ int p4gl_gl_load(void)
             exit(77);
         }
     }
+    if (!missing) {
+        probe_window_srgb();
+        if (sWindowSrgbWas || sWindowSrgb) {
+            fprintf(stderr, "p4gl: the window framebuffer encoded sRGB on write (25/255 stored as %d, 128/255 as %d); %s\n", sWindowSrgbFirst[0], sWindowSrgbFirst[1],
+                    sWindowSrgb ? "it still does after GL_FRAMEBUFFER_SRGB was switched off, the present blit decodes" :
+                                  "GL_FRAMEBUFFER_SRGB is off now (25/255 stored as it is)");
+        }
+    }
     if (!missing) p4gl_profile_init(sIsEs);
+    if (!missing) {
+        p4gl_rt_install(); /* the render thread's recorders go under the state cache (p4gl_rt.h); pass-through until it starts */
+    }
     if (!missing && (getenv("P4PC_GLSTATS") != NULL || getenv("P4PC_GL_HITCH_TRACE") != NULL || getenv("P4PC_GPU_TRACE") != NULL)) {
         stats_install();
     }

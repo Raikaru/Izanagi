@@ -10,6 +10,7 @@ import android.view.Gravity;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import android.app.AlertDialog;
 import java.io.File;
@@ -21,6 +22,7 @@ import java.io.File;
 public class P4Launcher extends Activity {
     private static final int REQ_ISO = 1;
     private static final int REQ_ELF = 2;
+    private static final int REQ_LOGS = 3;
     private static final String PREFS = "p4pc";
 
     private SharedPreferences prefs;
@@ -34,10 +36,14 @@ public class P4Launcher extends Activity {
         final File crash = new File(getFilesDir(), "p4pc-crash.log");
         if (crash.length() > 0 && prefs.getLong("crashShown", 0) != crash.lastModified()) {
             new AlertDialog.Builder(this).setTitle("Previous native crash")
-                    .setMessage("The previous run stopped unexpectedly. Crash details are saved at:\n"
-                            + crash.getAbsolutePath() + "\n\nInclude this file and boot.log in a bug report.")
+                    .setMessage("The previous run stopped unexpectedly. \"Export logs\" saves the crash report and the game's log "
+                            + "as one file you can attach to a bug report.")
                     .setPositiveButton("OK", (dialog, which) ->
-                            prefs.edit().putLong("crashShown", crash.lastModified()).apply()).show();
+                            prefs.edit().putLong("crashShown", crash.lastModified()).apply())
+                    .setNeutralButton("Export logs", (dialog, which) -> {
+                        prefs.edit().putLong("crashShown", crash.lastModified()).apply();
+                        exportLogs();
+                    }).show();
         }
 
         final Intent in = getIntent();
@@ -63,6 +69,10 @@ public class P4Launcher extends Activity {
         start.setText("Start");
         start.setOnClickListener(v -> launch(prefs.getString("iso", null), prefs.getString("elf", null), getIntent()));
         col.addView(start);
+        final Button logs = new Button(this);
+        logs.setText("Export logs (for a bug report)");
+        logs.setOnClickListener(v -> exportLogs());
+        col.addView(logs);
         setContentView(col);
         refresh();
     }
@@ -87,9 +97,40 @@ public class P4Launcher extends Activity {
             return;
         }
         final Uri uri = data.getData();
+        if (req == REQ_LOGS) {
+            writeLogs(uri);
+            return;
+        }
         getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
         prefs.edit().putString(req == REQ_ISO ? "iso" : "elf", uri.toString()).apply();
         refresh();
+    }
+
+    /** Asks where to save the logs (the system file dialog, so the player can pick Downloads or a cloud folder), then writes the zip there. */
+    private void exportLogs() {
+        if (!LogExport.hasLogs(this)) {
+            // the device facts are still worth sending
+            Toast.makeText(this, "No game log yet: start the game once, then export.", Toast.LENGTH_LONG).show();
+        }
+        final Intent save = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        save.addCategory(Intent.CATEGORY_OPENABLE);
+        save.setType("application/zip");
+        save.putExtra(Intent.EXTRA_TITLE, LogExport.suggestedName());
+        try {
+            startActivityForResult(save, REQ_LOGS);
+        } catch (RuntimeException e) {
+            Toast.makeText(this, "No file manager is available to save the logs: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void writeLogs(Uri uri) {
+        try (java.io.OutputStream out = getContentResolver().openOutputStream(uri)) {
+            if (out == null) throw new java.io.IOException("the file could not be opened");
+            final java.util.List<String> names = LogExport.write(this, out);
+            Toast.makeText(this, "Saved " + names.size() + " files. Attach the zip to your bug report.", Toast.LENGTH_LONG).show();
+        } catch (Exception e) {
+            Toast.makeText(this, "Could not save the logs: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
     }
 
     private boolean readable(String uri) {

@@ -1,0 +1,1635 @@
+{
+  "proof_id": "L1-C5-AI-condition-target-labels-20261113",
+  "class": "PROVEN",
+  "runtime_status": "pending-seam",
+  "scope": "Eight selected AI descriptor name literals, with actual condition and target-selector bank boundaries and indexed code consumers. No blanket AI program/data/callback-code equivalence.",
+  "sources": {
+    "steam_build": 10836033,
+    "steam_image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+    "nso": "Switch1.2 mapped main.nso",
+    "policy": "Static data and ordinary Steam.shared code only; no protector.arch decoding or game/emulator execution."
+  },
+  "banks": {
+    "condition": {
+      "ps2": {
+        "base": "0x609850",
+        "count": 78,
+        "stride": 12,
+        "size": 936,
+        "sha256": "748efdb746f007eb144c0ba005073c7a43087c8251c90b0f4a2c5c7e12fa3c5b"
+      },
+      "steam": {
+        "base": "0xaf97b0",
+        "count": 82,
+        "stride": 24,
+        "size": 1968,
+        "sha256": "8414a38a925cc7fbcebd659c5062e3a9e18e395ab57a35bd92b34f52c68ec256"
+      },
+      "nso": {
+        "base": "0x70a0c8",
+        "count": 82,
+        "stride": 24,
+        "size": 1968,
+        "sha256": "852079b6fd7509241ddfd34a54644182f640db9feba49e8c6b00c174c3cb9402"
+      },
+      "ordered_entries": [
+        {
+          "opcode": 0,
+          "name": "",
+          "metadata_s32": 0,
+          "ps2_callback": "0x0",
+          "steam_callback": "0x0",
+          "nso_callback": "0x0"
+        },
+        {
+          "opcode": 1,
+          "name": "MYHP",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1d9740",
+          "steam_callback": "0x615a0",
+          "nso_callback": "0x1bf10"
+        },
+        {
+          "opcode": 2,
+          "name": "MYMP",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1d9820",
+          "steam_callback": "0x61640",
+          "nso_callback": "0x2f740"
+        },
+        {
+          "opcode": 3,
+          "name": "FRHP",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1d9890",
+          "steam_callback": "0x61690",
+          "nso_callback": "0x2f790"
+        },
+        {
+          "opcode": 4,
+          "name": "ENHP",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1d98e0",
+          "steam_callback": "0x61750",
+          "nso_callback": "0x2f870"
+        },
+        {
+          "opcode": 5,
+          "name": "ENHP_O",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1d9940",
+          "steam_callback": "0x61820",
+          "nso_callback": "0x2f950"
+        },
+        {
+          "opcode": 6,
+          "name": "MYLV_O",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1d99a0",
+          "steam_callback": "0x618f0",
+          "nso_callback": "0x2fa30"
+        },
+        {
+          "opcode": 7,
+          "name": "FRLV_O",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1d99e0",
+          "steam_callback": "0x61950",
+          "nso_callback": "0x2fa60"
+        },
+        {
+          "opcode": 8,
+          "name": "ENLV_O",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1d9a30",
+          "steam_callback": "0x619a0",
+          "nso_callback": "0x2faa0"
+        },
+        {
+          "opcode": 9,
+          "name": "FRCNT",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1d9aa0",
+          "steam_callback": "0x619f0",
+          "nso_callback": "0x2faf0"
+        },
+        {
+          "opcode": 10,
+          "name": "ENCNT",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1d9af0",
+          "steam_callback": "0x61a40",
+          "nso_callback": "0x2fb30"
+        },
+        {
+          "opcode": 11,
+          "name": "MYBAD",
+          "metadata_s32": 1,
+          "ps2_callback": "0x1d9b60",
+          "steam_callback": "0x61a90",
+          "nso_callback": "0x1c080"
+        },
+        {
+          "opcode": 12,
+          "name": "FRBAD",
+          "metadata_s32": 1,
+          "ps2_callback": "0x1d9b90",
+          "steam_callback": "0x61ad0",
+          "nso_callback": "0x1bf60"
+        },
+        {
+          "opcode": 13,
+          "name": "ENBAD",
+          "metadata_s32": 1,
+          "ps2_callback": "0x1d9c00",
+          "steam_callback": "0x61bd0",
+          "nso_callback": "0x2fb80"
+        },
+        {
+          "opcode": 14,
+          "name": "ENBAD_ALL",
+          "metadata_s32": 1,
+          "ps2_callback": "0x1d9ca0",
+          "steam_callback": "0x61ce0",
+          "nso_callback": "0x2fcb0"
+        },
+        {
+          "opcode": 15,
+          "name": "FRID",
+          "metadata_s32": 1,
+          "ps2_callback": "0x1d9db0",
+          "steam_callback": "0x61d90",
+          "nso_callback": "0x2fd70"
+        },
+        {
+          "opcode": 16,
+          "name": "ENID",
+          "metadata_s32": 1,
+          "ps2_callback": "0x1d9e80",
+          "steam_callback": "0x61e30",
+          "nso_callback": "0x2fe20"
+        },
+        {
+          "opcode": 17,
+          "name": "FRHOJO",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1d9f60",
+          "steam_callback": "0x61ed0",
+          "nso_callback": "0x2fed0"
+        },
+        {
+          "opcode": 18,
+          "name": "ENHOJO",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1da040",
+          "steam_callback": "0x61f80",
+          "nso_callback": "0x2ff80"
+        },
+        {
+          "opcode": 19,
+          "name": "ESCAPE",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1da130",
+          "steam_callback": "0x62030",
+          "nso_callback": "0x1c090"
+        },
+        {
+          "opcode": 20,
+          "name": "SUMMON",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1da1a0",
+          "steam_callback": "0x62090",
+          "nso_callback": "0x30030"
+        },
+        {
+          "opcode": 21,
+          "name": "SENSEI",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1da1b0",
+          "steam_callback": "0x620b0",
+          "nso_callback": "0x30040"
+        },
+        {
+          "opcode": 22,
+          "name": "MYHANSYA",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1da230",
+          "steam_callback": "0x62120",
+          "nso_callback": "0x28fc0"
+        },
+        {
+          "opcode": 23,
+          "name": "MYKYUSYU",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1da270",
+          "steam_callback": "0x62160",
+          "nso_callback": "0x29150"
+        },
+        {
+          "opcode": 24,
+          "name": "MYMUKOU",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1da2b0",
+          "steam_callback": "0x621a0",
+          "nso_callback": "0x292f0"
+        },
+        {
+          "opcode": 25,
+          "name": "MYWEAK",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1da2f0",
+          "steam_callback": "0x621f0",
+          "nso_callback": "0x276b0"
+        },
+        {
+          "opcode": 26,
+          "name": "FRHANSYA",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1da330",
+          "steam_callback": "0x62230",
+          "nso_callback": "0x300a0"
+        },
+        {
+          "opcode": 27,
+          "name": "ENHANSYA",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1da380",
+          "steam_callback": "0x622f0",
+          "nso_callback": "0x30160"
+        },
+        {
+          "opcode": 28,
+          "name": "FRKYUSYU",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1da3e0",
+          "steam_callback": "0x623c0",
+          "nso_callback": "0x30230"
+        },
+        {
+          "opcode": 29,
+          "name": "ENKYUSYU",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1da430",
+          "steam_callback": "0x62480",
+          "nso_callback": "0x302f0"
+        },
+        {
+          "opcode": 30,
+          "name": "FRMUKOU",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1da490",
+          "steam_callback": "0x62550",
+          "nso_callback": "0x303c0"
+        },
+        {
+          "opcode": 31,
+          "name": "ENMUKOU",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1da4e0",
+          "steam_callback": "0x62610",
+          "nso_callback": "0x30490"
+        },
+        {
+          "opcode": 32,
+          "name": "FRWEAK",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1da540",
+          "steam_callback": "0x626e0",
+          "nso_callback": "0x30560"
+        },
+        {
+          "opcode": 33,
+          "name": "ENWEAK",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1da590",
+          "steam_callback": "0x627a0",
+          "nso_callback": "0x30620"
+        },
+        {
+          "opcode": 34,
+          "name": "MYUSEATTR",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1da5f0",
+          "steam_callback": "0x62870",
+          "nso_callback": "0x306f0"
+        },
+        {
+          "opcode": 35,
+          "name": "FRUSEATTR",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1da640",
+          "steam_callback": "0x628c0",
+          "nso_callback": "0x30730"
+        },
+        {
+          "opcode": 36,
+          "name": "ENUSEATTR",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1da690",
+          "steam_callback": "0x62980",
+          "nso_callback": "0x30800"
+        },
+        {
+          "opcode": 37,
+          "name": "MYUSESKIL",
+          "metadata_s32": 1,
+          "ps2_callback": "0x1da6f0",
+          "steam_callback": "0x62a50",
+          "nso_callback": "0x308d0"
+        },
+        {
+          "opcode": 38,
+          "name": "FRUSESKIL",
+          "metadata_s32": 1,
+          "ps2_callback": "0x1da730",
+          "steam_callback": "0x62ab0",
+          "nso_callback": "0x30900"
+        },
+        {
+          "opcode": 39,
+          "name": "ENUSESKIL",
+          "metadata_s32": 1,
+          "ps2_callback": "0x1da780",
+          "steam_callback": "0x62b70",
+          "nso_callback": "0x309d0"
+        },
+        {
+          "opcode": 40,
+          "name": "MYGROUP",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1da7e0",
+          "steam_callback": "0x62c40",
+          "nso_callback": "0x30aa0"
+        },
+        {
+          "opcode": 41,
+          "name": "FRGROUP",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1da840",
+          "steam_callback": "0x62c90",
+          "nso_callback": "0x30ad0"
+        },
+        {
+          "opcode": 42,
+          "name": "ENGROUP",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1da890",
+          "steam_callback": "0x62d50",
+          "nso_callback": "0x30ba0"
+        },
+        {
+          "opcode": 43,
+          "name": "TURN",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1da8f0",
+          "steam_callback": "0x62e20",
+          "nso_callback": "0x30c80"
+        },
+        {
+          "opcode": 44,
+          "name": "TURN_O",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1da910",
+          "steam_callback": "0x62e50",
+          "nso_callback": "0x30c90"
+        },
+        {
+          "opcode": 45,
+          "name": "MYHREC",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1da930",
+          "steam_callback": "0x62e80",
+          "nso_callback": "0x30ca0"
+        },
+        {
+          "opcode": 46,
+          "name": "MORE",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1da9f0",
+          "steam_callback": "0x62f20",
+          "nso_callback": "0x30d30"
+        },
+        {
+          "opcode": 47,
+          "name": "FRHANSYA_ST",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1daa00",
+          "steam_callback": "0x62f50",
+          "nso_callback": "0x30d40"
+        },
+        {
+          "opcode": 48,
+          "name": "ENHANSYA_ST",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1daa50",
+          "steam_callback": "0x63020",
+          "nso_callback": "0x30e00"
+        },
+        {
+          "opcode": 49,
+          "name": "FRKYUSYU_ST",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1daab0",
+          "steam_callback": "0x630f0",
+          "nso_callback": "0x30ed0"
+        },
+        {
+          "opcode": 50,
+          "name": "ENKYUSYU_ST",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1dab00",
+          "steam_callback": "0x631c0",
+          "nso_callback": "0x30f90"
+        },
+        {
+          "opcode": 51,
+          "name": "FRMUKOU_ST",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1dab60",
+          "steam_callback": "0x63290",
+          "nso_callback": "0x31060"
+        },
+        {
+          "opcode": 52,
+          "name": "ENMUKOU_ST",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1dabb0",
+          "steam_callback": "0x63360",
+          "nso_callback": "0x31130"
+        },
+        {
+          "opcode": 53,
+          "name": "FRWEAK_ST",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1dac10",
+          "steam_callback": "0x63430",
+          "nso_callback": "0x31200"
+        },
+        {
+          "opcode": 54,
+          "name": "ENWEAK_ST",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1dac60",
+          "steam_callback": "0x63500",
+          "nso_callback": "0x312c0"
+        },
+        {
+          "opcode": 55,
+          "name": "MYID",
+          "metadata_s32": 1,
+          "ps2_callback": "0x1dacc0",
+          "steam_callback": "0x635d0",
+          "nso_callback": "0x23940"
+        },
+        {
+          "opcode": 56,
+          "name": "FRALLHP",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1dace0",
+          "steam_callback": "0x63610",
+          "nso_callback": "0x31390"
+        },
+        {
+          "opcode": 57,
+          "name": "ENALLHP",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1dae00",
+          "steam_callback": "0x636f0",
+          "nso_callback": "0x31470"
+        },
+        {
+          "opcode": 58,
+          "name": "MYABLESKIL",
+          "metadata_s32": 1,
+          "ps2_callback": "0x1daf40",
+          "steam_callback": "0x639f0",
+          "nso_callback": "0x26f60"
+        },
+        {
+          "opcode": 59,
+          "name": "ENWEAK_PAI",
+          "metadata_s32": 1,
+          "ps2_callback": "0x1db040",
+          "steam_callback": "0x63a80",
+          "nso_callback": "0x31550"
+        },
+        {
+          "opcode": 60,
+          "name": "ENWEAK_ST_PAI",
+          "metadata_s32": 1,
+          "ps2_callback": "0x1db0a0",
+          "steam_callback": "0x63bc0",
+          "nso_callback": "0x31580"
+        },
+        {
+          "opcode": 61,
+          "name": "ENWEAK_DW_PAI",
+          "metadata_s32": 1,
+          "ps2_callback": "0x1db100",
+          "steam_callback": "0x63d10",
+          "nso_callback": "0x315b0"
+        },
+        {
+          "opcode": 62,
+          "name": "MYATTRSKIL",
+          "metadata_s32": 1,
+          "ps2_callback": "0x1db160",
+          "steam_callback": "0x63e50",
+          "nso_callback": "0x315e0"
+        },
+        {
+          "opcode": 63,
+          "name": "MYNOMAL",
+          "metadata_s32": 1,
+          "ps2_callback": "0x1db580",
+          "steam_callback": "0x640c0",
+          "nso_callback": "0x27c90"
+        },
+        {
+          "opcode": 64,
+          "name": "ENNOMAL",
+          "metadata_s32": 1,
+          "ps2_callback": "0x1db620",
+          "steam_callback": "0x64190",
+          "nso_callback": "0x316a0"
+        },
+        {
+          "opcode": 65,
+          "name": "ENNOMAL_ST",
+          "metadata_s32": 1,
+          "ps2_callback": "0x1db680",
+          "steam_callback": "0x642c0",
+          "nso_callback": "0x316d0"
+        },
+        {
+          "opcode": 66,
+          "name": "ENNOMAL_DW",
+          "metadata_s32": 1,
+          "ps2_callback": "0x1db6e0",
+          "steam_callback": "0x64400",
+          "nso_callback": "0x31700"
+        },
+        {
+          "opcode": 67,
+          "name": "ANALYZE",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1db740",
+          "steam_callback": "0x64540",
+          "nso_callback": "0x31730"
+        },
+        {
+          "opcode": 68,
+          "name": "DOWN",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1db790",
+          "steam_callback": "0x645f0",
+          "nso_callback": "0x31770"
+        },
+        {
+          "opcode": 69,
+          "name": "SLIP",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1db7b0",
+          "steam_callback": "0x64630",
+          "nso_callback": "0x31790"
+        },
+        {
+          "opcode": 70,
+          "name": "ENOVERLV",
+          "metadata_s32": 1,
+          "ps2_callback": "0x1db7d0",
+          "steam_callback": "0x64670",
+          "nso_callback": "0x317b0"
+        },
+        {
+          "opcode": 71,
+          "name": "MYHOJO",
+          "metadata_s32": 1,
+          "ps2_callback": "0x1db8d0",
+          "steam_callback": "0x64760",
+          "nso_callback": "0x26110"
+        },
+        {
+          "opcode": 72,
+          "name": "MYTAISEI",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1db900",
+          "steam_callback": "0x647b0",
+          "nso_callback": "0x29490"
+        },
+        {
+          "opcode": 73,
+          "name": "FRTAISEI",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1db940",
+          "steam_callback": "0x647f0",
+          "nso_callback": "0x31870"
+        },
+        {
+          "opcode": 74,
+          "name": "ENTAISEI",
+          "metadata_s32": 0,
+          "ps2_callback": "0x1db990",
+          "steam_callback": "0x648b0",
+          "nso_callback": "0x31930"
+        },
+        {
+          "opcode": 75,
+          "name": "MYNOTNOMAL",
+          "metadata_s32": 1,
+          "ps2_callback": "0x1db9f0",
+          "steam_callback": "0x64980",
+          "nso_callback": "0x2f6e0"
+        },
+        {
+          "opcode": 76,
+          "name": "ENNOTNOMAL",
+          "metadata_s32": 1,
+          "ps2_callback": "0x1dba90",
+          "steam_callback": "0x64a10",
+          "nso_callback": "0x31a00"
+        },
+        {
+          "opcode": 77,
+          "name": "MYWALL",
+          "metadata_s32": 1,
+          "ps2_callback": "0x1dbaf0",
+          "steam_callback": "0x64b40",
+          "nso_callback": "0x31a30"
+        },
+        {
+          "opcode": 78,
+          "name": "FRALLSP",
+          "metadata_s32": 0,
+          "ps2_callback": null,
+          "steam_callback": "0x637d0",
+          "nso_callback": "0x31a70"
+        },
+        {
+          "opcode": 79,
+          "name": "ENALLHAVESKIL",
+          "metadata_s32": 0,
+          "ps2_callback": null,
+          "steam_callback": "0x638b0",
+          "nso_callback": "0x31b50"
+        },
+        {
+          "opcode": 80,
+          "name": "MYBADOFF",
+          "metadata_s32": 0,
+          "ps2_callback": null,
+          "steam_callback": "0x63960",
+          "nso_callback": "0x289b0"
+        },
+        {
+          "opcode": 81,
+          "name": "MYNOBADOFF",
+          "metadata_s32": 0,
+          "ps2_callback": null,
+          "steam_callback": "0x639a0",
+          "nso_callback": "0x28b00"
+        }
+      ],
+      "boundary_evidence": {
+        "ps2_next": {
+          "id": 78,
+          "record": "0x609bf8",
+          "values": [
+            "0x48544f4e",
+            "0x59534e41",
+            "0x41"
+          ],
+          "name": "",
+          "valid": false
+        },
+        "nso_next": {
+          "id": 82,
+          "record": "0x70a878",
+          "values": [
+            "0x32fe0",
+            "0x330d0",
+            "0x331a0"
+          ],
+          "name": "\ufffdC\u0001\ufffd\ufffd{\u0003\ufffd\ufffd\ufffd",
+          "valid": false
+        }
+      },
+      "legacy_mapping": "all old entries retain index/name/metadata/callback-nullness; code-address equality or whole callback equivalence is not claimed"
+    },
+    "target_selector": {
+      "ps2": {
+        "base": "0x609ce0",
+        "count": 40,
+        "stride": 8,
+        "size": 320,
+        "sha256": "02abf2495b5016503d867e3522c2420dbd0678f5f9bf53b493b8442cb8c6caed"
+      },
+      "steam": {
+        "base": "0xaf9f60",
+        "count": 40,
+        "stride": 16,
+        "size": 640,
+        "sha256": "6132525c5603644bc563d9c9fdbbf67f291860b846abee8eff6df5a7f109f1de"
+      },
+      "nso": {
+        "base": "0x709e48",
+        "count": 40,
+        "stride": 16,
+        "size": 640,
+        "sha256": "9e132485d5107211de325a45e7917cbe3e4b5b9cde3e4ee91d7d2102317759ee"
+      },
+      "ordered_entries": [
+        {
+          "opcode": 0,
+          "name": "AI",
+          "metadata_s32": null,
+          "ps2_callback": "0x1dbf20",
+          "steam_callback": "0x64f50",
+          "nso_callback": "0x1c680"
+        },
+        {
+          "opcode": 1,
+          "name": "HPMIN",
+          "metadata_s32": null,
+          "ps2_callback": "0x1dc380",
+          "steam_callback": "0x652b0",
+          "nso_callback": "0x2d050"
+        },
+        {
+          "opcode": 2,
+          "name": "LVMIN",
+          "metadata_s32": null,
+          "ps2_callback": "0x1dc480",
+          "steam_callback": "0x653b0",
+          "nso_callback": "0x2d110"
+        },
+        {
+          "opcode": 3,
+          "name": "MPMAX",
+          "metadata_s32": null,
+          "ps2_callback": "0x1dc5b0",
+          "steam_callback": "0x654f0",
+          "nso_callback": "0x2d1e0"
+        },
+        {
+          "opcode": 4,
+          "name": "BAD",
+          "metadata_s32": null,
+          "ps2_callback": "0x1dc5c0",
+          "steam_callback": "0x65510",
+          "nso_callback": "0x2d1f0"
+        },
+        {
+          "opcode": 5,
+          "name": "NOTBAD",
+          "metadata_s32": null,
+          "ps2_callback": "0x1dc600",
+          "steam_callback": "0x65640",
+          "nso_callback": "0x2d340"
+        },
+        {
+          "opcode": 6,
+          "name": "ID",
+          "metadata_s32": null,
+          "ps2_callback": "0x1dc640",
+          "steam_callback": "0x65770",
+          "nso_callback": "0x2d490"
+        },
+        {
+          "opcode": 7,
+          "name": "MINE",
+          "metadata_s32": null,
+          "ps2_callback": "0x1dc680",
+          "steam_callback": "0x658a0",
+          "nso_callback": "0x2d5e0"
+        },
+        {
+          "opcode": 8,
+          "name": "MYAI",
+          "metadata_s32": null,
+          "ps2_callback": "0x1dc6a0",
+          "steam_callback": "0x658d0",
+          "nso_callback": "0x2d600"
+        },
+        {
+          "opcode": 9,
+          "name": "HANSYA",
+          "metadata_s32": null,
+          "ps2_callback": "0x1dc7a0",
+          "steam_callback": "0x65990",
+          "nso_callback": "0x2d6e0"
+        },
+        {
+          "opcode": 10,
+          "name": "KYUSYU",
+          "metadata_s32": null,
+          "ps2_callback": "0x1dc7e0",
+          "steam_callback": "0x65af0",
+          "nso_callback": "0x2d830"
+        },
+        {
+          "opcode": 11,
+          "name": "MUKOU",
+          "metadata_s32": null,
+          "ps2_callback": "0x1dc820",
+          "steam_callback": "0x65c50",
+          "nso_callback": "0x2d980"
+        },
+        {
+          "opcode": 12,
+          "name": "WEAK",
+          "metadata_s32": null,
+          "ps2_callback": "0x1dc860",
+          "steam_callback": "0x65db0",
+          "nso_callback": "0x2dad0"
+        },
+        {
+          "opcode": 13,
+          "name": "NOTHANSYA",
+          "metadata_s32": null,
+          "ps2_callback": "0x1dc8a0",
+          "steam_callback": "0x65f10",
+          "nso_callback": "0x2dc20"
+        },
+        {
+          "opcode": 14,
+          "name": "NOTKYUSYU",
+          "metadata_s32": null,
+          "ps2_callback": "0x1dc8e0",
+          "steam_callback": "0x66070",
+          "nso_callback": "0x2dd70"
+        },
+        {
+          "opcode": 15,
+          "name": "NOTMUKOU",
+          "metadata_s32": null,
+          "ps2_callback": "0x1dc920",
+          "steam_callback": "0x661d0",
+          "nso_callback": "0x2dec0"
+        },
+        {
+          "opcode": 16,
+          "name": "NOTWEAK",
+          "metadata_s32": null,
+          "ps2_callback": "0x1dc960",
+          "steam_callback": "0x66330",
+          "nso_callback": "0x2e010"
+        },
+        {
+          "opcode": 17,
+          "name": "AI_REV",
+          "metadata_s32": null,
+          "ps2_callback": "0x1dc9a0",
+          "steam_callback": "0x66490",
+          "nso_callback": "0x2e160"
+        },
+        {
+          "opcode": 18,
+          "name": "APPOINT",
+          "metadata_s32": null,
+          "ps2_callback": "0x1dca60",
+          "steam_callback": "0x66530",
+          "nso_callback": "0x2e1f0"
+        },
+        {
+          "opcode": 19,
+          "name": "DOWN",
+          "metadata_s32": null,
+          "ps2_callback": "0x1dcb50",
+          "steam_callback": "0x66600",
+          "nso_callback": "0x2e2b0"
+        },
+        {
+          "opcode": 20,
+          "name": "STAND",
+          "metadata_s32": null,
+          "ps2_callback": "0x1dcb90",
+          "steam_callback": "0x66730",
+          "nso_callback": "0x2e3f0"
+        },
+        {
+          "opcode": 21,
+          "name": "HANSYA_ST",
+          "metadata_s32": null,
+          "ps2_callback": "0x1dcbd0",
+          "steam_callback": "0x66860",
+          "nso_callback": "0x2e530"
+        },
+        {
+          "opcode": 22,
+          "name": "KYUSYU_ST",
+          "metadata_s32": null,
+          "ps2_callback": "0x1dcc10",
+          "steam_callback": "0x669c0",
+          "nso_callback": "0x2e680"
+        },
+        {
+          "opcode": 23,
+          "name": "MUKOU_ST",
+          "metadata_s32": null,
+          "ps2_callback": "0x1dcc50",
+          "steam_callback": "0x66b20",
+          "nso_callback": "0x2e7d0"
+        },
+        {
+          "opcode": 24,
+          "name": "WEAK_ST",
+          "metadata_s32": null,
+          "ps2_callback": "0x1dcc90",
+          "steam_callback": "0x66c90",
+          "nso_callback": "0x2e920"
+        },
+        {
+          "opcode": 25,
+          "name": "NOTHANSYA_ST",
+          "metadata_s32": null,
+          "ps2_callback": "0x1dccd0",
+          "steam_callback": "0x66df0",
+          "nso_callback": "0x2ea70"
+        },
+        {
+          "opcode": 26,
+          "name": "NOTKYUSYU_ST",
+          "metadata_s32": null,
+          "ps2_callback": "0x1dcd10",
+          "steam_callback": "0x66f50",
+          "nso_callback": "0x2ebc0"
+        },
+        {
+          "opcode": 27,
+          "name": "NOTMUKOU_ST",
+          "metadata_s32": null,
+          "ps2_callback": "0x1dcd50",
+          "steam_callback": "0x670b0",
+          "nso_callback": "0x2ed10"
+        },
+        {
+          "opcode": 28,
+          "name": "NOTWEAK_ST",
+          "metadata_s32": null,
+          "ps2_callback": "0x1dcd90",
+          "steam_callback": "0x67220",
+          "nso_callback": "0x2ee60"
+        },
+        {
+          "opcode": 29,
+          "name": "HANSYA_DW",
+          "metadata_s32": null,
+          "ps2_callback": "0x1dcdd0",
+          "steam_callback": "0x67380",
+          "nso_callback": "0x2efb0"
+        },
+        {
+          "opcode": 30,
+          "name": "KYUSYU_DW",
+          "metadata_s32": null,
+          "ps2_callback": "0x1dce10",
+          "steam_callback": "0x674e0",
+          "nso_callback": "0x2efd0"
+        },
+        {
+          "opcode": 31,
+          "name": "MUKOU_DW",
+          "metadata_s32": null,
+          "ps2_callback": "0x1dce50",
+          "steam_callback": "0x67640",
+          "nso_callback": "0x2eff0"
+        },
+        {
+          "opcode": 32,
+          "name": "WEAK_DW",
+          "metadata_s32": null,
+          "ps2_callback": "0x1dce90",
+          "steam_callback": "0x677b0",
+          "nso_callback": "0x2f010"
+        },
+        {
+          "opcode": 33,
+          "name": "NOTID",
+          "metadata_s32": null,
+          "ps2_callback": "0x1dced0",
+          "steam_callback": "0x67910",
+          "nso_callback": "0x2f030"
+        },
+        {
+          "opcode": 34,
+          "name": "RND",
+          "metadata_s32": null,
+          "ps2_callback": "0x1dcf10",
+          "steam_callback": "0x67a40",
+          "nso_callback": "0x2f180"
+        },
+        {
+          "opcode": 35,
+          "name": "HOJO",
+          "metadata_s32": null,
+          "ps2_callback": "0x1dcfd0",
+          "steam_callback": "0x67b10",
+          "nso_callback": "0x2f210"
+        },
+        {
+          "opcode": 36,
+          "name": "NOTHOJO",
+          "metadata_s32": null,
+          "ps2_callback": "0x1dd010",
+          "steam_callback": "0x67c70",
+          "nso_callback": "0x2f360"
+        },
+        {
+          "opcode": 37,
+          "name": "NOTNOMAL",
+          "metadata_s32": null,
+          "ps2_callback": "0x1dd050",
+          "steam_callback": "0x67dd0",
+          "nso_callback": "0x2f4b0"
+        },
+        {
+          "opcode": 38,
+          "name": "NOMAL",
+          "metadata_s32": null,
+          "ps2_callback": "0x1dd090",
+          "steam_callback": "0x67f20",
+          "nso_callback": "0x2f4d0"
+        },
+        {
+          "opcode": 39,
+          "name": "HPMAX",
+          "metadata_s32": null,
+          "ps2_callback": "0x1dd0d0",
+          "steam_callback": "0x68090",
+          "nso_callback": "0x2f620"
+        }
+      ],
+      "boundary_evidence": {
+        "ps2_next": {
+          "id": 40,
+          "record": "0x609e20",
+          "values": [
+            "0x505f4941",
+            "0x30255f43"
+          ],
+          "name": "",
+          "valid": false
+        },
+        "nso_next": {
+          "id": 40,
+          "record": "0x70a0c8",
+          "values": [
+            "0x0",
+            "0x0"
+          ],
+          "name": "",
+          "valid": false
+        }
+      },
+      "legacy_mapping": "all old entries retain index/name/metadata/callback-nullness; code-address equality or whole callback equivalence is not claimed"
+    }
+  },
+  "reader_correspondence": {
+    "ps2_condition": "btlAICommandPickTableAction001de800, btlAICommand.c:1767-1815: two*three conditions, kind0=false else D609850[kind*3](action,low24). Also actual script/effect wrappers use same root.",
+    "ps2_target": "btlTargetAIPickAction001eb1d0, btlTarget.c:94-111: actual AI state/selected weighted command, D609ce0[topbyte*2](action,low24), false->entry0(action,0).",
+    "nso_core": {
+      "start": "0x1cbe0",
+      "end": "0x1d0c0",
+      "worker_status": 0,
+      "sha256": "3717930823f9d57a72ecc02147f292f960da2831de82db7e7c80a49e8ef53a68",
+      "actual_condition_load": "1cc10 establishes70a0c8; repeated actual top-byte*24 callback loads for both condition rows;0 skipped",
+      "actual_target_load": "1d068 materializes709e48; packed selected target word indexes16-byte callback records at decomp lines204-206",
+      "upstream_ai_record": "realaction.unit+38,charIdu16+a4, recordbase through8805d0, stridea4; payload supplier not qualified here"
+    },
+    "steam": [
+      {
+        "role": "condition",
+        "start": "0x69730",
+        "end": "0x69783",
+        "section": ".shared",
+        "sha256": "4d916048aa5faeb797d2566e5c7599f99abab3269ba319e375575b6e5de2aad9"
+      },
+      {
+        "role": "target_selector",
+        "start": "0x69790",
+        "end": "0x697e4",
+        "section": ".shared",
+        "sha256": "3216dbdc1b6fb7eddc6363e76e836b8230ff925e3ac791b2f9513784f64933c3"
+      }
+    ],
+    "steam_condition_detail": "6974d topbyte;69750 zero test;6975f low24 mask;69765 index*3;6976b LEAaf97b0;6977f JMP[base+index*8], effective24-byte stride.",
+    "steam_target_detail": "697ad LEAaf9f60;697b4 topbyte;697b8 low24;697be index*2;697c6 CALL[base+index*8], effective16-byte stride; false697d3 retries callback0(action,0)."
+  },
+  "representative_callback_corroboration": {
+    "ENBAD_ALL": {
+      "ps2": "btlCond_ENBAD_ALL001d9ca0, btlCond.c:238-279",
+      "nso": "2fcb0..2fd70,worker0",
+      "sha256": "5b5f98c57a4605dfa17e49252f84950d807cad4dae9779dcc739c4ee128fc707",
+      "structure": "Walk real action list; require active flags1/8, opposing genus, not dead via7a7d0, requested status via72450. Return false on first living opponent failing mask, true when none fail. This independently distinguishes condition boolean role from a target mutation."
+    },
+    "HANSYA_ST": {
+      "ps2": "btlAICommandPickMyHansyaExcludingDown001dcbd0, btlAICommand.c:1052-1055",
+      "nso": "2e530..2e680,worker0",
+      "sha256": "0c4de0b826d1d358ee4d9ede2d8db90655b53a0f6f7465bdb7dde29261948ceb",
+      "structure": "Actual candidate builder, down-status exclusion100000, reflectbit25, real candidate/random choice and target handles/count mutation; special candidate path preserved."
+    }
+  },
+  "negative_evidence": [
+    {
+      "finding": "6098bc is condition callback slot9, not the bank base. A guessed flag-first record order misleadingly produced69/73 trailing rows and apparent missing references. Actual callback/name/metadata order and reader root609850/70a0c8 recover78/82 including NULL0."
+    },
+    {
+      "finding": "609df0 is an interior target callback slot34, not a separate root. Actual target bank609ce0 has40 entries. Following NSO70a0c8 NULL triple is the next CONDITION bank, not target entry40; callback/name pairs alone cannot merge the adjacent banks."
+    },
+    {
+      "finding": "Condition and target banks reverse relative order across the Golden images: Steam condition precedes target; NSO target precedes condition. No relative-image-gap, raw pointer-number or label-only module inference is used."
+    }
+  ],
+  "required_seams": [
+    {
+      "owner": "Golden AI descriptor name supplier and namespace",
+      "requirement": "Route five condition names by opcode14/54/66/70/76 in the82-record Golden condition bank, and three target-selector names by opcode21/23/37 in its separate40-record bank. Author exact qualified Golden NUL-terminated strings; preserve only listed zero alignment tails. Names are actual callback-record fields, not free-floating cosmetic strings or the same-named function in another namespace. Cover actual direct/translated/inlined/native descriptor/name routes and mode isolation, without writing platform code/host pointer values into guest tables."
+    },
+    {
+      "owner": "condition interpreter live AI record and packed operand producer",
+      "requirement": "Actual core1cbe0 gets current action.unit through+38 and realu16 charId+ a4, then actual AI-record storage via8805d0, stridea4. Two rows of three packedu32 conditions at record+4/8/c and18/1c/20 feed opcode=word>>24 and argument=word&ffffff;0 yields false and MUST NOT call NULL record0. Dispatch remaining opcode through82*24 bank70a0c8, callback+0. Preserve real AI-record/selector bytes (8 is skip sentinel), actual action/unit/data handles and script/native packed input, not fabricated IDs or zero operands. This proof does not qualify the AI-record payload bank; its actual Golden producer must be separately bound."
+    },
+    {
+      "owner": "target selection live formation, state and result publication",
+      "requirement": "Actual selected weighted-command target word supplies top-byte target opcode and low24-bit argument to40*16 bank709e48; actual command work is populated before selection. Target procedures mutate actual action target handles/count, not merely return a predicate boolean. Representative HANSYA_ST2e530 uses real candidate builder661a0, candidate array+100/count168, unit/action state, status100000 exclusion via72450 and element-reflect bit25 via771d0; actual RNG715a0 picks eligible candidates and publishes chosen handle+48/count+aa, or clears through1c680. Preserve expanded/special candidate path, selection side effects and downstream command readers. Ordinary Steam69790 retries descriptor0 with argument0 on false; core1cbe0 has its own Golden candidate/RNG fallback, which must not be replaced with that generic fallback."
+    },
+    {
+      "owner": "namespace boundaries, Golden additions and runtime qualification",
+      "requirement": "Condition records are PS278*12 at609850 and Golden82*24 at Steamaf97b0/NSO70a0c8: callback0/name4/metadata8 widens to0/8/16. All78 old identities/metadata/nullness retain indices; Golden appends FRALLSP78,ENALLHAVESKIL79,MYBADOFF80,MYNOBADOFF81. Target records are PS240*8 at609ce0 and Golden40*16 at Steamaf9f60/NSO709e48: callback0/name4 widens0/8. Keep banks distinct despite adjacent NULL condition0 looking like target padding. Qualify all selected names/tails, condition opcode0, actual live-unit status outcomes including no opposing units, selected packed operands, target mutation/failure/default/RNG, real producer and consumer lifetimes, new opcode domain and mode isolation before runtime closure. No callback gameplay equivalence is admitted merely by its label."
+    }
+  ],
+  "admissions": [
+    {
+      "address": "0x00609630",
+      "ps2_size": 16,
+      "role": "AI condition descriptor name",
+      "namespace": "condition",
+      "opcode": 14,
+      "name": "ENBAD_ALL",
+      "golden": {
+        "kind": "typed-record-name",
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x917668",
+        "raw_offset": 9527912,
+        "offset": 591464,
+        "size": 10,
+        "sha256": "6cf0750aa20173f1cd837f2aae3a37737a2892244c400cf7111a7c6da47783c7",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "source_group": "L1-C5-AI-condition-target-labels-20261113",
+        "mapping_proven": true,
+        "descriptor_rva": "0xaf9900",
+        "descriptor_stride": 24,
+        "name_field_offset": 8,
+        "opcode": 14,
+        "namespace": "condition",
+        "nso_name": "0x5fbb6a",
+        "nso_descriptor": "0x70a218"
+      },
+      "layout": {
+        "kind": "nul-terminated-name-with-retained-alignment",
+        "ps2_live_size": 10,
+        "retained_tail": {
+          "offset": 10,
+          "size": 6,
+          "sha256": "b0f66adc83641586656866813fd9dd0b8ebb63796075661ba45d1aa8089e1d44"
+        },
+        "copy_policy": "Golden authoritative name including NUL; preserve observed zero alignment tail; no pointer-table or guessed-parent copy"
+      },
+      "required_seams": [
+        {
+          "owner": "Golden AI descriptor name supplier and namespace",
+          "requirement": "Route five condition names by opcode14/54/66/70/76 in the82-record Golden condition bank, and three target-selector names by opcode21/23/37 in its separate40-record bank. Author exact qualified Golden NUL-terminated strings; preserve only listed zero alignment tails. Names are actual callback-record fields, not free-floating cosmetic strings or the same-named function in another namespace. Cover actual direct/translated/inlined/native descriptor/name routes and mode isolation, without writing platform code/host pointer values into guest tables."
+        },
+        {
+          "owner": "condition interpreter live AI record and packed operand producer",
+          "requirement": "Actual core1cbe0 gets current action.unit through+38 and realu16 charId+ a4, then actual AI-record storage via8805d0, stridea4. Two rows of three packedu32 conditions at record+4/8/c and18/1c/20 feed opcode=word>>24 and argument=word&ffffff;0 yields false and MUST NOT call NULL record0. Dispatch remaining opcode through82*24 bank70a0c8, callback+0. Preserve real AI-record/selector bytes (8 is skip sentinel), actual action/unit/data handles and script/native packed input, not fabricated IDs or zero operands. This proof does not qualify the AI-record payload bank; its actual Golden producer must be separately bound."
+        },
+        {
+          "owner": "target selection live formation, state and result publication",
+          "requirement": "Actual selected weighted-command target word supplies top-byte target opcode and low24-bit argument to40*16 bank709e48; actual command work is populated before selection. Target procedures mutate actual action target handles/count, not merely return a predicate boolean. Representative HANSYA_ST2e530 uses real candidate builder661a0, candidate array+100/count168, unit/action state, status100000 exclusion via72450 and element-reflect bit25 via771d0; actual RNG715a0 picks eligible candidates and publishes chosen handle+48/count+aa, or clears through1c680. Preserve expanded/special candidate path, selection side effects and downstream command readers. Ordinary Steam69790 retries descriptor0 with argument0 on false; core1cbe0 has its own Golden candidate/RNG fallback, which must not be replaced with that generic fallback."
+        },
+        {
+          "owner": "namespace boundaries, Golden additions and runtime qualification",
+          "requirement": "Condition records are PS278*12 at609850 and Golden82*24 at Steamaf97b0/NSO70a0c8: callback0/name4/metadata8 widens to0/8/16. All78 old identities/metadata/nullness retain indices; Golden appends FRALLSP78,ENALLHAVESKIL79,MYBADOFF80,MYNOBADOFF81. Target records are PS240*8 at609ce0 and Golden40*16 at Steamaf9f60/NSO709e48: callback0/name4 widens0/8. Keep banks distinct despite adjacent NULL condition0 looking like target padding. Qualify all selected names/tails, condition opcode0, actual live-unit status outcomes including no opposing units, selected packed operands, target mutation/failure/default/RNG, real producer and consumer lifetimes, new opcode domain and mode isolation before runtime closure. No callback gameplay equivalence is admitted merely by its label."
+        }
+      ]
+    },
+    {
+      "address": "0x00609770",
+      "ps2_size": 16,
+      "role": "AI condition descriptor name",
+      "namespace": "condition",
+      "opcode": 54,
+      "name": "ENWEAK_ST",
+      "golden": {
+        "kind": "typed-record-name",
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x917838",
+        "raw_offset": 9528376,
+        "offset": 591928,
+        "size": 10,
+        "sha256": "a3e0cb9d9038ccef61a773b1f0ddb2fb76bc8487dcd534fd309bfa5c459fc373",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "source_group": "L1-C5-AI-condition-target-labels-20261113",
+        "mapping_proven": true,
+        "descriptor_rva": "0xaf9cc0",
+        "descriptor_stride": 24,
+        "name_field_offset": 8,
+        "opcode": 54,
+        "namespace": "condition",
+        "nso_name": "0x5d89da",
+        "nso_descriptor": "0x70a5d8"
+      },
+      "layout": {
+        "kind": "nul-terminated-name-with-retained-alignment",
+        "ps2_live_size": 10,
+        "retained_tail": {
+          "offset": 10,
+          "size": 6,
+          "sha256": "b0f66adc83641586656866813fd9dd0b8ebb63796075661ba45d1aa8089e1d44"
+        },
+        "copy_policy": "Golden authoritative name including NUL; preserve observed zero alignment tail; no pointer-table or guessed-parent copy"
+      },
+      "required_seams": [
+        {
+          "owner": "Golden AI descriptor name supplier and namespace",
+          "requirement": "Route five condition names by opcode14/54/66/70/76 in the82-record Golden condition bank, and three target-selector names by opcode21/23/37 in its separate40-record bank. Author exact qualified Golden NUL-terminated strings; preserve only listed zero alignment tails. Names are actual callback-record fields, not free-floating cosmetic strings or the same-named function in another namespace. Cover actual direct/translated/inlined/native descriptor/name routes and mode isolation, without writing platform code/host pointer values into guest tables."
+        },
+        {
+          "owner": "condition interpreter live AI record and packed operand producer",
+          "requirement": "Actual core1cbe0 gets current action.unit through+38 and realu16 charId+ a4, then actual AI-record storage via8805d0, stridea4. Two rows of three packedu32 conditions at record+4/8/c and18/1c/20 feed opcode=word>>24 and argument=word&ffffff;0 yields false and MUST NOT call NULL record0. Dispatch remaining opcode through82*24 bank70a0c8, callback+0. Preserve real AI-record/selector bytes (8 is skip sentinel), actual action/unit/data handles and script/native packed input, not fabricated IDs or zero operands. This proof does not qualify the AI-record payload bank; its actual Golden producer must be separately bound."
+        },
+        {
+          "owner": "target selection live formation, state and result publication",
+          "requirement": "Actual selected weighted-command target word supplies top-byte target opcode and low24-bit argument to40*16 bank709e48; actual command work is populated before selection. Target procedures mutate actual action target handles/count, not merely return a predicate boolean. Representative HANSYA_ST2e530 uses real candidate builder661a0, candidate array+100/count168, unit/action state, status100000 exclusion via72450 and element-reflect bit25 via771d0; actual RNG715a0 picks eligible candidates and publishes chosen handle+48/count+aa, or clears through1c680. Preserve expanded/special candidate path, selection side effects and downstream command readers. Ordinary Steam69790 retries descriptor0 with argument0 on false; core1cbe0 has its own Golden candidate/RNG fallback, which must not be replaced with that generic fallback."
+        },
+        {
+          "owner": "namespace boundaries, Golden additions and runtime qualification",
+          "requirement": "Condition records are PS278*12 at609850 and Golden82*24 at Steamaf97b0/NSO70a0c8: callback0/name4/metadata8 widens to0/8/16. All78 old identities/metadata/nullness retain indices; Golden appends FRALLSP78,ENALLHAVESKIL79,MYBADOFF80,MYNOBADOFF81. Target records are PS240*8 at609ce0 and Golden40*16 at Steamaf9f60/NSO709e48: callback0/name4 widens0/8. Keep banks distinct despite adjacent NULL condition0 looking like target padding. Qualify all selected names/tails, condition opcode0, actual live-unit status outcomes including no opposing units, selected packed operands, target mutation/failure/default/RNG, real producer and consumer lifetimes, new opcode domain and mode isolation before runtime closure. No callback gameplay equivalence is admitted merely by its label."
+        }
+      ]
+    },
+    {
+      "address": "0x006097e0",
+      "ps2_size": 16,
+      "role": "AI condition descriptor name",
+      "namespace": "condition",
+      "opcode": 66,
+      "name": "ENNOMAL_DW",
+      "golden": {
+        "kind": "typed-record-name",
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x9178d0",
+        "raw_offset": 9528528,
+        "offset": 592080,
+        "size": 11,
+        "sha256": "be726f8aa782bb8c63259b9f226d6699ed7046b1620db3e865e9ee4b7cbc0da9",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "source_group": "L1-C5-AI-condition-target-labels-20261113",
+        "mapping_proven": true,
+        "descriptor_rva": "0xaf9de0",
+        "descriptor_stride": 24,
+        "name_field_offset": 8,
+        "opcode": 66,
+        "namespace": "condition",
+        "nso_name": "0x5e9327",
+        "nso_descriptor": "0x70a6f8"
+      },
+      "layout": {
+        "kind": "nul-terminated-name-with-retained-alignment",
+        "ps2_live_size": 11,
+        "retained_tail": {
+          "offset": 11,
+          "size": 5,
+          "sha256": "8855508aade16ec573d21e6a485dfd0a7624085c1a14b5ecdd6485de0c6839a4"
+        },
+        "copy_policy": "Golden authoritative name including NUL; preserve observed zero alignment tail; no pointer-table or guessed-parent copy"
+      },
+      "required_seams": [
+        {
+          "owner": "Golden AI descriptor name supplier and namespace",
+          "requirement": "Route five condition names by opcode14/54/66/70/76 in the82-record Golden condition bank, and three target-selector names by opcode21/23/37 in its separate40-record bank. Author exact qualified Golden NUL-terminated strings; preserve only listed zero alignment tails. Names are actual callback-record fields, not free-floating cosmetic strings or the same-named function in another namespace. Cover actual direct/translated/inlined/native descriptor/name routes and mode isolation, without writing platform code/host pointer values into guest tables."
+        },
+        {
+          "owner": "condition interpreter live AI record and packed operand producer",
+          "requirement": "Actual core1cbe0 gets current action.unit through+38 and realu16 charId+ a4, then actual AI-record storage via8805d0, stridea4. Two rows of three packedu32 conditions at record+4/8/c and18/1c/20 feed opcode=word>>24 and argument=word&ffffff;0 yields false and MUST NOT call NULL record0. Dispatch remaining opcode through82*24 bank70a0c8, callback+0. Preserve real AI-record/selector bytes (8 is skip sentinel), actual action/unit/data handles and script/native packed input, not fabricated IDs or zero operands. This proof does not qualify the AI-record payload bank; its actual Golden producer must be separately bound."
+        },
+        {
+          "owner": "target selection live formation, state and result publication",
+          "requirement": "Actual selected weighted-command target word supplies top-byte target opcode and low24-bit argument to40*16 bank709e48; actual command work is populated before selection. Target procedures mutate actual action target handles/count, not merely return a predicate boolean. Representative HANSYA_ST2e530 uses real candidate builder661a0, candidate array+100/count168, unit/action state, status100000 exclusion via72450 and element-reflect bit25 via771d0; actual RNG715a0 picks eligible candidates and publishes chosen handle+48/count+aa, or clears through1c680. Preserve expanded/special candidate path, selection side effects and downstream command readers. Ordinary Steam69790 retries descriptor0 with argument0 on false; core1cbe0 has its own Golden candidate/RNG fallback, which must not be replaced with that generic fallback."
+        },
+        {
+          "owner": "namespace boundaries, Golden additions and runtime qualification",
+          "requirement": "Condition records are PS278*12 at609850 and Golden82*24 at Steamaf97b0/NSO70a0c8: callback0/name4/metadata8 widens to0/8/16. All78 old identities/metadata/nullness retain indices; Golden appends FRALLSP78,ENALLHAVESKIL79,MYBADOFF80,MYNOBADOFF81. Target records are PS240*8 at609ce0 and Golden40*16 at Steamaf9f60/NSO709e48: callback0/name4 widens0/8. Keep banks distinct despite adjacent NULL condition0 looking like target padding. Qualify all selected names/tails, condition opcode0, actual live-unit status outcomes including no opposing units, selected packed operands, target mutation/failure/default/RNG, real producer and consumer lifetimes, new opcode domain and mode isolation before runtime closure. No callback gameplay equivalence is admitted merely by its label."
+        }
+      ]
+    },
+    {
+      "address": "0x006097f0",
+      "ps2_size": 16,
+      "role": "AI condition descriptor name",
+      "namespace": "condition",
+      "opcode": 70,
+      "name": "ENOVERLV",
+      "golden": {
+        "kind": "typed-record-name",
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x9178f0",
+        "raw_offset": 9528560,
+        "offset": 592112,
+        "size": 9,
+        "sha256": "2dcd55fa9d043dfe47aab4b769a13105d46ed79a7c8e14f78ed8301aa786b054",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "source_group": "L1-C5-AI-condition-target-labels-20261113",
+        "mapping_proven": true,
+        "descriptor_rva": "0xaf9e40",
+        "descriptor_stride": 24,
+        "name_field_offset": 8,
+        "opcode": 70,
+        "namespace": "condition",
+        "nso_name": "0x60bd96",
+        "nso_descriptor": "0x70a758"
+      },
+      "layout": {
+        "kind": "nul-terminated-name-with-retained-alignment",
+        "ps2_live_size": 9,
+        "retained_tail": {
+          "offset": 9,
+          "size": 7,
+          "sha256": "837885c8f8091aeaeb9ec3c3f85a6ff470a415e610b8ba3e49f9b33c9cf9d619"
+        },
+        "copy_policy": "Golden authoritative name including NUL; preserve observed zero alignment tail; no pointer-table or guessed-parent copy"
+      },
+      "required_seams": [
+        {
+          "owner": "Golden AI descriptor name supplier and namespace",
+          "requirement": "Route five condition names by opcode14/54/66/70/76 in the82-record Golden condition bank, and three target-selector names by opcode21/23/37 in its separate40-record bank. Author exact qualified Golden NUL-terminated strings; preserve only listed zero alignment tails. Names are actual callback-record fields, not free-floating cosmetic strings or the same-named function in another namespace. Cover actual direct/translated/inlined/native descriptor/name routes and mode isolation, without writing platform code/host pointer values into guest tables."
+        },
+        {
+          "owner": "condition interpreter live AI record and packed operand producer",
+          "requirement": "Actual core1cbe0 gets current action.unit through+38 and realu16 charId+ a4, then actual AI-record storage via8805d0, stridea4. Two rows of three packedu32 conditions at record+4/8/c and18/1c/20 feed opcode=word>>24 and argument=word&ffffff;0 yields false and MUST NOT call NULL record0. Dispatch remaining opcode through82*24 bank70a0c8, callback+0. Preserve real AI-record/selector bytes (8 is skip sentinel), actual action/unit/data handles and script/native packed input, not fabricated IDs or zero operands. This proof does not qualify the AI-record payload bank; its actual Golden producer must be separately bound."
+        },
+        {
+          "owner": "target selection live formation, state and result publication",
+          "requirement": "Actual selected weighted-command target word supplies top-byte target opcode and low24-bit argument to40*16 bank709e48; actual command work is populated before selection. Target procedures mutate actual action target handles/count, not merely return a predicate boolean. Representative HANSYA_ST2e530 uses real candidate builder661a0, candidate array+100/count168, unit/action state, status100000 exclusion via72450 and element-reflect bit25 via771d0; actual RNG715a0 picks eligible candidates and publishes chosen handle+48/count+aa, or clears through1c680. Preserve expanded/special candidate path, selection side effects and downstream command readers. Ordinary Steam69790 retries descriptor0 with argument0 on false; core1cbe0 has its own Golden candidate/RNG fallback, which must not be replaced with that generic fallback."
+        },
+        {
+          "owner": "namespace boundaries, Golden additions and runtime qualification",
+          "requirement": "Condition records are PS278*12 at609850 and Golden82*24 at Steamaf97b0/NSO70a0c8: callback0/name4/metadata8 widens to0/8/16. All78 old identities/metadata/nullness retain indices; Golden appends FRALLSP78,ENALLHAVESKIL79,MYBADOFF80,MYNOBADOFF81. Target records are PS240*8 at609ce0 and Golden40*16 at Steamaf9f60/NSO709e48: callback0/name4 widens0/8. Keep banks distinct despite adjacent NULL condition0 looking like target padding. Qualify all selected names/tails, condition opcode0, actual live-unit status outcomes including no opposing units, selected packed operands, target mutation/failure/default/RNG, real producer and consumer lifetimes, new opcode domain and mode isolation before runtime closure. No callback gameplay equivalence is admitted merely by its label."
+        }
+      ]
+    },
+    {
+      "address": "0x00609840",
+      "ps2_size": 16,
+      "role": "AI condition descriptor name",
+      "namespace": "condition",
+      "opcode": 76,
+      "name": "ENNOTNOMAL",
+      "golden": {
+        "kind": "typed-record-name",
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x917948",
+        "raw_offset": 9528648,
+        "offset": 592200,
+        "size": 11,
+        "sha256": "8c09c0b165e253a1b228dbc65f13b4814755346b87d4fe456348604097d1baf8",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "source_group": "L1-C5-AI-condition-target-labels-20261113",
+        "mapping_proven": true,
+        "descriptor_rva": "0xaf9ed0",
+        "descriptor_stride": 24,
+        "name_field_offset": 8,
+        "opcode": 76,
+        "namespace": "condition",
+        "nso_name": "0x5f3fba",
+        "nso_descriptor": "0x70a7e8"
+      },
+      "layout": {
+        "kind": "nul-terminated-name-with-retained-alignment",
+        "ps2_live_size": 11,
+        "retained_tail": {
+          "offset": 11,
+          "size": 5,
+          "sha256": "8855508aade16ec573d21e6a485dfd0a7624085c1a14b5ecdd6485de0c6839a4"
+        },
+        "copy_policy": "Golden authoritative name including NUL; preserve observed zero alignment tail; no pointer-table or guessed-parent copy"
+      },
+      "required_seams": [
+        {
+          "owner": "Golden AI descriptor name supplier and namespace",
+          "requirement": "Route five condition names by opcode14/54/66/70/76 in the82-record Golden condition bank, and three target-selector names by opcode21/23/37 in its separate40-record bank. Author exact qualified Golden NUL-terminated strings; preserve only listed zero alignment tails. Names are actual callback-record fields, not free-floating cosmetic strings or the same-named function in another namespace. Cover actual direct/translated/inlined/native descriptor/name routes and mode isolation, without writing platform code/host pointer values into guest tables."
+        },
+        {
+          "owner": "condition interpreter live AI record and packed operand producer",
+          "requirement": "Actual core1cbe0 gets current action.unit through+38 and realu16 charId+ a4, then actual AI-record storage via8805d0, stridea4. Two rows of three packedu32 conditions at record+4/8/c and18/1c/20 feed opcode=word>>24 and argument=word&ffffff;0 yields false and MUST NOT call NULL record0. Dispatch remaining opcode through82*24 bank70a0c8, callback+0. Preserve real AI-record/selector bytes (8 is skip sentinel), actual action/unit/data handles and script/native packed input, not fabricated IDs or zero operands. This proof does not qualify the AI-record payload bank; its actual Golden producer must be separately bound."
+        },
+        {
+          "owner": "target selection live formation, state and result publication",
+          "requirement": "Actual selected weighted-command target word supplies top-byte target opcode and low24-bit argument to40*16 bank709e48; actual command work is populated before selection. Target procedures mutate actual action target handles/count, not merely return a predicate boolean. Representative HANSYA_ST2e530 uses real candidate builder661a0, candidate array+100/count168, unit/action state, status100000 exclusion via72450 and element-reflect bit25 via771d0; actual RNG715a0 picks eligible candidates and publishes chosen handle+48/count+aa, or clears through1c680. Preserve expanded/special candidate path, selection side effects and downstream command readers. Ordinary Steam69790 retries descriptor0 with argument0 on false; core1cbe0 has its own Golden candidate/RNG fallback, which must not be replaced with that generic fallback."
+        },
+        {
+          "owner": "namespace boundaries, Golden additions and runtime qualification",
+          "requirement": "Condition records are PS278*12 at609850 and Golden82*24 at Steamaf97b0/NSO70a0c8: callback0/name4/metadata8 widens to0/8/16. All78 old identities/metadata/nullness retain indices; Golden appends FRALLSP78,ENALLHAVESKIL79,MYBADOFF80,MYNOBADOFF81. Target records are PS240*8 at609ce0 and Golden40*16 at Steamaf9f60/NSO709e48: callback0/name4 widens0/8. Keep banks distinct despite adjacent NULL condition0 looking like target padding. Qualify all selected names/tails, condition opcode0, actual live-unit status outcomes including no opposing units, selected packed operands, target mutation/failure/default/RNG, real producer and consumer lifetimes, new opcode domain and mode isolation before runtime closure. No callback gameplay equivalence is admitted merely by its label."
+        }
+      ]
+    },
+    {
+      "address": "0x00609c28",
+      "ps2_size": 16,
+      "role": "AI target_selector descriptor name",
+      "namespace": "target_selector",
+      "opcode": 21,
+      "name": "HANSYA_ST",
+      "golden": {
+        "kind": "typed-record-name",
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x917a38",
+        "raw_offset": 9528888,
+        "offset": 592440,
+        "size": 10,
+        "sha256": "3d5429bc889c1c716166c85349b4e1ed91df5b4299322e718a7e5642903ceded",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "source_group": "L1-C5-AI-condition-target-labels-20261113",
+        "mapping_proven": true,
+        "descriptor_rva": "0xafa0b0",
+        "descriptor_stride": 16,
+        "name_field_offset": 8,
+        "opcode": 21,
+        "namespace": "target_selector",
+        "nso_name": "0x5dddd8",
+        "nso_descriptor": "0x709f98"
+      },
+      "layout": {
+        "kind": "nul-terminated-name-with-retained-alignment",
+        "ps2_live_size": 10,
+        "retained_tail": {
+          "offset": 10,
+          "size": 6,
+          "sha256": "b0f66adc83641586656866813fd9dd0b8ebb63796075661ba45d1aa8089e1d44"
+        },
+        "copy_policy": "Golden authoritative name including NUL; preserve observed zero alignment tail; no pointer-table or guessed-parent copy"
+      },
+      "required_seams": [
+        {
+          "owner": "Golden AI descriptor name supplier and namespace",
+          "requirement": "Route five condition names by opcode14/54/66/70/76 in the82-record Golden condition bank, and three target-selector names by opcode21/23/37 in its separate40-record bank. Author exact qualified Golden NUL-terminated strings; preserve only listed zero alignment tails. Names are actual callback-record fields, not free-floating cosmetic strings or the same-named function in another namespace. Cover actual direct/translated/inlined/native descriptor/name routes and mode isolation, without writing platform code/host pointer values into guest tables."
+        },
+        {
+          "owner": "condition interpreter live AI record and packed operand producer",
+          "requirement": "Actual core1cbe0 gets current action.unit through+38 and realu16 charId+ a4, then actual AI-record storage via8805d0, stridea4. Two rows of three packedu32 conditions at record+4/8/c and18/1c/20 feed opcode=word>>24 and argument=word&ffffff;0 yields false and MUST NOT call NULL record0. Dispatch remaining opcode through82*24 bank70a0c8, callback+0. Preserve real AI-record/selector bytes (8 is skip sentinel), actual action/unit/data handles and script/native packed input, not fabricated IDs or zero operands. This proof does not qualify the AI-record payload bank; its actual Golden producer must be separately bound."
+        },
+        {
+          "owner": "target selection live formation, state and result publication",
+          "requirement": "Actual selected weighted-command target word supplies top-byte target opcode and low24-bit argument to40*16 bank709e48; actual command work is populated before selection. Target procedures mutate actual action target handles/count, not merely return a predicate boolean. Representative HANSYA_ST2e530 uses real candidate builder661a0, candidate array+100/count168, unit/action state, status100000 exclusion via72450 and element-reflect bit25 via771d0; actual RNG715a0 picks eligible candidates and publishes chosen handle+48/count+aa, or clears through1c680. Preserve expanded/special candidate path, selection side effects and downstream command readers. Ordinary Steam69790 retries descriptor0 with argument0 on false; core1cbe0 has its own Golden candidate/RNG fallback, which must not be replaced with that generic fallback."
+        },
+        {
+          "owner": "namespace boundaries, Golden additions and runtime qualification",
+          "requirement": "Condition records are PS278*12 at609850 and Golden82*24 at Steamaf97b0/NSO70a0c8: callback0/name4/metadata8 widens to0/8/16. All78 old identities/metadata/nullness retain indices; Golden appends FRALLSP78,ENALLHAVESKIL79,MYBADOFF80,MYNOBADOFF81. Target records are PS240*8 at609ce0 and Golden40*16 at Steamaf9f60/NSO709e48: callback0/name4 widens0/8. Keep banks distinct despite adjacent NULL condition0 looking like target padding. Qualify all selected names/tails, condition opcode0, actual live-unit status outcomes including no opposing units, selected packed operands, target mutation/failure/default/RNG, real producer and consumer lifetimes, new opcode domain and mode isolation before runtime closure. No callback gameplay equivalence is admitted merely by its label."
+        }
+      ]
+    },
+    {
+      "address": "0x00609c48",
+      "ps2_size": 16,
+      "role": "AI target_selector descriptor name",
+      "namespace": "target_selector",
+      "opcode": 23,
+      "name": "MUKOU_ST",
+      "golden": {
+        "kind": "typed-record-name",
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x917a58",
+        "raw_offset": 9528920,
+        "offset": 592472,
+        "size": 9,
+        "sha256": "a490d8a43f15f8a52acc951dcb7f1a4120cf527b0ce9d6f5cdf89b1a410d12be",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "source_group": "L1-C5-AI-condition-target-labels-20261113",
+        "mapping_proven": true,
+        "descriptor_rva": "0xafa0d0",
+        "descriptor_stride": 16,
+        "name_field_offset": 8,
+        "opcode": 23,
+        "namespace": "target_selector",
+        "nso_name": "0x5d89c7",
+        "nso_descriptor": "0x709fb8"
+      },
+      "layout": {
+        "kind": "nul-terminated-name-with-retained-alignment",
+        "ps2_live_size": 9,
+        "retained_tail": {
+          "offset": 9,
+          "size": 7,
+          "sha256": "837885c8f8091aeaeb9ec3c3f85a6ff470a415e610b8ba3e49f9b33c9cf9d619"
+        },
+        "copy_policy": "Golden authoritative name including NUL; preserve observed zero alignment tail; no pointer-table or guessed-parent copy"
+      },
+      "required_seams": [
+        {
+          "owner": "Golden AI descriptor name supplier and namespace",
+          "requirement": "Route five condition names by opcode14/54/66/70/76 in the82-record Golden condition bank, and three target-selector names by opcode21/23/37 in its separate40-record bank. Author exact qualified Golden NUL-terminated strings; preserve only listed zero alignment tails. Names are actual callback-record fields, not free-floating cosmetic strings or the same-named function in another namespace. Cover actual direct/translated/inlined/native descriptor/name routes and mode isolation, without writing platform code/host pointer values into guest tables."
+        },
+        {
+          "owner": "condition interpreter live AI record and packed operand producer",
+          "requirement": "Actual core1cbe0 gets current action.unit through+38 and realu16 charId+ a4, then actual AI-record storage via8805d0, stridea4. Two rows of three packedu32 conditions at record+4/8/c and18/1c/20 feed opcode=word>>24 and argument=word&ffffff;0 yields false and MUST NOT call NULL record0. Dispatch remaining opcode through82*24 bank70a0c8, callback+0. Preserve real AI-record/selector bytes (8 is skip sentinel), actual action/unit/data handles and script/native packed input, not fabricated IDs or zero operands. This proof does not qualify the AI-record payload bank; its actual Golden producer must be separately bound."
+        },
+        {
+          "owner": "target selection live formation, state and result publication",
+          "requirement": "Actual selected weighted-command target word supplies top-byte target opcode and low24-bit argument to40*16 bank709e48; actual command work is populated before selection. Target procedures mutate actual action target handles/count, not merely return a predicate boolean. Representative HANSYA_ST2e530 uses real candidate builder661a0, candidate array+100/count168, unit/action state, status100000 exclusion via72450 and element-reflect bit25 via771d0; actual RNG715a0 picks eligible candidates and publishes chosen handle+48/count+aa, or clears through1c680. Preserve expanded/special candidate path, selection side effects and downstream command readers. Ordinary Steam69790 retries descriptor0 with argument0 on false; core1cbe0 has its own Golden candidate/RNG fallback, which must not be replaced with that generic fallback."
+        },
+        {
+          "owner": "namespace boundaries, Golden additions and runtime qualification",
+          "requirement": "Condition records are PS278*12 at609850 and Golden82*24 at Steamaf97b0/NSO70a0c8: callback0/name4/metadata8 widens to0/8/16. All78 old identities/metadata/nullness retain indices; Golden appends FRALLSP78,ENALLHAVESKIL79,MYBADOFF80,MYNOBADOFF81. Target records are PS240*8 at609ce0 and Golden40*16 at Steamaf9f60/NSO709e48: callback0/name4 widens0/8. Keep banks distinct despite adjacent NULL condition0 looking like target padding. Qualify all selected names/tails, condition opcode0, actual live-unit status outcomes including no opposing units, selected packed operands, target mutation/failure/default/RNG, real producer and consumer lifetimes, new opcode domain and mode isolation before runtime closure. No callback gameplay equivalence is admitted merely by its label."
+        }
+      ]
+    },
+    {
+      "address": "0x00609cc8",
+      "ps2_size": 24,
+      "role": "AI target_selector descriptor name",
+      "namespace": "target_selector",
+      "opcode": 37,
+      "name": "NOTNOMAL",
+      "golden": {
+        "kind": "typed-record-name",
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x917b08",
+        "raw_offset": 9529096,
+        "offset": 592648,
+        "size": 9,
+        "sha256": "835dfa3a1cc61dd1e34bd3c5fb04333ba3833dc86b6f5f91afeccc6dc3181ccc",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "source_group": "L1-C5-AI-condition-target-labels-20261113",
+        "mapping_proven": true,
+        "descriptor_rva": "0xafa1b0",
+        "descriptor_stride": 16,
+        "name_field_offset": 8,
+        "opcode": 37,
+        "namespace": "target_selector",
+        "nso_name": "0x6012d8",
+        "nso_descriptor": "0x70a098"
+      },
+      "layout": {
+        "kind": "nul-terminated-name-with-retained-alignment",
+        "ps2_live_size": 9,
+        "retained_tail": {
+          "offset": 9,
+          "size": 15,
+          "sha256": "5322fecfc92a5e3248a297a3df3eddfb9bd9049504272e4f572b87fa36d4b3bd"
+        },
+        "copy_policy": "Golden authoritative name including NUL; preserve observed zero alignment tail; no pointer-table or guessed-parent copy"
+      },
+      "required_seams": [
+        {
+          "owner": "Golden AI descriptor name supplier and namespace",
+          "requirement": "Route five condition names by opcode14/54/66/70/76 in the82-record Golden condition bank, and three target-selector names by opcode21/23/37 in its separate40-record bank. Author exact qualified Golden NUL-terminated strings; preserve only listed zero alignment tails. Names are actual callback-record fields, not free-floating cosmetic strings or the same-named function in another namespace. Cover actual direct/translated/inlined/native descriptor/name routes and mode isolation, without writing platform code/host pointer values into guest tables."
+        },
+        {
+          "owner": "condition interpreter live AI record and packed operand producer",
+          "requirement": "Actual core1cbe0 gets current action.unit through+38 and realu16 charId+ a4, then actual AI-record storage via8805d0, stridea4. Two rows of three packedu32 conditions at record+4/8/c and18/1c/20 feed opcode=word>>24 and argument=word&ffffff;0 yields false and MUST NOT call NULL record0. Dispatch remaining opcode through82*24 bank70a0c8, callback+0. Preserve real AI-record/selector bytes (8 is skip sentinel), actual action/unit/data handles and script/native packed input, not fabricated IDs or zero operands. This proof does not qualify the AI-record payload bank; its actual Golden producer must be separately bound."
+        },
+        {
+          "owner": "target selection live formation, state and result publication",
+          "requirement": "Actual selected weighted-command target word supplies top-byte target opcode and low24-bit argument to40*16 bank709e48; actual command work is populated before selection. Target procedures mutate actual action target handles/count, not merely return a predicate boolean. Representative HANSYA_ST2e530 uses real candidate builder661a0, candidate array+100/count168, unit/action state, status100000 exclusion via72450 and element-reflect bit25 via771d0; actual RNG715a0 picks eligible candidates and publishes chosen handle+48/count+aa, or clears through1c680. Preserve expanded/special candidate path, selection side effects and downstream command readers. Ordinary Steam69790 retries descriptor0 with argument0 on false; core1cbe0 has its own Golden candidate/RNG fallback, which must not be replaced with that generic fallback."
+        },
+        {
+          "owner": "namespace boundaries, Golden additions and runtime qualification",
+          "requirement": "Condition records are PS278*12 at609850 and Golden82*24 at Steamaf97b0/NSO70a0c8: callback0/name4/metadata8 widens to0/8/16. All78 old identities/metadata/nullness retain indices; Golden appends FRALLSP78,ENALLHAVESKIL79,MYBADOFF80,MYNOBADOFF81. Target records are PS240*8 at609ce0 and Golden40*16 at Steamaf9f60/NSO709e48: callback0/name4 widens0/8. Keep banks distinct despite adjacent NULL condition0 looking like target padding. Qualify all selected names/tails, condition opcode0, actual live-unit status outcomes including no opposing units, selected packed operands, target mutation/failure/default/RNG, real producer and consumer lifetimes, new opcode domain and mode isolation before runtime closure. No callback gameplay equivalence is admitted merely by its label."
+        }
+      ]
+    }
+  ],
+  "counts": {
+    "new_PROVEN": 8,
+    "new_ps2_partition_bytes": 136,
+    "cohort_PROVEN": 55,
+    "cohort_proven_bytes": 56309,
+    "cohort_OPEN_retain": 22,
+    "cohort_open_bytes": 2957,
+    "assigned_objects": 77,
+    "assigned_ps2_bytes": 59266,
+    "PROVEN-code": 0,
+    "PROVEN-layout": 0,
+    "D10a": 0,
+    "D10b": 0,
+    "D10c": 0
+  }
+}

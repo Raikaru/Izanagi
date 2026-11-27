@@ -1,9 +1,12 @@
 #include "p4pc/game_skills.h"
+#include "p4pc/game_mode.h"
+#include "p4pc/golden_names_native.h"
 #include "p4pc/game_table_extents.h"
 #include "p4pc/game_table_derived.h"
 #include "p4pc/game_text_native.h"
 #include "p4pc/gmem.h"
 #include "p4pc/package_boot.h"
+#include "../golden/golden_battle_rows.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -211,7 +214,7 @@ uint32_t p4_game_skills_packed_scan(const P4GameTablePackedBlock *blocks, unsign
         uint32_t stride = 0, bit = 0;
         if (slot == SKILL_METADATA_SLOT) { stride = P4_SKILL_ROW_SIZE; bit = 1; }
         else if (slot == SKILL_ELEMENT_SLOT) { stride = P4_SKILL_ELEMENT_SIZE; bit = 2; }
-        else if (slot == SKILL_NAME_SLOT) { stride = 19; bit = 4; }
+        else if (slot == SKILL_NAME_SLOT) { stride = p4_game_mode() == P4_GAME_MODE_GOLDEN ? P4_GOLDEN_SKILL_NAME_SIZE : 19u; bit = 4; }
         else if (slot == SKILL_PRESENTATION_SLOT) { stride = 4; bit = 8; }
         if (!stride) continue;
         if (size % stride) refuse(P4_TABLE_INVALID);
@@ -237,17 +240,18 @@ static int prepare_complete(void *user)
     if (!pending() || staged.prepared != 15) return P4_TABLE_NOT_READY;
     uint32_t metadata_base, metadata_rows, element_base, element_rows, name_base, name_rows;
     uint32_t presentation_base, presentation_rows;
+    const uint32_t name_stride = p4_game_mode() == P4_GAME_MODE_GOLDEN ? P4_GOLDEN_SKILL_NAME_SIZE : 19u;
     if (!p4_game_table_extent_rows(SKILL_METADATA_SLOT, P4_SKILL_ROW_SIZE, &metadata_base, &metadata_rows) ||
         !p4_game_table_extent_rows(SKILL_ELEMENT_SLOT, P4_SKILL_ELEMENT_SIZE, &element_base, &element_rows) ||
         !p4_game_table_extent_rows(SKILL_PRESENTATION_SLOT, 4, &presentation_base, &presentation_rows) ||
-        !p4_game_table_extent_rows(SKILL_NAME_SLOT, 19, &name_base, &name_rows)) return P4_TABLE_INVALID;
+        !p4_game_table_extent_rows(SKILL_NAME_SLOT, name_stride, &name_base, &name_rows)) return P4_TABLE_INVALID;
     /* Semantic/source/profile checks were completed by the early CPU seal.
      * Only actual copied-byte verification, allocation and binding remain. */
     int result = p4_game_skills_materialize(staged.skills,
         P4_GPTR(const uint8_t, metadata_base), (size_t)metadata_rows * P4_SKILL_ROW_SIZE,
         P4_GPTR(const uint8_t, element_base), (size_t)element_rows * P4_SKILL_ELEMENT_SIZE,
         P4_GPTR(const uint8_t, presentation_base), (size_t)presentation_rows * 4u,
-        P4_GPTR(const uint8_t, name_base), (size_t)name_rows * 19u);
+        P4_GPTR(const uint8_t, name_base), (size_t)name_rows * name_stride);
     if (result) return result;
     original_metadata = metadata_base; original_metadata_bytes = metadata_rows * P4_SKILL_ROW_SIZE;
     original_elements = element_base; original_element_bytes = element_rows * P4_SKILL_ELEMENT_SIZE;
@@ -283,5 +287,6 @@ int p4_game_skills_session_end(int image_live)
     staged = (SkillStage){0};
     original_metadata = original_elements = original_presentation = 0;
     original_metadata_bytes = original_element_bytes = original_presentation_bytes = 0;
+    if (p4_game_mode() == P4_GAME_MODE_GOLDEN) p4_golden_battle_rows_reset();
     return P4_TABLE_OK;
 }

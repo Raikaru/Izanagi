@@ -10,8 +10,10 @@
 # Source tarballs are fetched into <prefix>/../dl-cache (or $P4PC_DL_CACHE) and checked against
 # the pinned sha256 below. llvm-mingw (clang, lld, mingw-w64 UCRT headers/CRT) is the toolchain
 # the Windows build uses; its location comes from the second argument or $P4PC_LLVM_MINGW
-# (default /opt/llvm-mingw). Needs: curl, tar, xz, cmake, ninja, make, nasm, python3.
+# (default /opt/llvm-mingw). Needs: curl, tar, xz, cmake, ninja, make, nasm, patch, python3.
 set -eu
+recipe_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+hca_patch=$recipe_dir/../ffmpeg-7.1.1-hca-window-alignment.patch
 
 prefix=${1:?usage: build_deps.sh <prefix> [llvm-mingw-dir]}
 llvm=${2:-${P4PC_LLVM_MINGW:-/opt/llvm-mingw}}
@@ -73,12 +75,14 @@ if [ ! -f "$prefix/$sdl_sentinel" ]; then
 fi
 
 # ---- FFmpeg (LGPL): the decoders the port uses. mpeg2video + its parser (src/movie/mpeg2_dec.c) and
-# adpcm_adx (src/movie/adx_dec.c), libswscale for the picture conversion. Add a decoder here when a
-# source starts using one: a changed option list rebuilds FFmpeg.
-FFMPEG_OPTS="--enable-decoder=mpeg2video --enable-parser=mpegvideo --enable-decoder=adpcm_adx"
-if [ ! -f "$prefix/$av_sentinel" ] || [ "$(cat "$prefix/ffmpeg.opts" 2>/dev/null)" != "$FFMPEG_OPTS" ]; then
+# adpcm_adx (src/movie/adx_dec.c), HCA (Golden-only audio), and libswscale for the picture conversion.
+# A changed option list rebuilds FFmpeg; no libavformat or additional codec is enabled.
+FFMPEG_OPTS="--enable-decoder=mpeg2video --enable-parser=mpegvideo --enable-decoder=adpcm_adx --enable-decoder=hca"
+if [ ! -f "$prefix/$av_sentinel" ] || [ "$(cat "$prefix/ffmpeg.opts" 2>/dev/null)" != "$FFMPEG_OPTS" ] ||
+   ! cmp -s "$hca_patch" "$prefix/ffmpeg-7.1.1-hca-window-alignment.patch"; then
   fetch "$FFMPEG_URL" "$FFMPEG_SHA" ffmpeg-$FFMPEG_VER.tar.xz
   rm -rf "$work/ffmpeg" && mkdir -p "$work/ffmpeg" && tar -xJf "$dl/ffmpeg-$FFMPEG_VER.tar.xz" -C "$work/ffmpeg" --strip-components=1
+  patch -d "$work/ffmpeg" -p1 < "$hca_patch"
   if [ $native = 1 ]; then ff_target="--arch=$ffarch --target-os=linux --cc=$cc"
   else ff_target="--arch=$ffarch --target-os=mingw32 --enable-cross-compile --cross-prefix=$triple- --cc=$cc --ar=llvm-ar --nm=llvm-nm --ranlib=llvm-ranlib --strip=llvm-strip"; fi
   if [ $linux_cross = 1 ]; then
@@ -91,7 +95,8 @@ if [ ! -f "$prefix/$av_sentinel" ] || [ "$(cat "$prefix/ffmpeg.opts" 2>/dev/null
     --disable-avdevice --disable-avformat --disable-avfilter --disable-swresample \
     --enable-avcodec --enable-swscale $FFMPEG_OPTS \
     --enable-shared --disable-static --disable-debug \
-    --extra-cflags="-O2" && make -j"$(nproc)" && make install) && printf '%s' "$FFMPEG_OPTS" > "$prefix/ffmpeg.opts"
+    --extra-cflags="-O2" && make -j"$(nproc)" && make install) && printf '%s' "$FFMPEG_OPTS" > "$prefix/ffmpeg.opts" \
+    && cp "$hca_patch" "$prefix/ffmpeg-7.1.1-hca-window-alignment.patch"
 fi
 
 echo "build_deps: SDL3 and FFmpeg for $triple are in $prefix"

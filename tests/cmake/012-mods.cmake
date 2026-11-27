@@ -42,6 +42,32 @@ add_executable(mod_authorize_test mod_authorize_test.c
 target_compile_definitions(mod_authorize_test PRIVATE ${P4_PORT_DEFINES})
 add_test(NAME mod_authorize COMMAND mod_authorize_test)
 set_tests_properties(mod_authorize PROPERTIES LABELS "host" TIMEOUT 30)
+foreach(_ai_variant IN ITEMS normal small)
+  add_executable(ai_item_journal_${_ai_variant}_test ai_item_journal_test.c
+    "${CMAKE_SOURCE_DIR}/src/platform/mods/ai_item_journal.c")
+  target_compile_options(ai_item_journal_${_ai_variant}_test PRIVATE -UNDEBUG)
+  target_compile_definitions(ai_item_journal_${_ai_variant}_test PRIVATE ${P4_PORT_DEFINES})
+  if(_ai_variant STREQUAL "small")
+    target_compile_definitions(ai_item_journal_${_ai_variant}_test PRIVATE P4_AI_ITEM_PC_COUNT=1 P4_AI_ITEM_SCRATCH_COUNT=2 P4_AI_ITEM_TEST_SMALL=1)
+  endif()
+  add_test(NAME ai_item_journal_${_ai_variant} COMMAND ai_item_journal_${_ai_variant}_test)
+  set_tests_properties(ai_item_journal_${_ai_variant} PROPERTIES LABELS "host" TIMEOUT 30)
+endforeach()
+# Exercise the actual mirrored consumer bodies over synthetic state.
+set(_p4_item_use_generated "${CMAKE_CURRENT_BINARY_DIR}/item_use_generated.inc")
+add_custom_command(OUTPUT "${_p4_item_use_generated}"
+  COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/item_use_extract.py"
+    "${P4_GEN}/decomp" "${_p4_item_use_generated}"
+  DEPENDS p4_mirror "${CMAKE_CURRENT_SOURCE_DIR}/item_use_extract.py"
+  VERBATIM)
+set_source_files_properties(item_use_consumer_test.c PROPERTIES OBJECT_DEPENDS "${_p4_item_use_generated}")
+add_executable(item_use_consumer_test item_use_consumer_test.c
+  "${CMAKE_SOURCE_DIR}/src/platform/mods/authorize.c" "${CMAKE_SOURCE_DIR}/src/platform/mods/ai_item_journal.c" "${_p4_item_use_generated}")
+target_include_directories(item_use_consumer_test PRIVATE "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_SOURCE_DIR}/include")
+target_compile_options(item_use_consumer_test PRIVATE -UNDEBUG)
+target_compile_definitions(item_use_consumer_test PRIVATE ${P4_PORT_DEFINES})
+add_test(NAME item_use_consumer COMMAND item_use_consumer_test)
+set_tests_properties(item_use_consumer PROPERTIES LABELS "host" TIMEOUT 30)
 # Weapon fusion transaction over a fake game state (accessors stubbed in the test).
 add_executable(mod_forge_test mod_forge_test.c
   "${CMAKE_SOURCE_DIR}/src/platform/mods/forge_native.c"

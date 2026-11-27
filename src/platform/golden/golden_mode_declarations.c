@@ -97,7 +97,7 @@ int p4_golden_mode_declare(P4GameMode mode, const P4GoldenDomainMap *map, const 
         if (!item_icon_valid(&in->item_icons[g])) goto malformed;
         row->desc.icon = in->item_icons[g];
         memcpy(&row->desc.metadata, in->item_metadata + (size_t)g * P4_ITEM_ROW_SIZE, P4_ITEM_ROW_SIZE);
-        if (row->desc.metadata.kind > 31) goto malformed;
+        if (row->desc.metadata.kind > 9) goto malformed;
     }
     for (uint32_t g = P4_PERSONA_RETAIL_ROWS; g < map->shape.personas; ++g) {
         if (g >= in->persona_count || in->personas[g].model_source >= P4_PERSONA_RETAIL_ROWS ||

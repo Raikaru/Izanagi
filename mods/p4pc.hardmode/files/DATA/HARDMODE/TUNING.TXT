@@ -8,7 +8,7 @@
 # hexadecimal with 0x. Unknown sections or keys, missing keys and values
 # outside their limits stop the mod with an error rather than being ignored.
 
-revision = 9
+revision = 10
 
 # An encounter is a boss encounter when its formation flags (the first word of
 # its 0x18-byte ENCOUNT.TBL row) share a bit with this mask. In the retail
@@ -182,9 +182,10 @@ rescue_below = 0.00
 # stands) of the element paired here with an ailment the target already has
 # deals `party` times the damage when the attacker is on the party side and
 # `enemy` times when it is on the enemy side. No extra Down or turn. The stance
-# panel calls TECHNICAL. Ailments: panic, fear, rage, silence; elements: fire,
-# ice, electric, wind. Each element pairs with at most one ailment. Limits:
-# 1..2 for each factor.
+# panel calls TECHNICAL. Retail ailments: panic, fear, rage, silence; elements:
+# fire, ice, electric, wind. Each element has at most one retail-ailment pair.
+# Burn is a side ailment outside these masks and also pairs with Wind.
+# Limits: 1..2 for each factor.
 [technical]
 party = 1.50
 enemy = 1.25
@@ -284,6 +285,10 @@ enemy.258 = 0x04
 enemy.259 = 0x02
 # Contrarian King: Silence (Electric Technical).
 enemy.304 = 0x08
+# Daring Gigas: Fear (Ice Technical). Its execution guard holds from Power
+# Charge admission through the proven completion of Single Shot, including
+# Rebellion, Tarukaja and One More/extra actions. Attribution loss is immune.
+enemy.311 = 0x04
 
 # Lock guards: a window boss shrugs its ailment off from a turn that uses one
 # of these skills until its next turn (`skill.<ID> = 1`): Power Charge 0xE3 and

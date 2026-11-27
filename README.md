@@ -63,8 +63,9 @@ Open an issue with:
 
 - the package name (for example `p4pc-win64-v0.1.0.zip`; `VERSION.txt` inside it),
 - what you did and what happened,
-- `p4pc.log`, and `p4pc-crash.log` if it exists (both beside `p4pc.ini`; Android: see
-  [packaging](docs/platform/packaging.md)).
+- the logs: `p4pc.log` (and `p4pc.prev.log` or `p4pc.unclean.log` if the problem was in an earlier run, and `p4pc-crash.log` if it
+  exists), all beside `p4pc.ini`; on Android, **Export logs** on the app's first screen. The issue form asks for the same.
+  See [diagnostics](docs/platform/diagnostics.md).
 
 Do not attach your ISO, the game executable, extracted game files or memory card images.
 

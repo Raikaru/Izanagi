@@ -76,6 +76,12 @@ int32_t func_004de2e8(int32_t);                            /* AIXP_ExecServer */
 #define AIXP_STAT_END 3
 void *kwlnProbeHeapBudget(void);
 
+/* The mixer's output limiter (p4snd_soft_limit) bends samples past 0.9 of full scale; the reference is passed through it the same way. */
+static double limited16(double s)
+{
+    return (double)p4snd_soft_limit((float)(s / 32768.0)) * 32768.0;
+}
+
 static int failures;
 
 static void fail(const char *what)
@@ -473,7 +479,7 @@ static int test_main(int argc, char **argv)
             idx = 0;
             frac = 0.0;
             for (j = 0; j < n; j++) {
-                double s = ((double)r[idx] + ((double)r[idx + 1] - (double)r[idx]) * (float)frac) * gain;
+                double s = limited16(((double)r[idx] + ((double)r[idx + 1] - (double)r[idx]) * (float)frac) * gain);
 
                 if (j >= EDGE && j < n - EDGE) {
                     err = fabs(s - (double)pcm[(startFrame + j) * 2 + ch]);

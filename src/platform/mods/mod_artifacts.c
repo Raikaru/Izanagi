@@ -1,5 +1,6 @@
 /* Mod-owned artifact files beside p4pc.ini (p4pc/mod_artifacts.h). */
 #include "p4pc/mod_artifacts.h"
+#include "p4pc/hostpath.h"
 #include "p4pc/os.h"
 #include <errno.h>
 #include <stdarg.h>
@@ -154,7 +155,7 @@ static int resolve(const char *mod_id, const char *path, int create, char folder
 
 static long file_size(const char *path)
 {
-    FILE *stream = fopen(path, "rb");
+    FILE *stream = p4_host_fopen(path, "rb");
     if (!stream) return -1;
     long size = fseek(stream, 0, SEEK_END) ? -1 : ftell(stream);
     fclose(stream);
@@ -210,13 +211,13 @@ int p4_mod_artifact_write(const char *mod_id, const char *path, const void *byte
     if (n <= 0 || n >= PATH_CAP) return fail(reason, reason_capacity, "Artifact path is too long");
     if (file_size(temporary) >= 0 && !p4_os_is_file_nofollow(temporary))
         return fail(reason, reason_capacity, "Artifact %s has a foreign temporary file", path);
-    FILE *stream = fopen(temporary, "wb");
+    FILE *stream = p4_host_fopen(temporary, "wb");
     if (!stream) return fail(reason, reason_capacity, "Cannot write artifact %s", path);
     int bad = size && fwrite(bytes, 1, size, stream) != size;
     if (fflush(stream) || p4_os_sync_file(stream)) bad = 1;
     if (fclose(stream)) bad = 1;
     if (bad || p4_os_replace_file(temporary, file)) {
-        remove(temporary);
+        p4_host_remove(temporary);
         return fail(reason, reason_capacity, "Cannot write artifact %s", path);
     }
     return 0;
@@ -232,7 +233,7 @@ int64_t p4_mod_artifact_read(const char *mod_id, const char *path, void *out, si
     char ignored[96];
     if (resolve(mod_id, path, 0, folder, file, ignored, sizeof ignored)) return -1;
     if (!p4_os_is_file_nofollow(file)) return -1;
-    FILE *stream = fopen(file, "rb");
+    FILE *stream = p4_host_fopen(file, "rb");
     if (!stream) return -1;
     long size = fseek(stream, 0, SEEK_END) ? -1 : ftell(stream);
     if (size < 0 || (uint64_t)size > capacity || fseek(stream, 0, SEEK_SET)) {

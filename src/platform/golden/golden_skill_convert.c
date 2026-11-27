@@ -40,6 +40,23 @@ int p4_golden_skill_elements(const P4GoldenDomainMap *map, const uint8_t *input,
     if (reason && reason_capacity) reason[0] = 0;
     return 0;
 }
+int p4_golden_skill_semantics(const uint8_t *elements, size_t rows, uint8_t *element_ids,
+    size_t element_capacity, uint8_t *groups, size_t group_capacity)
+{
+    if (!elements || !rows || rows > P4_SKILL_MAX_ID + 1u || !element_ids || !groups ||
+        rows > element_capacity / 4u || rows > group_capacity) return -1;
+    for (size_t i = 0; i < rows; ++i)
+        if (elements[2u * i] > 18u && elements[2u * i] != 0xFF) return -1;
+    for (size_t i = 0; i < rows; ++i) {
+        uint8_t element = elements[2u * i];
+        uint32_t semantic = element == 0xFF ? UINT32_MAX : element;
+        uint8_t *out = element_ids + 4u * i;
+        out[0] = (uint8_t)semantic; out[1] = (uint8_t)(semantic >> 8);
+        out[2] = (uint8_t)(semantic >> 16); out[3] = (uint8_t)(semantic >> 24);
+        groups[i] = element == 0xFF ? 18u : element;
+    }
+    return 0;
+}
 int p4_golden_skill_metadata(const P4GoldenDomainMap *map, const uint8_t *input, size_t size,
                              uint8_t *out, size_t capacity, size_t *written, char *reason, size_t reason_capacity)
 {

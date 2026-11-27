@@ -10,6 +10,8 @@
 #include "p4pc/game_table_boot.h"
 #include "p4pc/game_table_derived.h"
 #include "p4pc/game_data_catalog.h"
+#include "p4pc/game_mode.h"
+#include "p4pc/golden_names_native.h"
 #include "p4pc/game_enemies.h"
 #include "p4pc/game_items.h"
 #include "p4pc/game_personas.h"
@@ -177,7 +179,8 @@ static int bind_all(P4GameTableInput *const *inputs, size_t count)
     }
     if (bind(&edits.skill_element, P4_TABLE_INPUT_SKILL, 0, 0, P4_SKILL_ELEMENT_SIZE) ||
         bind(&edits.skill, P4_TABLE_INPUT_SKILL, 1, 0, P4_SKILL_ROW_SIZE) ||
-        bind(&edits.skill_name, P4_TABLE_INPUT_MSG, 1, 0, 19) ||
+        bind(&edits.skill_name, P4_TABLE_INPUT_MSG, 1, 0,
+            p4_game_mode() == P4_GAME_MODE_GOLDEN ? P4_GOLDEN_SKILL_NAME_SIZE : 19) ||
         bind(&edits.enemy, P4_TABLE_INPUT_UNIT, 0, 0, P4_ENEMY_ROW_SIZE) ||
         bind(&edits.enemy_affinity, P4_TABLE_INPUT_UNIT, 1, 0, P4_ENEMY_AFFINITY_SIZE) ||
         bind(&edits.enemy_name, P4_TABLE_INPUT_MSG, 2, 0, P4_ENEMY_NAME_SIZE) ||
@@ -185,7 +188,8 @@ static int bind_all(P4GameTableInput *const *inputs, size_t count)
         bind(&edits.persona_growth, P4_TABLE_INPUT_PERSONA, 1, 0, P4_PERSONA_GROWTH_SIZE) ||
         bind(&edits.party, P4_TABLE_INPUT_PERSONA, 2, 0, P4_DATA_PARTY_ROW_SIZE) ||
         bind(&edits.persona_affinity, P4_TABLE_INPUT_UNIT, 2, 0, P4_PERSONA_AFFINITY_SIZE) ||
-        bind(&edits.persona_name, P4_TABLE_INPUT_MSG, 3, 0, P4_PERSONA_NAME_SIZE) ||
+        bind(&edits.persona_name, P4_TABLE_INPUT_MSG, 3, 0,
+            p4_game_mode() == P4_GAME_MODE_GOLDEN ? P4_GOLDEN_PERSONA_NAME_SIZE : P4_PERSONA_NAME_SIZE) ||
         bind(&edits.item, P4_TABLE_INPUT_ITEM, 0, P4_ITEM_FILE_HEADER_SIZE, P4_ITEM_ROW_SIZE))
         return -1;
     int relocated = 0;
@@ -200,12 +204,14 @@ static int bind_all(P4GameTableInput *const *inputs, size_t count)
         .skill_element = edits.skill_element.base, .skill_elements = edits.skill_element.rows,
         .skill = edits.skill.base, .skills = edits.skill.rows,
         .skill_name = edits.skill_name.base, .skill_names = edits.skill_name.rows,
+        .skill_name_stride = p4_game_mode() == P4_GAME_MODE_GOLDEN ? P4_GOLDEN_SKILL_NAME_SIZE : 19,
         .enemy = edits.enemy.base, .enemy_affinity = edits.enemy_affinity.base, .enemy_name = edits.enemy_name.base,
         .enemies = edits.enemy.rows < edits.enemy_affinity.rows ? edits.enemy.rows : edits.enemy_affinity.rows,
         .enemy_names = edits.enemy_name.rows,
         .persona = edits.persona.base, .persona_growth = edits.persona_growth.base, .party = edits.party.base,
         .persona_affinity = edits.persona_affinity.base, .persona_name = edits.persona_name.base,
         .personas = edits.persona.rows, .parties = edits.party.rows, .persona_names = edits.persona_name.rows,
+        .persona_name_stride = p4_game_mode() == P4_GAME_MODE_GOLDEN ? P4_GOLDEN_PERSONA_NAME_SIZE : P4_PERSONA_NAME_SIZE,
         .item = edits.item.base, .items = edits.item.rows,
         .floor = edits.floor.base, .floors = edits.floor.rows,
         .formation = edits.formation.base, .formations = edits.formation.rows,
@@ -412,8 +418,8 @@ static int affinity(P4DataKind kind, uint32_t id, uint8_t *words, const char *pa
     }
     return commit(kind, id, path, input, at, 2, packed, error, capacity);
 }
-/* A display name in its fixed-width MSG row (19, 21 or 17 bytes with the
- * final NUL). The key keeps the disc's name. Plain ASCII only: the game's
+/* A display name in its fixed-width MSG row, including the final NUL.
+ * The key keeps the original name. Plain ASCII only: the game's
  * two-byte glyphs have no agreed text form here. */
 static int rename_row(P4DataKind kind, uint32_t id, const Bank *names, uint32_t width, const P4DataEditValue *value,
     const char *row, char *error, size_t capacity)
@@ -450,7 +456,7 @@ static int skill_set(uint32_t id, const char *path, const P4DataEditValue *value
     uint8_t *element = edits.skill_element.base + (size_t)id * P4_SKILL_ELEMENT_SIZE;
     uint8_t *m = id < edits.skill.rows ? edits.skill.base + (size_t)id * P4_SKILL_ROW_SIZE : NULL;
     uint32_t v;
-    if (!strcmp(path, "name")) return rename_row(P4_DATA_SKILL, id, &edits.skill_name, 19, value, row, error, capacity);
+    if (!strcmp(path, "name")) return rename_row(P4_DATA_SKILL, id, &edits.skill_name, edits.view.skill_name_stride, value, row, error, capacity);
     if (!strcmp(path, "element")) {
         const char *name;
         uint32_t wanted;
@@ -554,7 +560,7 @@ static int persona_set(uint32_t id, const char *path, const P4DataEditValue *val
     uint8_t *m = edits.persona.base + (size_t)id * P4_PERSONA_METADATA_SIZE;
     uint32_t v;
     if (!strcmp(path, "name"))
-        return rename_row(P4_DATA_PERSONA, id, &edits.persona_name, P4_PERSONA_NAME_SIZE, value, row, error, capacity);
+        return rename_row(P4_DATA_PERSONA, id, &edits.persona_name, edits.view.persona_name_stride, value, row, error, capacity);
     if (!strcmp(path, "level")) {
         if (whole(value, path, row, 1, 99, &v, error, capacity)) return -1;
         return commit(P4_DATA_PERSONA, id, path, P4_TABLE_INPUT_PERSONA, m + 0x03, 1, v, error, capacity);

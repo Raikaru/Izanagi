@@ -40,6 +40,7 @@ end
 -- Fictional, weakness-free rows at the IDs selected by the mod.
 F.rows = {
     [310] = {affinities = {physical = "null", light = "resist"}},
+    [311] = {affinities = {physical = "resist", light = "null", dark = "null"}},
     [258] = {affinities = {fire = "resist", electric = "drain"}},
     [259] = {affinities = {wind = "null", dark = "drain"}},
     [304] = {affinities = {fire = "resist", wind = "drain"}},
@@ -59,6 +60,16 @@ for _ = 1, 2 do
 end
 assert(#F.protections == 1 and F.protections[1] == 0x1000, "Yu must be protected exactly once")
 F.battleUnits = nil
+-- Burn Technical applies only to normal Wind hits.
+local technical = F.damageHandlers[100]
+local burning = {element = 4, hit_kind = "normal", reflected = false, target_status = 0,
+    target_side_ailment = 26, resolved = false, source_side = "party"}
+assert(technical.fn(burning) == 1.5, "Wind must trigger Burn Technical")
+burning.element = 1
+assert(technical.fn(burning) == nil, "Fire must not trigger Burn Technical")
+burning.element, burning.hit_kind = 4, "weak"
+assert(technical.fn(burning) == nil, "weakness must not stack with Burn Technical")
+
 
 -- The same save loaded again and again in one session, past the shared sprite
 -- pool: each LOAD GAME removes the badge at its reset and registers it again at

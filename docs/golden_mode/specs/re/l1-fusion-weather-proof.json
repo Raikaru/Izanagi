@@ -1,0 +1,287 @@
+{
+  "schema": 1,
+  "proof_id": "L1c-fusion-weather-expanded-date-table",
+  "class": "PROVEN",
+  "runtime_status": "pending-seam",
+  "method": "module loader -> named table descriptor -> calendar date selection -> constraint header and five weighted effects; PS2 duplicate logic/display arrays recovered to sentinel",
+  "weighted_rng_addendum": {
+    "applies_to": "explicit-date and phase-fallback branches converge on the same tail in0x7100169790",
+    "candidate_rule": "kind!=0 and weight!=100 enters the weighted candidate list, including weight0; weight100 effects are appended unconditionally",
+    "rng_call_rule": "Call0x710033ad60 exactly once only when candidate_count>0 AND total_weight>=1. Unsigned byte weights and at most5 entries make this equivalent to total_weight>0.",
+    "zero_total_rule": "If candidates exist but total_weight==0, do not call RNG; roll=0. All cumulative sums remain0, strict roll<cumulative fails for every candidate; append no weighted effect and return only previously appended weight100 effects, or0 if none.",
+    "no_candidate_rule": "Return unconditional-effect count directly without calling RNG.",
+    "rounding": "Positive total: convert masked RNG and total to f32; multiply f32(R&0x7fffffff)*f32(2^-31), then by f32(total). FCVTZU at169bfc truncates to unsigned32, followed by SXTH at169c00; cumulative comparison is signed16. Do not consume a random value on the zero-total path.",
+    "evidence": [
+      {"address":"0x7100169bcc..0x7100169bd0","role":"candidate count cmp0; nonpositive branches to final count store169c60"},
+      {"address":"0x7100169bd4..0x7100169bd8","role":"total weight cmp1; signed less-than branches to zero-roll169c08"},
+      {"address":"0x7100169be0","role":"actual RNG call0x710033ad60, not169bd8 (the latter is the guard branch)"},
+      {"address":"0x7100169c08","role":"zero-total path sets roll register to0 without RNG"},
+      {"address":"0x7100169c18..0x7100169c38","role":"signed-halfword cumulative walk with strict less-than; exhaustion returns without appending"},
+      {"address":"0x7100169c60..0x7100169c68","role":"store/return unconditional plus selected weighted effect count"}
+    ],
+    "qualification": "Static NSO instruction evidence; no RNG/game execution or runtime binding was performed."
+  },
+  "ps2": {
+    "bases": [
+      "0x0063fca0",
+      "0x006432b0"
+    ],
+    "stride": 28,
+    "records_including_dummy_and_sentinel": 94,
+    "real_dates": 92,
+    "sentinel_index": 93,
+    "live_bytes_per_copy": 2632,
+    "alignment_tail_bytes_per_copy": 8,
+    "copies_equal_sha256": "40479cdd199bd07a90cf1ebdde04dfd7e908d927993072c4a71527eee5f842bf",
+    "source_pin": "18016afe6",
+    "source_files": [
+      {
+        "file": "src/unplaced/unplaced_inferred_003136b0.c",
+        "lines": "65-76,215-319",
+        "role": "date lookup starts at1, stops at signed -1/-1; today/tomorrow selection; display priority"
+      },
+      {
+        "file": "src/Event/Fcl/y_fclCombine.c",
+        "lines": "6165-6285,6337-6419,9169-9185",
+        "role": "ingredient constraints +2..7; weighted outcome IDs at+8+4j,weights+9+4j,skill argument+10+4j"
+      },
+      {
+        "file": "src/Event/Fcl/y_fclCombineDraw.c",
+        "lines": "5412-5532",
+        "role": "same selected row header+2,+4,+6 and effect kind/argument at+8,+10"
+      }
+    ]
+  },
+  "golden": {
+    "container": "data.cpk",
+    "member_chain": "data.cpk::init_free.bin::init/fclTable.bin::WeatherBonusTbl.ftd",
+    "member_size": 3616,
+    "member_sha256": "cc735128c64661481994fd57af58551ba5cf125c5cfbf054ebe9113e50fd02fc",
+    "offset": 16,
+    "size": 3584,
+    "sha256": "7c0c8e357e36c8ac14a7e9512ba7d61e262b7af3ad52ad927e532e20f5162de5",
+    "rows": 128,
+    "real_dates": 126,
+    "stride": 28,
+    "sentinel_index": 127,
+    "dummy_index": 0,
+    "excluded_member_padding_bytes": 16,
+    "fields": [
+      {
+        "offset": 0,
+        "type": "s8",
+        "role": "month"
+      },
+      {
+        "offset": 1,
+        "type": "s8",
+        "role": "day"
+      },
+      {
+        "offset": 2,
+        "type": "s8",
+        "role": "constraint kind"
+      },
+      {
+        "offset": 3,
+        "type": "u8",
+        "role": "header reserved; preserve source"
+      },
+      {
+        "offset": 4,
+        "type": "s16le",
+        "role": "constraint first argument"
+      },
+      {
+        "offset": 6,
+        "type": "s16le",
+        "role": "constraint second argument"
+      },
+      {
+        "offset": 8,
+        "count": 5,
+        "stride": 4,
+        "fields": [
+          {
+            "offset": 0,
+            "type": "u8",
+            "role": "effect kind"
+          },
+          {
+            "offset": 1,
+            "type": "u8",
+            "role": "effect weight"
+          },
+          {
+            "offset": 2,
+            "type": "u16le",
+            "role": "effect argument"
+          }
+        ]
+      }
+    ]
+  },
+  "structural_chain": [
+    {
+      "image": "Switch1.2",
+      "address": "0x7100173720",
+      "role": "global table bank at0x71009fb6c0; member lookup0x7100397040 using WeatherBonusTbl.ftd string0x71005eee42; returns payload+16 and header count+4"
+    },
+    {
+      "image": "Switch1.2",
+      "address": "0x7100169790",
+      "role": "date consumer calls descriptor at1697c0, calSplit at1697d8, scans count records stride28 at1697f4; signed month/day at169800/16980c; publishes header pointer row+2 at16981c"
+    },
+    {
+      "image": "Switch1.2",
+      "address": "0x7100169a40..0x7100169c84",
+      "role": "five four-byte effects; kind0 skip, weight100 direct copy, others enter weighted candidates including weight0. Positive total guards actual RNG call169be0 via cmp1/b.lt at169bd4/169bd8; zero total sets roll0 and selects nothing. Argument preserved by four-byte copy. Positive draw uses mask7fffffff, f32*2^-31*sum, FCVTZU then SXTH and strict signed-halfword cumulative choice."
+    },
+    {
+      "image": "Switch1.2",
+      "address": "0x7100159850,0x710015eec0,0x7100166f24,0x7100169640,0x71001696f0",
+      "role": "fusion module callers use date-derived descriptor;15a51c/15a55c today/tomorrow output slots;15e47c fusion work. Consumer functionality split/reorganized, not one-to-one function signatures"
+    }
+  ],
+  "old_to_new_row_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    14,
+    16,
+    18,
+    20,
+    21,
+    22,
+    24,
+    25,
+    26,
+    27,
+    28,
+    30,
+    32,
+    33,
+    34,
+    36,
+    38,
+    39,
+    40,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    61,
+    62,
+    63,
+    64,
+    66,
+    67,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79,
+    80,
+    81,
+    83,
+    84,
+    85,
+    86,
+    87,
+    89,
+    91,
+    92,
+    93,
+    94,
+    95,
+    96,
+    97,
+    98,
+    99,
+    100,
+    101,
+    102,
+    103,
+    104,
+    105,
+    106,
+    107,
+    108,
+    127
+  ],
+  "date_join": {
+    "all_ps2_keys_present": true,
+    "unique_keys_both": true,
+    "added_dates": 34,
+    "unchanged_whole_records": 68,
+    "changed_existing_records": 26
+  },
+  "installation": {
+    "kind": "semantic-keyed-expansion",
+    "copy_to_ps2_image": false,
+    "single_shared_logical_source": true,
+    "ps2_partition_cuts_are_not_golden_object_boundaries": true,
+    "requirements": [
+      "Bind the complete128x28 source descriptor once for both PS2 logic and display copies. Never stitch or prefix-copy M2 fragments.",
+      "Mode-gate the date selector and all direct/inlined/transformed consumers00303610,00303de0,0030c3c0,00313b50,00313d20,0032e570,including cmmFindDateEntry inlines. Return the same selected Golden date record for all paths.",
+      "Lookup dates by signed month/day, skipping dummy0 and stopping sentinel127 or using qualified count128; missing dates retain existing fallback role, not a fabricated empty effect. Widen/index transport as needed; live indices1..126 fit signed8 but -1 remains missing.",
+      "Route existing +2 constraint kind,+4/+6 argument roles and +8+4j effect IDs,+9+4j weights,+10+4j arguments through selected Golden record; preserve all five effect entries, including skill argument for kind10.",
+      "Gameplay outcome selection must use Golden unsigned effect kind/weight and full4-byte effects; weight100 entries all apply, others enter weighted candidates including weight0. Call RNG once only for positive total; zero total consumes no RNG and appends no weighted effect. Preserve strict cumulative comparison, FCVTZU/SXTH rounding path, and do not clamp/reweight or reuse PS2 indices.",
+      "Display and eligibility must read same selected full record; never show Golden calendar while logic still reads native/guest PS2 tables.",
+      "Calendar phase fallback20-byte table is a distinct source and remains OPEN where unproved. This admission covers explicit dated rows, not a claim that every fallback calendar behavior is Golden-correct.",
+      "Retain PS2-mode arrays and8-byte alignment tails unchanged. This group source proof does not authorize blanket writes into adjacent objects or unknown11-byte partitions."
+    ]
+  },
+  "synthetic_vectors": [
+    {
+      "input": "fabricated dummy,(4,1),(4,2),sentinel; expanded table adds(4,3)",
+      "expected": "lookup(4,3) selects added full row for BOTH logic/display; missing(4,4) selects fallback, not row0"
+    },
+    {
+      "input": "fabricated effect weights[100,20,80,0,0],kinds[1,2,3,0,0]",
+      "expected": "kind1 always copied; draw0..99 selects kind2 iff roll<20 otherwise kind3; output order preserves always entries then selected entry"
+    },
+    {
+      "input": "fabricated kinds[1,2,3,0,0],weights[100,0,0,0,0]",
+      "expected": "two weighted candidates exist but total0: RNGcalls0; only unconditional kind1 is returned, no weighted candidate selected"
+    },
+    {
+      "input": "fabricated kinds[1,2,0,0,0],weights[0,0,0,0,0]",
+      "expected": "weighted candidates exist but total0: RNGcalls0, outputcount0; never pick first candidate as a fallback"
+    },
+    {
+      "input": "fabricated kind10,weight100,argument0x1234",
+      "expected": "argument travels with four-byte effect; no truncation to effect-ID-only list"
+    }
+  ]
+}

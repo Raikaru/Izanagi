@@ -4,6 +4,7 @@
 #include "mod_save_hash.h"
 #include "save_image.h"
 #include "p4pc/save_import.h"
+#include "p4pc/hostpath.h"
 #include "p4pc/os.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -17,6 +18,19 @@ static P4ModSaveLoad *load;
 static int reset_pending;
 static P4SaveConfirmFn confirm_warning;
 static P4SaveErrorFn report_error;
+static int (*save_tainted)(void);
+
+int p4_mod_save_transport_fence(int (*tainted)(void))
+{
+    if (save.state || save_tainted || !tainted) return -1;
+    save_tainted = tainted;
+    return 0;
+}
+int p4_mod_save_transport_requires_stage(const char *card,const char *slot)
+{
+    return save_tainted && (!p4_save_transaction_staged(&save) || !card || !slot ||
+                            strcmp(card,save.card) || strcmp(slot,save.name));
+}
 static int fail(char *error,size_t cap,const char *reason)
 {
     if(cap)snprintf(error,cap,"%s",reason);
@@ -45,7 +59,7 @@ static int write_metadata(const char *name,const void *data,size_t size)
 {
     char path[P4_SAVE_PATH_CAP];
     if(p4_save_transaction_path(&save,name,path,sizeof path))return -1;
-    FILE *file=fopen(path,"wbx");if(!file)return -1;
+    FILE *file=p4_host_fopen(path,"wbx");if(!file)return -1;
     int bad=fwrite(data,1,size,file)!=size;
     if(fclose(file))bad=1;
     return bad?-1:0;
@@ -77,7 +91,7 @@ int p4_mod_save_transport_begin(const char *card,unsigned slot,const void *image
     int codec_active=p4_mod_save_needs_codec();
     P4ModSaveImage raw={.data=image,.size=size,.slot=save.name};
     if(codec_active&&p4_mod_save_capture_image(&raw,&capture,error,cap))goto bad;
-    if((!capture||!capture->sidecar_size)&&!old_custody&&!tagged)return 0;
+    if((!capture||!capture->sidecar_size)&&!old_custody&&!tagged&&!save_tainted)return 0;
     P4SavePairBinding binding={.retail_size=size};
     if(capture&&capture->sidecar_size){
         memcpy(binding.retail_hash,capture->retail_hash,32);
@@ -123,6 +137,10 @@ int p4_mod_save_transport_written(const char *card,const char *slot,const char *
     }
     files_written|=bit;
     if(bit!=4)return 0;
+    if(save_tainted&&save_tainted()){
+        p4_mod_save_transport_abort();
+        return fail(error,cap,"Save refused: an unknown writer modified protected Golden session state. Restart the game before saving.");
+    }
     int result=p4_save_transaction_commit(&save,error,cap);files_written=0;
     if(result)p4_mod_save_capture_free(capture);
     else p4_mod_save_capture_commit(capture);

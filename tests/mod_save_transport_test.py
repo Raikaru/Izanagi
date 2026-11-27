@@ -41,11 +41,13 @@ class NativeSaveTransport(unittest.TestCase):
             environment["P4PC_MOD_WITNESS"] = "1"
         return environment
 
-    def run_case(self, mode, *, witness=False, expected=0, source=None):
+    def run_case(self, mode, *, witness=False, expected=0, source=None, allow_skip=False):
         environment = self.environment(witness)
         result = subprocess.run([*DRIVER, mode, str(self.card), str(source or self.package.parent)],
                                 env=environment, capture_output=True, text=True,
                                 check=False, timeout=40)
+        if allow_skip and result.returncode == 77:
+            self.skipTest("C03 runtime guard needs a supported 64-bit platform")
         self.assertEqual(result.returncode, expected, result.stdout + result.stderr)
         if expected == 0:
             self.assertIn("synthetic filesystem/codec complete", result.stdout)
@@ -70,6 +72,37 @@ class NativeSaveTransport(unittest.TestCase):
         self.assertEqual(sorted(p.name for p in self.slot.iterdir()),
                          [SLOT, "icon.ico", "icon.sys"])
         self.assertEqual(len(self.raw.read_bytes()), 4100)
+        self.assert_no_journal()
+
+    def test_tainted_plain_save_is_staged_and_preserves_live_bytes(self):
+        self.run_case("plain")
+        before = {p.name: p.read_bytes() for p in self.slot.iterdir()}
+        result = self.run_case("fence-plain")
+        self.assertIn("unknown writer", result.stderr)
+        self.assertEqual(before, {p.name: p.read_bytes() for p in self.slot.iterdir()})
+        self.assert_no_journal()
+
+    def test_tainted_tagged_save_preserves_live_bytes(self):
+        self.run_case("required-write")
+        before = {p.name: p.read_bytes() for p in self.slot.iterdir()}
+        result = self.run_case("fence-tagged")
+        self.assertIn("unknown writer", result.stderr)
+        self.assertEqual(before, {p.name: p.read_bytes() for p in self.slot.iterdir()})
+        self.assert_no_journal()
+
+    def test_unknown_guard_writer_refuses_real_save(self):
+        self.run_case("plain")
+        before = {p.name: p.read_bytes() for p in self.slot.iterdir()}
+        result = self.run_case("guard-fence", allow_skip=True)
+        self.assertIn("unknown writer", result.stderr)
+        self.assertEqual(before, {p.name: p.read_bytes() for p in self.slot.iterdir()})
+        self.assert_no_journal()
+
+    def test_guarded_direct_write_without_intent_is_refused(self):
+        self.run_case("plain")
+        before = {p.name: p.read_bytes() for p in self.slot.iterdir()}
+        self.run_case("guard-direct")
+        self.assertEqual(before, {p.name: p.read_bytes() for p in self.slot.iterdir()})
         self.assert_no_journal()
 
     def test_new_load_intent_cancels_owned_stage_not_an_unrelated_read(self):

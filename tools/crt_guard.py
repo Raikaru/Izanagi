@@ -22,7 +22,9 @@ import crt_flow
 
 ROOT = Path(__file__).resolve().parents[1]
 # nm, objdump and the adapters' clang AST dumps run this many at a time; results are always consumed in object order.
-WORKERS = os.cpu_count() or 1
+# The container's CPU share (P4PC_JOBS), and no more workers than fit in half its memory at 1 GiB each: a worker holds one object's
+# AST dump and relocation tables and was measured up to 0.9 GiB resident (gen_port.worker_budget).
+WORKERS = gen_port.worker_budget(1024)
 # ISO C library entry points, including optional C11 Annex K spellings. Target
 # library exports supplement this catalog; unknown non-retail externals also fail.
 C_FUNCTIONS = set("""
@@ -352,7 +354,7 @@ def _object_facts(obj, flow, audited, objdump, coff32):
 def host_exports(paths, nm, coff32):
     names = set()
     for path in paths:
-        dynamic = not str(path).endswith(".a")
+        dynamic = Path(path).suffix.lower() not in (".a", ".lib")
         # Mach-O dylibs list their exports without -D; libSystem's .tbd stub carries its re-exported libraries inline
         extra = (["--add-inlinedinfo"] if str(path).endswith(".tbd") else []) if MACHO else (["-D"] if dynamic else [])
         out = subprocess.run([nm, "-P", "-g", "--defined-only", *extra, str(path)],

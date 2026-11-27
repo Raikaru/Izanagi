@@ -290,6 +290,39 @@ static inline void p4_vu0_ftoi(int dst, unsigned mask, int s)
     }
 }
 
+/* Packed single-precision versions (src/vu0.c, P4PC_VU0_SIMD): every call of the lane-by-lane helpers above goes to these instead, one packed operation and
+ * one bit-level fix-up for four lanes, with the same result bits in the EE float mode (the comment there has the argument; tests/vu0_helpers_test.c the
+ * proof). The helpers above stay defined (tests and the P4PC_VU0_SIMD=0 path use them); only their names are redirected. The declarations are out of
+ * line so that no vector code reaches the mirrored units. */
+#if defined(__SSE2__) || defined(__aarch64__)
+extern int p4pc_vu0_simd;
+void p4pc_vu0_simd_init(int on);
+void p4_vu0_mul_s(int dst, unsigned mask, int s, int t, int bc);
+void p4_vu0_add_s(int dst, unsigned mask, int s, int t, int bc);
+void p4_vu0_sub_s(int dst, unsigned mask, int s, int t, int bc);
+void p4_vu0_madd_s(int dst, unsigned mask, int s, int t, int bc);
+void p4_vu0_msub_s(int dst, unsigned mask, int s, int t, int bc);
+void p4_vu0_mulq_s(int dst, unsigned mask, int s);
+void p4_vu0_move_s(int dst, unsigned mask, int s);
+void p4_vu0_opmula_s(int s, int t);
+void p4_vu0_opmsub_s(int dst, int s, int t);
+void p4_vu0_itof_s(int dst, unsigned mask, int s);
+void p4_vu0_ftoi_s(int dst, unsigned mask, int s);
+#ifndef P4_VU0_NO_REDIRECT
+#define p4_vu0_mul(...) p4_vu0_mul_s(__VA_ARGS__)
+#define p4_vu0_add(...) p4_vu0_add_s(__VA_ARGS__)
+#define p4_vu0_sub(...) p4_vu0_sub_s(__VA_ARGS__)
+#define p4_vu0_madd(...) p4_vu0_madd_s(__VA_ARGS__)
+#define p4_vu0_msub(...) p4_vu0_msub_s(__VA_ARGS__)
+#define p4_vu0_mulq(...) p4_vu0_mulq_s(__VA_ARGS__)
+#define p4_vu0_move(...) p4_vu0_move_s(__VA_ARGS__)
+#define p4_vu0_opmula(...) p4_vu0_opmula_s(__VA_ARGS__)
+#define p4_vu0_opmsub(...) p4_vu0_opmsub_s(__VA_ARGS__)
+#define p4_vu0_itof(...) p4_vu0_itof_s(__VA_ARGS__)
+#define p4_vu0_ftoi(...) p4_vu0_ftoi_s(__VA_ARGS__)
+#endif
+#endif
+
 /* Bridges between VU registers and 128-bit memory/GPR values. */
 static inline void p4_vu0_lqc2(int dst, const void *addr)
 {

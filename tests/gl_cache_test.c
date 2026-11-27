@@ -10,6 +10,7 @@
 #include <SDL3/SDL.h>
 
 #include "p4gl_gl.h"
+#include "p4gl_rt.h"
 #include "p4gl_win.h"
 
 #ifndef GL_ARRAY_BUFFER_BINDING
@@ -72,6 +73,14 @@ int main(void)
         printf("gl_cache_test: GL entry points missing\n");
         return 77;
     }
+    if (SDL_getenv("P4PC_RENDER_THREAD") != NULL && SDL_getenv("P4PC_RENDER_THREAD")[0] == '1') {
+        /* the same cases with the driver calls on the render thread: the questions go through it too (they wait), so they see what it ran */
+        if (!p4gl_rt_start(window, ctx)) {
+            printf("gl_cache_test: the render thread did not start\n");
+            return 1;
+        }
+        getIntegerv = p4gl_glGetIntegerv;
+    }
 
     /* 1: a bound array buffer is deleted; the next buffer reuses the name (or not) and its bind must reach the driver */
     p4gl_glGenBuffers(1, &a);
@@ -115,6 +124,7 @@ int main(void)
     if (!bad) {
         printf("gl_cache_test: the filter tracks the driver's bindings through deletes\n");
     }
+    p4gl_rt_stop(1);
     SDL_GL_DestroyContext(ctx);
     SDL_DestroyWindow(window);
     SDL_Quit();

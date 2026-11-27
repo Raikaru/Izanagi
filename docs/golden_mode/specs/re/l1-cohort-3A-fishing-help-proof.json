@@ -1,0 +1,260 @@
+{
+  "proof_id": "L1-C3A-fishing-help-task-identity-20261113",
+  "scope": "One complete A-owned fishing HELP task identity/24PS2B; all three identified PS2 literal users and the corresponding three-entry manager are accounted for. No other fishing task identity, coefficient, callback-pointer table or minigame algorithm is admitted.",
+  "source_images": {
+    "steam": {
+      "build": 10836033,
+      "file": "P4G.exe",
+      "sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+      "data_section_bounds": {
+        "section": ".sdata",
+        "rva_start": "0x887000",
+        "size": 1674240,
+        "raw_start": 8936448
+      },
+      "code_witness_bounds": {
+        "section": ".shared",
+        "rva_start": "0x1000",
+        "size": 8934912,
+        "raw_start": 1536
+      },
+      "runtime_input": "Owned Steam install only; never require NSO or private research cache."
+    },
+    "switch": {
+      "version": "1.2",
+      "nso_sha256": "854c7a1e33de1619abf009fa7f32b8c012960d685c8bf1bf99a92a6a4d0bda1c",
+      "mapped_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+      "base": "0x7100000000",
+      "segments": [
+        {
+          "name": "text",
+          "file_offset": 257,
+          "mapped_offset": 0,
+          "decompressed_size": 5448752,
+          "compressed_size": 3719998,
+          "lz4_compressed": true
+        },
+        {
+          "name": "rodata",
+          "file_offset": 3720255,
+          "mapped_offset": 5451776,
+          "decompressed_size": 1870824,
+          "compressed_size": 990563,
+          "lz4_compressed": true
+        },
+        {
+          "name": "data",
+          "file_offset": 4710818,
+          "mapped_offset": 7323648,
+          "decompressed_size": 1606720,
+          "compressed_size": 439860,
+          "lz4_compressed": true
+        }
+      ],
+      "purpose": "Independent static structural witness, not runtime dependency."
+    }
+  },
+  "golden": {
+    "container": "P4G.exe",
+    "section": ".sdata",
+    "source_build": 10836033,
+    "rva": "0x91cff0",
+    "offset": 614384,
+    "raw_offset": 9550832,
+    "size": 15,
+    "sha256": "26adb4af7ed987bbb45c553d1b388843d337bdc9e94f50fefee2ea5ec7fe5779",
+    "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+    "mapping_proven": true,
+    "source_group": "L1-C3A-fishing-help-task-identity-20261113",
+    "corroborating_nso_address": "0x71005d5d2d",
+    "structural_reader_platform": "Switch1.2 ordinary code and original PS2 MIPS",
+    "nso_named_user_envelopes": [
+      "0x710012e0c0",
+      "0x710012e780",
+      "0x710012f730 (contains materialization sub-envelope12f75c)",
+      "0x71001328b0",
+      "0x7100133050",
+      "0x7100135f50"
+    ]
+  },
+  "structural_correspondence": "The PS2 and Golden complete HELP task constructors replace any old same-name task, allocate92->216B of owned work, install exactly three slot callbacks, and register a priority15 child. Their dispatchers test active bit1 for exactly three entries, invoke each callback with manager base and selected entry, clear active bit on nonzero completion, and return0. Original MIPS confirms24B entry stride/callback offsets14,2c,44; ordinary Golden dispatcher1327e0 uses56B stride and callback offsets20,58,90. This independently establishes a three-entry help-controller identity, not just equal spelling or a module label. Lookup/arm and gameplay prompt writers are additional old users of this same manager.",
+  "all_ps2_literal_users": [
+    "0x0024f080",
+    "0x0024f790",
+    "0x00250120"
+  ],
+  "ps2_roles": {
+    "0x0024f080": "Lookup/arm selected entry: active bit, counters/state reset and display mode2/4.",
+    "0x0024f790": "Fishing aim looks up entry1, writes direction and marks its prompt feedback flag.",
+    "0x00250120": "Replace HELP manager and create3-entry task; the separate DATA task initialization is context only."
+  },
+  "paired_dispatchers": {
+    "ps2": "0x0024efa0",
+    "nso": "0x71001327e0",
+    "count": 3,
+    "old_stride": 24,
+    "new_stride": 56,
+    "old_callback_offset": 20,
+    "new_callback_offset": 32,
+    "rule": "On flagbit0 invoke callback(base,entry); if result!=0 clearbit0; after all3 return0. Golden unrolls the loop."
+  },
+  "constructor_delta": {
+    "old_work_size": 92,
+    "golden_work_size": 216,
+    "old_callback_offsets": [
+      20,
+      44,
+      68
+    ],
+    "golden_callback_offsets": [
+      32,
+      88,
+      144
+    ],
+    "golden_callbacks": [
+      "0x710012f170",
+      "0x710012f730",
+      "0x7100130f00"
+    ],
+    "parent_change": "Golden13c7d0 is primary-task lookup only. Old285af0 also tried evtEdit. No behavioral equality is claimed for the fallback or extra work fields."
+  },
+  "query_evidence": "All51 materialized Golden HELP string reference PCs are recorded below. Six envelopes cover constructor/replacement, new staged setup, help display callbacks and expanded fishing-phase/prompt logic. These extra Golden users are not asserted one-to-one matches for PS2 functions. In particular12e780 is a time-gated new setup, not the generic old arm API; its3/5 low-bit display modes and counter resets provide context, not full equivalence.",
+  "nso_materialized_reference_pcs": [
+    "0x710012e168",
+    "0x710012e1c4",
+    "0x710012e79c",
+    "0x710012f7d4",
+    "0x710012f814",
+    "0x710012f844",
+    "0x710012f89c",
+    "0x710012fa74",
+    "0x710012fa94",
+    "0x710012fc18",
+    "0x710012fc40",
+    "0x7100130314",
+    "0x71001307f4",
+    "0x710013080c",
+    "0x7100130840",
+    "0x71001308ac",
+    "0x7100130904",
+    "0x7100130988",
+    "0x71001329f4",
+    "0x7100132a80",
+    "0x7100132e80",
+    "0x71001331dc",
+    "0x7100133290",
+    "0x7100133358",
+    "0x71001333a8",
+    "0x71001333c8",
+    "0x7100133498",
+    "0x7100133580",
+    "0x7100133a1c",
+    "0x7100133a9c",
+    "0x7100133ae8",
+    "0x7100133b18",
+    "0x7100133b44",
+    "0x7100134144",
+    "0x7100134524",
+    "0x7100134c50",
+    "0x7100134d30",
+    "0x71001353f4",
+    "0x710013554c",
+    "0x710013559c",
+    "0x7100135b30",
+    "0x7100135b4c",
+    "0x7100135b6c",
+    "0x7100135f6c",
+    "0x7100136018",
+    "0x7100136038",
+    "0x7100136074",
+    "0x71001360b8",
+    "0x7100136100",
+    "0x7100136144",
+    "0x7100136180"
+  ],
+  "code_witnesses": [
+    {
+      "platform": "ps2",
+      "start": "0x250120",
+      "end": "0x2502f0",
+      "size": 464,
+      "sha256": "29d9388507dd33c04142c1b0537a63983cf425f0c41c80bc916218bd3cf95328",
+      "boundary_kind": "Static function envelope; no runtime code-byte dependency"
+    },
+    {
+      "platform": "ps2",
+      "start": "0x24efa0",
+      "end": "0x24f040",
+      "size": 160,
+      "sha256": "3d41c894f4532c2901084131c97358f11e6d0310ba0361bc5576ef948b44d60e",
+      "boundary_kind": "Static function envelope; no runtime code-byte dependency"
+    },
+    {
+      "platform": "ps2",
+      "start": "0x24f040",
+      "end": "0x24f080",
+      "size": 64,
+      "sha256": "1167137e839193a7ae760176e24285964c7ac62e48777f313b063ea906f0275f",
+      "boundary_kind": "Static function envelope; no runtime code-byte dependency"
+    },
+    {
+      "platform": "switch",
+      "start": "0x710012e0c0",
+      "end": "0x710012e200",
+      "size": 320,
+      "sha256": "a774b30bd8d6b9da1a3f0c8f83caaf1df41a19fe8ff5660ef2b9d980a0c39ea3",
+      "boundary_kind": "Static function envelope; no runtime code-byte dependency"
+    },
+    {
+      "platform": "switch",
+      "start": "0x710012e780",
+      "end": "0x710012e840",
+      "size": 192,
+      "sha256": "327d2ef05c6899b7d23d0c95a0c216df153d8b76aeef8914ff5cdcbab9e0f476",
+      "boundary_kind": "Static function envelope; no runtime code-byte dependency"
+    },
+    {
+      "platform": "switch",
+      "start": "0x71001327e0",
+      "end": "0x7100132890",
+      "size": 176,
+      "sha256": "f5b738761163eb883571cf1fb118636d756d9f09743b576973935eeee0150c3a",
+      "boundary_kind": "Static function envelope; no runtime code-byte dependency"
+    },
+    {
+      "platform": "switch",
+      "start": "0x7100132890",
+      "end": "0x71001328b0",
+      "size": 32,
+      "sha256": "fc0a2bfa218c17fcc826048df8c24ceb5d7f7446340024a99c8851c0ed06d0c7",
+      "boundary_kind": "Static function envelope; no runtime code-byte dependency"
+    }
+  ],
+  "required_seams": [
+    {
+      "ps2_address": "0x0024f080",
+      "symbol": "func_0024f080",
+      "requirement": "Install the complete15B sealed Steam cmmFishingHELP identity and retain9PS2 tail bytes; cover all three listed PS2 literal users and every translated/inlined/compiled-native copy. Replacement registration, lookup, arming and prompt writes must use one identity and qualified task/work ownership. Golden constructor parent lookup is primary evtEvent only (13c7d0), unlike old285af0 event-or-editor fallback; do not invent that fallback in Golden mode. Preserve three-entry dispatcher active/callback/completion protocol, but do not widen/copy216B native work over92B guest work, apply56B indices to24B guest records, or assume other state/layout/gameplay equivalence. Native/translated prompt/state routing must bind deliberately; no arbitrary new reset, clamp or fallback. Runtime remains pending-seam; NSO/private cache are static witnesses only.",
+      "proof": "l1-cohort-3A-fishing-help-proof.json"
+    },
+    {
+      "ps2_address": "0x0024f790",
+      "symbol": "func_0024f790",
+      "requirement": "Install the complete15B sealed Steam cmmFishingHELP identity and retain9PS2 tail bytes; cover all three listed PS2 literal users and every translated/inlined/compiled-native copy. Replacement registration, lookup, arming and prompt writes must use one identity and qualified task/work ownership. Golden constructor parent lookup is primary evtEvent only (13c7d0), unlike old285af0 event-or-editor fallback; do not invent that fallback in Golden mode. Preserve three-entry dispatcher active/callback/completion protocol, but do not widen/copy216B native work over92B guest work, apply56B indices to24B guest records, or assume other state/layout/gameplay equivalence. Native/translated prompt/state routing must bind deliberately; no arbitrary new reset, clamp or fallback. Runtime remains pending-seam; NSO/private cache are static witnesses only.",
+      "proof": "l1-cohort-3A-fishing-help-proof.json"
+    },
+    {
+      "ps2_address": "0x00250120",
+      "symbol": "func_00250120",
+      "requirement": "Install the complete15B sealed Steam cmmFishingHELP identity and retain9PS2 tail bytes; cover all three listed PS2 literal users and every translated/inlined/compiled-native copy. Replacement registration, lookup, arming and prompt writes must use one identity and qualified task/work ownership. Golden constructor parent lookup is primary evtEvent only (13c7d0), unlike old285af0 event-or-editor fallback; do not invent that fallback in Golden mode. Preserve three-entry dispatcher active/callback/completion protocol, but do not widen/copy216B native work over92B guest work, apply56B indices to24B guest records, or assume other state/layout/gameplay equivalence. Native/translated prompt/state routing must bind deliberately; no arbitrary new reset, clamp or fallback. Runtime remains pending-seam; NSO/private cache are static witnesses only.",
+      "proof": "l1-cohort-3A-fishing-help-proof.json"
+    }
+  ],
+  "installation": {
+    "kind": "prefix-copy",
+    "live_size": 15,
+    "retain_ps2_tail": 9,
+    "requirement": "Install the complete15B sealed Steam cmmFishingHELP identity and retain9PS2 tail bytes; cover all three listed PS2 literal users and every translated/inlined/compiled-native copy. Replacement registration, lookup, arming and prompt writes must use one identity and qualified task/work ownership. Golden constructor parent lookup is primary evtEvent only (13c7d0), unlike old285af0 event-or-editor fallback; do not invent that fallback in Golden mode. Preserve three-entry dispatcher active/callback/completion protocol, but do not widen/copy216B native work over92B guest work, apply56B indices to24B guest records, or assume other state/layout/gameplay equivalence. Native/translated prompt/state routing must bind deliberately; no arbitrary new reset, clamp or fallback. Runtime remains pending-seam; NSO/private cache are static witnesses only."
+  },
+  "runtime_status": "pending-seam"
+}

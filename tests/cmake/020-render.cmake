@@ -15,6 +15,10 @@ add_executable(content_mips_test content_mips_test.c
   "${CMAKE_SOURCE_DIR}/src/render/p4content_mips.c")
 target_include_directories(content_mips_test PRIVATE "${CMAKE_SOURCE_DIR}/src/render")
 add_test(NAME content_mips COMMAND content_mips_test)
+add_executable(alpha_pass_cull_test alpha_pass_cull_test.c)
+target_include_directories(alpha_pass_cull_test PRIVATE "${CMAKE_SOURCE_DIR}/src/render")
+target_link_libraries(alpha_pass_cull_test m)
+add_test(NAME alpha_pass_cull COMMAND alpha_pass_cull_test)
 add_executable(content_image_test content_image_test.c
   "${CMAKE_SOURCE_DIR}/src/platform/mods/p4content_image.c"
   "${CMAKE_SOURCE_DIR}/third_party/miniz/miniz.c"
@@ -60,7 +64,7 @@ add_test(NAME png_writer COMMAND png_writer_test)
 # header, one triangle read back from an RGBA8 framebuffer object, and the picture as a PNG in the build directory. Skipped (exit 77) where
 # the machine gives no context; the macOS CI requires the ES path on ANGLE (P4PC_REQUIRE_GLES=1, docs/platform/macos.md).
 add_executable(gles_context_smoke gles_context_smoke.c ${P4_PNG_SOURCES} "${P4_OS_SRC}"
-  "${CMAKE_SOURCE_DIR}/src/render/p4gl_gl.c" "${CMAKE_SOURCE_DIR}/src/render/p4gl_profile.c")
+  "${CMAKE_SOURCE_DIR}/src/render/p4gl_gl.c" "${CMAKE_SOURCE_DIR}/src/render/p4gl_rt.c" "${CMAKE_SOURCE_DIR}/src/render/p4gl_profile.c")
 target_include_directories(gles_context_smoke PRIVATE "${CMAKE_SOURCE_DIR}/src/render" "${CMAKE_SOURCE_DIR}/src/viewer")
 target_compile_definitions(gles_context_smoke PRIVATE ${P4_PORT_DEFINES})
 target_link_libraries(gles_context_smoke m ${P4_SDL3_LIB})
@@ -91,7 +95,8 @@ set_tests_properties(render_smoke PROPERTIES SKIP_RETURN_CODE 77 LABELS gl)
 add_test(NAME render_smoke_gl33 COMMAND "${CMAKE_COMMAND}" -E env P4PC_GL_API=gl $<TARGET_FILE:render_smoke> "${CMAKE_BINARY_DIR}/render_smoke_gl33.png")
 add_test(NAME render_smoke_es30 COMMAND "${CMAKE_COMMAND}" -E env P4PC_GL_API=gles MESA_GLES_VERSION_OVERRIDE=3.0 P4PC_GLES_BORDER=shader
   $<TARGET_FILE:render_smoke> "${CMAKE_BINARY_DIR}/render_smoke_es30.png")
-set_tests_properties(render_smoke_gl33 render_smoke_es30 PROPERTIES SKIP_RETURN_CODE 77 LABELS gl)
+add_test(NAME render_smoke_rt COMMAND "${CMAKE_COMMAND}" -E env P4PC_RENDER_THREAD=1 $<TARGET_FILE:render_smoke> "${CMAKE_BINARY_DIR}/render_smoke_rt.png")
+set_tests_properties(render_smoke_gl33 render_smoke_es30 render_smoke_rt PROPERTIES SKIP_RETURN_CODE 77 LABELS gl)
 add_test(NAME renderer_reference_scope COMMAND "${P4_PYTHON}"
   "${CMAKE_CURRENT_SOURCE_DIR}/renderer_scope_test.py"
   $<TARGET_FILE:render_smoke> "${CMAKE_BINARY_DIR}/renderer_reference_scope.png")

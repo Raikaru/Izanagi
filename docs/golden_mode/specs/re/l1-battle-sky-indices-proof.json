@@ -1,0 +1,26 @@
+{
+  "schema":1,
+  "proof_id":"L1-c12-battle-sky-index-topology",
+  "decision":"PROVEN",
+  "runtime_status":"pending-seam",
+  "address":"0x0060a140",
+  "ps2_size":720,
+  "live_size":708,
+  "retained_tail":{"offset":708,"size":12,"observed":"all zero in the selected PS2 partition; not part of the118 index triples"},
+  "steam":{"container":"P4G.exe","section":".xpdata","rva":"0xa2f300","raw_offset":10672896,"section_offset":62208,"size":708,"sha256":"7a07c06e7f6e78e76adfe4f401f2d52ed935a31d36ed1eb325802c0725732ccd"},
+  "nso":{"got":"0x71008806a0","relocation_target":"0x710071b4d0","size":708,"sha256":"7a07c06e7f6e78e76adfe4f401f2d52ed935a31d36ed1eb325802c0725732ccd"},
+  "shape":{"rows":1,"vertices_per_row":89,"triangles_per_row":118,"indices_per_triangle":3,"index_width":2,"index_count":354,"stride":6,"maximum_observed_index":88,"geometry_flags":"0x4c"},
+  "ps2_call":"Original ELF1b6714..1b6730 sets a0=1,a1=76hex,a2=59hex,a3=60a140,t0=4chex and calls482f70 at1b672c. Original factory instructions48303c/483048/483054 load u16+0/+2/+4;483088 increments element cursor by3 and483090/483094 bounds the loop. The pinned typed reader corroborates triangleCount*3 elements. PS2 triangle destination advances8 bytes at483084.",
+  "steam_call":"Ordinary .shared b8430 sets edx=76hex; b843c forms r9=a2f300; b8443 supplies4chex flags on stack; b844b derives rowCount1 and b844e derives vertexCount59hex from that118 count; b8452 calls52dde0. The resulting actual geometry/texture is stored and used by the surrounding named-sky path, including vertex/UV/color buffers. The Steam factory body was not recovered from its initial listing; no protected implementation or byte-identical geometry ABI is asserted.",
+  "nso_call":"601d0..601e8 loads GOT8806a0 into x3, supplies rowCount1,triangles76hex,vertices59hex,flags4chex and calls35fc40. RELATIVE relocation gives actual source71b4d0, not a guessed adjacent data window.",
+  "nso_reader":"35fc40..35fde0: counts are masked to low16;35fd50 forms three indices per triangle;35fd64..35fd70 loads u16+0/+2/+4;35fd8c advances index element cursor by3;35fd94/98 bounds it by118*3. With one row, firstVertex is0. Exactly354u16/708B are consumed. Golden triangle output advances6B at35fd90, unlike the8B PS2 RenderWare triangle destination; that output structure must not be memcpy-converted.",
+  "identity_and_extent":"The complete708B source independently agrees in Steam, NSO and PS2; maximum index88 fits the actual89 vertices. Agreement supports, but does not replace, actual caller/role/bounded index-reader correspondence. The next12 Steam bytes are59750001000000000000803f; next12 NSO bytes are0080bbc4000000000080bb44. They are not this index source. Earlier M2 matches715/720 bytes and references at source+712 overread the logical object; they do not authorize a720-byte source copy.",
+  "install":"Copy708B of the qualified Golden u16 index table to60a140; retain selected+708..719. Rebind all native/inlined table aliases to the same118-triple Golden source. No new canonical row is added for the separate sky vertex/UV data or retained tail.",
+  "required_seams":[
+    {"ps2_addresses":["0x001b6120","0x00482f70"],"action":"Route guest/native/inlined sky-table use to the qualified708B Golden source, not the old720-byte M2 probe. Preserve one row,118 triangles,89 vertices, index width2/stride6 and4chex flags; no fixed empty mesh or silently dropped triangles. Cover compiled-native static arrays as well as guest memory."},
+    {"action":"Use the real named sky resource/texture graph and formation/variant state from l1-battle-named-resources-proof.json. Preserve conditional creation only when the actual background resource is found, plus real geometry/material/texture ownership and teardown. Do not force a synthetic sky or treat a filename/table copy as a renderer qualification."},
+    {"action":"Project the actual Golden geometry builder and its six-byte triangle outputs to the native backend; original PS2 outputs are eight-byte RenderWare triangles. Preserve real vertex/UV/white-color/lighting producers and current renderer lifetime. This index-only admission does not qualify every neighboring geometry table, GP coefficient, widened work field or native rendering operation."}
+  ],
+  "source_boundary":"Steam10836033 ordinary.shared caller and file-backed.xpdata data, Switch1.2 ordinary NSO caller/reader and static relocation, original PS2 ELF and pinned typed reader context. No.arch decoding or game/emulator execution; source proof is not a verify/objdiff or runtime match claim.",
+  "reproduction":"Private l1c12_sky_indices.py, l1c12_sky_index_calls.py and l1c12_sky_index_proof.py under <scratch>/GoldenRE-notes/l1. Complete708B equality/hash, maximum index, zero PS2tail, original call arguments and actual original u16 loop, independent NSO relocation and bounded Golden triangle loop were observed; source assertions passed. Generic MIPS decoding of unrelated R5900 save opcodes is not evidence."
+}

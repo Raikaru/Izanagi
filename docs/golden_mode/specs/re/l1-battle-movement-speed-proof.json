@@ -1,0 +1,55 @@
+{
+  "schema":1,
+  "proof_id":"L1-c12-battle-movement-speed",
+  "address":"0x005f6d20",
+  "ps2_size":24,
+  "decision":"PROVEN",
+  "runtime_status":"pending-seam",
+  "ps2":{
+    "source":"decomp18016afe6 src/Battle/btlAction_inferred_001a0670.c:343-344; btlAction_inferred_001a1450.c:2244-2269,2400-2424; btlAction_inferred_001b0020.c:148-169",
+    "record_layout":"include/btl_character_camera_internal.h establishes character row stride232, side record stride4, speed-indexu16 at+36/+40",
+    "reader_addresses":["0x001a0f40","0x001a4c80","0x001a5650","0x001b0020"],
+    "role":"Action movement speed coefficient selected by defaultindex2 for ordinary units, or the enemy character/skill-side speed index; forwarded to real movement packet creation."
+  },
+  "golden":{
+    "container":"P4G.exe",
+    "build":10836033,
+    "section":".sdata",
+    "rva":"0x90a970",
+    "raw_offset":9475440,
+    "size":20,
+    "sha256":"45a0c3a0a0401415c2543e1a006b0e94c527eaf220cbb00bf7bf2e88b41831aa",
+    "independent_nso_address":"0x710062a0d0",
+    "layout":"five little-endianf32 coefficients:0.5,0.75,1.0,1.5,2.0",
+    "live_equal_ps2":true,
+    "reader":"ordinarySteam .shared47f70..47fee",
+    "reader_contract":"action.unit at+56; genusbyte+162; defaultspeedindex2. For genus1 obtain skillflags from stride44 skill row indexedbyactionhalfword+174, select side(!(flags&2)); obtaincharacterIDfromunit.datUnit+2; character rowstride232 and side*4; readu16speedindexat+36. Loadf32table[index]at47fdd/47fe4. No clamp is present.",
+    "nso_reader_witnesses":[
+      {"address":"0x71000117cc..0x7100011824","role":"same enemy rowstride232 and sidebit, speedindexu16+36, indexedf32 load; defaultbranchindex2"},
+      {"address":"0x710001b478..0x710001b4c0","role":"same return-to-anchor selector; indexedf32 load followedbyactualmovementpacket68cf0(unit,target,speed,0)"},
+      {"address":"0x710000b66c..0x710000b684","role":"defaultindex2 typedf32 read forwardedtomovementpacket"},
+      {"address":"0x7100011b94..0x7100011bbc","role":"defaultindex2 typedf32 read, then separatefloatmultiplier3f89999a, thenmovementpacket; multiplierisnotpartofthisfive-entrytable"}
+    ]
+  },
+  "extent_proof":"The fivef32 Steam/NSO span is20B and complete, equaltoPS2first20B. NSO+20 starts a distinct indexedu32 skill/cue-ID family at62a0e4 (eb64..eb7c typedwordload forwardedwithkind2 to637c0), with subsequentdistinctroots62a0f0/62a108. The PS2 partition'slast4B arezero alignmenttail. The Steam24B candidate includes anadjacent2.0scalar; it is NOTsixspeedcoefficients. Nevercopy24B or treatNSOnextword0x3a2asasixthfloat.",
+  "layout":{
+    "kind":"prefix-copy",
+    "live_size":20,
+    "rows":5,
+    "stride":4,
+    "retained_tail":{"offset":20,"size":4},
+    "tail_policy":"retain-PS2"
+  },
+  "required_seams":[
+    {"ps2_addresses":["0x001a0f40","0x001a4c80","0x001a5650","0x001b0020"],"action":"Bindallmovementcoefficientreadstothequalified20Bprefix,includingtranslated/inlined/nativecompiledcopies; retain4PS2tailbytes. EnsureactualpacketcreationreceivestheGoldenf32value,notaretainednativestatictable."},
+    {"action":"Preserveliveaction.unitgenus,DatUnitcharacterID,actionskillIDandloadedskillflagproducer. Golden skillrowsstride44; enemycharacterrowsstride232; speedindexu16at36+4*side. QualificationmustsupplyactualpublishedGoldenbanksfortheseinputs,notdefaultindex2forallunits."},
+    {"action":"Defaultindex2andvalidenemyindices0..4usefivecoefficientvalues. Readerhasnoclamp; do notinventfallback/clampingorreadcandidatepaddingforotherindices. Runtimequalificationmustestablishtherealproducer'svalid-indexdomainbeforecallingthisroutebound."},
+    {"action":"Preservemovementtargetpositions,unitanchors,packetUID/queueownershipandanyseparatelyobservedcallermultiplier. ThisproofdoesnotadmitanadditionalGPconstantorclaimidenticalmovementtimingfromequalcoefficients."}
+  ],
+  "synthetic_vectors":[
+    {"input":"ordinaryunitdefaultindex2","coefficient":1.0},
+    {"input":"enemyproducedindex0","coefficient":0.5},
+    {"input":"enemyproducedindex4","coefficient":2.0}
+  ],
+  "qualification":"Staticsource/read/extentcorrespondenceonly; noruntimemovement,test,game,emulator,BBVorprotected.archdecode. Nochanged-balanceclaim:thefivequalifiedcoefficientsareunchanged."
+}

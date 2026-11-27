@@ -22,6 +22,9 @@ dir=$2
 case "$dir" in
   */sdl) mkdir -p "$dir/android-project" ;;
   */ffmpeg)
+    # the HCA window patch (ci/ffmpeg-7.1.1-hca-window-alignment.patch, applied with git apply --unidiff-zero) edits line 65 of this file
+    mkdir -p "$dir/libavcodec"
+    awk 'BEGIN { for (i = 1; i < 65; i++) print "/* line " i " */"; print "static const float window[128] =" }' > "$dir/libavcodec/hca_data.h"
     cat > "$dir/configure" <<'CONFIGURE'
 #!/bin/sh
 printf '%s\n' configure >> "$TEST_ROOT/ffmpeg-count"

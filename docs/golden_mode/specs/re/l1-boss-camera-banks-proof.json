@@ -1,0 +1,256 @@
+{
+  "schema": 1,
+  "proof_id": "L1-c12-boss-camera-banks",
+  "decision": "PROVEN",
+  "runtime_status": "pending-seam",
+  "source_boundary": "Steam build10836033 ordinary .shared readers and file-backed .xpdata; independent Switch1.2 NSO. No .arch decode or runtime observation.",
+  "ps2_source": "decomp18016afe6 src/Battle/btlBoss_inferred_0022b0b0.c and btlVoice_inferred.c; include/btl_boss_internal.h",
+  "sources": [
+    {
+      "address": "0x0062a5f0",
+      "steam_rva": "0xaea0f0",
+      "live_size": 1868,
+      "sha256": "cfcd3eeedab90456c9acb7a5edcee8300b33a1346a356cd10d8c0e0d2f01ed0c",
+      "ps2_live_equal": true,
+      "nso": "0x70257c",
+      "nso_unique": true,
+      "nso_sites": [
+        "0x71000031d0",
+        "0x710000217c",
+        "0x71000033d0"
+      ],
+      "ps2_size": 1872,
+      "ps2_tail_bytes": 4,
+      "steam_raw_offset": 11438320,
+      "nso_address": "0x710070257c",
+      "next_nso_bank_address": "0x7100702cc8"
+    },
+    {
+      "address": "0x0062ad40",
+      "steam_rva": "0xaee1c0",
+      "live_size": 1868,
+      "sha256": "15fea024174d606bb6db8a9180abeca3dfef2f74f1c9973ac39ae2dd52192d0d",
+      "ps2_live_equal": true,
+      "nso": "0x708ba4",
+      "nso_unique": true,
+      "nso_sites": [
+        "0x71000031e8",
+        "0x71000035f8"
+      ],
+      "ps2_size": 1872,
+      "ps2_tail_bytes": 4,
+      "steam_raw_offset": 11454912,
+      "nso_address": "0x7100708ba4",
+      "next_nso_bank_address": "0x71007092f0"
+    },
+    {
+      "address": "0x0062b490",
+      "steam_rva": "0xaecc00",
+      "live_size": 1868,
+      "sha256": "d4ac239823fd1ce9fbb57201a86dcd1e6d2a63d762a96f780932be82d43a9814",
+      "ps2_live_equal": true,
+      "nso": "0x702cc8",
+      "nso_unique": true,
+      "nso_sites": [
+        "0x7100002198",
+        "0x7100003400",
+        "0x71000031dc"
+      ],
+      "ps2_size": 1872,
+      "ps2_tail_bytes": 4,
+      "steam_raw_offset": 11449344,
+      "nso_address": "0x7100702cc8",
+      "next_nso_bank_address": "0x7100703414"
+    },
+    {
+      "address": "0x0062ca80",
+      "steam_rva": "0xaf2ad0",
+      "live_size": 1868,
+      "sha256": "e901728fcbcc512e1f33e34d7c198bb21ed3e60dd52ecc4b1dd83b6d5d6e8ab0",
+      "ps2_live_equal": true,
+      "nso": "0x703414",
+      "nso_unique": true,
+      "nso_sites": [
+        "0x71000021c0"
+      ],
+      "ps2_size": 1872,
+      "ps2_tail_bytes": 4,
+      "steam_raw_offset": 11473616,
+      "nso_address": "0x7100703414",
+      "next_nso_bank_address": "0x7100703b60"
+    },
+    {
+      "address": "0x0062e7c0",
+      "steam_rva": "0xaeda40",
+      "live_size": 1868,
+      "sha256": "bac1c6e2bc09079c4157cad2caf9f2c2a0733aaae70abb91ddc9b400090ee8eb",
+      "ps2_live_equal": true,
+      "nso": "0x7049f8",
+      "nso_unique": true,
+      "nso_sites": [
+        "0x710000223c"
+      ],
+      "ps2_size": 1872,
+      "ps2_tail_bytes": 4,
+      "steam_raw_offset": 11452992,
+      "nso_address": "0x71007049f8",
+      "next_nso_bank_address": "0x7100705144"
+    },
+    {
+      "address": "0x00630500",
+      "steam_rva": "0xaea840",
+      "live_size": 1868,
+      "sha256": "f18e82f8522a5078a69964a567d5e1db76f49546e77ac19b547e33bd15ef4115",
+      "ps2_live_equal": true,
+      "nso": "0x706728",
+      "nso_unique": true,
+      "nso_sites": [
+        "0x7100002110"
+      ],
+      "ps2_size": 1872,
+      "ps2_tail_bytes": 4,
+      "steam_raw_offset": 11440192,
+      "nso_address": "0x7100706728",
+      "next_nso_bank_address": "0x7100706e74"
+    }
+  ],
+  "selector_correspondence": [
+    {
+      "ps2": "0x0022bd60",
+      "steam": "ordinary selector0x3f420..0x3f6a9; dispatch table3f6ac",
+      "switch": "0x7100002090..0x710000239c; dispatch table629df1",
+      "role": "encounter IDs202/203/204/207/20b select banks62a5f0/62b490/62ca80/62e7c0/630500 respectively;20b is distinguished from215 before storing the pointer; all converge on the same boss-bank field"
+    },
+    {
+      "ps2": "0x0022db90",
+      "steam": "0x40560..0x40620",
+      "switch": "0x7100003180..0x7100003208",
+      "role": "active boss gate, unit genus1; unit IDs102/103/10d select62a5f0/62b490/62ad40 respectively;110/111 select other banks, not claimed as selected rows here"
+    },
+    {
+      "ps2": "0x0022dc70",
+      "steam": "0x40630..0x40e9c",
+      "switch": "0x7100003210 onward; selected-bank materializations33d0/3400/35f8",
+      "role": "packet-dependent bank reselection corroborates the first three identities independently of encounter setup"
+    }
+  ],
+  "layout": {
+    "kind": "mixed boss-camera record bank, not a homogeneous 36x52 array",
+    "live_size": 1868,
+    "tail_bytes": 4,
+    "pose_record": {
+      "size": 52,
+      "fields": "u16 duration at+0; position/target f32 triples at+4/+16 and+28/+40; duration divided by30"
+    },
+    "observed_regions": [
+      {
+        "offset": "0x3a8",
+        "role": "party-position*104+random-variant*52 pose pairs"
+      },
+      {
+        "offset": "0x548",
+        "role": "two random-variant poses"
+      },
+      {
+        "offset": "0x5b0",
+        "role": "two random-variant poses"
+      },
+      {
+        "offset": "0x618",
+        "role": "status fallback pose"
+      },
+      {
+        "offset": "0x64c",
+        "role": "two random-variant poses"
+      },
+      {
+        "offset": "0x6b4",
+        "size": 24,
+        "role": "fixed eye/target vectors, duration0.75"
+      },
+      {
+        "offset": "0x6cc",
+        "size": 24,
+        "role": "immediate fixed eye/target vectors"
+      },
+      {
+        "offset": "0x6e4",
+        "size": 52,
+        "role": "recorded pose"
+      },
+      {
+        "offset": "0x718",
+        "size": 52,
+        "role": "final status-dependent pose, ending at0x74c"
+      }
+    ],
+    "extent_proof": "The final live pose reads its second target triple at+0x740, so its last byte is+0x74b. NSO next distinct bank bases are exactly+0x74c (e.g.70257c->702cc8->703414->703b60); Steam next unrelated globals may start+0x74c rather than at the PS2 0x750 partition. Never copy the final four candidate-window bytes.",
+    "same_live_values": "All six complete1868-byte Steam spans equal the independently selected NSO spans and the corresponding PS2 live spans. Equality corroborates, but selectors and typed consumers establish identity."
+  },
+  "typed_consumer_evidence": [
+    {
+      "switch": "0x71000062e0..0x710000637c",
+      "role": "bank+random*52+64c, vector offsets+4/+16/+28/+40, u16 frames/30"
+    },
+    {
+      "switch": "0x71000063d4..0x7100006430",
+      "role": "bank+6e4, same typed pose fields"
+    },
+    {
+      "switch": "0x7100006930..0x71000069b4",
+      "role": "final pose718; two look-at calls with targets728/740;u16 duration718/30"
+    },
+    {
+      "switch": "0x71000084c0..0x7100008510",
+      "role": "fixed6cc/6d8 eye-target vectors"
+    },
+    {
+      "switch": "0x7100008564..0x71000085b4",
+      "role": "fixed6b4/6c0 eye-target vectors and0.75duration"
+    },
+    {
+      "switch": "0x710000877c..0x7100008818",
+      "role": "party-order*104+variant*52+3a8; same frame/vector typing"
+    }
+  ],
+  "required_seams": [
+    {
+      "action": "Bind the complete 1868-byte mixed boss-camera bank selected through BtlBattleState.boss.recordTable (PS2 battle+0xb98; Steam+0x1100; Switch+0x1118). Preserve the four PS2 inventory-tail bytes, not the next Golden object."
+    },
+    {
+      "ps2_addresses": [
+        "0x0022bd60",
+        "0x0022db90",
+        "0x0022dc70",
+        "0x0022b120",
+        "0x00229c40"
+      ],
+      "action": "Cover encounter initialization, unit-specific reselection, packet-triggered reselection and transformation/sequence restoration. Preserve the demonstrated encounter/unit selector identities; do not initialize the bank once and ignore later writers."
+    },
+    {
+      "ps2_addresses": [
+        "0x00225ec0",
+        "0x00226c40",
+        "0x00227230",
+        "0x002277e0",
+        "0x00227e40",
+        "0x002282d0",
+        "0x002284d0",
+        "0x00228580",
+        "0x002286c0",
+        "0x00228800",
+        "0x00228890",
+        "0x00228a80",
+        "0x00228d50",
+        "0x00228f60",
+        "0x00229020",
+        "0x00229c40"
+      ],
+      "action": "Cover every boss-record camera read, including alternate branches of party-camera functions, translated/inlined reads and native static copies. Existing non-boss camera-script proofs do not cover these alternate branches."
+    },
+    {
+      "action": "Live inputs retain their producer contracts: current encounter ID, action.unit genus/character ID, active boss/battle flags, status bits, current party ordering and independent RNG draws. Native copies must agree byte-for-byte with the qualified source. No replacement of live selectors by defaults."
+    }
+  ],
+  "qualification": "Structural source proof only; no runtime binding, changed gameplay claim, build, unit test, game or emulator execution."
+}

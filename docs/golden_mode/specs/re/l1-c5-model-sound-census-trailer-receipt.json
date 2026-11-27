@@ -1,0 +1,339 @@
+{
+  "proof_id": "L1-C5-native-SE-trailer-census-20261113",
+  "kind": "census-tooling-coverage-repair",
+  "canonical_row_admissions": 0,
+  "scope": "Main-authorized Python RE/census tooling only; no runtime port changes.",
+  "format_rule": {
+    "variant": "pak-v2 little-endian",
+    "all_declared_members_valid": true,
+    "max_opaque_trailer": 16,
+    "other_families": "unchanged",
+    "existing_zero_padding": "unchanged",
+    "metadata": "trailer offset/size/hex/SHA256; no member payload bytes exported"
+  },
+  "verification": {
+    "commands": [
+      "<python>/python.exe tests/golden_mode_formats_test.py",
+      "<python>/python.exe tests/golden_mode_inventory_test.py",
+      "<python>/python.exe <scratch>/GoldenRE-notes/l1/c5_cue_recensus.py"
+    ],
+    "results": {
+      "format_tests": 15,
+      "inventory_tests": 7,
+      "failed_tests": 0,
+      "newly_recognized_containers": 3,
+      "new_children": 9
+    },
+    "fixture_policy": "Synthetic bc007/bc007_c1/bc008 shapes only, not retail bytes; malformed names/count/member lengths,17-byte nonzero tails and v3 widening remain rejected."
+  },
+  "inference_policy": "New census coverage and equal active-cell counts are not row-source admissions or actor/costume identity proofs.",
+  "census": {
+    "containers": 4,
+    "newly_recognized_containers": 3,
+    "added_children": 9,
+    "deltas": [
+      {
+        "path": "data.cpk::model/pack/bc007.pac::bc007.se",
+        "before_kind": null,
+        "after_kind": "pak-v2",
+        "before_children": 0,
+        "after_children": 3,
+        "added_children": 3,
+        "cue_member": {
+          "path": "data.cpk::model/pack/bc007.pac::bc007.se::bc007.bin",
+          "size": 3072,
+          "sha256": "aa9a51aa3f395f2b282f22d767793cc8a7d0a883de0ca8b602d3f5f72a0196d5",
+          "rows": 32,
+          "columns": 8,
+          "cell_stride": 12,
+          "active_cells": 15
+        },
+        "trailer": {
+          "offset": 214800,
+          "size": 16,
+          "hex": "85082a40a0bc82412a7d200ce36ddd6c",
+          "sha256": "b028d8a569065b4e7e784923a16c78199b3398cb75f4b73b12e6ac6e5621afce"
+        }
+      },
+      {
+        "path": "data.cpk::model/pack/bc007_c1.pac::bc007_c1.se",
+        "before_kind": null,
+        "after_kind": "pak-v2",
+        "before_children": 0,
+        "after_children": 3,
+        "added_children": 3,
+        "cue_member": {
+          "path": "data.cpk::model/pack/bc007_c1.pac::bc007_c1.se::bc007_c1.bin",
+          "size": 3072,
+          "sha256": "12ed058756c8b2b1272dd411445b079f340174e885f76f2024e4217d1a5e5c62",
+          "rows": 32,
+          "columns": 8,
+          "cell_stride": 12,
+          "active_cells": 15
+        },
+        "trailer": {
+          "offset": 202416,
+          "size": 16,
+          "hex": "00000064002702271000280400000064",
+          "sha256": "778fb821767dafe403fc9ea0121afb6cf2662c0220155840eeb7d5b8e088fde1"
+        }
+      },
+      {
+        "path": "data.cpk::model/pack/bc008.pac::bc008.se",
+        "before_kind": null,
+        "after_kind": "pak-v2",
+        "before_children": 0,
+        "after_children": 3,
+        "added_children": 3,
+        "cue_member": {
+          "path": "data.cpk::model/pack/bc008.pac::bc008.se::bc008.bin",
+          "size": 3072,
+          "sha256": "5b2cee58262369fe52057310bd895cad4e2d1f81b12d86f3cdc3efb600dbd035",
+          "rows": 32,
+          "columns": 8,
+          "cell_stride": 12,
+          "active_cells": 24
+        },
+        "trailer": {
+          "offset": 284784,
+          "size": 16,
+          "hex": "6f017670cad14acac9c56f26eeeecf28",
+          "sha256": "3c0017ebe67d46c31331cd86a429a5f9abbbd88adff860bd0290b2fcaae5b533"
+        }
+      },
+      {
+        "path": "data.cpk::model/pack/bc008_c1.pac::bc008_c1.se",
+        "before_kind": "pak-v2",
+        "after_kind": "pak-v2",
+        "before_children": 3,
+        "after_children": 3,
+        "added_children": 0,
+        "cue_member": {
+          "path": "data.cpk::model/pack/bc008_c1.pac::bc008_c1.se::bc008_c1.bin",
+          "size": 3072,
+          "sha256": "1c242bfeb562363d0e74ddc4fb90db8ce04a2a8437f5053ee49d865992c3cbb1",
+          "rows": 32,
+          "columns": 8,
+          "cell_stride": 12,
+          "active_cells": 24
+        },
+        "trailer": {
+          "offset": 262864,
+          "size": 16,
+          "hex": "00000000000000000000000000000000",
+          "sha256": "374708fff7719dd5979ec875d56cd2286f6d3cf7ec317a3b25632aab28ec37bb"
+        }
+      }
+    ],
+    "rows": [
+      {
+        "path": "data.cpk::model/pack/bc007.pac::bc007.se",
+        "depth": 2,
+        "container": "pak-v2",
+        "stored": 214816,
+        "compressed": false,
+        "size": 214816,
+        "sha256": "49a60afdd024321e6c399728afb74b85e765c1fcf560c146e198e36a34608a06",
+        "signature": "magic:03000000",
+        "magic": "03000000",
+        "kind": "pak-v2",
+        "children": 3,
+        "trailer": {
+          "offset": 214800,
+          "size": 16,
+          "hex": "85082a40a0bc82412a7d200ce36ddd6c",
+          "sha256": "b028d8a569065b4e7e784923a16c78199b3398cb75f4b73b12e6ac6e5621afce"
+        }
+      },
+      {
+        "path": "data.cpk::model/pack/bc007.pac::bc007.se::bc007.acb",
+        "depth": 3,
+        "container": "pak-v2",
+        "stored": 82976,
+        "compressed": false,
+        "size": 82976,
+        "sha256": "fd53963dd7fe2650531dba07cb86e8e403daf903de54645180763eca53976ec8",
+        "signature": "cri-utf",
+        "magic": "40555446"
+      },
+      {
+        "path": "data.cpk::model/pack/bc007.pac::bc007.se::bc007.bin",
+        "depth": 3,
+        "container": "pak-v2",
+        "stored": 3072,
+        "compressed": false,
+        "size": 3072,
+        "sha256": "aa9a51aa3f395f2b282f22d767793cc8a7d0a883de0ca8b602d3f5f72a0196d5",
+        "signature": "magic:ffffff00",
+        "magic": "ffffff00"
+      },
+      {
+        "path": "data.cpk::model/pack/bc007.pac::bc007.se::bc007_e.acb",
+        "depth": 3,
+        "container": "pak-v2",
+        "stored": 128640,
+        "compressed": false,
+        "size": 128640,
+        "sha256": "83bdd3da80edcdd97803d05d11e11b58bd0fc9ceb3bf588913fb63f854892bbc",
+        "signature": "cri-utf",
+        "magic": "40555446"
+      },
+      {
+        "path": "data.cpk::model/pack/bc007_c1.pac::bc007_c1.se",
+        "depth": 2,
+        "container": "pak-v2",
+        "stored": 202432,
+        "compressed": false,
+        "size": 202432,
+        "sha256": "f83e3278b4109fa4a3a55f05cbaee031a3f15ceaca6b6af59d47243931c3716d",
+        "signature": "magic:03000000",
+        "magic": "03000000",
+        "kind": "pak-v2",
+        "children": 3,
+        "trailer": {
+          "offset": 202416,
+          "size": 16,
+          "hex": "00000064002702271000280400000064",
+          "sha256": "778fb821767dafe403fc9ea0121afb6cf2662c0220155840eeb7d5b8e088fde1"
+        }
+      },
+      {
+        "path": "data.cpk::model/pack/bc007_c1.pac::bc007_c1.se::bc007_c1.acb",
+        "depth": 3,
+        "container": "pak-v2",
+        "stored": 78144,
+        "compressed": false,
+        "size": 78144,
+        "sha256": "236e3204607dd0dc400f3d8169c739b55b3bf0081c2f365ed112347fd24dbdf6",
+        "signature": "cri-utf",
+        "magic": "40555446"
+      },
+      {
+        "path": "data.cpk::model/pack/bc007_c1.pac::bc007_c1.se::bc007_c1.bin",
+        "depth": 3,
+        "container": "pak-v2",
+        "stored": 3072,
+        "compressed": false,
+        "size": 3072,
+        "sha256": "12ed058756c8b2b1272dd411445b079f340174e885f76f2024e4217d1a5e5c62",
+        "signature": "magic:ffffff00",
+        "magic": "ffffff00"
+      },
+      {
+        "path": "data.cpk::model/pack/bc007_c1.pac::bc007_c1.se::bc007_c1_e.acb",
+        "depth": 3,
+        "container": "pak-v2",
+        "stored": 121088,
+        "compressed": false,
+        "size": 121088,
+        "sha256": "6982d8d741e38bbcbb5293bbfbc38a2a695557f5c694a4b140ad8c07ea19fb8f",
+        "signature": "cri-utf",
+        "magic": "40555446"
+      },
+      {
+        "path": "data.cpk::model/pack/bc008.pac::bc008.se",
+        "depth": 2,
+        "container": "pak-v2",
+        "stored": 284800,
+        "compressed": false,
+        "size": 284800,
+        "sha256": "8a2838087ccc3be347065eef563cd6bc348d54f1ca5b8ab098363c853f73bc3e",
+        "signature": "magic:03000000",
+        "magic": "03000000",
+        "kind": "pak-v2",
+        "children": 3,
+        "trailer": {
+          "offset": 284784,
+          "size": 16,
+          "hex": "6f017670cad14acac9c56f26eeeecf28",
+          "sha256": "3c0017ebe67d46c31331cd86a429a5f9abbbd88adff860bd0290b2fcaae5b533"
+        }
+      },
+      {
+        "path": "data.cpk::model/pack/bc008.pac::bc008.se::bc008.acb",
+        "depth": 3,
+        "container": "pak-v2",
+        "stored": 94720,
+        "compressed": false,
+        "size": 94720,
+        "sha256": "0420e1ad107bb3e68ff36c5b245d1cb145ba89bda8705b1beeaa2c493a1566b0",
+        "signature": "cri-utf",
+        "magic": "40555446"
+      },
+      {
+        "path": "data.cpk::model/pack/bc008.pac::bc008.se::bc008.bin",
+        "depth": 3,
+        "container": "pak-v2",
+        "stored": 3072,
+        "compressed": false,
+        "size": 3072,
+        "sha256": "5b2cee58262369fe52057310bd895cad4e2d1f81b12d86f3cdc3efb600dbd035",
+        "signature": "magic:ffffff00",
+        "magic": "ffffff00"
+      },
+      {
+        "path": "data.cpk::model/pack/bc008.pac::bc008.se::bc008_e.acb",
+        "depth": 3,
+        "container": "pak-v2",
+        "stored": 186880,
+        "compressed": false,
+        "size": 186880,
+        "sha256": "98a7c1f353aac4383f2a833d5a810b545699f54a5abfc642a78a4d32489b1f74",
+        "signature": "cri-utf",
+        "magic": "40555446"
+      },
+      {
+        "path": "data.cpk::model/pack/bc008_c1.pac::bc008_c1.se",
+        "depth": 2,
+        "container": "pak-v2",
+        "stored": 262880,
+        "compressed": false,
+        "size": 262880,
+        "sha256": "b4cf7428d6e2c2285c0eadf2a345c5d88bcdb84e4ae1ef76dcee9639f08163b3",
+        "signature": "magic:03000000",
+        "magic": "03000000",
+        "kind": "pak-v2",
+        "children": 3,
+        "trailer": {
+          "offset": 262864,
+          "size": 16,
+          "hex": "00000000000000000000000000000000",
+          "sha256": "374708fff7719dd5979ec875d56cd2286f6d3cf7ec317a3b25632aab28ec37bb"
+        }
+      },
+      {
+        "path": "data.cpk::model/pack/bc008_c1.pac::bc008_c1.se::bc008_c1.acb",
+        "depth": 3,
+        "container": "pak-v2",
+        "stored": 91264,
+        "compressed": false,
+        "size": 91264,
+        "sha256": "ce6a67b10024dd858a670848fb9a412bed4f34eae0e89631d8c3495be8c837de",
+        "signature": "cri-utf",
+        "magic": "40555446"
+      },
+      {
+        "path": "data.cpk::model/pack/bc008_c1.pac::bc008_c1.se::bc008_c1.bin",
+        "depth": 3,
+        "container": "pak-v2",
+        "stored": 3072,
+        "compressed": false,
+        "size": 3072,
+        "sha256": "1c242bfeb562363d0e74ddc4fb90db8ce04a2a8437f5053ee49d865992c3cbb1",
+        "signature": "magic:ffffff00",
+        "magic": "ffffff00"
+      },
+      {
+        "path": "data.cpk::model/pack/bc008_c1.pac::bc008_c1.se::bc008_c1_e.acb",
+        "depth": 3,
+        "container": "pak-v2",
+        "stored": 168416,
+        "compressed": false,
+        "size": 168416,
+        "sha256": "0cc65c9cb2b20cbb4ba97f4a8cded9659dfd77dc004ea3e5a8c25632186dcd99",
+        "signature": "cri-utf",
+        "magic": "40555446"
+      }
+    ]
+  }
+}

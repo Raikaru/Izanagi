@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "p4pc/hostpath.h"
 
 #include "p4pc/gmem.h"
 #include "p4pc/guest.h"
@@ -733,9 +734,9 @@ static void *dump_atomic(void *atomic, void *data)
 
 int p4_model_viewer_dump(void *clump)
 {
-    const char *path = getenv("P4PC_VIEWER_DUMP");
+    const char *path = p4_host_getenv("P4PC_VIEWER_DUMP");
     if (!path || !*path) return 0;
-    FILE *f = clump ? fopen(path, "w") : NULL;
+    FILE *f = clump ? p4_host_fopen(path, "w") : NULL;
     if (!f) {
         fprintf(stderr, "p4pc_viewer: cannot write %s\n", path);
         return -1;

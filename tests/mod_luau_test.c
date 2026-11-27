@@ -294,7 +294,7 @@ static void damage_witness(P4LuaMod *mod, const P4PackageProvider *other_provide
         .target_side = P4_DAMAGE_SIDE_ENEMY, .target_id = 258, .origin_side = P4_DAMAGE_SIDE_ENEMY,
         .origin_id = 258, .hit_kind = P4_DAMAGE_HIT_WEAK, .element_valid = 1, .element_id = 1,
         .resolved = 1, .stock = 100, .source_status = 0x2, .target_status = 0x10,
-        .origin = P4_DAMAGE_ORIGIN_SKILL, .source_persona = 0x2a, .source_persona_level = 31};
+        .origin = P4_DAMAGE_ORIGIN_SKILL, .source_persona = 0x2a, .source_persona_level = 31, .target_side_leaf = 27};
     CHECK(p4_game_damage_count() == 0 && p4_game_damage_apply(&hit) == 100);
     run(mod, "p4.damage.on{kind='divide', fn=function() end}", 0);
     run(mod, "p4.damage.on{kind='add'}", 0);
@@ -315,6 +315,7 @@ static void damage_witness(P4LuaMod *mod, const P4PackageProvider *other_provide
         " assert(h.source_side=='party' and h.source_id==1 and h.target_side=='enemy' and h.target_id==258)\n"
         " assert(h.origin_side=='enemy' and h.origin_id==258 and h.hit_kind=='weak' and h.element==1)\n"
         " assert(h.resolved and not h.reflected and h.stock==100 and h.source_status==2 and h.target_status==0x10)\n"
+        " assert(h.target_side_ailment==26)\n"
         " assert(h.origin=='skill' and h.source_persona==0x2a and h.source_persona_level==31)\n"
         " assert(not pcall(function() h.stock=1 end))\n"
         " assert(not pcall(p4.damage.on, {kind='add', fn=function() end}))\n"
@@ -1211,6 +1212,17 @@ static int witness(int argc, char **argv)
     run(mod, "p4.mem.write('f32',a+16,1.000000059604644775390625); assert(p4.mem.read('u32',a+16)==0x3f800000)", 1);
     CHECK(fegetround() == FE_DOWNWARD);
     fesetround(rounding);
+    /* LZ-NaN: a NaN written to guest memory is the canonical quiet NaN whatever sign the arithmetic gave it;
+     * finite values, infinities and signed zeros are written unchanged. */
+    run(mod, "local z=0; local n=z/z; local m=-n\n"
+        "p4.mem.write('f32',a+16,n); assert(p4.mem.read('u32',a+16)==0x7fc00000)\n"
+        "p4.mem.write('f32',a+16,m); assert(p4.mem.read('u32',a+16)==0x7fc00000)\n"
+        "p4.mem.write('f64',a+24,n); assert(p4.mem.read('u32',a+24)==0 and p4.mem.read('u32',a+28)==0x7ff80000)\n"
+        "p4.mem.write('f64',a+24,m); assert(p4.mem.read('u32',a+24)==0 and p4.mem.read('u32',a+28)==0x7ff80000)\n"
+        "p4.mem.write('f64',a+24,-1/z); assert(p4.mem.read('u32',a+28)==0xfff00000)\n"
+        "p4.mem.write('f32',a+16,-1/z); assert(p4.mem.read('u32',a+16)==0xff800000)\n"
+        "p4.mem.write('f64',a+24,-0.0); assert(p4.mem.read('u32',a+28)==0x80000000)\n"
+        "p4.mem.write('f32',a+16,1.25); assert(p4.mem.read('f32',a+16)==1.25)", 1);
     run(mod, "scratch:release(); assert(view.value==-17); view.value=-18; assert(view.value==-18); scratch=nil", 1);
     lua_gc(mod->state, LUA_GCCOLLECT, 0);
     run(mod, "assert(view.value==-18)", 1);

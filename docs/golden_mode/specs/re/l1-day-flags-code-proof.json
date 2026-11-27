@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "proof_id": "L1c-day-flags-unrolled-code-source",
+  "decision": "PROVEN-code",
+  "runtime_status": "pending-seam",
+  "owner_authorization": "Main2026-11-13: code-derived constants from Switch NSO are approved D1 RE sources; implementer authors Golden-mode constants when Steam has no corresponding literal table. Missing Steam corroboration is explicit, not an absence proof.",
+  "ps2": {
+    "address": "0x005e4610",
+    "size": 32,
+    "live_entries": 6,
+    "live_bytes": 24,
+    "alignment_tail_bytes": 8,
+    "source": "decomp18016afe6 src/unplaced/unplaced_inferred_00110850.c:375-466",
+    "readers": ["0x001110e0", "0x00111160", "0x00111200", "0x00111290"],
+    "default_initializer": "0x00111050",
+    "layout": "six s32 flag IDs, followed by two unused s32 inventory-tail words; low six mask bits, bit31 saved-mask validity"
+  },
+  "golden": {
+    "source": "Switch1.2 ordinary NSO code, approved under D1",
+    "source_kind": "unrolled-immediate-flag-list",
+    "steam_corroboration": "not established; Steam .sdata RVA90c578 has57..64, which is not this10-ID list and is rejected as a source",
+    "flag_ids_hex": ["0x39", "0x3a", "0x3b", "0x3c", "0x3d", "0x3e", "0x1003", "0x1474", "0x1477", "0x1476"],
+    "default_states": [1, 1, 0, 1, 1, 0, 1, 0, 0, 1],
+    "mask_bits": 10,
+    "saved_validity_bit": 31,
+    "saved_mask_nso_address": "0x7104a4be68",
+    "post_write_override": {
+      "helper": "0x71002a8090",
+      "evidence": "ordinary four-instruction leaf: loadw1 from0x7104a70c38, movw0,1474, tail-call flag setter2e30d0; Romwright worker confirms Boolean set/clear",
+      "effect": "After defaults and mask write/restore, flag1474 (mask bit7) is overwritten from the live signed32 state at0x7104a70c38, nonzero means set. Thus final bit7 is NOT generally the supplied/default mask bit7.",
+      "state_owner": "Golden network-feature enable/session latch. All observed direct writers, initialization, config/load rehydration and network-dialog/operation transitions are specified in l1-network-sidecar-lifecycle.json; no PS2 field counterpart is identified."
+    },
+    "sidecar_lifecycle_proof": "l1-network-sidecar-lifecycle.json",
+    "helper_roles": {
+      "0x71002e2fd0": "read flag",
+      "0x71002e2ff0": "set flag",
+      "0x71002e3060": "clear flag",
+      "0x71002e30d0": "set flag from Boolean state"
+    },
+    "evidence": [
+      {"address":"0x7100275700..0x71002757ac","role":"default initializer sets ten ordered mask flags and then flag0802=1, calls2a8090; nonzero clearSavedMask argument clears saved mask"},
+      {"address":"0x71002757b0..0x7100275888","role":"reads the same ordered ten IDs, converts nonzero to bit1, packs bits0..9; order independently agrees with defaults and restore"},
+      {"address":"0x7100275890..0x71002759a0","role":"tests bits0..9 and sets/clears matching flag IDs; both final branches tail-call2a8090"},
+      {"address":"0x71002759b0..0x71002759cc","role":"capture calls2757b0, ORs80000000, stores saved mask"},
+      {"address":"0x71002759d0..0x7100275a10","role":"restore tests bit31; valid calls275890, invalid calls275700(1); both clear saved mask"}
+    ]
+  },
+  "binding": {
+    "kind": "authored-Golden-mode-code-constant-and-semantic-mask-expansion",
+    "copy_to_ps2_image": false,
+    "required_seams": [
+      {"ps2_address":"0x001110e0","action":"Read all ten ordered Golden flags into bits0..9; do not truncate to original six bits."},
+      {"ps2_address":"0x00111160","action":"Write all ten ordered Golden flags from mask bits, then overwrite flag1474 from the live external state at NSO4a70c38 via the demonstrated2a8090 role."},
+      {"ps2_address":"0x00111200","action":"Capture all ten bits, OR bit31 validity and store saved mask; cover inlined six-entry loops."},
+      {"ps2_address":"0x00111290","action":"If saved bit31 is set restore all ten flags; otherwise apply Golden defaults; clear saved mask afterwards."},
+      {"ps2_address":"0x00111050","action":"Golden defaults use the ten listed initial states; set separate flag0802=1, then overwrite1474 from the live external state. Clear saved mask only when requested."},
+      {"action":"Author the approved ten-ID constant only in Golden mode; leave six-entry PS2 behavior and eight inventory-tail bytes unchanged. No Steam90c578 byte copy, no eight-ID57..64 substitute, no wholesale PS2 flag-namespace rewrite."},
+      {"action":"Post-update helper2a8090 sets1474 from the Golden-only network sidecar. Implement every writer/initializer/load/config/dialog/operation seam in l1-network-sidecar-lifecycle.json. Do not substitute zero or inputmaskbit7; process initialization is zero, later observed writers supersede it."}
+    ]
+  },
+  "synthetic_vectors": [
+    {"input":"only flag1003 set; external post-write state0","expected":"read mask0x40; capture0x80000040; restore sets flag1003 and clears other nine mask flags"},
+    {"input":"only flag1476 set","expected":"read mask0x200, not zero or a six-bit truncated value"},
+    {"input":"all ten flags set","expected":"read mask0x3ff; capture0x800003ff"},
+    {"input":"saved mask invalid, external post-write state0","expected":"final default mask0x25b, plus separate0802=1; saved mask cleared"},
+    {"input":"saved mask invalid, external post-write state1","expected":"initial default mask0x25b then post-write override sets bit7: final mask0x2db; separate0802=1"},
+    {"input":"write mask0x80, external post-write state0","expected":"1474 is first set by mask, then cleared by post-write helper; final mask0"}
+  ],
+  "qualification": "Static instruction/source-role proof only. No runtime tests, game execution, Steam .arch decoding or game bytes/instruction listings committed.2a8090 effect and sidecar writer lifecycle are established; runtime lifecycle binding remains pending implementation and qualification."
+}

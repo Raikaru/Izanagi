@@ -1,0 +1,10 @@
+{
+  "milestone": "M6c-1",
+  "baseline": "8414978b2b6b26687242d0a9ce323cd1043053ef",
+  "specification_cut": "c8987ecc75e843c875bd1d5c3db19bc4c7d23ba7",
+  "provenance_sanitation_commit": "2dd82cb48cc7081971cac284dac450ff8c8e19c9",
+  "new_bindings": ["0x0063c660", "0x0076151c"],
+  "remaining_native_drivers": "M6c-2",
+  "external_seam_owners": ["M8f", "M10", "M11"],
+  "later_source_batches": "next sub-milestone; not admitted by this cut"
+}

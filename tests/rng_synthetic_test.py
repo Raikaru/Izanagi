@@ -25,6 +25,9 @@ class SyntheticRngTest(unittest.TestCase):
             self.skipTest("C compiler unavailable")
         rp = (ROOT / "overrides/003b7060.c").read_text()
         seed = (ROOT / "overrides/003b6f00.c").read_text()
+        # the overrides call the Golden native hooks; the synthetic reference runs the retail generator, so those hooks are declined here
+        rp = rp.replace('#include "p4pc/golden_ai_native.h"\n', "")
+        seed = seed.replace('#include "p4pc/golden_ai_native.h"\n', "")
         for offset in (12, 8, 4):
             for slot in ("blk", "iGpffffb618"):
                 rp = rp.replace(f"{slot} + {offset})", f"{slot} + {offset // 4} * sizeof(void *))")
@@ -40,6 +43,8 @@ int p4pc_align_rng_calls_enabled;
 void p4pc_rng_value(u32 draw, u32 value) {(void)draw; (void)value;}
 void p4pc_rng_note(s32 value) {(void)value;}
 void p4pc_align_rng_call(u32 draw, const void *caller) {(void)draw; (void)caller;}
+int p4_golden_ai_native_random(u32 *value) {(void)value; return 0;}
+int p4_golden_ai_native_seed(u32 seed) {(void)seed; return 0;}
 ''' + rp + "\n" + seed + r'''
 int main(void) {
     u32 words[31] = {0};

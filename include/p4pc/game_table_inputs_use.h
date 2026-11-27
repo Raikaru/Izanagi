@@ -2,6 +2,7 @@
 #define P4PC_GAME_TABLE_INPUTS_USE_H
 #include "p4pc/game_table_inputs.h"
 struct P4GameTableSources;
+struct P4TableSourceOrigin;
 typedef struct P4GameTableNativeUses P4GameTableNativeUses;
 /* One actual prepared input/source context's optional native provenance block.
  * Register before Load; inputs, stable borrowed array and sealed source ledger
@@ -11,6 +12,9 @@ typedef struct P4GameTableNativeUses P4GameTableNativeUses;
 int p4_game_table_native_uses_prepare(P4GameTableInput *const *inputs, size_t count,
     const struct P4GameTableSources *sealed_sources, P4GameTableNativeUses **out);
 int p4_game_table_native_uses_destroy(P4GameTableNativeUses *);
+/* Core image publication only: mark an exact origin pointer issued by this
+ * sealed owner, after authenticating real loaded bytes. Never string lookup. */
+int p4_game_table_native_origin_use(P4GameTableNativeUses *, const struct P4TableSourceOrigin *);
 /* Runtime authored-row use: exact view/domain/five-ID tuple resolves only from
  * the same immutable source ledger owned by this native-use context. Package
  * use and issued NATIVE_MODE use share the actual provider/optional history

@@ -1,0 +1,295 @@
+{
+  "schema": 1,
+  "proof_id": "L1-c12-battle-genus-motion-id-map",
+  "decision": "PROVEN",
+  "runtime_status": "pending-seam",
+  "address": "0x005f6ca0",
+  "ps2_size": 96,
+  "ps2": {
+    "base": "0x005f6ca0",
+    "rows": 3,
+    "columns": 30,
+    "stride": 30,
+    "element_width": 1,
+    "live_size": 90,
+    "sha256": "5bd5518614c86a759a611c62ee80ae8a1843f3abf4dccf67928705920defeef4",
+    "retained_tail": {
+      "offset": 90,
+      "size": 6,
+      "observed": "000000000000"
+    }
+  },
+  "steam": {
+    "container": "P4G.exe",
+    "section": ".sdata",
+    "rva": "0x90ae60",
+    "raw_offset": 9476704,
+    "offset": 540256,
+    "size": 102,
+    "sha256": "a929b0f17557703ff08bb93424abe97ed145444960325bfe786a21735e2647cb",
+    "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+    "mapping_proven": true,
+    "source_build": 10836033
+  },
+  "nso": {
+    "base": "0x710062d790",
+    "size": 102,
+    "sha256": "a929b0f17557703ff08bb93424abe97ed145444960325bfe786a21735e2647cb",
+    "addressing": "Direct ADRP+ADD materialization, not a GOT or guessed neighboring data window."
+  },
+  "golden_shape": {
+    "rows": 3,
+    "columns": 34,
+    "stride": 34,
+    "element_width": 1,
+    "maximum_stored_value": 31,
+    "values": [
+      [
+        0,
+        2,
+        14,
+        13,
+        3,
+        4,
+        5,
+        6,
+        0,
+        16,
+        17,
+        18,
+        15,
+        7,
+        8,
+        9,
+        10,
+        1,
+        13,
+        19,
+        20,
+        22,
+        21,
+        12,
+        11,
+        6,
+        23,
+        24,
+        25,
+        26,
+        28,
+        29,
+        30,
+        31
+      ],
+      [
+        0,
+        3,
+        2,
+        1,
+        4,
+        4,
+        0,
+        4,
+        5,
+        8,
+        9,
+        10,
+        7,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        11,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        1,
+        2,
+        3,
+        4,
+        0,
+        5,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    ],
+    "role": "unit.genus0/1/2 x low16 logical motion -> unsigned model motion-slot index"
+  },
+  "extent_and_identity": "Original199138..19915c forms genus*30+low16motion and LBU from5f6ca0. Steamc6a4c..c6b31 dispatches actual genera0/1/2 and reads byte from90ae60+genus*34+low16motion; actual NSO6ac30..6ac60 and6a468..6a47c independently materialize62d790 and perform the same34-byte-stride byte lookup. Actual NSO type100 packet6b3b8..6b3c0 accepts unsigned motion0..33, rejecting34/ffff. Together these establish complete3*34/102B Golden source and3*30/90B old view, not the old96B probe, nor a guessed32-column shape. Full102B uniquely agrees in the two Golden images. Following bytes are separate data; Steam102B end90aec6 has2zero alignment bytes then a pointer table at90aec8; NSO end62d7f6 is followed by a different small-byte sequence.",
+  "projection": [
+    {
+      "genus": 0,
+      "source_offset": 0,
+      "guest_offset": 0,
+      "size": 30
+    },
+    {
+      "genus": 1,
+      "source_offset": 34,
+      "guest_offset": 30,
+      "size": 30
+    },
+    {
+      "genus": 2,
+      "source_offset": 68,
+      "guest_offset": 60,
+      "size": 30
+    }
+  ],
+  "changed_values": [
+    {
+      "genus": 2,
+      "logical_motion": 5,
+      "ps2": 5,
+      "golden": 0
+    },
+    {
+      "genus": 2,
+      "logical_motion": 6,
+      "ps2": 0,
+      "golden": 5
+    },
+    {
+      "genus": 2,
+      "logical_motion": 7,
+      "ps2": 1,
+      "golden": 0
+    }
+  ],
+  "new_logical_motions": {
+    "ids": [
+      30,
+      31,
+      32,
+      33
+    ],
+    "genus0_slots": [
+      28,
+      29,
+      30,
+      31
+    ],
+    "genus1_slots": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "genus2_slots": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "reader_correspondence": {
+    "original": "Actual original1990e8..19915c selects genus, calls formation override22cb90 for genus1, and otherwise reads u8 from5f6ca0+genus*30+(motion&ffff); actual199168..199198 checks stateflagC4/100, genus0, unitID A4==1 and motion1 to return1c. Pinned btlUnitGetMotionId1990d0 and five frame/follow/model/table/hit consumers1991c0/199350/199500/1996d0/1999f0 use the same source. Old type100 motion callback199e70 accepts0..29.",
+    "steam": "Complete ordinary.sharedc6a30..c6b5a resolves actual unit genus+A2/ID+A4. Genus0/2 use static map; genus1 first follows actual battle dynamic formation mapping and overrides. c6b16 multiplies genus by22hex, c6b20 materializes90ae60, c6b31 MOVZX reads byte; C8 flag100/genus0/ID1/motion1 yields1c atc6b4b. Other genera return0 at the resolver, not permission to force every dependent frame consumer to0. Instrumentation881a04 was not followed.",
+    "nso": "Actual6ac20..6ad3c maps real unit genreA2 and low16motion, direct3*34 source at6ac4c..6ac60; actualC8/100,ID A4==1,motion1 override1c; genus1 calls23a0 and falls back only on low16ffff. Actual6ad40..6ae64 repeats this for follow frames,6ae70 default/table field reader and6afa0 hit interval reader independently repeat typed mapping. Other inlined setup/cost consumers are observed at the eleven direct materialization sites below; model-fields.md already traces their savedC50 motion-pointer fields.",
+    "formation_override": "Complete NSO23a0..2438: non-genus1 or missing battle+11e0 map pointer returnsffff; ID110/111/10d directly reads the real dynamic map[low16motion]. Other IDs first use signed per-motion override byte battle+11b8+motion if nonnegative, otherwise dynamic map byte. ID10f on logical0/12hex returns0b when battleword11e8!=3, otherwise dynamic map. Ordinary Steamc6a7b..c6b14 independently uses corresponding battle+11c8 map/+11a0 overridebytes/+11d0 word and the same IDs/conditions. No missing-map fabrication or constant default map is allowed.",
+    "model_motion_producers": "Use established model-fields.md actual initializer6f000: genus0 MODEL0 row+3c publishes unit+C50 and count32 at+C34, not27 legacy slots. Actual setup6a3f0 reads loadedbit98/2, current logical+C2a, rate/state/C8, maps slot through this source and validates against real count; then motion-state+C28 bit40 can force actual model slot27 at6a5b0..6a5c4. Static genus0 table has no27 mapping, but this does NOT make slot27 unreachable or absent. Real setup/model/animation/frame and resource lifetime remain required; not an index-only implementation."
+  },
+  "observed_nso_materialization_sites": [
+    "0x7100067f74",
+    "0x710006a02c",
+    "0x710006a46c",
+    "0x710006a9fc",
+    "0x710006ab08",
+    "0x710006ac50",
+    "0x710006ad70",
+    "0x710006aed4",
+    "0x710006b034",
+    "0x710006dd38",
+    "0x710006de18"
+  ],
+  "layout": {
+    "kind": "row-prefix-transcode",
+    "ps2_rows": 3,
+    "ps2_columns": 30,
+    "ps2_stride": 30,
+    "golden_rows": 3,
+    "golden_columns": 34,
+    "golden_stride": 34,
+    "element_width": 1,
+    "selected_live_size": 90,
+    "retained_tail": {
+      "offset": 90,
+      "size": 6
+    },
+    "copy_policy": "For genus g0..2 copy Golden[g*34:g*34+30] to selected+g*30; preserve selected+90..95. Native/direct/inlined consumers must use coherent full3x34 source and actual expanded motion producers, not the truncated3x30 image projection. Never prefix-copy90/96/102B or overwrite beyond the96B selected object."
+  },
+  "required_seams": [
+    {
+      "owner": "Qualified loaded boss map source and exact override initialization",
+      "requirement": "The applicable real encounter map supplier is now separately qualified by l1-battle-boss-motion-map-proof.json: SteamAECBD8/NSO6FFA74, full34B, logical27->18. Preserve actual branch-conditioned battle11C8/NSO11E0 publication, phase/mode word11D0/11E8 and exact34-byte signed ff override reset11A0/11B8. Do not use the generic3x34 fallback as this loaded map, force publication in other encounters, retain old30-byte resets, or freeze later override/phase writers. Bind the new map's real producer/state/lifecycle contracts together with this generic map before runtimebound."
+    },
+    {
+      "owner": "Static genus-motion supplier and expanded logical domain",
+      "ps2_addresses": [
+        "0x001990d0",
+        "0x001991c0",
+        "0x00199350",
+        "0x00199500",
+        "0x001996d0",
+        "0x001999f0"
+      ],
+      "requirement": "Seal full102B Steam90ae60/image hashes, provide one actual3x34u8 Golden bank to direct/translated/native/compiled-inline aliases and all eleven observed NSO-equivalent sites. Guest projected view copies30B per genus from source0/34/68 to destination0/30/60 and retains6old alignment bytes; never use a flat96B M2 copy. Preserve actual low16 logical IDs, type100 packet unsigned0..33 domain and native/new-motion producers30..33; no guessed32-column schema or invented clamp in the unchecked getter."
+    },
+    {
+      "owner": "Real unit and formation mapping producers",
+      "requirement": "Bind actual unit genusA2/ID A4, stateflagsC8/100 and their real construction/reset/mutation lifecycles. Genus0ID1motion1 flag100 selects28; otherwise use exact qualified bytes, including changed genus2 motions5/6/7. Genus1 needs actual loaded formation map pointer, signed override byte array, special IDs10d/10f/110/111, dynamic mode word3 and supported motion-input producer. Preserve actualffff missing-formation sentinel/fallback, loaded-map byte values and extra special0/12hex->0b branch. Implement real resource/model/battle setup writers and teardown, not null/zero/default formation maps or synthetic unit state."
+    },
+    {
+      "owner": "Model motion rows, packet and native consumer semantics",
+      "requirement": "Preserve actual loaded model, countC34 and saved motion pointerC50, all real genus-specific MODEL.TBL/formation rows and per-consumer signed10B rate/frame/interval fields. Genus0 has32 real model slots; logical motion30..33 maps28..31, and separate setupC28/40 can force27. Bind real state-bit writers, model-resource creation/load/reset/release, queued motion/rate/options and packet start/update/cleanup/counters. Preserve each actual default/model-key-time/negative interval/rate and conversion behavior, not generic frame0/rate100, empty models, forced success or a constant slot. This data proof does not qualify all motion-renderer/body semantics; require mode isolation plus actual guest/native/inline producer/consumer witnesses before runtimebound."
+    }
+  ],
+  "source_verification": {
+    "script": "<scratch>/GoldenRE-notes/l1/l1c12_motion_proof.py",
+    "observed_result": "exit0; MOTION_SOURCE_PASS102/3/34 and MOTION_PROJECTION_PASS90/retain6/changed3/new30..33/packet0..33",
+    "checks": "Pinned full Steam image hash, complete102B payload/hash equality and uniqueness in both Golden images, actual section/RVA/raw coordinates, original90B live hash and6zero tail bytes, every3x34 stored value, per-row90B projection, all three changed genus2 entries, actual NSO34-stride u8 read and packet upper-bound33 instructions.",
+    "scope": "Static source assertions, not whole-model/motion implementation equivalence, runtime qualification, build, verify, objdiff, unittest or CI."
+  },
+  "source_boundary": "Original PS2 ELF/common MIPS instructions and pinned source; ordinary Steam.shared typed resolver and file-backed.sdata; ordinary NSO typed code and static data. No.arch decode or game/emulator execution; numeric/byte agreement corroborates actual typed role/extent, never replaces it.",
+  "reproduction": "Private l1c12_motion_map.py, motion_extent.py, motion_packet_domain.py and established model-fields.md. Initial32-column display was an unqualified hypothesis; actual Steam/NSO multiply34 and packet upper bound33 fixed it. A first96-byte match was deliberately extended to the complete102-byte source. Source verifier receipt follows separate full-span/projection assertions."
+}

@@ -39,6 +39,9 @@ extern uint8_t *p4_guest_base;
 
 /* Reserves and zero-fills the block (mmap / VirtualAlloc). Returns 0, or -1. Idempotent. */
 int p4_guest_init(void);
+/* Install an alternate arena allocator before initialization. Failure is
+ * final; callers must not silently fall back to an unguarded arena. */
+int p4_guest_arena_factory(void *(*factory)(size_t reserve, size_t commit));
 
 void p4_guest_fault(const char *what, uint64_t value);   /* P4_GUEST_CHECK builds: reports and aborts */
 extern int p4_guest_check_off;                           /* nonzero: P4_H2G of a wild host pointer is not a fault (ovdiff's random words) */
@@ -67,8 +70,22 @@ void p4_guest_stack_free(void *p);
 /* Adds a window (guest base, host memory, size). p4_guest_init adds the three above; at most 8 windows. */
 void p4_guest_window(uint32_t guest, void *host, size_t size);
 
-void *p4_g2h_slow(uint32_t a);
-uint32_t p4_h2g_slow(const void *p);
+
+/* The slow paths of p4_g2h / p4_h2g (below) are cold, and an inline copy of each sits at every guest pointer read of the rewritten game (about 46,000 call sites in
+ * the Android build). With the default calling convention every value live across such a call has to sit in a callee-saved register (saved and restored by
+ * the enclosing function) or be spilled; `preserve_most` makes the callee keep every register but the argument and result ones, so the fast path stays in
+ * caller-saved registers and the enclosing function needs no extra prologue. A caller using the default convention (the Zig battle simulator's extern
+ * declarations) may call it: the callee preserves a superset. A test stub that defines these must carry the same attribute (P4_GUEST_SLOW_CC). */
+#if defined(__clang__) && defined(__has_attribute)
+#if __has_attribute(preserve_most) && (defined(__aarch64__) || defined(__x86_64__))
+#define P4_GUEST_SLOW_CC __attribute__((preserve_most))
+#endif
+#endif
+#ifndef P4_GUEST_SLOW_CC
+#define P4_GUEST_SLOW_CC
+#endif
+void *p4_g2h_slow(uint32_t a) P4_GUEST_SLOW_CC;
+uint32_t p4_h2g_slow(const void *p) P4_GUEST_SLOW_CC;
 
 /* Runs `fn` once the block exists (at once if it does): the initialisers of statics that hold guest addresses. The
  * rewriter registers one per unit from a constructor. */
@@ -76,7 +93,7 @@ void p4_guest_on_init(void (*fn)(void));
 
 static inline void *p4_g2h(uint32_t a)
 {
-    if (a - 1u < P4_GUEST_SIZE - 1u) return (void *)(p4_guest_base + a);
+    if (__builtin_expect(a - 1u < P4_GUEST_SIZE - 1u, 1)) return (void *)(p4_guest_base + a);
     return p4_g2h_slow(a);
 }
 
@@ -90,7 +107,7 @@ static inline void *p4_g2h_off(uint32_t a)
 static inline uint32_t p4_h2g(const void *p)
 {
     uintptr_t d = (uintptr_t)p - (uintptr_t)p4_guest_base;
-    if (d - 1u < P4_GUEST_SIZE - 1u) return (uint32_t)d;
+    if (__builtin_expect(d - 1u < P4_GUEST_SIZE - 1u, 1)) return (uint32_t)d;
     return p4_h2g_slow(p);
 }
 

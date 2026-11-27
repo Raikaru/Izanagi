@@ -64,9 +64,21 @@ PARTY_COMMANDS = {
 UNIT_CHECKS = {
     0x200E: ("btlAICommandScriptQueryFrId", ("unit",)),
     0x200F: ("btlAICommandScriptQueryEnId", ("unit",)),
+    0x2032: ("btlAICommandCondQueryId", ("unit",)),
+    0x205A: ("btlAICommandSideIdQueryMyHp", ("unit", "condition")),
+    0x205B: ("btlAICommandSideIdQueryMyMp", ("unit", "condition")),
+    0x205C: ("btlAICommandSideIdQueryMyLvO", ("unit", "condition")),
     0x205D: ("btlAICommandSideIdQueryMyBad", ("unit", "ailments")),
+    0x205E: ("btlAICommandSideIdQueryHasBuff", ("unit", "buffs")),
     0x2069: ("btlAICommandScriptUnitIsIdOnSide", ("side", "unit")),
+    # These IDs are action lookups, not party-member IDs. Keep that distinction:
+    # 0x2076 dereferences the lookup without a missing-unit check (001e66c0).
+    0x2075: ("btlAICommandIdScriptQueryMyHp", ("action", "condition")),
+    0x2076: ("btlAICommandIdScriptQueryHasBuff", ("action", "buffs")),
+    0x2079: ("btlAICommandScriptLookupOnlyFalse", ("action", "argument1")),
     0x207B: ("btlEffectScriptPickUnitByKind", ("side", "kind")),
+    0x2098: ("btlAICommandCondQueryNotId", ("unit",)),
+    0x209C: ("btlAICommandIdScriptQueryMyNomal", ("action", "condition")),
     0x20C8: ("btlEffectScriptCheckSideAndId", ("side", "unit")),
     0x20FD: ("btlEffectScriptApplyToSideUnit", ("side", "unit", "argument2", "argument3", "argument4")),
 }
@@ -339,7 +351,7 @@ def inventory(scripts, table, record):
     for key, member, script in scripts:
         for procedure, word, command, arguments in script_calls(script, table, wanted):
             row = {"file": key, "member": member, "procedure": procedure, "word": word,
-                   "command": "0x%04X" % command}
+                   "command": "0x%04X" % command, "handler": "0x%08X" % table[command][0]}
             if command in BATTLE_STARTS:
                 name, roles = BATTLE_STARTS[command]
                 row.update(name=name, arguments=dict(zip(roles, arguments)))
@@ -378,10 +390,11 @@ def summary(result):
         if check["encounter"] is None:
             continue
         arguments = check["arguments"]
-        if isinstance(arguments.get("unit"), int):
-            checks.setdefault(check["encounter"], set()).add("%s(%s)" % (
-                check["name"].replace("btlAICommandScript", "").replace("btlEffectScript", "").replace("btlAICommand", ""),
-                ",".join(str(v) if isinstance(v, int) else v["kind"] for v in arguments.values())))
+        # Do not hide kind/action selectors or nonconstant actor references.
+        # A variable/return/expression still needs review for solo safety.
+        checks.setdefault(check["encounter"], set()).add("%s(%s)" % (
+            check["name"].replace("btlAICommandScript", "").replace("btlEffectScript", "").replace("btlAICommand", ""),
+            ",".join(str(v) if isinstance(v, int) else v["kind"] for v in arguments.values())))
     for encounter in sorted(seen, key=lambda e: (e is None, e or 0)):
         record = next((r for r in result["encounters"] if r["encounter"] == encounter), None)
         enemies = ", ".join(e["name"] or str(e["id"]) for e in record["enemies"]) if record and "enemies" in record else "-"

@@ -102,6 +102,10 @@ uint32_t p4_game_tables_derived_item_name_stream(uint32_t id);
  * expanded, otherwise the game's actual loaded retail base. Call after item
  * loading; an unknown new ID never aliases a retail row or bank. */
 const uint8_t *p4_game_tables_items_native_metadata(uint32_t id);
+/* Admission-only read for an expanded row. It does not mark the item as used;
+ * an allowed operation must still perform its ordinary metadata read. */
+uint32_t p4_game_tables_items_native_peek_effect(uint32_t id);
+uint32_t p4_game_tables_items_native_peek_kind(uint32_t id);
 uint32_t p4_game_tables_items_native_description(uint32_t id);
 uint32_t p4_game_tables_items_native_category_name(uint32_t id);
 /* New item only: returns its explicitly inherited retail anchor, or -1 for

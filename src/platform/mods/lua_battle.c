@@ -159,22 +159,9 @@ void p4_lua_battle_initialize(lua_State *L)
     };
     p4_battle_menu_prepare();
     p4_battle_menu_on_use(record_use);
-    /* p4.battle may already hold other battle services (API 1.3 formation):
-     * the namespace becomes one read-only table with theirs and these. */
     lua_newtable(L);
-    lua_getfield(L, -2, "battle");
-    if (lua_istable(L, -1)) {
-        lua_pushnil(L);
-        while (lua_next(L, -2)) {
-            lua_pushvalue(L, -2);
-            lua_insert(L, -2);
-            lua_settable(L, -5);
-        }
-    }
-    lua_pop(L, 1);
     luaL_register(L, NULL, methods);
-    lua_setreadonly(L, -1, 1);
-    lua_setfield(L, -2, "battle");
+    p4_lua_namespace_merge(L, "battle");
 }
 void p4_lua_battle_close(P4LuaMod *mod)
 {

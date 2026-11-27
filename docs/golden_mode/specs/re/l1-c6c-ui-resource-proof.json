@@ -1,0 +1,2144 @@
+{
+  "proof_id": "L1-c6C-typed-UI-resource-and-render-source-20261113",
+  "scope": "Only exact setC rows in GoldenRE-L1-c6-SPLIT.md. Source proof, never runtime closure. Other writers and previous diagnostic reviews remain unchanged.",
+  "source_pins": {
+    "steam_build": 10836033,
+    "steam_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+    "ps2_elf_sha256": "f90675b8a38138ddb5dc5cdf641550f41800fcb86bb499c586073e964fb41836",
+    "switch_version": "1.2",
+    "switch_mapped_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+    "switch_nso_sha256": "854c7a1e33de1619abf009fa7f32b8c012960d685c8bf1bf99a92a6a4d0bda1c",
+    "ps2_decomp_revision": "18016afe6"
+  },
+  "runtime_status": "pending-seam",
+  "method": "Positive corresponding typed producer/consumer fields and complete logical layouts. Ordinary Steam.shared only; no.arch decoding or game execution. Full bank equality is corroboration after structural identity; byte votes, namespace labels, missing references and presentation role never justify closure.",
+  "counts": {
+    "PROVEN": {
+      "objects": 28,
+      "ps2_bytes": 1636
+    },
+    "PROVEN-code": {
+      "objects": 3,
+      "ps2_bytes": 240
+    }
+  },
+  "rows": [
+    {
+      "address": "0x005dd6c0",
+      "size": 28,
+      "decision": "PROVEN",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "01c78825648aa64faa8c3c14ca5b10744e01dfea891febd4f362a6aa69cb5d79",
+        "readers": [
+          {
+            "function": "0x104510",
+            "name": "func_00104510",
+            "file": "src/Event/Fcl/fclBankManager_inferred_00103510.c"
+          }
+        ]
+      },
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".sdata",
+        "rva": "0x9431c0",
+        "raw_offset": 9706944,
+        "size": 21,
+        "sha256": "a6de7587072c28d1f7191b2d0baff7e4a62b16c1e0eb7f6d3792917d5cba90ef",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "structural_correspondence": "PS2 104510 formats bustup/b%d_%d_%d.bin from three signed indices. NSO2c3ec0 stores the three signed indices in bustup work+4/+6/+8, formats this exact path at2c3f0c..2c3f2c with530a20, copies the resolved name to work+74 then chooses matching packed-ID metadata. Steam43c410 and43cff4 use same format. This proves the filename field, not bustup payload layout.",
+      "required_seams": [
+        "bustup-filename:signed-three-index-producer",
+        "bustup-filename:Golden-resource-lookup-and-lifetime"
+      ],
+      "golden_string": "bustup/b%d_%d_%d.bin",
+      "switch": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x71005ffc6d",
+        "size": 21,
+        "sha256": "a6de7587072c28d1f7191b2d0baff7e4a62b16c1e0eb7f6d3792917d5cba90ef",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "steam_span_alternatives": [
+        {
+          "container": "P4G.exe",
+          "source_build": 10836033,
+          "section": ".sdata",
+          "rva": "0x9431c0",
+          "raw_offset": 9706944,
+          "size": 21,
+          "sha256": "a6de7587072c28d1f7191b2d0baff7e4a62b16c1e0eb7f6d3792917d5cba90ef",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        }
+      ],
+      "ps2_live_bytes": 21,
+      "ps2_alignment_tail_bytes": 7,
+      "tail_policy": "Do not source Golden suffix bytes. Retain only inert zero alignment; all live uses take the sealed Golden string, including when longer than PS2 storage. No truncation or guest overrun."
+    },
+    {
+      "address": "0x005e4ff8",
+      "size": 24,
+      "decision": "PROVEN",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "ea6261417645ef106124b1ded97572cdf25e8ac53065f178642a4b142ccf6903",
+        "readers": [
+          {
+            "function": "0x1211b0",
+            "name": "func_001211b0",
+            "file": "src/calendar.c"
+          },
+          {
+            "function": "0x121a20",
+            "name": "func_00121a20",
+            "file": "src/calendar.c"
+          }
+        ]
+      },
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".sdata",
+        "rva": "0x91b220",
+        "raw_offset": 9543200,
+        "size": 13,
+        "sha256": "18b20470ba20e8b6a4830769836cb530bdd88c77c0f78007cc0c83e02cc0ef4d",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "structural_correspondence": "PS21211b0/121a20 register child CalendarDraw with priority101 and calendarTimeSlotChildNoop. NSOc9240/c9c80 materialize exact CalendarDraw inx1, priority101 inw2, callbackcaDF0 inx5 and tail-call39f2b0. Steam1d3c8a registers corresponding child. Name equality is corroboration after the scheduler producer role.",
+      "required_seams": [
+        "scheduler-name:all-create-lookup-destroy-sites:0x5e4ff8",
+        "scheduler-name:normalize-native-callbacks-and-Golden-work-layout"
+      ],
+      "golden_string": "CalendarDraw",
+      "switch": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x7100616501",
+        "size": 13,
+        "sha256": "18b20470ba20e8b6a4830769836cb530bdd88c77c0f78007cc0c83e02cc0ef4d",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "steam_span_alternatives": [
+        {
+          "container": "P4G.exe",
+          "source_build": 10836033,
+          "section": ".sdata",
+          "rva": "0x91b220",
+          "raw_offset": 9543200,
+          "size": 13,
+          "sha256": "18b20470ba20e8b6a4830769836cb530bdd88c77c0f78007cc0c83e02cc0ef4d",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        }
+      ],
+      "ps2_live_bytes": 13,
+      "ps2_alignment_tail_bytes": 11,
+      "tail_policy": "Do not source Golden suffix bytes. Retain only inert zero alignment; all live uses take the sealed Golden string, including when longer than PS2 storage. No truncation or guest overrun."
+    },
+    {
+      "address": "0x005e5038",
+      "size": 24,
+      "decision": "PROVEN",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "8a193d0f3c473412717b211a62d1a3d073addb04662421be525144cbb854c1b7",
+        "readers": [
+          {
+            "function": "0x121940",
+            "name": "func_00121940",
+            "file": "src/calendar.c"
+          }
+        ]
+      },
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".sdata",
+        "rva": "0x91b290",
+        "raw_offset": 9543312,
+        "size": 14,
+        "sha256": "2a203ed79e28f091a3e12b56ab8827cd7c0a41c0ade15ea3f7c038b5c0dd935f",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "structural_correspondence": "PS2121940 creates calendarInput task priority100 with calendarInputUpdate and release. NSOc9370 materializes exact name, priority100, updatec9430 and destroyc97d0 for39ef90; Steam13b6d0 has the corresponding producer.",
+      "required_seams": [
+        "scheduler-name:all-create-lookup-destroy-sites:0x5e5038",
+        "scheduler-name:normalize-native-callbacks-and-Golden-work-layout"
+      ],
+      "golden_string": "calendarInput",
+      "switch": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x71005d5cbd",
+        "size": 14,
+        "sha256": "2a203ed79e28f091a3e12b56ab8827cd7c0a41c0ade15ea3f7c038b5c0dd935f",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "steam_span_alternatives": [
+        {
+          "container": "P4G.exe",
+          "source_build": 10836033,
+          "section": ".sdata",
+          "rva": "0x91b290",
+          "raw_offset": 9543312,
+          "size": 14,
+          "sha256": "2a203ed79e28f091a3e12b56ab8827cd7c0a41c0ade15ea3f7c038b5c0dd935f",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        }
+      ],
+      "ps2_live_bytes": 14,
+      "ps2_alignment_tail_bytes": 10,
+      "tail_policy": "Do not source Golden suffix bytes. Retain only inert zero alignment; all live uses take the sealed Golden string, including when longer than PS2 storage. No truncation or guest overrun."
+    },
+    {
+      "address": "0x00637270",
+      "size": 16,
+      "decision": "PROVEN",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "067cfca87d399d850e0b0e559eae8419ea9061ec41b588d3dded58ec7241c440",
+        "readers": [
+          {
+            "function": "0x25e800",
+            "name": "func_0025e800",
+            "file": "src/shdWindow.c"
+          }
+        ]
+      },
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".sdata",
+        "rva": "0x942950",
+        "raw_offset": 9704784,
+        "size": 11,
+        "sha256": "485d67a82f357160d6b023df29bde36476410e6a34472abbc2cc87c08090b2e4",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "structural_correspondence": "PS225e800 creates shdWNDProc child at priorityF with update and destructor. NSO2b7ec0 allocates88-byte work, passes exact name inx1, priorityF, callbacks2b8060/2b8410 into39f2b0. This is a registered task identity, NOT the source filename shdWNDProc.c; M2candidate942950 is unrelated.",
+      "required_seams": [
+        "scheduler-name:all-create-lookup-destroy-sites:0x637270",
+        "scheduler-name:normalize-native-callbacks-and-Golden-work-layout"
+      ],
+      "golden_string": "shdWNDProc",
+      "switch": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x71005eca47",
+        "size": 11,
+        "sha256": "485d67a82f357160d6b023df29bde36476410e6a34472abbc2cc87c08090b2e4",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "steam_span_alternatives": [
+        {
+          "container": "P4G.exe",
+          "source_build": 10836033,
+          "section": ".sdata",
+          "rva": "0x942950",
+          "raw_offset": 9704784,
+          "size": 11,
+          "sha256": "485d67a82f357160d6b023df29bde36476410e6a34472abbc2cc87c08090b2e4",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        }
+      ],
+      "ps2_live_bytes": 11,
+      "ps2_alignment_tail_bytes": 5,
+      "tail_policy": "Do not source Golden suffix bytes. Retain only inert zero alignment; all live uses take the sealed Golden string, including when longer than PS2 storage. No truncation or guest overrun."
+    },
+    {
+      "address": "0x0063c018",
+      "size": 24,
+      "decision": "PROVEN",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "60843079fce794a4fb4bfa0a458a6e6f4583032b2e245a698642f46fce7bb86a",
+        "readers": [
+          {
+            "function": "0x27d2f0",
+            "name": "func_0027d2f0",
+            "file": "src/itfMsgProcedure_Window.c"
+          }
+        ]
+      },
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".sdata",
+        "rva": "0x93d518",
+        "raw_offset": 9683224,
+        "size": 10,
+        "sha256": "ce2d0254b6b28a261ddca8ea74f41fab2b371f57a82aee3647257b8478ff5044",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "structural_correspondence": "PS227d2f0 creates itfMsgEff child priorityF, msgWinUpdateEntries, no destructor/work. NSO205540..205564 supplies exact name inx1, priorityF, callback205570, zerosx6/x7 and branches39f2b0. Steam333510 supplies same task name and callback through4fb670.",
+      "required_seams": [
+        "scheduler-name:all-create-lookup-destroy-sites:0x63c018",
+        "scheduler-name:normalize-native-callbacks-and-Golden-work-layout"
+      ],
+      "golden_string": "itfMsgEff",
+      "switch": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x710061c7fc",
+        "size": 10,
+        "sha256": "ce2d0254b6b28a261ddca8ea74f41fab2b371f57a82aee3647257b8478ff5044",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "steam_span_alternatives": [
+        {
+          "container": "P4G.exe",
+          "source_build": 10836033,
+          "section": ".sdata",
+          "rva": "0x93d518",
+          "raw_offset": 9683224,
+          "size": 10,
+          "sha256": "ce2d0254b6b28a261ddca8ea74f41fab2b371f57a82aee3647257b8478ff5044",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        }
+      ],
+      "ps2_live_bytes": 10,
+      "ps2_alignment_tail_bytes": 14,
+      "tail_policy": "Do not source Golden suffix bytes. Retain only inert zero alignment; all live uses take the sealed Golden string, including when longer than PS2 storage. No truncation or guest overrun."
+    },
+    {
+      "address": "0x0064f0f0",
+      "size": 32,
+      "decision": "PROVEN",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "841fb5a403cd3c73ce927383af04916e174e65f863dc7c57b8d2df66fffcdd6b",
+        "readers": [
+          {
+            "function": "0x38d790",
+            "name": "func_0038d790",
+            "file": "src/Battle/btlShuffleEff.c"
+          }
+        ]
+      },
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".xpdata",
+        "rva": "0xb05ec8",
+        "raw_offset": 11552456,
+        "size": 19,
+        "sha256": "28b8d0f8629a71e2c40a6f6d3450d65f2b0d055803b15b79dfc65eeb1e0ef0d6",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "structural_correspondence": "PS238d790 creates battle_shuffle_eff child priority13 with btlShuffleEffUpdate and destroy. NSOae250 allocatesA0-byte work and atae29c..ae2c8 creates same named child priority13, callbacks ae310/ae650; updater calls table reader aeb70. Steam117b60 reads corresponding nine-slot bank.",
+      "required_seams": [
+        "scheduler-name:all-create-lookup-destroy-sites:0x64f0f0",
+        "scheduler-name:normalize-native-callbacks-and-Golden-work-layout"
+      ],
+      "golden_string": "battle_shuffle_eff",
+      "switch": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x710073c0ce",
+        "size": 19,
+        "sha256": "28b8d0f8629a71e2c40a6f6d3450d65f2b0d055803b15b79dfc65eeb1e0ef0d6",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "steam_span_alternatives": [
+        {
+          "container": "P4G.exe",
+          "source_build": 10836033,
+          "section": ".xpdata",
+          "rva": "0xb05ec8",
+          "raw_offset": 11552456,
+          "size": 19,
+          "sha256": "28b8d0f8629a71e2c40a6f6d3450d65f2b0d055803b15b79dfc65eeb1e0ef0d6",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        }
+      ],
+      "ps2_live_bytes": 19,
+      "ps2_alignment_tail_bytes": 13,
+      "tail_policy": "Do not source Golden suffix bytes. Retain only inert zero alignment; all live uses take the sealed Golden string, including when longer than PS2 storage. No truncation or guest overrun."
+    },
+    {
+      "address": "0x007132b8",
+      "size": 24,
+      "decision": "PROVEN",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "214fa2fa4cbda82846562b14b60eafc72d0fc330fdc46405e9f76f0013ae15e3",
+        "readers": [
+          {
+            "function": "0x481a20",
+            "name": "tnInitModule",
+            "file": "src/Graphics/Effect/tnEffect.c"
+          }
+        ]
+      },
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".xpdata",
+        "rva": "0xb2c470",
+        "raw_offset": 11709552,
+        "size": 11,
+        "sha256": "bc82555cdf41a42b6ab9c21e412873b0e146920f6befd2de5e91d866ada2c34b",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "structural_correspondence": "PS2481a20 initializes22 general textures, RNG seed12345678, lighting, crossfade then creates effect_epl task. NSO385090 initializes exactly22 GENERAL_%02d.tmx resources, same RNG seed and crossfade, then registers exact task name with385290 through39ef90. Steam51a4d0 also uses this task identity.",
+      "required_seams": [
+        "scheduler-name:all-create-lookup-destroy-sites:0x7132b8",
+        "scheduler-name:normalize-native-callbacks-and-Golden-work-layout"
+      ],
+      "golden_string": "effect_epl",
+      "switch": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x7100871148",
+        "size": 11,
+        "sha256": "bc82555cdf41a42b6ab9c21e412873b0e146920f6befd2de5e91d866ada2c34b",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "steam_span_alternatives": [
+        {
+          "container": "P4G.exe",
+          "source_build": 10836033,
+          "section": ".xpdata",
+          "rva": "0xb2c470",
+          "raw_offset": 11709552,
+          "size": 11,
+          "sha256": "bc82555cdf41a42b6ab9c21e412873b0e146920f6befd2de5e91d866ada2c34b",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        }
+      ],
+      "ps2_live_bytes": 11,
+      "ps2_alignment_tail_bytes": 13,
+      "tail_policy": "Do not source Golden suffix bytes. Retain only inert zero alignment; all live uses take the sealed Golden string, including when longer than PS2 storage. No truncation or guest overrun."
+    },
+    {
+      "address": "0x007145f0",
+      "size": 24,
+      "decision": "PROVEN",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "a5f6f37687c07a134fa1977d40feb4a5df80b51eb7c477dc5f39e9c7ca6b6d23",
+        "readers": [
+          {
+            "function": "0x4b3110",
+            "name": "func_004b3110",
+            "file": "src/Graphics/Effect/effCrossfade.c"
+          },
+          {
+            "function": "0x4b3180",
+            "name": "func_004b3180",
+            "file": "src/Graphics/Effect/effCrossfade.c"
+          }
+        ]
+      },
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".xpdata",
+        "rva": "0xb2b328",
+        "raw_offset": 11705128,
+        "size": 17,
+        "sha256": "774e064c44a364bb21c133749b17791601fe7261d15efbc803db6c30cd434927",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "structural_correspondence": "PS24b3180 allocates/zeros crossfade work and registers effect_crossfade with CrossfadeTaskUpdate;4b3110 looks it up and refuses already-active work. NSO35c580 allocatesD8 work and sets self and vtable callbacks before39ef90 with update35c980;35c520 looks same name up through39f3b0 and guards active byte. Steam538c01 is the corresponding constructor.",
+      "required_seams": [
+        "scheduler-name:all-create-lookup-destroy-sites:0x7145f0",
+        "scheduler-name:normalize-native-callbacks-and-Golden-work-layout"
+      ],
+      "golden_string": "effect_crossfade",
+      "switch": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x710086f950",
+        "size": 17,
+        "sha256": "774e064c44a364bb21c133749b17791601fe7261d15efbc803db6c30cd434927",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "steam_span_alternatives": [
+        {
+          "container": "P4G.exe",
+          "source_build": 10836033,
+          "section": ".xpdata",
+          "rva": "0xb2b328",
+          "raw_offset": 11705128,
+          "size": 17,
+          "sha256": "774e064c44a364bb21c133749b17791601fe7261d15efbc803db6c30cd434927",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        }
+      ],
+      "ps2_live_bytes": 17,
+      "ps2_alignment_tail_bytes": 7,
+      "tail_policy": "Do not source Golden suffix bytes. Retain only inert zero alignment; all live uses take the sealed Golden string, including when longer than PS2 storage. No truncation or guest overrun."
+    },
+    {
+      "address": "0x005e5028",
+      "size": 16,
+      "decision": "PROVEN",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "836eba8d4b7677600b8057cb57bbd6d7002b5ee040e10d2fc0f205bb49edc865",
+        "readers": [
+          {
+            "function": "0x121690",
+            "name": "func_00121690",
+            "file": "src/calendar.c"
+          }
+        ]
+      },
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".sdata",
+        "rva": "0x91b280",
+        "raw_offset": 9543296,
+        "size": 12,
+        "sha256": "bfb65126ae4de28a2e3f458abd1b7f84423719c7101c5d55f7836ce6e586124b",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "structural_correspondence": "PS2121690 passes the selected format to sdkDbprtPrint with month and time-slot string from calendar diagnostic drawing. NSOc9830 computes month/day/weekday, then c9aXX formats the exact Golden format with month and time-slot pointer table73fd08 before3499e0; Steam13b3ba performs same month-day grid rendering. Golden format has two spaces before##, not a shifted candidate window.",
+      "required_seams": [
+        "calendar-diagnostic:month-timeslot-argument-and-format",
+        "calendar-diagnostic:complete-Golden-task-input"
+      ],
+      "golden_string": "%2d  ##%s##",
+      "switch": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x71005d2f4e",
+        "size": 12,
+        "sha256": "bfb65126ae4de28a2e3f458abd1b7f84423719c7101c5d55f7836ce6e586124b",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "steam_span_alternatives": [
+        {
+          "container": "P4G.exe",
+          "source_build": 10836033,
+          "section": ".sdata",
+          "rva": "0x91b280",
+          "raw_offset": 9543296,
+          "size": 12,
+          "sha256": "bfb65126ae4de28a2e3f458abd1b7f84423719c7101c5d55f7836ce6e586124b",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        }
+      ],
+      "ps2_live_bytes": 12,
+      "ps2_alignment_tail_bytes": 4,
+      "tail_policy": "Do not source Golden suffix bytes. Retain only inert zero alignment; all live uses take the sealed Golden string, including when longer than PS2 storage. No truncation or guest overrun."
+    },
+    {
+      "address": "0x005e5090",
+      "size": 32,
+      "decision": "PROVEN",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "6b5daf0a588884100cae7340614cfde0328387f30e640ecd59c5acd66d5ffc99",
+        "readers": [
+          {
+            "function": "0x122520",
+            "name": "fadeBeginTransition",
+            "file": "src/fade.c"
+          }
+        ]
+      },
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".sdata",
+        "rva": "0x943c20",
+        "raw_offset": 9709600,
+        "size": 21,
+        "sha256": "5f35baebaeb69598157a6814728ed0a5e051929cd98e5ee0e0cfde9ab910a657",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "structural_correspondence": "PS2fadeBeginTransition122520 / fadeBeginReturnTransition122640 use this message argument of kAssertFailAt on invalid fade kind. Golden NSO2c51b0 checks same state/kind fields, supplies exact message inx0,file inx1,line inw2 and calls3499a0. Invalid-kind fallback and phase/state updates independently establish paired guard role; no absence inference.",
+      "required_seams": [
+        "fade-guard:message-slot-and-kind-state-conditions",
+        "fade-guard:no-invented-release-logging"
+      ],
+      "golden_string": "FADE OUT TYPE ERROR ",
+      "switch": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x7100602287",
+        "size": 21,
+        "sha256": "5f35baebaeb69598157a6814728ed0a5e051929cd98e5ee0e0cfde9ab910a657",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "steam_span_alternatives": [
+        {
+          "container": "P4G.exe",
+          "source_build": 10836033,
+          "section": ".sdata",
+          "rva": "0x943c20",
+          "raw_offset": 9709600,
+          "size": 21,
+          "sha256": "5f35baebaeb69598157a6814728ed0a5e051929cd98e5ee0e0cfde9ab910a657",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        }
+      ],
+      "ps2_live_bytes": 21,
+      "ps2_alignment_tail_bytes": 11,
+      "tail_policy": "Do not source Golden suffix bytes. Retain only inert zero alignment; all live uses take the sealed Golden string, including when longer than PS2 storage. No truncation or guest overrun."
+    },
+    {
+      "address": "0x005e50b0",
+      "size": 32,
+      "decision": "PROVEN",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "102f434ffae66776bdc43931148b2fc279000d8b8e948a55b8aa729eb819e9cc",
+        "readers": [
+          {
+            "function": "0x122640",
+            "name": "fadeBeginReturnTransition",
+            "file": "src/fade.c"
+          }
+        ]
+      },
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".sdata",
+        "rva": "0x943c38",
+        "raw_offset": 9709624,
+        "size": 20,
+        "sha256": "9356d9381cbede61080b8108c4a2a29013edbfad4da908fcb062b55d40ee760b",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "structural_correspondence": "PS2fadeBeginTransition122520 / fadeBeginReturnTransition122640 use this message argument of kAssertFailAt on invalid fade kind. Golden NSO2c5270 checks same state/kind fields, supplies exact message inx0,file inx1,line inw2 and calls3499a0. Invalid-kind fallback and phase/state updates independently establish paired guard role; no absence inference.",
+      "required_seams": [
+        "fade-guard:message-slot-and-kind-state-conditions",
+        "fade-guard:no-invented-release-logging"
+      ],
+      "golden_string": "FADE IN TYPE ERROR ",
+      "switch": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x710060a4fa",
+        "size": 20,
+        "sha256": "9356d9381cbede61080b8108c4a2a29013edbfad4da908fcb062b55d40ee760b",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "steam_span_alternatives": [
+        {
+          "container": "P4G.exe",
+          "source_build": 10836033,
+          "section": ".sdata",
+          "rva": "0x943c38",
+          "raw_offset": 9709624,
+          "size": 20,
+          "sha256": "9356d9381cbede61080b8108c4a2a29013edbfad4da908fcb062b55d40ee760b",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        }
+      ],
+      "ps2_live_bytes": 20,
+      "ps2_alignment_tail_bytes": 12,
+      "tail_policy": "Do not source Golden suffix bytes. Retain only inert zero alignment; all live uses take the sealed Golden string, including when longer than PS2 storage. No truncation or guest overrun."
+    },
+    {
+      "address": "0x006250d0",
+      "size": 48,
+      "decision": "PROVEN",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "1590369148118104e651e6539a25b23f40255beb25379a868d60b9ae8fce1e17",
+        "readers": [
+          {
+            "function": "0x1f9cf0",
+            "name": "func_001f9cf0",
+            "file": "src/Battle/btlCutin.c"
+          }
+        ]
+      },
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".sdata",
+        "rva": "0x917e60",
+        "raw_offset": 9529952,
+        "size": 36,
+        "sha256": "f3a38fe26c958c27f86ee88a3269c1962ce37c9a83515246d270c87fb61e6287",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "structural_correspondence": "PS21f9cf0/1fa490 and Steam95450/95624/95ca0, NSO45610/461d0 correspond on request.kind0, formatter arguments count+1 twice, date/day-window bit0, then common acquire397d20 and publication of cutin/name handle. NSO45610 request structure has request-kind at+8 and IDs at+A; do not assume PS2 offsets. Actual format source selected by paired branch/argument flow, not basename similarity.",
+      "required_seams": [
+        "cutin-path:request.kind0:Golden-request-layout-and-signed-IDs",
+        "cutin-path:date-bit-suffix-namespaces",
+        "cutin-path:load-poll-materialize-release-lifecycle"
+      ],
+      "golden_string": "battle/cutin/boko/koma%d/%dICON.EPL",
+      "switch": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x71005f92ea",
+        "size": 36,
+        "sha256": "f3a38fe26c958c27f86ee88a3269c1962ce37c9a83515246d270c87fb61e6287",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "steam_span_alternatives": [
+        {
+          "container": "P4G.exe",
+          "source_build": 10836033,
+          "section": ".sdata",
+          "rva": "0x917e60",
+          "raw_offset": 9529952,
+          "size": 36,
+          "sha256": "f3a38fe26c958c27f86ee88a3269c1962ce37c9a83515246d270c87fb61e6287",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        }
+      ],
+      "ps2_live_bytes": 36,
+      "ps2_alignment_tail_bytes": 12,
+      "tail_policy": "Do not source Golden suffix bytes. Retain only inert zero alignment; all live uses take the sealed Golden string, including when longer than PS2 storage. No truncation or guest overrun."
+    },
+    {
+      "address": "0x00625100",
+      "size": 48,
+      "decision": "PROVEN",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "f73a02b26c0c3e15b359ff09316896ea6071c67960a9905a6f930d53dee5aead",
+        "readers": [
+          {
+            "function": "0x1f9cf0",
+            "name": "func_001f9cf0",
+            "file": "src/Battle/btlCutin.c"
+          }
+        ]
+      },
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".sdata",
+        "rva": "0x917e88",
+        "raw_offset": 9529992,
+        "size": 37,
+        "sha256": "6f87993306dfa3cb747e61903511e004ebfebaff2eecc26b21b3513ad6ccd871",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "structural_correspondence": "PS21f9cf0/1fa490 and Steam95450/95624/95ca0, NSO45610/461d0 correspond on request.kind2, formatter arguments ids[0] and date-bit-selected suffix, date/day-window bit0, then common acquire397d20 and publication of cutin/name handle. NSO45610 request structure has request-kind at+8 and IDs at+A; do not assume PS2 offsets. Actual format source selected by paired branch/argument flow, not basename similarity.",
+      "required_seams": [
+        "cutin-path:request.kind2:Golden-request-layout-and-signed-IDs",
+        "cutin-path:date-bit-suffix-namespaces",
+        "cutin-path:load-poll-materialize-release-lifecycle"
+      ],
+      "golden_string": "battle/cutin/tokusyu/TOKUS_%X_%s.EPL",
+      "switch": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x710060975b",
+        "size": 37,
+        "sha256": "6f87993306dfa3cb747e61903511e004ebfebaff2eecc26b21b3513ad6ccd871",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "steam_span_alternatives": [
+        {
+          "container": "P4G.exe",
+          "source_build": 10836033,
+          "section": ".sdata",
+          "rva": "0x917e88",
+          "raw_offset": 9529992,
+          "size": 37,
+          "sha256": "6f87993306dfa3cb747e61903511e004ebfebaff2eecc26b21b3513ad6ccd871",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        }
+      ],
+      "ps2_live_bytes": 37,
+      "ps2_alignment_tail_bytes": 11,
+      "tail_policy": "Do not source Golden suffix bytes. Retain only inert zero alignment; all live uses take the sealed Golden string, including when longer than PS2 storage. No truncation or guest overrun."
+    },
+    {
+      "address": "0x00625130",
+      "size": 48,
+      "decision": "PROVEN",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "d98ffd8ea493e250c0370975e472557a35289dac69dc6390daaf1a7ee87bf7e7",
+        "readers": [
+          {
+            "function": "0x1f9cf0",
+            "name": "func_001f9cf0",
+            "file": "src/Battle/btlCutin.c"
+          }
+        ]
+      },
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".sdata",
+        "rva": "0x917eb0",
+        "raw_offset": 9530032,
+        "size": 33,
+        "sha256": "21b4172d52f9242361fd892fa65c329c2ca1e535f1593d7159d48cd6c68ef01a",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "structural_correspondence": "PS21f9cf0/1fa490 and Steam95450/95624/95ca0, NSO45610/461d0 correspond on request.kind4, signedids[0]<11, formatter arguments signedids[0], date/day-window bit0, then common acquire397d20 and publication of cutin/name handle. NSO45610 request structure has request-kind at+8 and IDs at+A; do not assume PS2 offsets. Actual format source selected by paired branch/argument flow, not basename similarity.",
+      "required_seams": [
+        "cutin-path:request.kind4, signedids[0]<11:Golden-request-layout-and-signed-IDs",
+        "cutin-path:date-bit-suffix-namespaces",
+        "cutin-path:load-poll-materialize-release-lifecycle"
+      ],
+      "golden_string": "battle/cutin/syoukan/SYKN_%X.EPL",
+      "switch": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x710061bb79",
+        "size": 33,
+        "sha256": "21b4172d52f9242361fd892fa65c329c2ca1e535f1593d7159d48cd6c68ef01a",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "steam_span_alternatives": [
+        {
+          "container": "P4G.exe",
+          "source_build": 10836033,
+          "section": ".sdata",
+          "rva": "0x917eb0",
+          "raw_offset": 9530032,
+          "size": 33,
+          "sha256": "21b4172d52f9242361fd892fa65c329c2ca1e535f1593d7159d48cd6c68ef01a",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        }
+      ],
+      "ps2_live_bytes": 33,
+      "ps2_alignment_tail_bytes": 15,
+      "tail_policy": "Do not source Golden suffix bytes. Retain only inert zero alignment; all live uses take the sealed Golden string, including when longer than PS2 storage. No truncation or guest overrun."
+    },
+    {
+      "address": "0x00625160",
+      "size": 48,
+      "decision": "PROVEN",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "8b7a99a2d9ecad9e0e68980518b3fc6461aa472b89f89fb9d719aec37c31f76a",
+        "readers": [
+          {
+            "function": "0x1f9cf0",
+            "name": "func_001f9cf0",
+            "file": "src/Battle/btlCutin.c"
+          }
+        ]
+      },
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".sdata",
+        "rva": "0x917ed8",
+        "raw_offset": 9530072,
+        "size": 34,
+        "sha256": "e68f18a7a59df7da4555edf3f27decc7eb1e5a3c6230d28b1a54b6b9bc30475e",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "structural_correspondence": "PS21f9cf0/1fa490 and Steam95450/95624/95ca0, NSO45610/461d0 correspond on request.kind4, signedids[0]>=11, formatter arguments signedids[0], date/day-window bit0, then common acquire397d20 and publication of cutin/name handle. NSO45610 request structure has request-kind at+8 and IDs at+A; do not assume PS2 offsets. Actual format source selected by paired branch/argument flow, not basename similarity.",
+      "required_seams": [
+        "cutin-path:request.kind4, signedids[0]>=11:Golden-request-layout-and-signed-IDs",
+        "cutin-path:date-bit-suffix-namespaces",
+        "cutin-path:load-poll-materialize-release-lifecycle"
+      ],
+      "golden_string": "battle/cutin/syoukan/SYKN_E%X.EPL",
+      "switch": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x71005d5ab5",
+        "size": 34,
+        "sha256": "e68f18a7a59df7da4555edf3f27decc7eb1e5a3c6230d28b1a54b6b9bc30475e",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "steam_span_alternatives": [
+        {
+          "container": "P4G.exe",
+          "source_build": 10836033,
+          "section": ".sdata",
+          "rva": "0x917ed8",
+          "raw_offset": 9530072,
+          "size": 34,
+          "sha256": "e68f18a7a59df7da4555edf3f27decc7eb1e5a3c6230d28b1a54b6b9bc30475e",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        }
+      ],
+      "ps2_live_bytes": 34,
+      "ps2_alignment_tail_bytes": 14,
+      "tail_policy": "Do not source Golden suffix bytes. Retain only inert zero alignment; all live uses take the sealed Golden string, including when longer than PS2 storage. No truncation or guest overrun."
+    },
+    {
+      "address": "0x00625190",
+      "size": 48,
+      "decision": "PROVEN",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "0f46d4823bd7e3edbec75b12eacb143e2dc4f99cf09e540fc74da53d3d5318c0",
+        "readers": [
+          {
+            "function": "0x1fa490",
+            "name": "func_001fa490",
+            "file": "src/Battle/btlCutin.c"
+          }
+        ]
+      },
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".sdata",
+        "rva": "0x917f00",
+        "raw_offset": 9530112,
+        "size": 40,
+        "sha256": "c44b811edba69b05470ce764a5cfc958eee174484ed2237cba7938fee794544f",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "structural_correspondence": "PS21f9cf0/1fa490 and Steam95450/95624/95ca0, NSO45610/461d0 correspond on name.kind1, formatter arguments signedids[0] and date-bit-selected name suffix, date/day-window bit0, then common acquire397d20 and publication of cutin/name handle. NSO45610 request structure has request-kind at+8 and IDs at+A; do not assume PS2 offsets. Actual format source selected by paired branch/argument flow, not basename similarity.",
+      "required_seams": [
+        "cutin-path:name.kind1:Golden-request-layout-and-signed-IDs",
+        "cutin-path:date-bit-suffix-namespaces",
+        "cutin-path:load-poll-materialize-release-lifecycle"
+      ],
+      "golden_string": "battle/cutin/syoudaku/BOKO_SD_%X_%s.EPL",
+      "switch": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x710061ed74",
+        "size": 40,
+        "sha256": "c44b811edba69b05470ce764a5cfc958eee174484ed2237cba7938fee794544f",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "steam_span_alternatives": [
+        {
+          "container": "P4G.exe",
+          "source_build": 10836033,
+          "section": ".sdata",
+          "rva": "0x917f00",
+          "raw_offset": 9530112,
+          "size": 40,
+          "sha256": "c44b811edba69b05470ce764a5cfc958eee174484ed2237cba7938fee794544f",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        }
+      ],
+      "ps2_live_bytes": 40,
+      "ps2_alignment_tail_bytes": 8,
+      "tail_policy": "Do not source Golden suffix bytes. Retain only inert zero alignment; all live uses take the sealed Golden string, including when longer than PS2 storage. No truncation or guest overrun."
+    },
+    {
+      "address": "0x006251c0",
+      "size": 48,
+      "decision": "PROVEN",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "a20cd88db2b62494ad7fa92b98e4d1cf29aabb11de0d852e677c38e758520505",
+        "readers": [
+          {
+            "function": "0x1fa490",
+            "name": "func_001fa490",
+            "file": "src/Battle/btlCutin.c"
+          }
+        ]
+      },
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".sdata",
+        "rva": "0x917f28",
+        "raw_offset": 9530152,
+        "size": 40,
+        "sha256": "bfbc97f79f5be0340317085a9f6e0448f75ad1b9efd98cfcb0cc8535a43e27b9",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "structural_correspondence": "PS21f9cf0/1fa490 and Steam95450/95624/95ca0, NSO45610/461d0 correspond on name.kind3, formatter arguments signedids[0] and date-bit-selected name suffix, date/day-window bit0, then common acquire397d20 and publication of cutin/name handle. NSO45610 request structure has request-kind at+8 and IDs at+A; do not assume PS2 offsets. Actual format source selected by paired branch/argument flow, not basename similarity.",
+      "required_seams": [
+        "cutin-path:name.kind3:Golden-request-layout-and-signed-IDs",
+        "cutin-path:date-bit-suffix-namespaces",
+        "cutin-path:load-poll-materialize-release-lifecycle"
+      ],
+      "golden_string": "battle/cutin/syoudaku/TUGK_SD_%X_%s.EPL",
+      "switch": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x71005e9347",
+        "size": 40,
+        "sha256": "bfbc97f79f5be0340317085a9f6e0448f75ad1b9efd98cfcb0cc8535a43e27b9",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "steam_span_alternatives": [
+        {
+          "container": "P4G.exe",
+          "source_build": 10836033,
+          "section": ".sdata",
+          "rva": "0x917f28",
+          "raw_offset": 9530152,
+          "size": 40,
+          "sha256": "bfbc97f79f5be0340317085a9f6e0448f75ad1b9efd98cfcb0cc8535a43e27b9",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        }
+      ],
+      "ps2_live_bytes": 40,
+      "ps2_alignment_tail_bytes": 8,
+      "tail_policy": "Do not source Golden suffix bytes. Retain only inert zero alignment; all live uses take the sealed Golden string, including when longer than PS2 storage. No truncation or guest overrun."
+    },
+    {
+      "address": "0x00636630",
+      "size": 32,
+      "decision": "PROVEN",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "c411cccb22308604db3bad4b2c35e35a1061caf5c81c108b5baa263730775a18",
+        "readers": [
+          {
+            "function": "0x257900",
+            "name": "func_00257900",
+            "file": "src/cmmRankUp.c"
+          }
+        ]
+      },
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".sdata",
+        "rva": "0x91ccf8",
+        "raw_offset": 9550072,
+        "size": 24,
+        "sha256": "d65d7bb3643f95e65745d7bae29427ab429c260bd96a206df3353df234701dee",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "structural_correspondence": "PS2257900 cmmRankUpDraw and NSO1274d0 are corresponding mode/timeline dispatchers; ordinary Steam1b1cab/1bf792 also references these exact resource strings. NSO1274d0 calls398470(path,0), then2e4b50(parent,resource,priority,Golden-queue); sets transforms through35cc30/35cb90. Role: frame crossing0 and570:CMY01_02. Bank-prefix636850 is excluded and untouched.",
+      "required_seams": [
+        "rankup-effect:0x636630:complete-mode-timeline-dispatch",
+        "rankup-effect:Golden-resource-and-queue-transform-route"
+      ],
+      "golden_string": "event_data/CMY01_02.EPL",
+      "switch": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x71005d8b52",
+        "size": 24,
+        "sha256": "d65d7bb3643f95e65745d7bae29427ab429c260bd96a206df3353df234701dee",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "steam_span_alternatives": [
+        {
+          "container": "P4G.exe",
+          "source_build": 10836033,
+          "section": ".sdata",
+          "rva": "0x91ccf8",
+          "raw_offset": 9550072,
+          "size": 24,
+          "sha256": "d65d7bb3643f95e65745d7bae29427ab429c260bd96a206df3353df234701dee",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        }
+      ],
+      "ps2_live_bytes": 24,
+      "ps2_alignment_tail_bytes": 8,
+      "tail_policy": "Do not source Golden suffix bytes. Retain only inert zero alignment; all live uses take the sealed Golden string, including when longer than PS2 storage. No truncation or guest overrun."
+    },
+    {
+      "address": "0x00636650",
+      "size": 32,
+      "decision": "PROVEN",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "645ff0c70e6300959c3901f0306050d1051b68d8efd41a347ac630202561cac5",
+        "readers": [
+          {
+            "function": "0x257900",
+            "name": "func_00257900",
+            "file": "src/cmmRankUp.c"
+          }
+        ]
+      },
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".sdata",
+        "rva": "0x91cd10",
+        "raw_offset": 9550096,
+        "size": 22,
+        "sha256": "3c4078e3e7cc6fc371622d81d22cd7ac5ed5ff4be5550f2c78e5d79758e17fdc",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "structural_correspondence": "PS2257900 cmmRankUpDraw and NSO1274d0 are corresponding mode/timeline dispatchers; ordinary Steam1b1cab/1bf792 also references these exact resource strings. NSO1274d0 calls398470(path,0), then2e4b50(parent,resource,priority,Golden-queue); sets transforms through35cc30/35cb90. Role: frame crossing0:E_KIRA. Bank-prefix636850 is excluded and untouched.",
+      "required_seams": [
+        "rankup-effect:0x636650:complete-mode-timeline-dispatch",
+        "rankup-effect:Golden-resource-and-queue-transform-route"
+      ],
+      "golden_string": "event_data/E_KIRA.EPL",
+      "switch": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x71005e0d6b",
+        "size": 22,
+        "sha256": "3c4078e3e7cc6fc371622d81d22cd7ac5ed5ff4be5550f2c78e5d79758e17fdc",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "steam_span_alternatives": [
+        {
+          "container": "P4G.exe",
+          "source_build": 10836033,
+          "section": ".sdata",
+          "rva": "0x91cd10",
+          "raw_offset": 9550096,
+          "size": 22,
+          "sha256": "3c4078e3e7cc6fc371622d81d22cd7ac5ed5ff4be5550f2c78e5d79758e17fdc",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        }
+      ],
+      "ps2_live_bytes": 22,
+      "ps2_alignment_tail_bytes": 10,
+      "tail_policy": "Do not source Golden suffix bytes. Retain only inert zero alignment; all live uses take the sealed Golden string, including when longer than PS2 storage. No truncation or guest overrun."
+    },
+    {
+      "address": "0x00636670",
+      "size": 32,
+      "decision": "PROVEN",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "83bc631c2dc50f34bd323e8cb146ed29468d98cefee2d13b6fb0b46c5b1fbc05",
+        "readers": [
+          {
+            "function": "0x257900",
+            "name": "func_00257900",
+            "file": "src/cmmRankUp.c"
+          }
+        ]
+      },
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".sdata",
+        "rva": "0x91cd28",
+        "raw_offset": 9550120,
+        "size": 24,
+        "sha256": "c3dca186495ac9028d41f39cfb3b1af157a1bdfae31991d28fe53da4c66c3f54",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "structural_correspondence": "PS2257900 cmmRankUpDraw and NSO1274d0 are corresponding mode/timeline dispatchers; ordinary Steam1b1cab/1bf792 also references these exact resource strings. NSO1274d0 calls398470(path,0), then2e4b50(parent,resource,priority,Golden-queue); sets transforms through35cc30/35cb90. Role: frame crossing120:CMY02_01. Bank-prefix636850 is excluded and untouched.",
+      "required_seams": [
+        "rankup-effect:0x636670:complete-mode-timeline-dispatch",
+        "rankup-effect:Golden-resource-and-queue-transform-route"
+      ],
+      "golden_string": "event_data/CMY02_01.EPL",
+      "switch": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x71005db038",
+        "size": 24,
+        "sha256": "c3dca186495ac9028d41f39cfb3b1af157a1bdfae31991d28fe53da4c66c3f54",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "steam_span_alternatives": [
+        {
+          "container": "P4G.exe",
+          "source_build": 10836033,
+          "section": ".sdata",
+          "rva": "0x91cd28",
+          "raw_offset": 9550120,
+          "size": 24,
+          "sha256": "c3dca186495ac9028d41f39cfb3b1af157a1bdfae31991d28fe53da4c66c3f54",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        }
+      ],
+      "ps2_live_bytes": 24,
+      "ps2_alignment_tail_bytes": 8,
+      "tail_policy": "Do not source Golden suffix bytes. Retain only inert zero alignment; all live uses take the sealed Golden string, including when longer than PS2 storage. No truncation or guest overrun."
+    },
+    {
+      "address": "0x00636690",
+      "size": 32,
+      "decision": "PROVEN",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "2b29dc355a372211716c62cebcd48d7c5ece27ce2010679c1b0b1eba7e081739",
+        "readers": [
+          {
+            "function": "0x257900",
+            "name": "func_00257900",
+            "file": "src/cmmRankUp.c"
+          }
+        ]
+      },
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".sdata",
+        "rva": "0x91cd40",
+        "raw_offset": 9550144,
+        "size": 24,
+        "sha256": "91c82de5652a224dcb02ba0410987492c0f72f48b69ebf7d86ee8e09d1f89533",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "structural_correspondence": "PS2257900 cmmRankUpDraw and NSO1274d0 are corresponding mode/timeline dispatchers; ordinary Steam1b1cab/1bf792 also references these exact resource strings. NSO1274d0 calls398470(path,0), then2e4b50(parent,resource,priority,Golden-queue); sets transforms through35cc30/35cb90. Role: frame crossing600:CMY05_05 with actor bone2. Bank-prefix636850 is excluded and untouched.",
+      "required_seams": [
+        "rankup-effect:0x636690:complete-mode-timeline-dispatch",
+        "rankup-effect:Golden-resource-and-queue-transform-route"
+      ],
+      "golden_string": "event_data/CMY05_05.EPL",
+      "switch": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x71005f6951",
+        "size": 24,
+        "sha256": "91c82de5652a224dcb02ba0410987492c0f72f48b69ebf7d86ee8e09d1f89533",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "steam_span_alternatives": [
+        {
+          "container": "P4G.exe",
+          "source_build": 10836033,
+          "section": ".sdata",
+          "rva": "0x91cd40",
+          "raw_offset": 9550144,
+          "size": 24,
+          "sha256": "91c82de5652a224dcb02ba0410987492c0f72f48b69ebf7d86ee8e09d1f89533",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        }
+      ],
+      "ps2_live_bytes": 24,
+      "ps2_alignment_tail_bytes": 8,
+      "tail_policy": "Do not source Golden suffix bytes. Retain only inert zero alignment; all live uses take the sealed Golden string, including when longer than PS2 storage. No truncation or guest overrun."
+    },
+    {
+      "address": "0x006366b0",
+      "size": 32,
+      "decision": "PROVEN",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "b9c9d38d23b6b1dbd40467acd8dbfa941bbc9a4a039386ee235edb451bc89a23",
+        "readers": [
+          {
+            "function": "0x257900",
+            "name": "func_00257900",
+            "file": "src/cmmRankUp.c"
+          }
+        ]
+      },
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".sdata",
+        "rva": "0x91cd58",
+        "raw_offset": 9550168,
+        "size": 22,
+        "sha256": "6e43b25008d6b65577503a83abb5a1d2e26260ccb5f8aab79ea0fb6921ce42cb",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "structural_correspondence": "PS2257900 cmmRankUpDraw and NSO1274d0 are corresponding mode/timeline dispatchers; ordinary Steam1b1cab/1bf792 also references these exact resource strings. NSO1274d0 calls398470(path,0), then2e4b50(parent,resource,priority,Golden-queue); sets transforms through35cc30/35cb90. Role: frame crossing600:P_GET3. Bank-prefix636850 is excluded and untouched.",
+      "required_seams": [
+        "rankup-effect:0x6366b0:complete-mode-timeline-dispatch",
+        "rankup-effect:Golden-resource-and-queue-transform-route"
+      ],
+      "golden_string": "event_data/P_GET3.EPL",
+      "switch": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x7100622102",
+        "size": 22,
+        "sha256": "6e43b25008d6b65577503a83abb5a1d2e26260ccb5f8aab79ea0fb6921ce42cb",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "steam_span_alternatives": [
+        {
+          "container": "P4G.exe",
+          "source_build": 10836033,
+          "section": ".sdata",
+          "rva": "0x91cd58",
+          "raw_offset": 9550168,
+          "size": 22,
+          "sha256": "6e43b25008d6b65577503a83abb5a1d2e26260ccb5f8aab79ea0fb6921ce42cb",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        }
+      ],
+      "ps2_live_bytes": 22,
+      "ps2_alignment_tail_bytes": 10,
+      "tail_policy": "Do not source Golden suffix bytes. Retain only inert zero alignment; all live uses take the sealed Golden string, including when longer than PS2 storage. No truncation or guest overrun."
+    },
+    {
+      "address": "0x006366f0",
+      "size": 32,
+      "decision": "PROVEN",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "abf5d97ac18438abdb5bda64c72a895f700739ccd24b19e72fcddb95b6a0a7ee",
+        "readers": [
+          {
+            "function": "0x257900",
+            "name": "func_00257900",
+            "file": "src/cmmRankUp.c"
+          }
+        ]
+      },
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".sdata",
+        "rva": "0x91cda0",
+        "raw_offset": 9550240,
+        "size": 23,
+        "sha256": "d4decd53bd25624da99352f83203e14257de1255f374c7180b50526af3b9d7fe",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "structural_correspondence": "PS2257900 cmmRankUpDraw and NSO1274d0 are corresponding mode/timeline dispatchers; ordinary Steam1b1cab/1bf792 also references these exact resource strings. NSO1274d0 calls398470(path,0), then2e4b50(parent,resource,priority,Golden-queue); sets transforms through35cc30/35cb90. Role: same E_KIRA2 branch in complete rank-up dispatcher. Bank-prefix636850 is excluded and untouched.",
+      "required_seams": [
+        "rankup-effect:0x6366f0:complete-mode-timeline-dispatch",
+        "rankup-effect:Golden-resource-and-queue-transform-route"
+      ],
+      "golden_string": "event_data/E_KIRA2.EPL",
+      "switch": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x710060149d",
+        "size": 23,
+        "sha256": "d4decd53bd25624da99352f83203e14257de1255f374c7180b50526af3b9d7fe",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "steam_span_alternatives": [
+        {
+          "container": "P4G.exe",
+          "source_build": 10836033,
+          "section": ".sdata",
+          "rva": "0x91cda0",
+          "raw_offset": 9550240,
+          "size": 23,
+          "sha256": "d4decd53bd25624da99352f83203e14257de1255f374c7180b50526af3b9d7fe",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        }
+      ],
+      "ps2_live_bytes": 23,
+      "ps2_alignment_tail_bytes": 9,
+      "tail_policy": "Do not source Golden suffix bytes. Retain only inert zero alignment; all live uses take the sealed Golden string, including when longer than PS2 storage. No truncation or guest overrun."
+    },
+    {
+      "address": "0x0063bb40",
+      "size": 64,
+      "decision": "PROVEN",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "4beff3852c251b32c34e254453707d3c6ec4752dd745a33a0cfcdbc92f9c5a3b",
+        "readers": [
+          {
+            "function": "0x2716b0",
+            "name": "func_002716b0",
+            "file": "src/frFont.c"
+          }
+        ]
+      },
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".sdata",
+        "rva": "0x943fd0",
+        "raw_offset": 9710544,
+        "size": 51,
+        "sha256": "15eb0aab3582944a448fa6671e867127a0d65f92105d201b739c39a3790e3860",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "structural_correspondence": "PS22716b0 style load substitutes missing header from fontData, checks slotId&FF<9, then parses variable metric blocks and glyph offsets. NSO2ccd40 performs same substitution, checks style<17 then passes exact Illegal-style message to3499a0 before same header/chunk parsing, with native stride38.",
+      "required_seams": [
+        "font-diagnostic:typed-message-guard-slot",
+        "font-diagnostic:Golden-slot-domain-and-free-list-lifecycle"
+      ],
+      "golden_string": "FONT SYS : Illegal style no error.[frAddFontStyle]",
+      "switch": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x710060f537",
+        "size": 51,
+        "sha256": "15eb0aab3582944a448fa6671e867127a0d65f92105d201b739c39a3790e3860",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "steam_span_alternatives": [
+        {
+          "container": "P4G.exe",
+          "source_build": 10836033,
+          "section": ".sdata",
+          "rva": "0x943fd0",
+          "raw_offset": 9710544,
+          "size": 51,
+          "sha256": "15eb0aab3582944a448fa6671e867127a0d65f92105d201b739c39a3790e3860",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        }
+      ],
+      "ps2_live_bytes": 51,
+      "ps2_alignment_tail_bytes": 13,
+      "tail_policy": "Do not source Golden suffix bytes. Retain only inert zero alignment; all live uses take the sealed Golden string, including when longer than PS2 storage. No truncation or guest overrun."
+    },
+    {
+      "address": "0x0063bc20",
+      "size": 48,
+      "decision": "PROVEN",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "6c27a5bf4423adf97b418417d5cd0cb5c4b3fadc1bf5e8a4f8b9d8646857ce00",
+        "readers": [
+          {
+            "function": "0x271f50",
+            "name": "func_00271f50",
+            "file": "src/frFont.c"
+          }
+        ]
+      },
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".sdata",
+        "rva": "0x944078",
+        "raw_offset": 9710712,
+        "size": 33,
+        "sha256": "30b0af40115f8b959139dd752ce16687bf7a84b46d4d1661edb3e388c4b90be6",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "structural_correspondence": "PS2271f50 glyph allocator removes/reuses a linked buffer node then issues exact GS-overflow message on unavailable node. NSO2d3a80 caches glyphs by code/style, detaches linked free node and calls3499a0 with this exact message on empty/unavailable node; then increments glyph refcount. This is the message field, not GPU-API equivalence.",
+      "required_seams": [
+        "font-diagnostic:typed-message-guard-slot",
+        "font-diagnostic:Golden-slot-domain-and-free-list-lifecycle"
+      ],
+      "golden_string": "FONT SYS : GS buffer over flow.\n",
+      "switch": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x71005f4dd3",
+        "size": 33,
+        "sha256": "30b0af40115f8b959139dd752ce16687bf7a84b46d4d1661edb3e388c4b90be6",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "steam_span_alternatives": [
+        {
+          "container": "P4G.exe",
+          "source_build": 10836033,
+          "section": ".sdata",
+          "rva": "0x944078",
+          "raw_offset": 9710712,
+          "size": 33,
+          "sha256": "30b0af40115f8b959139dd752ce16687bf7a84b46d4d1661edb3e388c4b90be6",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        }
+      ],
+      "ps2_live_bytes": 33,
+      "ps2_alignment_tail_bytes": 15,
+      "tail_policy": "Do not source Golden suffix bytes. Retain only inert zero alignment; all live uses take the sealed Golden string, including when longer than PS2 storage. No truncation or guest overrun."
+    },
+    {
+      "address": "0x00713280",
+      "size": 32,
+      "decision": "PROVEN",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "94dfb277031d075295284df26f1ff833d084e178312e51c9e5261cdc27e76fe1",
+        "readers": [
+          {
+            "function": "0x481a20",
+            "name": "tnInitModule",
+            "file": "src/Graphics/Effect/tnEffect.c"
+          }
+        ]
+      },
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".sdata",
+        "rva": "0x94e967",
+        "raw_offset": 9753959,
+        "size": 19,
+        "sha256": "e8a13d4d0f6fbfdcb529bf15bc1433de41dc5d33d001d32535c168fdead85626",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "structural_correspondence": "PS2481a20 requests effect/effpack.bin, waits, enumerates22 textures and creates effect task. NSO385090 obtains system/effect/effpack.bin through398470 or397d20+poll398080+get398380, enumerates22 GENERAL_%02d.tmx through397040, then releases only owned fallback handle and seeds same RNG. Positive filename replacement is anchored in full constructor lifecycle, not path spelling. Steam has identical Golden path in data; c4 effects route independently pins the208540-byte22-child archive.",
+      "required_seams": [
+        "effects-pack:system/effect/effpack.bin-loader-route",
+        "effects-pack:22-GENERAL-texture-members-and-owned-handle-lifetime"
+      ],
+      "golden_string": "effect/effpack.bin",
+      "switch": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x710061ab52",
+        "size": 19,
+        "sha256": "e8a13d4d0f6fbfdcb529bf15bc1433de41dc5d33d001d32535c168fdead85626",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "steam_span_alternatives": [
+        {
+          "container": "P4G.exe",
+          "source_build": 10836033,
+          "section": ".sdata",
+          "rva": "0x94e967",
+          "raw_offset": 9753959,
+          "size": 19,
+          "sha256": "e8a13d4d0f6fbfdcb529bf15bc1433de41dc5d33d001d32535c168fdead85626",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        }
+      ],
+      "ps2_live_bytes": 19,
+      "ps2_alignment_tail_bytes": 13,
+      "tail_policy": "Do not source Golden suffix bytes. Retain only inert zero alignment; all live uses take the sealed Golden string, including when longer than PS2 storage. No truncation or guest overrun."
+    },
+    {
+      "address": "0x00629380",
+      "size": 480,
+      "decision": "PROVEN",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "9e8a6af4fffcbfd5930a636924956ba725625fd36e69cd7a0c2846e852ee27cb",
+        "readers": [
+          {
+            "function": "0x21ef70",
+            "name": "func_0021ef70",
+            "file": "src/Battle/btlResultSimple.c"
+          },
+          {
+            "function": "0x21f520",
+            "name": "func_0021f520",
+            "file": "src/Battle/btlResultSimple.c"
+          }
+        ]
+      },
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".xpdata",
+        "rva": "0xb05840",
+        "raw_offset": 11550784,
+        "size": 384,
+        "sha256": "d95110088296dc72fdadf4195612f9049cd29e5afc6128f3d4869fdf34de0dae",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "structural_correspondence": "PS221ef70 initializes20 animation rows from24-byte style records and21f520 selects motion at+20. Golden NSOa14e0 case2 initializes16 rows from62e6dc with position+0/+4,opacity+8,timing+12/+16; loop3c0/3c. State loopa1420..a1f70 reads motion at+20 across16 rows; Steam106581..106709 uses same stride18 and count10hex. Steam b05840 entire16-record bank equals NSO62e6dc. M2 b057f8 starts72 bytes before real bank and is rejected.",
+      "required_seams": [
+        "result-animation:replace20-domain-with16-and-native3c-work-stride",
+        "result-animation:all-init-motion-timing-readers-and-40-sprite-namespace",
+        "result-animation:no-reads-of-four-removed-PS2-records"
+      ],
+      "switch": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x710062e6dc",
+        "size": 384,
+        "sha256": "d95110088296dc72fdadf4195612f9049cd29e5afc6128f3d4869fdf34de0dae",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "layout": {
+        "ps2_records": 20,
+        "golden_records": 16,
+        "stride": 24,
+        "fields": {
+          "0": "f32 x",
+          "4": "f32 y",
+          "8": "u8 opacity +3 padding",
+          "12": "s32 start frame",
+          "16": "s32 end frame",
+          "20": "s32 motion"
+        }
+      },
+      "golden_records": [
+        {
+          "xy": [
+            0,
+            0
+          ],
+          "words8_20": [
+            255,
+            9,
+            12,
+            0
+          ]
+        },
+        {
+          "xy": [
+            0,
+            0
+          ],
+          "words8_20": [
+            255,
+            9,
+            12,
+            0
+          ]
+        },
+        {
+          "xy": [
+            0,
+            0
+          ],
+          "words8_20": [
+            255,
+            9,
+            12,
+            0
+          ]
+        },
+        {
+          "xy": [
+            0,
+            0
+          ],
+          "words8_20": [
+            255,
+            10,
+            14,
+            0
+          ]
+        },
+        {
+          "xy": [
+            0,
+            0
+          ],
+          "words8_20": [
+            255,
+            10,
+            14,
+            0
+          ]
+        },
+        {
+          "xy": [
+            0,
+            0
+          ],
+          "words8_20": [
+            255,
+            10,
+            14,
+            0
+          ]
+        },
+        {
+          "xy": [
+            0,
+            0
+          ],
+          "words8_20": [
+            255,
+            9,
+            12,
+            0
+          ]
+        },
+        {
+          "xy": [
+            0,
+            0
+          ],
+          "words8_20": [
+            255,
+            4,
+            10,
+            0
+          ]
+        },
+        {
+          "xy": [
+            0,
+            0
+          ],
+          "words8_20": [
+            255,
+            0,
+            6,
+            0
+          ]
+        },
+        {
+          "xy": [
+            0,
+            0
+          ],
+          "words8_20": [
+            255,
+            0,
+            6,
+            0
+          ]
+        },
+        {
+          "xy": [
+            0,
+            0
+          ],
+          "words8_20": [
+            255,
+            5,
+            9,
+            0
+          ]
+        },
+        {
+          "xy": [
+            0,
+            0
+          ],
+          "words8_20": [
+            255,
+            9,
+            13,
+            0
+          ]
+        },
+        {
+          "xy": [
+            0,
+            0
+          ],
+          "words8_20": [
+            255,
+            8,
+            12,
+            0
+          ]
+        },
+        {
+          "xy": [
+            0,
+            0
+          ],
+          "words8_20": [
+            255,
+            7,
+            11,
+            0
+          ]
+        },
+        {
+          "xy": [
+            0,
+            0
+          ],
+          "words8_20": [
+            255,
+            6,
+            10,
+            0
+          ]
+        },
+        {
+          "xy": [
+            0,
+            0
+          ],
+          "words8_20": [
+            255,
+            5,
+            9,
+            0
+          ]
+        }
+      ],
+      "installation": "Semantic full-bank replacement: no480-byte candidate copy. Old final four records are outside Golden index domain, not retained source values."
+    },
+    {
+      "address": "0x0064f110",
+      "size": 256,
+      "decision": "PROVEN",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "8b561593fb9b464ac796491ee5d7643311b0f24a42b2b0ed098e0d653fd3c686",
+        "readers": [
+          {
+            "function": "0x38d9f0",
+            "name": "func_0038d9f0",
+            "file": "src/Battle/btlShuffleEff.c"
+          }
+        ]
+      },
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".xpdata",
+        "rva": "0xb05ee0",
+        "raw_offset": 11552480,
+        "size": 252,
+        "sha256": "8585886d7279e157d7a2892540c96a028788cddda309e39eac6706aa66feabce",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "structural_correspondence": "PS238d9f0 uses9 active slots, stride7floats, two screen coordinates, depth, Euler3 and uniform scale. NSOaeb70 loops9 on same active mask, reads62eaf4+28*i, doubles xy and depth beforea9140/a9200 then35cb90,35cbc0,35ccf0. Steam117b60..117d05 reads corresponding b05ee0 bank and likewise doubles screen/depth coordinates. Complete252bytes independently equalNSO. Wrong M2b0efe0 is another table and rejected.",
+      "required_seams": [
+        "shuffle-effect:all-nine-mask-slots-and-7float-records",
+        "shuffle-effect:Golden-double-xy-depth-projection-and-effect-context",
+        "shuffle-effect:complete-native-source-and-guest-partition-tail"
+      ],
+      "switch": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x710062eaf4",
+        "size": 252,
+        "sha256": "8585886d7279e157d7a2892540c96a028788cddda309e39eac6706aa66feabce",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "layout": {
+        "records": 9,
+        "stride": 28,
+        "fields": [
+          "f32 x",
+          "f32 y",
+          "f32 depth",
+          "f32 pitch",
+          "f32 yaw",
+          "f32 roll",
+          "f32 scale"
+        ]
+      },
+      "golden_records": [
+        [
+          240,
+          116,
+          1.5,
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          240,
+          116,
+          1.399999976158142,
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          240,
+          116,
+          1.2000000476837158,
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          240,
+          116,
+          1.5,
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          240,
+          116,
+          1.399999976158142,
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          240,
+          116,
+          1.2000000476837158,
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          240,
+          170,
+          1,
+          0,
+          0,
+          0,
+          0.5
+        ],
+        [
+          240,
+          200,
+          1,
+          0,
+          0,
+          0,
+          0.5
+        ],
+        [
+          240,
+          136,
+          1,
+          10,
+          0,
+          0,
+          2
+        ]
+      ],
+      "ps2_live_bytes": 252,
+      "ps2_alignment_tail_bytes": 4,
+      "tail_policy": "Retain only4zero alignment bytes; never consume as a tenth field/record."
+    },
+    {
+      "address": "0x00636390",
+      "size": 128,
+      "decision": "PROVEN-code",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "884308ac8e01b6ccd1fdbbb59ea6460f56f60560cd3b2a55b796235fb53ffad6",
+        "readers": [
+          {
+            "function": "0x256460",
+            "name": "cmmRankUpDrawAlternateGradientStrip",
+            "file": "src/cmmRankUp.c"
+          }
+        ]
+      },
+      "source": {
+        "kind": "authored-Golden-code-constant",
+        "steam_reader": "0x1ba690",
+        "switch_reader": "0x710012b300",
+        "steam_vector_loads": [
+          {
+            "pc": "0x1ba6e1",
+            "source_rva": "0x966c70",
+            "source_hex": "00000000000000000000704400000000"
+          },
+          {
+            "pc": "0x1ba6ec",
+            "source_rva": "0x9684d0",
+            "source_hex": "00000000000060420000704400006042"
+          },
+          {
+            "pc": "0x1ba6f7",
+            "source_rva": "0x9689c0",
+            "source_hex": "000000000000af43000070440000af43"
+          },
+          {
+            "pc": "0x1ba706",
+            "source_rva": "0x968a20",
+            "source_hex": "000000000000d743000070440000d743"
+          },
+          {
+            "pc": "0x1ba73a",
+            "source_rva": "0x968630",
+            "source_hex": "000000000000c042000070440000e842"
+          },
+          {
+            "pc": "0x1ba749",
+            "source_rva": "0x968990",
+            "source_hex": "0000000000008e430000704400008e43"
+          },
+          {
+            "pc": "0x1ba755",
+            "source_rva": "0x9686d0",
+            "source_hex": "00000000000010430000704400001043"
+          },
+          {
+            "pc": "0x1ba764",
+            "source_rva": "0x968a40",
+            "source_hex": "000000000000eb43000070440000eb43"
+          }
+        ],
+        "logical_sha256": "2ce098bdd895db0d024b72a2a7b549c3ef1ce70afe46219c05d238c949fa87e6"
+      },
+      "structural_correspondence": "PS2256460 copies16 f32x2 points then colors edge indices0/1/14/15, upper6..9,lower10..13 and passes16-point strip. Steam1ba690 and NSO12b300 construct same16 pairs from scattered literals/immediates and use identical index-colored bands and16-point transformed primitive. Eight Steam vector loads/stores reconstruct128 bytes exactly equal independently decoded NSO16qword constants. This is not contiguous M2candidate968960, which contains unrelated floats.",
+      "required_seams": [
+        "rankup-strip:author-exact16-pair-Golden-constant",
+        "rankup-strip:Golden-native-20-y-offset-and-pixel-coordinate-convention",
+        "rankup-strip:all-Pass2-direct-inlined-consumers"
+      ],
+      "layout": {
+        "records": 16,
+        "stride": 8,
+        "type": "2xf32le"
+      },
+      "golden_values": [
+        [
+          0,
+          0
+        ],
+        [
+          960,
+          0
+        ],
+        [
+          0,
+          56
+        ],
+        [
+          960,
+          56
+        ],
+        [
+          0,
+          96
+        ],
+        [
+          960,
+          116
+        ],
+        [
+          0,
+          144
+        ],
+        [
+          960,
+          144
+        ],
+        [
+          0,
+          284
+        ],
+        [
+          960,
+          284
+        ],
+        [
+          0,
+          350
+        ],
+        [
+          960,
+          350
+        ],
+        [
+          0,
+          430
+        ],
+        [
+          960,
+          430
+        ],
+        [
+          0,
+          470
+        ],
+        [
+          960,
+          470
+        ]
+      ],
+      "installation": "Compile authored128-byte ordered f32 constant; never read NSO at runtime."
+    },
+    {
+      "address": "0x00636480",
+      "size": 80,
+      "decision": "PROVEN-code",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "2941e816bb21cc0487e0b2e9cf752c370298977e419c6371a9629790b10a3d64",
+        "readers": [
+          {
+            "function": "0x256be0",
+            "name": "cmmRankUpDrawAlternateFadedExpansion",
+            "file": "src/cmmRankUp.c"
+          }
+        ]
+      },
+      "source": {
+        "kind": "authored-Golden-code-constant",
+        "steam_reader": "0x1bada0..0x1baec2",
+        "switch_reader": "0x710012b460",
+        "logical_sha256": "9dbce8481d57f8ca32249a60685b20dedf7fa65431ad6207b806c0434fe1cde8"
+      },
+      "structural_correspondence": "PS2256be0 Pass2 copies two36-byte sprite keys and fourUV pairs, interpolates keys, rotates, then draws two textured passes3/5 and glow2/4. Golden NSO12b460 constructs ordered keys and UVs on stack, calls126f30 interpolation and339660 rotation then120700 passes3/5/2/4. It is called by1274d0 mode11 at timeline80/100/110/170, corresponding to PS2257900 mode11 Pass2 calls. Steam1bada0 builds matching keys inline at1bae68..1baeb3 and loads UV vectors before1baec2. Golden texel UVs must not pass through the PS2 normalized-UV interface unchanged.",
+      "required_seams": [
+        "rankup-expansion:author-exact-Golden-keys-and-pixel-UV",
+        "rankup-expansion:mode11-timeline-interpolation-and-rotation",
+        "rankup-expansion:Golden-texture-dimensions-and-3-5-2-4-render-passes"
+      ],
+      "layout": {
+        "records": 2,
+        "stride": 36,
+        "fields": [
+          "s32kind",
+          "f32x",
+          "f32y",
+          "3xf32axis",
+          "u32RGBA",
+          "f32angle",
+          "s16width",
+          "s16height"
+        ]
+      },
+      "golden_words_u32": [
+        0,
+        1131413504,
+        1123024896,
+        0,
+        0,
+        1065353216,
+        4294967295,
+        0,
+        7536722,
+        0,
+        1131413504,
+        1123024896,
+        0,
+        0,
+        1065353216,
+        4294967295,
+        1127481344,
+        7536722
+      ],
+      "ps2_live_bytes": 72,
+      "ps2_alignment_tail_bytes": 8,
+      "installation": "Compile exact logical constant, use native semantic seam; noNSO runtime input. Alignment is not part of keys."
+    },
+    {
+      "address": "0x006364d0",
+      "size": 32,
+      "decision": "PROVEN-code",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "8e54728923e31b12cf4c6803cb65867a95ab6fa31a75a6e52a92915babd2dda3",
+        "readers": [
+          {
+            "function": "0x256be0",
+            "name": "cmmRankUpDrawAlternateFadedExpansion",
+            "file": "src/cmmRankUp.c"
+          }
+        ]
+      },
+      "source": {
+        "kind": "authored-Golden-code-constant",
+        "steam_reader": "0x1bada0..0x1baec2",
+        "switch_reader": "0x710012b460",
+        "logical_sha256": "938d77b40c4aab6fadf944ae8c9fdc5097bc4158902eaba77456bcd683b0d29d"
+      },
+      "structural_correspondence": "PS2256be0 Pass2 copies two36-byte sprite keys and fourUV pairs, interpolates keys, rotates, then draws two textured passes3/5 and glow2/4. Golden NSO12b460 constructs ordered keys and UVs on stack, calls126f30 interpolation and339660 rotation then120700 passes3/5/2/4. It is called by1274d0 mode11 at timeline80/100/110/170, corresponding to PS2257900 mode11 Pass2 calls. Steam1bada0 builds matching keys inline at1bae68..1baeb3 and loads UV vectors before1baec2. Golden texel UVs must not pass through the PS2 normalized-UV interface unchanged.",
+      "required_seams": [
+        "rankup-expansion:author-exact-Golden-keys-and-pixel-UV",
+        "rankup-expansion:mode11-timeline-interpolation-and-rotation",
+        "rankup-expansion:Golden-texture-dimensions-and-3-5-2-4-render-passes"
+      ],
+      "layout": {
+        "records": 4,
+        "stride": 8,
+        "type": "f32 pixel UV"
+      },
+      "golden_words_u32": [
+        1065353216,
+        1065353216,
+        1126301696,
+        1065353216,
+        1065353216,
+        1130627072,
+        1126301696,
+        1130627072
+      ],
+      "ps2_live_bytes": 32,
+      "ps2_alignment_tail_bytes": 0,
+      "installation": "Compile exact logical constant, use native semantic seam; noNSO runtime input. Alignment is not part of keys."
+    }
+  ]
+}

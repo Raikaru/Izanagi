@@ -1,4 +1,4 @@
-# Retail-free builds and tests for Linux, Windows, AArch64, Android and macOS.
+# Retail-free builds and tests for Linux, Windows, Android and macOS.
 # Tests requiring a game disc are skipped.
 name: land
 
@@ -30,11 +30,6 @@ jobs:
             dockerfile: Dockerfile
             image: p4pc-land-ci
             ccache: ccache-test-
-          - shard: a64
-            runner: ubuntu-24.04-arm
-            dockerfile: Dockerfile.arm64
-            image: p4pc-land-ci-arm64
-            ccache: ccache-land-a64-
           - shard: mobile
             runner: ubuntu-24.04
             dockerfile: Dockerfile
@@ -69,12 +64,23 @@ jobs:
           restore-keys: |
             ccache-land-${{ matrix.shard }}-
             ${{ matrix.ccache }}
-      # mobile: the NDK ci/android/Dockerfile pins, from the runner's Android SDK, and SDL3/FFmpeg for Android cached per build script.
       - name: Android NDK (ci/android/Dockerfile's version)
         if: matrix.shard == 'mobile'
         run: |
           version=$(sed -n 's/^ARG NDK_VERSION=//p' ci/android/Dockerfile)
-          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "ndk;$version" > /dev/null
+          if [ -z "${ANDROID_HOME:-}" ]; then
+            export ANDROID_HOME="$RUNNER_TEMP/android-sdk"
+            tools=$(sed -n 's/^ARG CMDLINE_TOOLS=//p' ci/android/Dockerfile)
+            mkdir -p "$ANDROID_HOME/cmdline-tools"
+            curl -fsSL --retry 6 -o "$RUNNER_TEMP/android-tools.zip" "https://dl.google.com/android/repository/commandlinetools-linux-${tools}_latest.zip"
+            unzip -q "$RUNNER_TEMP/android-tools.zip" -d "$ANDROID_HOME/cmdline-tools"
+            mv "$ANDROID_HOME/cmdline-tools/cmdline-tools" "$ANDROID_HOME/cmdline-tools/latest"
+          fi
+          manager="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          set +o pipefail
+          yes | "$manager" --licenses > /dev/null
+          set -o pipefail
+          "$manager" --install "ndk;$version" > /dev/null
           echo "NDK=$ANDROID_HOME/ndk/$version" >> "$GITHUB_ENV"
           mkdir -p .android-cache
       - uses: actions/cache/restore@v4

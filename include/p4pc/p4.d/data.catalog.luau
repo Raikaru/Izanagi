@@ -54,6 +54,8 @@ export type P4DataFilter = string | {
     name: string?, kind: string?, element: string?, arcana: string?,
     level: (number | { min: number?, max: number? })?,
 }
+-- Only registered in Golden mode; unavailable until its image-table binder installs the bank.
+export type P4FusionRecipe = { result: number, materials: { number } }
 --!in p4.data
 -- By display name (case, spaces and punctuation ignored), by key, or by ID
 -- (advanced). An unknown name raises an error with the nearest names; a name
@@ -66,6 +68,8 @@ item: (query: string | number) -> P4Item,
 find: (kind: P4DataKind, filter: P4DataFilter?) -> { P4Ref },
 -- Every named row of a kind, in ID order.
 all: (kind: P4DataKind) -> { P4Ref },
+fusion_recipe: ((index: number) -> P4FusionRecipe)?,
+fusion_recipes: (() -> { P4FusionRecipe })?,
 --!example
 local agilao: P4Skill = p4.data.skill("Agilao")
 local power: number? = agilao.power

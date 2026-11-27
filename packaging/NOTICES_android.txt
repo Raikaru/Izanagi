@@ -4,13 +4,17 @@ No Persona 4 disc data is included. Supply your own USA PS2 disc image.
 
 SDL 3.2.10: https://libsdl.org, zlib licence (licenses/SDL3-zlib.txt).
 LodePNG 20261006: zlib licence (licenses/LodePNG-zlib.txt).
+bcdec 0.985 (Sergii Kudlai), BC7 decoding: MIT option (licenses/bcdec-MIT.txt).
 cgltf 1.15 (Johannes Kuhlmann): MIT licence (licenses/cgltf-MIT.txt).
 FFmpeg 7.1.1: https://ffmpeg.org, LGPL 2.1 or later
-(licenses/FFmpeg-LGPL-2.1.txt). Only MPEG-2 video, ADX audio, avutil and
+(licenses/FFmpeg-LGPL-2.1.txt). Only MPEG-2 video, ADX and HCA audio, avutil and
 swscale are built. No GPL or nonfree components are enabled.
 
-Complete unmodified upstream source archives and the exact build recipe are in
-assets/source inside this APK/AAB. FFmpeg and SDL are dynamically linked,
+  FFmpeg is modified: its HCA window has 32-byte alignment, without changing
+  coefficients or arithmetic. Complete upstream archives, the exact recipe
+  ci/android/build_deps.sh and the LGPL patch
+  ci/ffmpeg-7.1.1-hca-window-alignment.patch are in assets/source inside this
+  APK/AAB. FFmpeg and SDL are dynamically linked,
 separate lib/<abi>/*.so files. You may replace these with ABI-compatible builds:
 unzip the APK, replace the libraries, zipalign, and sign with your own key using
 Android SDK apksigner. Android requires every APK to be signed; the developer's

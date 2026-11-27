@@ -46,6 +46,7 @@ function(p4_mod_profile suffix)
   add_library(p4_mod_game${suffix} STATIC ${bridges}
     "${P4_MOD_ROOT}/src/platform/mods/native_bindings.c"
     "${P4_MOD_ROOT}/src/platform/mods/authorize.c"
+    "${P4_MOD_ROOT}/src/platform/mods/ai_item_journal.c"
     "${P4_MOD_ROOT}/src/platform/mods/field_host.c")
   add_dependencies(p4_mod_game${suffix} p4_mirror)
   set(native_targets p4_mod_core${suffix} p4_mod_game${suffix})
@@ -68,6 +69,7 @@ function(p4_mod_profile suffix)
       "${P4_MOD_ROOT}/src/platform/mods/battle_defeat.c"
       "${P4_MOD_ROOT}/src/platform/mods/lua_elements.c"
       "${P4_MOD_ROOT}/src/platform/mods/lua_data.c"
+      "${P4_MOD_ROOT}/src/platform/mods/lua_data_fusion.c"
       "${P4_MOD_ROOT}/src/platform/mods/lua_data_edit.c"
       "${P4_MOD_ROOT}/src/platform/mods/lua_audio.c"
       "${P4_MOD_ROOT}/src/platform/mods/lua_tables.c"
@@ -78,6 +80,7 @@ function(p4_mod_profile suffix)
       "${P4_MOD_ROOT}/src/platform/mods/battle_semantic.c"
       "${P4_MOD_ROOT}/src/platform/mods/lua_semantic_events.c"
       "${P4_MOD_ROOT}/src/platform/mods/lua_battle_decide.c"
+      "${P4_MOD_ROOT}/src/platform/mods/lua_battle_execution.c"
       "${P4_MOD_ROOT}/src/platform/mods/game_inventory.c"
       "${P4_MOD_ROOT}/src/platform/mods/game_party.c"
       "${P4_MOD_ROOT}/src/platform/mods/lua_inventory.c"
@@ -191,6 +194,9 @@ function(p4_mod_profile suffix)
     target_link_options(mod_scene_position_test${suffix} PRIVATE ${flags} -Wl,--gc-sections)
     add_test(NAME mod_scene_position${suffix} COMMAND ${runner} "$<TARGET_FILE:mod_scene_position_test${suffix}>")
     set_tests_properties(mod_scene_position${suffix} PROPERTIES LABELS "host" TIMEOUT 20)
+    if(suffix STREQUAL "64")
+      set_property(TEST mod_scene_position${suffix} APPEND PROPERTY LABELS port64)
+    endif()
   endif()
   # Completed scene results remain visible to their owner across other requests.
   if(NOT suffix STREQUAL "" AND NOT suffix STREQUAL "64w" AND NOT P4_APPLE)
@@ -285,6 +291,39 @@ function(p4_mod_profile suffix)
       "WINEPREFIX=${CMAKE_BINARY_DIR}/tests/wine64prefix")
     p4_wine_scale_timeouts(mod_luau_status${suffix})
   endif()
+  # The execution observer is the production reducer and binding over guest actors.
+  add_executable(mod_luau_execution_test${suffix} "${P4_MOD_ROOT}/tests/mod_luau_execution_test.c" ${save_sources}
+    "${P4_MOD_ROOT}/src/platform/mods/lua_battle_execution.c"
+    "${P4_MOD_ROOT}/src/platform/mods/battle_action_exec.c"
+    "${P4_MOD_ROOT}/src/platform/mods/battle_action_exec_native.c")
+  add_dependencies(mod_luau_execution_test${suffix} p4_mod_hook_fixture)
+  target_include_directories(mod_luau_execution_test${suffix} PRIVATE "${P4_MOD_ROOT}/tests"
+    "${P4_MOD_ROOT}/src/platform/mods" "${P4_MOD_ROOT}/src/platform/files")
+  target_compile_options(mod_luau_execution_test${suffix} PRIVATE ${flags} -O2 -g1 -fno-strict-aliasing -ffp-contract=off)
+  target_link_options(mod_luau_execution_test${suffix} PRIVATE ${flags})
+  target_link_libraries(mod_luau_execution_test${suffix} PRIVATE p4_mod_luau${suffix} m)
+  set_target_properties(mod_luau_execution_test${suffix} PROPERTIES C_COMPILER_LAUNCHER "${P4_MOD_LAUNCHER}" LINKER_LANGUAGE CXX)
+  if(suffix STREQUAL "")
+    p4_ps2_exe(mod_luau_execution_test${suffix})
+  elseif(suffix STREQUAL "64w")
+    set_target_properties(mod_luau_execution_test${suffix} PROPERTIES SUFFIX ".exe" LINK_DEPENDS_USE_LINKER FALSE)
+  endif()
+  add_test(NAME mod_luau_execution${suffix} COMMAND ${runner} "$<TARGET_FILE:mod_luau_execution_test${suffix}>"
+    "${CMAKE_CURRENT_BINARY_DIR}/execution-fixture-data${suffix}")
+  add_test(NAME mod_luau_execution_failure${suffix} COMMAND "${P4_PYTHON}"
+    "${P4_MOD_ROOT}/tests/mod_luau_execution_failure_test.py" -- ${runner}
+    "$<TARGET_FILE:mod_luau_execution_test${suffix}>" "${CMAKE_CURRENT_BINARY_DIR}/execution-failure-data${suffix}")
+  set_tests_properties(mod_luau_execution${suffix} mod_luau_execution_failure${suffix} PROPERTIES LABELS "host" TIMEOUT 60
+    ENVIRONMENT "P4PC_MODS=0;P4PC_PACKS=0;P4PC_INPUT=script;P4PC_VIRTUAL_CLOCK=1;SDL_AUDIODRIVER=dummy")
+  if(suffix STREQUAL "64")
+    set_property(TEST mod_luau_execution${suffix} mod_luau_execution_failure${suffix} APPEND PROPERTY LABELS port64)
+  elseif(suffix STREQUAL "64w")
+    set_tests_properties(mod_luau_execution${suffix} mod_luau_execution_failure${suffix}
+      PROPERTIES LABELS "host;port64win" FIXTURES_REQUIRED wine64_ready)
+    set_property(TEST mod_luau_execution${suffix} mod_luau_execution_failure${suffix} APPEND PROPERTY ENVIRONMENT WINEDEBUG=-all
+      "WINEPREFIX=${CMAKE_BINARY_DIR}/tests/wine64prefix")
+    p4_wine_scale_timeouts(mod_luau_execution${suffix} mod_luau_execution_failure${suffix})
+  endif()
   add_test(NAME mod_luau${suffix} COMMAND ${runner} "$<TARGET_FILE:mod_luau_test${suffix}>"
     "${CMAKE_CURRENT_BINARY_DIR}/fixture-data${suffix}")
   set_tests_properties(mod_luau${suffix} PROPERTIES LABELS "host" TIMEOUT 60
@@ -307,6 +346,32 @@ function(p4_mod_profile suffix)
     ${runner} "$<TARGET_FILE:mod_luau_test${suffix}>")
   set_tests_properties(mod_luau_quiescence${suffix} PROPERTIES LABELS "host" TIMEOUT 30
     SKIP_RETURN_CODE 77 ENVIRONMENT "P4PC_MODS=0;P4PC_PACKS=0;P4PC_INPUT=script")
+  # Run the same native contracts a second time against the experimental
+  # Zig bridge. Keep these distinct from the production C++ registrations.
+  if((suffix STREQUAL "64" OR suffix STREQUAL "64w") AND NOT P4_PORT64_ARCH STREQUAL "aarch64" AND NOT P4_ANDROID64)
+    if(DEFINED ENV{P4_ZIG} AND NOT "$ENV{P4_ZIG}" STREQUAL "")
+      set(_p4_luau_zig "$ENV{P4_ZIG}")
+    else()
+      set(_p4_luau_zig zig)
+    endif()
+    set(_p4_luau_zig_runner)
+    if(suffix STREQUAL "64w")
+      set(_p4_luau_zig_runner --wine "${P4_MOD_WINE}")
+    endif()
+    add_test(NAME mod_luau_zig_contract${suffix} COMMAND "${P4_PYTHON}"
+      "${P4_MOD_ROOT}/luau-zig/tests/mod_contract_lane.py"
+      --zig "${_p4_luau_zig}" --python "${P4_PYTHON}" ${_p4_luau_zig_runner})
+    set_tests_properties(mod_luau_zig_contract${suffix} PROPERTIES
+      LABELS "host;port64" TIMEOUT 1800
+      ENVIRONMENT "P4PC_MODS=0;P4PC_PACKS=0;P4PC_INPUT=script;P4PC_VIRTUAL_CLOCK=1;SDL_AUDIODRIVER=dummy")
+    if(suffix STREQUAL "64w")
+      set_tests_properties(mod_luau_zig_contract${suffix} PROPERTIES LABELS "host;port64win"
+        FIXTURES_REQUIRED wine64_ready)
+      set_property(TEST mod_luau_zig_contract${suffix} APPEND PROPERTY ENVIRONMENT WINEDEBUG=-all
+        "WINEPREFIX=${CMAKE_BINARY_DIR}/tests/wine64prefix")
+      p4_wine_scale_timeouts(mod_luau_zig_contract${suffix})
+    endif()
+  endif()
   add_test(NAME mod_frame_cpu${suffix} COMMAND "${P4_PYTHON}" "${P4_MOD_ROOT}/tests/mod_frame_cpu_test.py"
     ${runner} "$<TARGET_FILE:mod_luau_test${suffix}>" --driver-end)
   set_tests_properties(mod_frame_cpu${suffix} PROPERTIES LABELS "host" TIMEOUT 200

@@ -2,7 +2,10 @@
 #include "game_table_golden_attest.h"
 #include "game_table_derived_internal.h"
 #include "../golden/golden_mode_boot.h"
+#include "../golden/golden_mode_image_bind.h"
 #include "p4pc/game_table_boot.h"
+#include "p4pc/golden_ai_boot.h"
+#include "p4pc/golden_ai_native.h"
 #include "p4pc/game_table_extents.h"
 #include "p4pc/game_table_xml.h"
 #include "p4pc/game_table_inputs_use.h"
@@ -87,10 +90,13 @@ P4GameTablesDefinitionBuilder *p4_game_tables_boot_builder(void)
  * attests the actual exposed inputs, not a caller-provided readiness flag. */
 int p4_game_tables_boot_golden_ready(void)
 {
-    return p4_game_table_golden_inputs_attest(boot.builder.inputs, boot.builder.input_count, boot.exposed);
+    return p4_game_table_golden_inputs_attest(boot.builder.inputs, boot.builder.input_count, boot.exposed) &&
+        p4_golden_mode_image_ready(&boot.builder);
 }
 static int destroy(void)
 {
+    if (p4_golden_ai_native_session_end() || p4_golden_ai_product_release(&boot.builder))
+        return P4_TABLE_FROZEN;
     int result = boot.admission_staged ?
         p4_game_table_admission_unstage(boot.builder.inputs, boot.builder.input_count) : P4_TABLE_OK;
     if (result) return result;
@@ -101,6 +107,7 @@ static int destroy(void)
     if (result) return result;
     result = p4_game_skills_save_unregister();
     if (result) return result;
+    if (golden_requested) p4_golden_mode_image_release(&boot.builder);
     result = p4_game_tables_builder_destroy(&boot.builder);
     if (result) return result;
     for (size_t i = 0; i < boot.count; ++i) p4_package_file_plan_release(boot.definitions[i].plan);
@@ -337,6 +344,13 @@ static int prepare(void *unused)
         fprintf(stderr, "p4pc: combined table-source view/input/origin seal refused: %s\n", p4_game_tables_error(result));
         return failed_provider ? refuse(failed_provider, p4_game_tables_error(result)) : -1;
     }
+    if (golden_requested) {
+        char reason[192];
+        if (p4_golden_mode_image_bind(P4_GAME_MODE_GOLDEN, &boot.builder, reason, sizeof reason)) {
+            fprintf(stderr, "p4pc: Golden image bind refused: %s\n", reason);
+            return -1;
+        }
+    }
     boot.sealed = 1;
     seal_identity();
     boot.cpu_product = (P4GameTablesBootProduct){
@@ -345,7 +359,8 @@ static int prepare(void *unused)
         .items = boot.builder.items, .enemies = boot.builder.enemies, .personas = boot.builder.personas,
         .names = boot.builder.names,
         .descriptions = boot.builder.descriptions, .inputs = boot.builder.inputs,
-        .input_count = boot.builder.input_count
+        .input_count = boot.builder.input_count,
+        .golden_ai = p4_golden_ai_product(&boot.builder)
     };
     return p4_package_boot_provide(&boot.cpu_product);
 }

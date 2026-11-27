@@ -9,6 +9,7 @@
 #include "p4pc/gmem.h"
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 
 extern int32_t datCalcIsGuarding(uint16_t *unit);
 extern uint8_t datCalcGetBattleStat(void *unit, int32_t stat);
@@ -16,6 +17,8 @@ extern int8_t datCalcGetBuffLevel(void *unit, int32_t buff);
 extern int32_t datCalcHasSkill(void *unit, int32_t skill);
 extern int32_t datCalcSkillElement(void *unit, uint16_t skill);
 extern uint32_t RpRandom(void);
+extern uint16_t datCalcMaxHp(void *unit);
+extern void datCalcAdvanceSecondaryBuffs(void *unit);
 
 #define UNIT_FLAGS(unit) (*(const uint16_t *)(unit))
 #define UNIT_BAD(unit) (*(const uint32_t *)((const uint8_t *)(unit) + 0xC))
@@ -40,6 +43,13 @@ int p4_side_ailment_native_occupied(void *unit)
 {
     if (!unit || !p4_side_ailment_active()) return 0;
     return held(unit) != NULL || p4_side_ailment_landed(guest(unit), NULL);
+}
+
+uint32_t p4_side_ailment_native_leaf(void *unit)
+{
+    if (!unit || !p4_side_ailment_active()) return 0;
+    const P4SideAilmentDef *def = held(unit);
+    return def ? def->leaf + 1u : 0u;
 }
 
 int p4_side_ailment_native_lose_turn(void *unit)
@@ -101,6 +111,8 @@ void p4_side_ailment_native_riders(uint32_t skill_id, void *source, void *target
         p4_side_ailment_use_rider(rider);
         const P4SideAilmentDef *def = p4_side_ailment_find_leaf(rider->leaf);
         if (!def) continue;
+        if ((def->flags & P4_SIDE_NO_ENEMY_RIDER) &&
+            (UNIT_FLAGS(source) & UNIT_ENEMY) && !(UNIT_FLAGS(target) & UNIT_ENEMY)) continue;
         /* The occupied slot and Guard refuse every rider before any roll, as
          * 002397D0 and 00238940 do for a retail ailment; a single-slot leaf
          * also yields to a held retail ailment or one this hit inflicts. */
@@ -188,9 +200,49 @@ int p4_side_ailment_native_spend_turn(void *unit)
     return p4_side_ailment_turn_lost(guest(unit));
 }
 
+/* The boss entity set is the same set as the explicit F-G3 boss rows in
+ * hard mode's freezeshock.xml. Profile variants share their entity ID. */
+static int boss_entity(void *unit)
+{
+    if (!(UNIT_FLAGS(unit) & UNIT_ENEMY)) return 0;
+    const uint32_t id = *(const uint16_t *)((const uint8_t *)unit + 2);
+    return (id >= 257u && id <= 267u) || (id >= 269u && id <= 274u) ||
+        (id >= 288u && id <= 297u) || (id >= 304u && id <= 319u);
+}
 void p4_side_ailment_native_turn_end(void *unit)
 {
-    if (p4_side_ailment_native_lose_turn(unit)) (void)p4_side_ailment_clear(guest(unit), P4_SIDE_REASON_RECOVERED);
+    if (p4_side_ailment_native_lose_turn(unit))
+        (void)p4_side_ailment_clear(guest(unit), P4_SIDE_REASON_RECOVERED);
+}
+
+
+void p4_side_ailment_native_tick_end(void *unit)
+{
+    if (!unit || !p4_side_ailment_active()) return;
+    const P4SideAilmentDef *def = held(unit);
+    if (!def) return;
+    if (def->flags & P4_SIDE_END_TURN_TICK) {
+        uint16_t *hp = (uint16_t *)((uint8_t *)unit + 8);
+        const uint32_t maximum = datCalcMaxHp(unit);
+        uint32_t damage = maximum * (boss_entity(unit) ? 3u : 10u) / 100u;
+        if (*hp > 1u) {
+            if (damage >= *hp) damage = *hp - 1u;
+            *hp = (uint16_t)(*hp - damage);
+        } else {
+            damage = 0;
+        }
+        const uint32_t ticks = p4_side_ailment_tick(guest(unit));
+        fprintf(stderr, "P4PC_SIDE_TICK unit=%x leaf=%u damage=%u hp=%u tick=%u\n",
+            guest(unit), def->leaf, damage, (unsigned)*hp, ticks);
+        if (ticks >= 2u)
+            (void)p4_side_ailment_clear(guest(unit), P4_SIDE_REASON_RECOVERED);
+    }
+}
+
+void p4_side_ailment_native_finish_turn(void *unit)
+{
+    p4_side_ailment_native_tick_end(unit);
+    datCalcAdvanceSecondaryBuffs(unit);
 }
 
 void p4_side_ailment_native_action_begin(void)

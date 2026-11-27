@@ -35,6 +35,7 @@ struct P4SndVoice {
     uint32_t cap;
     _Atomic uint32_t wr; /* frames committed by the producer */
     _Atomic uint32_t rd; /* frames consumed, published by the mixer */
+    _Atomic uint32_t delay; /* remaining output frames before stream consumption */
     uint32_t rd_local;   /* mixer-private copy */
     double frac;
 
@@ -78,6 +79,113 @@ static void ensure_lock(void)
     if (g.lock == NULL) {
         g.lock = SDL_CreateMutex();
     }
+}
+
+/* ------------------------------------------------------------------ diagnostics (p4snd.h, p4diag): counted on the audio thread, read by the game thread */
+
+enum { DIAG_EVENTS = 32 };
+
+static struct {
+    _Atomic uint64_t callbacks, late, slow, lock_waits, clipped, render_sum_ns;
+    _Atomic uint64_t render_max_ns, gap_max_ns, lock_max_ns; /* reset by every poll */
+    _Atomic int peak_milli;                                  /* reset by every poll */
+    uint64_t last_in_ns;                                     /* the audio thread's */
+    uint64_t period_ns;                                      /* the device buffer as a time; set before the device starts calling */
+    P4SndDiagEvent events[DIAG_EVENTS];
+    _Atomic uint32_t events_written;
+    uint32_t events_read;                                    /* the poller's */
+} dg;
+
+static void diag_max(_Atomic uint64_t *slot, uint64_t value)
+{
+    if (value > atomic_load_explicit(slot, memory_order_relaxed)) {
+        atomic_store_explicit(slot, value, memory_order_relaxed);
+    }
+}
+
+static void diag_event(int kind, uint64_t t_ns, uint64_t a_ns, uint64_t b_ns)
+{
+    const uint32_t w = atomic_load_explicit(&dg.events_written, memory_order_relaxed);
+    P4SndDiagEvent *e = &dg.events[w % DIAG_EVENTS];
+
+    e->t_ns = t_ns;
+    e->kind = kind;
+    e->a_us = (uint32_t)(a_ns / 1000u);
+    e->b_us = (uint32_t)(b_ns / 1000u);
+    atomic_store_explicit(&dg.events_written, w + 1u, memory_order_release);
+}
+
+/* One finished device callback: when it began and ended, and how many frames it produced. */
+static void diag_callback(uint64_t t_in, uint64_t t_out, int frames)
+{
+    const uint64_t render = t_out - t_in;
+    const uint64_t budget = (uint64_t)frames * 1000000000ull / P4SND_RATE;
+
+    atomic_fetch_add_explicit(&dg.callbacks, 1u, memory_order_relaxed);
+    atomic_fetch_add_explicit(&dg.render_sum_ns, render, memory_order_relaxed);
+    diag_max(&dg.render_max_ns, render);
+    if (dg.last_in_ns != 0) {
+        const uint64_t gap = t_in - dg.last_in_ns;
+
+        /* a gap of seconds is the app in the background (the device is paused), not an underrun */
+        if (gap < 2000000000ull) {
+            diag_max(&dg.gap_max_ns, gap);
+            if (dg.period_ns != 0 && gap > dg.period_ns * 7u / 4u) {
+                atomic_fetch_add_explicit(&dg.late, 1u, memory_order_relaxed);
+                diag_event(P4SND_DIAG_LATE, t_in, gap, dg.period_ns);
+            }
+        }
+    }
+    dg.last_in_ns = t_in;
+    if (budget != 0 && render >= budget * 8u / 10u) {
+        atomic_fetch_add_explicit(&dg.slow, 1u, memory_order_relaxed);
+        diag_event(P4SND_DIAG_SLOW, t_in, render, budget);
+    }
+}
+
+/* The mixer lock, timing only the waits: an uncontended lock costs one try. */
+static void diag_lock(void)
+{
+    if (!SDL_TryLockMutex(g.lock)) {
+        const uint64_t t0 = p4_os_now_ns();
+        uint64_t waited;
+
+        SDL_LockMutex(g.lock);
+        waited = p4_os_now_ns() - t0;
+        if (waited >= 1000000ull) {
+            atomic_fetch_add_explicit(&dg.lock_waits, 1u, memory_order_relaxed);
+            diag_max(&dg.lock_max_ns, waited);
+            diag_event(P4SND_DIAG_LOCK, t0, waited, 0);
+        }
+    }
+}
+
+void p4snd_diag_poll(P4SndDiag *out)
+{
+    uint32_t r = dg.events_read;
+    const uint32_t w = atomic_load_explicit(&dg.events_written, memory_order_acquire);
+
+    memset(out, 0, sizeof *out);
+    out->device = g.stream != NULL && !g.virtual_clock;
+    out->period_us = (uint32_t)(dg.period_ns / 1000u);
+    out->callbacks = atomic_load_explicit(&dg.callbacks, memory_order_relaxed);
+    out->late = atomic_load_explicit(&dg.late, memory_order_relaxed);
+    out->slow = atomic_load_explicit(&dg.slow, memory_order_relaxed);
+    out->lock_waits = atomic_load_explicit(&dg.lock_waits, memory_order_relaxed);
+    out->clipped_samples = atomic_load_explicit(&dg.clipped, memory_order_relaxed);
+    out->render_sum_ns = atomic_load_explicit(&dg.render_sum_ns, memory_order_relaxed);
+    out->render_max_ns = atomic_exchange_explicit(&dg.render_max_ns, 0, memory_order_relaxed);
+    out->gap_max_ns = atomic_exchange_explicit(&dg.gap_max_ns, 0, memory_order_relaxed);
+    out->lock_max_ns = atomic_exchange_explicit(&dg.lock_max_ns, 0, memory_order_relaxed);
+    out->peak = (float)atomic_exchange_explicit(&dg.peak_milli, 0, memory_order_relaxed) / 1000.0f;
+    if (w - r > DIAG_EVENTS) {
+        r = w - DIAG_EVENTS; /* the ones overwritten are gone; the counters above still hold them */
+    }
+    while (r != w && out->nevents < sizeof out->events / sizeof out->events[0]) {
+        out->events[out->nevents++] = dg.events[r % DIAG_EVENTS];
+        r++;
+    }
+    dg.events_read = r;
 }
 
 static void log_audio(const char *what)
@@ -232,6 +340,18 @@ void p4snd_voice_play(P4SndVoice *v, int on)
     }
 }
 
+uint64_t p4snd_voices_play(P4SndVoice *const *voices, uint32_t count, int on)
+{
+    if (!voices) count = 0;
+    ensure_lock();
+    SDL_LockMutex(g.lock);
+    for (uint32_t i = 0; i < count; ++i)
+        if (voices[i]) voices[i]->playing = on != 0;
+    uint64_t origin = g.frames_rendered;
+    SDL_UnlockMutex(g.lock);
+    return origin;
+}
+
 int p4snd_voice_playing(const P4SndVoice *v)
 {
     return v != NULL && v->playing;
@@ -250,6 +370,19 @@ uint32_t p4snd_stream_data(const P4SndVoice *v)
 uint32_t p4snd_stream_room(const P4SndVoice *v)
 {
     return v->cap - p4snd_stream_data(v);
+}
+
+void p4snd_stream_set_delay(P4SndVoice *v, uint32_t output_frames)
+{
+    if (!v) return;
+    SDL_LockMutex(g.lock);
+    atomic_store_explicit(&v->delay, output_frames, memory_order_relaxed);
+    SDL_UnlockMutex(g.lock);
+}
+
+uint32_t p4snd_stream_delay(const P4SndVoice *v)
+{
+    return atomic_load_explicit((const _Atomic uint32_t *)&v->delay, memory_order_relaxed);
 }
 
 void p4snd_stream_write(P4SndVoice *v, int ch, uint32_t ahead, const int16_t *src, uint32_t n)
@@ -511,6 +644,14 @@ static void mix_sample(P4SndVoice *v, float *out, int frames)
 static void mix_voice(P4SndVoice *v, float *out, int frames)
 {
     if (v->kind == KIND_STREAM) {
+        uint32_t delay = atomic_load_explicit(&v->delay, memory_order_relaxed);
+        if (delay) {
+            int skip = delay < (uint32_t)frames ? (int)delay : frames;
+            atomic_store_explicit(&v->delay, delay - (uint32_t)skip, memory_order_relaxed);
+            out += skip * 2;
+            frames -= skip;
+            if (!frames) return;
+        }
         mix_stream(v, out, frames);
     } else {
         mix_sample(v, out, frames);
@@ -558,7 +699,7 @@ static void mix_chunk(float *out, int frames)
 
     uint64_t trace_start = p4pc_prof_span_begin();
     uint64_t trace_locked;
-    SDL_LockMutex(g.lock);
+    diag_lock();
     trace_locked = p4pc_prof_span_stop(trace_start);
     memset(g.wet, 0, (size_t)frames * 2 * sizeof(float));
     if (g.meter < 0) {
@@ -613,6 +754,26 @@ uint32_t p4snd_stream_consumed(const P4SndVoice *v)
     return atomic_load_explicit((_Atomic uint32_t *)&v->rd, memory_order_acquire);
 }
 
+/* The output stage's limiter. A sum of voices past full scale used to be cut flat at +-1 (a hard clip: the buzz a small phone speaker makes worst of). Below the
+ * knee (0.9, -0.9 dBFS) the sample passes unchanged, bit for bit; above it the excess is bent through tanh into the last 10% of the range, so the output stays
+ * continuous with the same slope at the knee and never exceeds +-1. It has no state and no look-ahead: nothing pumps, and it costs nothing on a mix that stays under the knee. */
+#define P4SND_LIMIT_KNEE 0.9f
+
+float p4snd_soft_limit(float x)
+{
+    const float ax = x < 0.0f ? -x : x;
+    float y;
+
+    if (!(ax > P4SND_LIMIT_KNEE)) {
+        return x; /* under the knee (and a NaN, which the hard clamp never changed either) */
+    }
+    y = P4SND_LIMIT_KNEE + (1.0f - P4SND_LIMIT_KNEE) * tanhf((ax - P4SND_LIMIT_KNEE) / (1.0f - P4SND_LIMIT_KNEE));
+    if (y > 1.0f) {
+        y = 1.0f; /* tanhf rounds to exactly 1 for a large excess */
+    }
+    return x < 0.0f ? -y : y;
+}
+
 void p4snd_render(float *out, int frames)
 {
     int i;
@@ -635,10 +796,30 @@ void p4snd_render(float *out, int frames)
         mix_chunk(out + done * 2, c);
         done += c;
     }
-    for (i = 0; i < n; i++) {
-        float x = out[i] * g.master;
+    {
+        unsigned clipped = 0;
+        float peak = 0.0f;
 
-        out[i] = x > 1.0f ? 1.0f : (x < -1.0f ? -1.0f : x);
+        for (i = 0; i < n; i++) {
+            float x = out[i] * g.master;
+            const float ax = x < 0.0f ? -x : x;
+
+            if (ax > peak) {
+                peak = ax;
+            }
+            clipped += ax > 1.0f;
+            out[i] = p4snd_soft_limit(x);
+        }
+        if (clipped != 0) {
+            atomic_fetch_add_explicit(&dg.clipped, clipped, memory_order_relaxed);
+        }
+        if (peak > 0.0f) {
+            const int milli = peak < 1000.0f ? (int)(peak * 1000.0f) : 1000000;
+
+            if (milli > atomic_load_explicit(&dg.peak_milli, memory_order_relaxed)) {
+                atomic_store_explicit(&dg.peak_milli, milli, memory_order_relaxed);
+            }
+        }
     }
     p4pc_prof_span_end(trace_start, "audio.render", frames, 0, 0, NULL);
 }
@@ -733,6 +914,15 @@ uint64_t p4snd_frames_rendered(void)
     return g.frames_rendered;
 }
 
+uint64_t p4snd_frames_snapshot(void)
+{
+    ensure_lock();
+    SDL_LockMutex(g.lock);
+    uint64_t frames = g.frames_rendered;
+    SDL_UnlockMutex(g.lock);
+    return frames;
+}
+
 /* ------------------------------------------------------------------ device */
 
 /* Paced practice play (p4snd_set_frame_driven): the device plays silence and the kernel renders
@@ -758,12 +948,20 @@ static void SDLCALL audio_cb(void *userdata, SDL_AudioStream *stream, int additi
         }
         return;
     }
-    while (frames > 0) {
-        int n = frames > RENDER_CHUNK ? RENDER_CHUNK : frames;
+    {
+        const uint64_t t_in = p4_os_now_ns();
+        const int wanted = frames;
 
-        p4snd_render(g.scratch, n);
-        SDL_PutAudioStreamData(stream, g.scratch, n * (int)(sizeof(float) * 2));
-        frames -= n;
+        while (frames > 0) {
+            int n = frames > RENDER_CHUNK ? RENDER_CHUNK : frames;
+
+            p4snd_render(g.scratch, n);
+            SDL_PutAudioStreamData(stream, g.scratch, n * (int)(sizeof(float) * 2));
+            frames -= n;
+        }
+        if (wanted > 0) {
+            diag_callback(t_in, p4_os_now_ns(), wanted);
+        }
     }
 }
 
@@ -876,6 +1074,22 @@ int p4snd_open(void)
         return -1;
     }
     SDL_SetAudioStreamGain(g.stream, g.user_gain);
+    {
+        /* What the device really is, for a bug report: SDL converts our 48 kHz stereo float to it. The buffer is what the callback must fill each time. */
+        const SDL_AudioDeviceID id = SDL_GetAudioStreamDevice(g.stream);
+        SDL_AudioSpec device;
+        int buffer = 0;
+        const char *name = id != 0 ? SDL_GetAudioDeviceName(id) : NULL;
+
+        if (id != 0 && SDL_GetAudioDeviceFormat(id, &device, &buffer) && device.freq > 0 && buffer > 0) {
+            dg.period_ns = (uint64_t)buffer * 1000000000ull / (uint64_t)device.freq;
+            fprintf(stderr, "p4snd: output \"%s\" via %s: device %d Hz, %d ch, %s, buffer %d frames (%.1f ms); mixer %d Hz stereo float\n",
+                    name != NULL ? name : "?", SDL_GetCurrentAudioDriver() != NULL ? SDL_GetCurrentAudioDriver() : "?", device.freq, device.channels,
+                    SDL_GetAudioFormatName(device.format), buffer, (double)dg.period_ns / 1e6, P4SND_RATE);
+        } else {
+            fprintf(stderr, "p4snd: output \"%s\": the device format is not known (%s)\n", name != NULL ? name : "?", SDL_GetError());
+        }
+    }
     SDL_ResumeAudioStreamDevice(g.stream);
     return 0;
 }

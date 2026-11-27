@@ -96,6 +96,39 @@ void p4snd_set_frame_driven(int on);
 
 /* Frames rendered since the device was opened (for tests and clocks). */
 uint64_t p4snd_frames_rendered(void);
+/* Producer-thread clock snapshot under the render lock. */
+uint64_t p4snd_frames_snapshot(void);
+
+/* ------------------------------------------------------------------ diagnostics (src/platform/diag/p4diag.c)
+ *
+ * The device callback times itself, so a log can say whether the audio thread keeps up. It never prints: it counts, and the game thread polls.
+ *   late    a callback came more than 1.75 device buffer periods after the last one: the device probably ran dry (an underrun)
+ *   slow    a callback took 80% or more of the audio it produced: no margin left
+ *   lock    the callback waited 1 ms or more for the mixer lock (the game thread held it)
+ * The counters are cumulative; the maxima and the peak cover the time since the last poll; events are the ones not yet returned (at most 16 a poll). */
+enum { P4SND_DIAG_LATE = 1, P4SND_DIAG_SLOW = 2, P4SND_DIAG_LOCK = 3 };
+
+typedef struct P4SndDiagEvent {
+    uint64_t t_ns; /* p4_os_now_ns when it happened */
+    int kind;      /* P4SND_DIAG_* */
+    uint32_t a_us; /* late: the gap since the last callback; slow: the time the callback took; lock: the wait */
+    uint32_t b_us; /* late: the nominal period; slow: the audio it produced; lock: 0 */
+} P4SndDiagEvent;
+
+typedef struct P4SndDiag {
+    int device;                 /* an SDL device is playing (not offline, not the pacing thread) */
+    uint32_t period_us;         /* the device buffer, as a time */
+    uint64_t callbacks, late, slow, lock_waits, clipped_samples, render_sum_ns;
+    uint64_t render_max_ns, gap_max_ns, lock_max_ns; /* since the last poll */
+    float peak;                 /* largest output sample before clamping, since the last poll */
+    P4SndDiagEvent events[16];
+    unsigned nevents;
+} P4SndDiag;
+
+void p4snd_diag_poll(P4SndDiag *out);
+
+/* The output limiter (p4snd_render): identity up to 0.9, then a smooth bend that never exceeds 1.0 in magnitude. */
+float p4snd_soft_limit(float x);
 
 /* ------------------------------------------------------------------ stream voices */
 
@@ -106,6 +139,10 @@ P4SndVoice *p4snd_stream_create(int nch, uint32_t ring_frames);
 /* Frames pushed and not yet consumed, and the free space, in frames. */
 uint32_t p4snd_stream_data(const P4SndVoice *v);
 uint32_t p4snd_stream_room(const P4SndVoice *v);
+/* Output-frame delay before consuming a stopped stream's first source sample.
+ * Group-start delayed streams together; paused streams do not advance delay. */
+void p4snd_stream_set_delay(P4SndVoice *v, uint32_t output_frames);
+uint32_t p4snd_stream_delay(const P4SndVoice *v);
 
 /* Copy n frames of channel ch into the ring at `ahead` frames past the write position (ahead is
  * 0 for the first call of a transfer, and the running total for a later chunk of the same
@@ -170,6 +207,10 @@ void p4snd_voice_set_mix(P4SndVoice *v, int dry_l, int dry_r, int wet_l, int wet
 
 /* Run (1) or pause (0). A paused stream voice keeps its buffered data. */
 void p4snd_voice_play(P4SndVoice *v, int on);
+/* Change a producer-owned group together under the render lock, so layered
+ * streams start on the same output frame. Returns that frame's clock value.
+ * Null entries are ignored; a zero-sized group only snapshots the clock. */
+uint64_t p4snd_voices_play(P4SndVoice *const *voices, uint32_t count, int on);
 int p4snd_voice_playing(const P4SndVoice *v);
 
 /* ------------------------------------------------------------------ helpers */
@@ -177,5 +218,23 @@ int p4snd_voice_playing(const P4SndVoice *v);
 /* Gains for a CRI output: vol in 1/10 dB (0 = full, more negative = quieter) and pan in -15..15
  * (-15 left, 0 centre, 15 right). Equal power. */
 void p4snd_cri_gains(int32_t vol_db10, int32_t pan, float *left, float *right);
+
+/* Golden-only cue seam. Inputs borrow the player's ACB/bank buffers until
+ * destroy. Call update from the producer thread before the mixer consumes;
+ * no decoder runs in the mixer/audio callback. PS2 refuses before reading
+ * inputs/settings or creating a voice. Fixed-rate cue scheduling follows
+ * docs/golden_mode/specs/re/acb-sequence-playback.md; OPEN variants refuse. */
+struct P4GoldenAcb;
+struct P4GoldenAwb;
+typedef struct P4SndGoldenCue P4SndGoldenCue;
+int p4snd_golden_cue_start(P4SndGoldenCue **out, const struct P4GoldenAcb *acb,
+                           const struct P4GoldenAwb *stream_bank, uint32_t cue_id,
+                           int category, int loop, char *reason, uint32_t reason_capacity);
+/* Explicit numeric entry from Golden's ADX voice AWBs; same producer lifetime. */
+int p4snd_golden_awb_voice_start(P4SndGoldenCue **out, const struct P4GoldenAwb *bank,
+                                 uint32_t wave_id, char *reason, uint32_t reason_capacity);
+int p4snd_golden_cue_update(P4SndGoldenCue *cue);
+int p4snd_golden_cue_done(const P4SndGoldenCue *cue);
+void p4snd_golden_cue_destroy(P4SndGoldenCue *cue);
 
 #endif /* P4PC_P4SND_H */

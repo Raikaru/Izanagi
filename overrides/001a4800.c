@@ -4,6 +4,9 @@
 #include "p4pc/battle_events.h"
 #include "p4pc/battle_events_native.h"
 
+#include "p4pc/battle_action_exec_native.h"
+#include "p4pc/mod_entry.h"
+extern void btlAICommandSetActionCode(u8 *, u8 *, u16);
 void btlActionReadyUpdate(u8 *actionBytes)
 {
     extern void btlTargetSavePair(u8 *target);
@@ -39,12 +42,23 @@ incr:
         }
 donecheck:
         if (loopIndex == (((BtlAction *)actionBytes)->unk_6a)) {
+            if (((BtlAction *)actionBytes)->unit->genus == 0) {
+                BtlAction *itemAction = (BtlAction *)actionBytes;
+                int denied = itemAction->unk_6c == 3 &&
+                    (p4_mod_authorize_mask & P4_MOD_AUTH_ITEM_USE_BIT) &&
+                    !p4_mod_authorize_item_use(5, itemAction->parameters.item, 0);
+                if (denied) p4_ai_item_deny(itemAction->unit->charId, itemAction);
+                if (p4_ai_item_finish(itemAction->unit->charId, itemAction) || denied)
+                    btlAICommandSetActionCode(actionBytes, actionBytes + 0x38, 0x8002);
+            }
             if (!((((BtlAction *)actionBytes)->flags) & 4)) {
                 btlTargetSavePair(actionBytes + 0x38);
             }
             (((BtlAction *)actionBytes)->flags) = (u16)((u16)((((BtlAction *)actionBytes)->flags) & 0xFFFD));
             delayFlag = 0;
             actionKind = (u16)((u16)((((BtlAction *)actionBytes)->unk_6c)));
+            if (p4_action_exec_enabled && actionKind >= 1 && actionKind <= 12 && actionKind != 4)
+                p4_action_exec_native_command(P4_H2G(actionBytes));
             switch (actionKind) {
             case 1:
             case 2:

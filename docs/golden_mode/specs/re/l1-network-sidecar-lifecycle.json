@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "proof_id": "L1c-day-flags-network-sidecar-lifecycle",
+  "parent_proof": "l1-day-flags-code-proof.json",
+  "address": "0x7104a70c38",
+  "type": "s32; consumers interpret nonzero as enabled",
+  "semantic_role": "Golden network-feature enable/session-preference latch mirrored to game flag0x1474; not a measured connection-status value",
+  "identity_evidence": [
+    {"reference":"0x71002a7bec,0x71002a7c90","role":"ordinary code references skeleton/src/shared/shdNetWork.c"},
+    {"reference":"0x71002a7c20","role":"task creator names NetworkDialog"},
+    {"reference":"0x710029af3c","role":"network-dialog transport neighbour references sdkWifiMatchSema"},
+    {"reference":"0x71000e4a38..0x71000e4ab8","role":"config-apply path converts option halfword+8e8==1 to flag1474; reads resulting flag and publishes it through2a8070"}
+  ],
+  "initial_state": {
+    "value": 0,
+    "basis": "NSO header data virtual offset006fc000 + size1606720 = BSS start00884440; BSS size493882304 ends1df85000. Sidecar04a70c38..3b lies inside zero-initialized BSS.",
+    "lifetime": "process/session-owned Golden sidecar, independent of temporary saved day-flag mask. Initialize once at process start; do not reset on every day-mask capture/restore or on default-flag setup. Actual config/load/dialog writers supersede initialzero."
+  },
+  "writer_protocol": {
+    "setter": "0x71002a8070",
+    "setter_rule": "store exact inputw0 as s32 sidecar, then set game flag1474 from the same argument through2e30d0; consumers treat nonzero as enabled",
+    "resynchronizer": "0x71002a8090",
+    "resynchronizer_rule": "read sidecar and set flag1474; does not write sidecar. Thus restoring arbitrary saved maskbit7 cannot change the live sidecar."
+  },
+  "observed_writers": [
+    {
+      "owner": "NetworkDialog task0x71002a7cd0",
+      "stores": ["0x71002a7f44=1", "0x71002a8010=1", "0x71002a7fa8=0"],
+      "protocol": "direct store followed by flag1474 update; several switch cases share store sites",
+      "state_transitions": [
+        {"state":0,"effect":"enable sidecar/flag and terminate task"},
+        {"state":13,"effect":"poll29a290;0 waits;negative disables/terminates;positive withwork+4==0 enables, then either terminates if2ea4c0==0 or advances14;positive withwork+4!=0 advances18 without publishing yet"},
+        {"state":19,"effect":"poll message handle2b7f60; result1 enables and terminates;other results wait"},
+        {"state":"21,23,25","effect":"poll message handle2b7f60; result1 disables and terminates;other results wait"}
+      ],
+      "qualification":"numeric dialog/transport result codes are stated as observed; do not relabel them as UI yes/no or transport connected/disconnected without a separate proof"
+    },
+    {
+      "owner":"config apply0x71000e4900",
+      "site":"0x71000e4ab8",
+      "rule":"after option+8e8==1 sets/clears flag1474, call2e2fd0(1474) then2a8070(returnedflag). Copy committed config value into sidecar."
+    },
+    {
+      "owner":"post-load/sequence-resume initializer0x71002774a0",
+      "site":"0x71002774c8",
+      "rule":"following state initialization calls, read flag1474 at2774c4 and pass returned value directly to2a8070. A loaded/restored game flag can therefore rehydrate sidecar at this explicit seam; not on generic day-mask restore."
+    },
+    {
+      "owner":"network operation state machine0x71002ea7b0",
+      "site":"0x71002eac3c",
+      "rule":"state27 polls message handle2b7f60; if result1 call2a8070(0) and advance tostate1;otherwise retain sidecar and continue waiting. Do not clear it on every transient network operation."
+    }
+  ],
+  "ps2_counterpart": {
+    "identified_field": null,
+    "scope_of_observation":"The owning PS2 default/read/write/capture/restore code at111050..111290 contains only six39..3e flags and no external1474 override state; no native PS2 sidecar field has been identified.",
+    "binding_decision":"Golden-only authored sidecar value under Main's lifecycle reframe. Do not alias an unrelated PS2 field or infer a whole-program absence proof."
+  },
+  "required_lifecycle_seams": [
+    "Own one process/session s32 Golden sidecar initializedzero by native state construction. Use the real config/dialog/load/operation writers above, never a fixedzero fallback.",
+    "Config commits publish the selected network-enable value into both sidecar and flag1474. Session/dialog enable-disable actions publish to both, including their numeric result gates.",
+    "The explicit post-load initializer rehydrates sidecar from loaded flag1474. Generic day-mask defaults/write/restore do not overwrite sidecar; after their writes they synchronize flag1474 FROM the sidecar.",
+    "Network-operation state27/result1 disables through the same setter; other wait/result paths preserve it.",
+    "Keep this state Golden-only; leave the original PS2 six-flag behavior unchanged. A user-facing native network feature replacement must preserve these enable-state lifecycle effects even when its transport implementation differs.",
+    "Qualify runtime with contrasting saved-mask bit7 and live-sidecar values, config toggle persistence, explicit load rehydration, dialog enable/disable completion and waiting paths, and no unintended RNG/state changes."
+  ],
+  "synthetic_vectors": [
+    {"input":"sidecar1, saved valid daymaskbit7=0","expected":"restore other flags frommask; finalflag1474=1 andsidecar1"},
+    {"input":"sidecar0, saved valid daymaskbit7=1","expected":"finalflag1474=0 andsidecar0;maskdoesnotbecomepreference"},
+    {"input":"explicit load initializer withloadedflag1474=1","expected":"setter publishes sidecar1 andflag1"},
+    {"input":"networkoperationstate27,result0 thenresult1","expected":"firstpollpreservessidecar;secondpublishes0andadvancesstate1"}
+  ],
+  "evidence_boundary":"NSO instruction/decompilation and header evidence, not game execution. Cached direct/materialized reference census identifies observed writers, not an exhaustive indirect alias proof. No Steam .arch code decoded; Steam corroboration remains missing. Runtime lifecycle seams remain pending implementation and tests."
+}

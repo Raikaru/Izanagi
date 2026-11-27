@@ -1,4 +1,5 @@
 #include "game_items_internal.h"
+#include "p4pc/game_mode.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -397,7 +398,9 @@ int p4_game_tables_items_seal(P4GameItems *t, const uint8_t *file, size_t size,
         uint32_t stock_policy = category < 3 ? P4_ITEM_STOCK_REQUIREMENTS :
             category == 3 ? P4_ITEM_STOCK_CALENDAR : P4_ITEM_STOCK_NONE;
         if (!category && !view->models_registered) return P4_TABLE_NOT_FOUND;
-        if (category >= 6) {
+        const int golden = p4_game_mode() == P4_GAME_MODE_GOLDEN && !strcmp(view->owner, "golden-mode");
+        if (golden && category > 9) return P4_TABLE_INVALID;
+        if (category >= 6 && !golden) {
             size_t index = 0;
             while (index < t->categories_count && t->categories[index].id != category) ++index;
             if (index == t->categories_count || !t->actions[category].fn) return P4_TABLE_NOT_FOUND;
@@ -599,6 +602,62 @@ void p4_game_tables_items_state_clear(P4GameItems *t)
         state->quantity = state->availability = 0;
     }
     memset(t->equipment, 0, sizeof t->equipment);
+}
+struct P4GameItemsCapture {
+    const P4GameItems *items;
+    uint32_t revision, limit;
+    size_t count;
+    uint16_t equipment[10][3];
+    ItemState state[];
+};
+int p4_game_tables_items_capture(const P4GameItems *t, P4GameItemsCapture **out)
+{
+    if (!t || !out || !t->revision || !t->count || !t->state) return P4_TABLE_INVALID;
+    const size_t slots = t->limit - P4_ITEM_RETAIL_COUNT;
+    P4GameItemsCapture *capture = malloc(sizeof *capture + slots * sizeof *capture->state);
+    if (!capture) return P4_TABLE_NOMEM;
+    capture->items = t; capture->revision = t->revision; capture->limit = t->limit; capture->count = t->count;
+    memcpy(capture->equipment, t->equipment, sizeof capture->equipment);
+    memcpy(capture->state, t->state, slots * sizeof *capture->state);
+    *out = capture;
+    return P4_TABLE_OK;
+}
+int p4_game_tables_items_capture_matches(const P4GameItems *t, const P4GameItemsCapture *capture)
+{
+    if (!t || !capture || capture->items != t || !t->revision || t->revision != capture->revision ||
+        t->limit != capture->limit || t->count != capture->count || !t->state) return P4_TABLE_CONFLICT;
+    /* The descriptor index of every slot is immutable; a changed one is another layout. */
+    for (size_t i = 0, slots = t->limit - P4_ITEM_RETAIL_COUNT; i < slots; ++i)
+        if (t->state[i].row != capture->state[i].row) return P4_TABLE_CONFLICT;
+    return P4_TABLE_OK;
+}
+int p4_game_tables_items_restore(P4GameItems *t, const P4GameItemsCapture *capture)
+{
+    int result = p4_game_tables_items_capture_matches(t, capture);
+    if (result) return result;
+    memcpy(t->state, capture->state, (size_t)(t->limit - P4_ITEM_RETAIL_COUNT) * sizeof *t->state);
+    memcpy(t->equipment, capture->equipment, sizeof t->equipment);
+    return P4_TABLE_OK;
+}
+void p4_game_tables_items_capture_free(P4GameItemsCapture *capture) { free(capture); }
+static uint64_t items_digest(const ItemState *state, size_t slots, const uint16_t equipment[10][3])
+{
+    uint64_t hash = 1469598103934665603ull;
+    for (size_t i = 0; i < slots; ++i) {
+        hash = (hash ^ state[i].quantity) * 1099511628211ull;
+        hash = (hash ^ state[i].availability) * 1099511628211ull;
+    }
+    for (unsigned unit = 0; unit < 10; ++unit)
+        for (unsigned slot = 0; slot < 3; ++slot) hash = (hash ^ equipment[unit][slot]) * 1099511628211ull;
+    return hash;
+}
+uint64_t p4_game_tables_items_state_digest(const P4GameItems *t)
+{
+    return t && t->revision && t->state ? items_digest(t->state, t->limit - P4_ITEM_RETAIL_COUNT, t->equipment) : 0;
+}
+uint64_t p4_game_tables_items_capture_digest(const P4GameItemsCapture *capture)
+{
+    return capture ? items_digest(capture->state, capture->limit - P4_ITEM_RETAIL_COUNT, capture->equipment) : 0;
 }
 void p4_game_tables_items_state_apply(P4GameItems *t,
     const P4GameItemState *rows, size_t count, const uint32_t equipment[10][3])

@@ -82,6 +82,20 @@ int main(void)
     CHECK(p4_mod_authorize_weapon_fusion(P4_MOD_WEAPON_FUSION_OFFER, 0, 0, 0, 0, reason, sizeof reason) == 0);
     CHECK(calls == 2 && !strcmp(reason, "NO WEAPON FUSION challenge rule"));
 
+    /* The scoped item operation is separate from inventory and fusion. */
+    P4ModAuthorizer *item = p4_mod_authorizer_add(4, "item_use", deny_all, NULL);
+    CHECK(item && (p4_mod_authorize_mask & P4_MOD_AUTH_ITEM_USE_BIT));
+    calls = 0;
+    CHECK(p4_mod_authorize_item_use(2, 0x31e, 0) == 0 && calls == 1);
+    /* An operation's earlier mask observation does not freeze subscriptions.
+     * Selection consults the live dispatcher after disable or re-enable. */
+    CHECK(p4_mod_authorizer_enable(item, 0) == 0);
+    calls = 0;
+    CHECK(p4_mod_authorize_item_use(4, 0x301, 0) == 1 && calls == 0);
+    CHECK(p4_mod_authorizer_enable(item, 1) == 0);
+    CHECK(p4_mod_authorize_item_use(4, 0x301, 0) == 0 && calls == 1);
+    CHECK(p4_mod_authorizer_remove(item) == 0);
+    CHECK(!(p4_mod_authorize_mask & P4_MOD_AUTH_ITEM_USE_BIT));
     /* Disabled and removed authorizers leave the seam mask clear again. */
     CHECK(p4_mod_authorizer_enable(all, 0) == 0);
     calls = 0;

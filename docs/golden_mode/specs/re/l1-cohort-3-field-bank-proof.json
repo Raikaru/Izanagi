@@ -1,0 +1,1597 @@
+{
+  "proof_id": "L1-C3-field-bank-20261113",
+  "scope": "Sixteen new cohort3 source admissions; source proof only, all pending-seam. No archive/unowned rows or global totals changed.",
+  "source_images": {
+    "steam": {
+      "build": 10836033,
+      "file": "P4G.exe",
+      "sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+      "data_section_bounds": {
+        "section": ".sdata",
+        "rva_start": "0x887000",
+        "size": 1674240,
+        "raw_start": 8936448
+      },
+      "code_witness_bounds": {
+        "section": ".shared",
+        "rva_start": "0x1000",
+        "size": 8934912,
+        "raw_start": 1536
+      },
+      "runtime_input": "Owned Steam install only; never require NSO or private research cache."
+    },
+    "switch": {
+      "version": "1.2",
+      "nso_sha256": "854c7a1e33de1619abf009fa7f32b8c012960d685c8bf1bf99a92a6a4d0bda1c",
+      "mapped_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+      "base": "0x7100000000",
+      "segments": [
+        {
+          "name": "text",
+          "file_offset": 257,
+          "mapped_offset": 0,
+          "decompressed_size": 5448752,
+          "compressed_size": 3719998,
+          "lz4_compressed": true
+        },
+        {
+          "name": "rodata",
+          "file_offset": 3720255,
+          "mapped_offset": 5451776,
+          "decompressed_size": 1870824,
+          "compressed_size": 990563,
+          "lz4_compressed": true
+        },
+        {
+          "name": "data",
+          "file_offset": 4710818,
+          "mapped_offset": 7323648,
+          "decompressed_size": 1606720,
+          "compressed_size": 439860,
+          "lz4_compressed": true
+        }
+      ],
+      "purpose": "Independent static structural witness, not runtime dependency."
+    }
+  },
+  "admissions": [
+    {
+      "address": "0x005f0aa0",
+      "ps2_size": 32,
+      "role": "field BF startup source",
+      "ps2_reader": "0x0015d730",
+      "ps2_symbol": "FldStartupDataUpdate",
+      "ps2_live_size": 22,
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x9304f8",
+        "raw_offset": 9629944,
+        "offset": 693496,
+        "size": 22,
+        "sha256": "c8688edf13f131b1fc57f53ae1278e723dcc53169d141574356896f0d1233422",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true,
+        "value_role": "field/script/field.bf",
+        "corroborating_nso_address": "0x7100607584",
+        "steam_read_sites": [
+          {
+            "function": "0x2da080",
+            "pc": "0x2da0a6"
+          },
+          {
+            "function": "0x2da400",
+            "pc": "0x2da416"
+          }
+        ],
+        "nso_materialized_read_sites": [
+          "0x71001c9230"
+        ]
+      },
+      "switch_reader": "0x71001c9160",
+      "steam_reader": "0x2da400",
+      "structural_correspondence": "The independently paired startup state machine loads model kind4/id2000, then field BF/dungeon/commonNPC/units, then the support BF. PS2 and Golden allocate an owned field-BF copy by the file length and keep its pointer and size together. Steam ordinary references2da461/2da634 corroborate the same three-path graph.",
+      "installation": {
+        "kind": "prefix-copy",
+        "live_size": 22,
+        "retain_ps2_tail": 10,
+        "requirement": "FldStartupDataUpdate at0x0015d730, all translations/inlines/native copies, must read the complete qualified NUL-terminated Golden string. Copy22 live bytes at this32B guest partition and retain10PS2tail bytes. Golden resource-provider ownership, complete-file size/lifetime, and all group selection/procedure rules remain required semantic seams; no filename write alone proves those routes bound."
+      },
+      "all_ps2_table_users": [
+        "0x0015d730"
+      ]
+    },
+    {
+      "address": "0x005f0ac0",
+      "ps2_size": 32,
+      "role": "dungeon startup table path",
+      "ps2_reader": "0x0015d730",
+      "ps2_symbol": "FldStartupDataUpdate",
+      "ps2_live_size": 24,
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x930510",
+        "raw_offset": 9629968,
+        "offset": 693520,
+        "size": 24,
+        "sha256": "5bd6f3c5f6e1b6ab0b9c1c3d1ad78e9e607f49f29d73bae04b4a1827c643f41f",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true,
+        "value_role": "field/table/dungeon.bin",
+        "corroborating_nso_address": "0x710060ee49",
+        "steam_read_sites": [
+          {
+            "function": "0x2da120",
+            "pc": "0x2da144"
+          },
+          {
+            "function": "0x2da400",
+            "pc": "0x2da45c"
+          }
+        ],
+        "nso_materialized_read_sites": [
+          "0x71001c928c"
+        ]
+      },
+      "switch_reader": "0x71001c9160",
+      "steam_reader": "0x2da400",
+      "structural_correspondence": "The same startup graph copies this table into fixed dungeon storage, with the identical strict size<0xc00 guard in PS2 and Golden. This proves the path role, not the full dungeon-table payload layout.",
+      "installation": {
+        "kind": "prefix-copy",
+        "live_size": 24,
+        "retain_ps2_tail": 8,
+        "requirement": "FldStartupDataUpdate at0x0015d730, all translations/inlines/native copies, must read the complete qualified NUL-terminated Golden string. Copy24 live bytes at this32B guest partition and retain8PS2tail bytes. Golden resource-provider ownership, complete-file size/lifetime, and all group selection/procedure rules remain required semantic seams; no filename write alone proves those routes bound."
+      },
+      "all_ps2_table_users": [
+        "0x0015d730"
+      ]
+    },
+    {
+      "address": "0x005f0b90",
+      "ps2_size": 32,
+      "role": "support BF startup source",
+      "ps2_reader": "0x0015d730",
+      "ps2_symbol": "FldStartupDataUpdate",
+      "ps2_live_size": 24,
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x930758",
+        "raw_offset": 9630552,
+        "offset": 694104,
+        "size": 24,
+        "sha256": "209dc1aea67011ee2f7dae2bdd69bc20434d0d3cd081b352538aa1ff68629884",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true,
+        "value_role": "field/script/support.bf",
+        "corroborating_nso_address": "0x7100622861",
+        "steam_read_sites": [
+          {
+            "function": "0x2da62f",
+            "pc": "0x2da634"
+          }
+        ],
+        "nso_materialized_read_sites": [
+          "0x71001c969c"
+        ]
+      },
+      "switch_reader": "0x71001c9160",
+      "steam_reader": "0x2da400",
+      "structural_correspondence": "Both startup readers stage support BF after the shared field script/dungeon/commonNPC resources, allocate an owned size-based copy and retain its byte size. Golden obtains the complete BF through the current resource provider, not a PS2 sector address.",
+      "installation": {
+        "kind": "prefix-copy",
+        "live_size": 24,
+        "retain_ps2_tail": 8,
+        "requirement": "FldStartupDataUpdate at0x0015d730, all translations/inlines/native copies, must read the complete qualified NUL-terminated Golden string. Copy24 live bytes at this32B guest partition and retain8PS2tail bytes. Golden resource-provider ownership, complete-file size/lifetime, and all group selection/procedure rules remain required semantic seams; no filename write alone proves those routes bound."
+      },
+      "all_ps2_table_users": [
+        "0x0015d730"
+      ]
+    },
+    {
+      "address": "0x005f0830",
+      "ps2_size": 32,
+      "role": "common NPC fixed-record table path",
+      "ps2_reader": "0x0015cf70",
+      "ps2_symbol": "NpcTable_RequestFixedTable",
+      "ps2_live_size": 24,
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x9317b0",
+        "raw_offset": 9634736,
+        "offset": 698288,
+        "size": 24,
+        "sha256": "db5ff2ddec765f679805ba064e0b3c0d39db225d333bbd50bac7ea6056d0ade2",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true,
+        "value_role": "field/table/comutbl.bin",
+        "corroborating_nso_address": "0x71005d67c1",
+        "steam_read_sites": [
+          {
+            "function": "0x2da400",
+            "pc": "0x2da486"
+          },
+          {
+            "function": "0x3069d0",
+            "pc": "0x3069f6"
+          }
+        ],
+        "nso_materialized_read_sites": [
+          "0x71001e6b94"
+        ]
+      },
+      "switch_reader": "0x71001e6b80",
+      "steam_reader": "0x3069d0",
+      "structural_correspondence": "PS2 request15cf70 hands to installer15d000; Golden1e6b80 merges request/install. Both own-copy the complete file, compute fileSize/0x84 records and count s16 -1 markers at stride0x84. The startup graph calls this installer after field BF and dungeon data.",
+      "installation": {
+        "kind": "prefix-copy",
+        "live_size": 24,
+        "retain_ps2_tail": 8,
+        "requirement": "NpcTable_RequestFixedTable at0x0015cf70, all translations/inlines/native copies, must read the complete qualified NUL-terminated Golden string. Copy24 live bytes at this32B guest partition and retain8PS2tail bytes. Golden resource-provider ownership, complete-file size/lifetime, and all group selection/procedure rules remain required semantic seams; no filename write alone proves those routes bound."
+      },
+      "all_ps2_table_users": [
+        "0x0015cf70"
+      ]
+    },
+    {
+      "address": "0x005f5470",
+      "ps2_size": 32,
+      "role": "food court first-season BF path",
+      "ps2_reader": "0x0018d950",
+      "ps2_symbol": "K_FldFoodCourt_Update",
+      "ps2_live_size": 20,
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x930c98",
+        "raw_offset": 9631896,
+        "offset": 695448,
+        "size": 20,
+        "sha256": "e0c8a5913f21039aa095e363bada85112b3e19c9e61fde6ca675592d1d097c78",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true,
+        "value_role": "field/script/fc0.bf",
+        "corroborating_nso_address": "0x71005e9953",
+        "steam_read_sites": [
+          {
+            "function": "0x2eeb40",
+            "pc": "0x2eebf0"
+          }
+        ],
+        "nso_materialized_read_sites": [
+          "0x71001d855c"
+        ]
+      },
+      "switch_reader": "0x71001d84e0",
+      "steam_reader": "0x2eeb40",
+      "structural_correspondence": "Both readers set up field9/room1 and camera, select the seasonal BF, wait for scene/request readiness, run procedure0 at priority0xf, wait for completion/transition, then run procedure1. This identifies the complete three-script family, not just a shared basename.",
+      "installation": {
+        "kind": "prefix-copy",
+        "live_size": 20,
+        "retain_ps2_tail": 12,
+        "requirement": "K_FldFoodCourt_Update at0x0018d950, all translations/inlines/native copies, must read the complete qualified NUL-terminated Golden string. Copy20 live bytes at this32B guest partition and retain12PS2tail bytes. Golden resource-provider ownership, complete-file size/lifetime, and all group selection/procedure rules remain required semantic seams; no filename write alone proves those routes bound. Bind the entire food_court_family selector and both procedure uses, including the unmodified third source, not two independent literals."
+      },
+      "all_ps2_table_users": [
+        "0x0018d950"
+      ]
+    },
+    {
+      "address": "0x005f5490",
+      "ps2_size": 32,
+      "role": "food court second-season BF path",
+      "ps2_reader": "0x0018d950",
+      "ps2_symbol": "K_FldFoodCourt_Update",
+      "ps2_live_size": 20,
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x930c80",
+        "raw_offset": 9631872,
+        "offset": 695424,
+        "size": 20,
+        "sha256": "71ac343d097b919c81e67d31df1c845df1c1b76017cbb96e2b904c5bf10528ed",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true,
+        "value_role": "field/script/fc1.bf",
+        "corroborating_nso_address": "0x71005f6fa6",
+        "steam_read_sites": [
+          {
+            "function": "0x2eeb40",
+            "pc": "0x2eec11"
+          }
+        ],
+        "nso_materialized_read_sites": [
+          "0x71001d85a4"
+        ]
+      },
+      "switch_reader": "0x71001d84e0",
+      "steam_reader": "0x2eeb40",
+      "structural_correspondence": "Same independently paired food-court BF state machine and complete three-script family as005f5470; selection sources/procedure uses are group-wide.",
+      "installation": {
+        "kind": "prefix-copy",
+        "live_size": 20,
+        "retain_ps2_tail": 12,
+        "requirement": "K_FldFoodCourt_Update at0x0018d950, all translations/inlines/native copies, must read the complete qualified NUL-terminated Golden string. Copy20 live bytes at this32B guest partition and retain12PS2tail bytes. Golden resource-provider ownership, complete-file size/lifetime, and all group selection/procedure rules remain required semantic seams; no filename write alone proves those routes bound. Bind the entire food_court_family selector and both procedure uses, including the unmodified third source, not two independent literals."
+      },
+      "all_ps2_table_users": [
+        "0x0018d950"
+      ]
+    },
+    {
+      "address": "0x005f1ff0",
+      "ps2_size": 32,
+      "role": "local map entry BF path",
+      "ps2_reader": "0x00186eb0",
+      "ps2_symbol": "FldLmapUpdate",
+      "ps2_live_size": 21,
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x931260",
+        "raw_offset": 9633376,
+        "offset": 696928,
+        "size": 21,
+        "sha256": "d54e71472983768b18e2acbfe41da77175944278671b6538a719c97775a77342",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true,
+        "value_role": "field/script/lmap.bf",
+        "corroborating_nso_address": "0x710060eed5",
+        "steam_read_sites": [
+          {
+            "function": "0x2f4b00",
+            "pc": "0x2f55b7"
+          }
+        ],
+        "nso_materialized_read_sites": [
+          "0x71001dc90c"
+        ]
+      },
+      "switch_reader": "0x71001dc8ec..0x71001dc934",
+      "steam_reader": "0x2f4b00",
+      "structural_correspondence": "Both local-map state machines request field1/room1, load the map-entry BF, wait for scene and BF readiness, acquire/copy the camera, and start script procedure0 at priority0xf. Golden instruction sites1dc8ec/1dc8f0 set field1/room1 and1dc90c loads this literal before request397d20. The displayed panel/resource differences do not invalidate the independently identified BF source role.",
+      "installation": {
+        "kind": "prefix-copy",
+        "live_size": 21,
+        "retain_ps2_tail": 11,
+        "requirement": "FldLmapUpdate at0x00186eb0, all translations/inlines/native copies, must read the complete qualified NUL-terminated Golden string. Copy21 live bytes at this32B guest partition and retain11PS2tail bytes. Golden resource-provider ownership, complete-file size/lifetime, and all group selection/procedure rules remain required semantic seams; no filename write alone proves those routes bound."
+      },
+      "all_ps2_table_users": [
+        "0x00186eb0"
+      ]
+    },
+    {
+      "address": "0x005f11b0",
+      "ps2_size": 32,
+      "role": "field-wide BF loose-request format",
+      "ps2_reader": "0x001601e0",
+      "ps2_symbol": "FldHbnOpenScript",
+      "ps2_live_size": 22,
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x930ec8",
+        "raw_offset": 9632456,
+        "offset": 696008,
+        "size": 22,
+        "sha256": "23423b494753cef47aae4fe681520661b7ba09c6da74a6ac3413df20b12b854e",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true,
+        "value_role": "field/script/f%03d.bf",
+        "corroborating_nso_address": "0x71005d6775",
+        "steam_read_sites": [],
+        "nso_materialized_read_sites": [
+          "0x71001db468"
+        ]
+      },
+      "switch_reader": "0x71001db430",
+      "steam_reader": null,
+      "structural_correspondence": "Both direct-request readers test field resource source mode, return sentinel1 for packed resources, otherwise format the same field-only signed-halfword field ID and open the corresponding BF. The packed member loader1db490 is distinct and is not confused with this direct-request literal.",
+      "installation": {
+        "kind": "prefix-copy",
+        "live_size": 22,
+        "retain_ps2_tail": 10,
+        "requirement": "FldHbnOpenScript at0x001601e0, all translations/inlines/native copies, must read the complete qualified NUL-terminated Golden string. Copy22 live bytes at this32B guest partition and retain10PS2tail bytes. Golden resource-provider ownership, complete-file size/lifetime, and all group selection/procedure rules remain required semantic seams; no filename write alone proves those routes bound."
+      },
+      "all_ps2_table_users": [
+        "0x001601e0"
+      ]
+    },
+    {
+      "address": "0x005f07d0",
+      "ps2_size": 32,
+      "ps2_live_size": 26,
+      "role": "NPC dated scene-record resource",
+      "ps2_reader": "0x0015c800",
+      "ps2_symbol": "NpcTable_InstallSceneTable",
+      "all_ps2_table_users": [
+        "0x0015c800"
+      ],
+      "golden": {
+        "container": "Steam-resource-name-family",
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "components": [
+          {
+            "container": "P4G.exe",
+            "section": ".sdata",
+            "rva": "0x931700",
+            "raw_offset": 9634560,
+            "offset": 698112,
+            "size": 15,
+            "sha256": "b08790a1e812e669bf87ec0c5837e14b74267b703963c2cc07575a6057d7bee6",
+            "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+            "mapping_proven": true,
+            "value_role": "n%03d_%03d.bin",
+            "corroborating_nso_address": "0x71005e9994",
+            "steam_read_sites": [],
+            "nso_materialized_read_sites": [
+              "0x71001e659c"
+            ]
+          },
+          {
+            "container": "P4G.exe",
+            "section": ".sdata",
+            "rva": "0x931710",
+            "raw_offset": 9634576,
+            "offset": 698128,
+            "size": 20,
+            "sha256": "1bc1e1218a31ed0c489db65ee99d97867ca8f15b32664e13a7bb0d3d33d5ec17",
+            "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+            "mapping_proven": true,
+            "value_role": "n%03d_%03d_yoru.bin",
+            "corroborating_nso_address": "0x7100601bc0",
+            "steam_read_sites": [],
+            "nso_materialized_read_sites": [
+              "0x71001e65a8"
+            ]
+          },
+          {
+            "container": "P4G.exe",
+            "section": ".sdata",
+            "rva": "0x9316e0",
+            "raw_offset": 9634528,
+            "offset": 698080,
+            "size": 27,
+            "sha256": "c49ee813b7c22640cdbb4358ff952fd60c42a6d4198e4539760f6df6cf02d51f",
+            "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+            "mapping_proven": true,
+            "value_role": "field/table/n%03d_%03d.bin",
+            "corroborating_nso_address": "0x71005eef3d",
+            "steam_read_sites": [
+              {
+                "function": "0x3061f0",
+                "pc": "0x306226"
+              },
+              {
+                "function": "0x30fff0",
+                "pc": "0x310366"
+              }
+            ],
+            "nso_materialized_read_sites": [
+              "0x71001e64fc"
+            ]
+          },
+          {
+            "container": "P4G.exe",
+            "section": ".sdata",
+            "rva": "0x931680",
+            "raw_offset": 9634432,
+            "offset": 697984,
+            "size": 32,
+            "sha256": "90a0f416c8541d6dd77f3a07b98cb08743544f11215162583ee2104a8be89524",
+            "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+            "mapping_proven": true,
+            "value_role": "field/table/n%03d_%03d_yoru.bin",
+            "corroborating_nso_address": "0x71005f9b60",
+            "steam_read_sites": [
+              {
+                "function": "0x3061f0",
+                "pc": "0x30622d"
+              },
+              {
+                "function": "0x30fff0",
+                "pc": "0x310357"
+              }
+            ],
+            "nso_materialized_read_sites": [
+              "0x71001e6504"
+            ]
+          }
+        ],
+        "source_count": 4,
+        "runtime_input": "Owned Steam .sdata strings and authored PROVEN-code routing constants; no runtime NSO dependency."
+      },
+      "switch_reader": "0x71001e6540",
+      "structural_correspondence": "Complete counted-row ownership/stride32/header32 and the request/install/derived-pointer graph identify this table filename family. The winter remap and night source are additions to the source contract, not a prefix-copy of the old full path.",
+      "installation": {
+        "kind": "semantic-resource-key-family",
+        "retain_ps2_partition": true,
+        "requirement": "Bind this complete Golden resource-key family at NpcTable_InstallSceneTable (0x0015c800), including translated/inlined/native copies. Do NOT copy the compact member string over a PS2 global-path literal. Route through a Golden-aware resource provider that selects the proper fd archive versus loose namespace, preserves source-mode/null/readiness/ownership behavior and applies the complete recorded selector/retry recipe. Retain the old guest image partition and its alignment tail; source-qualified constants are consumed through the semantic route. No old table indices, sector offsets, host pointers, guessed fallback, or raw asset/decoder equivalence. Golden selects the yoru format iff current time-slot byte==5. For packed source, normalize only the archive field/room first, try the original member field/room, then retry the winter-normalized member coordinates iff missing. Missing after retry returns success1 without inventing a table. Complete file copy yields count at+0, rows at+0x20, end=rows+count*0x20, matching PS2 counted32B calendar rows. Loose request day/night paths are the same family; request reader1e64b0 matches the mode split.",
+        "complete_golden_recipe": "Golden selects the yoru format iff current time-slot byte==5. For packed source, normalize only the archive field/room first, try the original member field/room, then retry the winter-normalized member coordinates iff missing. Missing after retry returns success1 without inventing a table. Complete file copy yields count at+0, rows at+0x20, end=rows+count*0x20, matching PS2 counted32B calendar rows. Loose request day/night paths are the same family; request reader1e64b0 matches the mode split."
+      }
+    },
+    {
+      "address": "0x005f0810",
+      "ps2_size": 32,
+      "ps2_live_size": 25,
+      "role": "NPC secondary BF resource",
+      "ps2_reader": "0x0015cd70",
+      "ps2_symbol": "NpcTable_InstallSecondaryTable",
+      "all_ps2_table_users": [
+        "0x0015cd70"
+      ],
+      "golden": {
+        "container": "Steam-resource-name-family",
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "components": [
+          {
+            "container": "P4G.exe",
+            "section": ".sdata",
+            "rva": "0x931768",
+            "raw_offset": 9634664,
+            "offset": 698216,
+            "size": 14,
+            "sha256": "c25a02600181f455e26e2e640745cdaae2868839e372cc9fe2b60a9208796e56",
+            "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+            "mapping_proven": true,
+            "value_role": "n%03d_%03d.bf",
+            "corroborating_nso_address": "0x71005e411a",
+            "steam_read_sites": [
+              {
+                "function": "0x306810",
+                "pc": "0x3068e5"
+              },
+              {
+                "function": "0x30fff0",
+                "pc": "0x3104d5"
+              }
+            ],
+            "nso_materialized_read_sites": [
+              "0x71001e6a28"
+            ]
+          },
+          {
+            "container": "P4G.exe",
+            "section": ".sdata",
+            "rva": "0x931778",
+            "raw_offset": 9634680,
+            "offset": 698232,
+            "size": 19,
+            "sha256": "dc4cccf67c89f3a9fd561e573dd75c934503855e4789dfe9b6b83769e9900f90",
+            "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+            "mapping_proven": true,
+            "value_role": "n%03d_%03d_yoru.bf",
+            "corroborating_nso_address": "0x71005e6be8",
+            "steam_read_sites": [
+              {
+                "function": "0x306810",
+                "pc": "0x3068f0"
+              },
+              {
+                "function": "0x30fff0",
+                "pc": "0x3104e0"
+              }
+            ],
+            "nso_materialized_read_sites": [
+              "0x71001e6a34"
+            ]
+          },
+          {
+            "container": "P4G.exe",
+            "section": ".sdata",
+            "rva": "0x931728",
+            "raw_offset": 9634600,
+            "offset": 698152,
+            "size": 27,
+            "sha256": "4f2eb1c468ad96705e9f90c98e238c76f4ba0e98b02c1abd9355a4e4331cf9d6",
+            "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+            "mapping_proven": true,
+            "value_role": "field/script/n%03d_%03d.bf",
+            "corroborating_nso_address": "0x71006048ce",
+            "steam_read_sites": [
+              {
+                "function": "0x306760",
+                "pc": "0x306796"
+              },
+              {
+                "function": "0x30fff0",
+                "pc": "0x3103cb"
+              }
+            ],
+            "nso_materialized_read_sites": [
+              "0x71001e698c"
+            ]
+          },
+          {
+            "container": "P4G.exe",
+            "section": ".sdata",
+            "rva": "0x931748",
+            "raw_offset": 9634632,
+            "offset": 698184,
+            "size": 32,
+            "sha256": "30a86778964c106ef3460809bd8495666390062f15ebad6d527f5f643b06d907",
+            "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+            "mapping_proven": true,
+            "value_role": "field/script/n%03d_%03d_yoru.bf",
+            "corroborating_nso_address": "0x71005e15cc",
+            "steam_read_sites": [
+              {
+                "function": "0x306760",
+                "pc": "0x30679d"
+              },
+              {
+                "function": "0x30fff0",
+                "pc": "0x3103b9"
+              }
+            ],
+            "nso_materialized_read_sites": [
+              "0x71001e6994"
+            ]
+          }
+        ],
+        "source_count": 4,
+        "runtime_input": "Owned Steam .sdata strings and authored PROVEN-code routing constants; no runtime NSO dependency."
+      },
+      "switch_reader": "0x71001e69d0",
+      "structural_correspondence": "PS2 and Golden secondary loaders share null/poll/resource-source branches, an owned copied BF buffer with size, release behavior and frame-owned secondary pointer. Steam306810 independently selects normal/yoru by time5 and uses the same fd archive/member shape.",
+      "installation": {
+        "kind": "semantic-resource-key-family",
+        "retain_ps2_partition": true,
+        "requirement": "Bind this complete Golden resource-key family at NpcTable_InstallSecondaryTable (0x0015cd70), including translated/inlined/native copies. Do NOT copy the compact member string over a PS2 global-path literal. Route through a Golden-aware resource provider that selects the proper fd archive versus loose namespace, preserves source-mode/null/readiness/ownership behavior and applies the complete recorded selector/retry recipe. Retain the old guest image partition and its alignment tail; source-qualified constants are consumed through the semantic route. No old table indices, sector offsets, host pointers, guessed fallback, or raw asset/decoder equivalence. Golden selects yoru iff current time-slot byte==5. Packed source formats the member using current field/room inside normalized fd archive, owns an exact length-based copy and stores pointer/size at frame+19f8/+1a00. Missing member returns success1 after release; unlike the scene-bin reader, there is NO second winter-normalized member retry. Loose reader1e6940 uses the matching full path family.",
+        "complete_golden_recipe": "Golden selects yoru iff current time-slot byte==5. Packed source formats the member using current field/room inside normalized fd archive, owns an exact length-based copy and stores pointer/size at frame+19f8/+1a00. Missing member returns success1 after release; unlike the scene-bin reader, there is NO second winter-normalized member retry. Loose reader1e6940 uses the matching full path family."
+      }
+    },
+    {
+      "address": "0x005f10b0",
+      "ps2_size": 32,
+      "ps2_live_size": 31,
+      "role": "FBN part/placement member format",
+      "ps2_reader": "0x0015e960",
+      "ps2_symbol": "FldFbnReadTable",
+      "all_ps2_table_users": [
+        "0x0015e960"
+      ],
+      "golden": {
+        "container": "Steam-resource-name-family",
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "components": [
+          {
+            "container": "P4G.exe",
+            "section": ".sdata",
+            "rva": "0x930c40",
+            "raw_offset": 9631808,
+            "offset": 695360,
+            "size": 20,
+            "sha256": "a29670879d010210dab755f322a775bbadd7cb3f7e63adeeff00074837903538",
+            "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+            "mapping_proven": true,
+            "value_role": "f%03d_%03d_%03d.FBN",
+            "corroborating_nso_address": "0x71005db7f3",
+            "steam_read_sites": [
+              {
+                "function": "0x2edbd3",
+                "pc": "0x2edc77"
+              },
+              {
+                "function": "0x2edbd3",
+                "pc": "0x2edccd"
+              }
+            ],
+            "nso_materialized_read_sites": [
+              "0x71001d7978",
+              "0x71001d79b8"
+            ]
+          },
+          {
+            "container": "P4G.exe",
+            "section": ".sdata",
+            "rva": "0x92caa0",
+            "raw_offset": 9615008,
+            "offset": 678560,
+            "size": 31,
+            "sha256": "20c03c0a914d1ca61a02f73b65451998f5c51a055e2c28c87c1db668ca21c8c9",
+            "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+            "mapping_proven": true,
+            "value_role": "field/data/f%03d_%03d_%03d.FBN",
+            "corroborating_nso_address": "0x71005f6f87",
+            "steam_read_sites": [
+              {
+                "function": "0x1f0c00",
+                "pc": "0x1f169b"
+              },
+              {
+                "function": "0x2b745b",
+                "pc": "0x2b7506"
+              },
+              {
+                "function": "0x2b758c",
+                "pc": "0x2b767f"
+              },
+              {
+                "function": "0x2ed840",
+                "pc": "0x2ed944"
+              }
+            ],
+            "nso_materialized_read_sites": [
+              "0x71001d7874"
+            ]
+          }
+        ],
+        "source_count": 2,
+        "runtime_input": "Owned Steam .sdata strings and authored PROVEN-code routing constants; no runtime NSO dependency."
+      },
+      "switch_reader": "0x71001d78a0",
+      "structural_correspondence": "Both readers reset a cached-source out pointer, choose loose versus named archive data, read partCount at header+8, parts at+0x18 and stride at+0xc, allocate per-part model tracking, then walk parts/placements. This structural layout identifies the filename role without assuming PS2 and Golden model-work/pointer sizes are equal.",
+      "installation": {
+        "kind": "semantic-resource-key-family",
+        "retain_ps2_partition": true,
+        "requirement": "Bind this complete Golden resource-key family at FldFbnReadTable (0x0015e960), including translated/inlined/native copies. Do NOT copy the compact member string over a PS2 global-path literal. Route through a Golden-aware resource provider that selects the proper fd archive versus loose namespace, preserves source-mode/null/readiness/ownership behavior and applies the complete recorded selector/retry recipe. Retain the old guest image partition and its alignment tail; source-qualified constants are consumed through the semantic route. No old table indices, sector offsets, host pointers, guessed fallback, or raw asset/decoder equivalence. Member parameters are signed-halfword field,room,variant. For packed source, archive room is0 when predicate29e440 is1, otherwise supplied room; normalize that archive field/room. Try original member coordinates, then winter-normalized member coordinates if missing, keeping variant unchanged. Missing twice returns1. Retain the cached-source out pointer. Loose source uses field/data full path.",
+        "complete_golden_recipe": "Member parameters are signed-halfword field,room,variant. For packed source, archive room is0 when predicate29e440 is1, otherwise supplied room; normalize that archive field/room. Try original member coordinates, then winter-normalized member coordinates if missing, keeping variant unchanged. Missing twice returns1. Retain the cached-source out pointer. Loose source uses field/data full path."
+      }
+    },
+    {
+      "address": "0x005f1150",
+      "ps2_size": 32,
+      "ps2_live_size": 26,
+      "role": "HBN light/point member format",
+      "ps2_reader": "0x0015f9b0",
+      "ps2_symbol": "FldHbnReadData",
+      "all_ps2_table_users": [
+        "0x0015f9b0"
+      ],
+      "golden": {
+        "container": "Steam-resource-name-family",
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "components": [
+          {
+            "container": "P4G.exe",
+            "section": ".sdata",
+            "rva": "0x930e48",
+            "raw_offset": 9632328,
+            "offset": 695880,
+            "size": 15,
+            "sha256": "0deb6867d9b74ba917558d5fec00672f8167ae8fe89f997e58ff32fea402d3b8",
+            "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+            "mapping_proven": true,
+            "value_role": "f%03d_%03d.HBN",
+            "corroborating_nso_address": "0x710061c322",
+            "steam_read_sites": [],
+            "nso_materialized_read_sites": [
+              "0x71001dac74",
+              "0x71001daccc",
+              "0x71001dada4"
+            ]
+          },
+          {
+            "container": "P4G.exe",
+            "section": ".sdata",
+            "rva": "0x930df0",
+            "raw_offset": 9632240,
+            "offset": 695792,
+            "size": 26,
+            "sha256": "45e5d7477ef700c6428c273af21ccd2b24550afb38e61cbd0c98e0f167b5e402",
+            "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+            "mapping_proven": true,
+            "value_role": "field/data/f%03d_%03d.HBN",
+            "corroborating_nso_address": "0x71005ff5ff",
+            "steam_read_sites": [
+              {
+                "function": "0x2f219a",
+                "pc": "0x2f248e"
+              }
+            ],
+            "nso_materialized_read_sites": [
+              "0x71001dab90",
+              "0x71001dac34"
+            ]
+          }
+        ],
+        "source_count": 2,
+        "runtime_input": "Owned Steam .sdata strings and authored PROVEN-code routing constants; no runtime NSO dependency."
+      },
+      "switch_reader": "0x71001dabc0",
+      "structural_correspondence": "Both HBN consumers choose source mode, accept field/room plus an owned-buffer out parameter, poll loose requests, copy the full member size and release the request. Source proof is for the resource key, not an assertion of identical HBN runtime-work layouts.",
+      "installation": {
+        "kind": "semantic-resource-key-family",
+        "retain_ps2_partition": true,
+        "requirement": "Bind this complete Golden resource-key family at FldHbnReadData (0x0015f9b0), including translated/inlined/native copies. Do NOT copy the compact member string over a PS2 global-path literal. Route through a Golden-aware resource provider that selects the proper fd archive versus loose namespace, preserves source-mode/null/readiness/ownership behavior and applies the complete recorded selector/retry recipe. Retain the old guest image partition and its alignment tail; source-qualified constants are consumed through the semantic route. No old table indices, sector offsets, host pointers, guessed fallback, or raw asset/decoder equivalence. Member field/room are supplied signed halfwords; archive coordinates come from current scene. Predicate29e470 selects the60..79 branch with original member coordinates; otherwise predicate29e380 can force archive room0. In the remaining branch only, missing first member normalizes supplied member coordinates via1d7420. A missing source is released and retried using those chosen coordinates, then returns1 if absent. Copy the whole source size to an owned out buffer. Loose source uses field/data full path.",
+        "complete_golden_recipe": "Member field/room are supplied signed halfwords; archive coordinates come from current scene. Predicate29e470 selects the60..79 branch with original member coordinates; otherwise predicate29e380 can force archive room0. In the remaining branch only, missing first member normalizes supplied member coordinates via1d7420. A missing source is released and retried using those chosen coordinates, then returns1 if absent. Copy the whole source size to an owned out buffer. Loose source uses field/data full path."
+      }
+    },
+    {
+      "address": "0x005f1190",
+      "ps2_size": 32,
+      "ps2_live_size": 26,
+      "role": "HBN event-entry member format",
+      "ps2_reader": "0x00160000",
+      "ps2_symbol": "FldHbnLoadEntryTable",
+      "all_ps2_table_users": [
+        "0x00160000"
+      ],
+      "golden": {
+        "container": "Steam-resource-name-family",
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "components": [
+          {
+            "container": "P4G.exe",
+            "section": ".sdata",
+            "rva": "0x930e80",
+            "raw_offset": 9632384,
+            "offset": 695936,
+            "size": 15,
+            "sha256": "f58957dcf831eadbab65bb3ce4f81097a768be1da0c6d761b94906b898dc6d9a",
+            "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+            "mapping_proven": true,
+            "value_role": "h%03d_%03d.bin",
+            "corroborating_nso_address": "0x71006075e9",
+            "steam_read_sites": [],
+            "nso_materialized_read_sites": [
+              "0x71001db290",
+              "0x71001db2d0"
+            ]
+          },
+          {
+            "container": "P4G.exe",
+            "section": ".sdata",
+            "rva": "0x930e90",
+            "raw_offset": 9632400,
+            "offset": 695952,
+            "size": 27,
+            "sha256": "cbb7ff296e1fd6f41fbae47b05e4be234c0570bc1e4c9226c6c574562cea3ac1",
+            "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+            "mapping_proven": true,
+            "value_role": "field/table/h%03d_%03d.bin",
+            "corroborating_nso_address": "0x71006250f5",
+            "steam_read_sites": [],
+            "nso_materialized_read_sites": [
+              "0x71001db1f4"
+            ]
+          }
+        ],
+        "source_count": 2,
+        "runtime_input": "Owned Steam .sdata strings and authored PROVEN-code routing constants; no runtime NSO dependency."
+      },
+      "switch_reader": "0x71001db220",
+      "structural_correspondence": "Both readers obtain current field/room, choose loose or archive source, replace owned event data after freeing prior storage, compute fileSize/44 and copy the exact source extent. The counted44B event records distinguish this member from FBN/HBN rendering data.",
+      "installation": {
+        "kind": "semantic-resource-key-family",
+        "retain_ps2_partition": true,
+        "requirement": "Bind this complete Golden resource-key family at FldHbnLoadEntryTable (0x00160000), including translated/inlined/native copies. Do NOT copy the compact member string over a PS2 global-path literal. Route through a Golden-aware resource provider that selects the proper fd archive versus loose namespace, preserves source-mode/null/readiness/ownership behavior and applies the complete recorded selector/retry recipe. Retain the old guest image partition and its alignment tail; source-qualified constants are consumed through the semantic route. No old table indices, sector offsets, host pointers, guessed fallback, or raw asset/decoder equivalence. Packed source uses normalized fd archive for current scene but first tries original h member coordinates; if missing, retries winter-normalized member coordinates. Free any prior owned event table and clear its count before installing the new full owned copy. Set count=fileSize/44. Missing twice returns1 without invented data.",
+        "complete_golden_recipe": "Packed source uses normalized fd archive for current scene but first tries original h member coordinates; if missing, retries winter-normalized member coordinates. Free any prior owned event table and clear its count before installing the new full owned copy. Set count=fileSize/44. Missing twice returns1 without invented data."
+      }
+    },
+    {
+      "address": "0x005efeb0",
+      "ps2_size": 32,
+      "ps2_live_size": 26,
+      "role": "versioned ENV member format",
+      "ps2_reader": "0x00153d60",
+      "ps2_symbol": "FldEnvironmentLoad",
+      "all_ps2_table_users": [
+        "0x00153d60"
+      ],
+      "golden": {
+        "container": "Steam-resource-name-family",
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "components": [
+          {
+            "container": "P4G.exe",
+            "section": ".sdata",
+            "rva": "0x930918",
+            "raw_offset": 9631000,
+            "offset": 694552,
+            "size": 15,
+            "sha256": "5102ab193711c2f7df2002d825472641412cc873cc88f6a7729bc09fde536add",
+            "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+            "mapping_proven": true,
+            "value_role": "f%03d_%03d.ENV",
+            "corroborating_nso_address": "0x71005f1f4b",
+            "steam_read_sites": [
+              {
+                "function": "0x2e2c30",
+                "pc": "0x2e2ce5"
+              },
+              {
+                "function": "0x2e2c30",
+                "pc": "0x2e2d15"
+              },
+              {
+                "function": "0x2e2c30",
+                "pc": "0x2e2e84"
+              },
+              {
+                "function": "0x2e3f20",
+                "pc": "0x2e3fb5"
+              },
+              {
+                "function": "0x2e3f20",
+                "pc": "0x2e3fe3"
+              },
+              {
+                "function": "0x2e3f20",
+                "pc": "0x2e4012"
+              }
+            ],
+            "nso_materialized_read_sites": [
+              "0x71001d117c",
+              "0x71001d11ac",
+              "0x71001d133c",
+              "0x71001d1e90",
+              "0x71001d1ec0",
+              "0x71001d1ef4"
+            ]
+          },
+          {
+            "container": "P4G.exe",
+            "section": ".sdata",
+            "rva": "0x9308e8",
+            "raw_offset": 9630952,
+            "offset": 694504,
+            "size": 25,
+            "sha256": "1c7e86149ff234a2a86801edad648e9035697b102c538e554e050c95b05225cd",
+            "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+            "mapping_proven": true,
+            "value_role": "field/env/f%03d_%03d.ENV",
+            "corroborating_nso_address": "0x71005d36b7",
+            "steam_read_sites": [
+              {
+                "function": "0x2e17ec",
+                "pc": "0x2e2889"
+              },
+              {
+                "function": "0x2e2c30",
+                "pc": "0x2e2e5a"
+              }
+            ],
+            "nso_materialized_read_sites": [
+              "0x71001d0f0c",
+              "0x71001d0f88",
+              "0x71001d0fb0",
+              "0x71001d1004",
+              "0x71001d101c",
+              "0x71001d1034",
+              "0x71001d104c",
+              "0x71001d1064",
+              "0x71001d1094",
+              "0x71001d1228",
+              "0x71001d1258",
+              "0x71001d12ac",
+              "0x71001d12c4",
+              "0x71001d12dc",
+              "0x71001d12f4",
+              "0x71001d130c"
+            ]
+          }
+        ],
+        "source_count": 2,
+        "runtime_input": "Owned Steam .sdata strings and authored PROVEN-code routing constants; no runtime NSO dependency."
+      },
+      "switch_reader": "0x71001d1120",
+      "structural_correspondence": "Both versioned ENV consumers select current field/room/source mode, update primary/secondary/tertiary intensity bytes+8..b, fog color bytes+c..e, fog-enable+f, fog distance+10/+14 and newer-version near-plane handling. The literal therefore belongs to the full environment reader, not an arbitrary resource path match. Newer Golden ENV versions remain distinct; payload decoder equivalence is not claimed.",
+      "installation": {
+        "kind": "semantic-resource-key-family",
+        "retain_ps2_partition": true,
+        "requirement": "Bind this complete Golden resource-key family at FldEnvironmentLoad (0x00153d60), including translated/inlined/native copies. Do NOT copy the compact member string over a PS2 global-path literal. Route through a Golden-aware resource provider that selects the proper fd archive versus loose namespace, preserves source-mode/null/readiness/ownership behavior and applies the complete recorded selector/retry recipe. Retain the old guest image partition and its alignment tail; source-qualified constants are consumed through the semantic route. No old table indices, sector offsets, host pointers, guessed fallback, or raw asset/decoder equivalence. Use environment_filename_recipe below, including its unusual full-path member for the field8/room9 nighttime weather variants. This is not blanket prefix stripping. Packed source uses current scene normalized fd archive. Missing ENV returns1.",
+        "complete_golden_recipe": "Use environment_filename_recipe below, including its unusual full-path member for the field8/room9 nighttime weather variants. This is not blanket prefix stripping. Packed source uses current scene normalized fd archive. Missing ENV returns1."
+      }
+    },
+    {
+      "address": "0x005efef0",
+      "ps2_size": 32,
+      "ps2_live_size": 26,
+      "role": "versioned CMR camera member format",
+      "ps2_reader": "0x00154be0",
+      "ps2_symbol": "FldCamReadRecord",
+      "all_ps2_table_users": [
+        "0x00154be0"
+      ],
+      "golden": {
+        "container": "Steam-resource-name-family",
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "components": [
+          {
+            "container": "P4G.exe",
+            "section": ".sdata",
+            "rva": "0x930a80",
+            "raw_offset": 9631360,
+            "offset": 694912,
+            "size": 15,
+            "sha256": "6b4d8bb04ec290ad16e4a581ff2adf608398c31d1ed68ab53b7172404de8f3cf",
+            "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+            "mapping_proven": true,
+            "value_role": "f%03d_%03d.CMR",
+            "corroborating_nso_address": "0x71005e40e1",
+            "steam_read_sites": [],
+            "nso_materialized_read_sites": [
+              "0x71001d2488"
+            ]
+          },
+          {
+            "container": "P4G.exe",
+            "section": ".sdata",
+            "rva": "0x930a50",
+            "raw_offset": 9631312,
+            "offset": 694864,
+            "size": 25,
+            "sha256": "6b9da2fd28cf5a9dc5485db25c1f49f1784eb3c91233c38da9819df817a56dd7",
+            "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+            "mapping_proven": true,
+            "value_role": "field/env/f%03d_%03d.CMR",
+            "corroborating_nso_address": "0x7100601b76",
+            "steam_read_sites": [
+              {
+                "function": "0x2e5437",
+                "pc": "0x2e55ae"
+              },
+              {
+                "function": "0x2e5760",
+                "pc": "0x2e57bd"
+              }
+            ],
+            "nso_materialized_read_sites": [
+              "0x71001d23d0"
+            ]
+          }
+        ],
+        "source_count": 2,
+        "runtime_input": "Owned Steam .sdata strings and authored PROVEN-code routing constants; no runtime NSO dependency."
+      },
+      "switch_reader": "0x71001d2400",
+      "structural_correspondence": "Both CMR consumers have the same optional output/direct-apply split, matrix at+10, FOV+8, curve u16+50, view-offset Vec3+54, view distance+60, follow height+64, version>=10001 slot IDs at+68 and vectors+88, and version>=10002 extra matrix+210. This complete structural schema identifies the filename source; it does not prove graphics/API equivalence.",
+      "installation": {
+        "kind": "semantic-resource-key-family",
+        "retain_ps2_partition": true,
+        "requirement": "Bind this complete Golden resource-key family at FldCamReadRecord (0x00154be0), including translated/inlined/native copies. Do NOT copy the compact member string over a PS2 global-path literal. Route through a Golden-aware resource provider that selects the proper fd archive versus loose namespace, preserves source-mode/null/readiness/ownership behavior and applies the complete recorded selector/retry recipe. Retain the old guest image partition and its alignment tail; source-qualified constants are consumed through the semantic route. No old table indices, sector offsets, host pointers, guessed fallback, or raw asset/decoder equivalence. Packed source uses normalized fd archive and ORIGINAL current field/room member name, with no invented member retry. Missing CMR returns0. Loose request format is field/env. The source reader preserves copied-versus-direct-applied camera modes.",
+        "complete_golden_recipe": "Packed source uses normalized fd archive and ORIGINAL current field/room member name, with no invented member retry. Missing CMR returns0. Loose request format is field/env. The source reader preserves copied-versus-direct-applied camera modes."
+      }
+    },
+    {
+      "address": "0x0063f2b0",
+      "ps2_size": 4,
+      "role": "persistent help bank0 initialization/reset sentinel, not a live message ID",
+      "ps2_reader": "0x002bc010",
+      "ps2_symbol": "nmMesWindowInstallHandle / persistent-handle table users",
+      "all_ps2_table_users": [
+        "0x002bc010",
+        "0x002bc060",
+        "0x002bc0e0",
+        "0x002bc4b0",
+        "0x002bc7a0",
+        "0x002bc7f0",
+        "0x002bc860 (whole-table alias+18, not this first word)"
+      ],
+      "golden": {
+        "container": "authored-PROVEN-code",
+        "mapping_proven": true,
+        "size": 4,
+        "sha256": "ad95131bc0b799c0b1af477fb14fcf26a6a9f76079e48bf090acb7e8367bfd0e",
+        "components": [
+          {
+            "class": "PROVEN-code",
+            "kind": "authored-constants",
+            "element_type": "s32-le",
+            "values": [
+              -1
+            ],
+            "output_offset": 0,
+            "count": 1,
+            "code_witness": {
+              "platform": "Switch1.2",
+              "class": "PROVEN-code",
+              "address": "0x710018b2a8",
+              "end": "0x710018b2b0",
+              "size": 8,
+              "sha256": "e7bbbcbad4e48dad1c22dabf826e469e59e3a0786aa6059bd865547d151b6227",
+              "role": "reset invalid sentinel after successful release",
+              "runtime_policy": "Author the recorded constants/decision recipe in Golden mode; never read NSO code or data at runtime."
+            }
+          }
+        ],
+        "initial_state_corroboration": {
+          "nso_address": "0x7100764b84",
+          "table_size": 60,
+          "rows": 15,
+          "stride": 4,
+          "sha256": "629a5c51b535fbed8cf66fe66ca7d893116c7b7a851db41f079e929680540f58"
+        },
+        "runtime_input": "Author signed32 -1; do not read NSO, copy live Golden host handles, or require a serialized guest/host handle equivalence."
+      },
+      "structural_correspondence": "PS2 complete13*s32 persistent-handle initializer and Golden complete15*s32 initializer both contain -1. Install2bc010/18b250 writes the returned message-window handle to bank[index]; release2bc060/18b280 checks handle>=0, releases it and restores signed32 -1. Bank0 is independently paired as datWeaponHelp.bmd through all nine common named registrations. Both item-category and generic/direct draw readers select the same bank0 role; no numeric byte-run vote establishes identity. This row is only the initial/reset FIRST WORD of mutable runtime state, not a frozen bank table or the unresolved selectors.",
+      "installation": {
+        "kind": "semantic-state-initializer",
+        "live_size": 4,
+        "retain_ps2_tail": 0,
+        "requirement": "At the persistent help-bank construction/reset seam, initialize the selected bank0 guest/native scalar to the authored Golden signed32 -1 BEFORE registration. Preserve guest-owned IDs thereafter: actual install calls populate runtime handles; valid release resets the same scalar to -1. Never overwrite a live initialized bank with an image literal or copy15 Golden runtime IDs over13 guest slots. Cover install2bc010/release2bc060, generic2bc0e0, actual kind-helper2bc4b0, direct2bc7a0/queued2bc7f0 and native/inlined copies; preserve the existing message-window ownership/lifetime. The whole-table alias2bc860 is recorded for coherent table ownership but does not authorize changes to its unowned slot6 row. Other bank aliases and selector rows retain their own decisions."
+      }
+    }
+  ],
+  "source_policy": "Use qualified Steam data strings and authored PROVEN-code scalar/selection constants. NSO is static corroboration only; no runtime NSO or private-notes input. Source proof does not certify complete resource decoders, rendering, or original/Golden behavioral equivalence.",
+  "field_archive_recipe": {
+    "archive_format": {
+      "container": "P4G.exe",
+      "section": ".sdata",
+      "rva": "0x930bc8",
+      "raw_offset": 9631688,
+      "offset": 695240,
+      "size": 27,
+      "sha256": "af917414a062656069872bdb9b6ca772821b7f1b2f27eeb4a6caabd9d9e889cb",
+      "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+      "mapping_proven": true,
+      "value_role": "field/pack/fd%03d_%03d.arc",
+      "corroborating_nso_address": "0x71005e40f0",
+      "steam_read_sites": [],
+      "nso_materialized_read_sites": [
+        "0x71001d76d4",
+        "0x71001d7950",
+        "0x71001eb248"
+      ]
+    },
+    "winter_normalization": {
+      "reader": "0x71001d7420",
+      "enabled_when": "Golden inclusive current-date range January1 through February29; false leaves field and room unchanged",
+      "input_output": "u16 field and room in/out; only room changes, all unlisted pairs unchanged",
+      "room_maps": [
+        [
+          1,
+          2,
+          1
+        ],
+        [
+          6,
+          18,
+          15
+        ],
+        [
+          6,
+          19,
+          14
+        ],
+        [
+          6,
+          20,
+          9
+        ],
+        [
+          7,
+          4,
+          1
+        ],
+        [
+          8,
+          12,
+          1
+        ],
+        [
+          8,
+          13,
+          2
+        ],
+        [
+          8,
+          14,
+          9
+        ],
+        [
+          9,
+          5,
+          1
+        ],
+        [
+          10,
+          5,
+          1
+        ],
+        [
+          10,
+          6,
+          2
+        ],
+        [
+          13,
+          9,
+          8
+        ],
+        [
+          17,
+          5,
+          1
+        ],
+        [
+          17,
+          6,
+          3
+        ]
+      ],
+      "code_witness": {
+        "platform": "Switch1.2",
+        "class": "PROVEN-code",
+        "address": "0x71001d7420",
+        "end": "0x71001d7550",
+        "size": 304,
+        "sha256": "524ae9e5c7c3ccfc3a6d03c06682aa77247d69a2645bf41cddae6c7e5c42c078",
+        "role": "complete winter-to-base room normalizer",
+        "runtime_policy": "Author the recorded constants/decision recipe in Golden mode; never read NSO code or data at runtime."
+      }
+    },
+    "inverse_winter_normalization": {
+      "reader": "0x71001d7550",
+      "room_maps": [
+        [
+          1,
+          1,
+          2
+        ],
+        [
+          6,
+          15,
+          18
+        ],
+        [
+          6,
+          14,
+          19
+        ],
+        [
+          6,
+          9,
+          20
+        ],
+        [
+          7,
+          1,
+          4
+        ],
+        [
+          8,
+          1,
+          12
+        ],
+        [
+          8,
+          2,
+          13
+        ],
+        [
+          8,
+          9,
+          14
+        ],
+        [
+          9,
+          1,
+          5
+        ],
+        [
+          10,
+          1,
+          5
+        ],
+        [
+          10,
+          2,
+          6
+        ],
+        [
+          13,
+          8,
+          9
+        ],
+        [
+          17,
+          1,
+          5
+        ],
+        [
+          17,
+          3,
+          6
+        ]
+      ],
+      "enabled_when": "same January1..February29 predicate",
+      "code_witness": {
+        "platform": "Switch1.2",
+        "class": "PROVEN-code",
+        "address": "0x71001d7550",
+        "end": "0x71001d76a0",
+        "size": 336,
+        "sha256": "99ec9acf65b48fe00d760dd6813e66bde1883e61149288d53130b7fa0c658a94",
+        "role": "complete base-to-winter room normalizer",
+        "runtime_policy": "Author the recorded constants/decision recipe in Golden mode; never read NSO code or data at runtime."
+      }
+    },
+    "archive_getter": "0x71001d76a0 normalizes the supplied field/room then formats fd archive; argument truncation/sign extension follows s16 inputs",
+    "source_mode": "0x71001eb1f0 nonzero chooses packed source; zero chooses loose-request path",
+    "special_scene_predicates": {
+      "0x710029e380": "u16 current field60..79 OR (u16 current field40..59 AND u16 current room==0)",
+      "0x710029e440": "u16 current field40..59 AND u16 current room==0",
+      "0x710029e470": "u16 current field60..79",
+      "0x710029e420": "((u16)(argumentField-60))<20"
+    },
+    "predicate_witnesses": [
+      {
+        "platform": "Switch1.2",
+        "class": "PROVEN-code",
+        "address": "0x710029e380",
+        "end": "0x710029e3c0",
+        "size": 64,
+        "sha256": "82570ee389345ece6ca3b21e66884b0c26f2684bf1e6774efa389155bbf3e609",
+        "role": "scene archive-room predicate",
+        "runtime_policy": "Author the recorded constants/decision recipe in Golden mode; never read NSO code or data at runtime."
+      },
+      {
+        "platform": "Switch1.2",
+        "class": "PROVEN-code",
+        "address": "0x710029e420",
+        "end": "0x710029e490",
+        "size": 112,
+        "sha256": "c97b97e4b3a51c9941a58f0ab805813864f45696bb85a969718a7ee3da3378f9",
+        "role": "three complete field-band predicates",
+        "runtime_policy": "Author the recorded constants/decision recipe in Golden mode; never read NSO code or data at runtime."
+      }
+    ],
+    "all_unknown_inputs": "No invented clamping, rollover, validation, or missing-resource fallback. Only the observed rules apply."
+  },
+  "food_court_family": {
+    "ps2_reader": "0x0018d950",
+    "golden_reader": "0x71001d84e0",
+    "source_count": 3,
+    "sources": [
+      {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x930c98",
+        "raw_offset": 9631896,
+        "offset": 695448,
+        "size": 20,
+        "sha256": "e0c8a5913f21039aa095e363bada85112b3e19c9e61fde6ca675592d1d097c78",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true,
+        "value_role": "field/script/fc0.bf",
+        "corroborating_nso_address": "0x71005e9953",
+        "steam_read_sites": [
+          {
+            "function": "0x2eeb40",
+            "pc": "0x2eebf0"
+          }
+        ],
+        "nso_materialized_read_sites": [
+          "0x71001d855c"
+        ]
+      },
+      {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x930c80",
+        "raw_offset": 9631872,
+        "offset": 695424,
+        "size": 20,
+        "sha256": "71ac343d097b919c81e67d31df1c845df1c1b76017cbb96e2b904c5bf10528ed",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true,
+        "value_role": "field/script/fc1.bf",
+        "corroborating_nso_address": "0x71005f6fa6",
+        "steam_read_sites": [
+          {
+            "function": "0x2eeb40",
+            "pc": "0x2eec11"
+          }
+        ],
+        "nso_materialized_read_sites": [
+          "0x71001d85a4"
+        ]
+      },
+      {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x930cf0",
+        "raw_offset": 9631984,
+        "offset": 695536,
+        "size": 20,
+        "sha256": "4abac5ee24b890f421ac02ea2d2bb6a9510ccf327831a445d873c86a3c5e66bc",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true,
+        "value_role": "field/script/fc2.bf",
+        "corroborating_nso_address": "0x71005f6fba",
+        "steam_read_sites": [
+          {
+            "function": "0x2eeb40",
+            "pc": "0x2eec1a"
+          }
+        ],
+        "nso_materialized_read_sites": [
+          "0x71001d859c"
+        ]
+      }
+    ],
+    "selection": "First range4/1..7/31 ->fc0; else range8/1..11/30 ->fc1; otherwisefc2. Calls use the current-date range helper, not a guessed month-only selector.",
+    "uses": "field9/room1; same request source runs procedure0 for entry then procedure1 after transition; priority0xf",
+    "code_witness": {
+      "platform": "Switch1.2",
+      "class": "PROVEN-code",
+      "address": "0x71001d84e0",
+      "end": "0x71001d85e0",
+      "size": 256,
+      "sha256": "ac5c2a1d9c734d4ce2283636f57ff9db31060f614c3073dd738279e35acf8b75",
+      "role": "complete three-script filename selector and first procedure handoff",
+      "runtime_policy": "Author the recorded constants/decision recipe in Golden mode; never read NSO code or data at runtime."
+    }
+  },
+  "environment_filename_recipe": {
+    "direct_reader": "0x71001d0ea0",
+    "packed_reader": "0x71001d1120",
+    "format_default": {
+      "loose": "field/env/f%03d_%03d.ENV",
+      "packed": "f%03d_%03d.ENV"
+    },
+    "initial_coordinates": "current field and supplied room; if predicate29e420(currentField) is nonzero use field-20",
+    "special_variant_gate": "current field==8 AND current room==9 AND current time-slot byte==5",
+    "special_variant_priority": [
+      {
+        "condition": "Golden calendar month==8 AND (day & ~1)==20",
+        "room": 209
+      },
+      {
+        "condition": "else Golden flag0x8a==1",
+        "room": 819
+      },
+      {
+        "condition": "else Golden weather/date/time selector result in map",
+        "weather_to_room": {
+          "0": 309,
+          "1": 709,
+          "4": 709,
+          "2": 509,
+          "3": 759,
+          "7": 259
+        }
+      },
+      {
+        "condition": "else",
+        "action": "leave default coordinates unchanged"
+      }
+    ],
+    "special_variant_format": "field/env/f%03d_%03d.ENV in BOTH loose and packed branches, with ORIGINAL current field and selected special room",
+    "final_override": "If unsigned(currentField-51)<8, use field=currentField-30 and room0 with branch-default format; this overrides preceding choices",
+    "code_witnesses": [
+      {
+        "platform": "Switch1.2",
+        "class": "PROVEN-code",
+        "address": "0x71001d0ea0",
+        "end": "0x71001d10d0",
+        "size": 560,
+        "sha256": "058ec4373009afb66907b7de2d64aab16046af63f809e27f715d6be16b57cf52",
+        "role": "complete loose ENV filename selector",
+        "runtime_policy": "Author the recorded constants/decision recipe in Golden mode; never read NSO code or data at runtime."
+      },
+      {
+        "platform": "Switch1.2",
+        "class": "PROVEN-code",
+        "address": "0x71001d1120",
+        "end": "0x71001d1390",
+        "size": 624,
+        "sha256": "7b1278c365ae28aab9c15fb8a20e9699f6d66596bacb60e931d242d8b8f11cca",
+        "role": "packed ENV filename selector plus payload entry",
+        "runtime_policy": "Author the recorded constants/decision recipe in Golden mode; never read NSO code or data at runtime."
+      }
+    ],
+    "warning": "New weather/date variants are code-authored Golden source constants, not unverified PS2 cosmetic retention. Selection graph must bind before runtime closure."
+  },
+  "bank_selector_follow_on": {
+    "status": "Bank0 initializer source is proved; remaining selector/alias ledger decisions are not silently promoted",
+    "ps2_complete_handle_initializer": {
+      "base": "0x0063f2b0",
+      "rows": 13,
+      "stride": 4,
+      "size": 52,
+      "all_initial_sentinels": -1
+    },
+    "golden_complete_handle_initializer": {
+      "base": "0x7100764b84",
+      "rows": 15,
+      "stride": 4,
+      "size": 60,
+      "all_initial_sentinels": -1
+    },
+    "contextual_banks": {
+      "golden13": "facility/datMyth.bmd, owned copy installed by both fclCmbRoot154bf0 and fclElvGirl180cf0; explicit member/ownership chains observed",
+      "golden14": "event/cmm.bin member9;11caa0 uses archive ordinal9 and stores pointer9fac48;11cf10 returns it;de070 installs bank14. PS2cmmAuxTable246970 returns the same member9 role, installed into PS2bank11 by356250 and released359720."
+    },
+    "corrected_ps2_category_owner": "0x002bc4b0, not the earlier handoff's erroneous002bc2b0",
+    "category_namespace_warning": "Retail2bc4b0 calls106850, datEntryGetKind, first word of stride68 item record. Its inferred C spells datEntryGetFlags and must not be treated as authoritative for this call target. Retail2bc0e0 uses106880, flags at+4, for the separate six-word selector. Golden18b390 uses111da0, first word of stride68 item record. Flags and Kind are different domains.",
+    "whole_table_alias_user": "0x002bc860 reads alias63f2c8 (slot6); preserve this additional whole-table consumer in any normalization work.",
+    "golden_entry_kind_selector": {
+      "base": "0x7100633830",
+      "live_words": 7,
+      "values": [
+        0,
+        0,
+        0,
+        6,
+        13,
+        8,
+        14
+      ],
+      "last_word_positive_reader": "0x71000deA70 and0x71000deAC4 pass literal kind6 into18b2c0;18b30c reads base+kind*4,18b310 then indexes the15-handle table",
+      "next_distinct_typed_object": {
+        "base": "0x710063384c",
+        "type": "32*u16 branch-displacement jump table",
+        "reader": "0x710018b604..0x710018b624 subtracts3, checks<=31, then loads u16[case] from63384c and branches relative to18b628"
+      },
+      "extent_proof": "Direct kind6 use establishes live selector through633848..84b; the independently consumed typed branch table starts63384c. Thus the logical live selector is exactly7 words, not an unproved seven-word prefix. This is a local structural upper/lower bound, not a global TU-order assumption.",
+      "direct_call_census": "17 containing function envelopes;22 directcall sites; all observed kind arguments0,3 or6. No no-reference/liveness/absence inference is made."
+    },
+    "golden_kind_to_help_bank_code": {
+      "reader": "0x710018b390",
+      "kind_accessor": "0x7100111da0 reads signed-item-index*68 first word",
+      "case_count": 10,
+      "bank_by_kind": [
+        0,
+        1,
+        2,
+        4,
+        5,
+        7,
+        9,
+        10,
+        11,
+        12
+      ],
+      "code_witness": {
+        "platform": "Switch1.2",
+        "class": "PROVEN-code",
+        "address": "0x710018b390",
+        "end": "0x710018b510",
+        "size": 384,
+        "sha256": "c42e99b2b92b883d966031aa879ca122a8e54000cada0c4d27f39a659201b948",
+        "role": "complete ten-case item-kind to persistent help-bank switch",
+        "runtime_policy": "Author the recorded constants/decision recipe in Golden mode; never read NSO code or data at runtime."
+      }
+    },
+    "ps2_selectors": {
+      "63f2f0": {
+        "rows": 6,
+        "stride": 4,
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          5,
+          6
+        ],
+        "domain": "Flags-based item helper, not the separate Kind helper",
+        "live_bytes": 24,
+        "tail_bytes": 8,
+        "consumer": "0x002bc0e0"
+      },
+      "63f310": {
+        "rows": 9,
+        "stride": 4,
+        "values": [
+          0,
+          0,
+          0,
+          7,
+          9,
+          10,
+          8,
+          11,
+          12
+        ],
+        "domain": "generic display-kind selector with special cases0/1/2 in PS2",
+        "live_bytes": 36,
+        "tail_bytes": 12,
+        "consumer": "0x002bc0e0"
+      }
+    },
+    "remaining_selector_contract": "Replacing the PS2 flags/special-pair helper with Golden kind-based help routing and changing generic-kind9->7 requires explicit semantic caller adaptation. Never prefix-copy or equate old/new enum ordinals. Adjacent selector/alias rows outside cohort3 are intentionally unchanged; their owner may consume this evidence, but numeric namespace correspondence is not fabricated."
+  }
+}

@@ -184,6 +184,19 @@ static void native_mode_history(const P4ModSaveImage *image, int developer)
     assert(!p4_game_tables_runtime_use_row(mode_tables, P4_TABLE_SOURCE_ELEMENT, leaf));
     assert(registry_uses == 2);
     P4ModSaveCapture *saved = capture(image); assert(saved);
+    /* Adding the image publication entrypoint cannot change an ordinary mode's
+     * ledger or sidecar. Equal strings/copies are not issued pointer authority. */
+    size_t origin_cursor = 0;
+    const P4TableSourceOrigin *issued = p4_game_table_sources_native_mode_next(mode_sources, &origin_cursor);
+    assert(issued);
+    P4TableSourceOrigin copied = *issued;
+    assert(p4_game_table_native_origin_use(uses, &copied));
+    assert(p4_game_table_native_origin_use(NULL, issued));
+    assert(!p4_game_table_native_origin_use(uses, issued));
+    P4ModSaveCapture *unchanged = capture(image); assert(unchanged);
+    assert(unchanged->sidecar_size == saved->sidecar_size &&
+        !memcmp(unchanged->sidecar, saved->sidecar, saved->sidecar_size));
+    p4_mod_save_capture_free(unchanged);
     assert(read_word(saved->sidecar + 56) == 1 && !read_word(saved->sidecar + 60) && !read_word(saved->sidecar + 64));
     size_t payload = P4_MOD_SAVE_HEADER_BYTES + 32u + strlen("p4pc") + strlen("native-table-use");
     assert(read_word(saved->sidecar + payload) == (developer ? 2u : 1u)); /* ONE context/block, versioned variants. */

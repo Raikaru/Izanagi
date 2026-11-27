@@ -1,0 +1,141 @@
+{
+  "proof_id": "L1-C3B-radar-status-mode1-20261113",
+  "address": "0x005edea0",
+  "size": 1152,
+  "source_correspondence": "PROVEN-code",
+  "census_member": false,
+  "census_delta": 0,
+  "runtime_status": "pending-seam",
+  "authority": "Main2026-11-13 corrected the proposed transfer:005edea0 is outside the1043-row census. Keep this as supplemental non-census source proof attached to golden-native-driver:radar-status-modes. Do not create a1044th row or count1152 additional bytes.",
+  "required_seams": [
+    "golden-native-driver:radar-status-modes"
+  ],
+  "complete_driver_proof": "l1-cohort-3B-radar-status-code-proof.json",
+  "complete_driver_proof_sha256": "1bd9cc411637d24f0c5f87324248e4ca1e73a25928f86e4cbc331950a09aefec",
+  "ps2": {
+    "reader": "0x141d80 radarSetMode case1",
+    "extra_reader": "0x13fb50 radarInitState initial positions from this table",
+    "records": 41,
+    "stride": 28,
+    "live_bytes": 1148,
+    "alignment_tail_bytes": 4,
+    "sha256": "438b08fa179237b93b6fb8b41e9657e73c0c24618673be43fccad6da5e8f24f9"
+  },
+  "paired_mode": {
+    "mode": 1,
+    "switch_entry": "0x10ab54",
+    "steam_entry_rva": "0x1998fa",
+    "same_mode_return": 0,
+    "calls_in_order": [
+      {
+        "operation": "conceal",
+        "channel_offset": "0xe48",
+        "arguments": [
+          {
+            "f32_bits": "0x40a00000"
+          }
+        ],
+        "switch_pc": "0x10ab60",
+        "steam_pc": "0x19990c",
+        "steam_arguments": [
+          {
+            "f32_bits": "0x40a00000",
+            "literal_rva": "0x965038"
+          }
+        ]
+      },
+      {
+        "operation": "conceal",
+        "channel_offset": "0xe60",
+        "arguments": [
+          {
+            "f32_bits": "0x40000000"
+          }
+        ],
+        "switch_pc": "0x10ab6c",
+        "steam_pc": "0x199920",
+        "steam_arguments": [
+          {
+            "f32_bits": "0x40000000",
+            "literal_rva": "0x964e84"
+          }
+        ]
+      },
+      {
+        "operation": "conceal",
+        "channel_offset": "0xea8",
+        "arguments": [
+          {
+            "f32_bits": "0x40400000"
+          }
+        ],
+        "switch_pc": "0x10ab78",
+        "steam_pc": "0x199934",
+        "steam_arguments": [
+          {
+            "f32_bits": "0x40400000",
+            "literal_rva": "0x964f58"
+          }
+        ]
+      },
+      {
+        "operation": "conceal",
+        "channel_offset": "0xef0",
+        "arguments": [
+          {
+            "f32_bits": "0x40a00000"
+          }
+        ],
+        "switch_pc": "0x10ab84",
+        "steam_pc": "0x199943",
+        "steam_arguments": [
+          {
+            "f32_bits": "0x40a00000",
+            "literal_rva": "0x965038"
+          }
+        ]
+      },
+      {
+        "operation": "conceal",
+        "channel_offset": "0xf20",
+        "arguments": [
+          {
+            "f32_bits": "0x40a00000"
+          }
+        ],
+        "switch_pc": "0x10ab90",
+        "steam_pc": "0x199952",
+        "steam_arguments": [
+          {
+            "f32_bits": "0x40a00000",
+            "literal_rva": "0x965038"
+          }
+        ]
+      }
+    ],
+    "label_at_work_0x3e": "preserve",
+    "unmentioned_channels": "preserve; do not zero or synthesize transitions"
+  },
+  "correspondence": "Mode1 is the exit/conceal transition called on party-selection cancellation: PS2142f20 nLine17, NSO10e1b0 nLine17 and Steam19a2f0 nLine17. Five ordered conceal channels e48,e60,ea8,ef0,f20 carry exact f32 durations5,2,3,5,5. Mode1 preserves label and every other channel. Both platform conceal helpers require (flags&0x4)!=0; set flags|2, store duration+12, reset elapsed+4. The original initialization read of mode1 table is replaced by Golden10a910/Steam1993b0 zero/init work and explicit mode0 entry; no old41-record positions are retained.",
+  "driver_contract": {
+    "required_seams": [
+      "golden-native-driver:radar-status-modes"
+    ],
+    "implementers": [
+      "GoldenM6c",
+      "GoldenM10"
+    ],
+    "runtime_status": "pending-seam",
+    "golden_mode": "PS2 41x28 table path is never consulted: no reads from any of the five selected image partitions, no PS2 template/mask overlay, no emulated copy41-record path, no byte-patching. Author ledger constants from this sealed proof in the native Golden status driver; never load the NSO at runtime.",
+    "behavior": "Reproduce complete Golden transitions exactly: mode-entry/idempotence, ordered scalar/integer helpers with guards, integer retarget history, durations and float bits, label gates, selected-party identity, nLine15-18 edges, persona-state snapshots, pane waits and completion. Route every translated/native/inlined copy and direct init/mode/frame consumer to that one Golden driver. Keep original PS2 mode unchanged.",
+    "integration": "Use native Golden0x1130 status work, ten scalar/five integer channels and real Golden panel/character views. Golden extra mode7 (character equipment/model view) and later states are preserved, not silently discarded. Frame/update/evaluation/drawing must consume native Golden channels, not resurrect old41-record layout values. No runtime completion is claimed by source admission."
+  },
+  "images": {
+    "steam_build": 10836033,
+    "steam_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+    "nso_sha256": "854c7a1e33de1619abf009fa7f32b8c012960d685c8bf1bf99a92a6a4d0bda1c",
+    "mapped_nso_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+    "ps2_source_commit": "18016afe60c6c73bdc5d0c72177a29c6f25878c6"
+  },
+  "source_proof": "Complete Steam199820..199bc4 and NSO10aa90..10ad78 plus initialization/helper/frame/state witnesses and all-mode ledger are sealed in the referenced proof; no unpaired channel or byte-similarity inference."
+}

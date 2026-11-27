@@ -21,7 +21,8 @@ int p4_game_tables_builder_golden_cache(P4GameTablesDefinitionBuilder *builder,
     for (size_t i = 0; i < extra_count; ++i)
         if (!extra[i].name || (i && strcmp(extra[i-1].name,extra[i].name) >= 0)) return P4_TABLE_INVALID;
     if (p4_game_mode() != P4_GAME_MODE_GOLDEN || !builder || !builder->tables || !builder->sources ||
-        !builder->registry_revision || builder->sealing || builder->sealed || builder->input_count || builder->input_mask) {
+        !builder->registry_revision || builder->sealing || builder->sealed || builder->input_count ||
+        (builder->input_mask & ~((1u << P4_TABLE_INPUT_COUNT) - 1u))) {
         if (reason && capacity) snprintf(reason,capacity,"Golden cache requires an empty Golden-mode builder");
         return P4_TABLE_INVALID;
     }

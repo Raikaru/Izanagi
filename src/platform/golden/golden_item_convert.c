@@ -37,6 +37,9 @@ int p4_golden_items_convert(const P4GoldenDomainMap *map, const uint8_t *input, 
         return fail(reason, reason_capacity, "invalid ITEMTBL section shape");
     for (uint32_t i = 0; i < count; ++i) {
         const uint8_t *name = input + second + 16 + (size_t)i * 24;
+        uint32_t kind = u32(input + 16 + (size_t)i * 68);
+        if (kind > 9)
+            return fail(reason, reason_capacity, "item kind outside committed Golden domain 0..9");
         uint32_t skill = u32(input + 16 + (size_t)i * 68 + 0x24);
         size_t j = 0;
         if (skill && p4_golden_domain_to_port(map, P4_GOLDEN_DOMAIN_SKILL, skill, &port, NULL))

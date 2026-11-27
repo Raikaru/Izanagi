@@ -6,15 +6,17 @@
  *
  * Direct transliteration of the retail code. */
 
+#include "p4pc/golden_ai_native.h"
 extern u32 RpRandom(void);
 extern void p4pc_rng_note(s32 seed);
 
 void RpRandomSeed(s32 arg0, u8 *arg1)
 {
-    u32 *base = *(u32 **)(D_008872E0 + iGpffffb618);
     s32 i;
 
     p4pc_rng_note(arg0);
+    if (p4_golden_ai_native_seed((u32)arg0)) return;
+    u32 *base = *(u32 **)(D_008872E0 + iGpffffb618);
 
     base[0] = (u32)arg0;
     for (i = 1; i < 31; i++)

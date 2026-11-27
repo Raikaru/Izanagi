@@ -17,6 +17,7 @@
 #include <string.h>
 #include <wchar.h>
 
+#include "p4pc/hostpath.h"
 #include "p4pc/os.h"
 #include "p4pc/profile_trace.h"
 
@@ -64,6 +65,13 @@ static int readable(uintptr_t addr, size_t len) {
 void (*p4_os_fault_note)(uintptr_t addr);
 
 static volatile LONG crashing;
+static char crash_build[96];
+void p4_os_crash_build_set(const char *id)
+{
+    size_t n = 0;
+    while (id && id[n] && n < sizeof crash_build - 1) { crash_build[n] = id[n]; n++; }
+    crash_build[n] = 0;
+}
 static HANDLE marker_handle = INVALID_HANDLE_VALUE;
 static char marker_bytes[2][P4_OS_CRASH_MARKER_CAP];
 static DWORD marker_length[2];
@@ -106,6 +114,16 @@ void p4_os_crash_marker_close(void)
 }
 
 
+static char crash_note[256];
+void p4_os_crash_note_set(const char *text) {
+    char next[sizeof crash_note];
+    size_t n = text != NULL ? strlen(text) : 0;
+    if (n >= sizeof next) n = sizeof next - 1;
+    if (n) memcpy(next, text, n);
+    memset(next + n, 0, sizeof next - n);
+    memcpy(crash_note, next, sizeof next); /* always ends in NUL: the last byte is never written non-zero */
+}
+
 static LONG WINAPI crash_handler(EXCEPTION_POINTERS *ep) {
     const EXCEPTION_RECORD *er = ep->ExceptionRecord;
     const CONTEXT *c = ep->ContextRecord;
@@ -139,6 +157,19 @@ static LONG WINAPI crash_handler(EXCEPTION_POINTERS *ep) {
 #endif
         DWORD w;
         WriteFile(GetStdHandle(STD_ERROR_HANDLE), b, (DWORD)n, &w, NULL);
+        if (crash_build[0]) { /* which build crashed, right after the exception line (no C library: the heap may be what failed) */
+            WriteFile(GetStdHandle(STD_ERROR_HANDLE), "p4pc: build ", 12, &w, NULL);
+            WriteFile(GetStdHandle(STD_ERROR_HANDLE), crash_build, (DWORD)lstrlenA(crash_build), &w, NULL);
+            WriteFile(GetStdHandle(STD_ERROR_HANDLE), "\n", 1, &w, NULL);
+        }
+        if (crash_note[0]) {
+            /* the build and area of this run, before the unwinding that may fault again */
+            DWORD len = 0;
+            while (len < sizeof crash_note - 1 && crash_note[len]) len++;
+            WriteFile(GetStdHandle(STD_ERROR_HANDLE), "p4pc: context: ", 15, &w, NULL);
+            WriteFile(GetStdHandle(STD_ERROR_HANDLE), crash_note, len, &w, NULL);
+            WriteFile(GetStdHandle(STD_ERROR_HANDLE), "\n", 1, &w, NULL);
+        }
 #if __SIZEOF_POINTER__ == 8
         {
             const NT_TIB *tib = (const NT_TIB *)NtCurrentTeb();
@@ -480,7 +511,6 @@ static int object_identity(HANDLE handle, const BY_HANDLE_FILE_INFORMATION *fact
     return 0;
 }
 
-int p4_os_mkdir(const char *path) { return _mkdir(path); }
 static int utf8_file_path(const char *path, WCHAR out[4096])
 {
     if (!path || !MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, path, -1, out, 4096)) {
@@ -488,36 +518,24 @@ static int utf8_file_path(const char *path, WCHAR out[4096])
     }
     return 0;
 }
-FILE *p4_os_fopen_utf8(const char *path, const char *mode)
-{
-    WCHAR wide[4096];
-    const wchar_t *wmode = mode && !strcmp(mode,"rb") ? L"rb" :
-                           mode && !strcmp(mode,"wb") ? L"wb" : NULL;
-    if (!wmode) { errno = EINVAL; return NULL; }
-    return utf8_file_path(path,wide) ? NULL : _wfopen(wide,wmode);
-}
-int p4_os_mkdir_utf8(const char *path)
-{
-    WCHAR wide[4096];
-    return utf8_file_path(path,wide) ? -1 : _wmkdir(wide);
-}
-int p4_os_remove_utf8(const char *path)
-{
-    WCHAR wide[4096];
-    return utf8_file_path(path,wide) ? -1 : _wremove(wide);
-}
-int p4_os_list_dir_utf8(const char *path, void (*visit)(const char *name, void *user), void *user)
+int p4_os_mkdir(const char *path) { return p4_host_mkdir(path); }
+FILE *p4_os_fopen_utf8(const char *path, const char *mode) { return p4_host_fopen(path, mode); }
+int p4_os_mkdir_utf8(const char *path) { return p4_os_mkdir(path); }
+int p4_os_remove_utf8(const char *path) { return p4_host_remove(path); }
+int p4_os_list_dir(const char *path, void (*visit)(const char *name, void *user), void *user)
 {
     WCHAR pattern[4096]; WIN32_FIND_DATAW entry;
     if (!visit || utf8_file_path(path,pattern)) { errno = EINVAL; return -1; }
     size_t length = wcslen(pattern);
-    if (!length || length + 3 >= 4096) { errno = ENAMETOOLONG; return -1; }
+    if (!length) { errno = ENOENT; return -1; }
+    if (length + 3 >= 4096) { errno = ENAMETOOLONG; return -1; }
     if (pattern[length-1] != L'\\' && pattern[length-1] != L'/') pattern[length++] = L'\\';
     pattern[length++] = L'*'; pattern[length] = 0;
     HANDLE handle = FindFirstFileW(pattern,&entry);
     if (handle == INVALID_HANDLE_VALUE) {
         DWORD error = GetLastError();
-        errno = error == ERROR_FILE_NOT_FOUND || error == ERROR_PATH_NOT_FOUND ? ENOENT : EIO;
+        errno = error == ERROR_FILE_NOT_FOUND || error == ERROR_PATH_NOT_FOUND ? ENOENT :
+                error == ERROR_ACCESS_DENIED ? EACCES : error == ERROR_DIRECTORY ? ENOTDIR : EIO;
         return -1;
     }
     int result = 0;
@@ -531,6 +549,10 @@ int p4_os_list_dir_utf8(const char *path, void (*visit)(const char *name, void *
     if (!result && GetLastError() != ERROR_NO_MORE_FILES) { errno = EIO; result = -1; }
     FindClose(handle);
     return result;
+}
+int p4_os_list_dir_utf8(const char *path, void (*visit)(const char *name, void *user), void *user)
+{
+    return p4_os_list_dir(path,visit,user);
 }
 
 int p4_os_directory_lock(const char *path, uintptr_t token[2]) {
@@ -653,41 +675,17 @@ int p4_os_rmdir(const char *path) {
     return retry_path_change(wide, NULL, "rmdir");
 }
 
-int p4_os_list_dir(const char *path, void (*visit)(const char *name, void *user), void *user) {
-    char pattern[4096];
-    struct _finddata_t entry;
-    const size_t length = strlen(path);
-    const char *separator;
-    intptr_t handle;
-    int error;
-    if (length == 0) {
-        errno = ENOENT;
-        return -1;
-    }
-    separator = path[length - 1] == '/' || path[length - 1] == '\\' ? "" : "\\";
-    if (snprintf(pattern, sizeof pattern, "%s%s*", path, separator) >= (int)sizeof pattern) {
-        errno = ENAMETOOLONG;
-        return -1;
-    }
-    handle = _findfirst(pattern, &entry);
-    if (handle == -1) return -1;
-    do {
-        visit(entry.name, user);
-    } while (_findnext(handle, &entry) == 0);
-    error = errno;
-    _findclose(handle);
-    if (error != ENOENT) {
-        errno = error;
-        return -1;
-    }
-    return 0;
+/* The environment is read and written wide, so a UTF-8 path survives it whatever the ANSI codepage. */
+static int utf8_to_wide_env(const char *text, WCHAR *out, int capacity)
+{
+    return text && MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, text, -1, out, capacity) ? 0 : -1;
 }
-
 int p4_os_setenv(const char *name, const char *value, int overwrite) {
-    if (!overwrite && getenv(name) != NULL) return 0;
-    return _putenv_s(name, value) == 0 ? 0 : -1;
+    WCHAR wname[256], wvalue[4096];
+    if (utf8_to_wide_env(name, wname, 256) || utf8_to_wide_env(value, wvalue, 4096)) { errno = EINVAL; return -1; }
+    if (!overwrite && GetEnvironmentVariableW(wname, NULL, 0) != 0) return 0;
+    return _wputenv_s(wname, wvalue) == 0 ? 0 : -1;
 }
-
 void p4_os_headless_env(void) { p4_os_setenv("P4PC_HIDDEN_WINDOW", "1", 0); }
 
 int p4_os_is_dir_nofollow(const char *path) {
@@ -1008,4 +1006,4 @@ void p4_os_list_modules(void (*cb)(uintptr_t base, uintptr_t size, const char *n
     CloseHandle(snap);
 }
 
-FILE *p4_os_fopen_rb(const char *path) { return fopen(path, "rb"); }
+FILE *p4_os_fopen_rb(const char *path) { return p4_host_fopen(path, "rb"); }

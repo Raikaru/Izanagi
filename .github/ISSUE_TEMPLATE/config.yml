@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: How to get the logs
+    url: https://github.com/Raikaru/Izanagi/blob/main/docs/platform/diagnostics.md
+    about: Where p4pc.log and the other logs are on each platform, and Android's Export logs.

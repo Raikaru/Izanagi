@@ -1,0 +1,8 @@
+.{
+    .name = .luau,
+    .version = "0.1.0",
+    .fingerprint = 0x5e07e249308b76ed,
+    .minimum_zig_version = "0.18.0-dev.935+ead8f5a7a",
+    .dependencies = .{},
+    .paths = .{ "build.zig", "build.zig.zon", "src", "tests", "sandbox-witness" },
+}

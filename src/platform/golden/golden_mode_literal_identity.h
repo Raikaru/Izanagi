@@ -1,0 +1,5 @@
+/* Generated metadata identity; no game bytes. */
+#define P4_GOLDEN_LITERAL_MANIFEST_SHA256 "e511b49245be78e1ebcfc7e4e1d1797baa437443a71582dbb86e8a3faef178fb"
+#define P4_GOLDEN_LITERAL_SOURCE_COUNT 23u
+#define P4_GOLDEN_LITERAL_BYTES 7188u
+#define P4_GOLDEN_LITERAL_PE_BYTES 6976u

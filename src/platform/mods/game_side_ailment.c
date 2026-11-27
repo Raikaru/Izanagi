@@ -18,6 +18,7 @@ typedef struct UnitState {
     const P4SideAilmentDef *held, *landed;  /* landed: this action's mark */
     uint16_t landings[P4_SIDE_AILMENT_LIMIT]; /* by definition index */
     uint8_t protected_;                     /* a lock-guard window: nothing lands */
+    uint8_t ticks;                          /* end-of-turn ticks of held ailment */
 } UnitState;
 static const P4GameTables *prepared, *published;
 static UnitState units[UNIT_SLOTS];
@@ -121,6 +122,7 @@ int p4_side_ailment_set(uint32_t unit, uint32_t leaf, uint32_t reason)
     UnitState *slot = slot_get(unit);
     if (!slot) return P4_TABLE_NOMEM;
     slot->held = def;
+    slot->ticks = 0;
     slot->landed = NULL;
     uint16_t *landings = &slot->landings[def_index(def)];
     if (*landings < UINT16_MAX) ++*landings;
@@ -143,6 +145,13 @@ uint32_t p4_side_ailment_landings(uint32_t unit, uint32_t leaf)
     const P4SideAilmentDef *def = p4_side_ailment_find_leaf(leaf);
     const UnitState *slot = def ? slot_find(unit) : NULL;
     return slot ? slot->landings[def_index(def)] : 0;
+}
+/* Called once at the end of the holder's own turn. */
+uint32_t p4_side_ailment_tick(uint32_t unit)
+{
+    UnitState *slot = published && in_battle ? slot_find(unit) : NULL;
+    if (!slot || !slot->held) return 0;
+    return ++slot->ticks;
 }
 int p4_side_ailment_turn_lost(uint32_t unit)
 {

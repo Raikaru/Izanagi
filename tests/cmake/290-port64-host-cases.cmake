@@ -2,12 +2,26 @@
 # tools and lockstep cases. Keep the two build aggregates architecture-specific.
 if(P4_PORT64_LINK AND P4_PORT64_OBJS)
   p4_host64_tests(64)
+  add_test(NAME golden_c03_session64 COMMAND "${P4_PYTHON}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/golden_c03_session_test.py" "$<TARGET_FILE:p4pc64>")
+  set_tests_properties(golden_c03_session64 PROPERTIES LABELS "port64" TIMEOUT 1600 SKIP_RETURN_CODE 77)
   if(TARGET p4pc64w)
     if(TEST port64_coro_win)
       set_property(TEST port64_coro_win APPEND PROPERTY LABELS port64win)
       set_tests_properties(port64_coro_win PROPERTIES FIXTURES_SETUP wine64_ready)
     endif()
     p4_host64_tests(64w)
+    if(TARGET battle_policy_ratings_test64w)
+      target_link_libraries(battle_policy_ratings_test64w ntdll)
+    endif()
+    if(P4_WINE64)
+      add_test(NAME golden_c03_session64w COMMAND "${P4_PYTHON}"
+        "${CMAKE_CURRENT_SOURCE_DIR}/golden_c03_session_test.py" "${P4_WINE64}" "$<TARGET_FILE:p4pc64w>")
+      set_tests_properties(golden_c03_session64w PROPERTIES LABELS "port64win" TIMEOUT 1600
+        SKIP_RETURN_CODE 77 FIXTURES_REQUIRED wine64_ready
+        ENVIRONMENT "WINEDEBUG=-all;WINEPREFIX=${CMAKE_BINARY_DIR}/tests/wine64prefix")
+      p4_wine_scale_timeouts(golden_c03_session64w)
+    endif()
     # The Wine budget of every Windows x64 test (cmake/wine-tests.cmake).
     add_test(NAME wine_timeouts64w COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/wine_timeout_test.py"
       "${CMAKE_BINARY_DIR}" "${P4_WINE_TIMEOUT_SCALE}" "${CMAKE_CTEST_COMMAND}")

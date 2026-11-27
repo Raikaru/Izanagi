@@ -88,27 +88,14 @@ static int say(lua_State *L) { return present(L, P4_PRESENT_SAY); }
 
 void p4_lua_battle_present_initialize(lua_State *L)
 {
-    /* p4.battle may already hold other battle services (formation, decide): the
-     * namespace becomes one read-only table with theirs and these. */
     lua_newtable(L);
-    lua_getfield(L, -2, "battle");
-    if (lua_istable(L, -1)) {
-        lua_pushnil(L);
-        while (lua_next(L, -2)) {
-            lua_pushvalue(L, -2);
-            lua_insert(L, -2);
-            lua_settable(L, -5);
-        }
-    }
-    lua_pop(L, 1);
     lua_pushcfunction(L, announce, "p4.battle.announce");
     lua_setfield(L, -2, "announce");
     lua_pushcfunction(L, announce_clear, "p4.battle.announce_clear");
     lua_setfield(L, -2, "announce_clear");
     lua_pushcfunction(L, say, "p4.battle.say");
     lua_setfield(L, -2, "say");
-    lua_setreadonly(L, -1, 1);
-    lua_setfield(L, -2, "battle");
+    p4_lua_namespace_merge(L, "battle");
 }
 void p4_lua_battle_present_close(P4LuaMod *mod)
 {

@@ -9,6 +9,7 @@
 #include <string.h>
 
 #include "p4pc/eefloat.h"
+#include "p4pc/hostmath.h"
 
 static uint64_t rng = 0x9E3779B97F4A7C15ull;
 
@@ -108,6 +109,61 @@ static uint32_t operand(int kind)
     }
 }
 
+/* The host-adder version of add/sub (p4pc_ee_add_hw_bits) against the guard-bit integer adder, in the EE float mode it needs. Operands: every exponent pair
+ * with mantissa patterns that exercise the dropped bits, then random patterns of several kinds. */
+static uint32_t sparse_operand(void)
+{
+    const uint32_t r = next32();
+    const uint32_t m = (r & 1u) ? 0u : (next32() & next32() & 0x7FFFFFu);
+
+    return (r & 0x80000000u) | ((next32() % 256u) << 23) | m;
+}
+
+static void check_add_hw(uint32_t a, uint32_t b)
+{
+    check("add(hw)", a, b, p4pc_ee_add_hw_bits(a, b), p4pc_ee_add_bits(a, b));
+    check("sub(hw)", a, b, p4pc_ee_add_hw_bits(a, b ^ 0x80000000u), p4pc_ee_sub_bits(a, b));
+}
+
+static void test_add_hw(void)
+{
+    static const uint32_t mant[] = {0u, 1u, 2u, 0x7FFFFFu, 0x7FFFFEu, 0x400000u, 0x3FFFFFu, 0x155555u, 0x2AAAAAu, 0x000100u, 0x7FF000u};
+    unsigned i;
+    unsigned ea;
+    unsigned eb;
+    unsigned ma;
+    unsigned mb;
+    int kind;
+    int kb;
+
+    for (ea = 0; ea < 256; ea++) {
+        for (eb = 0; eb < 256; eb++) {
+            for (ma = 0; ma < sizeof mant / sizeof mant[0]; ma++) {
+                for (mb = 0; mb < sizeof mant / sizeof mant[0]; mb++) {
+                    const uint32_t a = (ea << 23) | mant[ma];
+                    const uint32_t b = (eb << 23) | mant[mb];
+
+                    check_add_hw(a, b);
+                    check_add_hw(a | 0x80000000u, b);
+                    check_add_hw(a, b | 0x80000000u);
+                    check_add_hw(a | 0x80000000u, b | 0x80000000u);
+                }
+            }
+        }
+    }
+    for (kind = 0; kind < 6; kind++) {
+        for (kb = 0; kb < 6; kb++) {
+            for (i = 0; i < 1500000u; i++) {
+                const uint32_t a = kind == 5 ? sparse_operand() : operand(kind);
+                const uint32_t b = kb == 5 ? sparse_operand() : operand(kb);
+
+                check_add_hw(a, b);
+                check_add_hw(a, a ^ (next32() & 0x807FFFFFu & (0u - (next32() & 1u))));   /* nearly equal magnitudes: cancellation */
+            }
+        }
+    }
+}
+
 int main(void)
 {
     const unsigned n = 400000;
@@ -133,6 +189,10 @@ int main(void)
 #endif
             }
         }
+    }
+    /* the host adder needs the EE mode (the divisions above do not depend on it, but run first anyway) */
+    if (p4pc_fpu_ee_mode()) {
+        test_add_hw();
     }
     if (fails != 0) {
         fprintf(stderr, "ee_float_test: FAIL, %lu of %lu differ\n", fails, checked);

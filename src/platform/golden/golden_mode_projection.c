@@ -5,6 +5,7 @@
 #include "p4pc/golden_item_convert.h"
 #include "p4pc/golden_persona_convert.h"
 #include "p4pc/golden_encounter_convert.h"
+#include "p4pc/golden_names_native.h"
 #include "p4pc/golden_names.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -59,18 +60,14 @@ int p4_golden_mode_project(const P4GoldenDomainMap *map, const P4GoldenSource *s
         return fail(reason, capacity, "missing Golden table spans");
     if (!skill->spans[1].bytes || skill->spans[1].size != (size_t)map->shape.active_skills * 44u)
         return fail(reason, capacity, "invalid SKILL metadata shape");
-    for (uint32_t i = 0; i < map->shape.active_skills; ++i) {
-        const uint8_t *row = skill->spans[1].bytes + (size_t)i * 44u;
-        if (row[1] || row[2] || row[3] || row[7])
-            return fail(reason, capacity, "Golden skill flags or padding do not fit the native row");
-    }
+    p.skill_golden = skill->spans[1];
     /* The largest mapped ID includes holes caused by the active-skill shift. */
     if (allocate(&p.skill_elements, ((size_t)max_skill + 1u) * 2u) ||
         allocate(&p.skill_metadata, ((size_t)max_active + 1u) * P4_SKILL_ROW_SIZE) ||
-        allocate(&p.skill_names, ((size_t)max_skill + 1u) * 19u) ||
+        allocate(&p.skill_names, ((size_t)max_skill + 1u) * P4_GOLDEN_SKILL_NAME_SIZE) ||
         allocate(&p.enemy_metadata, (size_t)map->shape.enemies * P4_ENEMY_ROW_SIZE) ||
         allocate(&p.enemy_names, (size_t)map->shape.enemies * P4_ENEMY_NAME_SIZE) ||
-        allocate(&p.persona_names, (size_t)map->shape.personas * P4_PERSONA_NAME_SIZE) ||
+        allocate(&p.persona_names, (size_t)map->shape.personas * P4_GOLDEN_PERSONA_NAME_SIZE) ||
         allocate(&p.item_metadata, (size_t)map->shape.items * P4_ITEM_ROW_SIZE) ||
         allocate(&p.item_names, (size_t)map->shape.items * 24u)) goto memory;
     if (p4_golden_skill_elements(map, skill->spans[0].bytes, skill->spans[0].size,
@@ -84,7 +81,8 @@ int p4_golden_mode_project(const P4GoldenDomainMap *map, const P4GoldenSource *s
     P4GoldenModeBytes *names[] = {&p.skill_names, &p.enemy_names, &p.persona_names};
     const P4GoldenDomain domains[] = {P4_GOLDEN_DOMAIN_SKILL, P4_GOLDEN_DOMAIN_ENEMY, P4_GOLDEN_DOMAIN_PERSONA};
     const unsigned rows[] = {map->shape.skills, map->shape.enemies, map->shape.personas};
-    const unsigned src_width[] = {23, 21, 21}, dst_width[] = {19, 21, 17};
+    const unsigned src_width[] = {23, 21, 21}, dst_width[] = {
+        P4_GOLDEN_SKILL_NAME_SIZE, P4_ENEMY_NAME_SIZE, P4_GOLDEN_PERSONA_NAME_SIZE};
     for (unsigned i = 0; i < 3; ++i) {
         const P4GoldenSpan *span = &msg->spans[i + 1];
         if (p4_golden_names_convert(map, domains[i], span->bytes, span->size, rows[i],

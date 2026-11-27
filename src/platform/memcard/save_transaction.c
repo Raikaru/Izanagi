@@ -5,6 +5,7 @@
 #include "save_transaction.h"
 #include "mod_save_format.h"
 #include "mod_save_hash.h"
+#include "p4pc/hostpath.h"
 #include "p4pc/os.h"
 #include "p4pc/save_import.h"
 #include <errno.h>
@@ -83,7 +84,7 @@ static void remove_entry(const char *name,void *user)
     Remove *state=user;
     if(!strcmp(name,".")||!strcmp(name,".."))return;
     char path[PATH_CAP];
-    if(join(path,state->path,name)||!p4_os_is_file_nofollow(path)||remove(path))state->failed=1;
+    if(join(path,state->path,name)||!p4_os_is_file_nofollow(path)||p4_host_remove(path))state->failed=1;
 }
 static int stage_remove(const char *card,const char *name)
 {
@@ -155,7 +156,7 @@ static int remove_named(const char *card,const char *name)
     int exists=entry_exists(card,name);
     if(exists<=0)return exists;
     char path[PATH_CAP];
-    return join(path,card,name)||!p4_os_is_file_nofollow(path)||remove(path)?-1:0;
+    return join(path,card,name)||!p4_os_is_file_nofollow(path)||p4_host_remove(path)?-1:0;
 }
 static int remove_records(const char *card,const char *slot)
 {
@@ -195,7 +196,7 @@ static int journal_write(P4SaveTransaction *t,int initial,int publishing)
     if(join(next_path,t->card,next))return -1;
     if(!initial&&remove_named(t->card,next))return -1;
     unsigned char bytes[JOURNAL_BYTES];journal_encode(bytes,t,publishing);
-    FILE *file=fopen(initial?path:next_path,"wbx");
+    FILE *file=p4_host_fopen(initial?path:next_path,"wbx");
     if(!file)return -1;
     if(initial)t->journal=1; /* even partial bytes are ours, not another writer */
     int bad=fwrite(bytes,1,sizeof bytes,file)!=sizeof bytes;
@@ -350,6 +351,10 @@ int p4_save_transaction_path(const P4SaveTransaction *t,const char *file,char *o
         snprintf(out,capacity,"%s/%s",t->card,t->state==TX_STAGED?t->stage:t->name);
     return n<0||(size_t)n>=capacity||p4_os_extended_path(out,capacity)?-1:0;
 }
+int p4_save_transaction_staged(const P4SaveTransaction *t)
+{
+    return t && t == active_transaction && t->state == TX_STAGED;
+}
 int p4_save_transaction_stage(P4SaveTransaction *t,const P4SavePairBinding *binding,char *error,size_t cap)
 {
     if(!t||t->state!=TX_LOCKED||active_transaction!=t||!binding_valid(binding))
@@ -384,7 +389,7 @@ static void clone_extra(const char *name,void *user)
     if(!in){c->failed=1;return;}
     P4OSFileIdentity before,after;
     if(p4_os_file_identity(in,&before)||before.size>P4SAVE_MAX_BYTES-c->bytes){fclose(in);c->failed=1;return;}
-    FILE *out=fopen(destination,"wbx");
+    FILE *out=p4_host_fopen(destination,"wbx");
     if(!out){fclose(in);c->failed=1;return;}
     unsigned char buffer[16384];uint64_t copied=0;
     while(copied<before.size){

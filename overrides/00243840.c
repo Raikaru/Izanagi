@@ -2,9 +2,17 @@
  * names are owned RAW game-encoded streams, not truncated 19-byte copies. */
 #include "p4pc/game_skills_native.h"
 #include "p4pc/guest.h"
+#include "p4pc/game_mode.h"
+#include "p4pc/golden_names_native.h"
+#include "p4pc/package_boot.h"
 u8 *datCalcGetIdRecord(s32 skillId)
 {
     u16 id = (u16)skillId;
+    if (p4_game_mode() == P4_GAME_MODE_GOLDEN) {
+        u32 name = p4_golden_skill_name(id);
+        if (!name) p4_package_boot_runtime_failed("Golden skill name unavailable");
+        return (u8 *)P4_G2H(name);
+    }
     if (id >= P4_SKILL_RETAIL_COUNT) {
         u32 name = p4_game_skill_name(id);
         if (name) return (u8 *)P4_G2H(name);

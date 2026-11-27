@@ -6,6 +6,7 @@
 #include "p4pc/content_digest.h"
 #include <stdlib.h>
 #include <string.h>
+#include "p4pc/hostpath.h"
 
 static const char *const table_paths[P4_GOLDEN_TABLE_COUNT] = {
     "battle/SKILL.TBL", "battle/UNIT.TBL", "battle/PERSONA.TBL",
@@ -37,7 +38,7 @@ const char *p4_golden_table_name(int table)
 
 static int file_exists(const char *path)
 {
-    FILE *file = fopen(path, "rb");
+    FILE *file = p4_host_fopen(path, "rb");
     if (!file) return 0;
     fclose(file);
     return 1;
@@ -55,7 +56,7 @@ static int install_at(const char *directory, char *out, size_t capacity)
 /* Every "path" value in a Steam libraryfolders.vdf, unescaped. */
 static int scan_libraries(const char *vdf_path, char *out, size_t capacity)
 {
-    FILE *file = fopen(vdf_path, "rb");
+    FILE *file = p4_host_fopen(vdf_path, "rb");
     char line[1200];
     if (!file) return 0;
     while (fgets(line, sizeof line, file)) {
@@ -88,8 +89,8 @@ int p4_golden_locate(const char *configured, char *out, size_t capacity)
         "Library/Application Support/Steam",
     };
     char vdf[1200];
-    const char *home = getenv("HOME");
-    const char *x86 = getenv("ProgramFiles(x86)");
+    const char *home = p4_host_getenv("HOME");
+    const char *x86 = p4_host_getenv("ProgramFiles(x86)");
 
     if (configured && configured[0]) return install_at(configured, out, capacity) ? 0 : 1;
     if (x86) {

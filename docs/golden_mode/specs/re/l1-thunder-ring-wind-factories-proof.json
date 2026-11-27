@@ -1,0 +1,568 @@
+{
+  "proof_id": "L1-c6A-thunder-ring-wind-factories-20261113",
+  "class": "PROVEN",
+  "runtime_status": "pending-seam",
+  "scope": "Three complete neighboring effect factory banks plus their shared connected-strip topology. Four selected L1 objects320 PS2 B; no renderer-wide or remaining scalar-constant admission.",
+  "source_pins": {
+    "ps2_decomp_commit": "18016afe6",
+    "steam_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+    "switch_nso_sha256": "854c7a1e33de1619abf009fa7f32b8c012960d685c8bf1bf99a92a6a4d0bda1c",
+    "switch_mapped_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+    "method": "Static ELF/data, ordinary Steam .shared/.sdata/.xpdata and decompressed NSO code/data only. No .arch decode, game execution or runtime binding."
+  },
+  "factory_banks": [
+    {
+      "name": "thunder",
+      "address": "0x00713e84",
+      "size": 108,
+      "ps2_base": "0x713e70",
+      "ps2_complete_size": 120,
+      "ps2_stride": 24,
+      "ps2_partition_offset": 20,
+      "ps2_live_bytes": 100,
+      "retained_ps2_tail_bytes": 8,
+      "ps2_complete_sha256": "e3f2231044e7419bff578cdaab1a5a0e2d5cae2f8ac52b40ced5662e8b2c2e44",
+      "golden_count": 5,
+      "golden_stride": 48,
+      "callback_roles": [
+        "initialize_instance",
+        "allocate_child",
+        "destroy_instance_state",
+        "advance",
+        "post_age_update"
+      ],
+      "golden_parameter_size_offset": 40,
+      "switch_base": "0x7100870f78",
+      "mapped_offset": 8851320,
+      "golden_size": 240,
+      "golden_sha256": "6ca67e675830ba9c79f01d05d6ab76bc8c13fe86c1a75fbe586ac2821735da69",
+      "records": [
+        {
+          "kind": 0,
+          "parameter_bytes": 0,
+          "ps2_callbacks": [
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          "switch_callbacks": [
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "kind": 1,
+          "parameter_bytes": 136,
+          "ps2_callbacks": [
+            "0x4950e0",
+            "0x495160",
+            "0x495620",
+            "0x4956b0",
+            "0x495f80"
+          ],
+          "switch_callbacks": [
+            "0x710037a0b0",
+            "0x710037a100",
+            "0x710037a370",
+            "0x710037a3c0",
+            "0x710037b1a0"
+          ]
+        },
+        {
+          "kind": 2,
+          "parameter_bytes": 0,
+          "ps2_callbacks": [
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          "switch_callbacks": [
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "kind": 3,
+          "parameter_bytes": 172,
+          "ps2_callbacks": [
+            "0x4961f0",
+            "0x496340",
+            "0x496810",
+            "0x4968a0",
+            "0x497460"
+          ],
+          "switch_callbacks": [
+            "0x710037b470",
+            "0x710037b550",
+            "0x710037b7c0",
+            "0x710037b810",
+            "0x710037ca80"
+          ]
+        },
+        {
+          "kind": 4,
+          "parameter_bytes": 136,
+          "ps2_callbacks": [
+            "0x4976d0",
+            "0x497750",
+            "0x497c50",
+            "0x497ce0",
+            "0x498650"
+          ],
+          "switch_callbacks": [
+            "0x710037cd40",
+            "0x710037cd90",
+            "0x710037d010",
+            "0x710037d060",
+            "0x710037e010"
+          ]
+        }
+      ],
+      "steam_size_vector_candidates": [
+        {
+          "section": ".xpdata",
+          "rva": "0xae93a0",
+          "raw_offset": 11434912,
+          "size": 240,
+          "sha256": "147c1852536d9f8a9eadaf4d52cd452369d940b9c703d1f9cf7ccb992ea88bf3"
+        }
+      ],
+      "steam_ordinary_readers": [
+        {
+          "start": "0x561eb0",
+          "end": "0x561f7a"
+        },
+        {
+          "start": "0x561fe0",
+          "end": "0x562019"
+        },
+        {
+          "start": "0x562050",
+          "end": "0x562089"
+        },
+        {
+          "start": "0x562090",
+          "end": "0x5620c5"
+        },
+        {
+          "start": "0x5620d0",
+          "end": "0x56210e"
+        },
+        {
+          "start": "0x562110",
+          "end": "0x562166"
+        }
+      ],
+      "ps2_tail_hex": "0000000000000000"
+    },
+    {
+      "name": "ring",
+      "address": "0x00713f24",
+      "size": 76,
+      "ps2_base": "0x713f10",
+      "ps2_complete_size": 96,
+      "ps2_stride": 24,
+      "ps2_partition_offset": 20,
+      "ps2_live_bytes": 76,
+      "retained_ps2_tail_bytes": 0,
+      "ps2_complete_sha256": "05ed79f6427220e22f9ab6291e3475263aace8d0eb34a363b0760684cd7ab953",
+      "golden_count": 4,
+      "golden_stride": 48,
+      "callback_roles": [
+        "initialize_instance",
+        "allocate_child",
+        "destroy_child",
+        "advance",
+        "post_age_update"
+      ],
+      "golden_parameter_size_offset": 40,
+      "switch_base": "0x7100870eb8",
+      "mapped_offset": 8851128,
+      "golden_size": 192,
+      "golden_sha256": "b9b42f1f938a052ed8a4b73a269a9026a59c3d3e45f9eaff0b1b8aac6da278d2",
+      "records": [
+        {
+          "kind": 0,
+          "parameter_bytes": 0,
+          "ps2_callbacks": [
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          "switch_callbacks": [
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "kind": 1,
+          "parameter_bytes": 108,
+          "ps2_callbacks": [
+            "0x498d20",
+            "0x498da0",
+            "0x498ec0",
+            "0x498f10",
+            "0x4992a0"
+          ],
+          "switch_callbacks": [
+            "0x7100377ad0",
+            "0x7100377b20",
+            "0x7100377c70",
+            "0x7100377ca0",
+            "0x7100377f50"
+          ]
+        },
+        {
+          "kind": 2,
+          "parameter_bytes": 208,
+          "ps2_callbacks": [
+            "0x499470",
+            "0x499510",
+            "0x4996e0",
+            "0x499730",
+            "0x499a30"
+          ],
+          "switch_callbacks": [
+            "0x7100378160",
+            "0x71003781f0",
+            "0x71003783b0",
+            "0x7100378410",
+            "0x7100378700"
+          ]
+        },
+        {
+          "kind": 3,
+          "parameter_bytes": 104,
+          "ps2_callbacks": [
+            "0x499c50",
+            "0x499cd0",
+            "0x499df0",
+            "0x499e40",
+            "0x49a1a0"
+          ],
+          "switch_callbacks": [
+            "0x71003789e0",
+            "0x7100378a30",
+            "0x7100378b80",
+            "0x7100378bb0",
+            "0x7100378e30"
+          ]
+        }
+      ],
+      "steam_size_vector_candidates": [
+        {
+          "section": ".xpdata",
+          "rva": "0xae9490",
+          "raw_offset": 11435152,
+          "size": 192,
+          "sha256": "db700e999912534950ed408c8cf04fadd832174cc426151cfdfd228519114f52"
+        }
+      ],
+      "steam_ordinary_readers": [
+        {
+          "start": "0x566e70",
+          "end": "0x566ee8"
+        },
+        {
+          "start": "0x567130",
+          "end": "0x567189"
+        },
+        {
+          "start": "0x5671fe",
+          "end": "0x56726b"
+        },
+        {
+          "start": "0x5675b0",
+          "end": "0x5676e0"
+        },
+        {
+          "start": "0x567f10",
+          "end": "0x568007"
+        },
+        {
+          "start": "0x568070",
+          "end": "0x5680aa"
+        },
+        {
+          "start": "0x5680e0",
+          "end": "0x568119"
+        },
+        {
+          "start": "0x568120",
+          "end": "0x56816c"
+        },
+        {
+          "start": "0x568170",
+          "end": "0x5681b5"
+        },
+        {
+          "start": "0x5681c0",
+          "end": "0x56822f"
+        }
+      ],
+      "ps2_tail_hex": ""
+    },
+    {
+      "name": "wind",
+      "address": "0x00714148",
+      "size": 88,
+      "ps2_base": "0x714130",
+      "ps2_complete_size": 112,
+      "ps2_stride": 28,
+      "ps2_partition_offset": 24,
+      "ps2_live_bytes": 88,
+      "retained_ps2_tail_bytes": 0,
+      "ps2_complete_sha256": "dbfb6289307df6d3680e3b45bd6f3690d08ce4cadc3f9efe69a553c3e41b6389",
+      "golden_count": 4,
+      "golden_stride": 56,
+      "callback_roles": [
+        "initialize_instance",
+        "allocate_child",
+        "destroy_child",
+        "optional_parent_constructor",
+        "advance",
+        "post_age_update"
+      ],
+      "golden_parameter_size_offset": 48,
+      "switch_base": "0x7100871068",
+      "mapped_offset": 8851560,
+      "golden_size": 224,
+      "golden_sha256": "ae322d1d34453d553b786ac57971efe6c83133b5f59cbf58d287891afcdf222f",
+      "records": [
+        {
+          "kind": 0,
+          "parameter_bytes": 0,
+          "ps2_callbacks": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          "switch_callbacks": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "kind": 1,
+          "parameter_bytes": 248,
+          "ps2_callbacks": [
+            "0x4a1ca0",
+            "0x4a20b0",
+            "0x4a22c0",
+            "0x4a21e0",
+            "0x4a2310",
+            "0x4a2c90"
+          ],
+          "switch_callbacks": [
+            "0x7100380420",
+            "0x71003804c0",
+            "0x71003805b0",
+            "0x71003805e0",
+            "0x7100380690",
+            "0x7100380da0"
+          ]
+        },
+        {
+          "kind": 2,
+          "parameter_bytes": 244,
+          "ps2_callbacks": [
+            "0x4a3010",
+            "0x4a33e0",
+            "0x4a35f0",
+            "0x4a3510",
+            "0x4a3640",
+            "0x4a4000"
+          ],
+          "switch_callbacks": [
+            "0x7100381180",
+            "0x7100381220",
+            "0x7100381310",
+            "0x7100381340",
+            "0x71003813f0",
+            "0x7100381c10"
+          ]
+        },
+        {
+          "kind": 3,
+          "parameter_bytes": 216,
+          "ps2_callbacks": [
+            "0x4a4380",
+            "0x4a4790",
+            "0x4a49c0",
+            "0x4a48d0",
+            "0x4a4a10",
+            "0x4a52b0"
+          ],
+          "switch_callbacks": [
+            "0x7100381ff0",
+            "0x7100382090",
+            "0x7100382180",
+            "0x71003821b0",
+            "0x7100382260",
+            "0x7100382aa0"
+          ]
+        }
+      ],
+      "steam_size_vector_candidates": [
+        {
+          "section": ".xpdata",
+          "rva": "0xae9550",
+          "raw_offset": 11435344,
+          "size": 224,
+          "sha256": "664851f0eef2e375e7fde1c09b24bf0ca8a9efda815033417945d89a11ead91d"
+        }
+      ],
+      "steam_ordinary_readers": [
+        {
+          "start": "0x570cc0",
+          "end": "0x570d98"
+        },
+        {
+          "start": "0x570da0",
+          "end": "0x570e1c"
+        },
+        {
+          "start": "0x570e20",
+          "end": "0x570eea"
+        },
+        {
+          "start": "0x570ef0",
+          "end": "0x570f26"
+        },
+        {
+          "start": "0x570f30",
+          "end": "0x570f98"
+        },
+        {
+          "start": "0x570fa0",
+          "end": "0x570fd5"
+        },
+        {
+          "start": "0x570fe0",
+          "end": "0x57104c"
+        },
+        {
+          "start": "0x571050",
+          "end": "0x571092"
+        },
+        {
+          "start": "0x5710a0",
+          "end": "0x571133"
+        }
+      ],
+      "ps2_tail_hex": ""
+    }
+  ],
+  "shared_topology": {
+    "name": "shared-four-column-strip-topology",
+    "address": "0x00713330",
+    "size": 48,
+    "ps2_live_bytes": 36,
+    "retained_ps2_tail_bytes": 12,
+    "ps2_tail_hex": "000000000000000000000000",
+    "mapped_offset": 8845696,
+    "switch_base": "0x710086f980",
+    "golden_size": 36,
+    "golden_sha256": "bb6ef45eeb2e68387b8b71a67e0270c45d60dd04f5a5318c51c7b5811148fd32",
+    "indices": [
+      0,
+      1,
+      5,
+      0,
+      5,
+      4,
+      1,
+      2,
+      6,
+      1,
+      6,
+      5,
+      2,
+      3,
+      7,
+      2,
+      7,
+      6
+    ],
+    "indices_per_repeat": 18,
+    "vertices_per_row": 4,
+    "triangles_per_repeat": 6,
+    "paired_producer": "PS2 RingCreateHandle00498da0 ->NSO7100377b20: allocate one-pointer handle4->8 bytes, clamp segment count>=3, common connected-strip builder with four columns/flags0x48, inner/middle/middle/outer color rows.",
+    "all_ps2_consumers": [
+      "0x00498da0",
+      "0x00499cd0",
+      "0x004a20b0",
+      "0x004a33e0",
+      "0x004a4790"
+    ],
+    "all_switch_consumers": [
+      "0x7100377b20",
+      "0x7100378a30",
+      "0x71003804c0",
+      "0x7100381220",
+      "0x7100382090"
+    ],
+    "reader_contract": "PS2 GeometryCreateStripGrid00482dc0 in effGeometry.c:202..250 and NSO710035fa70: columns4 gives2*(4-1)=6 triangles and3 indices each; read18 u16/36 bytes, per-repeat vertex offset4. New native geometry layout is not implied equivalent."
+  },
+  "qualified_structural_pairs": {
+    "thunder": {
+      "ps2_constructor": "0x004988c0 ThunderTextureForIndex, sourceeffPolygonThunder.c: kind<5, parameter_size alias713e84 at record+20, allocate parameterBytes+64, parameters at instance+64, color-1 and scalar scale1, two identity quads, parameter copy, child allocation then init",
+      "switch_constructor": "0x710037e2d0: same five-way range, stride48 and parameter field+40, same allocation/layout partition and ordered child/init dispatch; bank rootGOT881820 resolves870f78",
+      "independent_lifecycle": "PS2 mdlEffect.c ThunderInstanceDestroy/Stop/Advance/Update use aliases713e78/713e70/713e7c/713e80 at stride24; NSO37e480/37e4d0/37e510/37e590 select corresponding slots at stride48. Destructor callback receives the INSTANCE, unlike ring.",
+      "age_semantics": "Golden thunder remains integer age++:37e53c LDR w8,[instance,#28],37e540 ADD w8,#1,37e544 STR. Do not apply ring/wind float scaling to thunder.",
+      "holes": "Kinds0 and2 have null callbacks and0 parameter bytes in both images. Preserve existing caller constraints; invent neither fallback handlers nor new PS2 validation."
+    },
+    "ring": {
+      "ps2_constructor": "0x0049a370 RingCreateKindInstance: kind<4, size alias713f24 at record+20; allocate parameterBytes+80; copy unit-scale quad; two identity quads and parameter copy, child allocate then init",
+      "switch_constructor": "0x7100379040: same four-way kind input,48-byte descriptors and parameter field+40; same ordered allocation/copy/child/init graph; rootGOT881808 resolves870eb8",
+      "independent_lifecycle": "PS2 mdlEffect.c RingInstanceDestroy/Stop/Advance/Update aliases713f18/713f10/713f1c/713f20; NSO379210/379260/3792a0/379320 corresponding slots. Destroy passes CHILD, not the thunder instance ABI.",
+      "age_semantics": "Golden ring age is float and advances by277bb0()*0.5, observed at3792d0..3792dc and379350..37935c; old source increments integer age."
+    },
+    "wind": {
+      "ps2_constructor": "0x004a5630 WindAllocKindEntry: kind&ffff<4; parameter-size alias714148, stride28; allocate parameterBytes+80, set kind/color/age, copy unit-scale quad and two identity quads, copy parameters",
+      "switch_constructor": "0x7100383070: same four-way guard, stride56 and parameter field+48; matching allocation and initialization. RootGOT881830 resolves871068. Native wind kind is at+3c, not ring/flash+38.",
+      "independent_lifecycle": "PS2 effPolygonWind.c source constructor uses allocation alias714134 then initializer714130; mdlEffect source aliases71413c optional parent,714138 destroy,714140 advance,714144 post-age update. NSO382e80/382fc0/383000/383190/3831d0/383280 independently access the same56-byte descriptors and phase fields.",
+      "age_semantics": "Golden wind float age updates via277bb0()*0.5 at38322c..383238 and3832dc..3832e8, not PS2 integer age++."
+    }
+  },
+  "extent_proof": [
+    "Thunder complete bank713e70 +5*24=713ee8. Selection713e84 +108 ends713ef0:100 live bytes plus8 zero alignment bytes. effPolygonRing.c begins713ef0 and has independently proven typed filename consumers; do not stitch it into descriptor records.",
+    "Ring complete bank713f10 +4*24 ends713f70. Selection+20/76 bytes is wholly live.",
+    "Wind complete bank714130 +4*28 ends7141a0, the following effPolygonTex.c diagnostic. Selection+24/88 bytes is wholly live.",
+    "Shared strip selection713330/48 consumes36 live bytes by the actual loop/column contract;12 old zero tail bytes are outside the template. Native source suffix is another topology, not retained old padding."
+  ],
+  "cross_image_checks": [
+    "All ordered per-kind parameter-size fields are equal across PS2 and NSO; each complete size vector uniquely identifies a permitted Steam.xpdata candidate recorded above. These are corroboration, not the sole proof. Typed constructors plus independent lifecycle readers establish source identity.",
+    "Native data callback words require RELA resolution on NSO and preferred-VA normalization on Steam. Do not compare raw zero relocated words or copy code addresses across ISA."
+  ],
+  "required_seams": [
+    "Bind all three complete Golden factory banks semantically with native callback identities, actual per-family/per-kind signatures, parameter byte counts and kind ranges. Do not memcpy their240/192/224 bytes over selected108/76/88-byte old partitions.",
+    "Preserve thunder0/2 null holes and preserve unchanged PS2 behavior; no invented fallback or validation. Qualify actual Golden callables for initializer, child allocation, destruction, advance, post-age update and wind optional parent construction. Thunder destruction receives instance; ring destruction receives child; wind allocation also has the resource argument. Do not unify these ABIs merely by field index.",
+    "Route all constructors, source-record resolvers, reset/stop, parent-copy, destructor, advance/post-age update and all native/inlined copies. Source-proven unit-scale quad713ce0 is already committed separately; all these native readers must use its Golden semantics.",
+    "Port per-family instance layouts and timing: ring/wind use float age+=277bb0()*0.5, thunder retains integer age++. Wind kind+3c differs from ring kind+38 despite both80-byte native headers. No generic stride/timing adapter may silently retain PS2 fields.",
+    "Route every shared four-column-strip constructor (two ring,three wind) to exactly18 u16 Golden indices/36 bytes and preserve12 old zero tail bytes. Preserve8 old thunder alignment bytes, no tail in ring/wind selected partitions. Native mesh/vertex layouts and indexing bounds require their actual Golden implementation, not topology equivalence assumptions.",
+    "GoldenM6b must witness mode selection, all consumers/native copies, genuine callback lifecycle, per-family timing, index/allocation bounds, normalized pointers and unchanged PS2 mode. These are source proofs, not runtime or visual matches."
+  ]
+}

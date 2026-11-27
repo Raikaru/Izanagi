@@ -83,11 +83,19 @@ int main(void)
     assert(p4_mod_inventory_pump() == 1 && !counts[1]);
     context = P4_MOD_SCENE_FIELD;
     assert(!p4_mod_inventory_pump() && counts[1] == 2 && money == 0);
+    /* Queued stock changes are not consumable activations: both grants and
+     * takes retain their independent, ordered safe-point semantics. */
+    context = P4_MOD_SCENE_BATTLE;
+    assert(p4_mod_item_add(1, 4, &changed, &reason) == 1);
+    assert(p4_mod_item_add(1, -3, &changed, &reason) == 1);
+    assert(counts[1] == 2 && p4_mod_inventory_pump() == 1);
+    context = P4_MOD_SCENE_FIELD;
+    assert(!p4_mod_inventory_pump() && counts[1] == 3);
     assert(!p4_mod_inventory_pump());
     context = P4_MOD_SCENE_BATTLE;
     assert(p4_mod_item_add(1, 1, &changed, &reason) == 1);
     context = P4_MOD_SCENE_TITLE;
-    assert(!p4_mod_inventory_pump() && counts[1] == 2); /* quit to title: dropped */
+    assert(!p4_mod_inventory_pump() && counts[1] == 3); /* quit to title: dropped */
     assert(p4_mod_item_add(1, 1, &changed, &reason) == -1 && strstr(reason, "no game"));
     context = P4_MOD_SCENE_DUNGEON;
     assert(!p4_mod_item_add(1, 1, &changed, &reason) && changed == 1);

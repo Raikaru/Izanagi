@@ -1,6 +1,7 @@
 /* Opt-in original texture capture. Encoding and filesystem writes stay off the
  * game thread. A failed dump is incomplete, never a successful missing frame. */
 #include "p4pc/texture_dump.h"
+#include "p4pc/hostpath.h"
 #include "p4pc/os.h"
 #include "../viewer/p4png.h"
 #include <SDL3/SDL.h>
@@ -141,12 +142,12 @@ static int write_job(const DumpJob *job)
         fclose(existing);
         if (!same_file(path,temporary)) {
             fprintf(stderr,"texture dump: existing PNG differs: %s\n",path);
-            remove(temporary);
+            p4_host_remove(temporary);
             return -1;
         }
-        if (remove(temporary)!=0) return -1;
+        if (p4_host_remove(temporary)!=0) return -1;
     } else if (errno!=ENOENT || p4_os_rename(temporary,path)!=0) {
-        remove(temporary); return -1;
+        p4_host_remove(temporary); return -1;
     }
     if (fprintf(dump.inventory,"{\"schema\":\"p4tex-v1\",\"hash\":\"%s\",\"width\":%u,\"height\":%u,\"format\":%u,\"palette_format\":%u,\"palette_entries\":%u,\"palette_rgba_hex\":\"",
         job->key,p->width,p->height,p->format,p->palette_format,p->palette_entries)<0) return -1;
@@ -196,7 +197,7 @@ int p4_texture_dump_start(const char *root, int allow_synthetic)
     if (n<0 || (size_t)n>=sizeof dump.directory || make_directories(dump.directory)!=0) goto fail;
     n=snprintf(inventory,sizeof inventory,"%s/inventory.jsonl",root);
     if (n<0 || (size_t)n>=sizeof inventory) goto fail;
-    dump.inventory=fopen(inventory,"ab");
+    dump.inventory=p4_host_fopen(inventory,"ab");
     if (!dump.inventory) goto fail;
     dump.mutex=SDL_CreateMutex(); dump.condition=SDL_CreateCondition();
     if (!dump.mutex || !dump.condition) goto fail;

@@ -1,0 +1,236 @@
+{
+  "proof_id": "L1-c6-battle-panel-message-bank-20261113",
+  "class": "PROVEN",
+  "runtime_status": "pending-seam",
+  "scope": "Complete logical battle-panel MSG1 resource and its three selected PS2 partitions; manager source-file diagnostic separately qualified by typed assertion/allocation consumers.",
+  "ps2": {
+    "header_type": 7,
+    "size": 4427,
+    "magic": "0x3147534d",
+    "relocation_offset": 4332,
+    "relocation_size": 95,
+    "entry_count": 47,
+    "sha256": "0bef56747e0fd0ae9bfc14682446ed04a509af3d2ec1610042424f55086b12c1"
+  },
+  "ps2_file_base": "0x006253b0",
+  "ps2_file_end_exclusive": "0x006264fb",
+  "parts": [
+    {
+      "address": "0x006253b0",
+      "size": 3484,
+      "offset_in_ps2_file": 0,
+      "ps2_live_bytes": 3484,
+      "retained_ps2_tail_bytes": 0
+    },
+    {
+      "address": "0x00626172",
+      "size": 512,
+      "offset_in_ps2_file": 3522,
+      "ps2_live_bytes": 512,
+      "retained_ps2_tail_bytes": 0
+    },
+    {
+      "address": "0x00626372",
+      "size": 398,
+      "offset_in_ps2_file": 4034,
+      "ps2_live_bytes": 393,
+      "retained_ps2_tail_bytes": 5
+    }
+  ],
+  "ownership": "Main explicitly reassigned00626172 and00626372 from cohort5 to c6 on2026-11-13.00626fe0 is owned byc5 and is not touched.",
+  "golden_locale_table_switch": "0x7100733878",
+  "golden_locale_table_steam": {
+    "section": ".sdata",
+    "rva": "0x90b240",
+    "raw_offset": 9477696,
+    "size": 64
+  },
+  "localized_banks": [
+    {
+      "locale_slot": 0,
+      "size": 8059,
+      "entry_count": 89,
+      "relocation_offset": 7880,
+      "relocation_size": 179,
+      "sha256": "6805f1bb378297952ba7227b1af5ad41da77924bae2cf1c17dbac4d184f50ec3",
+      "switch_address": "0x7100721d68",
+      "steam": {
+        "section": ".xpdata",
+        "rva": "0xa3e750",
+        "raw_offset": 10735440
+      },
+      "ps2_first47_kind_and_name_sequence_equal": true
+    },
+    {
+      "locale_slot": 1,
+      "size": 8123,
+      "entry_count": 89,
+      "relocation_offset": 7944,
+      "relocation_size": 179,
+      "sha256": "980fd69e3318c05ff77c538b04460a9c302b081f26933ea0c53b11a11afff88b",
+      "switch_address": "0x7100723ce3",
+      "steam": {
+        "section": ".xpdata",
+        "rva": "0xa38400",
+        "raw_offset": 10710016
+      },
+      "ps2_first47_kind_and_name_sequence_equal": true
+    },
+    {
+      "locale_slot": 2,
+      "size": 7903,
+      "entry_count": 89,
+      "relocation_offset": 7724,
+      "relocation_size": 179,
+      "sha256": "ba1b7bd1ca7fceb7682bf43d18a2ce1addac76dd02f4b40b5fc22d086c4685e9",
+      "switch_address": "0x7100725c9e",
+      "steam": {
+        "section": ".xpdata",
+        "rva": "0xa363e0",
+        "raw_offset": 10701792
+      },
+      "ps2_first47_kind_and_name_sequence_equal": true
+    },
+    {
+      "locale_slot": 3,
+      "size": 7691,
+      "entry_count": 89,
+      "relocation_offset": 7512,
+      "relocation_size": 179,
+      "sha256": "0ce1f5ca5762f26bf0753b91d8e6030dd7081f98d227a61cd66cc99509246318",
+      "switch_address": "0x7100727b7d",
+      "steam": {
+        "section": ".xpdata",
+        "rva": "0xa427c0",
+        "raw_offset": 10751936
+      },
+      "ps2_first47_kind_and_name_sequence_equal": true
+    },
+    {
+      "locale_slot": 4,
+      "size": 7679,
+      "entry_count": 89,
+      "relocation_offset": 7500,
+      "relocation_size": 179,
+      "sha256": "8b38a75d6cbe44b458d0e6062aa1b394c0ca37ce0ec51679938ad7fac4dc7624",
+      "switch_address": "0x7100729988",
+      "steam": {
+        "section": ".xpdata",
+        "rva": "0xa345e0",
+        "raw_offset": 10694112
+      },
+      "ps2_first47_kind_and_name_sequence_equal": true
+    },
+    {
+      "locale_slot": 5,
+      "size": 8255,
+      "entry_count": 89,
+      "relocation_offset": 8076,
+      "relocation_size": 179,
+      "sha256": "25b6ff40e4624d75fcd5dbeb50341bac475702ce4ecc1e5d9f7671f362218be7",
+      "switch_address": "0x710072b787",
+      "steam": {
+        "section": ".xpdata",
+        "rva": "0xa406d0",
+        "raw_offset": 10743504
+      },
+      "ps2_first47_kind_and_name_sequence_equal": true
+    },
+    {
+      "locale_slot": 6,
+      "size": 8203,
+      "entry_count": 89,
+      "relocation_offset": 8024,
+      "relocation_size": 179,
+      "sha256": "1581bd1f17a652a128bd7fd77d590fe40b815e9248b5e1f8bd4fd20e908c0d46",
+      "switch_address": "0x710072d7c6",
+      "steam": {
+        "section": ".xpdata",
+        "rva": "0xa3a3c0",
+        "raw_offset": 10718144
+      },
+      "ps2_first47_kind_and_name_sequence_equal": true
+    },
+    {
+      "locale_slot": 7,
+      "size": 8175,
+      "entry_count": 89,
+      "relocation_offset": 7996,
+      "relocation_size": 179,
+      "sha256": "b72cc309b763241150e6264d102d8aa47968165b17471333ba01c1eff5b7ce61",
+      "switch_address": "0x710072f7d1",
+      "steam": {
+        "section": ".xpdata",
+        "rva": "0xa325f0",
+        "raw_offset": 10685936
+      },
+      "ps2_first47_kind_and_name_sequence_equal": true
+    }
+  ],
+  "locale_contract": "Eight positional locale slots, not guessed language names. Slot1 is independently recognized English by operation-help text and is the complete Steam English source; do not assign names to the other seven slots without the language selector contract. Both native versions select the same ordered8-pointer table by signed current locale.",
+  "correspondence": [
+    {
+      "ps2": "00200fd0 btlUiInitComponents / src/Battle/btlEffect_inferred_00200cb0.c:249-304",
+      "steam": "ordinary.shared db800..dbad0",
+      "switch": "71000834a0..71000836f0",
+      "witness": "Repeated panel owner/init pointer families, subobject wiring, final four1.0f scales, u16-1/u8ff fields and message-handle install. Steam/NSO share64-bit offsets5180..5830 and store installed message handleat+c0. PS2 owning task uses the same component/owner graph and installs006253b0."
+    },
+    {
+      "ps2": "002774d0 itfMesWindowInstall and002776a0 itfMesObjectCreate",
+      "steam": "ordinary.shared45b830 called bydb800",
+      "switch": "actual full entry71002d8240 and constructor71002d8440",
+      "witness": "ValidateMSG0/MSG1 at+8; allocate manager/window; four-slot install; preserve prior window flags; constructor widens/relocates the record and usesCONV marker when appropriate. Initial worker entry2d8254 was an interior unwind/stack-split boundary, NOT the callable entry; incomingcall contract is2d8240."
+    },
+    {
+      "ps2": "00278da0 validator,00278de0 entry lookup; include/itf_mes_objects.h:112-127",
+      "switch": "2d8258..8280 actualinstructions and2d8440 constructor",
+      "witness": "32-byte on-disc header; relative8-byte entry records; magic+8,relocationoffset+16/size+20,entrycount+24. OrdinaryA64 maskfeffffff acceptsMSG0/MSG1; data header confirms complete4427/8123-byte extents and relocation ends."
+    }
+  ],
+  "old_entry_identity_sequence_sha256": "cce1efbc5bfc8efb441a67d7e295c026fabc9c2edc5762be8865e9057b983b50",
+  "directory_identity": "All eight Golden banks have89 entries. The first47 ordered (record-kind,24-byte debug-name) directory identities equal the complete47-entry PS2 sequence;42 further entries append. This is namespace corroboration of the reader-qualified complete bank, not a claim that every repeated truncated debug name is independently unique or that text bytes remain unchanged.",
+  "m2_correction": "M2 nomineea38534 starts0x134 bytes into actual English resourcea38400, inside its entry directory. Never admit that3484-byte window or map old file offsets onto an expanded Golden message file.",
+  "required_seams": [
+    {
+      "owner": "btlUiInitComponents / legacy00200fd0 and translated/inlined/native copies",
+      "action": "Install the single complete selected-locale Golden MSG1 descriptor through the battle-panel message-window owner; all three old partitions resolve the same logical source. English source is8123 bytes atSteam.xpdata RVAa38400/raw10710016 SHA980fd69e3318c05ff77c538b04460a9c302b081f26933ea0c53b11a11afff88b. Preserve PS2 mode."
+    },
+    {
+      "owner": "itfMesWindowInstall / itfMesObjectCreate / entry/text/choice/relocation readers and all panel message-handle users",
+      "action": "Use the complete89-entry Golden namespace and full relative-pointer/relocation/text data; qualify on-disc32-bit to native64-bit conversion and actual Golden encoding/control semantics. Do not stitch three partitions or overwrite guestPS2 storage with an expanded8123-byte file. Existing first47 directory positions are corroborated, but duplicated/truncated names are not lookup keys."
+    },
+    {
+      "action": "Selected00626372 includes only393 live PS2 file bytes and5 alignment-tail bytes. Retain those5 PS2 bytes.006253b0 and00626172 are wholly live PS2 file slices. Full resource service covers unselected gaps via owning resource seam, not writes to unrelated suppliers."
+    },
+    {
+      "action": "Locale slot must match the host language selector. Do not always select English when running another locale; all8 complete source descriptors are qualified. Native static/guest-relocated copies need a routing/equality witness before runtimebound."
+    }
+  ],
+  "manager_diagnostic": {
+    "address": "0x0063be10",
+    "ps2_size": 16,
+    "ps2_literal": "itfMesManager.c",
+    "source": {
+      "switch_address": "0x71005f4f74",
+      "size": 69,
+      "sha256": "d57af4c00906a6a87aa371227b6f6a58a2824f408216fd04917615ec9b082977"
+    },
+    "mapped_image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+    "nso_sha256": "854c7a1e33de1619abf009fa7f32b8c012960d685c8bf1bf99a92a6a4d0bda1c",
+    "version": "Switch1.2",
+    "semantics": "Full69-byte Golden source-path diagnostic includingNUL, not a16-byte suffix copy. Structurally paired installer validation failure passes this exact source asargument0 to349960, withline5d9; paired constructor uses it asargument0 to349960 andallocationSite39e630. Sourcefile identity, typed sink, and matched reader/format checks establish correspondence; no globalTU-order or visual/byte vote.",
+    "required_seam": "Resolve every old0063be10 diagnostic-file use (assert/allocation-site routes and all inlines/native copies) to the entire sealed69-byte Golden source path in Golden mode. Do not overwrite the16-byte guest object or truncate the path. Source comes from permittedSwitch1.2 NSO evidence, not an asserted Steam path; a Steam scan found no matching plaintext filename, which is NOT absence proof."
+  },
+  "private_evidence": [
+    "c6_ui_bank.py",
+    "c6_ui_proof.py",
+    "c6_ui_steam_table.py",
+    "c6_ui_finalize.py",
+    "c6-ui-final-instructions.txt",
+    "c6-ui-steam-table-readers.txt",
+    "71000834a0-c6.txt",
+    "71002d8240-c6.txt",
+    "71002d8440-c6.txt"
+  ],
+  "boundary": "Metadata and source correspondence only. No game,BBV,runtime text decoding tests,localization playback,build,verify or unittest. No .arch code decoded."
+}

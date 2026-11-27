@@ -33,7 +33,12 @@
  * data flags colour | matrix, built by the 2D generator) is placed by the matrix whichever generator
  * made it, so it is drawn: the matrix's row 3 is the centre unless a position cluster overrides it.
  * Billboards: a quad of width and height `size` centred on the position in the camera plane,
- * rotated by the 2D rotation; the corners are top-left, top-right, bottom-right, bottom-left.
+ * rotated by the 2D rotation; the corners are top-left, top-right, bottom-right, bottom-left of
+ * the picture on the screen. The camera's +x is the screen's left (p4gl_camera_projection), so
+ * the sprite's right and up are built with their x negated: the quad was the mirror image of the
+ * picture (the notes and sweat drops over the characters' heads, public issue #11, had their stems
+ * on the left and their drops leaning in rather than spreading out), and a positive rotation turned
+ * it the other way round.
  * A matrix supplies the quad's full right and up dimensions (the size cluster is dead then).
  * rpPTANKDFLAGUSECENTER (cCenter) is not applied; no tank on this disc sets it. The clone pipeline
  * is not drawn. Colour is material colour x texel x particle colour, where the particle colour is
@@ -230,7 +235,9 @@ int p4gl_ptank_draw(void *atomic)
 {
     /* Top-left, top-right, bottom-right, bottom-left. */
     static const float corner[4][2] = {{-1.0f, 1.0f}, {1.0f, 1.0f}, {1.0f, -1.0f}, {-1.0f, -1.0f}};
-    static const uint32_t quad[6] = {0, 1, 2, 0, 2, 3};
+    /* Counter-clockwise on the screen for the sprite's corner order (a matrix quad keeps its own order, below). */
+    static const uint32_t quad[6] = {0, 2, 1, 0, 3, 2};
+    static const uint32_t matrixQuad[6] = {0, 1, 2, 0, 2, 3};
     const uint8_t *record;
     const uint8_t *pd;
     const uint8_t *userData;
@@ -380,11 +387,11 @@ int p4gl_ptank_draw(void *atomic)
                 sinR = func_0044b7b0(rot);
                 cosR = func_0044b610(rot);
             }
-            /* The camera's right and up, rotated by rot, scaled to half the size. */
-            rightCam[0] = cosR * sx * 0.5f;
+            /* The screen's right and up, rotated by rot, scaled to half the size, in camera space (+x is the screen's left). */
+            rightCam[0] = -cosR * sx * 0.5f;
             rightCam[1] = sinR * sx * 0.5f;
             rightCam[2] = 0.0f;
-            upCam[0] = -sinR * sy * 0.5f;
+            upCam[0] = sinR * sy * 0.5f;
             upCam[1] = cosR * sy * 0.5f;
             upCam[2] = 0.0f;
         }
@@ -439,7 +446,7 @@ int p4gl_ptank_draw(void *atomic)
             v->uv[1] = uv[k][1];
         }
         for (k = 0; k < 6; k++) {
-            sIndices[(size_t)i * 6u + (size_t)k] = (uint32_t)i * 4u + quad[k];
+            sIndices[(size_t)i * 6u + (size_t)k] = (uint32_t)i * 4u + (mat != NULL ? matrixQuad[k] : quad[k]);
         }
     }
 

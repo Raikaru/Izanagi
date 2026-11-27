@@ -41,14 +41,18 @@ retail_arg=
 nb="$build/android-$abi${P4PC_ANDROID_TAG:+-$P4PC_ANDROID_TAG}$phone_suffix"
 # arm64-v8a and x86_64 are the 64-bit model (the rewritten mirror, optimised through the EE float rewrite like the shipping x86_64 build); x86 is the i386 build
 case $abi in arm64-v8a|x86_64) model64="-DP4_PORT64_LINK=ON -DP4_PORT64_OPT=O2 -DP4_PORT64_WIN=OFF" ;; *) model64= ;; esac
-if [ -f "$nb/build.ninja" ]; then
+# A configured tree is reused only when its cached P4_ANDROID_PHONE_TESTS is what this run wants: a warm or pooled tree
+# configured before the phone unit tests existed would otherwise build them without their link options.
+want_phone_tests=OFF
+[ "$phone" != 1 ] || want_phone_tests=ON
+if [ -f "$nb/build.ninja" ] && grep -q "^P4_ANDROID_PHONE_TESTS:BOOL=$want_phone_tests\$" "$nb/CMakeCache.txt" 2>/dev/null; then
   echo "P4PC android configure skipped (cached) rc=0 secs=0"
 else
   t=$(now)
   python3 "$src/tools/build_cache.py" run android.configure -- cmake -S "$src" -B "$nb" -G Ninja \
     -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake" -DANDROID_ABI="$abi" -DANDROID_PLATFORM=android-24 -DANDROID_STL=c++_static \
     -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DP4_ANDROID_PREFIX="$prefix" \
-    $model64 ${P4PC_ANDROID_CMAKE_ARGS:-} -DP4_ANDROID_PHONE_RUNNER="$phone" -DP4_DECOMP="$src/decomp" $retail_arg > "$nb.configure.log" 2>&1 || { tail -n 40 "$nb.configure.log"; exit 1; }
+    $model64 ${P4PC_ANDROID_CMAKE_ARGS:-} -DP4_ANDROID_PHONE_RUNNER="$phone" -DP4_ANDROID_PHONE_TESTS="$want_phone_tests" -DP4_DECOMP="$src/decomp" $retail_arg > "$nb.configure.log" 2>&1 || { tail -n 40 "$nb.configure.log"; exit 1; }
   echo "P4PC android configure rc=0 secs=$(( $(now) - t ))"
 fi
 
@@ -67,6 +71,20 @@ if [ "$phone" = 1 ]; then
   for library in libSDL3.so libavcodec.so libavutil.so libswscale.so; do
     cp -L "$prefix/arm64-v8a/lib/$library" "/lane/out/$library"
   done
+  # The arm64 unit tests (tools/phone_units.py, docs/android_arm64_tests.md): every port64 C test as an NDK arm64 executable, packed with its
+  # data for the phone. They replace the Linux AArch64 qemu scope. A unit that does not compile or link for Android fails this build.
+  t=$(now)
+  ndkbin="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin"
+  python3 "$src/tools/phone_units.py" plan --build "$nb" --src "$src" > "$nb.units.txt" || exit 1
+  rc=0
+  # shellcheck disable=SC2046
+  python3 "$src/tools/build_cache.py" run android.units -- cmake --build "$nb" -- -k 0 $(cat "$nb.units.txt") > "$nb.units.log" 2>&1 || rc=$?
+  echo "P4PC android units build rc=$rc secs=$(( $(now) - t )) executables=$(wc -l < "$nb.units.txt")"
+  if [ $rc -ne 0 ]; then
+    grep -E 'error:|FAILED|undefined| -> ' "$nb.units.log" | head -n 60 || true
+    exit $rc
+  fi
+  python3 "$src/tools/phone_units.py" pack --build "$nb" --src "$src" --out /lane/out/phone-units.tgz --strip "$ndkbin/llvm-strip"     --lib "$prefix/arm64-v8a/lib/libSDL3.so" --lib "$prefix/arm64-v8a/lib/libavcodec.so" --lib "$prefix/arm64-v8a/lib/libavutil.so"     --lib "$prefix/arm64-v8a/lib/libswscale.so" || exit 1
   exit 0
 fi
 
@@ -91,6 +109,7 @@ cp "$src/third_party/licenses/FFmpeg-LGPL-2.1.txt" "$src/third_party/licenses/SD
 cp "$src/third_party/miniz/LICENSE" "$assets/licenses/miniz-MIT.txt"
 cp "$src/third_party/licenses/LodePNG-zlib.txt" "$src/third_party/licenses/cgltf-MIT.txt" "$src/third_party/licenses/yxml-MIT.txt" "$src/third_party/licenses/fdlibm-Sun.txt" "$src/third_party/licenses/newlib-BSD.txt" \
   "$src/third_party/licenses/recvx-decomp-MIT.txt" "$src/third_party/licenses/sky2hook-permission.txt" "$assets/licenses/"
+cp "$src/third_party/licenses/bcdec-MIT.txt" "$assets/licenses/"
 cp "$src/LICENSE" "$assets/licenses/p4pc-MIT.txt"
 cp "$src/NOTICE" "$assets/licenses/NOTICE.txt"
 cp "$src/third_party/licenses/Luau-MIT.txt" "$src/third_party/licenses/Lua-MIT.txt" \
@@ -105,7 +124,9 @@ case $abi in
 esac
 sh "$src/tools/package_runtime_provenance.sh" android "$runtime_target" "$assets/source/runtime-provenance.txt"
 cp "$cache/dl/ffmpeg-7.1.1.tar.xz" "$cache/dl/SDL3-3.2.10.tar.gz" "$assets/source/"
-cp "$src/ci/android/build_deps.sh" "$assets/source/"
+mkdir -p "$assets/source/ci/android"
+cp "$src/ci/android/build_deps.sh" "$assets/source/ci/android/"
+cp "$src/ci/ffmpeg-7.1.1-hca-window-alignment.patch" "$assets/source/ci/"
 cp "$src/packaging/NOTICES_android.txt" "$assets/THIRD_PARTY_NOTICES.txt"
 
 t=$(now)

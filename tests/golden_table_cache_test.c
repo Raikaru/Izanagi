@@ -58,6 +58,14 @@ int main(void)
     P4GoldenCacheTable invalid[] = {{"z",(uint8_t *)(uintptr_t)1,1},{"a",(uint8_t *)(uintptr_t)1,1}};
     assert(p4_game_tables_builder_golden_cache(&b,NULL,NULL,invalid,2,NULL,0) == P4_TABLE_INVALID);
     assert(!invalid[0].data && !invalid[1].data);
+    b.input_mask = 1u << P4_TABLE_INPUT_MSG;
+    miss = 1;
+    assert(p4_game_tables_builder_golden_cache(&b,NULL,NULL,NULL,0,NULL,0) == P4_TABLE_NOT_FOUND);
+    assert(!b.input_count && b.input_mask == 1u << P4_TABLE_INPUT_MSG);
+    miss = 0;
+    b.input_mask |= 1u << P4_TABLE_INPUT_COUNT;
+    assert(p4_game_tables_builder_golden_cache(&b,NULL,NULL,NULL,0,NULL,0) == P4_TABLE_INVALID);
+    b.input_mask = 1u << P4_TABLE_INPUT_MSG;
     P4GoldenCacheTable extra[] = {{"extra/exp",NULL,0}};
     assert(p4_game_tables_builder_golden_cache(&b,NULL,NULL,extra,1,NULL,0) == P4_TABLE_OK);
     assert(extra[0].size == 1 && extra[0].data[0] == 42);

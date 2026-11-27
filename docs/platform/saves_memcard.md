@@ -109,9 +109,9 @@ complete version-prefixed retail image; providers never retain that image.
 Tagged writes stage the data file, `icon.ico`, `icon.sys`, sidecar and commit
 marker in one same-card private generation. Publication happens only after the
 final `icon.sys` close and before reporting async success, not after the first
-data write. No extension state means the original retail byte/write path;
-explicitly overwriting an old tagged slot still stages a clean replacement so
-stale sidecar/test markers cannot bind the new image.
+data write. Outside Golden mode, no extension state means the original retail
+byte/write path; explicitly overwriting an old tagged slot still stages a clean
+replacement so stale sidecar/test markers cannot bind the new image.
 
 Native game writes and imports share `save_transaction.c`. A real root-directory
 lock excludes another process without adding a memory-card lockfile. A bounded
@@ -124,6 +124,17 @@ restoration preserves stage/backup/journal with a clear error, never a claimed
 rollback. Startup recovers recognized interrupted generations or refuses an
 ambiguous/corrupt one without deleting it. This is not a power-loss/physical-media
 durability qualification.
+
+Golden mode always stages live saves, including otherwise untagged saves. The
+C03 guard preserves guest address `0x007458c0` and protects its containing
+guest RAM page after image loading. Linux uses a shared memfd page; Windows
+reserves the guest arena as placeholders and maps a pagefile-backed section,
+with a private writable window for bounded admitted writes. Any other write to
+that page permanently taints the session before the page becomes writable.
+The save transport checks taint after snapshotting and before publication while
+holding the card lock. A tainted save is refused with a native error; direct
+writes without the matching staged intent are refused. Page-level faults do not
+prove or close any outstanding C03 research row.
 
 Only an actual complete data-file read stages providers, under the same root
 lock as retail/sidecar/marker reads; 56-byte menu summaries do not. Missing,

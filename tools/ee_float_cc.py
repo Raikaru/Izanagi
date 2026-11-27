@@ -27,8 +27,8 @@ import tempfile
 import build_cache
 
 # options of the original command that the IR compile does not need (they only matter to the front end)
-DROP_WITH_ARG = {"-I", "-include", "-isystem", "-MF", "-MT", "-MQ", "-o", "-Xclang", "-iquote", "-idirafter", "-imacros"}
-DROP_PREFIX = ("-I", "-D", "-std=", "-MD", "-MMD", "-isystem", "-include", "-iquote")
+DROP_WITH_ARG = {"-I", "-include", "-isystem", "-MF", "-MT", "-MQ", "-o", "-Xclang", "-iquote", "-idirafter", "-imacros", "-x"}
+DROP_PREFIX = ("-I", "-D", "-std=", "-MD", "-MMD", "-isystem", "-include", "-iquote", "-x")
 
 NAME = r"%[\w.$-]+"
 FLAGS = r"(?:(?:fast|nnan|ninf|nsz|arcp|contract|afn|reassoc) )*"

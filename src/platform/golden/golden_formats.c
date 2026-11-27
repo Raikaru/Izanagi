@@ -5,6 +5,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
+#include "p4pc/hostpath.h"
 
 static uint16_t be16(const uint8_t *p) { return (uint16_t)(p[0] << 8 | p[1]); }
 static uint32_t be32(const uint8_t *p) { return (uint32_t)p[0] << 24 | (uint32_t)p[1] << 16 | (uint32_t)p[2] << 8 | p[3]; }
@@ -164,6 +165,84 @@ int p4_golden_utf_str(const P4GoldenUtf *utf, uint32_t row, const char *name, co
     return 0;
 }
 
+int p4_golden_utf_blob(const P4GoldenUtf *utf, uint32_t row, const char *name,
+                       uint8_t **data, size_t *size)
+{
+    const P4GoldenUtfColumn *column = utf_column(utf, name);
+    const uint8_t *cell;
+    uint32_t offset, length;
+    int zero;
+    if (!column || column->type != 0x0b || !data || !size) return -1;
+    cell = utf_cell(utf, row, column, &zero);
+    if (zero) { *data = NULL; *size = 0; return row < utf->row_count ? 0 : -1; }
+    if (!cell) return -1;
+    offset = be32(cell);
+    length = be32(cell + 4);
+    if (offset > utf->size - utf->data_offset ||
+        length > utf->size - utf->data_offset - offset) return -1;
+    *data = (uint8_t *)utf->table + utf->data_offset + offset;
+    *size = length;
+    return 0;
+}
+
+int p4_golden_utf_open_selected(P4GoldenUtf *utf, uint8_t *packet, size_t size,
+                                const char *const *names)
+{
+    const uint8_t *d;
+    uint32_t cursor = 24, row_cursor = 0, columns;
+    memset(utf, 0, sizeof *utf);
+    if (!packet || !names || size < 32) return -1;
+    if (memcmp(packet, "@UTF", 4)) {
+        utf_unmask(packet, size);
+        if (memcmp(packet, "@UTF", 4)) return -1;
+    }
+    utf->size = be32(packet + 4);
+    if (utf->size < 24 || utf->size > size - 8) return -1;
+    d = utf->table = packet + 8;
+    utf->rows_offset = be16(d + 2);
+    utf->strings_offset = be32(d + 4);
+    utf->data_offset = be32(d + 8);
+    utf->row_width = be16(d + 18);
+    utf->row_count = be32(d + 20);
+    columns = be16(d + 16);
+    if (utf->rows_offset < 24 || utf->rows_offset > utf->strings_offset ||
+        utf->strings_offset > utf->data_offset || utf->data_offset > utf->size ||
+        (uint64_t)utf->row_width * utf->row_count > utf->strings_offset - utf->rows_offset) return -1;
+    for (uint32_t i = 0; i < columns; ++i) {
+        P4GoldenUtfColumn column;
+        size_t width;
+        const char *name;
+        int selected = 0;
+        if (cursor + 5 > utf->rows_offset) return -1;
+        column.storage = d[cursor] & 0xf0;
+        column.type = d[cursor] & 15;
+        column.name = be32(d + cursor + 1);
+        cursor += 5;
+        name = utf_string(utf, column.name);
+        width = utf_value_size(column.type);
+        if (!name || !width) return -1;
+        for (size_t n = 0; names[n]; ++n) {
+            if (n >= P4_GOLDEN_UTF_MAX_COLUMNS) return -1;
+            if (!strcmp(name, names[n])) selected = 1;
+        }
+        column.value = 0;
+        if (column.storage == 0x30) {
+            if (width > utf->rows_offset - cursor) return -1;
+            column.value = cursor;
+            cursor += (uint32_t)width;
+        } else if (column.storage == 0x50) {
+            column.value = row_cursor;
+            row_cursor += (uint32_t)width;
+            if (selected && row_cursor > utf->row_width) return -1;
+        } else if (column.storage != 0x10) return -1;
+        if (selected) {
+            if (utf->column_count == P4_GOLDEN_UTF_MAX_COLUMNS || utf_column(utf, name)) return -1;
+            utf->columns[utf->column_count++] = column;
+        }
+    }
+    return 0;
+}
+
 /* ---- CRILAYLA ------------------------------------------------------------- */
 
 size_t p4_golden_crilayla_size(const uint8_t *src, size_t size)
@@ -290,32 +369,129 @@ static int ascii_ncase(const char *a, const char *b, size_t n)
     }
     return 0;
 }
+/* ITOC DataL/DataH are nested @UTF packets. Offsets are in the parent
+ * table's data area, not absolute file offsets.
+ * https://reverseengineering.wiki/index.php/Format:CRI_CPK */
+static int utf_data(const P4GoldenUtf *utf, const char *name, uint8_t **data, size_t *size)
+{
+    const P4GoldenUtfColumn *column = utf_column(utf, name);
+    const uint8_t *cell;
+    uint32_t offset, length;
+    int zero;
+    if (!column || column->type != 0x0b) return -1;
+    cell = utf_cell(utf, 0, column, &zero);
+    if (zero) { *data = NULL; *size = 0; return 0; }
+    if (!cell) return -1;
+    offset = be32(cell);
+    length = be32(cell + 4);
+    if (utf->data_offset > utf->size || offset > utf->size - utf->data_offset ||
+        length > utf->size - utf->data_offset - offset) return -1;
+    *data = (uint8_t *)utf->table + utf->data_offset + offset;
+    *size = length;
+    return 0;
+}
+
+static int compare_id(const void *a, const void *b)
+{
+    const P4GoldenCpkIdEntry *x = a, *y = b;
+    return (x->id > y->id) - (x->id < y->id);
+}
+
+static int itoc_part(P4GoldenCpk *cpk, const P4GoldenUtf *itoc, const char *field,
+                     uint64_t expected, size_t *next)
+{
+    uint8_t *data;
+    size_t size;
+    P4GoldenUtf table;
+    if (utf_data(itoc, field, &data, &size)) return -1;
+    if (!size) return expected ? -1 : 0;
+    if (p4_golden_utf_open(&table, data, size) || table.row_count != expected) return -1;
+    for (uint32_t row = 0; row < table.row_count; ++row) {
+        uint64_t id, stored, extracted;
+        if (*next >= cpk->id_count ||
+            p4_golden_utf_u64(&table, row, "ID", &id) || id > UINT32_MAX ||
+            p4_golden_utf_u64(&table, row, "FileSize", &stored) || stored > UINT32_MAX ||
+            p4_golden_utf_u64(&table, row, "ExtractSize", &extracted) || extracted > UINT32_MAX)
+            return -1;
+        cpk->ids[*next].id = (uint32_t)id;
+        cpk->ids[*next].entry.size = (uint32_t)stored;
+        cpk->ids[*next].entry.extract = (uint32_t)extracted;
+        ++*next;
+    }
+    return 0;
+}
+
+static int read_itoc(P4GoldenCpk *cpk, uint64_t offset, uint64_t content, uint64_t align)
+{
+    uint8_t *packet;
+    size_t size, next = 0;
+    uint64_t low, high;
+    P4GoldenUtf itoc;
+    int result = -1;
+    packet = read_chunk(cpk->file, offset, "ITOC", &size);
+    if (!packet) return -1;
+    if (p4_golden_utf_open(&itoc, packet, size) || itoc.row_count != 1 ||
+        p4_golden_utf_u64(&itoc, 0, "FilesL", &low) ||
+        p4_golden_utf_u64(&itoc, 0, "FilesH", &high) ||
+        high > SIZE_MAX || low > SIZE_MAX - high ||
+        low + high > (64u << 20) / sizeof *cpk->ids)
+        goto done;
+    cpk->id_count = (size_t)(low + high);
+    if (cpk->id_count && !(cpk->ids = calloc(cpk->id_count, sizeof *cpk->ids))) goto done;
+    if (itoc_part(cpk, &itoc, "DataL", low, &next) ||
+        itoc_part(cpk, &itoc, "DataH", high, &next)) goto done;
+    if (cpk->id_count) qsort(cpk->ids, cpk->id_count, sizeof *cpk->ids, compare_id);
+    for (size_t i = 0; i < cpk->id_count; ++i) {
+        uint64_t padding;
+        if (i && cpk->ids[i - 1].id == cpk->ids[i].id) goto done;
+        cpk->ids[i].entry.offset = content;
+        if (content > UINT64_MAX - cpk->ids[i].entry.size) goto done;
+        content += cpk->ids[i].entry.size;
+        padding = align && content % align ? align - content % align : 0;
+        if (content > UINT64_MAX - padding) goto done;
+        content += padding;
+    }
+    result = 0;
+done:
+    free(packet);
+    return result;
+}
 
 int p4_golden_cpk_open(P4GoldenCpk *cpk, const char *path, char *reason, size_t capacity)
 {
     P4GoldenUtf header;
     uint8_t *packet = NULL;
     size_t size;
-    uint64_t toc = 0, content = 0;
+    uint64_t toc = 0, itoc = 0, etoc = 0, content = 0, align = 0;
 
     memset(cpk, 0, sizeof *cpk);
-    if (!(cpk->file = fopen(path, "rb"))) { reason_set(reason, capacity, "cannot open", path); return -1; }
-    if (!(packet = read_chunk(cpk->file, 0, "CPK ", &size)) || p4_golden_utf_open(&header, packet, size) ||
-        p4_golden_utf_u64(&header, 0, "TocOffset", &toc) || !toc) {
-        free(packet);
-        p4_golden_cpk_close(cpk);
-        reason_set(reason, capacity, "not a CPK archive", path);
-        return -1;
-    }
-    if (p4_golden_utf_u64(&header, 0, "ContentOffset", &content) || !content) content = toc;
+    if (!(cpk->file = p4_host_fopen(path, "rb"))) { reason_set(reason, capacity, "cannot open", path); return -1; }
+    if (!(packet = read_chunk(cpk->file, 0, "CPK ", &size)) ||
+        p4_golden_utf_open(&header, packet, size) || header.row_count != 1) goto fail;
+    (void)p4_golden_utf_u64(&header, 0, "TocOffset", &toc);
+    (void)p4_golden_utf_u64(&header, 0, "ItocOffset", &itoc);
+    (void)p4_golden_utf_u64(&header, 0, "EtocOffset", &etoc);
+    (void)p4_golden_utf_u64(&header, 0, "ContentOffset", &content);
+    (void)p4_golden_utf_u64(&header, 0, "Align", &align);
+    if (toc == UINT64_MAX) toc = 0;
+    if (itoc == UINT64_MAX) itoc = 0;
+    if (etoc == UINT64_MAX) etoc = 0;
+    if (content == UINT64_MAX) content = 0;
+    if ((!toc && !itoc) || (itoc && !content)) goto fail;
+    if (!content) content = toc;
     cpk->base = toc < content ? toc : content;
-    free(packet);
-    if (!(cpk->toc = read_chunk(cpk->file, toc, "TOC ", &size)) || p4_golden_utf_open(&cpk->utf, cpk->toc, size)) {
-        p4_golden_cpk_close(cpk);
-        reason_set(reason, capacity, "unreadable CPK table of contents", path);
-        return -1;
-    }
+    free(packet); packet = NULL;
+    if (toc && (!(cpk->toc = read_chunk(cpk->file, toc, "TOC ", &size)) ||
+                p4_golden_utf_open(&cpk->utf, cpk->toc, size))) goto fail;
+    if (etoc && (!(cpk->etoc = read_chunk(cpk->file, etoc, "ETOC", &size)) ||
+                 p4_golden_utf_open(&cpk->etoc_utf, cpk->etoc, size))) goto fail;
+    if (itoc && read_itoc(cpk, itoc, content, align)) goto fail;
     return 0;
+fail:
+    free(packet);
+    p4_golden_cpk_close(cpk);
+    reason_set(reason, capacity, "unreadable CPK tables", path);
+    return -1;
 }
 
 static int path_equal(const char *dir, const char *name, const char *path)
@@ -330,6 +506,23 @@ static int path_equal(const char *dir, const char *name, const char *path)
 
 int p4_golden_cpk_find(const P4GoldenCpk *cpk, const char *path, P4GoldenCpkEntry *out)
 {
+    if (path[0] == '#' && path[1]) {
+        uint64_t id = 0;
+        for (const char *p = path + 1; *p; ++p) {
+            if (*p < '0' || *p > '9' || id > (UINT32_MAX - (unsigned)(*p - '0')) / 10u)
+                return 1;
+            id = id * 10 + (unsigned)(*p - '0');
+        }
+        size_t lo = 0, hi = cpk->id_count;
+        while (lo < hi) {
+            size_t mid = lo + (hi - lo) / 2;
+            if (cpk->ids[mid].id < id) lo = mid + 1;
+            else hi = mid;
+        }
+        if (lo == cpk->id_count || cpk->ids[lo].id != id) return 1;
+        *out = cpk->ids[lo].entry;
+        return 0;
+    }
     for (uint32_t row = 0; row < cpk->utf.row_count; ++row) {
         const char *dir, *name;
         uint64_t size, extract, offset;
@@ -363,10 +556,15 @@ int p4_golden_cpk_read(P4GoldenCpk *cpk, const P4GoldenCpkEntry *entry, uint8_t 
         reason_set(reason, capacity, "short read from CPK", NULL);
         return -1;
     }
-    if (entry->size == entry->extract || entry->size < 8 || memcmp(stored, "CRILAYLA", 8)) {
+    if (entry->size == entry->extract) {
         *out = stored;
         *size = entry->size;
         return 0;
+    }
+    if (entry->size < 8 || memcmp(stored, "CRILAYLA", 8)) {
+        free(stored);
+        reason_set(reason, capacity, "unsupported CPK compression", NULL);
+        return -1;
     }
     total = p4_golden_crilayla_size(stored, entry->size);
     if (total != entry->extract || !(plain = malloc(total))) {
@@ -390,6 +588,8 @@ void p4_golden_cpk_close(P4GoldenCpk *cpk)
 {
     if (cpk->file) fclose(cpk->file);
     free(cpk->toc);
+    free(cpk->etoc);
+    free(cpk->ids);
     memset(cpk, 0, sizeof *cpk);
 }
 

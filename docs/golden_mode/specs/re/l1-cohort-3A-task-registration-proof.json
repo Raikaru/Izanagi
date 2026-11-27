@@ -1,0 +1,464 @@
+{
+  "proof_id": "L1-C3A-task-registration-20261113",
+  "scope": "Seven setA task-name objects/192PS2B; source PROVEN only, runtime pending-seam. SetB and previously published proof files are untouched.",
+  "source_images": {
+    "steam": {
+      "build": 10836033,
+      "file": "P4G.exe",
+      "sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+      "data_section_bounds": {
+        "section": ".sdata",
+        "rva_start": "0x887000",
+        "size": 1674240,
+        "raw_start": 8936448
+      },
+      "code_witness_bounds": {
+        "section": ".shared",
+        "rva_start": "0x1000",
+        "size": 8934912,
+        "raw_start": 1536
+      },
+      "runtime_input": "Owned Steam install only; never require NSO or private research cache."
+    },
+    "switch": {
+      "version": "1.2",
+      "nso_sha256": "854c7a1e33de1619abf009fa7f32b8c012960d685c8bf1bf99a92a6a4d0bda1c",
+      "mapped_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+      "base": "0x7100000000",
+      "segments": [
+        {
+          "name": "text",
+          "file_offset": 257,
+          "mapped_offset": 0,
+          "decompressed_size": 5448752,
+          "compressed_size": 3719998,
+          "lz4_compressed": true
+        },
+        {
+          "name": "rodata",
+          "file_offset": 3720255,
+          "mapped_offset": 5451776,
+          "decompressed_size": 1870824,
+          "compressed_size": 990563,
+          "lz4_compressed": true
+        },
+        {
+          "name": "data",
+          "file_offset": 4710818,
+          "mapped_offset": 7323648,
+          "decompressed_size": 1606720,
+          "compressed_size": 439860,
+          "lz4_compressed": true
+        }
+      ],
+      "purpose": "Independent static structural witness, not runtime dependency."
+    }
+  },
+  "split": "<scratch>/GoldenRE-L1-c3-SPLIT.md",
+  "admissions": [
+    {
+      "address": "0x0063f398",
+      "ps2_size": 24,
+      "role": "MsgAssist task registration/identity",
+      "ps2_reader": "0x002bcd20",
+      "ps2_symbol": "fclMiscCreateAssistTask",
+      "all_ps2_table_users": [
+        "0x002bcd20"
+      ],
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x93d438",
+        "offset": 746552,
+        "raw_offset": 9683000,
+        "size": 10,
+        "sha256": "e5857ee3f564b90346da050a1dfe37307d4a598f038a0b134a5feebcfd6164f7",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true,
+        "source_group": "L1-C3A-task-registration-20261113",
+        "source_build": 10836033,
+        "corroborating_nso_address": "0x710061fde0",
+        "structural_reader_platform": "Switch1.2, with independent ordinary Steam MsgAssist corroboration",
+        "structural_reader": "0x7100203890",
+        "steam_reference_sites": [
+          {
+            "function_envelope": "0x32f510",
+            "pc": "0x32f591"
+          },
+          {
+            "function_envelope": "0x3d9f21",
+            "pc": "0x3da3ec"
+          }
+        ],
+        "nso_materialized_reference_sites": [
+          "0x71002038f0",
+          "0x710039efa8",
+          "0x710039eff8",
+          "0x710039f004"
+        ]
+      },
+      "structural_correspondence": "PS2 allocates manager work160=28+11*12 and a12B pending queue; Golden216=40+11*16 and a16B pending queue. Both store the entries-manager identity, pending-list pointer and flags|1, reset the same16B message-window state with two -1 handles, mode/suspended zero and two enabled bytes, then register priority15 with the assist update callback. The paired callback activates queued messages, clears bit1 after drain and marks all11 slots for release. Steam32f510 independently allocates headers64 plus work216/16, stores the same fields, resets the same root-state sentinels and registers the same named task; startup also inlines this constructor. This compound queue/layout/callback graph proves the role, not name similarity.",
+      "installation": {
+        "kind": "prefix-copy",
+        "live_size": 10,
+        "retain_ps2_tail": 14,
+        "requirement": "fclMiscCreateAssistTask at0x002bcd20 and every translated/inlined/compiled-native task-name copy must consume the complete10B NUL-terminated Golden name. Retain exactly14PS2 partition-tail bytes. Registration and any named lookup/stop operation must use the same qualified name. Keep the identified parent/child, callback/destructor and priority role coherent. Work sizes/offsets and changed gameplay/resource algorithms are evidence of identity, not an authorization to widen/copy guest work or a claim those behaviors match. Source proof remains pending runtime binding/qualification."
+      }
+    },
+    {
+      "address": "0x005e46e8",
+      "ps2_size": 24,
+      "role": "initDataRead task registration/identity",
+      "ps2_reader": "0x00111b30",
+      "ps2_symbol": "initBootChainStart",
+      "all_ps2_table_users": [
+        "0x00111b30"
+      ],
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x93f0d8",
+        "offset": 753880,
+        "raw_offset": 9690328,
+        "size": 13,
+        "sha256": "6798401c04c582a5fb68889ac384584d370e87208464a8b7ccbfc7d911d4cf8a",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true,
+        "source_group": "L1-C3A-task-registration-20261113",
+        "source_build": 10836033,
+        "corroborating_nso_address": "0x710060a420",
+        "structural_reader_platform": "Switch1.2, with independent ordinary Steam MsgAssist corroboration",
+        "structural_reader": "0x7100276d30",
+        "steam_reference_sites": [
+          {
+            "function_envelope": "0x3d9290",
+            "pc": "0x3d92bc"
+          },
+          {
+            "function_envelope": "0x3db470",
+            "pc": "0x3db480"
+          },
+          {
+            "function_envelope": "0x3db4a0",
+            "pc": "0x3db4b0"
+          }
+        ],
+        "nso_materialized_reference_sites": [
+          "0x7100276d64",
+          "0x7100277fac",
+          "0x7100277fe0",
+          "0x710039efa8",
+          "0x710039eff8",
+          "0x710039f004"
+        ]
+      },
+      "structural_correspondence": "Both constructors zero-allocate boot work (PS2 size12, Golden16 as the child task handle widens), return0 on allocation failure, and register priority256 with step and destroy callbacks. PS2111990 and Golden276da0 share states0/1/2: initialize stage index, invoke indexed child-task factory and save child handle at work+8, wait for child task state3, increment index and return to dispatch. The Golden stage list/audio setup expands; this proves the boot-task label role, not equality of startup content or callback counts. Golden277fa0/277fd0 find and stop this same named task.",
+      "installation": {
+        "kind": "prefix-copy",
+        "live_size": 13,
+        "retain_ps2_tail": 11,
+        "requirement": "initBootChainStart at0x00111b30 and every translated/inlined/compiled-native task-name copy must consume the complete13B NUL-terminated Golden name. Retain exactly11PS2 partition-tail bytes. Registration and any named lookup/stop operation must use the same qualified name. Keep the identified parent/child, callback/destructor and priority role coherent. Work sizes/offsets and changed gameplay/resource algorithms are evidence of identity, not an authorization to widen/copy guest work or a claim those behaviors match. Source proof remains pending runtime binding/qualification."
+      }
+    },
+    {
+      "address": "0x005eff48",
+      "ps2_size": 24,
+      "role": "field root task registration/identity",
+      "ps2_reader": "0x00155e10",
+      "ps2_symbol": "FldRootCreate",
+      "all_ps2_table_users": [
+        "0x00155e10"
+      ],
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x930290",
+        "offset": 692880,
+        "raw_offset": 9629328,
+        "size": 11,
+        "sha256": "2dc9df67dbf75b772ac9595aaf677d233de3d2a1f2c4de8ffb93355a1c12fab4",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true,
+        "source_group": "L1-C3A-task-registration-20261113",
+        "source_build": 10836033,
+        "corroborating_nso_address": "0x71005e6b5b",
+        "structural_reader_platform": "Switch1.2, with independent ordinary Steam MsgAssist corroboration",
+        "structural_reader": "0x71001be1f0",
+        "steam_reference_sites": [],
+        "nso_materialized_reference_sites": [
+          "0x71001be288"
+        ]
+      },
+      "structural_correspondence": "Both field-root constructors clear the global field frame, allocate their controller work (PS2244B, Golden424B), register a priority15 child with update/destroy callbacks and save the returned handle globally. Positive event ID creates an event reader, records event major/minor and sets state0; otherwise they store field/room/entry/spawn/direction, scene flags and load/transition modes, open the primary field file and set state1. Both then reset camera placement. This rich branch/work protocol distinguishes the root from subordinate resource/setup tasks; newer extra field cases and camera implementation are not declared equivalent.",
+      "installation": {
+        "kind": "prefix-copy",
+        "live_size": 11,
+        "retain_ps2_tail": 13,
+        "requirement": "FldRootCreate at0x00155e10 and every translated/inlined/compiled-native task-name copy must consume the complete11B NUL-terminated Golden name. Retain exactly13PS2 partition-tail bytes. Registration and any named lookup/stop operation must use the same qualified name. Keep the identified parent/child, callback/destructor and priority role coherent. Work sizes/offsets and changed gameplay/resource algorithms are evidence of identity, not an authorization to widen/copy guest work or a claim those behaviors match. Source proof remains pending runtime binding/qualification."
+      }
+    },
+    {
+      "address": "0x005f1590",
+      "ps2_size": 32,
+      "role": "enemy pop scheduler task registration/identity",
+      "ps2_reader": "0x00166b40",
+      "ps2_symbol": "FldUnit_SpawnEncounterTask",
+      "all_ps2_table_users": [
+        "0x00166b40"
+      ],
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x93d158",
+        "offset": 745816,
+        "raw_offset": 9682264,
+        "size": 20,
+        "sha256": "c60089ac7ba00cea5017e18f6ac43d6844fd5836c053739cb278f8d8e10f12a7",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true,
+        "source_group": "L1-C3A-task-registration-20261113",
+        "source_build": 10836033,
+        "corroborating_nso_address": "0x71005dedd7",
+        "structural_reader_platform": "Switch1.2, with independent ordinary Steam MsgAssist corroboration",
+        "structural_reader": "0x71001f4df0",
+        "steam_reference_sites": [],
+        "nso_materialized_reference_sites": [
+          "0x71001f4e44"
+        ]
+      },
+      "structural_correspondence": "Both encounter-scheduler constructors reject scenes outside their two allowed field-band predicates, allocate16B work, return0 on failure, register a priority15 child with setup/free callbacks, and store the supplied spawn limit in encounter work (Golden work+12). The positive gate and limit-field role identify a scheduler rather than a generic task-name registration. Golden band predicates29e440/29e470 are independently decoded in the preceding field-bank proof.",
+      "installation": {
+        "kind": "prefix-copy",
+        "live_size": 20,
+        "retain_ps2_tail": 12,
+        "requirement": "FldUnit_SpawnEncounterTask at0x00166b40 and every translated/inlined/compiled-native task-name copy must consume the complete20B NUL-terminated Golden name. Retain exactly12PS2 partition-tail bytes. Registration and any named lookup/stop operation must use the same qualified name. Keep the identified parent/child, callback/destructor and priority role coherent. Work sizes/offsets and changed gameplay/resource algorithms are evidence of identity, not an authorization to widen/copy guest work or a claim those behaviors match. Source proof remains pending runtime binding/qualification."
+      }
+    },
+    {
+      "address": "0x005f1610",
+      "ps2_size": 32,
+      "role": "collision update task registration/identity",
+      "ps2_reader": "0x001684a0",
+      "ps2_symbol": "FldFrameTask_Spawn",
+      "all_ps2_table_users": [
+        "0x001684a0"
+      ],
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x930d90",
+        "offset": 695696,
+        "raw_offset": 9632144,
+        "size": 17,
+        "sha256": "dff6018dca5c84eb50c80221f82e2537ba2164a4d81f8aa88ece4edfed463951",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true,
+        "source_group": "L1-C3A-task-registration-20261113",
+        "source_build": 10836033,
+        "corroborating_nso_address": "0x71005d6764",
+        "structural_reader_platform": "Switch1.2, with independent ordinary Steam MsgAssist corroboration",
+        "structural_reader": "0x71001d9450",
+        "steam_reference_sites": [
+          {
+            "function_envelope": "0x2f0340",
+            "pc": "0x2f039e"
+          }
+        ],
+        "nso_materialized_reference_sites": [
+          "0x71001d9840"
+        ]
+      },
+      "structural_correspondence": "Both complete collision constructors first register the controller at priority15, extract resource class bits10..19, resolve class1/3 model resources and associate the model against4 party and15 enemy slots. The updater is then registered as a child of that controller at priority16, with its own update/free callbacks and the resource key stored in follower work. Golden adds a separate collis-sphere child and requires a resolved model before making these children. Old updater work16 becomes24B; controller72 becomes3792B. These explicit deltas are not hidden by the same task text.",
+      "installation": {
+        "kind": "prefix-copy",
+        "live_size": 17,
+        "retain_ps2_tail": 15,
+        "requirement": "FldFrameTask_Spawn at0x001684a0 and every translated/inlined/compiled-native task-name copy must consume the complete17B NUL-terminated Golden name. Retain exactly15PS2 partition-tail bytes. Registration and any named lookup/stop operation must use the same qualified name. Keep the identified parent/child, callback/destructor and priority role coherent. Work sizes/offsets and changed gameplay/resource algorithms are evidence of identity, not an authorization to widen/copy guest work or a claim those behaviors match. Source proof remains pending runtime binding/qualification."
+      }
+    },
+    {
+      "address": "0x005f1630",
+      "ps2_size": 32,
+      "role": "collision controler task registration/identity",
+      "ps2_reader": "0x001684a0",
+      "ps2_symbol": "FldFrameTask_Spawn",
+      "all_ps2_table_users": [
+        "0x001684a0"
+      ],
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x930d78",
+        "offset": 695672,
+        "raw_offset": 9632120,
+        "size": 20,
+        "sha256": "b13b2c6346e06b848d6829e4d1d05f23c8ea67c44949aa26ac35b57d61b68846",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true,
+        "source_group": "L1-C3A-task-registration-20261113",
+        "source_build": 10836033,
+        "corroborating_nso_address": "0x71005d36db",
+        "structural_reader_platform": "Switch1.2, with independent ordinary Steam MsgAssist corroboration",
+        "structural_reader": "0x71001d9450",
+        "steam_reference_sites": [],
+        "nso_materialized_reference_sites": [
+          "0x71001d94a0"
+        ]
+      },
+      "structural_correspondence": "Same complete two-row collision family: controller is the priority15 parent, initialized with state1, resource key and height; class1/3 model lookup and4-party/15-enemy association precede the priority16 updater child. The source retains the intentional controler spelling. Golden enlarges controller work and adds conditional sphere handling; source correspondence does not assert identical collision layout/behavior.",
+      "installation": {
+        "kind": "prefix-copy",
+        "live_size": 20,
+        "retain_ps2_tail": 12,
+        "requirement": "FldFrameTask_Spawn at0x001684a0 and every translated/inlined/compiled-native task-name copy must consume the complete20B NUL-terminated Golden name. Retain exactly12PS2 partition-tail bytes. Registration and any named lookup/stop operation must use the same qualified name. Keep the identified parent/child, callback/destructor and priority role coherent. Work sizes/offsets and changed gameplay/resource algorithms are evidence of identity, not an authorization to widen/copy guest work or a claim those behaviors match. Source proof remains pending runtime binding/qualification."
+      }
+    },
+    {
+      "address": "0x005f1b28",
+      "ps2_size": 24,
+      "role": "party ai task registration/identity",
+      "ps2_reader": "0x0017e890",
+      "ps2_symbol": "FldAI_SpawnChaser",
+      "all_ps2_table_users": [
+        "0x0017e890"
+      ],
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x9303c8",
+        "offset": 693192,
+        "raw_offset": 9629640,
+        "size": 9,
+        "sha256": "89642d3aa7eef9306628c3342cd2b686d7d4d3c0f5c2fc3e2058db51fe2fffdf",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true,
+        "source_group": "L1-C3A-task-registration-20261113",
+        "source_build": 10836033,
+        "corroborating_nso_address": "0x71005d369b",
+        "structural_reader_platform": "Switch1.2, with independent ordinary Steam MsgAssist corroboration",
+        "structural_reader": "0x71001bf920",
+        "steam_reference_sites": [
+          {
+            "function_envelope": "0x2cf0c0",
+            "pc": "0x2cf11f"
+          }
+        ],
+        "nso_materialized_reference_sites": [
+          "0x71001bf968"
+        ]
+      },
+      "structural_correspondence": "Both follower/chaser constructors allocate work (PS2116B, Golden136B), return0 on failure, register a priority15 child with chaser update/destroy callbacks, store follower and leader identities, set previous formation to-1 and save the current camera near-plane value. Golden identities are64-bit and occupy+16/+24; formation is+36, saved camera value+112. This role-specific post-registration state identifies the pair without treating expanded work as byte-compatible.",
+      "installation": {
+        "kind": "prefix-copy",
+        "live_size": 9,
+        "retain_ps2_tail": 15,
+        "requirement": "FldAI_SpawnChaser at0x0017e890 and every translated/inlined/compiled-native task-name copy must consume the complete9B NUL-terminated Golden name. Retain exactly15PS2 partition-tail bytes. Registration and any named lookup/stop operation must use the same qualified name. Keep the identified parent/child, callback/destructor and priority role coherent. Work sizes/offsets and changed gameplay/resource algorithms are evidence of identity, not an authorization to widen/copy guest work or a claim those behaviors match. Source proof remains pending runtime binding/qualification."
+      }
+    }
+  ],
+  "interpretation": "These are task registration/identity strings, not gameplay coefficients, diagnostic messages or mutable state. Constructor work layouts are structural witnesses, not instructions to copy Golden work over PS2 structs. No VM, camera, collision, encounter or bootstrap behavior-equivalence claim follows.",
+  "code_witnesses": [
+    {
+      "platform": "Switch1.2",
+      "start": "0x7100203890",
+      "end": "0x7100203918",
+      "size": 136,
+      "sha256": "9f559d8b33e2657baadfb3169b02c7b405371cade7dbd3fa82ec60a469a407f2",
+      "role": "assist constructor",
+      "runtime_policy": "Static witness only; never require the NSO at runtime."
+    },
+    {
+      "platform": "Switch1.2",
+      "start": "0x71002c8540",
+      "end": "0x71002c8560",
+      "size": 32,
+      "sha256": "3c58db8abf9b30da47fdfe526a02b40545934d9b34d3e94f46bc90f9ceed888b",
+      "role": "assist window reset",
+      "runtime_policy": "Static witness only; never require the NSO at runtime."
+    },
+    {
+      "platform": "Switch1.2",
+      "start": "0x7100203920",
+      "end": "0x7100203a20",
+      "size": 256,
+      "sha256": "b1a73e98db7d0b13f5f77822b17694f0b7fafbd31e404135b702e8fbc707c13c",
+      "role": "assist eleven-slot queue/drain prefix",
+      "runtime_policy": "Static witness only; never require the NSO at runtime."
+    },
+    {
+      "platform": "Switch1.2",
+      "start": "0x7100276d30",
+      "end": "0x7100276d94",
+      "size": 100,
+      "sha256": "75fdb646b6bbd33aaf9471a91ed1184f1074e528958f1ffcdbe00ffb5573add2",
+      "role": "boot constructor",
+      "runtime_policy": "Static witness only; never require the NSO at runtime."
+    },
+    {
+      "platform": "Switch1.2",
+      "start": "0x7100276da0",
+      "end": "0x7100276f20",
+      "size": 384,
+      "sha256": "9889b503b3e9bb7c4dcbe5abda257c50ae0b1485301bc43e91f64b0445a04f9a",
+      "role": "complete boot step",
+      "runtime_policy": "Static witness only; never require the NSO at runtime."
+    },
+    {
+      "platform": "Switch1.2",
+      "start": "0x71001be1f0",
+      "end": "0x71001be410",
+      "size": 544,
+      "sha256": "71689704b433df3b53d39358f9c9122b7873067797a2c8caaf0b4aed31d30f52",
+      "role": "field root constructor",
+      "runtime_policy": "Static witness only; never require the NSO at runtime."
+    },
+    {
+      "platform": "Switch1.2",
+      "start": "0x71001f4df0",
+      "end": "0x71001f4ea0",
+      "size": 176,
+      "sha256": "42ffe0bf7f51b3e2913405cad24bbd57569a69695d964af639c83150689292bb",
+      "role": "encounter scheduler constructor",
+      "runtime_policy": "Static witness only; never require the NSO at runtime."
+    },
+    {
+      "platform": "Switch1.2",
+      "start": "0x71001d9450",
+      "end": "0x71001d9890",
+      "size": 1088,
+      "sha256": "979b0478a8ce17915988b3c52fa7b7700c40745f69ab88b0c2f5ca2b4dc0b69a",
+      "role": "complete controller/updater/sphere registration family",
+      "runtime_policy": "Static witness only; never require the NSO at runtime."
+    },
+    {
+      "platform": "Switch1.2",
+      "start": "0x71001bf920",
+      "end": "0x71001bf9d0",
+      "size": 176,
+      "sha256": "588b4124a40a9a4329be4a58736ea1ca95774046cf1c6d0b4be1eb0fa9a48ae1",
+      "role": "follower constructor",
+      "runtime_policy": "Static witness only; never require the NSO at runtime."
+    },
+    {
+      "platform": "Steam10836033",
+      "section": ".shared",
+      "start": "0x32f510",
+      "end": "0x32f5ef",
+      "raw_offset": 3336976,
+      "size": 223,
+      "sha256": "c81c30fa3d180728f0e5ddc06d781d610f9a52659b3a9da89c872719a735ed03",
+      "role": "standalone assist constructor"
+    },
+    {
+      "platform": "Steam10836033",
+      "section": ".shared",
+      "start": "0x3da369",
+      "end": "0x3da429",
+      "raw_offset": 4036969,
+      "size": 192,
+      "sha256": "2c129b53b939b31affa758a84bb923fbecc9d7fdbf90e18d5b02deb18b37f34a",
+      "role": "inlined startup assist constructor"
+    }
+  ],
+  "reference_census_limits": "NSO API string-copy/lookup sites can accompany constructor literal-load sites; the actual constructor ABI and typed callback protocol, not the census alone, prove identity. No no-reference conclusion or generic-module-only proof is admitted."
+}

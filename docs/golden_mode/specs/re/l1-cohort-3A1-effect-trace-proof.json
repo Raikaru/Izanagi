@@ -1,0 +1,903 @@
+{
+  "proof_id": "L1-C3A1-positive-null-effect-diagnostic-retirement-20261113",
+  "address": "0x005ef870",
+  "ps2_size": 32,
+  "decision": "D10c",
+  "runtime_status": "pending-seam",
+  "source_images": {
+    "steam": {
+      "build": 10836033,
+      "file": "P4G.exe",
+      "sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+      "data_section_bounds": {
+        "section": ".sdata",
+        "rva_start": "0x887000",
+        "size": 1674240,
+        "raw_start": 8936448
+      },
+      "code_witness_bounds": {
+        "section": ".shared",
+        "rva_start": "0x1000",
+        "size": 8934912,
+        "raw_start": 1536
+      },
+      "runtime_input": "Owned Steam install only; never require NSO or private research cache."
+    },
+    "switch": {
+      "version": "1.2",
+      "nso_sha256": "854c7a1e33de1619abf009fa7f32b8c012960d685c8bf1bf99a92a6a4d0bda1c",
+      "mapped_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+      "base": "0x7100000000",
+      "segments": [
+        {
+          "name": "text",
+          "file_offset": 257,
+          "mapped_offset": 0,
+          "decompressed_size": 5448752,
+          "compressed_size": 3719998,
+          "lz4_compressed": true
+        },
+        {
+          "name": "rodata",
+          "file_offset": 3720255,
+          "mapped_offset": 5451776,
+          "decompressed_size": 1870824,
+          "compressed_size": 990563,
+          "lz4_compressed": true
+        },
+        {
+          "name": "data",
+          "file_offset": 4710818,
+          "mapped_offset": 7323648,
+          "decompressed_size": 1606720,
+          "compressed_size": 439860,
+          "lz4_compressed": true
+        }
+      ],
+      "purpose": "Independent static structural witness, not runtime dependency."
+    }
+  },
+  "all_ps2_literal_users": [
+    "0x001459b0"
+  ],
+  "structural_correspondence": "The sole old reader1459b0 constructs kind6 resources: low10-bit ID|1800, manager/model/allocation guards, effect creation, draw-mode byte, position(100,0,0) and uniformscale1.5. Steam40fca0 and NSO2a1670 independently implement that complete distinctive protocol, including silent null-model/manager guards returning0; Steam1ee3a9..1ee4b4 is an additional real inline copy with the same vector/scale. The old invalid-efeect-data printf exists only on the old null-model guard and has no output counterpart in these positively paired complete native guards. The constructor remains real; this is not absence of effects, a typo-only search or suppression of failure.",
+  "code_witnesses": [
+    {
+      "platform": "ps2",
+      "start": "0x1459b0",
+      "end": "0x145ac0",
+      "raw_offset": null,
+      "size": 272,
+      "sha256": "f5ea54a87084f804380eef12bad6c2261a71d831fe2af0d0dd9eab4470d7e9e7",
+      "extent_kind": "Observed bounded ordinary code span; inline fragment is not asserted a whole function.",
+      "instructions": []
+    },
+    {
+      "platform": "steam",
+      "start": "0x40fca0",
+      "end": "0x40fd5d",
+      "raw_offset": 4256416,
+      "size": 189,
+      "sha256": "17fd5ed5324a30d5c14f33d55e68c7d631ebcdcbde1f66961180c86867eebbdc",
+      "extent_kind": "Observed bounded ordinary code span; inline fragment is not asserted a whole function.",
+      "instructions": [
+        {
+          "pc": "0x40fca0",
+          "mnemonic": "mov",
+          "operands": "qword ptr [rsp + 8], rbx"
+        },
+        {
+          "pc": "0x40fca5",
+          "mnemonic": "mov",
+          "operands": "qword ptr [rsp + 0x10], rbp"
+        },
+        {
+          "pc": "0x40fcaa",
+          "mnemonic": "mov",
+          "operands": "qword ptr [rsp + 0x18], rsi"
+        },
+        {
+          "pc": "0x40fcaf",
+          "mnemonic": "push",
+          "operands": "rdi"
+        },
+        {
+          "pc": "0x40fcb0",
+          "mnemonic": "sub",
+          "operands": "rsp, 0x30"
+        },
+        {
+          "pc": "0x40fcb4",
+          "mnemonic": "movzx",
+          "operands": "ebx, cx"
+        },
+        {
+          "pc": "0x40fcb7",
+          "mnemonic": "mov",
+          "operands": "ebp, r8d"
+        },
+        {
+          "pc": "0x40fcba",
+          "mnemonic": "lea",
+          "operands": "rcx, [rip + 0x1e09fe0d]"
+        },
+        {
+          "pc": "0x40fcc1",
+          "mnemonic": "mov",
+          "operands": "rsi, rdx"
+        },
+        {
+          "pc": "0x40fcc4",
+          "mnemonic": "call",
+          "operands": "0x881a04"
+        },
+        {
+          "pc": "0x40fcc9",
+          "mnemonic": "mov",
+          "operands": "eax, 0x3ff"
+        },
+        {
+          "pc": "0x40fcce",
+          "mnemonic": "and",
+          "operands": "bx, ax"
+        },
+        {
+          "pc": "0x40fcd1",
+          "mnemonic": "mov",
+          "operands": "eax, 0x1800"
+        },
+        {
+          "pc": "0x40fcd6",
+          "mnemonic": "or",
+          "operands": "bx, ax"
+        },
+        {
+          "pc": "0x40fcd9",
+          "mnemonic": "mov",
+          "operands": "rax, qword ptr [rip + 0x6983b8]"
+        },
+        {
+          "pc": "0x40fce0",
+          "mnemonic": "mov",
+          "operands": "rcx, qword ptr [rax + 8]"
+        },
+        {
+          "pc": "0x40fce4",
+          "mnemonic": "test",
+          "operands": "rcx, rcx"
+        },
+        {
+          "pc": "0x40fce7",
+          "mnemonic": "je",
+          "operands": "0x40fd46"
+        },
+        {
+          "pc": "0x40fce9",
+          "mnemonic": "test",
+          "operands": "rsi, rsi"
+        },
+        {
+          "pc": "0x40fcec",
+          "mnemonic": "je",
+          "operands": "0x40fd46"
+        },
+        {
+          "pc": "0x40fcee",
+          "mnemonic": "movzx",
+          "operands": "edx, bx"
+        },
+        {
+          "pc": "0x40fcf1",
+          "mnemonic": "call",
+          "operands": "0x4178a0"
+        },
+        {
+          "pc": "0x40fcf6",
+          "mnemonic": "mov",
+          "operands": "rdi, rax"
+        },
+        {
+          "pc": "0x40fcf9",
+          "mnemonic": "test",
+          "operands": "rax, rax"
+        },
+        {
+          "pc": "0x40fcfc",
+          "mnemonic": "je",
+          "operands": "0x40fd46"
+        },
+        {
+          "pc": "0x40fcfe",
+          "mnemonic": "mov",
+          "operands": "rcx, rsi"
+        },
+        {
+          "pc": "0x40fd01",
+          "mnemonic": "call",
+          "operands": "0x507870"
+        },
+        {
+          "pc": "0x40fd06",
+          "mnemonic": "movaps",
+          "operands": "xmm0, xmmword ptr [rip + 0x556b73]"
+        },
+        {
+          "pc": "0x40fd0d",
+          "mnemonic": "lea",
+          "operands": "rdx, [rsp + 0x20]"
+        },
+        {
+          "pc": "0x40fd12",
+          "mnemonic": "mov",
+          "operands": "rcx, rax"
+        },
+        {
+          "pc": "0x40fd15",
+          "mnemonic": "mov",
+          "operands": "qword ptr [rdi + 0x168], rax"
+        },
+        {
+          "pc": "0x40fd1c",
+          "mnemonic": "movups",
+          "operands": "xmmword ptr [rsp + 0x20], xmm0"
+        },
+        {
+          "pc": "0x40fd21",
+          "mnemonic": "mov",
+          "operands": "byte ptr [rdi + 0x160], bpl"
+        },
+        {
+          "pc": "0x40fd28",
+          "mnemonic": "call",
+          "operands": "0x508ca0"
+        },
+        {
+          "pc": "0x40fd2d",
+          "mnemonic": "movss",
+          "operands": "xmm1, dword ptr [rip + 0x555083]"
+        },
+        {
+          "pc": "0x40fd35",
+          "mnemonic": "mov",
+          "operands": "rcx, qword ptr [rdi + 0x168]"
+        },
+        {
+          "pc": "0x40fd3c",
+          "mnemonic": "call",
+          "operands": "0x509550"
+        },
+        {
+          "pc": "0x40fd41",
+          "mnemonic": "movzx",
+          "operands": "eax, bx"
+        },
+        {
+          "pc": "0x40fd44",
+          "mnemonic": "jmp",
+          "operands": "0x40fd48"
+        },
+        {
+          "pc": "0x40fd46",
+          "mnemonic": "xor",
+          "operands": "eax, eax"
+        },
+        {
+          "pc": "0x40fd48",
+          "mnemonic": "mov",
+          "operands": "rbx, qword ptr [rsp + 0x40]"
+        },
+        {
+          "pc": "0x40fd4d",
+          "mnemonic": "mov",
+          "operands": "rbp, qword ptr [rsp + 0x48]"
+        },
+        {
+          "pc": "0x40fd52",
+          "mnemonic": "mov",
+          "operands": "rsi, qword ptr [rsp + 0x50]"
+        },
+        {
+          "pc": "0x40fd57",
+          "mnemonic": "add",
+          "operands": "rsp, 0x30"
+        },
+        {
+          "pc": "0x40fd5b",
+          "mnemonic": "pop",
+          "operands": "rdi"
+        },
+        {
+          "pc": "0x40fd5c",
+          "mnemonic": "ret",
+          "operands": ""
+        }
+      ]
+    },
+    {
+      "platform": "steam",
+      "start": "0x1ee3a9",
+      "end": "0x1ee4b4",
+      "raw_offset": 2021801,
+      "size": 267,
+      "sha256": "05b9278ad45a22b34c7cd8a70e70b012e81f4521e331feaa38eaf116043509ad",
+      "extent_kind": "Observed bounded ordinary code span; inline fragment is not asserted a whole function.",
+      "instructions": [
+        {
+          "pc": "0x1ee3a9",
+          "mnemonic": "mov",
+          "operands": "qword ptr [rsp + 0x50], rbx"
+        },
+        {
+          "pc": "0x1ee3ae",
+          "mnemonic": "xor",
+          "operands": "ebx, ebx"
+        },
+        {
+          "pc": "0x1ee3b0",
+          "mnemonic": "mov",
+          "operands": "qword ptr [rsp + 0x58], r14"
+        },
+        {
+          "pc": "0x1ee3b5",
+          "mnemonic": "movzx",
+          "operands": "r14d, word ptr [rsi + rdi*2 + 0x2b8]"
+        },
+        {
+          "pc": "0x1ee3be",
+          "mnemonic": "mov",
+          "operands": "qword ptr [rsp + 0x60], r15"
+        },
+        {
+          "pc": "0x1ee3c3",
+          "mnemonic": "mov",
+          "operands": "r15, rdi"
+        },
+        {
+          "pc": "0x1ee3c6",
+          "mnemonic": "test",
+          "operands": "r14w, r14w"
+        },
+        {
+          "pc": "0x1ee3ca",
+          "mnemonic": "je",
+          "operands": "0x1ee3f5"
+        },
+        {
+          "pc": "0x1ee3cc",
+          "mnemonic": "movzx",
+          "operands": "ecx, r14w"
+        },
+        {
+          "pc": "0x1ee3d0",
+          "mnemonic": "call",
+          "operands": "0x40f790"
+        },
+        {
+          "pc": "0x1ee3d5",
+          "mnemonic": "test",
+          "operands": "rax, rax"
+        },
+        {
+          "pc": "0x1ee3d8",
+          "mnemonic": "je",
+          "operands": "0x1ee3e3"
+        },
+        {
+          "pc": "0x1ee3da",
+          "mnemonic": "movzx",
+          "operands": "ecx, r14w"
+        },
+        {
+          "pc": "0x1ee3de",
+          "mnemonic": "call",
+          "operands": "0x4105f0"
+        },
+        {
+          "pc": "0x1ee3e3",
+          "mnemonic": "mov",
+          "operands": "rdx, qword ptr [rip + 0x8b9cae]"
+        },
+        {
+          "pc": "0x1ee3ea",
+          "mnemonic": "mov",
+          "operands": "word ptr [rsi + rdi*2 + 0x2b8], bx"
+        },
+        {
+          "pc": "0x1ee3f2",
+          "mnemonic": "mov",
+          "operands": "eax, dword ptr [rsi + 4]"
+        },
+        {
+          "pc": "0x1ee3f5",
+          "mnemonic": "cmp",
+          "operands": "eax, ebp"
+        },
+        {
+          "pc": "0x1ee3f7",
+          "mnemonic": "jle",
+          "operands": "0x1ee4a5"
+        },
+        {
+          "pc": "0x1ee3fd",
+          "mnemonic": "cmp",
+          "operands": "ebp, 0xc"
+        },
+        {
+          "pc": "0x1ee400",
+          "mnemonic": "jge",
+          "operands": "0x1ee4a5"
+        },
+        {
+          "pc": "0x1ee406",
+          "mnemonic": "imul",
+          "operands": "rcx, rbp, 0x38"
+        },
+        {
+          "pc": "0x1ee40a",
+          "mnemonic": "mov",
+          "operands": "r14, qword ptr [rcx + rsi + 0x40]"
+        },
+        {
+          "pc": "0x1ee40f",
+          "mnemonic": "test",
+          "operands": "r14, r14"
+        },
+        {
+          "pc": "0x1ee412",
+          "mnemonic": "je",
+          "operands": "0x1ee4a5"
+        },
+        {
+          "pc": "0x1ee418",
+          "mnemonic": "mov",
+          "operands": "rcx, qword ptr [rdx + 8]"
+        },
+        {
+          "pc": "0x1ee41c",
+          "mnemonic": "mov",
+          "operands": "eax, 0xc8"
+        },
+        {
+          "pc": "0x1ee421",
+          "mnemonic": "add",
+          "operands": "di, ax"
+        },
+        {
+          "pc": "0x1ee424",
+          "mnemonic": "mov",
+          "operands": "eax, 0x3ff"
+        },
+        {
+          "pc": "0x1ee429",
+          "mnemonic": "and",
+          "operands": "di, ax"
+        },
+        {
+          "pc": "0x1ee42c",
+          "mnemonic": "mov",
+          "operands": "eax, 0x1800"
+        },
+        {
+          "pc": "0x1ee431",
+          "mnemonic": "or",
+          "operands": "di, ax"
+        },
+        {
+          "pc": "0x1ee434",
+          "mnemonic": "test",
+          "operands": "rcx, rcx"
+        },
+        {
+          "pc": "0x1ee437",
+          "mnemonic": "je",
+          "operands": "0x1ee48f"
+        },
+        {
+          "pc": "0x1ee439",
+          "mnemonic": "movzx",
+          "operands": "edx, di"
+        },
+        {
+          "pc": "0x1ee43c",
+          "mnemonic": "call",
+          "operands": "0x4178a0"
+        },
+        {
+          "pc": "0x1ee441",
+          "mnemonic": "mov",
+          "operands": "rbp, rax"
+        },
+        {
+          "pc": "0x1ee444",
+          "mnemonic": "test",
+          "operands": "rax, rax"
+        },
+        {
+          "pc": "0x1ee447",
+          "mnemonic": "je",
+          "operands": "0x1ee48f"
+        },
+        {
+          "pc": "0x1ee449",
+          "mnemonic": "mov",
+          "operands": "rcx, r14"
+        },
+        {
+          "pc": "0x1ee44c",
+          "mnemonic": "call",
+          "operands": "0x507870"
+        },
+        {
+          "pc": "0x1ee451",
+          "mnemonic": "movaps",
+          "operands": "xmm0, xmmword ptr [rip + 0x778428]"
+        },
+        {
+          "pc": "0x1ee458",
+          "mnemonic": "lea",
+          "operands": "rdx, [rsp + 0x20]"
+        },
+        {
+          "pc": "0x1ee45d",
+          "mnemonic": "mov",
+          "operands": "rcx, rax"
+        },
+        {
+          "pc": "0x1ee460",
+          "mnemonic": "mov",
+          "operands": "qword ptr [rbp + 0x168], rax"
+        },
+        {
+          "pc": "0x1ee467",
+          "mnemonic": "movups",
+          "operands": "xmmword ptr [rsp + 0x20], xmm0"
+        },
+        {
+          "pc": "0x1ee46c",
+          "mnemonic": "mov",
+          "operands": "byte ptr [rbp + 0x160], r12b"
+        },
+        {
+          "pc": "0x1ee473",
+          "mnemonic": "call",
+          "operands": "0x508ca0"
+        },
+        {
+          "pc": "0x1ee478",
+          "mnemonic": "movss",
+          "operands": "xmm1, dword ptr [rip + 0x776938]"
+        },
+        {
+          "pc": "0x1ee480",
+          "mnemonic": "mov",
+          "operands": "rcx, qword ptr [rbp + 0x168]"
+        },
+        {
+          "pc": "0x1ee487",
+          "mnemonic": "call",
+          "operands": "0x509550"
+        },
+        {
+          "pc": "0x1ee48c",
+          "mnemonic": "movzx",
+          "operands": "ebx, di"
+        },
+        {
+          "pc": "0x1ee48f",
+          "mnemonic": "mov",
+          "operands": "edx, 1"
+        },
+        {
+          "pc": "0x1ee494",
+          "mnemonic": "movzx",
+          "operands": "ecx, bx"
+        },
+        {
+          "pc": "0x1ee497",
+          "mnemonic": "call",
+          "operands": "0x412d90"
+        },
+        {
+          "pc": "0x1ee49c",
+          "mnemonic": "mov",
+          "operands": "word ptr [rsi + r15*2 + 0x2b8], bx"
+        },
+        {
+          "pc": "0x1ee4a5",
+          "mnemonic": "mov",
+          "operands": "r14, qword ptr [rsp + 0x58]"
+        },
+        {
+          "pc": "0x1ee4aa",
+          "mnemonic": "mov",
+          "operands": "rbx, qword ptr [rsp + 0x50]"
+        },
+        {
+          "pc": "0x1ee4af",
+          "mnemonic": "mov",
+          "operands": "r15, qword ptr [rsp + 0x60]"
+        }
+      ]
+    },
+    {
+      "platform": "switch",
+      "start": "0x71002a1670",
+      "end": "0x71002a1720",
+      "raw_offset": null,
+      "size": 176,
+      "sha256": "24e5d9fc68d8b67864647346963b7a391d50dd33aa8e080f86ef9c53c03dfe2d",
+      "extent_kind": "Observed bounded ordinary code span; inline fragment is not asserted a whole function.",
+      "instructions": [
+        {
+          "pc": "0x71002a1670",
+          "mnemonic": "sub",
+          "operands": "sp, sp, #0x40"
+        },
+        {
+          "pc": "0x71002a1674",
+          "mnemonic": "stp",
+          "operands": "x29, x30, [sp, #0x10]"
+        },
+        {
+          "pc": "0x71002a1678",
+          "mnemonic": "add",
+          "operands": "x29, sp, #0x10"
+        },
+        {
+          "pc": "0x71002a167c",
+          "mnemonic": "stp",
+          "operands": "x22, x21, [sp, #0x20]"
+        },
+        {
+          "pc": "0x71002a1680",
+          "mnemonic": "stp",
+          "operands": "x20, x19, [sp, #0x30]"
+        },
+        {
+          "pc": "0x71002a1684",
+          "mnemonic": "mov",
+          "operands": "w19, wzr"
+        },
+        {
+          "pc": "0x71002a1688",
+          "mnemonic": "cbz",
+          "operands": "x1, #0x71002a16fc"
+        },
+        {
+          "pc": "0x71002a168c",
+          "mnemonic": "adrp",
+          "operands": "x8, #0x7100880000"
+        },
+        {
+          "pc": "0x71002a1690",
+          "mnemonic": "ldr",
+          "operands": "x8, [x8, #0x560]"
+        },
+        {
+          "pc": "0x71002a1694",
+          "mnemonic": "ldr",
+          "operands": "x8, [x8]"
+        },
+        {
+          "pc": "0x71002a1698",
+          "mnemonic": "ldr",
+          "operands": "x8, [x8, #8]"
+        },
+        {
+          "pc": "0x71002a169c",
+          "mnemonic": "cbz",
+          "operands": "x8, #0x71002a16fc"
+        },
+        {
+          "pc": "0x71002a16a0",
+          "mnemonic": "mov",
+          "operands": "w19, #0x1800"
+        },
+        {
+          "pc": "0x71002a16a4",
+          "mnemonic": "bfxil",
+          "operands": "w19, w0, #0, #0xa"
+        },
+        {
+          "pc": "0x71002a16a8",
+          "mnemonic": "mov",
+          "operands": "x21, x1"
+        },
+        {
+          "pc": "0x71002a16ac",
+          "mnemonic": "mov",
+          "operands": "x0, x8"
+        },
+        {
+          "pc": "0x71002a16b0",
+          "mnemonic": "mov",
+          "operands": "w1, w19"
+        },
+        {
+          "pc": "0x71002a16b4",
+          "mnemonic": "mov",
+          "operands": "w20, w2"
+        },
+        {
+          "pc": "0x71002a16b8",
+          "mnemonic": "bl",
+          "operands": "#0x71002a6ae0"
+        },
+        {
+          "pc": "0x71002a16bc",
+          "mnemonic": "cbz",
+          "operands": "x0, #0x71002a16f8"
+        },
+        {
+          "pc": "0x71002a16c0",
+          "mnemonic": "mov",
+          "operands": "x22, x0"
+        },
+        {
+          "pc": "0x71002a16c4",
+          "mnemonic": "mov",
+          "operands": "x0, x21"
+        },
+        {
+          "pc": "0x71002a16c8",
+          "mnemonic": "bl",
+          "operands": "#0x710035cae0"
+        },
+        {
+          "pc": "0x71002a16cc",
+          "mnemonic": "mov",
+          "operands": "w8, #0x42c80000"
+        },
+        {
+          "pc": "0x71002a16d0",
+          "mnemonic": "mov",
+          "operands": "x1, sp"
+        },
+        {
+          "pc": "0x71002a16d4",
+          "mnemonic": "strb",
+          "operands": "w20, [x22, #0x160]"
+        },
+        {
+          "pc": "0x71002a16d8",
+          "mnemonic": "str",
+          "operands": "x0, [x22, #0x168]"
+        },
+        {
+          "pc": "0x71002a16dc",
+          "mnemonic": "str",
+          "operands": "x8, [sp]"
+        },
+        {
+          "pc": "0x71002a16e0",
+          "mnemonic": "str",
+          "operands": "wzr, [sp, #8]"
+        },
+        {
+          "pc": "0x71002a16e4",
+          "mnemonic": "bl",
+          "operands": "#0x710035cb90"
+        },
+        {
+          "pc": "0x71002a16e8",
+          "mnemonic": "ldr",
+          "operands": "x0, [x22, #0x168]"
+        },
+        {
+          "pc": "0x71002a16ec",
+          "mnemonic": "fmov",
+          "operands": "s0, #1.50000000"
+        },
+        {
+          "pc": "0x71002a16f0",
+          "mnemonic": "bl",
+          "operands": "#0x710035ccf0"
+        },
+        {
+          "pc": "0x71002a16f4",
+          "mnemonic": "b",
+          "operands": "#0x71002a16fc"
+        },
+        {
+          "pc": "0x71002a16f8",
+          "mnemonic": "mov",
+          "operands": "w19, wzr"
+        },
+        {
+          "pc": "0x71002a16fc",
+          "mnemonic": "mov",
+          "operands": "w0, w19"
+        },
+        {
+          "pc": "0x71002a1700",
+          "mnemonic": "ldp",
+          "operands": "x20, x19, [sp, #0x30]"
+        },
+        {
+          "pc": "0x71002a1704",
+          "mnemonic": "ldp",
+          "operands": "x22, x21, [sp, #0x20]"
+        },
+        {
+          "pc": "0x71002a1708",
+          "mnemonic": "ldp",
+          "operands": "x29, x30, [sp, #0x10]"
+        },
+        {
+          "pc": "0x71002a170c",
+          "mnemonic": "add",
+          "operands": "sp, sp, #0x40"
+        },
+        {
+          "pc": "0x71002a1710",
+          "mnemonic": "ret",
+          "operands": ""
+        },
+        {
+          "pc": "0x71002a1714",
+          "mnemonic": "udf",
+          "operands": "#0"
+        },
+        {
+          "pc": "0x71002a1718",
+          "mnemonic": "udf",
+          "operands": "#0"
+        },
+        {
+          "pc": "0x71002a171c",
+          "mnemonic": "udf",
+          "operands": "#0"
+        }
+      ]
+    }
+  ],
+  "independent_steam_constructor_constants": [
+    {
+      "container": "P4G.exe",
+      "section": ".sdata",
+      "rva": "0x966880",
+      "raw_offset": 9852032,
+      "size": 16,
+      "sha256": "819fd389237e3d814a4be7cb687b7c4f747e0f74701a7e8ff9195e1a4bf4bf3b",
+      "values": [
+        100.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "container": "P4G.exe",
+      "section": ".sdata",
+      "rva": "0x964db8",
+      "raw_offset": 9845176,
+      "size": 4,
+      "sha256": "c0e336a5f371ef22cd534e094269f2c1a9635cd080b71ffa671086832d3b60b7",
+      "values": [
+        1.5
+      ]
+    }
+  ],
+  "golden": {
+    "kind": "retired-explicit-null-effect-data-printf-in-real-kind6-constructor",
+    "paired_steam_constructor": "0x40fca0",
+    "paired_nso_constructor": "0x71002a1670",
+    "additional_steam_inline": "0x1ee3a9..0x1ee4b4",
+    "actual_effect_constructor_retained": true
+  },
+  "required_seams": [
+    {
+      "ps2_address": "0x001459b0",
+      "symbol": "mtSceneCreateEffectResource",
+      "requirement": "In Golden mode route old1459b0 and all translated/inlined/native copies through the actual qualified kind6 effect-resource constructor. Retire only the old explicit null-model diagnostic5ef870; preserve null-model/manager/allocation failure return0, low10-bit ID|1800, actual effect creation/draw-mode storage, position(100,0,0),scale1.5 and real ownership/lifetime. Never substitute constant success, fake effect, arbitrary fallback or new logging/error validation. Keep the old literal inactive; this source retirement is not effect-payload/renderer/runtime qualification. No runtime NSO/privatecache dependency.",
+      "proof": "l1-cohort-3A1-effect-trace-proof.json"
+    }
+  ],
+  "installation": {
+    "kind": "retire-explicit-old-diagnostic",
+    "old_literal_inactive_in_golden_mode": true,
+    "retain_ps2_partition": true,
+    "requirement": "In Golden mode route old1459b0 and all translated/inlined/native copies through the actual qualified kind6 effect-resource constructor. Retire only the old explicit null-model diagnostic5ef870; preserve null-model/manager/allocation failure return0, low10-bit ID|1800, actual effect creation/draw-mode storage, position(100,0,0),scale1.5 and real ownership/lifetime. Never substitute constant success, fake effect, arbitrary fallback or new logging/error validation. Keep the old literal inactive; this source retirement is not effect-payload/renderer/runtime qualification. No runtime NSO/privatecache dependency."
+  },
+  "limits": "Only the explicit old output is retired. Do not claim all native logging/effect errors removed. This is positive complete constructor/guard correspondence; no missing string/reference census is used as absence proof."
+}

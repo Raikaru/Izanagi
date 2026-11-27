@@ -15,7 +15,7 @@ uint32_t datGetFlag(int32_t bit) { (void)bit; return 0; }
 void *datPersonaGetRecord(uint16_t id) { (void)id; return NULL; }
 int32_t datPersonaFindSkillSlot(uint8_t *persona, uint16_t skill) { (void)persona; (void)skill; return -1; }
 const P4SideAilmentDef *p4_side_ailment_find_leaf(uint32_t leaf)
-{ return side_registered && (leaf == 24u || leaf == 25u) ? (const P4SideAilmentDef *)(uintptr_t)1 : NULL; }
+{ return side_registered && (leaf == 24u || leaf == 25u || leaf == 26u) ? (const P4SideAilmentDef *)(uintptr_t)1 : NULL; }
 int p4_side_ailment_active(void) { return side_enabled; }
 
 /* The rest of the presenter pulls game tables and the element owner; the
@@ -79,9 +79,9 @@ int main(void)
     active = (const P4GameElementUi *)(uintptr_t)1;
     assert(ailment_columns((void *)(uintptr_t)1, columns) == 7);
     side_enabled = 1;
-    assert(ailment_columns((void *)(uintptr_t)1, columns) == 9);
+    assert(ailment_columns((void *)(uintptr_t)1, columns) == 10);
     side_enabled = 0;
     side_registered = 0;
-    assert(ailment_columns((void *)(uintptr_t)1, columns) == 9);
+    assert(ailment_columns((void *)(uintptr_t)1, columns) == 10);
     return 0;
 }

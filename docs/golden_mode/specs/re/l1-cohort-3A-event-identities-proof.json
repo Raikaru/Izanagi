@@ -1,0 +1,458 @@
+{
+  "proof_id": "L1-C3A-event-identities-BF-source-20261113",
+  "scope": "Four A-owned complete event strings/120PS2B; source PROVEN only, runtime pending-seam. No filter parameter table, motion dispatch table or event payload/VM equivalence is promoted.",
+  "source_images": {
+    "steam": {
+      "build": 10836033,
+      "file": "P4G.exe",
+      "sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+      "data_section_bounds": {
+        "section": ".sdata",
+        "rva_start": "0x887000",
+        "size": 1674240,
+        "raw_start": 8936448
+      },
+      "code_witness_bounds": {
+        "section": ".shared",
+        "rva_start": "0x1000",
+        "size": 8934912,
+        "raw_start": 1536
+      },
+      "runtime_input": "Owned Steam install only; never require NSO or private research cache."
+    },
+    "switch": {
+      "version": "1.2",
+      "nso_sha256": "854c7a1e33de1619abf009fa7f32b8c012960d685c8bf1bf99a92a6a4d0bda1c",
+      "mapped_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+      "base": "0x7100000000",
+      "segments": [
+        {
+          "name": "text",
+          "file_offset": 257,
+          "mapped_offset": 0,
+          "decompressed_size": 5448752,
+          "compressed_size": 3719998,
+          "lz4_compressed": true
+        },
+        {
+          "name": "rodata",
+          "file_offset": 3720255,
+          "mapped_offset": 5451776,
+          "decompressed_size": 1870824,
+          "compressed_size": 990563,
+          "lz4_compressed": true
+        },
+        {
+          "name": "data",
+          "file_offset": 4710818,
+          "mapped_offset": 7323648,
+          "decompressed_size": 1606720,
+          "compressed_size": 439860,
+          "lz4_compressed": true
+        }
+      ],
+      "purpose": "Independent static structural witness, not runtime dependency."
+    }
+  },
+  "objects": [
+    {
+      "address": "0x0063c2f8",
+      "name": "evtEvent",
+      "container": "P4G.exe",
+      "section": ".sdata",
+      "rva": "0x92c838",
+      "offset": 677944,
+      "raw_offset": 9614392,
+      "size": 9,
+      "sha256": "914ea5bf363e4d56738b748c5492b879b2dc38d4166e48879e19d79dbdb09baa",
+      "mapping_proven": true,
+      "corroborating_nso_address": "0x7100622124",
+      "nso_reader_envelopes": [
+        "0x710013c010",
+        "0x710013c7d0",
+        "0x710013cff0",
+        "0x710013d040"
+      ],
+      "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+      "source_build": 10836033
+    },
+    {
+      "address": "0x0063c5c0",
+      "name": "event_data/script/E%03d_%03d%c.bf",
+      "container": "P4G.exe",
+      "section": ".sdata",
+      "rva": "0x92ccd8",
+      "offset": 679128,
+      "raw_offset": 9615576,
+      "size": 34,
+      "sha256": "80fbf313af65268ea3c183254672ee7175086b043748821187844fb7fb4b1063",
+      "mapping_proven": true,
+      "corroborating_nso_address": "0x71005f9a19",
+      "nso_reader_envelopes": [
+        "0x7100144260"
+      ],
+      "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+      "source_build": 10836033
+    },
+    {
+      "address": "0x0063c648",
+      "name": "evtFilter",
+      "container": "P4G.exe",
+      "section": ".sdata",
+      "rva": "0x92cd88",
+      "offset": 679304,
+      "raw_offset": 9615752,
+      "size": 10,
+      "sha256": "664add658911bd14606e180682dbf109c7d6952229ab3b9f50b3f719f6afd8a6",
+      "mapping_proven": true,
+      "corroborating_nso_address": "0x71005d653c",
+      "nso_reader_envelopes": [
+        "0x7100147700",
+        "0x7100147870"
+      ],
+      "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+      "source_build": 10836033
+    },
+    {
+      "address": "0x0063c958",
+      "name": "evtModelMotion",
+      "container": "P4G.exe",
+      "section": ".sdata",
+      "rva": "0x92ce30",
+      "offset": 679472,
+      "raw_offset": 9615920,
+      "size": 15,
+      "sha256": "e2bb976859619e0ed8f5fd8a107bf9578e3ed35e548d360807ba1b5f6fb23b26",
+      "mapping_proven": true,
+      "corroborating_nso_address": "0x71005ff414",
+      "nso_reader_envelopes": [
+        "0x7100148c30",
+        "0x7100148c60",
+        "0x7100149080",
+        "0x71001491f0",
+        "0x7100149370"
+      ],
+      "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+      "source_build": 10836033
+    }
+  ],
+  "event_identity_family": {
+    "old_primary_constructor": "0x002859e0",
+    "new_primary_constructor": "0x710013c010",
+    "proof": "Both account/zero the exact event-task work allocation (old96B, Golden112B), register priority15 with event update/destroy callbacks, associate the separate event-load task, set major/minor event IDs with third ID0, request its load and set primary state0. The old unused third constructor argument is not a new Golden parameter.",
+    "old_query_literal_user": "0x00285af0",
+    "old_query_meaning": "Search evtEvent, then fall back to evtLookupTask2853c0, whose actual literal is evtEdit. Despite the old comment/name, this does NOT create a task.",
+    "new_named_query": "0x710013c7d0",
+    "new_editor_query": "0x710013b290",
+    "related_new_queries": [
+      "0x710013cff0",
+      "0x710013d040"
+    ],
+    "query_limit": "The complete evtEvent identity is shared by registration and named search. New higher-level queries add availability gates and return booleans; do not substitute their boolean return for the old task handle. evtEditLoad getter13c830 and work getter13c800 are separate namespaces/roles, not asserted matches for the old event-or-editor handle wrapper."
+  },
+  "event_BF_label_family": {
+    "ps2_reader": "0x00289780",
+    "nso_reader": "0x7100144260",
+    "proof": "Both action handlers return the event-status predicate for action0; on action2 require command frame==requested frame, set flag0x80000, format the complete BF path from current event major/minor plus command suffix+0x41, lazily create the script-loader context if missing, and submit priority15 with the extra command mode. Both use a256B filename buffer.",
+    "nso_operand_evidence": "Ordinary1442bc loads signed16 suffix at command+14 and1442c0 adds0x41; the mode at+16 is passed to the request. The current IDs are at event context+ad8/+adc; these are evidence, not guest offsets.",
+    "limits": "No ASCII suffix clamp, fake default, record-layout identity or BF-bytecode compatibility is inferred. Preserve the actual operand domain and one-context lifetime."
+  },
+  "filter_identity_family": {
+    "all_ps2_users": [
+      "0x0028d390",
+      "0x0028dc30"
+    ],
+    "nso_direct": "0x7100147700",
+    "nso_copied": "0x7100147870",
+    "proof": "Both old constructors decode event filter records, build direct or copied/reference-aware filters, allocate a small task work record (old16B, Golden24B), store filter handle plus progression value and register the same priority15 child with update/free callbacks. The copied family includes types1/2/3/5; its type3 path has the independently confirmed44B template anchors65848484,3ba3d70a,3e051eb8 and percent-normalized weight. Golden shares packed-record parser147430 and stores64-bit filter handles.",
+    "selector_delta": "Old direct selector0 builds type1; Golden direct wrapper accepts1 for that role. Both also handle2. This is not a claim of identical entry selector numbering or parameter-buffer layout.",
+    "rare_template_context": {
+      "ps2_address": "0x0063c660",
+      "size": 44,
+      "words_sha256": "cba7a9c03d281441b1011b4d8a25751f8969423bc6c949556dce194bae7a0eff",
+      "confirmed_words": [
+        "0x65848484",
+        "0x3ba3d70a",
+        "0x3e051eb8"
+      ],
+      "status": "Context anchors only; this separate table row is not changed."
+    }
+  },
+  "motion_identity_family": {
+    "all_ps2_users": [
+      "0x00293270",
+      "0x002932b0",
+      "0x002933a0",
+      "0x00293550",
+      "0x00293710"
+    ],
+    "all_nso_roles": [
+      "0x7100148c30",
+      "0x7100148c60",
+      "0x7100149080",
+      "0x71001491f0",
+      "0x7100149370"
+    ],
+    "proof": "The complete family includes named destroy, per-resource queue flush, speed motion, timed motion and explicit position/angle motion. Constructors find or create one priority15 manager task, allocate manager userdata4->8B and queued records76->88B, copy the same44B parameter packet, and store the selected dispatch pointer. Speed/timed variants remove prior motion3 entries for the same16-bit resource ID; explicit placement accepts four extra settings and marks its record when present. Flush removes matching resource nodes; Golden adds motion-specific finalization and is not declared behaviorally identical.",
+    "pivotal_ABI": "Ordinary1490cc loads manager userdata into x6 and1490d0 stores its owner before registering the task;1490ec sets priority15. Worker prototypes omit this work argument, so they are not authoritative.",
+    "dispatch_context": "Old dispatch pointer table0063c930 and Golden763a80 are related context only. No complete motion-dispatch table/source admission or timing/interpolation equivalence is claimed by a task-name proof."
+  },
+  "code_witnesses": [
+    {
+      "platform": "Switch1.2",
+      "start": "0x710013c010",
+      "end": "0x710013c780",
+      "size": 1904,
+      "sha256": "99eb03a803482fdeee9bf590cb1cab6f177a6e05cf60619a4277f5f39d7c53b7",
+      "runtime_policy": "Static correspondence evidence only; runtime reads sealed Steam strings, never NSO/private cache."
+    },
+    {
+      "platform": "Switch1.2",
+      "start": "0x710013c7d0",
+      "end": "0x710013c800",
+      "size": 48,
+      "sha256": "fec07c8bc820be34825bbb6c109d1010be8d42024864b3fbd613495f24c7b609",
+      "runtime_policy": "Static correspondence evidence only; runtime reads sealed Steam strings, never NSO/private cache."
+    },
+    {
+      "platform": "Switch1.2",
+      "start": "0x710013b290",
+      "end": "0x710013b2a0",
+      "size": 16,
+      "sha256": "7a4f41251f681fe875b8c57972c0e7c40aef222052e7488bcd071f4481a02a0f",
+      "runtime_policy": "Static correspondence evidence only; runtime reads sealed Steam strings, never NSO/private cache."
+    },
+    {
+      "platform": "Switch1.2",
+      "start": "0x710013cff0",
+      "end": "0x710013d040",
+      "size": 80,
+      "sha256": "02e342b922bf7b51d87efc2eb8d7fc6e8308d1b378267d964d8850a166a2ac5a",
+      "runtime_policy": "Static correspondence evidence only; runtime reads sealed Steam strings, never NSO/private cache."
+    },
+    {
+      "platform": "Switch1.2",
+      "start": "0x710013d040",
+      "end": "0x710013d090",
+      "size": 80,
+      "sha256": "4debe815e80e9b6e2f4762e76694147edfeebfc2d2ad4f117bb27c09a233b66a",
+      "runtime_policy": "Static correspondence evidence only; runtime reads sealed Steam strings, never NSO/private cache."
+    },
+    {
+      "platform": "Switch1.2",
+      "start": "0x7100144260",
+      "end": "0x7100144330",
+      "size": 208,
+      "sha256": "de91143315516c85625523b8871b9dfc47b9bf3a936d7e03aa64326b83354866",
+      "runtime_policy": "Static correspondence evidence only; runtime reads sealed Steam strings, never NSO/private cache."
+    },
+    {
+      "platform": "Switch1.2",
+      "start": "0x7100147700",
+      "end": "0x7100147870",
+      "size": 368,
+      "sha256": "5e0268562920842e986a2c82069f9e57b584993abcaf5cd2d88dc2c33a658a02",
+      "runtime_policy": "Static correspondence evidence only; runtime reads sealed Steam strings, never NSO/private cache."
+    },
+    {
+      "platform": "Switch1.2",
+      "start": "0x7100147870",
+      "end": "0x7100147b40",
+      "size": 720,
+      "sha256": "9007b316b8846c3c179f66394e521cc2c1f07b97fbcc7649a6f40173955b5c8f",
+      "runtime_policy": "Static correspondence evidence only; runtime reads sealed Steam strings, never NSO/private cache."
+    },
+    {
+      "platform": "Switch1.2",
+      "start": "0x7100148c30",
+      "end": "0x7100148c60",
+      "size": 48,
+      "sha256": "625d1f20b13ba839b72de3aec2a400afd9ecf98a1eb2d0f94ad9b66fa6d199e3",
+      "runtime_policy": "Static correspondence evidence only; runtime reads sealed Steam strings, never NSO/private cache."
+    },
+    {
+      "platform": "Switch1.2",
+      "start": "0x7100148c60",
+      "end": "0x7100149080",
+      "size": 1056,
+      "sha256": "cdaf2eff143c6b7f935f3d565fb4d5280e6d6958b7d2fce00ee4f3ac5579007a",
+      "runtime_policy": "Static correspondence evidence only; runtime reads sealed Steam strings, never NSO/private cache."
+    },
+    {
+      "platform": "Switch1.2",
+      "start": "0x7100149080",
+      "end": "0x71001491f0",
+      "size": 368,
+      "sha256": "377ac4b4f79d8ab4f6571e1aa583b6c9beeb4d6a175436479991d9c92056135d",
+      "runtime_policy": "Static correspondence evidence only; runtime reads sealed Steam strings, never NSO/private cache."
+    },
+    {
+      "platform": "Switch1.2",
+      "start": "0x71001491f0",
+      "end": "0x7100149370",
+      "size": 384,
+      "sha256": "16195c220c0da7ac79056176b29f9e6e6a6d1f1b32581a681d083871c11822f8",
+      "runtime_policy": "Static correspondence evidence only; runtime reads sealed Steam strings, never NSO/private cache."
+    },
+    {
+      "platform": "Switch1.2",
+      "start": "0x7100149370",
+      "end": "0x71001494b0",
+      "size": 320,
+      "sha256": "6d9b7baaa4d93e6ae88090a7b2e76dd4e6d30e0ce579acfc3eb1f3c97f56c556",
+      "runtime_policy": "Static correspondence evidence only; runtime reads sealed Steam strings, never NSO/private cache."
+    }
+  ],
+  "admissions": [
+    {
+      "address": "0x0063c2f8",
+      "ps2_size": 24,
+      "role": "evtEvent task identity",
+      "all_ps2_table_users": [
+        "0x002859e0",
+        "0x00285af0"
+      ],
+      "golden": {
+        "address": "0x0063c2f8",
+        "name": "evtEvent",
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x92c838",
+        "offset": 677944,
+        "raw_offset": 9614392,
+        "size": 9,
+        "sha256": "914ea5bf363e4d56738b748c5492b879b2dc38d4166e48879e19d79dbdb09baa",
+        "mapping_proven": true,
+        "corroborating_nso_address": "0x7100622124",
+        "nso_reader_envelopes": [
+          "0x710013c010",
+          "0x710013c7d0",
+          "0x710013cff0",
+          "0x710013d040"
+        ],
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "source_group": "L1-C3A-event-identities-BF-source-20261113"
+      },
+      "structural_correspondence": "Both account/zero the exact event-task work allocation (old96B, Golden112B), register priority15 with event update/destroy callbacks, associate the separate event-load task, set major/minor event IDs with third ID0, request its load and set primary state0. The old unused third constructor argument is not a new Golden parameter. Registration and the complete named-query namespace establish both old literal users; higher-level new query results are not equated with task handles.",
+      "installation": {
+        "kind": "prefix-copy",
+        "live_size": 9,
+        "retain_ps2_tail": 15,
+        "requirement": "Install the complete9B qualified NUL-terminated Golden prefix at0x0063c2f8, retain15PS2 tail bytes, and cover EVERY listed PS2 user plus translated/inlined/compiled-native literal copies. Registration, named lookup, destroy/flush/queue operations and script source requests must consume the same qualified role. Preserve real task/handle versus boolean result domains, parent/callback/priority, owned context lifetime and source operand widths; do not use inferred prototypes with missing arguments. This source proof does not copy expanded structs, port parameter buffers/dispatch tables, or certify event rendering, interpolation/timing or BF payload/VM compatibility. No invented fallback/clamp/extra validation or runtime NSO dependency. Runtime closure remains separately qualified."
+      }
+    },
+    {
+      "address": "0x0063c5c0",
+      "ps2_size": 48,
+      "role": "complete event BF label filename format",
+      "all_ps2_table_users": [
+        "0x00289780"
+      ],
+      "golden": {
+        "address": "0x0063c5c0",
+        "name": "event_data/script/E%03d_%03d%c.bf",
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x92ccd8",
+        "offset": 679128,
+        "raw_offset": 9615576,
+        "size": 34,
+        "sha256": "80fbf313af65268ea3c183254672ee7175086b043748821187844fb7fb4b1063",
+        "mapping_proven": true,
+        "corroborating_nso_address": "0x71005f9a19",
+        "nso_reader_envelopes": [
+          "0x7100144260"
+        ],
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "source_group": "L1-C3A-event-identities-BF-source-20261113"
+      },
+      "structural_correspondence": "Both action handlers return the event-status predicate for action0; on action2 require command frame==requested frame, set flag0x80000, format the complete BF path from current event major/minor plus command suffix+0x41, lazily create the script-loader context if missing, and submit priority15 with the extra command mode. Both use a256B filename buffer.",
+      "installation": {
+        "kind": "prefix-copy",
+        "live_size": 34,
+        "retain_ps2_tail": 14,
+        "requirement": "Install the complete34B qualified NUL-terminated Golden prefix at0x0063c5c0, retain14PS2 tail bytes, and cover EVERY listed PS2 user plus translated/inlined/compiled-native literal copies. Registration, named lookup, destroy/flush/queue operations and script source requests must consume the same qualified role. Preserve real task/handle versus boolean result domains, parent/callback/priority, owned context lifetime and source operand widths; do not use inferred prototypes with missing arguments. This source proof does not copy expanded structs, port parameter buffers/dispatch tables, or certify event rendering, interpolation/timing or BF payload/VM compatibility. No invented fallback/clamp/extra validation or runtime NSO dependency. Runtime closure remains separately qualified."
+      }
+    },
+    {
+      "address": "0x0063c648",
+      "ps2_size": 24,
+      "role": "evtFilter task identity",
+      "all_ps2_table_users": [
+        "0x0028d390",
+        "0x0028dc30"
+      ],
+      "golden": {
+        "address": "0x0063c648",
+        "name": "evtFilter",
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x92cd88",
+        "offset": 679304,
+        "raw_offset": 9615752,
+        "size": 10,
+        "sha256": "664add658911bd14606e180682dbf109c7d6952229ab3b9f50b3f719f6afd8a6",
+        "mapping_proven": true,
+        "corroborating_nso_address": "0x71005d653c",
+        "nso_reader_envelopes": [
+          "0x7100147700",
+          "0x7100147870"
+        ],
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "source_group": "L1-C3A-event-identities-BF-source-20261113"
+      },
+      "structural_correspondence": "Both old constructors decode event filter records, build direct or copied/reference-aware filters, allocate a small task work record (old16B, Golden24B), store filter handle plus progression value and register the same priority15 child with update/free callbacks. The copied family includes types1/2/3/5; its type3 path has the independently confirmed44B template anchors65848484,3ba3d70a,3e051eb8 and percent-normalized weight. Golden shares packed-record parser147430 and stores64-bit filter handles.",
+      "installation": {
+        "kind": "prefix-copy",
+        "live_size": 10,
+        "retain_ps2_tail": 14,
+        "requirement": "Install the complete10B qualified NUL-terminated Golden prefix at0x0063c648, retain14PS2 tail bytes, and cover EVERY listed PS2 user plus translated/inlined/compiled-native literal copies. Registration, named lookup, destroy/flush/queue operations and script source requests must consume the same qualified role. Preserve real task/handle versus boolean result domains, parent/callback/priority, owned context lifetime and source operand widths; do not use inferred prototypes with missing arguments. This source proof does not copy expanded structs, port parameter buffers/dispatch tables, or certify event rendering, interpolation/timing or BF payload/VM compatibility. No invented fallback/clamp/extra validation or runtime NSO dependency. Runtime closure remains separately qualified."
+      }
+    },
+    {
+      "address": "0x0063c958",
+      "ps2_size": 24,
+      "role": "evtModelMotion complete manager identity",
+      "all_ps2_table_users": [
+        "0x00293270",
+        "0x002932b0",
+        "0x002933a0",
+        "0x00293550",
+        "0x00293710"
+      ],
+      "golden": {
+        "address": "0x0063c958",
+        "name": "evtModelMotion",
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x92ce30",
+        "offset": 679472,
+        "raw_offset": 9615920,
+        "size": 15,
+        "sha256": "e2bb976859619e0ed8f5fd8a107bf9578e3ed35e548d360807ba1b5f6fb23b26",
+        "mapping_proven": true,
+        "corroborating_nso_address": "0x71005ff414",
+        "nso_reader_envelopes": [
+          "0x7100148c30",
+          "0x7100148c60",
+          "0x7100149080",
+          "0x71001491f0",
+          "0x7100149370"
+        ],
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "source_group": "L1-C3A-event-identities-BF-source-20261113"
+      },
+      "structural_correspondence": "The complete family includes named destroy, per-resource queue flush, speed motion, timed motion and explicit position/angle motion. Constructors find or create one priority15 manager task, allocate manager userdata4->8B and queued records76->88B, copy the same44B parameter packet, and store the selected dispatch pointer. Speed/timed variants remove prior motion3 entries for the same16-bit resource ID; explicit placement accepts four extra settings and marks its record when present. Flush removes matching resource nodes; Golden adds motion-specific finalization and is not declared behaviorally identical.",
+      "installation": {
+        "kind": "prefix-copy",
+        "live_size": 15,
+        "retain_ps2_tail": 9,
+        "requirement": "Install the complete15B qualified NUL-terminated Golden prefix at0x0063c958, retain9PS2 tail bytes, and cover EVERY listed PS2 user plus translated/inlined/compiled-native literal copies. Registration, named lookup, destroy/flush/queue operations and script source requests must consume the same qualified role. Preserve real task/handle versus boolean result domains, parent/callback/priority, owned context lifetime and source operand widths; do not use inferred prototypes with missing arguments. This source proof does not copy expanded structs, port parameter buffers/dispatch tables, or certify event rendering, interpolation/timing or BF payload/VM compatibility. No invented fallback/clamp/extra validation or runtime NSO dependency. Runtime closure remains separately qualified."
+      }
+    }
+  ]
+}

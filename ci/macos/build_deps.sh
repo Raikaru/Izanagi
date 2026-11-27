@@ -15,10 +15,14 @@
 #
 #   sh ci/macos/build_deps.sh <prefix>
 #
-# <prefix>/llvm: the compiler (bin/clang, bin/clang++, bin/llvm-nm, bin/llvm-objdump, bin/llvm-ar); <prefix>/include, <prefix>/lib: SDL3,
+# <prefix>/llvm: the compiler (bin/clang, bin/clang++, bin/llvm-nm, bin/llvm-objdump, bin/llvm-ar); <prefix>/zig-<version>: the pinned
+# Zig (ci/zig/fetch_zig.sh; version-named, so a prefix that holds an older pinned Zig keeps it untouched beside the new one);
+# <prefix>/include, <prefix>/lib: SDL3,
 # FFmpeg and ANGLE; <prefix>/share/angle: ANGLE's and Chromium's licence files. Downloads are cached in <prefix>/../dl-cache
-# (or $P4PC_DL_CACHE) and checked against the SHA-256 below. Needs: curl, tar, unzip, cmake, ninja, make, python3, shasum.
+# (or $P4PC_DL_CACHE) and checked against the SHA-256 below. Needs: curl, tar, unzip, cmake, ninja, make, patch, python3, shasum.
 set -eu
+recipe_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+hca_patch=$recipe_dir/../ffmpeg-7.1.1-hca-window-alignment.patch
 
 prefix=${1:?usage: build_deps.sh <prefix>}
 dl=${P4PC_DL_CACHE:-$prefix/../dl-cache}
@@ -85,6 +89,11 @@ if [ ! -x "$prefix/llvm/bin/clang" ] || [ ! -x "$prefix/llvm/bin/llvm-ar" ] || [
   printf '%s' "$LLVM_MINGW_RELEASE" > "$prefix/llvm/release"
 fi
 
+# ---- Zig: the battle simulator's compiler, the nightly and SHA-256 pinned in cmake/zig/pin.cmake (ci/macos/configure.sh passes it)
+fetch_zig="$(CDPATH= cd -- "$(dirname -- "$0")/../zig" && pwd)/fetch_zig.sh"
+zig_version=$(sh "$fetch_zig" --print-version)
+P4PC_DL_CACHE=$dl sh "$fetch_zig" "$prefix/zig-$zig_version"
+
 # ---- SDL3
 if [ ! -f "$prefix/lib/libSDL3.0.dylib" ]; then
   fetch "$SDL_URL" "$SDL_SHA" SDL3-$SDL_VER.tar.gz
@@ -108,12 +117,14 @@ fi
 
 # ---- FFmpeg (LGPL): the same decoders and options as ci/win32/build_deps.sh, with the architecture's assembly (NEON on arm64, the
 # x86 SIMD through the nasm above on Intel), as on Linux and Windows.
-FFMPEG_OPTS="--enable-decoder=mpeg2video --enable-parser=mpegvideo --enable-decoder=adpcm_adx"
+FFMPEG_OPTS="--enable-decoder=mpeg2video --enable-parser=mpegvideo --enable-decoder=adpcm_adx --enable-decoder=hca"
 asm=
 [ "$arch" = x86_64 ] && asm=--x86asmexe=$prefix/nasm/bin/nasm
-if [ ! -f "$prefix/lib/libavcodec.dylib" ] || [ "$(cat "$prefix/ffmpeg.opts" 2>/dev/null)" != "$FFMPEG_OPTS $asm" ]; then
+if [ ! -f "$prefix/lib/libavcodec.dylib" ] || [ "$(cat "$prefix/ffmpeg.opts" 2>/dev/null)" != "$FFMPEG_OPTS $asm" ] ||
+   ! cmp -s "$hca_patch" "$prefix/ffmpeg-7.1.1-hca-window-alignment.patch"; then
   fetch "$FFMPEG_URL" "$FFMPEG_SHA" ffmpeg-$FFMPEG_VER.tar.xz
   rm -rf "$work/ffmpeg" && mkdir -p "$work/ffmpeg" && tar -xJf "$dl/ffmpeg-$FFMPEG_VER.tar.xz" -C "$work/ffmpeg" --strip-components=1
+  patch -d "$work/ffmpeg" -p1 < "$hca_patch"
   # shellcheck disable=SC2086
   (cd "$work/ffmpeg" && ./configure \
     --prefix="$prefix" --arch=$ffarch --target-os=darwin --cc=clang --install-name-dir=@rpath ${asm:+"$asm"} ${cross:+"$cross"} \
@@ -122,7 +133,8 @@ if [ ! -f "$prefix/lib/libavcodec.dylib" ] || [ "$(cat "$prefix/ffmpeg.opts" 2>/
     --enable-avcodec --enable-swscale $FFMPEG_OPTS \
     --enable-shared --disable-static --disable-debug \
     --extra-cflags="${archflag}-O2 -mmacosx-version-min=$deployment" --extra-ldflags="${archflag}-mmacosx-version-min=$deployment" \
-    && make -j"$jobs" && make install) && printf '%s' "$FFMPEG_OPTS $asm" > "$prefix/ffmpeg.opts"
+    && make -j"$jobs" && make install) && printf '%s' "$FFMPEG_OPTS $asm" > "$prefix/ffmpeg.opts" \
+    && cp "$hca_patch" "$prefix/ffmpeg-7.1.1-hca-window-alignment.patch"
 fi
 
 # ---- ANGLE from Electron's macOS zip: Chromium's builds, self-contained (system frameworks only).

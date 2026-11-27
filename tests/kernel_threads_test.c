@@ -6,10 +6,13 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "guest_test.h"
 #include "p4pc/platform.h"
+#include "p4pc/frame_timing.h"
+#include "p4pc/os.h"
 
 /* Wrappers under test. */
 int32_t func_004215e0(void *param);
@@ -500,6 +503,14 @@ static void test_vsync(void) {
  * independently of how often the caller polls in the current update. */
 static int32_t frame_alarm_sema;
 static int frame_alarm_calls, frame_alarm_vsync;
+static unsigned timing_publications;
+static uint64_t timing_first_ns, timing_last_ns;
+static void frame_timing_observe(uint64_t now) {
+    if (!timing_publications) timing_first_ns = now;
+    CHECK(now >= timing_last_ns);
+    timing_last_ns = now;
+    ++timing_publications;
+}
 
 static uint32_t frame_alarm_handler(int32_t id, void *arg) {
     (void)id;
@@ -523,7 +534,11 @@ static void test_frame_alarm(void) {
     CHECK(p4pc_cancel_alarm(id) == -1);
     id = p4pc_set_next_frame_alarm(frame_alarm_handler, NULL);
     CHECK(p4pc_cancel_alarm(id) == 0);
+    p4pc_frame_timing_install(frame_timing_observe);
+    CHECK(timing_publications == 1); /* Prime the actual scheduler baseline. */
     p4pc_vsync_wait();
+    CHECK(timing_publications == 2 && timing_last_ns > timing_first_ns);
+    p4pc_frame_timing_install(NULL);
     CHECK(frame_alarm_calls == 1);
     {
         uint32_t flips = p4pc_flip_count();
@@ -533,7 +548,45 @@ static void test_frame_alarm(void) {
         for (polls = 0; polls < 2000000 && frame_alarm_calls == 1; polls++)
             p4pc_poll_devices();
         CHECK(frame_alarm_calls == 2 && p4pc_flip_count() == flips);
+        CHECK(timing_publications == 2); /* Polls do not publish engine frames. */
     }
+}
+
+/* P4PC_PACING=carry (the kernel_threads_carry run): scheduler time is the virtual clock's and the host paces it. A frame
+ * that works longer than a tick still waits for exactly the next tick of scheduler time, and the host is not held up for
+ * more than its own work while the carried lateness stays small; legacy time would let ticks pass under the work, so
+ * every wait waits one more. */
+static void test_carry(void) {
+    const char *mode = getenv("P4PC_PACING");
+    const uint64_t tick = 1000000000ull / 60u;
+    uint64_t s0, s1, h0, h1;
+    int i;
+
+    if (mode == NULL || strcmp(mode, "carry") != 0)
+        return;
+    p4pc_vsync_wait();
+    s0 = p4pc_scheduler_time_ns();
+    h0 = p4_os_now_ns();
+    for (i = 0; i < 10; i++) {
+        const uint64_t until = p4_os_now_ns() + 20000000ull; /* 20 ms of work: over one tick, under two */
+        while (p4_os_now_ns() < until) {
+        }
+        p4pc_vsync_wait();
+    }
+    s1 = p4pc_scheduler_time_ns();
+    h1 = p4_os_now_ns();
+    CHECK(s1 - s0 >= 10 * tick && s1 - s0 < 10 * tick + 2000000ull);
+    CHECK(h1 - h0 >= 190000000ull && h1 - h0 < 300000000ull);
+    /* idle: the lateness the loop carried (33 ms) is paid back by waits that do not sleep, then each tick is served at its own time */
+    for (i = 0; i < 4; i++)
+        p4pc_vsync_wait();
+    s0 = p4pc_scheduler_time_ns();
+    h0 = p4_os_now_ns();
+    for (i = 0; i < 3; i++)
+        p4pc_vsync_wait();
+    h1 = p4_os_now_ns();
+    CHECK(p4pc_scheduler_time_ns() - s0 >= 3 * tick && p4pc_scheduler_time_ns() - s0 < 3 * tick + 2000000ull);
+    CHECK(h1 - h0 >= 45000000ull && h1 - h0 < 80000000ull);
 }
 
 /* Exercise the actual synchronous hardware wrapper, not a copied wait loop.
@@ -701,6 +754,7 @@ int main(void) {
     test_hardware_sync_wait();
     test_vsync();
     test_frame_alarm();
+    test_carry();
     test_small_stack_relocation();
     test_stack_admission();
     test_context_incarnations();

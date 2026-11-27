@@ -74,7 +74,7 @@ void p4pc_pad_inject(unsigned bits, unsigned frames);   /* buttons down for that
 /* -2 until a walk is parsed; otherwise P4WALK_RUNNING/DONE/FAILED. */
 int p4pc_pad_walk_status(void);
 /* Optional source for the walk's battle driver once its battleturn: lines are spent (P4WalkHost.battle_turn); NULL by default.
- * The battle simulator's fork search sets it (src/platform/battle_sim/live.c). */
+ * The battle simulator's fork search sets it (src/platform/battle_sim/live.zig). */
 void p4pc_pad_set_battle_turn_hook(int (*hook)(unsigned n, char *line, size_t size));
 /* The game's active-skill predicate for the walk driver's Skill/Item list model (P4WalkHost.skill_active), so it lists an added
  * skill as the native list does; NULL (the default) keeps the retail split. Kernel init sets p4_game_skill_active. */
@@ -128,5 +128,7 @@ struct SDL_Window *p4pc_pad_sdl_window(void);
 
 /* 1 once after SDL replaced the window's GL context (SDL_EVENT_RENDER_DEVICE_RESET: Android resumed with the old context lost), else 0. */
 int p4pc_pad_sdl_take_device_reset(void);
+/* 1 once (then 0) after SDL_EVENT_DID_ENTER_FOREGROUND. */
+int p4pc_pad_sdl_take_foreground(void);
 
 #endif

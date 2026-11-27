@@ -1,4 +1,5 @@
 #include "p4pc/save_import.h"
+#include "p4pc/hostpath.h"
 #include "p4pc/os.h"
 #include "../config/p4cfg.h"
 #include <SDL3/SDL.h>
@@ -7,13 +8,13 @@
 #include <string.h>
 
 int p4save_default_card(char *card,size_t cap) {
-    char root[2048]; const char *env=getenv("P4PC_SAVE_DIR");
+    char root[2048]; const char *env=p4_host_getenv("P4PC_SAVE_DIR");
     if(env && *env) {
         if(strlen(env)>=sizeof root) return -1;
         strcpy(root,env);
     } else {
         const char *cfg=p4cfg_path();
-        const char *explicit_cfg=getenv("P4PC_CONFIG");
+        const char *explicit_cfg=p4_host_getenv("P4PC_CONFIG");
         if(!cfg && explicit_cfg && strcmp(explicit_cfg,"none")) cfg=explicit_cfg;
         if(cfg) {
             if(strlen(cfg)>=sizeof root) return -1;

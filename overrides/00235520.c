@@ -8,6 +8,9 @@
 #include "p4pc/game_enemies_native.h"
 #include "p4pc/game_damage_stage_native.h"
 #include "p4pc/game_recovery_stage_native.h"
+#include "p4pc/game_side_ailment_native.h"
+#include "p4pc/golden_battle_rows_native.h"
+#include "p4pc/guest.h"
 /* Later0023df70 is also called by the following status routine in this unit. */
 extern s32 datCalcUsesWeaponProperties(s32 skillId);
 /* The stages report a party source's active persona: datPersonaGetRecordId
@@ -45,6 +48,10 @@ static s32 p4_calc_amount(u32 skillId, u8 *source, u8 *target, u16 hitCount,
     u16 outcome, u16 hitKind, s32 options, u8 channel,
     const P4GameActionFrame *p4_frame, const P4GameAffinityQuery *p4_query, P4GameActionFrame *p4_storage)
 {
+    if (p4_golden_battle_rows_enabled() && p4_game_skill_active(skillId)) {
+        u32 selector = p4_golden_skill_selector(skillId);
+        if (selector) source = (u8 *)P4_G2H(p4_golden_skill_unit_guest(selector));
+    }
     DatUnit *sourceRecord = (DatUnit *)source;
     DatUnit *targetRecord = (DatUnit *)target;
     /* Byte-pointer transport is retained; the field expressions name the established unit and table layouts. */
@@ -603,7 +610,8 @@ static s32 p4_calc_amount(u32 skillId, u8 *source, u8 *target, u16 hitCount,
             (*(u16 *)target & 4) != 0, ((DatUnit *)target)->id, targetStatus, hitKind, leafValid,
             !leafValid ? 0u : p4_frame ? p4_frame->element.element_id : (u32)rawElement, damage,
             sourceEnemy ? 0u : (u32)datPersonaGetRecordId(sourceRecord->id),
-            sourceEnemy ? 0u : (u32)datPersonaGetLevelByPcId(sourceRecord->id));
+            sourceEnemy ? 0u : (u32)datPersonaGetLevelByPcId(sourceRecord->id),
+            p4_side_ailment_native_leaf(target));
     }
     /* Recovery stage: the formula HP heal (effect kind 2, after Divine Grace
      * and the 95..105% variance) that this outcome delivers; not drains,

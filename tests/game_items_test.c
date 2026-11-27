@@ -2,6 +2,7 @@
  * raster and source-transport probes are isolated; real provenance is covered
  * by source/use fixtures, live menu/battle/sidecar qualification is separate. */
 #include "p4pc/game_items.h"
+#include "p4pc/game_mode.h"
 #include "p4pc/game_items_ui.h"
 #include "p4pc/game_tables_native.h"
 #include "p4pc/game_table_overlay.h"
@@ -12,6 +13,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+static P4GameMode item_mode = P4_GAME_MODE_PS2;
+P4GameMode p4_game_mode(void) { return item_mode; }
+const uint8_t *p4_golden_skill_raw(uint32_t id) { (void)id; abort(); }
+void datItemSetCount(int16_t id, int32_t count) { (void)id; (void)count; abort(); }
 static unsigned allocations, releases, live_arenas, rasters, destroyed;
 static unsigned prepared, icons_drawn;
 static unsigned item_uses, category_uses, text_uses;
@@ -921,6 +926,11 @@ int main(void)
     assert(p4_game_tables_items_active() == items && P4_G32(0x007642a0u) == relocated);
     assert(p4_game_tables_items_native_metadata(0) == (const uint8_t *)p4_game_tables_items_metadata(items, 0));
     assert(p4_game_tables_items_native_metadata(1535) == (const uint8_t *)p4_game_tables_items_metadata(items, 1535));
+    unsigned before_peek = item_uses;
+    assert(p4_game_tables_items_native_peek_effect(1536) ==
+        (uint16_t)p4_game_tables_items_metadata(items, 1536)->granted_skill);
+    assert(p4_game_tables_items_native_peek_kind(1550) == 6);
+    assert(item_uses == before_peek);
     assert(p4_game_tables_items_native_metadata(1536) == (const uint8_t *)p4_game_tables_items_metadata(items, 1536));
     assert(p4_game_tables_items_native_row_count() == 1539);
     assert(p4_game_tables_items_native_id_at(1536) == 1536 && p4_game_tables_items_native_id_at(1537) == 1550 &&
@@ -998,6 +1008,53 @@ int main(void)
     for (size_t i = 0; i < 3; ++i)
         assert(p4_game_tables_items_state_set(items, saved[i].id, saved[i].quantity, saved[i].availability) == P4_TABLE_OK);
     assert(p4_game_tables_items_state_get(items, 1550, &state) == P4_TABLE_OK && state.quantity == 7 && state.availability == 3);
+    {   /* Battle-retry capture: restores exactly the quantities, availability and equipment references. */
+        P4GameItemsCapture *capture = NULL, *native = NULL;
+        assert(p4_game_tables_items_capture(NULL, &capture) == P4_TABLE_INVALID && !capture);
+        assert(p4_game_tables_items_capture(items, &capture) == P4_TABLE_OK && capture);
+        assert(p4_game_tables_items_active() == items && p4_game_tables_items_battle_capture(&native) == P4_TABLE_OK && native);
+        const uint64_t digest = p4_game_tables_items_state_digest(items);
+        assert(digest && digest == p4_game_tables_items_capture_digest(capture) &&
+            digest == p4_game_tables_items_capture_digest(native) && digest == p4_game_tables_items_battle_digest());
+        assert(p4_game_tables_items_capture_matches(items, capture) == P4_TABLE_OK &&
+            p4_game_tables_items_battle_matches(native) == P4_TABLE_OK);
+        /* A battle consumes, finds and re-equips. */
+        assert(p4_game_tables_items_state_set(items, 1536, 0, 0) == P4_TABLE_OK);
+        assert(p4_game_tables_items_state_set(items, 1550, 3, 9) == P4_TABLE_OK);
+        assert(p4_game_tables_items_state_set(items, 1551, 99, 255) == P4_TABLE_OK);
+        assert(p4_game_tables_items_equipment_clear(items, 1, 0) == P4_TABLE_OK);
+        assert(p4_game_tables_items_equipment_set(items, 10, 0, 1536) == P4_TABLE_OK);
+        assert(p4_game_tables_items_state_digest(items) != digest && p4_game_tables_items_battle_digest() != digest);
+        assert(p4_game_tables_items_capture_matches(items, capture) == P4_TABLE_OK);
+        assert(p4_game_tables_items_restore(items, capture) == P4_TABLE_OK);
+        assert(p4_game_tables_items_state_digest(items) == digest);
+        assert(p4_game_tables_items_state_get(items, 1536, &state) == P4_TABLE_OK && state.quantity == 99 && state.availability == 255);
+        assert(p4_game_tables_items_state_get(items, 1550, &state) == P4_TABLE_OK && state.quantity == 7 && state.availability == 3);
+        assert(p4_game_tables_items_state_get(items, 1551, &state) == P4_TABLE_OK && state.quantity == 2 && state.availability == 1);
+        assert(p4_game_tables_items_equipment_get(items, 1, 0, &equipped) == P4_TABLE_OK && equipped == 1536);
+        /* Restore is idempotent and every one of the 30 equipment slots comes back. */
+        assert(p4_game_tables_items_equipment_set(items, 10, 0, 1536) == P4_TABLE_OK);
+        assert(p4_game_tables_items_state_digest(items) != digest);
+        assert(p4_game_tables_items_battle_restore(native) == P4_TABLE_OK && p4_game_tables_items_state_digest(items) == digest);
+        assert(p4_game_tables_items_equipment_get(items, 10, 0, &equipped) == P4_TABLE_NOT_FOUND);
+        /* Fail closed: another table, no capture, or no native table at all touches nothing. */
+        assert(p4_game_tables_items_capture_matches(items, NULL) == P4_TABLE_CONFLICT &&
+            p4_game_tables_items_restore(items, NULL) == P4_TABLE_CONFLICT &&
+            p4_game_tables_items_battle_matches(NULL) == P4_TABLE_CONFLICT &&
+            p4_game_tables_items_battle_restore(NULL) == P4_TABLE_CONFLICT);
+        P4GameItems *other = p4_game_tables_items_create(NULL);
+        assert(other && p4_game_tables_items_capture_matches(other, capture) == P4_TABLE_CONFLICT &&
+            p4_game_tables_items_capture(other, &native) == P4_TABLE_INVALID);
+        assert(p4_game_tables_items_state_set(items, 1536, 5, 5) == P4_TABLE_OK);
+        assert(p4_game_tables_items_restore(other, capture) == P4_TABLE_CONFLICT &&
+            p4_game_tables_items_state_get(items, 1536, &state) == P4_TABLE_OK && state.quantity == 5);
+        p4_game_tables_items_destroy(other);
+        assert(p4_game_tables_items_restore(items, capture) == P4_TABLE_OK);
+        assert(p4_game_tables_items_state_get(items, 1536, &state) == P4_TABLE_OK && state.quantity == 99);
+        p4_game_tables_items_capture_free(capture);
+        p4_game_tables_items_capture_free(native);
+        assert(!p4_game_tables_items_state_digest(NULL) && !p4_game_tables_items_capture_digest(NULL));
+    }
     list_rebuild(1);
     shop_layout(1);
     uint32_t camp_bytes = p4_game_tables_items_native_camp_work_bytes();
@@ -1028,6 +1085,17 @@ int main(void)
     assert(compile_items(unresolved, file, P4_ITEM_RETAIL_FILE_SIZE, names, descriptions, 9) == P4_TABLE_NOT_FOUND);
     assert(allocations == before && !p4_game_tables_items_revision(unresolved));
     p4_game_tables_items_destroy(unresolved);
+    for (unsigned gm = 0; gm < 2; ++gm) for (unsigned owner = 0; owner < 2; ++owner) {
+        item_mode = gm ? P4_GAME_MODE_GOLDEN : P4_GAME_MODE_PS2;
+        P4GameItems *probe = p4_game_tables_items_create(&allocator); assert(probe);
+        P4GameItemDesc row = card;
+        row.key = owner ? "golden-mode:card" : "gear:card";
+        assert(!p4_game_tables_items_register(probe, owner ? "golden-mode" : "gear", &row));
+        int result = p4_game_tables_items_seal(probe, file, P4_ITEM_RETAIL_FILE_SIZE, names, descriptions, 9);
+        assert(result == (gm && owner ? P4_TABLE_OK : P4_TABLE_NOT_FOUND));
+        p4_game_tables_items_destroy(probe);
+    }
+    item_mode = P4_GAME_MODE_PS2;
     for (uint32_t policy = P4_ITEM_STOCK_NONE; policy <= P4_ITEM_STOCK_REQUIREMENTS; ++policy) {
         P4GameItems *policy_items = p4_game_tables_items_create(&allocator); assert(policy_items);
         P4GameItemCategoryDesc declared = category; declared.stock_policy = policy;

@@ -1,0 +1,227 @@
+[
+  {
+    "address": "0x005dc974",
+    "required_seams_sha256": "6d30e81c9ee25a143c2331e9ac1e04123195f30cfd4e69d3397febea3205138c",
+    "tests": [
+      "golden_mode_image",
+      "golden_mode_image_steam"
+    ]
+  },
+  {
+    "address": "0x005e45e0",
+    "required_seams_sha256": "e937be2ea5d373990ed66c5072493a81b835ff395880ebc81d2225c74604b69a",
+    "tests": [
+      "golden_mode_image",
+      "golden_mode_image_steam"
+    ]
+  },
+  {
+    "address": "0x005efa20",
+    "required_seams_sha256": "67755c32650e835ab96dc92ebbb1defbc838700ee68e605293e9cf7c30f2fbb0",
+    "tests": [
+      "golden_mode_image",
+      "golden_mode_image_steam"
+    ]
+  },
+  {
+    "address": "0x00609c38",
+    "required_seams_sha256": "2163d2bbe51ee795f62ac7bda119a0039d65dad1ed1404fab111dce999af3203",
+    "tests": [
+      "golden_mode_image",
+      "golden_mode_image_steam"
+    ],
+    "consumer_witness": "none"
+  },
+  {
+    "address": "0x0060a410",
+    "required_seams_sha256": "52ead7d269ee9e990e6ea7dd47122039cc1ce40f345b3173d437a6714bb2a31d",
+    "tests": [
+      "golden_mode_image",
+      "golden_mode_image_steam"
+    ]
+  },
+  {
+    "address": "0x00626f00",
+    "required_seams_sha256": "29e9d132f498e74e085511a9017ec8ce1d2a922050110638a104863dd0f64e63",
+    "tests": [
+      "golden_mode_image",
+      "golden_mode_image_steam"
+    ]
+  },
+  {
+    "address": "0x0063cb50",
+    "required_seams_sha256": "cb6835a90a7752dc6b97b51a40d9bd988e7fe9a56ccec585d6ae8e7e82bfc87b",
+    "tests": [
+      "golden_mode_image",
+      "golden_mode_image_steam"
+    ]
+  },
+  {
+    "address": "0x0063e4f0",
+    "required_seams_sha256": "536866b57c5de3132402b90e4afd0565f212bec8829db2a1b226dec00c4003d8",
+    "tests": [
+      "golden_mode_image",
+      "golden_mode_image_steam"
+    ]
+  },
+  {
+    "address": "0x0063fca0",
+    "required_seams_sha256": "27c12e6d178a6a9afe26dfaeacabc24aa0ff28e4193aa134043efac63b485c68",
+    "tests": [
+      "golden_mode_image",
+      "golden_mode_image_steam"
+    ]
+  },
+  {
+    "address": "0x0063fff6",
+    "required_seams_sha256": "27c12e6d178a6a9afe26dfaeacabc24aa0ff28e4193aa134043efac63b485c68",
+    "tests": [
+      "golden_mode_image",
+      "golden_mode_image_steam"
+    ]
+  },
+  {
+    "address": "0x0064006e",
+    "required_seams_sha256": "27c12e6d178a6a9afe26dfaeacabc24aa0ff28e4193aa134043efac63b485c68",
+    "tests": [
+      "golden_mode_image",
+      "golden_mode_image_steam"
+    ]
+  },
+  {
+    "address": "0x00640131",
+    "required_seams_sha256": "27c12e6d178a6a9afe26dfaeacabc24aa0ff28e4193aa134043efac63b485c68",
+    "tests": [
+      "golden_mode_image",
+      "golden_mode_image_steam"
+    ]
+  },
+  {
+    "address": "0x006417e0",
+    "required_seams_sha256": "6506481509302679a501d0bb3f2aac8a48b5e42b456ff12630adfe5e4d27c14b",
+    "tests": [
+      "golden_mode_image",
+      "golden_mode_image_steam"
+    ]
+  },
+  {
+    "address": "0x006432b0",
+    "required_seams_sha256": "27c12e6d178a6a9afe26dfaeacabc24aa0ff28e4193aa134043efac63b485c68",
+    "tests": [
+      "golden_mode_image",
+      "golden_mode_image_steam"
+    ]
+  },
+  {
+    "address": "0x00643825",
+    "required_seams_sha256": "27c12e6d178a6a9afe26dfaeacabc24aa0ff28e4193aa134043efac63b485c68",
+    "tests": [
+      "golden_mode_image",
+      "golden_mode_image_steam"
+    ]
+  },
+  {
+    "address": "0x0064efb0",
+    "required_seams_sha256": "58833ab577a3090953d50b9855e3f7797b4ef287e072c3261da8f71a5352cb73",
+    "tests": [
+      "golden_mode_image",
+      "golden_mode_image_steam"
+    ]
+  },
+  {
+    "address": "0x00749040",
+    "required_seams_sha256": "a3a1660bfce3b12a9e79e808994ff74246ad411a9329c6a62f34500d87365d02",
+    "tests": [
+      "golden_mode_image",
+      "golden_mode_image_steam"
+    ]
+  },
+  {
+    "address": "0x00749060",
+    "required_seams_sha256": "a3a1660bfce3b12a9e79e808994ff74246ad411a9329c6a62f34500d87365d02",
+    "tests": [
+      "golden_mode_image",
+      "golden_mode_image_steam"
+    ]
+  },
+  {
+    "address": "0x00749080",
+    "required_seams_sha256": "a3a1660bfce3b12a9e79e808994ff74246ad411a9329c6a62f34500d87365d02",
+    "tests": [
+      "golden_mode_image",
+      "golden_mode_image_steam"
+    ]
+  },
+  {
+    "address": "0x007490a0",
+    "required_seams_sha256": "a3a1660bfce3b12a9e79e808994ff74246ad411a9329c6a62f34500d87365d02",
+    "tests": [
+      "golden_mode_image",
+      "golden_mode_image_steam"
+    ]
+  },
+  {
+    "address": "0x007490c0",
+    "required_seams_sha256": "a3a1660bfce3b12a9e79e808994ff74246ad411a9329c6a62f34500d87365d02",
+    "tests": [
+      "golden_mode_image",
+      "golden_mode_image_steam"
+    ]
+  },
+  {
+    "address": "0x007490e0",
+    "required_seams_sha256": "943c109674013548c152baa8f152ca94c10790140513f7bf98a7f207b192b44c",
+    "tests": [
+      "golden_mode_image",
+      "golden_mode_image_steam"
+    ]
+  },
+  {
+    "address": "0x007494d0",
+    "required_seams_sha256": "2714549fd9c744368790b4bb4cc754b56aded44890e9f06fa95fe76135d1f40c",
+    "tests": [
+      "golden_mode_image",
+      "golden_mode_image_steam"
+    ]
+  },
+  {
+    "address": "0x00749500",
+    "required_seams_sha256": "3dbd6b24fa0974b81eff2b04e00520a78b51aed4ce139a38a4d912fab660994a",
+    "tests": [
+      "golden_mode_image",
+      "golden_mode_image_steam"
+    ]
+  },
+  {
+    "address": "0x0063c660",
+    "required_seams_sha256": "6b4bb9b44bbab3251b4fac1f85810363d0e71def2800c6f3a5edb12989d4fd10",
+    "tests": ["golden_mode_literal_ledger", "golden_mode_image", "golden_mode_image_steam"],
+    "supply": {
+      "source": "spec-constant",
+      "proof": "docs/golden_mode/specs/re/l1-cohort-3A1-filter-schema-proof.json",
+      "proof_sha256": "77dacf745a4200815cdce3a0c481c041dbc725ab461151f44ac82a485dedb832",
+      "destination": "native",
+      "fields": [
+        {"ref": "/schema/fixed_cells/0/bits", "width": 4},
+        {"ref": "/schema/fixed_cells/1/bits", "width": 4},
+        {"ref": "/schema/fixed_cells/2/bits", "width": 4},
+        {"ref": "/schema/fixed_cells/3/bits", "width": 4},
+        {"ref": "/schema/fixed_cells/4/bits", "width": 4},
+        {"ref": "/schema/fixed_cells/5/bits", "width": 4},
+        {"ref": "/schema/fixed_cells/6/bits", "width": 4}
+      ]
+    }
+  },
+  {
+    "address": "0x0076151c",
+    "required_seams_sha256": "3eb473bcc0c7468f7acb8f8a438b5523e56f54ad7fa9da001a54dfd30fe262aa",
+    "tests": ["golden_mode_literal_ledger", "golden_mode_image", "golden_mode_image_steam"],
+    "supply": {
+      "source": "spec-constant",
+      "proof": "docs/golden_mode/specs/re/l1-cohort-3B-path-epsilon-code-proof.json",
+      "proof_sha256": "1192f2e13def2d8df2cb1b3523141cb243ac62232d0e88804eb9d0441c2ce8c3",
+      "destination": "guest-prefix",
+      "fields": [{"ref": "/value/bits_hex", "width": 4}]
+    }
+  }
+]

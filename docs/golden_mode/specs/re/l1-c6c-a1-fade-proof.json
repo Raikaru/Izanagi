@@ -1,0 +1,174 @@
+{
+  "proof_id": "L1-c6C-A1-encounter-fade-code-20261114",
+  "scope": "Only625210/7613d8/7613dc in exact A1C authority. Original114 and other transfers unchanged.",
+  "runtime_status": "pending-seam",
+  "source_pins": {
+    "steam_build": 10836033,
+    "steam_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+    "switch_mapped_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+    "switch_nso_sha256": "854c7a1e33de1619abf009fa7f32b8c012960d685c8bf1bf99a92a6a4d0bda1c",
+    "ps2_elf_sha256": "f90675b8a38138ddb5dc5cdf641550f41800fcb86bb499c586073e964fb41836",
+    "ps2_decomp_revision": "18016afe6"
+  },
+  "method": "Actual native constructor/enqueue/render state-machine and explicit code definitions/uses, positively paired to old task/feedback operations; no module/name/absence/byte-vote closure. Static only; no game or.arch decoding.",
+  "rows": [
+    {
+      "address": "0x00625210",
+      "size": 32,
+      "decision": "PROVEN-code",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "dc98f137912a43ef23123a6e2421900bcfa357062f9a8c0d037554881628e340",
+        "readers": [
+          {
+            "function": "0x1fbb50",
+            "name": "func_001fbb50",
+            "file": "src/Graphics/Model/mdlEffect_inferred_001fbb50.c"
+          }
+        ]
+      },
+      "source": {
+        "kind": "authored-Golden-code-constant",
+        "logical_words": [
+          13,
+          12,
+          7,
+          14,
+          9,
+          6,
+          8
+        ],
+        "logical_bytes_hex": "0d0000000c000000070000000e000000090000000600000008000000",
+        "switch_definitions_and_calls": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x710004d264",
+          "size": 88,
+          "sha256": "c52ab12027ff43199af5ae5efc1ba8c024a65ddb9adadbd7331f5e5a06d43f92",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+        },
+        "native_query_implementation": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x710033b960",
+          "size": 4,
+          "sha256": "110f46b5b35c069160560c6ad6786f647dd44e8760a52a46fc22dbbcd7630b91",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+        }
+      },
+      "structural_correspondence": "Old1fbb50 hFadeTaskUpdate consumes seven selected render-state IDs from625210 before its battle_encount_fade state machine. Actual Native4d000/4d090 construct that task with885168 work and update4d120, which queues actual draw4d230. That draw positively corresponds on fade state1/2/3, wait/countdown, sixth-power white flash and squared radial-opacity branch, followed by variant-selected repeated screen-feedback passes and particle updates. It explicitly unrolls seven native legacy-query call arguments at4d264..4d2b8:13,12,7,14,9,6,8, each with a separate8-byte stack output. Thus the actual Golden ID sequence differs in slots0/3 from the old14,12,7,20,9,6,8. Native33b960 is exactly RET, and no restoration of those query outputs occurs in4d230: do not misrepresent this as a live Golden state-save/restore stack. The Golden owner instead issues its actual explicit native draw/state/feedback commands. These exact code argument values are authored Golden constants; the eighth old zero word is only inert alignment.",
+      "required_seams": [
+        "encounter-fade-state:author exact seven Golden query IDs13,12,7,14,9,6,8; old eighth zero word is inert alignment, not a native eighth state",
+        "encounter-fade-state:replace entire old1fbb50 state/save/restore/render/feedback and every computed alias with actual Native4d000/4d090/4d120/4d230 owner graph, actual30-tick time-scaled flash, particle work and explicit native render protocol; actual native legacy-query is RET and query outputs are unused, so never invent restored state or retain old PS2 rendering"
+      ],
+      "native_owner": {
+        "task_name_offset": "71be88",
+        "constructor": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x710004d000",
+          "size": 288,
+          "sha256": "4c0d153a266305485d96b1b9cb3bcd99d19d7a79d3f0e22791ec99ec1a61634e",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+        },
+        "enqueue": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x710004d120",
+          "size": 96,
+          "sha256": "202c6e4249eec20ba34910a841b99a703e3e4739cb7db1a3a3a284b64453ebc6",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+        },
+        "draw_code_envelope": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x710004d230",
+          "size": 4608,
+          "sha256": "e5b44dd4b13434ccba056e10d2d301f26d5e03bcb146164653cce0b16c48dc56",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+        }
+      },
+      "ps2_live_bytes": 28,
+      "ps2_alignment_tail_bytes": 4
+    },
+    {
+      "address": "0x007613d8",
+      "size": 4,
+      "decision": "PROVEN-code",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "0e59bb9a4b82da2576c695d9acac300260b7c66edd4339d9cf949f940c278c09",
+        "readers": [
+          {
+            "function": "0x1fb480",
+            "name": "mdlEffectDrawScreenTexture",
+            "file": "src/Graphics/Model/mdlEffect_inferred_001fb480.c"
+          }
+        ]
+      },
+      "source": {
+        "kind": "authored-Golden-code-constant",
+        "logical_u32": "0x43f00000",
+        "logical_f32": 480,
+        "definition_pc": "0x710004e1e8",
+        "switch_feedback_function": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x710004e180",
+          "size": 480,
+          "sha256": "44f9cea302624027884ac211d59444b3f2559201d883a55e859112906643ded6",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+        },
+        "switch_geometry_definitions": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x710004e1c4",
+          "size": 76,
+          "sha256": "01c5c834959538783df47e8032f5fc18d2c8fb57c40453e3049400776d54cc3a",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+        }
+      },
+      "structural_correspondence": "Old1fb480 mdlEffectDrawScreenTexture scales the display-buffer rectangle around selected319.5/223.5 center literals and renders the display framebuffer with old640x448 geometry and normalized texture coordinates. Actual Golden4d230 calls4e180 repeatedly with the corresponding unity/zoom factors, variant-selected feedback color/alpha and blend mode after the paired encounter-flash state. Actual4e180 calls39e580, obtains its native raster object through33b590 and performs33b140/33b150 setup, derives scaled bounds around exact480.0/270.0 center in code4e1e8..4e20c, and uses full960x540 bounds when scale is zero. It supplies that raster to33eeb0/33ef60, writes four native24-byte vertices, uses960-wide/-540-height pixel UVs with the33b150-derived vertical origin and queues them through3938d0. The actual center has no old half-pixel subtraction. These are positively corresponding Golden code values480 and270, not guessed479.5/269.5, not the separate radial-flash center480/272, and not a mere resolution-ratio adjustment.",
+      "required_seams": [
+        "encounter-feedback-center:author Golden center480.0/270.0 exact IEEE754 bits; replace every old1fb480 and center-literal alias with actual Golden4e180 scale==0 and nonzero-scale bound formulas",
+        "encounter-feedback-center:bind complete current-raster capture/synchronization/lifetime, native960x540 logical geometry, pixel-UV/flip/depth/color/blend/state/queue layout and owner feedback pass order; do not feed these values through old640x448 PS2 packets or infer actual host framebuffer dimensions from logical coordinates"
+      ],
+      "axis": "x"
+    },
+    {
+      "address": "0x007613dc",
+      "size": 4,
+      "decision": "PROVEN-code",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "7d62e5e2af7aed210e102db1c5dfaafa880e61861789f3e04190835b7c40d49a",
+        "readers": [
+          {
+            "function": "0x1fb480",
+            "name": "mdlEffectDrawScreenTexture",
+            "file": "src/Graphics/Model/mdlEffect_inferred_001fb480.c"
+          }
+        ]
+      },
+      "source": {
+        "kind": "authored-Golden-code-constant",
+        "logical_u32": "0x43870000",
+        "logical_f32": 270,
+        "definition_pc": "0x710004e1f0",
+        "switch_feedback_function": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x710004e180",
+          "size": 480,
+          "sha256": "44f9cea302624027884ac211d59444b3f2559201d883a55e859112906643ded6",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+        },
+        "switch_geometry_definitions": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x710004e1c4",
+          "size": 76,
+          "sha256": "01c5c834959538783df47e8032f5fc18d2c8fb57c40453e3049400776d54cc3a",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+        }
+      },
+      "structural_correspondence": "Old1fb480 mdlEffectDrawScreenTexture scales the display-buffer rectangle around selected319.5/223.5 center literals and renders the display framebuffer with old640x448 geometry and normalized texture coordinates. Actual Golden4d230 calls4e180 repeatedly with the corresponding unity/zoom factors, variant-selected feedback color/alpha and blend mode after the paired encounter-flash state. Actual4e180 calls39e580, obtains its native raster object through33b590 and performs33b140/33b150 setup, derives scaled bounds around exact480.0/270.0 center in code4e1e8..4e20c, and uses full960x540 bounds when scale is zero. It supplies that raster to33eeb0/33ef60, writes four native24-byte vertices, uses960-wide/-540-height pixel UVs with the33b150-derived vertical origin and queues them through3938d0. The actual center has no old half-pixel subtraction. These are positively corresponding Golden code values480 and270, not guessed479.5/269.5, not the separate radial-flash center480/272, and not a mere resolution-ratio adjustment.",
+      "required_seams": [
+        "encounter-feedback-center:author Golden center480.0/270.0 exact IEEE754 bits; replace every old1fb480 and center-literal alias with actual Golden4e180 scale==0 and nonzero-scale bound formulas",
+        "encounter-feedback-center:bind complete current-raster capture/synchronization/lifetime, native960x540 logical geometry, pixel-UV/flip/depth/color/blend/state/queue layout and owner feedback pass order; do not feed these values through old640x448 PS2 packets or infer actual host framebuffer dimensions from logical coordinates"
+      ],
+      "axis": "y"
+    }
+  ]
+}

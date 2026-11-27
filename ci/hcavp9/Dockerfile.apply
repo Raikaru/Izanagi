@@ -1,0 +1,13 @@
+# Stage 2 of the HCA/VP9 generation: a strictly additive overlay on one host's accepted immutable base image.
+# Context: a directory holding hcavp9-delta.tar (from Dockerfile.build); check its SHA-256 against the policy review first.
+#   podman build --no-cache --identity-label=false --build-arg P4PC_BASE_IMAGE=sha256:<id> \
+#     -f Dockerfile.apply -t p4pc-ci-hcavp9-20261123 <context>
+# Never rebuild dependencies, install packages or retag the base: the delta is only FFmpeg's files under /opt/p4win32 and
+# /opt/p4win64 (the decoder list, headers, import libraries, DLLs and the recorded patch) plus /usr/bin/patch (what
+# ci/win32/build_deps.sh needs once it applies that patch).
+ARG P4PC_BASE_IMAGE
+FROM ${P4PC_BASE_IMAGE}
+ADD hcavp9-delta.tar /
+RUN grep -q -- '--enable-decoder=hca --enable-decoder=vp9' /opt/p4win32/ffmpeg.opts \
+ && grep -q -- '--enable-decoder=hca --enable-decoder=vp9' /opt/p4win64/ffmpeg.opts \
+ && patch --version >/dev/null

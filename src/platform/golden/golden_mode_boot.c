@@ -4,13 +4,17 @@
 #include <string.h>
 
 static const char *const required[] = {
-    "verified sources and projections", "EFFECT0 conversion (472x12 to 440x4)",
-    "MODEL0 conversion (11x382 to 11x332)",
+    "verified sources and projections", "EFFECT0 Golden rows (472x12)",
+    "MODEL0 Golden rows (11x382)",
     "AICALC9/10 compatibility", "expanded enemy model sources", "expanded item icon sources",
-    "expanded item categories, actions and models",
+    "expanded item categories and actions", "expanded item models",
     "expanded entity names and descriptions",
     "passive skill semantic elements", "widened skill flags", "skill and persona name widths",
-    "image-table binding"
+    "R2 EFFECT0 packet timing", "M8f-res:battle-common-14A8-1490",
+    "R7a-dep:M11-skill-card-UI-U1-U4", "R7a-dep:M11-return-field-flow",
+    "R7a-dep:shop-permissions-context-flags-U2-U3-U5", "P10-dep:E2-forced-retry-liveness",
+    "M6 image-table cache binder (chart, gate, recipe, EXP, inheritance)", "image supplier ledger",
+    "Golden BF command compatibility", "Golden script feature compatibility", "native Golden asset families"
 };
 enum { REQUIRED_COUNT = sizeof required / sizeof required[0] };
 static P4GoldenModeAdapter registered_items[REQUIRED_COUNT];
@@ -68,6 +72,15 @@ int p4_golden_mode_boot_prepare(P4GameMode mode, P4GameTablesDefinitionBuilder *
     if (!adapters || !adapters->publish || !adapters->rollback) {
         fprintf(stderr, "p4pc: Golden mode refuses unavailable adapter: cache publication and declarations\n");
         ++missing;
+    }
+    if (missing) {
+        for (size_t i = 0; i < REQUIRED_COUNT; ++i)
+            if (!resolved[i] && !strcmp(required[i], "M6 image-table cache binder (chart, gate, recipe, EXP, inheritance)"))
+                return fail(reason, capacity, "M6 image-table cache binder required for chart, gate, recipe, EXP and inheritance publication");
+        for (size_t i = 0; i < REQUIRED_COUNT; ++i)
+            if (!resolved[i] && (!strcmp(required[i], "R2 EFFECT0 packet timing") ||
+                                 !strcmp(required[i], "M8f-res:battle-common-14A8-1490")))
+                return fail(reason, capacity, required[i]);
     }
     if (missing) return fail(reason, capacity, "required Golden table adapters are unavailable");
     if (!builder) return fail(reason, capacity, "no Golden table boot builder");

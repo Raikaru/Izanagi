@@ -1,6 +1,8 @@
 /* Actual MC async adapter + package core + sidecar codec/filesystem. Synthetic
  * retail-format bytes only: NOT gameplay, native SDL/restart or parity proof. */
 #include "p4pc/os.h"
+#include "p4pc/c03_guard.h"
+#include "p4pc/guest.h"
 #include "p4pc/mod_save.h"
 #include "p4pc/mod_save_native.h"
 #include "p4pc/mods.h"
@@ -28,6 +30,8 @@ static unsigned char image[4100],readback[4100],icon[964];
 static char card[P4_SAVE_PATH_CAP],host_slot[P4_SAVE_PATH_CAP];
 static unsigned active,commits,discards,decodes,errors,warnings;
 static int acknowledge;
+static int fence_tainted;
+static int fence_check(void){return fence_tainted;}
 static const P4PackageProvider *dependency;
 static void word(unsigned char *p,uint32_t value)
 {
@@ -144,6 +148,47 @@ int main(int argc,char **argv)
     const char *mode=argv[1];char error[1024];
     if(!strcmp(mode,"plain")){
         start_save();finish_save();assert_raw();CHECK(!present(P4_MOD_SAVE_SIDECAR)&&!present(P4_MOD_SAVE_COMMIT)&&!present(P4_SAVE_MODE_MARKER));
+    }else if(!strcmp(mode,"fence-plain")||!strcmp(mode,"fence-tagged")){
+        P4ModSaveRegistration *registration=NULL;
+        if(!strcmp(mode,"fence-tagged")){registration=install(1);active=29;}
+        CHECK(!p4_mod_save_transport_fence(fence_check));
+        image[100]=9;
+        start_save();
+        static const unsigned char ico[]={1,2,3,4};
+        create("icon.ico");write_part("icon.ico",ico,sizeof ico);
+        create("icon.sys");
+        fence_tainted=1;
+        char name[96];virtual_path(name,"icon.sys");
+        CHECK(finish(func_00432288(0,name,icon,0,sizeof icon),6)==MC_FAIL(EIO));
+        CHECK(errors==1);
+        if(registration)CHECK(!p4_mod_save_unregister(registration));
+    }else if(!strcmp(mode,"guard-direct")){
+        CHECK(!p4_mod_save_transport_fence(fence_check));
+        fence_tainted=1;
+        char name[96];virtual_path(name,slot);
+        CHECK(finish(func_00432288(0,name,image,0,sizeof image),6)==MC_FAIL(EIO));
+        CHECK(errors==1);
+    }else if(!strcmp(mode,"guard-fence")){
+#if __SIZEOF_POINTER__ == 8 && (defined(_WIN32) || (defined(__linux__) && !defined(__ANDROID__)))
+        CHECK(!p4_guest_arena_factory(p4_c03_guard_reserve));
+        CHECK(!p4_guest_init());
+        CHECK(!p4_c03_guard_start());
+        CHECK(!p4_mod_save_transport_fence(p4_c03_guard_tainted));
+        uint32_t allowed=123;
+        p4_c03_guard_store(0,&allowed,sizeof allowed);
+        CHECK(!p4_c03_guard_tainted());
+        image[100]=9;start_save();
+        static const unsigned char ico[]={1,2,3,4};
+        create("icon.ico");write_part("icon.ico",ico,sizeof ico);
+        create("icon.sys");
+        *(volatile unsigned char *)P4_G2H(0x007458c0u)=77;
+        CHECK(p4_c03_guard_tainted()&&p4_c03_guard_origin());
+        char name[96];virtual_path(name,"icon.sys");
+        CHECK(finish(func_00432288(0,name,icon,0,sizeof icon),6)==MC_FAIL(EIO));
+        CHECK(errors==1);
+#else
+        return 77;
+#endif
     }else if(!strcmp(mode,"roundtrip")){
         P4ModSaveRegistration *registration=install(1);active=17;
         start_save();CHECK(!p4_os_is_dir_nofollow(host_slot));
@@ -204,5 +249,6 @@ int main(int argc,char **argv)
         CHECK(p4_save_witness_input(argv[3],0,error,sizeof error)<0);
     }else return 2;
     p4_mod_save_transport_abort();p4_mod_save_transport_load_abort();
+    if(!strcmp(mode,"guard-fence"))p4_c03_guard_shutdown();
     puts("native save transport: synthetic filesystem/codec complete; NOT gameplay/SDL/restart/parity/reference proof");return 0;
 }

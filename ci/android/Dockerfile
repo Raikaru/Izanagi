@@ -8,7 +8,7 @@ FROM debian:trixie-slim
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
-      ca-certificates curl unzip xz-utils git python3 cmake ninja-build make nasm pkg-config ccache file \
+      ca-certificates curl unzip xz-utils git python3 cmake ninja-build make nasm patch pkg-config ccache file \
       openjdk-21-jdk-headless \
       libgl1 libpulse0 libnss3 libxcomposite1 libxcursor1 libxdamage1 libxi6 libxrandr2 libxtst6 libxkbfile1 libx11-6 libxext6 libxfixes3 \
       libasound2t64 libdbus-1-3 libxcb1 libxcb-xinerama0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0 libxcb-shape0 libxkbcommon-x11-0 \
@@ -43,6 +43,20 @@ RUN echo no | avdmanager create avd -n p4pc -k "${SYSTEM_IMAGE}" -d pixel_5 --fo
 
 # FFmpeg's configure compiles host-side helper programs with a host C compiler.
 RUN apt-get update && apt-get install -y --no-install-recommends gcc libc6-dev && rm -rf /var/lib/apt/lists/*
+
+# The pinned Zig nightly of the battle simulator (cmake/zig/pin.cmake: keep the version and the x86_64-linux SHA-256 equal to it),
+# the official ziglang.org/builds archive whose file name carries the version's "+". The Zig objects use the NDK sysroot's bionic
+# headers (cmake/zig/zig_object.py). Last, so the SDK/NDK layers above stay cached; ziglang.org/builds keeps only recent nightlies:
+# the built image keeps this one. A host overrides it with -DP4_ZIG=<zig> or P4_ZIG in the environment.
+ARG ZIG_VERSION=0.18.0-dev.935+ead8f5a7a
+ARG ZIG_SHA256=76258449f1088b6f80359944f9735a4c96e94246e553111155f0af6457ff8de4
+RUN curl -fsSL --proto '=https' --retry 6 --retry-all-errors --retry-delay 10 -o /tmp/zig.tar.xz https://ziglang.org/builds/zig-x86_64-linux-${ZIG_VERSION}.tar.xz \
+ && echo "${ZIG_SHA256}  /tmp/zig.tar.xz" | sha256sum -c - \
+ && mkdir -p /opt/zig-${ZIG_VERSION} \
+ && tar -xJf /tmp/zig.tar.xz -C /opt/zig-${ZIG_VERSION} --strip-components=1 \
+ && rm /tmp/zig.tar.xz \
+ && test "$(/opt/zig-${ZIG_VERSION}/zig version)" = "${ZIG_VERSION}"
+ENV P4_ZIG=/opt/zig-${ZIG_VERSION}/zig
 
 ENV CCACHE_DIR=/ccache
 WORKDIR /work

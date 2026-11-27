@@ -30,6 +30,7 @@ local F = {
     sessionEdits = 0,
     -- The units p4.status.protect was asked to protect, in order.
     protections = {} :: {number},
+    statusLocks = {} :: {[number]: boolean},
     -- Boss-window regression (mod_hardmode_lifecycle_test.luau): every hook's
     -- subscription by address, the status chance stage's one modifier and the
     -- damage modifiers by priority.
@@ -50,6 +51,11 @@ local F = {
     -- The step-down/retry checks (mod_hardmode_retry_test.luau) drive the
     -- hooks, memory and input the lifecycle check never fires.
     hookFns = {} :: {[number]: any},
+    hookPhases = {} :: {[number]: {[string]: any}},
+    executionHandlers = {} :: {any},
+    executionUnits = {} :: {[number]: any},
+    chanceSpec = nil :: any,
+    snapshot = false,
     memMap = {} :: {[number]: number},
     callLog = {} :: {any},
     battleUnits = nil :: any,
@@ -74,6 +80,11 @@ function F.fire(name: string, event: any)
         end
     end
 end
+function F.fireExecution(event: any)
+    for _, entry in F.executionHandlers do
+        if entry.subscription.enabled then entry.fn(event) end
+    end
+end
 
 do
     local text = buffer.tostring(assert(read_file(MAIN), "cannot read " .. MAIN))
@@ -92,6 +103,7 @@ end
 
 p4 = {
     log = function(text: string)
+        assert(not F.snapshot, "p4.log is refused in snapshot callbacks")
         table.insert(F.logs, text)
     end,
     describe = function(address: number): any
@@ -105,16 +117,23 @@ p4 = {
         local s: any = subscription()
         s.fn, s.phase = fn, phase
         F.hookHandlers[address] = s
+        F.hookPhases[address] = F.hookPhases[address] or {}
+        F.hookPhases[address][phase] = fn
         return s
     end,
     call = function(address: number, signature: string, ...: any): number
+        assert(not F.snapshot, "native calls are refused in snapshot callbacks")
         local args = table.pack(...)
         table.insert(F.callLog, {address = address, signature = signature, args = args})
         return F.calls[address] or 0
     end,
     mem = {
-        read = function(kind: string, address: number): number return F.memMap[address] or 0 end,
+        read = function(kind: string, address: number): number
+            assert(not F.snapshot, "guest reads are refused in snapshot callbacks")
+            return F.memMap[address] or 0
+        end,
         write = function(kind: string, address: number, value: number)
+            assert(not F.snapshot, "guest writes are refused in snapshot callbacks")
             F.memMap[address] = value
         end,
         alloc = function(size: number): any return {address = 0x01f00000, size = size} end,
@@ -178,6 +197,16 @@ p4 = {
         local s: any = subscription()
         s.fn = spec.fn
         F.chance = s
+        -- The Gigas witness (mod_hardmode_gigas_test.luau) drives the stage the way the
+        -- game does: in snapshot mode, where logging, calls and live reads are refused.
+        local wrapped = table.clone(spec)
+        wrapped.fn = function(hit: any): any
+            F.snapshot = true
+            local result = spec.fn(hit)
+            F.snapshot = false
+            return result
+        end
+        F.chanceSpec = wrapped
         return s
     end},
     enemy_reward = {on = function(kind: string, fn: any): any
@@ -193,7 +222,7 @@ p4 = {
         end,
         protected = function(unit: number): boolean return false end,
         protect = function(unit: number, on: boolean): (boolean, string?)
-            assert(on)
+            F.statusLocks[unit] = on
             table.insert(F.protections, unit)
             return true, nil
         end,
@@ -204,6 +233,17 @@ p4 = {
         updates = function(): number return 0 end,
     },
     battle = {
+        execution = {
+            on = function(fn: any): any
+                local s = subscription()
+                table.insert(F.executionHandlers, {fn = fn, subscription = s})
+                return s
+            end,
+            unit = function(data: number): any
+                assert(not F.snapshot, "live identities are refused in snapshot callbacks")
+                return F.executionUnits[data]
+            end,
+        },
         menu = function(): any return nil end,
         units = function(): any return F.battleUnits end,
         substitute = function(action: number, skill: number): (boolean, string?) return false, "no battle" end,

@@ -23,6 +23,8 @@
 #include "p4gl_gl.h"
 #include "p4gl_profile.h"
 #include "p4gl_readback.h"
+#include "p4gl_rt.h"
+#include "p4gl_comparison_evidence.h"
 #include "../viewer/p4png.h"
 
 static P4GlContext sContext;
@@ -31,7 +33,8 @@ static int sNoDevice;
 
 int p4gl_context_is_current(void)
 {
-    return sContext && p4gl_win_current_context() == sContext;
+    /* with the render thread the context is current on that thread: the game thread owns the device all the same */
+    return sContext && (p4gl_rt_active() || p4gl_win_current_context() == sContext);
 }
 int p4gl_device_ready(void)
 {
@@ -88,7 +91,11 @@ static void setSwapInterval(void)
             fprintf(stderr, "p4gl: the display runs at %.1f Hz: not waiting for its blank (video.vsync = on forces it), the game is paced by the clock\n", (double)hz);
         }
     }
-    p4gl_win_set_swap_interval(on);
+    if (p4gl_rt_active()) {
+        p4gl_rt_swap_interval(on); /* SDL_GL_SetSwapInterval needs the current context: the render thread's */
+    } else {
+        p4gl_win_set_swap_interval(on);
+    }
 }
 
 static void fitRect(int ww, int wh, int fit, GLint *dx, GLint *dy, GLint *dw, GLint *dh);
@@ -228,6 +235,19 @@ static void registerMovieFitSetting(void)
 extern int p4_battle_sim_renderless;
 extern int p4_battle_sim_graphics_open(void);
 
+/* The render thread (p4gl_rt.h) takes the game thread's float mode (the EE's: llvmpipe's colour rounding follows it, and so do the scene gates' pixels) and a
+ * driver that changes it is put back at the end of each frame as on the game thread (p4pc_fpu_check). On by default in player runs on the desktop and Android;
+ * macOS and iOS (Cocoa, ANGLE on Metal) have not been tried. P4PC_RENDER_THREAD=0|1 decides otherwise. */
+static void renderThreadPolicy(void)
+{
+#if defined(__APPLE__)
+    p4gl_rt_set_default(0);
+#else
+    p4gl_rt_set_default(p4cfg_player_run());
+#endif
+    p4gl_rt_set_frame_check(p4pc_fpu_check);
+}
+
 int p4gl_context_open(void)
 {
     SDL_Window *window;
@@ -261,6 +281,7 @@ int p4gl_context_open(void)
         return -1;
     }
     p4gl_api_set_attributes();
+    renderThreadPolicy();
     sContext = p4gl_win_create_context(window);
     if (sContext == NULL && p4gl_api_wants_es() && !p4gl_api_explicit()) {
         /* The build's default is ES but this machine has none (a Windows driver without the ES profile, no EGL library): the desktop
@@ -309,6 +330,7 @@ int p4gl_context_open(void)
     p4gl_frame_rasters_open();
     registerResolutionSetting();
     p4pc_pad_set_settings_hooks(p4_settings_event, p4_settings_model_capturing, p4_settings_active, p4_settings_pad);
+    p4gl_rt_start(window, sContext);
     return 0;
 }
 
@@ -332,6 +354,7 @@ void p4gl_context_close(void)
 {
     sNoDevice = 0;
     if (sContext != NULL) {
+        p4gl_rt_stop(1);
         p4gl_profile_close();
         p4gl_win_destroy_context(sContext);
         sContext = NULL;
@@ -352,6 +375,7 @@ static int context_recover(int adopt)
     if (window == NULL || sContext == NULL) {
         return -1;
     }
+    p4gl_rt_stop(0); /* its commands are dropped or run; the context is replaced or taken over below, and goes back to the thread at the end */
     p4gl_readback_pixel_size(&w, &h);
     p4gl_readback_virtual_size(&virtualWidth, &virtualHeight);
     p4gl_readback_context_lost();
@@ -384,6 +408,7 @@ static int context_recover(int adopt)
     p4gl_atomic_context_lost();
     p4gl_raster_context_lost();
     fprintf(stderr, "p4gl: GL context replaced%s; textures uploaded again\n", adopt ? " by SDL" : "");
+    p4gl_rt_start(window, sContext);
     return 0;
 }
 
@@ -613,11 +638,13 @@ static void captureFrame(SDL_Window *window, unsigned frame)
             double mad;
             const char *maxText = p4gl_gate_limit("P4PC_CAPTURE_REF_MAX");
             if (p4gl_reference_mad(flipped, (uint32_t)w, (uint32_t)h, refPath, &mad) != 0) {
+                p4gl_comparison_evidence(1, 0, -1.0, maxText);
                 if (maxText != NULL) exit(1);
             } else {
                 fprintf(stderr, "p4gl: frame %u mean abs diff from %s = %.4f%%\n", frame, refPath, mad);
                 if (maxText != NULL) {
                     const double max = atof(maxText);
+                    p4gl_comparison_evidence(0, mad <= max, mad, maxText);
                     if (mad > max) fprintf(stderr, "p4gl: FAIL: above the %.1f%% limit\n", max);
                     fflush(stderr);
                     exit(mad > max ? 1 : 0);
@@ -837,6 +864,10 @@ int p4gl_context_menu_position(float x, float y, float *menuX, float *menuY)
 /* SDL_GL_SwapWindow, and the recovery when EGL says the context is lost (EGL_CONTEXT_LOST at eglSwapBuffers: Android took the GPU away, ANGLE lost its device). */
 static void swapWindow(SDL_Window *window)
 {
+    if (p4gl_rt_active()) {
+        p4gl_rt_swap(window); /* the render thread swaps; a lost context shows at the next present (p4gl_rt_context_lost) */
+        return;
+    }
     if (p4gl_profile_pass != NULL) p4gl_profile_frame_end(sPresented);
     const uint64_t swap_start = p4gl_gl_hitch_begin();
     const int swapped = p4gl_win_swap(window);
@@ -925,6 +956,13 @@ void p4gl_context_present(void)
         unsigned frame;
         int capture;
 
+        if (p4gl_rt_active() && p4gl_rt_context_lost()) {
+            context_recover(0); /* the render thread's swap found the context lost */
+        }
+        if (p4pc_pad_sdl_take_foreground() && p4gl_rt_active()) {
+            p4gl_rt_rebind(); /* a new window surface after a pause: the context is bound to it again, by the render thread */
+            setSwapInterval();
+        }
         if (p4pc_pad_sdl_take_device_reset()) {
             context_recover(1); /* SDL made a new context for the resumed window */
         }
@@ -988,8 +1026,12 @@ void p4gl_context_present(void)
                         fprintf(stderr, "p4gl: window %dx%d pixels, %ux%u frame shown at %d,%d size %dx%d\n", ww, wh, (unsigned)fw, (unsigned)fh, dx, dy, dw, dh);
                     }
                 }
-                p4gl_glBlitFramebuffer(0, 0, (GLint)fw, (GLint)fh, dx, dy, dx + dw, dy + dh, GL_COLOR_BUFFER_BIT,
-                                       (uint32_t)dw == fw && (uint32_t)dh == fh ? GL_NEAREST : GL_LINEAR);
+                /* A window that sRGB-encodes what it is given (p4gl_gl_window_srgb) takes the frame through the decoding pass. */
+                if (!p4gl_gl_present_decoded(p4gl_readback_texture(), (int)fw, (int)fh, dx, dy, dw, dh,
+                                             (uint32_t)dw != fw || (uint32_t)dh != fh)) {
+                    p4gl_glBlitFramebuffer(0, 0, (GLint)fw, (GLint)fh, dx, dy, dx + dw, dy + dh, GL_COLOR_BUFFER_BIT,
+                                           (uint32_t)dw == fw && (uint32_t)dh == fh ? GL_NEAREST : GL_LINEAR);
+                }
                 if (getenv("P4PC_CAPTURE_WINDOW") != NULL && capture) {
                     captureWindow(frame, ww, wh);
                 }
@@ -1019,6 +1061,7 @@ void p4gl_context_present(void)
         swapNs += p4_os_now_ns() - t1;
         p4_settings_native_frame_end();
         p4gl_gl_set_draw(turboNeedsDraw(frame) && paceNeedsDraw(frame));
+        p4gl_rt_frame_end(); /* hands the frame to the render thread; waits while it is still on the one before */
         p4pc_fpu_check("the swap");
         presentNs += p4_os_now_ns() - t0;
         if (frame % 1000u == 0) {

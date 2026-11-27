@@ -1,5 +1,7 @@
 /* Normal-fusion result scan: retail IDs below 0xC0, then added personas. */
 #include "p4pc/game_personas_native.h"
+#include "p4pc/game_mode.h"
+#include "p4pc/golden_fusion_runtime.h"
 s32 fclFuseLowestCandidateAtMost(u32 arg0, s32 arg1, u16 *arg2)
 {
     extern u8 *DAT_007644c4;
@@ -10,8 +12,8 @@ s32 fclFuseLowestCandidateAtMost(u32 arg0, s32 arg1, u16 *arg2)
     s32 atMostPick = 0;
     s32 slot;
 
-    for (slot = 0; p4_game_personas_native_fusion_candidate((u32)(slot & 0xFFFF));
-         slot = (s32)p4_game_personas_native_fusion_next((u32)slot)) {
+    for (slot = 0; p4_game_mode() == P4_GAME_MODE_GOLDEN ? slot < 256 : p4_game_personas_native_fusion_candidate((u32)(slot & 0xFFFF));
+         slot = p4_game_mode() == P4_GAME_MODE_GOLDEN ? slot + 1 : (s32)p4_game_personas_native_fusion_next((u32)slot)) {
         s32 id = slot & 0xFFFF;
         s32 off = (u16)slot * 0xE;
         u8 *rec = iGpffffb3d4 + off;
@@ -29,23 +31,23 @@ s32 fclFuseLowestCandidateAtMost(u32 arg0, s32 arg1, u16 *arg2)
         if (flags & 3) {
             continue;
         }
-        for (k = 0; k < 0x17; k++) {
-            u8 *ent = D_006420A0 + k * 8;
+        for (k = 0; k < (p4_game_mode() == P4_GAME_MODE_GOLDEN ? (s32)p4_golden_fusion_gate_count() : 0x17); k++) {
+            u8 *ent = p4_game_mode() == P4_GAME_MODE_GOLDEN ? 0 : D_006420A0 + k * 8;
             s16 tag;
 
-            if (id != *(s16 *)(ent + 4)) {
+            if (id != (ent ? *(s16 *)(ent + 4) : p4_golden_fusion_gate_persona(k))) {
                 continue;
             }
-            tag = *(s16 *)(ent + 6);
+            tag = ent ? *(s16 *)(ent + 6) : p4_golden_fusion_gate_bits(k);
             if (tag & 1) {
-                if (datGetFlag(*(s32 *)ent) != 0) {
+                if (datGetFlag(ent ? *(s32 *)ent : p4_golden_fusion_gate_flag(k)) != 0) {
                     continue;
                 }
                 eligible = 0;
                 break;
             } else if (tag & 2) {
                 eligible = 0;
-                if (datGetFlag(*(s32 *)ent) != 1) {
+                if (datGetFlag(ent ? *(s32 *)ent : p4_golden_fusion_gate_flag(k)) != 1) {
                     continue;
                 }
                 eligible = 1;

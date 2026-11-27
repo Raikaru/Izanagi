@@ -1,0 +1,3160 @@
+{
+  "proof_id": "L1-c6b-A2-resource-registry-20261114",
+  "author": "GoldenRE-L1-c6b",
+  "scope": "47 exact A2 rows only, perGoldenRE-L1-c6-SPLIT2.md. Existing B/A1/shared proofs read-only. Source decisions, not runtime binding.",
+  "sources": {
+    "ps2_decomp_commit": "18016afe6",
+    "steam_build": 10836033,
+    "steam_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+    "switch_nso_sha256": "854c7a1e33de1619abf009fa7f32b8c012960d685c8bf1bf99a92a6a4d0bda1c",
+    "switch_mapped_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+  },
+  "method": "Static original ELF/source, ordinary Steam.shared/read-only data and decompressed NSO; exact named Steam pack extraction. No .arch decode, game execution, byte-vote or cosmetic retention.",
+  "route_contracts": {
+    "field-load-and-dungeon-step": {
+      "positive_correspondence": [
+        "PS2FldLoadTaskUpdate1561a0 completes primary FBN/script/scene load, then outside special map bands creates three persistent F_ICON01/02/03 effect child tasks and waits them before camera creation. NSO1bf210..1bf830 has the corresponding five-icon effect creation stage at1bf4e0/1bf504/1bf520 and added04/05;1c9160 startup independently requests/adopts the same named effects. Steam2cd590 references all five effect names. This qualifies effect instances, not just the separate startup texture strings.",
+        "PS2FldStepTaskUpdate159a60 creates genus4/idFFFF board objectfobj103.RMD, requests/copies dungeon script, waits model and preload effects, then creates the field root from16-byte step entries and skips party panel for step9F. NSO1cd290 independently preserves all of these discriminator/sentinel/record and wait roles withfobj103.AMD.",
+        "PS215c280 waits the shared preload archive and creates ENCONT_N and F_HAKEN tasks with durations1E and14; NSO1cf7b0 repeats the same archive/slot/duration logic through1bd100 and adds a thirdP_HAKEN effect."
+      ],
+      "required_seams": [
+        "golden-a2-field-effect-load: route the actual field-load child tasks and dungeon preload producer/wait/adoption/release paths through Golden namespaces and request handles; retain added04/05 icons and P_HAKEN, not a three-effect PS2 truncation. No CVM/RMD fallback or merely renamed payload decoder.",
+        "golden-a2-dungeon-step-model: use actual Golden AMD model kind4/idFFFF, step16-byte input namespace, root creation,9F panel gate and readiness lifecycle. All native/translated/inlined consumers of the corresponding old path must reach this producer."
+      ]
+    },
+    "dual-hand-weapon-resource": {
+      "positive_correspondence": "PS2230d30 and NSO281040 both gate modelgenus1, fetch equipped itemslot0, special-case actor2 for distinct right/left cache objects, use left cache ID(base+1000) but the base ID in both filenames, and set attachment frames500/501. Golden also adds actual costume-conditioned handling for actor3; it is not the old unconditional return. Steam3eac4c uses the same two stem formats at9410F8/9410E0. Native281040 appends little-endian word444D412E followed byNUL after formatting, proving the full .AMD suffix even though no complete .AMD format cstring exists.",
+      "required_seams": [
+        "golden-a2-dual-weapon: author both full .AMD format values from the proven stem plus appended constant; never read NSO at runtime. Bind actual Golden equipped-item ID/namespace, left-cache+1000 rule, cache-hit and cache-miss attach paths, actor3 costume gate, frame500/501 and model request lifetimes. Do not reuse RMD decoding or old item-pointer layout."
+      ]
+    },
+    "model-manager-source-field": {
+      "positive_correspondence": "All seven observed old uses are the file argument of allocation-source tagging or model input assertions in the model manager. Old470e90 builds an animation dispatch table with count/reference fields and per-entry identity matrices. Actual Golden38e670 chunk2D0 allocates the corresponding count-bounded table with native96-byte entries/count at8/reference atA, initializes matrices and passes the full mdlManager.c path to39d420. The same concrete model-stream processor handles channel/resource chunks and emits further file/line assertions. Golden385fc0 releases referenced table channel objects with the same full path; these typed table allocation/dispatch/destruction roles, not the basename alone, bind the owning diagnostic field.",
+      "required_seams": [
+        "golden-a2-model-manager-source: pass the complete actual Golden platform source-file string at every old basename/GP/interior diagnostic alias and native/inlined model-manager equivalent. This does not imply a release RET sink logs or aborts. Full paths must not overwrite the short guest basename; qualify the native diagnostic ABI and model-table lifetime separately."
+      ]
+    },
+    "event-icon-member-registry": {
+      "ps2": "26-pointer ordered bank63b4f0..63b558 contains event/_ICON1..26.EPL.26d890 indexes it and looks up a resource request, then installs the created effect into scene resource kinds1/3 and retires the previous effect.26da30 has the special iconIndex10 start-existing-effect path.",
+      "golden": "2a61d0 looks up cached event/icon.bin and the indexed member through26 typed8-byte name pointers at792ac0; after35cae0 effect creation it updates kind1/3 resource slot and spawns the previous effect.2a6110 preserves special index10 and creates work24/taskscnIcon.2a60c0 independently preloads indexed named members from the same archive. Steam914830 contains exactly the same26 ordered member identities after pointer normalization.",
+      "bounds_caveat": "Both native readers have an index bound admitting26, but only indices0..25 are typed named resources. The next NSO word is3F800000, not a27th valid name or null sentinel. No27th string/asset is admitted; producer namespace must be qualified at runtime.",
+      "registry": {
+        "count": 26,
+        "values": [
+          "_ICON1.EPL",
+          "_ICON2.EPL",
+          "_ICON3.EPL",
+          "_ICON4.EPL",
+          "_ICON5.EPL",
+          "_ICON6.EPL",
+          "_ICON7.EPL",
+          "_ICON8.EPL",
+          "_ICON9.EPL",
+          "_ICON10.EPL",
+          "_ICON11.EPL",
+          "_ICON12.EPL",
+          "_ICON13.EPL",
+          "_ICON14.EPL",
+          "_ICON15.EPL",
+          "_ICON16.EPL",
+          "_ICON17.EPL",
+          "_ICON18.EPL",
+          "_ICON19.EPL",
+          "_ICON20.EPL",
+          "_ICON21.EPL",
+          "_ICON22.EPL",
+          "_ICON23.EPL",
+          "_ICON24.EPL",
+          "_ICON25.EPL",
+          "_ICON26.EPL"
+        ],
+        "steam": [
+          {
+            "table": {
+              "rva": "0x914830",
+              "raw_offset": 9516080,
+              "size": 208,
+              "sha256": "b4d28a0528d351fed6a6c51f60f4361f936b106141c242a301a97287bd138c3e"
+            },
+            "records": [
+              {
+                "index": 0,
+                "value": "_ICON1.EPL",
+                "source": {
+                  "rva": "0x9422e8",
+                  "raw_offset": 9703144,
+                  "size": 11,
+                  "sha256": "c332b70526bb214b687a6ef0436ce7e68a6a2f8a2c2c49b561cccbf2eeab0617"
+                }
+              },
+              {
+                "index": 1,
+                "value": "_ICON2.EPL",
+                "source": {
+                  "rva": "0x942318",
+                  "raw_offset": 9703192,
+                  "size": 11,
+                  "sha256": "6f56fdb4320ad87c9a846e8908629a32af0d6491efd810dca509283839990bd3"
+                }
+              },
+              {
+                "index": 2,
+                "value": "_ICON3.EPL",
+                "source": {
+                  "rva": "0x942328",
+                  "raw_offset": 9703208,
+                  "size": 11,
+                  "sha256": "5f67357c5fbe1c7e99897a4f0a3029fc9bf124f3c13e781457d28abae6d52dcb"
+                }
+              },
+              {
+                "index": 3,
+                "value": "_ICON4.EPL",
+                "source": {
+                  "rva": "0x9422f8",
+                  "raw_offset": 9703160,
+                  "size": 11,
+                  "sha256": "29f6aa94b4e7650ac270a5f5ec70ae57e68b9efed37ac3d1f9db6ccd980feaac"
+                }
+              },
+              {
+                "index": 4,
+                "value": "_ICON5.EPL",
+                "source": {
+                  "rva": "0x942308",
+                  "raw_offset": 9703176,
+                  "size": 11,
+                  "sha256": "3718f685d9e8eaaf3462fa6c9467706be357a8cd7f04e09c7a11065adc37126f"
+                }
+              },
+              {
+                "index": 5,
+                "value": "_ICON6.EPL",
+                "source": {
+                  "rva": "0x942358",
+                  "raw_offset": 9703256,
+                  "size": 11,
+                  "sha256": "44bde6dea40a8fe6494a3ef8c364ab7d53083d66e4f435e862eb2cfb53376862"
+                }
+              },
+              {
+                "index": 6,
+                "value": "_ICON7.EPL",
+                "source": {
+                  "rva": "0x942368",
+                  "raw_offset": 9703272,
+                  "size": 11,
+                  "sha256": "edcc58253ab582c72a49b67c184bf3b2e6f98a9adcb81e26d52b807deb5a0d1f"
+                }
+              },
+              {
+                "index": 7,
+                "value": "_ICON8.EPL",
+                "source": {
+                  "rva": "0x942338",
+                  "raw_offset": 9703224,
+                  "size": 11,
+                  "sha256": "bcc35fb592a4a02eda2bd7bcfc5a587617c609d4a13f0290582f8f5ada739683"
+                }
+              },
+              {
+                "index": 8,
+                "value": "_ICON9.EPL",
+                "source": {
+                  "rva": "0x942348",
+                  "raw_offset": 9703240,
+                  "size": 11,
+                  "sha256": "dec1fc60bc4d629ea1f180de7a9cc07e4368d625abae6ea40c80b3de63795e74"
+                }
+              },
+              {
+                "index": 9,
+                "value": "_ICON10.EPL",
+                "source": {
+                  "rva": "0x942398",
+                  "raw_offset": 9703320,
+                  "size": 12,
+                  "sha256": "6675b2c1a79795b094520b6eb3f51f780ca954f055957f579fcd5a0de2e6a4db"
+                }
+              },
+              {
+                "index": 10,
+                "value": "_ICON11.EPL",
+                "source": {
+                  "rva": "0x9423a8",
+                  "raw_offset": 9703336,
+                  "size": 12,
+                  "sha256": "424479bea69198aa226ed3248141481da91bc01ed5351a6fe138c7a25ea3652c"
+                }
+              },
+              {
+                "index": 11,
+                "value": "_ICON12.EPL",
+                "source": {
+                  "rva": "0x942378",
+                  "raw_offset": 9703288,
+                  "size": 12,
+                  "sha256": "68646bb33b57c9d2fb7c124791cca2b5bc6e7c7bb4a0a6d3caa6380540c1952c"
+                }
+              },
+              {
+                "index": 12,
+                "value": "_ICON13.EPL",
+                "source": {
+                  "rva": "0x942388",
+                  "raw_offset": 9703304,
+                  "size": 12,
+                  "sha256": "1268fc6e220d1b4bfa9e66b2dfe6b65f089cde5d726b1b200b671ae4dbce96f2"
+                }
+              },
+              {
+                "index": 13,
+                "value": "_ICON14.EPL",
+                "source": {
+                  "rva": "0x9423d8",
+                  "raw_offset": 9703384,
+                  "size": 12,
+                  "sha256": "2a6448ccb18418d0b6023e747a74c37f637a65022b047798d77054ea98e6ec76"
+                }
+              },
+              {
+                "index": 14,
+                "value": "_ICON15.EPL",
+                "source": {
+                  "rva": "0x9423e8",
+                  "raw_offset": 9703400,
+                  "size": 12,
+                  "sha256": "5f26170706cec8886715010e2ac2ca87d9bc7f6c20b145d04eb581d7db575f70"
+                }
+              },
+              {
+                "index": 15,
+                "value": "_ICON16.EPL",
+                "source": {
+                  "rva": "0x9423b8",
+                  "raw_offset": 9703352,
+                  "size": 12,
+                  "sha256": "7d3ca31c3c8d441f9e6d979d874e933174d20087cbf49b560eebeec2288489f5"
+                }
+              },
+              {
+                "index": 16,
+                "value": "_ICON17.EPL",
+                "source": {
+                  "rva": "0x9423c8",
+                  "raw_offset": 9703368,
+                  "size": 12,
+                  "sha256": "81266f9d7b16ad82605d584fd2d32226650f3acbfbff19a8edf5797767e4c7d8"
+                }
+              },
+              {
+                "index": 17,
+                "value": "_ICON18.EPL",
+                "source": {
+                  "rva": "0x942418",
+                  "raw_offset": 9703448,
+                  "size": 12,
+                  "sha256": "37646ea6d739c951ebfd0bb922625b4aa1b8c180629db0018748340df65f3eb5"
+                }
+              },
+              {
+                "index": 18,
+                "value": "_ICON19.EPL",
+                "source": {
+                  "rva": "0x942428",
+                  "raw_offset": 9703464,
+                  "size": 12,
+                  "sha256": "7d9cfaaf1cd2c1b98f72ef454232e27424de29eaaf92adca27da303994d8c067"
+                }
+              },
+              {
+                "index": 19,
+                "value": "_ICON20.EPL",
+                "source": {
+                  "rva": "0x9423f8",
+                  "raw_offset": 9703416,
+                  "size": 12,
+                  "sha256": "6e65c3b252312484a01fdab4670159fbc6c4a8085ee91772953b11bcfef5be24"
+                }
+              },
+              {
+                "index": 20,
+                "value": "_ICON21.EPL",
+                "source": {
+                  "rva": "0x942408",
+                  "raw_offset": 9703432,
+                  "size": 12,
+                  "sha256": "c112d3ee34ea47c30888c8c55f68c7b0657b00f8dd06e9593824ae809a4d9431"
+                }
+              },
+              {
+                "index": 21,
+                "value": "_ICON22.EPL",
+                "source": {
+                  "rva": "0x942458",
+                  "raw_offset": 9703512,
+                  "size": 12,
+                  "sha256": "893d2732a7e59f89ad60e9f20cbaf9d0815a876e37697ddad6c9fb24048b6858"
+                }
+              },
+              {
+                "index": 22,
+                "value": "_ICON23.EPL",
+                "source": {
+                  "rva": "0x942468",
+                  "raw_offset": 9703528,
+                  "size": 12,
+                  "sha256": "d38c47ec6f85e0e8334c9d518d7d752fac65120e1c80a3a2cf9b0e73a9264c90"
+                }
+              },
+              {
+                "index": 23,
+                "value": "_ICON24.EPL",
+                "source": {
+                  "rva": "0x942438",
+                  "raw_offset": 9703480,
+                  "size": 12,
+                  "sha256": "463058fdcebbaad16fc2b4b222075cb4606d72630d53fedd56cc9486c90451dd"
+                }
+              },
+              {
+                "index": 24,
+                "value": "_ICON25.EPL",
+                "source": {
+                  "rva": "0x942448",
+                  "raw_offset": 9703496,
+                  "size": 12,
+                  "sha256": "64dc555fab8cf437e5d08675c94621479f7631ea2f78655a6c9b61545fd8180b"
+                }
+              },
+              {
+                "index": 25,
+                "value": "_ICON26.EPL",
+                "source": {
+                  "rva": "0x9424b8",
+                  "raw_offset": 9703608,
+                  "size": 12,
+                  "sha256": "db676164d3ece3f3f4a49f59c92e68d7e15fbf125ab27388a9b0171becf3758e"
+                }
+              }
+            ],
+            "readers": []
+          }
+        ],
+        "switch": {
+          "base": "0x7100792ac0",
+          "count": 27,
+          "records": [
+            {
+              "index": 0,
+              "target": "0x71005e1d98",
+              "value": "_ICON1.EPL"
+            },
+            {
+              "index": 1,
+              "target": "0x710060f4b1",
+              "value": "_ICON2.EPL"
+            },
+            {
+              "index": 2,
+              "target": "0x710060a4e1",
+              "value": "_ICON3.EPL"
+            },
+            {
+              "index": 3,
+              "target": "0x71005e74f2",
+              "value": "_ICON4.EPL"
+            },
+            {
+              "index": 4,
+              "target": "0x7100611e7b",
+              "value": "_ICON5.EPL"
+            },
+            {
+              "index": 5,
+              "target": "0x71005f76bc",
+              "value": "_ICON6.EPL"
+            },
+            {
+              "index": 6,
+              "target": "0x71005d3dc2",
+              "value": "_ICON7.EPL"
+            },
+            {
+              "index": 7,
+              "target": "0x71005ffc5d",
+              "value": "_ICON8.EPL"
+            },
+            {
+              "index": 8,
+              "target": "0x7100614984",
+              "value": "_ICON9.EPL"
+            },
+            {
+              "index": 9,
+              "target": "0x71005ef590",
+              "value": "_ICON10.EPL"
+            },
+            {
+              "index": 10,
+              "target": "0x71005e74fd",
+              "value": "_ICON11.EPL"
+            },
+            {
+              "index": 11,
+              "target": "0x71005ec9fe",
+              "value": "_ICON12.EPL"
+            },
+            {
+              "index": 12,
+              "target": "0x7100619e62",
+              "value": "_ICON13.EPL"
+            },
+            {
+              "index": 13,
+              "target": "0x7100622f2f",
+              "value": "_ICON14.EPL"
+            },
+            {
+              "index": 14,
+              "target": "0x7100627ff5",
+              "value": "_ICON15.EPL"
+            },
+            {
+              "index": 15,
+              "target": "0x71005fcd63",
+              "value": "_ICON16.EPL"
+            },
+            {
+              "index": 16,
+              "target": "0x710061498f",
+              "value": "_ICON17.EPL"
+            },
+            {
+              "index": 17,
+              "target": "0x7100628001",
+              "value": "_ICON18.EPL"
+            },
+            {
+              "index": 18,
+              "target": "0x71005defb5",
+              "value": "_ICON19.EPL"
+            },
+            {
+              "index": 19,
+              "target": "0x71005fcd6f",
+              "value": "_ICON20.EPL"
+            },
+            {
+              "index": 20,
+              "target": "0x71005defc1",
+              "value": "_ICON21.EPL"
+            },
+            {
+              "index": 21,
+              "target": "0x71005defcd",
+              "value": "_ICON22.EPL"
+            },
+            {
+              "index": 22,
+              "target": "0x71005dbf3b",
+              "value": "_ICON23.EPL"
+            },
+            {
+              "index": 23,
+              "target": "0x71005f76c7",
+              "value": "_ICON24.EPL"
+            },
+            {
+              "index": 24,
+              "target": "0x7100619e6e",
+              "value": "_ICON25.EPL"
+            },
+            {
+              "index": 25,
+              "target": "0x71005fa222",
+              "value": "_ICON26.EPL"
+            },
+            {
+              "index": 26,
+              "target": "0x713f800000",
+              "value": null
+            }
+          ]
+        }
+      },
+      "sealed_archive": {
+        "qualified_member": "data.cpk::init.bin::event/icon.bin",
+        "size": 427116,
+        "sha256": "7799e841994b2688152ccb5a8622b104ded5903fd53cc48509d7841ce36a9b16",
+        "format": "pak-v2",
+        "member_names": [
+          "_ICON1.EPL",
+          "_ICON2.EPL",
+          "_ICON3.EPL",
+          "_ICON4.EPL",
+          "_ICON5.EPL",
+          "_ICON6.EPL",
+          "_ICON7.EPL",
+          "_ICON8.EPL",
+          "_ICON9.EPL",
+          "_ICON10.EPL",
+          "_ICON11.EPL",
+          "_ICON12.EPL",
+          "_ICON13.EPL",
+          "_ICON14.EPL",
+          "_ICON15.EPL",
+          "_ICON16.EPL",
+          "_ICON17.EPL",
+          "_ICON18.EPL",
+          "_ICON19.EPL",
+          "_ICON20.EPL",
+          "_ICON21.EPL",
+          "_ICON22.EPL",
+          "_ICON23.EPL",
+          "_ICON24.EPL",
+          "_ICON25.EPL",
+          "_ICON26.EPL"
+        ]
+      },
+      "required_seams": [
+        "golden-a2-event-icons: use the actual cached event/icon.bin archive and26 ordered basename members, with request completion, effect creation and kind1/3 replacement/retirement. Preserve special index10 behavior and qualify the script/scene icon-index namespace. No old event/fullpath lookup or27th guessed pointer.",
+        "golden-a2-event-icon-aliases: route all native, translated, inlined, preloader and computed-pointer consumers through this full registry. Normalize host pointers as logical names; never copy the native pointer table into the guest image or treat a basename as an unqualified filesystem path."
+      ]
+    },
+    "battle-panel-member-layout": {
+      "old_consumer": "202890 streams12 sprites into16 total slots:8 potential actor panels,4 common sprites, then4 cached common handles. It branches on flag1438 for the archive/actor1 override and checks the owning side for each actor.",
+      "golden_consumer": "084bd0 repeats flag1438 archive selection, actor-presence gating, actor1 override and ready/adopt/release state machine, but loads10 members:8 actor slots (slot4 null), status common at8, p4p_com01x2 at9. It adopts two cached common handles after texture readiness, not four old handles. Actual Steam pointer registry90b2b0 and refsdd5dc/dd61b agree with NSO733de0. Actual archive member directories exactly reproduce this ten-slot organization; actor1438 override is b_p_k01_op.spr.",
+      "positive_common_replacement": "Old battle_01, b_cammand01 and corsol_01 are separate common SPR resources in old slots8/9/10. The actual Golden loader and sealed pack have the different common composition: b_badsta01x2 and p4p_com01x2 plus two separately adopted cached handles. Old common-resource fields/handles have no positions in this replacement layout. Full current rendering must migrate with that layout; this is not permission to drop commands or cursor drawing.",
+      "registry": {
+        "count": 10,
+        "values": [
+          "b_p_k01x2.spr",
+          "b_p_k02x2.spr",
+          "b_p_k03x2.spr",
+          "b_p_k04x2.spr",
+          null,
+          "b_p_k06x2.spr",
+          "b_p_k07x2.spr",
+          "b_p_k08x2.spr",
+          "b_badsta01x2.spr",
+          "p4p_com01x2.spr"
+        ],
+        "steam": [
+          {
+            "table": {
+              "rva": "0x90b2b0",
+              "raw_offset": 9477808,
+              "size": 80,
+              "sha256": "eb8e293b80fe0a49aaf3902889cd9d8f6eb035ef03507698aa45c2db693e0197"
+            },
+            "records": [
+              {
+                "index": 0,
+                "value": "b_p_k01x2.spr",
+                "source": {
+                  "rva": "0x919120",
+                  "raw_offset": 9534752,
+                  "size": 14,
+                  "sha256": "468cffbd17d0e29a40ce00c4e3647090de19bbd81a9ac1b07fe5e282b65930c1"
+                }
+              },
+              {
+                "index": 1,
+                "value": "b_p_k02x2.spr",
+                "source": {
+                  "rva": "0x919130",
+                  "raw_offset": 9534768,
+                  "size": 14,
+                  "sha256": "0761369877a957e11a991bcfe6b717752707c8b43bcf01a023fb6f6e066574ab"
+                }
+              },
+              {
+                "index": 2,
+                "value": "b_p_k03x2.spr",
+                "source": {
+                  "rva": "0x919140",
+                  "raw_offset": 9534784,
+                  "size": 14,
+                  "sha256": "b86054cbc7e76b7855464f9bcd067380933b46e5221a7b7f17071867cfef68c0"
+                }
+              },
+              {
+                "index": 3,
+                "value": "b_p_k04x2.spr",
+                "source": {
+                  "rva": "0x919150",
+                  "raw_offset": 9534800,
+                  "size": 14,
+                  "sha256": "df4a34d1675799d7896c771818e88106033b1fa6a624108724dfd4a013495c5f"
+                }
+              },
+              {
+                "index": 4,
+                "value": null,
+                "source": null
+              },
+              {
+                "index": 5,
+                "value": "b_p_k06x2.spr",
+                "source": {
+                  "rva": "0x919160",
+                  "raw_offset": 9534816,
+                  "size": 14,
+                  "sha256": "b79cb2693a376fa27ad259d7abcf266c6a8cbd93b76d1642b9e7e03ab1f383f3"
+                }
+              },
+              {
+                "index": 6,
+                "value": "b_p_k07x2.spr",
+                "source": {
+                  "rva": "0x919170",
+                  "raw_offset": 9534832,
+                  "size": 14,
+                  "sha256": "1554a1b158762ceb0fbf64938be79209832533cf093be4b2599cf068f47dae44"
+                }
+              },
+              {
+                "index": 7,
+                "value": "b_p_k08x2.spr",
+                "source": {
+                  "rva": "0x919180",
+                  "raw_offset": 9534848,
+                  "size": 14,
+                  "sha256": "4f0d4767f7ac9e97620b323272af76766dae9eaeda63501a66129de28be6857e"
+                }
+              },
+              {
+                "index": 8,
+                "value": "b_badsta01x2.spr",
+                "source": {
+                  "rva": "0x919190",
+                  "raw_offset": 9534864,
+                  "size": 17,
+                  "sha256": "ea64fa302a85e82b1c7994e8637a17cb2aae792f62873e28233b879f1838d199"
+                }
+              },
+              {
+                "index": 9,
+                "value": "p4p_com01x2.spr",
+                "source": {
+                  "rva": "0x9191a8",
+                  "raw_offset": 9534888,
+                  "size": 16,
+                  "sha256": "4db8a2530f3b05df00e5a017636384023bf361facce13eb7ceeb356574d950d3"
+                }
+              }
+            ],
+            "readers": [
+              {
+                "function": "0xdd58b",
+                "pc": "0xdd5dc"
+              },
+              {
+                "function": "0xdd58b",
+                "pc": "0xdd61b"
+              }
+            ]
+          }
+        ],
+        "switch": {
+          "base": "0x7100733de0",
+          "count": 10,
+          "records": [
+            {
+              "index": 0,
+              "target": "0x7100627268",
+              "value": "b_p_k01x2.spr"
+            },
+            {
+              "index": 1,
+              "target": "0x7100610f04",
+              "value": "b_p_k02x2.spr"
+            },
+            {
+              "index": 2,
+              "target": "0x7100610f12",
+              "value": "b_p_k03x2.spr"
+            },
+            {
+              "index": 3,
+              "target": "0x71005d8a20",
+              "value": "b_p_k04x2.spr"
+            },
+            {
+              "index": 4,
+              "target": "0x7100000000",
+              "value": ""
+            },
+            {
+              "index": 5,
+              "target": "0x71005fede5",
+              "value": "b_p_k06x2.spr"
+            },
+            {
+              "index": 6,
+              "target": "0x7100627276",
+              "value": "b_p_k07x2.spr"
+            },
+            {
+              "index": 7,
+              "target": "0x7100621fe0",
+              "value": "b_p_k08x2.spr"
+            },
+            {
+              "index": 8,
+              "target": "0x7100606cb8",
+              "value": "b_badsta01x2.spr"
+            },
+            {
+              "index": 9,
+              "target": "0x71005e3809",
+              "value": "p4p_com01x2.spr"
+            }
+          ]
+        }
+      },
+      "sealed_archives": [
+        {
+          "qualified_member": "data.cpk::battle/panel/btlpanel.bin",
+          "size": 11866412,
+          "sha256": "02b6b279147a8e430ba56d720182cdd6d5a5beddb965a328c29dd47e9a43648b",
+          "format": "pak-v2",
+          "member_names": [
+            "b_p_k01x2.spr",
+            "b_p_k02x2.spr",
+            "b_p_k03x2.spr",
+            "b_p_k04x2.spr",
+            "dummy.dat",
+            "b_p_k06x2.spr",
+            "b_p_k07x2.spr",
+            "b_p_k08x2.spr",
+            "b_badsta01x2.spr",
+            "p4p_com01x2.spr"
+          ]
+        },
+        {
+          "qualified_member": "data.cpk::battle/panel/btlpnlop.bin",
+          "size": 11866412,
+          "sha256": "fc8f9136d04df69509aef16b35deaa6186b881ef428939130f5268bedf1c2f49",
+          "format": "pak-v2",
+          "member_names": [
+            "b_p_k01_op.spr",
+            "b_p_k02x2.spr",
+            "b_p_k03x2.spr",
+            "b_p_k04x2.spr",
+            "dummy.dat",
+            "b_p_k06x2.spr",
+            "b_p_k07x2.spr",
+            "b_p_k08x2.spr",
+            "b_badsta01x2.spr",
+            "p4p_com01x2.spr"
+          ]
+        }
+      ],
+      "required_seams": [
+        "golden-a2-battle-panel: use complete Golden10-member namespace, null actor slot4, actor-presence/flag1438 override, pack completion/adoption/destruction, TV texture stage and two cached handles. Bind all actual Golden panel/status/command/cursor draw consumers and their sprite-part/layout rules; no PS2-only resource/UV/slot fallback and no disabled presentation.",
+        "golden-a2-battle-panel-common: retire the entire old separate battle_01/cammand/corsol resource/handle representation in favor of the positively loaded Golden common composition. Do not invent a guest old-slot to native-slot byte mapping or preserve old sprite names cosmetically."
+      ]
+    },
+    "battle-voice-pack-loader": {
+      "positive_correspondence": "Old1f65d0 and Golden0648e0 are bank-loading packet state machines: bank0 chooses channel8, otherwise5; queue the indexed BVP request, wait, enable(1<<channel)|1 and set battle loaded flag01000000. Golden pack pointer registry7203b8 is indexed by the work bank selector. This qualifies the selected BSV108 path, not an unrelated battle voice dispatch enum or decoder.",
+      "required_seams": [
+        "golden-a2-battle-voice-pack: qualify actual Golden bank selector, BVP request, channel8/5 enable-mask and battle loaded state plus ownership. Bind all native/translated/computed registry aliases; a filename proof does not qualify the BVP payload/sound-bank namespace or the separate tactic-confirm table."
+      ]
+    }
+  },
+  "admissions": [
+    {
+      "address": "0x005eff80",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "persistent field-load icon effect",
+      "ps2_live_bytes": 19,
+      "retained_ps2_tail_bytes": 13,
+      "ps2_sha256": "4b1a6bb1894b18cc0ebdd6a6b00e758e83d39059b4c597627b45d9038335c369",
+      "ps2_consumers": [
+        {
+          "function": "0x1561a0",
+          "name": "func_001561a0",
+          "file": "src/Graphics/Model/mdlManager_inferred_001560a0.c"
+        }
+      ],
+      "golden": {
+        "kind": "cstring",
+        "value": "field/F_ICON01.EPL",
+        "switch_address": "0x71005d672b",
+        "size": 19,
+        "sha256": "fb4dfc3ab95b6b3de051a1f3bdd97e5cc16d1b06c1939d4280330c602c4c0d1b",
+        "steam_spans": [
+          {
+            "rva": "0x930278",
+            "raw_offset": 9629304,
+            "size": 19,
+            "sha256": "fb4dfc3ab95b6b3de051a1f3bdd97e5cc16d1b06c1939d4280330c602c4c0d1b",
+            "container": "P4G.exe",
+            "source_build": 10836033
+          }
+        ]
+      },
+      "structural_proof": "The paired field/FBN/script/scene load state graph explicitly submits this named effect in the corresponding persistent child slot, waits completion and only then builds the camera. Golden startup has an additional independent same-resource producer. Filename equality is corroboration, not the proof.",
+      "route_contract": "field-load-and-dungeon-step",
+      "required_seams": [
+        "golden-a2-field-effect-load: route the actual field-load child tasks and dungeon preload producer/wait/adoption/release paths through Golden namespaces and request handles; retain added04/05 icons and P_HAKEN, not a three-effect PS2 truncation. No CVM/RMD fallback or merely renamed payload decoder.",
+        "golden-a2-dungeon-step-model: use actual Golden AMD model kind4/idFFFF, step16-byte input namespace, root creation,9F panel gate and readiness lifecycle. All native/translated/inlined consumers of the corresponding old path must reach this producer."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005effa0",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "persistent field-load icon effect",
+      "ps2_live_bytes": 19,
+      "retained_ps2_tail_bytes": 13,
+      "ps2_sha256": "60d746ee26549b4f77b4535526a3cfb8852a8d1db05c9cd70df91dcd4ed332c3",
+      "ps2_consumers": [
+        {
+          "function": "0x1561a0",
+          "name": "func_001561a0",
+          "file": "src/Graphics/Model/mdlManager_inferred_001560a0.c"
+        }
+      ],
+      "golden": {
+        "kind": "cstring",
+        "value": "field/F_ICON02.EPL",
+        "switch_address": "0x71005fc693",
+        "size": 19,
+        "sha256": "fc9175a87058745e851d37c66db2a2dcb2ef69ec0bc9f1a1219ffbceb589c305",
+        "steam_spans": [
+          {
+            "rva": "0x9302b8",
+            "raw_offset": 9629368,
+            "size": 19,
+            "sha256": "fc9175a87058745e851d37c66db2a2dcb2ef69ec0bc9f1a1219ffbceb589c305",
+            "container": "P4G.exe",
+            "source_build": 10836033
+          }
+        ]
+      },
+      "structural_proof": "The paired field/FBN/script/scene load state graph explicitly submits this named effect in the corresponding persistent child slot, waits completion and only then builds the camera. Golden startup has an additional independent same-resource producer. Filename equality is corroboration, not the proof.",
+      "route_contract": "field-load-and-dungeon-step",
+      "required_seams": [
+        "golden-a2-field-effect-load: route the actual field-load child tasks and dungeon preload producer/wait/adoption/release paths through Golden namespaces and request handles; retain added04/05 icons and P_HAKEN, not a three-effect PS2 truncation. No CVM/RMD fallback or merely renamed payload decoder.",
+        "golden-a2-dungeon-step-model: use actual Golden AMD model kind4/idFFFF, step16-byte input namespace, root creation,9F panel gate and readiness lifecycle. All native/translated/inlined consumers of the corresponding old path must reach this producer."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005effc0",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "persistent field-load icon effect",
+      "ps2_live_bytes": 19,
+      "retained_ps2_tail_bytes": 13,
+      "ps2_sha256": "a158970e5e8fc013dfa6d72b12075aee0ae553ddcf33d62c64f315d59e3f9d88",
+      "ps2_consumers": [
+        {
+          "function": "0x1561a0",
+          "name": "func_001561a0",
+          "file": "src/Graphics/Model/mdlManager_inferred_001560a0.c"
+        }
+      ],
+      "golden": {
+        "kind": "cstring",
+        "value": "field/F_ICON03.EPL",
+        "switch_address": "0x71005e6b66",
+        "size": 19,
+        "sha256": "0ecc4e57be52c08d547b61f8413d198e3aee37c3f790acaf851c3aaa5a4f4513",
+        "steam_spans": [
+          {
+            "rva": "0x9302a0",
+            "raw_offset": 9629344,
+            "size": 19,
+            "sha256": "0ecc4e57be52c08d547b61f8413d198e3aee37c3f790acaf851c3aaa5a4f4513",
+            "container": "P4G.exe",
+            "source_build": 10836033
+          }
+        ]
+      },
+      "structural_proof": "The paired field/FBN/script/scene load state graph explicitly submits this named effect in the corresponding persistent child slot, waits completion and only then builds the camera. Golden startup has an additional independent same-resource producer. Filename equality is corroboration, not the proof.",
+      "route_contract": "field-load-and-dungeon-step",
+      "required_seams": [
+        "golden-a2-field-effect-load: route the actual field-load child tasks and dungeon preload producer/wait/adoption/release paths through Golden namespaces and request handles; retain added04/05 icons and P_HAKEN, not a three-effect PS2 truncation. No CVM/RMD fallback or merely renamed payload decoder.",
+        "golden-a2-dungeon-step-model: use actual Golden AMD model kind4/idFFFF, step16-byte input namespace, root creation,9F panel gate and readiness lifecycle. All native/translated/inlined consumers of the corresponding old path must reach this producer."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f0630",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "dungeon-step sentinel model resource",
+      "ps2_live_bytes": 23,
+      "retained_ps2_tail_bytes": 9,
+      "ps2_sha256": "f8be1d159ac41ea33319e8006eb2e2a9bc8c782e1aeffad27b3ac5bb197d0274",
+      "ps2_consumers": [
+        {
+          "function": "0x159a60",
+          "name": "func_00159a60",
+          "file": "src/Graphics/Model/mdlManager_inferred_001560a0.c"
+        }
+      ],
+      "golden": {
+        "kind": "cstring",
+        "value": "field/grmd/fobj103.AMD",
+        "switch_address": "0x71005f47b1",
+        "size": 23,
+        "sha256": "d17839169c63e3b7960e8f4a5026bc9de11311910443b10cc13d748f93d2ea09",
+        "steam_spans": [
+          {
+            "rva": "0x9307d8",
+            "raw_offset": 9630680,
+            "size": 23,
+            "sha256": "d17839169c63e3b7960e8f4a5026bc9de11311910443b10cc13d748f93d2ea09",
+            "container": "P4G.exe",
+            "source_build": 10836033
+          }
+        ]
+      },
+      "structural_proof": "The paired step state machines create genus4/idFFFF from this resource, wait for model readiness and shared preload tasks, interpret16-byte step records and suppress the party panel at step9F. These independent branch/ABI/lifetime anchors identify the new AMD path.",
+      "route_contract": "field-load-and-dungeon-step",
+      "required_seams": [
+        "golden-a2-field-effect-load: route the actual field-load child tasks and dungeon preload producer/wait/adoption/release paths through Golden namespaces and request handles; retain added04/05 icons and P_HAKEN, not a three-effect PS2 truncation. No CVM/RMD fallback or merely renamed payload decoder.",
+        "golden-a2-dungeon-step-model: use actual Golden AMD model kind4/idFFFF, step16-byte input namespace, root creation,9F panel gate and readiness lifecycle. All native/translated/inlined consumers of the corresponding old path must reach this producer."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f06e0",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "dungeon shared-archive preload effect",
+      "ps2_live_bytes": 19,
+      "retained_ps2_tail_bytes": 13,
+      "ps2_sha256": "0b9152aca33e0c19785655fba67e9ac1e601692e7842524b8a5c306ea714e3cf",
+      "ps2_consumers": [
+        {
+          "function": "0x15c280",
+          "name": "func_0015c280",
+          "file": "src/Graphics/Model/mdlManager_inferred_001560a0.c"
+        }
+      ],
+      "golden": {
+        "kind": "cstring",
+        "value": "field/ENCONT_N.EPL",
+        "switch_address": "0x71005d6751",
+        "size": 19,
+        "sha256": "63a81d976b426db24f48f7b268b40eef7f4b8621df007bd2056b68f175f4b9fe",
+        "steam_spans": [
+          {
+            "rva": "0x9307f0",
+            "raw_offset": 9630704,
+            "size": 19,
+            "sha256": "63a81d976b426db24f48f7b268b40eef7f4b8621df007bd2056b68f175f4b9fe",
+            "container": "P4G.exe",
+            "source_build": 10836033
+          }
+        ]
+      },
+      "structural_proof": "PS215c280 and actual Golden1cf7b0 share the nonnull step-task/shared-handle gate, file-ready test, per-slot null guard and child construction with duration30. Golden adds a third effect; do not confuse the old two slots with the complete Golden family.",
+      "route_contract": "field-load-and-dungeon-step",
+      "required_seams": [
+        "golden-a2-field-effect-load: route the actual field-load child tasks and dungeon preload producer/wait/adoption/release paths through Golden namespaces and request handles; retain added04/05 icons and P_HAKEN, not a three-effect PS2 truncation. No CVM/RMD fallback or merely renamed payload decoder.",
+        "golden-a2-dungeon-step-model: use actual Golden AMD model kind4/idFFFF, step16-byte input namespace, root creation,9F panel gate and readiness lifecycle. All native/translated/inlined consumers of the corresponding old path must reach this producer."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x005f0700",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "dungeon shared-archive preload effect",
+      "ps2_live_bytes": 18,
+      "retained_ps2_tail_bytes": 14,
+      "ps2_sha256": "6eb6ca1a84d1121cd8ef8448ccb61d2f39693e65c4123073a682ff823d93bd0d",
+      "ps2_consumers": [
+        {
+          "function": "0x15c280",
+          "name": "func_0015c280",
+          "file": "src/Graphics/Model/mdlManager_inferred_001560a0.c"
+        }
+      ],
+      "golden": {
+        "kind": "cstring",
+        "value": "field/F_HAKEN.EPL",
+        "switch_address": "0x7100601b64",
+        "size": 18,
+        "sha256": "685c8658d9cd8c2bea7e6c41bddb2696967cc00f3ec024c4b785de46f1290132",
+        "steam_spans": [
+          {
+            "rva": "0x930838",
+            "raw_offset": 9630776,
+            "size": 18,
+            "sha256": "685c8658d9cd8c2bea7e6c41bddb2696967cc00f3ec024c4b785de46f1290132",
+            "container": "P4G.exe",
+            "source_build": 10836033
+          }
+        ]
+      },
+      "structural_proof": "PS215c280 and actual Golden1cf7b0 share the nonnull step-task/shared-handle gate, file-ready test, per-slot null guard and child construction with duration20. Golden adds a third effect; do not confuse the old two slots with the complete Golden family.",
+      "route_contract": "field-load-and-dungeon-step",
+      "required_seams": [
+        "golden-a2-field-effect-load: route the actual field-load child tasks and dungeon preload producer/wait/adoption/release paths through Golden namespaces and request handles; retain added04/05 icons and P_HAKEN, not a three-effect PS2 truncation. No CVM/RMD fallback or merely renamed payload decoder.",
+        "golden-a2-dungeon-step-model: use actual Golden AMD model kind4/idFFFF, step16-byte input namespace, root creation,9F panel gate and readiness lifecycle. All native/translated/inlined consumers of the corresponding old path must reach this producer."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x006357e0",
+      "size": 32,
+      "class": "PROVEN-code",
+      "role": "dual-hand weapon model format",
+      "ps2_live_bytes": 22,
+      "retained_ps2_tail_bytes": 10,
+      "ps2_sha256": "9fef8823fc92d469b400ed4bc2feca5c611b48415e64678a2dcaf6e044ddba40",
+      "ps2_consumers": [
+        {
+          "function": "0x230d30",
+          "name": "func_00230d30",
+          "file": "src/Graphics/Model/mdlManager_inferred_00230c00.c"
+        }
+      ],
+      "golden": {
+        "kind": "authored-code-format",
+        "value": "%sweapon/wp%03X_R.AMD",
+        "stem": {
+          "kind": "cstring",
+          "value": "%sweapon/wp%03X_R",
+          "switch_address": "0x71005d6e6f",
+          "size": 18,
+          "sha256": "2e5b3530b0b5240966f58be6122f559895f9d406dc316411195d9d0fd219f6ae",
+          "steam_spans": [
+            {
+              "rva": "0x9410f8",
+              "raw_offset": 9698552,
+              "size": 18,
+              "sha256": "2e5b3530b0b5240966f58be6122f559895f9d406dc316411195d9d0fd219f6ae",
+              "container": "P4G.exe",
+              "source_build": 10836033
+            }
+          ]
+        },
+        "appended_le_u32": "0x444d412e",
+        "terminator_u8": 0,
+        "sites": [
+          "NSO281040 formatting stem,strlen,store444D412E,storeNUL before38adb0"
+        ],
+        "runtime_reads_nso": false
+      },
+      "structural_proof": "The full paired actor2/equipped-item/left-cache+1000/attachment-frame producer establishes this exact format field. Golden constructs the extension in code, not in a standalone cstring. The original base item ID, not the left cache ID, is the filename argument.",
+      "route_contract": "dual-hand-weapon-resource",
+      "required_seams": [
+        "golden-a2-dual-weapon: author both full .AMD format values from the proven stem plus appended constant; never read NSO at runtime. Bind actual Golden equipped-item ID/namespace, left-cache+1000 rule, cache-hit and cache-miss attach paths, actor3 costume gate, frame500/501 and model request lifetimes. Do not reuse RMD decoding or old item-pointer layout."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x00635800",
+      "size": 32,
+      "class": "PROVEN-code",
+      "role": "dual-hand weapon model format",
+      "ps2_live_bytes": 22,
+      "retained_ps2_tail_bytes": 10,
+      "ps2_sha256": "3533862da9784f3eba4910b6a3f70cab95850f8a59ca1d2285df89da86417968",
+      "ps2_consumers": [
+        {
+          "function": "0x230d30",
+          "name": "func_00230d30",
+          "file": "src/Graphics/Model/mdlManager_inferred_00230c00.c"
+        }
+      ],
+      "golden": {
+        "kind": "authored-code-format",
+        "value": "%sweapon/wp%03X_L.AMD",
+        "stem": {
+          "kind": "cstring",
+          "value": "%sweapon/wp%03X_L",
+          "switch_address": "0x7100614904",
+          "size": 18,
+          "sha256": "31711433bf2a749481be80a0f5d25bcf98631a9fb1387a3287ea9744545b934a",
+          "steam_spans": [
+            {
+              "rva": "0x9410e0",
+              "raw_offset": 9698528,
+              "size": 18,
+              "sha256": "31711433bf2a749481be80a0f5d25bcf98631a9fb1387a3287ea9744545b934a",
+              "container": "P4G.exe",
+              "source_build": 10836033
+            }
+          ]
+        },
+        "appended_le_u32": "0x444d412e",
+        "terminator_u8": 0,
+        "sites": [
+          "NSO281040 formatting stem,strlen,store444D412E,storeNUL before38adb0"
+        ],
+        "runtime_reads_nso": false
+      },
+      "structural_proof": "The full paired actor2/equipped-item/left-cache+1000/attachment-frame producer establishes this exact format field. Golden constructs the extension in code, not in a standalone cstring. The original base item ID, not the left cache ID, is the filename argument.",
+      "route_contract": "dual-hand-weapon-resource",
+      "required_seams": [
+        "golden-a2-dual-weapon: author both full .AMD format values from the proven stem plus appended constant; never read NSO at runtime. Bind actual Golden equipped-item ID/namespace, left-cache+1000 rule, cache-hit and cache-miss attach paths, actor3 costume gate, frame500/501 and model request lifetimes. Do not reuse RMD decoding or old item-pointer layout."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x00713138",
+      "size": 16,
+      "class": "PROVEN",
+      "role": "SDK model-manager file diagnostic",
+      "ps2_live_bytes": 13,
+      "retained_ps2_tail_bytes": 3,
+      "ps2_sha256": "db3100f117b4a9d0ad23774a9e59120cd81ad4a8fe574294ef3b23bbc8760c3f",
+      "ps2_consumers": [
+        {
+          "function": "0x470e90",
+          "name": "func_00470e90",
+          "file": "src/Graphics/Model/mdlManager.c"
+        },
+        {
+          "function": "0x4779b0",
+          "name": "func_004779b0",
+          "file": "src/Graphics/Model/mdlManager.c"
+        },
+        {
+          "function": "0x478410",
+          "name": "func_00478410",
+          "file": "src/Graphics/Model/mdlManager.c"
+        },
+        {
+          "function": "0x47af60",
+          "name": "func_0047af60",
+          "file": "src/Graphics/Model/mdlManager.c"
+        },
+        {
+          "function": "0x47aff0",
+          "name": "func_0047aff0",
+          "file": "src/Graphics/Model/mdlManager.c"
+        },
+        {
+          "function": "0x47b0c0",
+          "name": "func_0047b0c0",
+          "file": "src/Graphics/Model/mdlManager.c"
+        },
+        {
+          "function": "0x47c660",
+          "name": "func_0047c660",
+          "file": "src/Graphics/Model/mdlManager.c"
+        }
+      ],
+      "golden": {
+        "kind": "cstring",
+        "value": "D:/Projects/P4G-NSW/xrd654v/sdk/src/graphics/model/mdlManager.c",
+        "switch_address": "0x71005f84be",
+        "size": 64,
+        "sha256": "12abee23fe3eec71e704c21539bc7d7aeaa00a750475e33d73f4c3fcfa2cbf17",
+        "steam_spans": [],
+        "steam_corresponding_file_field": {
+          "rva": "0x94e2e0",
+          "raw_offset": 9752288,
+          "size": 58,
+          "sha256": "612f157da87628ac66feaaac042d247eb5fdd58c9dda7f98de2b72db84d07f0a",
+          "container": "P4G.exe",
+          "source_build": 10836033,
+          "value": "c:\\work\\p4g\\0\\xrd654v\\sdk\\src\\graphics\\model\\mdlmanager.c",
+          "note": "Platform build path differs; same typed file/line field, not byte equality."
+        }
+      },
+      "structural_proof": "Actual old uses are typed filename arguments, and actual Golden model dispatch-table allocation/destruction/stream processing passes this full source path and line at its matching ownership points. A historical diagnostic scanner missed the corresponding complex/inlined constructors; the source proof does not promote a module label.",
+      "route_contract": "model-manager-source-field",
+      "required_seams": [
+        "golden-a2-model-manager-source: pass the complete actual Golden platform source-file string at every old basename/GP/interior diagnostic alias and native/inlined model-manager equivalent. This does not imply a release RET sink logs or aborts. Full paths must not overwrite the short guest basename; qualify the native diagnostic ABI and model-table lifetime separately."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x0063b1b0",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "indexed scene event icon member",
+      "ps2_live_bytes": 17,
+      "retained_ps2_tail_bytes": 15,
+      "ps2_sha256": "791cb0baa97230456a57441ac8c13641eac6a9bddb518a371f19d22287c523d0",
+      "ps2_consumers": [
+        {
+          "function": "0x26d890",
+          "name": "mtSceneIconTaskUpdate",
+          "file": "src/mt_sceneIcon.c"
+        }
+      ],
+      "golden": {
+        "kind": "archive-member-registry-field",
+        "value": "_ICON1.EPL",
+        "switch_address": "0x71005e1d98",
+        "size": 11,
+        "sha256": "c332b70526bb214b687a6ef0436ce7e68a6a2f8a2c2c49b561cccbf2eeab0617",
+        "steam_spans": [
+          {
+            "rva": "0x9422e8",
+            "raw_offset": 9703144,
+            "size": 11,
+            "sha256": "c332b70526bb214b687a6ef0436ce7e68a6a2f8a2c2c49b561cccbf2eeab0617",
+            "container": "P4G.exe",
+            "source_build": 10836033
+          }
+        ],
+        "index": 0,
+        "registry_count": 26,
+        "qualified_archive": "data.cpk::init.bin::event/icon.bin",
+        "steam_registry_field": {
+          "index": 0,
+          "value": "_ICON1.EPL",
+          "source": {
+            "rva": "0x9422e8",
+            "raw_offset": 9703144,
+            "size": 11,
+            "sha256": "c332b70526bb214b687a6ef0436ce7e68a6a2f8a2c2c49b561cccbf2eeab0617"
+          }
+        }
+      },
+      "structural_proof": "The old ordered pointer-bank field and actual scene-icon task are positively paired with the Golden cached archive/member registry, kind1/3 effect-slot replacement and special index10 producer. Complete ordered26-name Steam and NSO registries agree; the source is not a similarly sized archive window.",
+      "route_contract": "event-icon-member-registry",
+      "required_seams": [
+        "golden-a2-event-icons: use the actual cached event/icon.bin archive and26 ordered basename members, with request completion, effect creation and kind1/3 replacement/retirement. Preserve special index10 behavior and qualify the script/scene icon-index namespace. No old event/fullpath lookup or27th guessed pointer.",
+        "golden-a2-event-icon-aliases: route all native, translated, inlined, preloader and computed-pointer consumers through this full registry. Normalize host pointers as logical names; never copy the native pointer table into the guest image or treat a basename as an unqualified filesystem path."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x0063b1d0",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "indexed scene event icon member",
+      "ps2_live_bytes": 17,
+      "retained_ps2_tail_bytes": 15,
+      "ps2_sha256": "ddd3a26d5fb1e3b76a3cbb8a01cf1015a304a1b64229793b418af9de99ba0429",
+      "ps2_consumers": [
+        {
+          "function": "0x26d890",
+          "name": "mtSceneIconTaskUpdate",
+          "file": "src/mt_sceneIcon.c"
+        }
+      ],
+      "golden": {
+        "kind": "archive-member-registry-field",
+        "value": "_ICON2.EPL",
+        "switch_address": "0x710060f4b1",
+        "size": 11,
+        "sha256": "6f56fdb4320ad87c9a846e8908629a32af0d6491efd810dca509283839990bd3",
+        "steam_spans": [
+          {
+            "rva": "0x942318",
+            "raw_offset": 9703192,
+            "size": 11,
+            "sha256": "6f56fdb4320ad87c9a846e8908629a32af0d6491efd810dca509283839990bd3",
+            "container": "P4G.exe",
+            "source_build": 10836033
+          }
+        ],
+        "index": 1,
+        "registry_count": 26,
+        "qualified_archive": "data.cpk::init.bin::event/icon.bin",
+        "steam_registry_field": {
+          "index": 1,
+          "value": "_ICON2.EPL",
+          "source": {
+            "rva": "0x942318",
+            "raw_offset": 9703192,
+            "size": 11,
+            "sha256": "6f56fdb4320ad87c9a846e8908629a32af0d6491efd810dca509283839990bd3"
+          }
+        }
+      },
+      "structural_proof": "The old ordered pointer-bank field and actual scene-icon task are positively paired with the Golden cached archive/member registry, kind1/3 effect-slot replacement and special index10 producer. Complete ordered26-name Steam and NSO registries agree; the source is not a similarly sized archive window.",
+      "route_contract": "event-icon-member-registry",
+      "required_seams": [
+        "golden-a2-event-icons: use the actual cached event/icon.bin archive and26 ordered basename members, with request completion, effect creation and kind1/3 replacement/retirement. Preserve special index10 behavior and qualify the script/scene icon-index namespace. No old event/fullpath lookup or27th guessed pointer.",
+        "golden-a2-event-icon-aliases: route all native, translated, inlined, preloader and computed-pointer consumers through this full registry. Normalize host pointers as logical names; never copy the native pointer table into the guest image or treat a basename as an unqualified filesystem path."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x0063b1f0",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "indexed scene event icon member",
+      "ps2_live_bytes": 17,
+      "retained_ps2_tail_bytes": 15,
+      "ps2_sha256": "c15643902e3b08ff53aeb3874993a4c56397d0c207e8212114786c3d3f085de3",
+      "ps2_consumers": [
+        {
+          "function": "0x26d890",
+          "name": "mtSceneIconTaskUpdate",
+          "file": "src/mt_sceneIcon.c"
+        }
+      ],
+      "golden": {
+        "kind": "archive-member-registry-field",
+        "value": "_ICON3.EPL",
+        "switch_address": "0x710060a4e1",
+        "size": 11,
+        "sha256": "5f67357c5fbe1c7e99897a4f0a3029fc9bf124f3c13e781457d28abae6d52dcb",
+        "steam_spans": [
+          {
+            "rva": "0x942328",
+            "raw_offset": 9703208,
+            "size": 11,
+            "sha256": "5f67357c5fbe1c7e99897a4f0a3029fc9bf124f3c13e781457d28abae6d52dcb",
+            "container": "P4G.exe",
+            "source_build": 10836033
+          }
+        ],
+        "index": 2,
+        "registry_count": 26,
+        "qualified_archive": "data.cpk::init.bin::event/icon.bin",
+        "steam_registry_field": {
+          "index": 2,
+          "value": "_ICON3.EPL",
+          "source": {
+            "rva": "0x942328",
+            "raw_offset": 9703208,
+            "size": 11,
+            "sha256": "5f67357c5fbe1c7e99897a4f0a3029fc9bf124f3c13e781457d28abae6d52dcb"
+          }
+        }
+      },
+      "structural_proof": "The old ordered pointer-bank field and actual scene-icon task are positively paired with the Golden cached archive/member registry, kind1/3 effect-slot replacement and special index10 producer. Complete ordered26-name Steam and NSO registries agree; the source is not a similarly sized archive window.",
+      "route_contract": "event-icon-member-registry",
+      "required_seams": [
+        "golden-a2-event-icons: use the actual cached event/icon.bin archive and26 ordered basename members, with request completion, effect creation and kind1/3 replacement/retirement. Preserve special index10 behavior and qualify the script/scene icon-index namespace. No old event/fullpath lookup or27th guessed pointer.",
+        "golden-a2-event-icon-aliases: route all native, translated, inlined, preloader and computed-pointer consumers through this full registry. Normalize host pointers as logical names; never copy the native pointer table into the guest image or treat a basename as an unqualified filesystem path."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x0063b210",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "indexed scene event icon member",
+      "ps2_live_bytes": 17,
+      "retained_ps2_tail_bytes": 15,
+      "ps2_sha256": "574e3b8319fd2c509a463aea16ef08662ceb7245773c3a20f5274c43e6f72711",
+      "ps2_consumers": [
+        {
+          "function": "0x26d890",
+          "name": "mtSceneIconTaskUpdate",
+          "file": "src/mt_sceneIcon.c"
+        }
+      ],
+      "golden": {
+        "kind": "archive-member-registry-field",
+        "value": "_ICON4.EPL",
+        "switch_address": "0x71005e74f2",
+        "size": 11,
+        "sha256": "29f6aa94b4e7650ac270a5f5ec70ae57e68b9efed37ac3d1f9db6ccd980feaac",
+        "steam_spans": [
+          {
+            "rva": "0x9422f8",
+            "raw_offset": 9703160,
+            "size": 11,
+            "sha256": "29f6aa94b4e7650ac270a5f5ec70ae57e68b9efed37ac3d1f9db6ccd980feaac",
+            "container": "P4G.exe",
+            "source_build": 10836033
+          }
+        ],
+        "index": 3,
+        "registry_count": 26,
+        "qualified_archive": "data.cpk::init.bin::event/icon.bin",
+        "steam_registry_field": {
+          "index": 3,
+          "value": "_ICON4.EPL",
+          "source": {
+            "rva": "0x9422f8",
+            "raw_offset": 9703160,
+            "size": 11,
+            "sha256": "29f6aa94b4e7650ac270a5f5ec70ae57e68b9efed37ac3d1f9db6ccd980feaac"
+          }
+        }
+      },
+      "structural_proof": "The old ordered pointer-bank field and actual scene-icon task are positively paired with the Golden cached archive/member registry, kind1/3 effect-slot replacement and special index10 producer. Complete ordered26-name Steam and NSO registries agree; the source is not a similarly sized archive window.",
+      "route_contract": "event-icon-member-registry",
+      "required_seams": [
+        "golden-a2-event-icons: use the actual cached event/icon.bin archive and26 ordered basename members, with request completion, effect creation and kind1/3 replacement/retirement. Preserve special index10 behavior and qualify the script/scene icon-index namespace. No old event/fullpath lookup or27th guessed pointer.",
+        "golden-a2-event-icon-aliases: route all native, translated, inlined, preloader and computed-pointer consumers through this full registry. Normalize host pointers as logical names; never copy the native pointer table into the guest image or treat a basename as an unqualified filesystem path."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x0063b230",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "indexed scene event icon member",
+      "ps2_live_bytes": 17,
+      "retained_ps2_tail_bytes": 15,
+      "ps2_sha256": "943ddfa56dea67fdc5fe892b23d52843a01a584e46cb2c7d0006888e01345920",
+      "ps2_consumers": [
+        {
+          "function": "0x26d890",
+          "name": "mtSceneIconTaskUpdate",
+          "file": "src/mt_sceneIcon.c"
+        }
+      ],
+      "golden": {
+        "kind": "archive-member-registry-field",
+        "value": "_ICON5.EPL",
+        "switch_address": "0x7100611e7b",
+        "size": 11,
+        "sha256": "3718f685d9e8eaaf3462fa6c9467706be357a8cd7f04e09c7a11065adc37126f",
+        "steam_spans": [
+          {
+            "rva": "0x942308",
+            "raw_offset": 9703176,
+            "size": 11,
+            "sha256": "3718f685d9e8eaaf3462fa6c9467706be357a8cd7f04e09c7a11065adc37126f",
+            "container": "P4G.exe",
+            "source_build": 10836033
+          }
+        ],
+        "index": 4,
+        "registry_count": 26,
+        "qualified_archive": "data.cpk::init.bin::event/icon.bin",
+        "steam_registry_field": {
+          "index": 4,
+          "value": "_ICON5.EPL",
+          "source": {
+            "rva": "0x942308",
+            "raw_offset": 9703176,
+            "size": 11,
+            "sha256": "3718f685d9e8eaaf3462fa6c9467706be357a8cd7f04e09c7a11065adc37126f"
+          }
+        }
+      },
+      "structural_proof": "The old ordered pointer-bank field and actual scene-icon task are positively paired with the Golden cached archive/member registry, kind1/3 effect-slot replacement and special index10 producer. Complete ordered26-name Steam and NSO registries agree; the source is not a similarly sized archive window.",
+      "route_contract": "event-icon-member-registry",
+      "required_seams": [
+        "golden-a2-event-icons: use the actual cached event/icon.bin archive and26 ordered basename members, with request completion, effect creation and kind1/3 replacement/retirement. Preserve special index10 behavior and qualify the script/scene icon-index namespace. No old event/fullpath lookup or27th guessed pointer.",
+        "golden-a2-event-icon-aliases: route all native, translated, inlined, preloader and computed-pointer consumers through this full registry. Normalize host pointers as logical names; never copy the native pointer table into the guest image or treat a basename as an unqualified filesystem path."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x0063b250",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "indexed scene event icon member",
+      "ps2_live_bytes": 17,
+      "retained_ps2_tail_bytes": 15,
+      "ps2_sha256": "15edcf2d6ce3c6494b2032804599b033f99bbcb511e39cb0d1e49457d667af84",
+      "ps2_consumers": [
+        {
+          "function": "0x26d890",
+          "name": "mtSceneIconTaskUpdate",
+          "file": "src/mt_sceneIcon.c"
+        }
+      ],
+      "golden": {
+        "kind": "archive-member-registry-field",
+        "value": "_ICON6.EPL",
+        "switch_address": "0x71005f76bc",
+        "size": 11,
+        "sha256": "44bde6dea40a8fe6494a3ef8c364ab7d53083d66e4f435e862eb2cfb53376862",
+        "steam_spans": [
+          {
+            "rva": "0x942358",
+            "raw_offset": 9703256,
+            "size": 11,
+            "sha256": "44bde6dea40a8fe6494a3ef8c364ab7d53083d66e4f435e862eb2cfb53376862",
+            "container": "P4G.exe",
+            "source_build": 10836033
+          }
+        ],
+        "index": 5,
+        "registry_count": 26,
+        "qualified_archive": "data.cpk::init.bin::event/icon.bin",
+        "steam_registry_field": {
+          "index": 5,
+          "value": "_ICON6.EPL",
+          "source": {
+            "rva": "0x942358",
+            "raw_offset": 9703256,
+            "size": 11,
+            "sha256": "44bde6dea40a8fe6494a3ef8c364ab7d53083d66e4f435e862eb2cfb53376862"
+          }
+        }
+      },
+      "structural_proof": "The old ordered pointer-bank field and actual scene-icon task are positively paired with the Golden cached archive/member registry, kind1/3 effect-slot replacement and special index10 producer. Complete ordered26-name Steam and NSO registries agree; the source is not a similarly sized archive window.",
+      "route_contract": "event-icon-member-registry",
+      "required_seams": [
+        "golden-a2-event-icons: use the actual cached event/icon.bin archive and26 ordered basename members, with request completion, effect creation and kind1/3 replacement/retirement. Preserve special index10 behavior and qualify the script/scene icon-index namespace. No old event/fullpath lookup or27th guessed pointer.",
+        "golden-a2-event-icon-aliases: route all native, translated, inlined, preloader and computed-pointer consumers through this full registry. Normalize host pointers as logical names; never copy the native pointer table into the guest image or treat a basename as an unqualified filesystem path."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x0063b270",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "indexed scene event icon member",
+      "ps2_live_bytes": 17,
+      "retained_ps2_tail_bytes": 15,
+      "ps2_sha256": "ef51825dca2799ab0d9f7d00b48a44194d101ba51e4a53b326a46f4de42b5743",
+      "ps2_consumers": [
+        {
+          "function": "0x26d890",
+          "name": "mtSceneIconTaskUpdate",
+          "file": "src/mt_sceneIcon.c"
+        }
+      ],
+      "golden": {
+        "kind": "archive-member-registry-field",
+        "value": "_ICON7.EPL",
+        "switch_address": "0x71005d3dc2",
+        "size": 11,
+        "sha256": "edcc58253ab582c72a49b67c184bf3b2e6f98a9adcb81e26d52b807deb5a0d1f",
+        "steam_spans": [
+          {
+            "rva": "0x942368",
+            "raw_offset": 9703272,
+            "size": 11,
+            "sha256": "edcc58253ab582c72a49b67c184bf3b2e6f98a9adcb81e26d52b807deb5a0d1f",
+            "container": "P4G.exe",
+            "source_build": 10836033
+          }
+        ],
+        "index": 6,
+        "registry_count": 26,
+        "qualified_archive": "data.cpk::init.bin::event/icon.bin",
+        "steam_registry_field": {
+          "index": 6,
+          "value": "_ICON7.EPL",
+          "source": {
+            "rva": "0x942368",
+            "raw_offset": 9703272,
+            "size": 11,
+            "sha256": "edcc58253ab582c72a49b67c184bf3b2e6f98a9adcb81e26d52b807deb5a0d1f"
+          }
+        }
+      },
+      "structural_proof": "The old ordered pointer-bank field and actual scene-icon task are positively paired with the Golden cached archive/member registry, kind1/3 effect-slot replacement and special index10 producer. Complete ordered26-name Steam and NSO registries agree; the source is not a similarly sized archive window.",
+      "route_contract": "event-icon-member-registry",
+      "required_seams": [
+        "golden-a2-event-icons: use the actual cached event/icon.bin archive and26 ordered basename members, with request completion, effect creation and kind1/3 replacement/retirement. Preserve special index10 behavior and qualify the script/scene icon-index namespace. No old event/fullpath lookup or27th guessed pointer.",
+        "golden-a2-event-icon-aliases: route all native, translated, inlined, preloader and computed-pointer consumers through this full registry. Normalize host pointers as logical names; never copy the native pointer table into the guest image or treat a basename as an unqualified filesystem path."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x0063b290",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "indexed scene event icon member",
+      "ps2_live_bytes": 17,
+      "retained_ps2_tail_bytes": 15,
+      "ps2_sha256": "31b1f161546f502841949479c73f62afedb544fe55b88b91d9f5d1ab524bb832",
+      "ps2_consumers": [
+        {
+          "function": "0x26d890",
+          "name": "mtSceneIconTaskUpdate",
+          "file": "src/mt_sceneIcon.c"
+        }
+      ],
+      "golden": {
+        "kind": "archive-member-registry-field",
+        "value": "_ICON8.EPL",
+        "switch_address": "0x71005ffc5d",
+        "size": 11,
+        "sha256": "bcc35fb592a4a02eda2bd7bcfc5a587617c609d4a13f0290582f8f5ada739683",
+        "steam_spans": [
+          {
+            "rva": "0x942338",
+            "raw_offset": 9703224,
+            "size": 11,
+            "sha256": "bcc35fb592a4a02eda2bd7bcfc5a587617c609d4a13f0290582f8f5ada739683",
+            "container": "P4G.exe",
+            "source_build": 10836033
+          }
+        ],
+        "index": 7,
+        "registry_count": 26,
+        "qualified_archive": "data.cpk::init.bin::event/icon.bin",
+        "steam_registry_field": {
+          "index": 7,
+          "value": "_ICON8.EPL",
+          "source": {
+            "rva": "0x942338",
+            "raw_offset": 9703224,
+            "size": 11,
+            "sha256": "bcc35fb592a4a02eda2bd7bcfc5a587617c609d4a13f0290582f8f5ada739683"
+          }
+        }
+      },
+      "structural_proof": "The old ordered pointer-bank field and actual scene-icon task are positively paired with the Golden cached archive/member registry, kind1/3 effect-slot replacement and special index10 producer. Complete ordered26-name Steam and NSO registries agree; the source is not a similarly sized archive window.",
+      "route_contract": "event-icon-member-registry",
+      "required_seams": [
+        "golden-a2-event-icons: use the actual cached event/icon.bin archive and26 ordered basename members, with request completion, effect creation and kind1/3 replacement/retirement. Preserve special index10 behavior and qualify the script/scene icon-index namespace. No old event/fullpath lookup or27th guessed pointer.",
+        "golden-a2-event-icon-aliases: route all native, translated, inlined, preloader and computed-pointer consumers through this full registry. Normalize host pointers as logical names; never copy the native pointer table into the guest image or treat a basename as an unqualified filesystem path."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x0063b2b0",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "indexed scene event icon member",
+      "ps2_live_bytes": 17,
+      "retained_ps2_tail_bytes": 15,
+      "ps2_sha256": "9009f5a19e656ea520c5221907e962a92e8a79959b60eb07f4cca5a5d529aaf0",
+      "ps2_consumers": [
+        {
+          "function": "0x26d890",
+          "name": "mtSceneIconTaskUpdate",
+          "file": "src/mt_sceneIcon.c"
+        }
+      ],
+      "golden": {
+        "kind": "archive-member-registry-field",
+        "value": "_ICON9.EPL",
+        "switch_address": "0x7100614984",
+        "size": 11,
+        "sha256": "dec1fc60bc4d629ea1f180de7a9cc07e4368d625abae6ea40c80b3de63795e74",
+        "steam_spans": [
+          {
+            "rva": "0x942348",
+            "raw_offset": 9703240,
+            "size": 11,
+            "sha256": "dec1fc60bc4d629ea1f180de7a9cc07e4368d625abae6ea40c80b3de63795e74",
+            "container": "P4G.exe",
+            "source_build": 10836033
+          }
+        ],
+        "index": 8,
+        "registry_count": 26,
+        "qualified_archive": "data.cpk::init.bin::event/icon.bin",
+        "steam_registry_field": {
+          "index": 8,
+          "value": "_ICON9.EPL",
+          "source": {
+            "rva": "0x942348",
+            "raw_offset": 9703240,
+            "size": 11,
+            "sha256": "dec1fc60bc4d629ea1f180de7a9cc07e4368d625abae6ea40c80b3de63795e74"
+          }
+        }
+      },
+      "structural_proof": "The old ordered pointer-bank field and actual scene-icon task are positively paired with the Golden cached archive/member registry, kind1/3 effect-slot replacement and special index10 producer. Complete ordered26-name Steam and NSO registries agree; the source is not a similarly sized archive window.",
+      "route_contract": "event-icon-member-registry",
+      "required_seams": [
+        "golden-a2-event-icons: use the actual cached event/icon.bin archive and26 ordered basename members, with request completion, effect creation and kind1/3 replacement/retirement. Preserve special index10 behavior and qualify the script/scene icon-index namespace. No old event/fullpath lookup or27th guessed pointer.",
+        "golden-a2-event-icon-aliases: route all native, translated, inlined, preloader and computed-pointer consumers through this full registry. Normalize host pointers as logical names; never copy the native pointer table into the guest image or treat a basename as an unqualified filesystem path."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x0063b2d0",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "indexed scene event icon member",
+      "ps2_live_bytes": 18,
+      "retained_ps2_tail_bytes": 14,
+      "ps2_sha256": "7f6d46c4a094ff7ff5354e6a13894f4d4743a5021f7f5597b521c37575c4e52a",
+      "ps2_consumers": [
+        {
+          "function": "0x26d890",
+          "name": "mtSceneIconTaskUpdate",
+          "file": "src/mt_sceneIcon.c"
+        }
+      ],
+      "golden": {
+        "kind": "archive-member-registry-field",
+        "value": "_ICON10.EPL",
+        "switch_address": "0x71005ef590",
+        "size": 12,
+        "sha256": "6675b2c1a79795b094520b6eb3f51f780ca954f055957f579fcd5a0de2e6a4db",
+        "steam_spans": [
+          {
+            "rva": "0x942398",
+            "raw_offset": 9703320,
+            "size": 12,
+            "sha256": "6675b2c1a79795b094520b6eb3f51f780ca954f055957f579fcd5a0de2e6a4db",
+            "container": "P4G.exe",
+            "source_build": 10836033
+          }
+        ],
+        "index": 9,
+        "registry_count": 26,
+        "qualified_archive": "data.cpk::init.bin::event/icon.bin",
+        "steam_registry_field": {
+          "index": 9,
+          "value": "_ICON10.EPL",
+          "source": {
+            "rva": "0x942398",
+            "raw_offset": 9703320,
+            "size": 12,
+            "sha256": "6675b2c1a79795b094520b6eb3f51f780ca954f055957f579fcd5a0de2e6a4db"
+          }
+        }
+      },
+      "structural_proof": "The old ordered pointer-bank field and actual scene-icon task are positively paired with the Golden cached archive/member registry, kind1/3 effect-slot replacement and special index10 producer. Complete ordered26-name Steam and NSO registries agree; the source is not a similarly sized archive window.",
+      "route_contract": "event-icon-member-registry",
+      "required_seams": [
+        "golden-a2-event-icons: use the actual cached event/icon.bin archive and26 ordered basename members, with request completion, effect creation and kind1/3 replacement/retirement. Preserve special index10 behavior and qualify the script/scene icon-index namespace. No old event/fullpath lookup or27th guessed pointer.",
+        "golden-a2-event-icon-aliases: route all native, translated, inlined, preloader and computed-pointer consumers through this full registry. Normalize host pointers as logical names; never copy the native pointer table into the guest image or treat a basename as an unqualified filesystem path."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x0063b2f0",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "indexed scene event icon member",
+      "ps2_live_bytes": 18,
+      "retained_ps2_tail_bytes": 14,
+      "ps2_sha256": "a0929cb5bd28e85a33d4ab63f1769a364e7b5b3cf3f7a2faa63239234e41cb1d",
+      "ps2_consumers": [
+        {
+          "function": "0x26d890",
+          "name": "mtSceneIconTaskUpdate",
+          "file": "src/mt_sceneIcon.c"
+        }
+      ],
+      "golden": {
+        "kind": "archive-member-registry-field",
+        "value": "_ICON11.EPL",
+        "switch_address": "0x71005e74fd",
+        "size": 12,
+        "sha256": "424479bea69198aa226ed3248141481da91bc01ed5351a6fe138c7a25ea3652c",
+        "steam_spans": [
+          {
+            "rva": "0x9423a8",
+            "raw_offset": 9703336,
+            "size": 12,
+            "sha256": "424479bea69198aa226ed3248141481da91bc01ed5351a6fe138c7a25ea3652c",
+            "container": "P4G.exe",
+            "source_build": 10836033
+          }
+        ],
+        "index": 10,
+        "registry_count": 26,
+        "qualified_archive": "data.cpk::init.bin::event/icon.bin",
+        "steam_registry_field": {
+          "index": 10,
+          "value": "_ICON11.EPL",
+          "source": {
+            "rva": "0x9423a8",
+            "raw_offset": 9703336,
+            "size": 12,
+            "sha256": "424479bea69198aa226ed3248141481da91bc01ed5351a6fe138c7a25ea3652c"
+          }
+        }
+      },
+      "structural_proof": "The old ordered pointer-bank field and actual scene-icon task are positively paired with the Golden cached archive/member registry, kind1/3 effect-slot replacement and special index10 producer. Complete ordered26-name Steam and NSO registries agree; the source is not a similarly sized archive window.",
+      "route_contract": "event-icon-member-registry",
+      "required_seams": [
+        "golden-a2-event-icons: use the actual cached event/icon.bin archive and26 ordered basename members, with request completion, effect creation and kind1/3 replacement/retirement. Preserve special index10 behavior and qualify the script/scene icon-index namespace. No old event/fullpath lookup or27th guessed pointer.",
+        "golden-a2-event-icon-aliases: route all native, translated, inlined, preloader and computed-pointer consumers through this full registry. Normalize host pointers as logical names; never copy the native pointer table into the guest image or treat a basename as an unqualified filesystem path."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x0063b310",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "indexed scene event icon member",
+      "ps2_live_bytes": 18,
+      "retained_ps2_tail_bytes": 14,
+      "ps2_sha256": "b7f13eb82580a97512706d2d75316e660a03bebd1d4b72e6799b3cc760295ba6",
+      "ps2_consumers": [
+        {
+          "function": "0x26d890",
+          "name": "mtSceneIconTaskUpdate",
+          "file": "src/mt_sceneIcon.c"
+        }
+      ],
+      "golden": {
+        "kind": "archive-member-registry-field",
+        "value": "_ICON12.EPL",
+        "switch_address": "0x71005ec9fe",
+        "size": 12,
+        "sha256": "68646bb33b57c9d2fb7c124791cca2b5bc6e7c7bb4a0a6d3caa6380540c1952c",
+        "steam_spans": [
+          {
+            "rva": "0x942378",
+            "raw_offset": 9703288,
+            "size": 12,
+            "sha256": "68646bb33b57c9d2fb7c124791cca2b5bc6e7c7bb4a0a6d3caa6380540c1952c",
+            "container": "P4G.exe",
+            "source_build": 10836033
+          }
+        ],
+        "index": 11,
+        "registry_count": 26,
+        "qualified_archive": "data.cpk::init.bin::event/icon.bin",
+        "steam_registry_field": {
+          "index": 11,
+          "value": "_ICON12.EPL",
+          "source": {
+            "rva": "0x942378",
+            "raw_offset": 9703288,
+            "size": 12,
+            "sha256": "68646bb33b57c9d2fb7c124791cca2b5bc6e7c7bb4a0a6d3caa6380540c1952c"
+          }
+        }
+      },
+      "structural_proof": "The old ordered pointer-bank field and actual scene-icon task are positively paired with the Golden cached archive/member registry, kind1/3 effect-slot replacement and special index10 producer. Complete ordered26-name Steam and NSO registries agree; the source is not a similarly sized archive window.",
+      "route_contract": "event-icon-member-registry",
+      "required_seams": [
+        "golden-a2-event-icons: use the actual cached event/icon.bin archive and26 ordered basename members, with request completion, effect creation and kind1/3 replacement/retirement. Preserve special index10 behavior and qualify the script/scene icon-index namespace. No old event/fullpath lookup or27th guessed pointer.",
+        "golden-a2-event-icon-aliases: route all native, translated, inlined, preloader and computed-pointer consumers through this full registry. Normalize host pointers as logical names; never copy the native pointer table into the guest image or treat a basename as an unqualified filesystem path."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x0063b330",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "indexed scene event icon member",
+      "ps2_live_bytes": 18,
+      "retained_ps2_tail_bytes": 14,
+      "ps2_sha256": "1e5a838885584c62e74d5bf6682694460831d52896f0539f7c78be51f8516414",
+      "ps2_consumers": [
+        {
+          "function": "0x26d890",
+          "name": "mtSceneIconTaskUpdate",
+          "file": "src/mt_sceneIcon.c"
+        }
+      ],
+      "golden": {
+        "kind": "archive-member-registry-field",
+        "value": "_ICON13.EPL",
+        "switch_address": "0x7100619e62",
+        "size": 12,
+        "sha256": "1268fc6e220d1b4bfa9e66b2dfe6b65f089cde5d726b1b200b671ae4dbce96f2",
+        "steam_spans": [
+          {
+            "rva": "0x942388",
+            "raw_offset": 9703304,
+            "size": 12,
+            "sha256": "1268fc6e220d1b4bfa9e66b2dfe6b65f089cde5d726b1b200b671ae4dbce96f2",
+            "container": "P4G.exe",
+            "source_build": 10836033
+          }
+        ],
+        "index": 12,
+        "registry_count": 26,
+        "qualified_archive": "data.cpk::init.bin::event/icon.bin",
+        "steam_registry_field": {
+          "index": 12,
+          "value": "_ICON13.EPL",
+          "source": {
+            "rva": "0x942388",
+            "raw_offset": 9703304,
+            "size": 12,
+            "sha256": "1268fc6e220d1b4bfa9e66b2dfe6b65f089cde5d726b1b200b671ae4dbce96f2"
+          }
+        }
+      },
+      "structural_proof": "The old ordered pointer-bank field and actual scene-icon task are positively paired with the Golden cached archive/member registry, kind1/3 effect-slot replacement and special index10 producer. Complete ordered26-name Steam and NSO registries agree; the source is not a similarly sized archive window.",
+      "route_contract": "event-icon-member-registry",
+      "required_seams": [
+        "golden-a2-event-icons: use the actual cached event/icon.bin archive and26 ordered basename members, with request completion, effect creation and kind1/3 replacement/retirement. Preserve special index10 behavior and qualify the script/scene icon-index namespace. No old event/fullpath lookup or27th guessed pointer.",
+        "golden-a2-event-icon-aliases: route all native, translated, inlined, preloader and computed-pointer consumers through this full registry. Normalize host pointers as logical names; never copy the native pointer table into the guest image or treat a basename as an unqualified filesystem path."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x0063b350",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "indexed scene event icon member",
+      "ps2_live_bytes": 18,
+      "retained_ps2_tail_bytes": 14,
+      "ps2_sha256": "cb82a3a60d37d68518ef672da42578ff0cd6f60991c12f6c7cf2f34d369efcf7",
+      "ps2_consumers": [
+        {
+          "function": "0x26d890",
+          "name": "mtSceneIconTaskUpdate",
+          "file": "src/mt_sceneIcon.c"
+        }
+      ],
+      "golden": {
+        "kind": "archive-member-registry-field",
+        "value": "_ICON14.EPL",
+        "switch_address": "0x7100622f2f",
+        "size": 12,
+        "sha256": "2a6448ccb18418d0b6023e747a74c37f637a65022b047798d77054ea98e6ec76",
+        "steam_spans": [
+          {
+            "rva": "0x9423d8",
+            "raw_offset": 9703384,
+            "size": 12,
+            "sha256": "2a6448ccb18418d0b6023e747a74c37f637a65022b047798d77054ea98e6ec76",
+            "container": "P4G.exe",
+            "source_build": 10836033
+          }
+        ],
+        "index": 13,
+        "registry_count": 26,
+        "qualified_archive": "data.cpk::init.bin::event/icon.bin",
+        "steam_registry_field": {
+          "index": 13,
+          "value": "_ICON14.EPL",
+          "source": {
+            "rva": "0x9423d8",
+            "raw_offset": 9703384,
+            "size": 12,
+            "sha256": "2a6448ccb18418d0b6023e747a74c37f637a65022b047798d77054ea98e6ec76"
+          }
+        }
+      },
+      "structural_proof": "The old ordered pointer-bank field and actual scene-icon task are positively paired with the Golden cached archive/member registry, kind1/3 effect-slot replacement and special index10 producer. Complete ordered26-name Steam and NSO registries agree; the source is not a similarly sized archive window.",
+      "route_contract": "event-icon-member-registry",
+      "required_seams": [
+        "golden-a2-event-icons: use the actual cached event/icon.bin archive and26 ordered basename members, with request completion, effect creation and kind1/3 replacement/retirement. Preserve special index10 behavior and qualify the script/scene icon-index namespace. No old event/fullpath lookup or27th guessed pointer.",
+        "golden-a2-event-icon-aliases: route all native, translated, inlined, preloader and computed-pointer consumers through this full registry. Normalize host pointers as logical names; never copy the native pointer table into the guest image or treat a basename as an unqualified filesystem path."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x0063b370",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "indexed scene event icon member",
+      "ps2_live_bytes": 18,
+      "retained_ps2_tail_bytes": 14,
+      "ps2_sha256": "2b90fbabfe55abff87771820f1dc4b70cb281511f64e1bc5d144fc454503fe60",
+      "ps2_consumers": [
+        {
+          "function": "0x26d890",
+          "name": "mtSceneIconTaskUpdate",
+          "file": "src/mt_sceneIcon.c"
+        }
+      ],
+      "golden": {
+        "kind": "archive-member-registry-field",
+        "value": "_ICON15.EPL",
+        "switch_address": "0x7100627ff5",
+        "size": 12,
+        "sha256": "5f26170706cec8886715010e2ac2ca87d9bc7f6c20b145d04eb581d7db575f70",
+        "steam_spans": [
+          {
+            "rva": "0x9423e8",
+            "raw_offset": 9703400,
+            "size": 12,
+            "sha256": "5f26170706cec8886715010e2ac2ca87d9bc7f6c20b145d04eb581d7db575f70",
+            "container": "P4G.exe",
+            "source_build": 10836033
+          }
+        ],
+        "index": 14,
+        "registry_count": 26,
+        "qualified_archive": "data.cpk::init.bin::event/icon.bin",
+        "steam_registry_field": {
+          "index": 14,
+          "value": "_ICON15.EPL",
+          "source": {
+            "rva": "0x9423e8",
+            "raw_offset": 9703400,
+            "size": 12,
+            "sha256": "5f26170706cec8886715010e2ac2ca87d9bc7f6c20b145d04eb581d7db575f70"
+          }
+        }
+      },
+      "structural_proof": "The old ordered pointer-bank field and actual scene-icon task are positively paired with the Golden cached archive/member registry, kind1/3 effect-slot replacement and special index10 producer. Complete ordered26-name Steam and NSO registries agree; the source is not a similarly sized archive window.",
+      "route_contract": "event-icon-member-registry",
+      "required_seams": [
+        "golden-a2-event-icons: use the actual cached event/icon.bin archive and26 ordered basename members, with request completion, effect creation and kind1/3 replacement/retirement. Preserve special index10 behavior and qualify the script/scene icon-index namespace. No old event/fullpath lookup or27th guessed pointer.",
+        "golden-a2-event-icon-aliases: route all native, translated, inlined, preloader and computed-pointer consumers through this full registry. Normalize host pointers as logical names; never copy the native pointer table into the guest image or treat a basename as an unqualified filesystem path."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x0063b390",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "indexed scene event icon member",
+      "ps2_live_bytes": 18,
+      "retained_ps2_tail_bytes": 14,
+      "ps2_sha256": "d84702ef1ab6f898f02f85472ff839f4c56bcf8e4e7a37b008c71e27c7a36f73",
+      "ps2_consumers": [
+        {
+          "function": "0x26d890",
+          "name": "mtSceneIconTaskUpdate",
+          "file": "src/mt_sceneIcon.c"
+        }
+      ],
+      "golden": {
+        "kind": "archive-member-registry-field",
+        "value": "_ICON16.EPL",
+        "switch_address": "0x71005fcd63",
+        "size": 12,
+        "sha256": "7d3ca31c3c8d441f9e6d979d874e933174d20087cbf49b560eebeec2288489f5",
+        "steam_spans": [
+          {
+            "rva": "0x9423b8",
+            "raw_offset": 9703352,
+            "size": 12,
+            "sha256": "7d3ca31c3c8d441f9e6d979d874e933174d20087cbf49b560eebeec2288489f5",
+            "container": "P4G.exe",
+            "source_build": 10836033
+          }
+        ],
+        "index": 15,
+        "registry_count": 26,
+        "qualified_archive": "data.cpk::init.bin::event/icon.bin",
+        "steam_registry_field": {
+          "index": 15,
+          "value": "_ICON16.EPL",
+          "source": {
+            "rva": "0x9423b8",
+            "raw_offset": 9703352,
+            "size": 12,
+            "sha256": "7d3ca31c3c8d441f9e6d979d874e933174d20087cbf49b560eebeec2288489f5"
+          }
+        }
+      },
+      "structural_proof": "The old ordered pointer-bank field and actual scene-icon task are positively paired with the Golden cached archive/member registry, kind1/3 effect-slot replacement and special index10 producer. Complete ordered26-name Steam and NSO registries agree; the source is not a similarly sized archive window.",
+      "route_contract": "event-icon-member-registry",
+      "required_seams": [
+        "golden-a2-event-icons: use the actual cached event/icon.bin archive and26 ordered basename members, with request completion, effect creation and kind1/3 replacement/retirement. Preserve special index10 behavior and qualify the script/scene icon-index namespace. No old event/fullpath lookup or27th guessed pointer.",
+        "golden-a2-event-icon-aliases: route all native, translated, inlined, preloader and computed-pointer consumers through this full registry. Normalize host pointers as logical names; never copy the native pointer table into the guest image or treat a basename as an unqualified filesystem path."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x0063b3b0",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "indexed scene event icon member",
+      "ps2_live_bytes": 18,
+      "retained_ps2_tail_bytes": 14,
+      "ps2_sha256": "61451a9b73f4b82cb78dadd14f1897b3aa39c33f39166d86a573d9ec7070b4a1",
+      "ps2_consumers": [
+        {
+          "function": "0x26d890",
+          "name": "mtSceneIconTaskUpdate",
+          "file": "src/mt_sceneIcon.c"
+        }
+      ],
+      "golden": {
+        "kind": "archive-member-registry-field",
+        "value": "_ICON17.EPL",
+        "switch_address": "0x710061498f",
+        "size": 12,
+        "sha256": "81266f9d7b16ad82605d584fd2d32226650f3acbfbff19a8edf5797767e4c7d8",
+        "steam_spans": [
+          {
+            "rva": "0x9423c8",
+            "raw_offset": 9703368,
+            "size": 12,
+            "sha256": "81266f9d7b16ad82605d584fd2d32226650f3acbfbff19a8edf5797767e4c7d8",
+            "container": "P4G.exe",
+            "source_build": 10836033
+          }
+        ],
+        "index": 16,
+        "registry_count": 26,
+        "qualified_archive": "data.cpk::init.bin::event/icon.bin",
+        "steam_registry_field": {
+          "index": 16,
+          "value": "_ICON17.EPL",
+          "source": {
+            "rva": "0x9423c8",
+            "raw_offset": 9703368,
+            "size": 12,
+            "sha256": "81266f9d7b16ad82605d584fd2d32226650f3acbfbff19a8edf5797767e4c7d8"
+          }
+        }
+      },
+      "structural_proof": "The old ordered pointer-bank field and actual scene-icon task are positively paired with the Golden cached archive/member registry, kind1/3 effect-slot replacement and special index10 producer. Complete ordered26-name Steam and NSO registries agree; the source is not a similarly sized archive window.",
+      "route_contract": "event-icon-member-registry",
+      "required_seams": [
+        "golden-a2-event-icons: use the actual cached event/icon.bin archive and26 ordered basename members, with request completion, effect creation and kind1/3 replacement/retirement. Preserve special index10 behavior and qualify the script/scene icon-index namespace. No old event/fullpath lookup or27th guessed pointer.",
+        "golden-a2-event-icon-aliases: route all native, translated, inlined, preloader and computed-pointer consumers through this full registry. Normalize host pointers as logical names; never copy the native pointer table into the guest image or treat a basename as an unqualified filesystem path."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x0063b3d0",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "indexed scene event icon member",
+      "ps2_live_bytes": 18,
+      "retained_ps2_tail_bytes": 14,
+      "ps2_sha256": "0710651496389c6dffc147e2d80ced64257b8b6697015a7df485af9db831b77c",
+      "ps2_consumers": [
+        {
+          "function": "0x26d890",
+          "name": "mtSceneIconTaskUpdate",
+          "file": "src/mt_sceneIcon.c"
+        }
+      ],
+      "golden": {
+        "kind": "archive-member-registry-field",
+        "value": "_ICON18.EPL",
+        "switch_address": "0x7100628001",
+        "size": 12,
+        "sha256": "37646ea6d739c951ebfd0bb922625b4aa1b8c180629db0018748340df65f3eb5",
+        "steam_spans": [
+          {
+            "rva": "0x942418",
+            "raw_offset": 9703448,
+            "size": 12,
+            "sha256": "37646ea6d739c951ebfd0bb922625b4aa1b8c180629db0018748340df65f3eb5",
+            "container": "P4G.exe",
+            "source_build": 10836033
+          }
+        ],
+        "index": 17,
+        "registry_count": 26,
+        "qualified_archive": "data.cpk::init.bin::event/icon.bin",
+        "steam_registry_field": {
+          "index": 17,
+          "value": "_ICON18.EPL",
+          "source": {
+            "rva": "0x942418",
+            "raw_offset": 9703448,
+            "size": 12,
+            "sha256": "37646ea6d739c951ebfd0bb922625b4aa1b8c180629db0018748340df65f3eb5"
+          }
+        }
+      },
+      "structural_proof": "The old ordered pointer-bank field and actual scene-icon task are positively paired with the Golden cached archive/member registry, kind1/3 effect-slot replacement and special index10 producer. Complete ordered26-name Steam and NSO registries agree; the source is not a similarly sized archive window.",
+      "route_contract": "event-icon-member-registry",
+      "required_seams": [
+        "golden-a2-event-icons: use the actual cached event/icon.bin archive and26 ordered basename members, with request completion, effect creation and kind1/3 replacement/retirement. Preserve special index10 behavior and qualify the script/scene icon-index namespace. No old event/fullpath lookup or27th guessed pointer.",
+        "golden-a2-event-icon-aliases: route all native, translated, inlined, preloader and computed-pointer consumers through this full registry. Normalize host pointers as logical names; never copy the native pointer table into the guest image or treat a basename as an unqualified filesystem path."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x0063b3f0",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "indexed scene event icon member",
+      "ps2_live_bytes": 18,
+      "retained_ps2_tail_bytes": 14,
+      "ps2_sha256": "b4909ffb8081cd322765059dd827d70adbd7bc39e56c1fc6679b3f55da77bc53",
+      "ps2_consumers": [
+        {
+          "function": "0x26d890",
+          "name": "mtSceneIconTaskUpdate",
+          "file": "src/mt_sceneIcon.c"
+        }
+      ],
+      "golden": {
+        "kind": "archive-member-registry-field",
+        "value": "_ICON19.EPL",
+        "switch_address": "0x71005defb5",
+        "size": 12,
+        "sha256": "7d9cfaaf1cd2c1b98f72ef454232e27424de29eaaf92adca27da303994d8c067",
+        "steam_spans": [
+          {
+            "rva": "0x942428",
+            "raw_offset": 9703464,
+            "size": 12,
+            "sha256": "7d9cfaaf1cd2c1b98f72ef454232e27424de29eaaf92adca27da303994d8c067",
+            "container": "P4G.exe",
+            "source_build": 10836033
+          }
+        ],
+        "index": 18,
+        "registry_count": 26,
+        "qualified_archive": "data.cpk::init.bin::event/icon.bin",
+        "steam_registry_field": {
+          "index": 18,
+          "value": "_ICON19.EPL",
+          "source": {
+            "rva": "0x942428",
+            "raw_offset": 9703464,
+            "size": 12,
+            "sha256": "7d9cfaaf1cd2c1b98f72ef454232e27424de29eaaf92adca27da303994d8c067"
+          }
+        }
+      },
+      "structural_proof": "The old ordered pointer-bank field and actual scene-icon task are positively paired with the Golden cached archive/member registry, kind1/3 effect-slot replacement and special index10 producer. Complete ordered26-name Steam and NSO registries agree; the source is not a similarly sized archive window.",
+      "route_contract": "event-icon-member-registry",
+      "required_seams": [
+        "golden-a2-event-icons: use the actual cached event/icon.bin archive and26 ordered basename members, with request completion, effect creation and kind1/3 replacement/retirement. Preserve special index10 behavior and qualify the script/scene icon-index namespace. No old event/fullpath lookup or27th guessed pointer.",
+        "golden-a2-event-icon-aliases: route all native, translated, inlined, preloader and computed-pointer consumers through this full registry. Normalize host pointers as logical names; never copy the native pointer table into the guest image or treat a basename as an unqualified filesystem path."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x0063b410",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "indexed scene event icon member",
+      "ps2_live_bytes": 18,
+      "retained_ps2_tail_bytes": 14,
+      "ps2_sha256": "3c3b4c1547837a060374b025584abd7e69f8c451fca3ee6020bb834867ffc009",
+      "ps2_consumers": [
+        {
+          "function": "0x26d890",
+          "name": "mtSceneIconTaskUpdate",
+          "file": "src/mt_sceneIcon.c"
+        }
+      ],
+      "golden": {
+        "kind": "archive-member-registry-field",
+        "value": "_ICON20.EPL",
+        "switch_address": "0x71005fcd6f",
+        "size": 12,
+        "sha256": "6e65c3b252312484a01fdab4670159fbc6c4a8085ee91772953b11bcfef5be24",
+        "steam_spans": [
+          {
+            "rva": "0x9423f8",
+            "raw_offset": 9703416,
+            "size": 12,
+            "sha256": "6e65c3b252312484a01fdab4670159fbc6c4a8085ee91772953b11bcfef5be24",
+            "container": "P4G.exe",
+            "source_build": 10836033
+          }
+        ],
+        "index": 19,
+        "registry_count": 26,
+        "qualified_archive": "data.cpk::init.bin::event/icon.bin",
+        "steam_registry_field": {
+          "index": 19,
+          "value": "_ICON20.EPL",
+          "source": {
+            "rva": "0x9423f8",
+            "raw_offset": 9703416,
+            "size": 12,
+            "sha256": "6e65c3b252312484a01fdab4670159fbc6c4a8085ee91772953b11bcfef5be24"
+          }
+        }
+      },
+      "structural_proof": "The old ordered pointer-bank field and actual scene-icon task are positively paired with the Golden cached archive/member registry, kind1/3 effect-slot replacement and special index10 producer. Complete ordered26-name Steam and NSO registries agree; the source is not a similarly sized archive window.",
+      "route_contract": "event-icon-member-registry",
+      "required_seams": [
+        "golden-a2-event-icons: use the actual cached event/icon.bin archive and26 ordered basename members, with request completion, effect creation and kind1/3 replacement/retirement. Preserve special index10 behavior and qualify the script/scene icon-index namespace. No old event/fullpath lookup or27th guessed pointer.",
+        "golden-a2-event-icon-aliases: route all native, translated, inlined, preloader and computed-pointer consumers through this full registry. Normalize host pointers as logical names; never copy the native pointer table into the guest image or treat a basename as an unqualified filesystem path."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x0063b430",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "indexed scene event icon member",
+      "ps2_live_bytes": 18,
+      "retained_ps2_tail_bytes": 14,
+      "ps2_sha256": "7b4422bcb06ebfc03377401a38d8cfd67cf5daef39b0311a504f428988f4393c",
+      "ps2_consumers": [
+        {
+          "function": "0x26d890",
+          "name": "mtSceneIconTaskUpdate",
+          "file": "src/mt_sceneIcon.c"
+        }
+      ],
+      "golden": {
+        "kind": "archive-member-registry-field",
+        "value": "_ICON21.EPL",
+        "switch_address": "0x71005defc1",
+        "size": 12,
+        "sha256": "c112d3ee34ea47c30888c8c55f68c7b0657b00f8dd06e9593824ae809a4d9431",
+        "steam_spans": [
+          {
+            "rva": "0x942408",
+            "raw_offset": 9703432,
+            "size": 12,
+            "sha256": "c112d3ee34ea47c30888c8c55f68c7b0657b00f8dd06e9593824ae809a4d9431",
+            "container": "P4G.exe",
+            "source_build": 10836033
+          }
+        ],
+        "index": 20,
+        "registry_count": 26,
+        "qualified_archive": "data.cpk::init.bin::event/icon.bin",
+        "steam_registry_field": {
+          "index": 20,
+          "value": "_ICON21.EPL",
+          "source": {
+            "rva": "0x942408",
+            "raw_offset": 9703432,
+            "size": 12,
+            "sha256": "c112d3ee34ea47c30888c8c55f68c7b0657b00f8dd06e9593824ae809a4d9431"
+          }
+        }
+      },
+      "structural_proof": "The old ordered pointer-bank field and actual scene-icon task are positively paired with the Golden cached archive/member registry, kind1/3 effect-slot replacement and special index10 producer. Complete ordered26-name Steam and NSO registries agree; the source is not a similarly sized archive window.",
+      "route_contract": "event-icon-member-registry",
+      "required_seams": [
+        "golden-a2-event-icons: use the actual cached event/icon.bin archive and26 ordered basename members, with request completion, effect creation and kind1/3 replacement/retirement. Preserve special index10 behavior and qualify the script/scene icon-index namespace. No old event/fullpath lookup or27th guessed pointer.",
+        "golden-a2-event-icon-aliases: route all native, translated, inlined, preloader and computed-pointer consumers through this full registry. Normalize host pointers as logical names; never copy the native pointer table into the guest image or treat a basename as an unqualified filesystem path."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x0063b450",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "indexed scene event icon member",
+      "ps2_live_bytes": 18,
+      "retained_ps2_tail_bytes": 14,
+      "ps2_sha256": "5c6e1ed412fd8230e48a44a2f822eb8bb79cb96f8ae6b74c632f3ea1cdd34399",
+      "ps2_consumers": [
+        {
+          "function": "0x26d890",
+          "name": "mtSceneIconTaskUpdate",
+          "file": "src/mt_sceneIcon.c"
+        }
+      ],
+      "golden": {
+        "kind": "archive-member-registry-field",
+        "value": "_ICON22.EPL",
+        "switch_address": "0x71005defcd",
+        "size": 12,
+        "sha256": "893d2732a7e59f89ad60e9f20cbaf9d0815a876e37697ddad6c9fb24048b6858",
+        "steam_spans": [
+          {
+            "rva": "0x942458",
+            "raw_offset": 9703512,
+            "size": 12,
+            "sha256": "893d2732a7e59f89ad60e9f20cbaf9d0815a876e37697ddad6c9fb24048b6858",
+            "container": "P4G.exe",
+            "source_build": 10836033
+          }
+        ],
+        "index": 21,
+        "registry_count": 26,
+        "qualified_archive": "data.cpk::init.bin::event/icon.bin",
+        "steam_registry_field": {
+          "index": 21,
+          "value": "_ICON22.EPL",
+          "source": {
+            "rva": "0x942458",
+            "raw_offset": 9703512,
+            "size": 12,
+            "sha256": "893d2732a7e59f89ad60e9f20cbaf9d0815a876e37697ddad6c9fb24048b6858"
+          }
+        }
+      },
+      "structural_proof": "The old ordered pointer-bank field and actual scene-icon task are positively paired with the Golden cached archive/member registry, kind1/3 effect-slot replacement and special index10 producer. Complete ordered26-name Steam and NSO registries agree; the source is not a similarly sized archive window.",
+      "route_contract": "event-icon-member-registry",
+      "required_seams": [
+        "golden-a2-event-icons: use the actual cached event/icon.bin archive and26 ordered basename members, with request completion, effect creation and kind1/3 replacement/retirement. Preserve special index10 behavior and qualify the script/scene icon-index namespace. No old event/fullpath lookup or27th guessed pointer.",
+        "golden-a2-event-icon-aliases: route all native, translated, inlined, preloader and computed-pointer consumers through this full registry. Normalize host pointers as logical names; never copy the native pointer table into the guest image or treat a basename as an unqualified filesystem path."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x0063b470",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "indexed scene event icon member",
+      "ps2_live_bytes": 18,
+      "retained_ps2_tail_bytes": 14,
+      "ps2_sha256": "24f110b62c730494cfdf9c0e7c3d3a262a31517c0d71d6d3245fe5fb077b78cc",
+      "ps2_consumers": [
+        {
+          "function": "0x26d890",
+          "name": "mtSceneIconTaskUpdate",
+          "file": "src/mt_sceneIcon.c"
+        }
+      ],
+      "golden": {
+        "kind": "archive-member-registry-field",
+        "value": "_ICON23.EPL",
+        "switch_address": "0x71005dbf3b",
+        "size": 12,
+        "sha256": "d38c47ec6f85e0e8334c9d518d7d752fac65120e1c80a3a2cf9b0e73a9264c90",
+        "steam_spans": [
+          {
+            "rva": "0x942468",
+            "raw_offset": 9703528,
+            "size": 12,
+            "sha256": "d38c47ec6f85e0e8334c9d518d7d752fac65120e1c80a3a2cf9b0e73a9264c90",
+            "container": "P4G.exe",
+            "source_build": 10836033
+          }
+        ],
+        "index": 22,
+        "registry_count": 26,
+        "qualified_archive": "data.cpk::init.bin::event/icon.bin",
+        "steam_registry_field": {
+          "index": 22,
+          "value": "_ICON23.EPL",
+          "source": {
+            "rva": "0x942468",
+            "raw_offset": 9703528,
+            "size": 12,
+            "sha256": "d38c47ec6f85e0e8334c9d518d7d752fac65120e1c80a3a2cf9b0e73a9264c90"
+          }
+        }
+      },
+      "structural_proof": "The old ordered pointer-bank field and actual scene-icon task are positively paired with the Golden cached archive/member registry, kind1/3 effect-slot replacement and special index10 producer. Complete ordered26-name Steam and NSO registries agree; the source is not a similarly sized archive window.",
+      "route_contract": "event-icon-member-registry",
+      "required_seams": [
+        "golden-a2-event-icons: use the actual cached event/icon.bin archive and26 ordered basename members, with request completion, effect creation and kind1/3 replacement/retirement. Preserve special index10 behavior and qualify the script/scene icon-index namespace. No old event/fullpath lookup or27th guessed pointer.",
+        "golden-a2-event-icon-aliases: route all native, translated, inlined, preloader and computed-pointer consumers through this full registry. Normalize host pointers as logical names; never copy the native pointer table into the guest image or treat a basename as an unqualified filesystem path."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x0063b490",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "indexed scene event icon member",
+      "ps2_live_bytes": 18,
+      "retained_ps2_tail_bytes": 14,
+      "ps2_sha256": "73c07c7115b4aa9e1c96a4a45221c37013209077533a6ecde953824888af4fd0",
+      "ps2_consumers": [
+        {
+          "function": "0x26d890",
+          "name": "mtSceneIconTaskUpdate",
+          "file": "src/mt_sceneIcon.c"
+        }
+      ],
+      "golden": {
+        "kind": "archive-member-registry-field",
+        "value": "_ICON24.EPL",
+        "switch_address": "0x71005f76c7",
+        "size": 12,
+        "sha256": "463058fdcebbaad16fc2b4b222075cb4606d72630d53fedd56cc9486c90451dd",
+        "steam_spans": [
+          {
+            "rva": "0x942438",
+            "raw_offset": 9703480,
+            "size": 12,
+            "sha256": "463058fdcebbaad16fc2b4b222075cb4606d72630d53fedd56cc9486c90451dd",
+            "container": "P4G.exe",
+            "source_build": 10836033
+          }
+        ],
+        "index": 23,
+        "registry_count": 26,
+        "qualified_archive": "data.cpk::init.bin::event/icon.bin",
+        "steam_registry_field": {
+          "index": 23,
+          "value": "_ICON24.EPL",
+          "source": {
+            "rva": "0x942438",
+            "raw_offset": 9703480,
+            "size": 12,
+            "sha256": "463058fdcebbaad16fc2b4b222075cb4606d72630d53fedd56cc9486c90451dd"
+          }
+        }
+      },
+      "structural_proof": "The old ordered pointer-bank field and actual scene-icon task are positively paired with the Golden cached archive/member registry, kind1/3 effect-slot replacement and special index10 producer. Complete ordered26-name Steam and NSO registries agree; the source is not a similarly sized archive window.",
+      "route_contract": "event-icon-member-registry",
+      "required_seams": [
+        "golden-a2-event-icons: use the actual cached event/icon.bin archive and26 ordered basename members, with request completion, effect creation and kind1/3 replacement/retirement. Preserve special index10 behavior and qualify the script/scene icon-index namespace. No old event/fullpath lookup or27th guessed pointer.",
+        "golden-a2-event-icon-aliases: route all native, translated, inlined, preloader and computed-pointer consumers through this full registry. Normalize host pointers as logical names; never copy the native pointer table into the guest image or treat a basename as an unqualified filesystem path."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x0063b4b0",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "indexed scene event icon member",
+      "ps2_live_bytes": 18,
+      "retained_ps2_tail_bytes": 14,
+      "ps2_sha256": "a3e8bde96e13417835595893a8dd5b8fa711bd51fdf447942b7b7848eea45b32",
+      "ps2_consumers": [
+        {
+          "function": "0x26d890",
+          "name": "mtSceneIconTaskUpdate",
+          "file": "src/mt_sceneIcon.c"
+        }
+      ],
+      "golden": {
+        "kind": "archive-member-registry-field",
+        "value": "_ICON25.EPL",
+        "switch_address": "0x7100619e6e",
+        "size": 12,
+        "sha256": "64dc555fab8cf437e5d08675c94621479f7631ea2f78655a6c9b61545fd8180b",
+        "steam_spans": [
+          {
+            "rva": "0x942448",
+            "raw_offset": 9703496,
+            "size": 12,
+            "sha256": "64dc555fab8cf437e5d08675c94621479f7631ea2f78655a6c9b61545fd8180b",
+            "container": "P4G.exe",
+            "source_build": 10836033
+          }
+        ],
+        "index": 24,
+        "registry_count": 26,
+        "qualified_archive": "data.cpk::init.bin::event/icon.bin",
+        "steam_registry_field": {
+          "index": 24,
+          "value": "_ICON25.EPL",
+          "source": {
+            "rva": "0x942448",
+            "raw_offset": 9703496,
+            "size": 12,
+            "sha256": "64dc555fab8cf437e5d08675c94621479f7631ea2f78655a6c9b61545fd8180b"
+          }
+        }
+      },
+      "structural_proof": "The old ordered pointer-bank field and actual scene-icon task are positively paired with the Golden cached archive/member registry, kind1/3 effect-slot replacement and special index10 producer. Complete ordered26-name Steam and NSO registries agree; the source is not a similarly sized archive window.",
+      "route_contract": "event-icon-member-registry",
+      "required_seams": [
+        "golden-a2-event-icons: use the actual cached event/icon.bin archive and26 ordered basename members, with request completion, effect creation and kind1/3 replacement/retirement. Preserve special index10 behavior and qualify the script/scene icon-index namespace. No old event/fullpath lookup or27th guessed pointer.",
+        "golden-a2-event-icon-aliases: route all native, translated, inlined, preloader and computed-pointer consumers through this full registry. Normalize host pointers as logical names; never copy the native pointer table into the guest image or treat a basename as an unqualified filesystem path."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x0063b4d0",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "indexed scene event icon member",
+      "ps2_live_bytes": 18,
+      "retained_ps2_tail_bytes": 14,
+      "ps2_sha256": "403d0b780cf9cf7a3c0d2319de27212f522bb83f20e4d7d5611a4f263152a009",
+      "ps2_consumers": [
+        {
+          "function": "0x26d890",
+          "name": "mtSceneIconTaskUpdate",
+          "file": "src/mt_sceneIcon.c"
+        }
+      ],
+      "golden": {
+        "kind": "archive-member-registry-field",
+        "value": "_ICON26.EPL",
+        "switch_address": "0x71005fa222",
+        "size": 12,
+        "sha256": "db676164d3ece3f3f4a49f59c92e68d7e15fbf125ab27388a9b0171becf3758e",
+        "steam_spans": [
+          {
+            "rva": "0x9424b8",
+            "raw_offset": 9703608,
+            "size": 12,
+            "sha256": "db676164d3ece3f3f4a49f59c92e68d7e15fbf125ab27388a9b0171becf3758e",
+            "container": "P4G.exe",
+            "source_build": 10836033
+          }
+        ],
+        "index": 25,
+        "registry_count": 26,
+        "qualified_archive": "data.cpk::init.bin::event/icon.bin",
+        "steam_registry_field": {
+          "index": 25,
+          "value": "_ICON26.EPL",
+          "source": {
+            "rva": "0x9424b8",
+            "raw_offset": 9703608,
+            "size": 12,
+            "sha256": "db676164d3ece3f3f4a49f59c92e68d7e15fbf125ab27388a9b0171becf3758e"
+          }
+        }
+      },
+      "structural_proof": "The old ordered pointer-bank field and actual scene-icon task are positively paired with the Golden cached archive/member registry, kind1/3 effect-slot replacement and special index10 producer. Complete ordered26-name Steam and NSO registries agree; the source is not a similarly sized archive window.",
+      "route_contract": "event-icon-member-registry",
+      "required_seams": [
+        "golden-a2-event-icons: use the actual cached event/icon.bin archive and26 ordered basename members, with request completion, effect creation and kind1/3 replacement/retirement. Preserve special index10 behavior and qualify the script/scene icon-index namespace. No old event/fullpath lookup or27th guessed pointer.",
+        "golden-a2-event-icon-aliases: route all native, translated, inlined, preloader and computed-pointer consumers through this full registry. Normalize host pointers as logical names; never copy the native pointer table into the guest image or treat a basename as an unqualified filesystem path."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x006265c0",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "battle actor/status sprite registry member",
+      "ps2_live_bytes": 25,
+      "retained_ps2_tail_bytes": 7,
+      "ps2_sha256": "6845aaf5290a6a9798d55d95895cf81822132ffd4e42c8995316e37ba6add20f",
+      "ps2_consumers": [
+        {
+          "function": "0x202890",
+          "name": "btlPanelIsEnabled",
+          "file": "src/Battle/btlPanel.c"
+        }
+      ],
+      "golden": {
+        "kind": "archive-member-registry-field",
+        "value": "b_p_k01x2.spr",
+        "switch_address": "0x7100627268",
+        "size": 14,
+        "sha256": "468cffbd17d0e29a40ce00c4e3647090de19bbd81a9ac1b07fe5e282b65930c1",
+        "steam_spans": [
+          {
+            "rva": "0x919120",
+            "raw_offset": 9534752,
+            "size": 14,
+            "sha256": "468cffbd17d0e29a40ce00c4e3647090de19bbd81a9ac1b07fe5e282b65930c1",
+            "container": "P4G.exe",
+            "source_build": 10836033
+          }
+        ],
+        "index": 0,
+        "registry_count": 10,
+        "archive_selection_flag": "0x1438",
+        "steam_registry_field": {
+          "index": 0,
+          "value": "b_p_k01x2.spr",
+          "source": {
+            "rva": "0x919120",
+            "raw_offset": 9534752,
+            "size": 14,
+            "sha256": "468cffbd17d0e29a40ce00c4e3647090de19bbd81a9ac1b07fe5e282b65930c1"
+          }
+        }
+      },
+      "structural_proof": "The paired loader preserves actual actor presence/flag1438 logic, source registry lookup, readiness, adoption and archive release. This actual actor/status member field is identified inside the complete changed resource layout. Status moves from old slot11 to Golden8; old ordinal copying is not allowed.",
+      "route_contract": "battle-panel-member-layout",
+      "required_seams": [
+        "golden-a2-battle-panel: use complete Golden10-member namespace, null actor slot4, actor-presence/flag1438 override, pack completion/adoption/destruction, TV texture stage and two cached handles. Bind all actual Golden panel/status/command/cursor draw consumers and their sprite-part/layout rules; no PS2-only resource/UV/slot fallback and no disabled presentation.",
+        "golden-a2-battle-panel-common: retire the entire old separate battle_01/cammand/corsol resource/handle representation in favor of the positively loaded Golden common composition. Do not invent a guest old-slot to native-slot byte mapping or preserve old sprite names cosmetically."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x006265e0",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "battle actor/status sprite registry member",
+      "ps2_live_bytes": 25,
+      "retained_ps2_tail_bytes": 7,
+      "ps2_sha256": "ff71f14f6553a68cfd2199f39fc709ea9a5608adb2602c872ad880908a051443",
+      "ps2_consumers": [
+        {
+          "function": "0x202890",
+          "name": "btlPanelIsEnabled",
+          "file": "src/Battle/btlPanel.c"
+        }
+      ],
+      "golden": {
+        "kind": "archive-member-registry-field",
+        "value": "b_p_k02x2.spr",
+        "switch_address": "0x7100610f04",
+        "size": 14,
+        "sha256": "0761369877a957e11a991bcfe6b717752707c8b43bcf01a023fb6f6e066574ab",
+        "steam_spans": [
+          {
+            "rva": "0x919130",
+            "raw_offset": 9534768,
+            "size": 14,
+            "sha256": "0761369877a957e11a991bcfe6b717752707c8b43bcf01a023fb6f6e066574ab",
+            "container": "P4G.exe",
+            "source_build": 10836033
+          }
+        ],
+        "index": 1,
+        "registry_count": 10,
+        "archive_selection_flag": "0x1438",
+        "steam_registry_field": {
+          "index": 1,
+          "value": "b_p_k02x2.spr",
+          "source": {
+            "rva": "0x919130",
+            "raw_offset": 9534768,
+            "size": 14,
+            "sha256": "0761369877a957e11a991bcfe6b717752707c8b43bcf01a023fb6f6e066574ab"
+          }
+        }
+      },
+      "structural_proof": "The paired loader preserves actual actor presence/flag1438 logic, source registry lookup, readiness, adoption and archive release. This actual actor/status member field is identified inside the complete changed resource layout. Status moves from old slot11 to Golden8; old ordinal copying is not allowed.",
+      "route_contract": "battle-panel-member-layout",
+      "required_seams": [
+        "golden-a2-battle-panel: use complete Golden10-member namespace, null actor slot4, actor-presence/flag1438 override, pack completion/adoption/destruction, TV texture stage and two cached handles. Bind all actual Golden panel/status/command/cursor draw consumers and their sprite-part/layout rules; no PS2-only resource/UV/slot fallback and no disabled presentation.",
+        "golden-a2-battle-panel-common: retire the entire old separate battle_01/cammand/corsol resource/handle representation in favor of the positively loaded Golden common composition. Do not invent a guest old-slot to native-slot byte mapping or preserve old sprite names cosmetically."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x00626600",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "battle actor/status sprite registry member",
+      "ps2_live_bytes": 25,
+      "retained_ps2_tail_bytes": 7,
+      "ps2_sha256": "9605916347e45e086f74d08ec28adbd484c52567de1d92af5d066ebfdc1db206",
+      "ps2_consumers": [
+        {
+          "function": "0x202890",
+          "name": "btlPanelIsEnabled",
+          "file": "src/Battle/btlPanel.c"
+        }
+      ],
+      "golden": {
+        "kind": "archive-member-registry-field",
+        "value": "b_p_k03x2.spr",
+        "switch_address": "0x7100610f12",
+        "size": 14,
+        "sha256": "b86054cbc7e76b7855464f9bcd067380933b46e5221a7b7f17071867cfef68c0",
+        "steam_spans": [
+          {
+            "rva": "0x919140",
+            "raw_offset": 9534784,
+            "size": 14,
+            "sha256": "b86054cbc7e76b7855464f9bcd067380933b46e5221a7b7f17071867cfef68c0",
+            "container": "P4G.exe",
+            "source_build": 10836033
+          }
+        ],
+        "index": 2,
+        "registry_count": 10,
+        "archive_selection_flag": "0x1438",
+        "steam_registry_field": {
+          "index": 2,
+          "value": "b_p_k03x2.spr",
+          "source": {
+            "rva": "0x919140",
+            "raw_offset": 9534784,
+            "size": 14,
+            "sha256": "b86054cbc7e76b7855464f9bcd067380933b46e5221a7b7f17071867cfef68c0"
+          }
+        }
+      },
+      "structural_proof": "The paired loader preserves actual actor presence/flag1438 logic, source registry lookup, readiness, adoption and archive release. This actual actor/status member field is identified inside the complete changed resource layout. Status moves from old slot11 to Golden8; old ordinal copying is not allowed.",
+      "route_contract": "battle-panel-member-layout",
+      "required_seams": [
+        "golden-a2-battle-panel: use complete Golden10-member namespace, null actor slot4, actor-presence/flag1438 override, pack completion/adoption/destruction, TV texture stage and two cached handles. Bind all actual Golden panel/status/command/cursor draw consumers and their sprite-part/layout rules; no PS2-only resource/UV/slot fallback and no disabled presentation.",
+        "golden-a2-battle-panel-common: retire the entire old separate battle_01/cammand/corsol resource/handle representation in favor of the positively loaded Golden common composition. Do not invent a guest old-slot to native-slot byte mapping or preserve old sprite names cosmetically."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x00626620",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "battle actor/status sprite registry member",
+      "ps2_live_bytes": 25,
+      "retained_ps2_tail_bytes": 7,
+      "ps2_sha256": "fb4df3fbf77c8569a2b3fd9a86e69e7df2aa1b5c25628cc18d4b4ab2f63a9a1c",
+      "ps2_consumers": [
+        {
+          "function": "0x202890",
+          "name": "btlPanelIsEnabled",
+          "file": "src/Battle/btlPanel.c"
+        }
+      ],
+      "golden": {
+        "kind": "archive-member-registry-field",
+        "value": "b_p_k04x2.spr",
+        "switch_address": "0x71005d8a20",
+        "size": 14,
+        "sha256": "df4a34d1675799d7896c771818e88106033b1fa6a624108724dfd4a013495c5f",
+        "steam_spans": [
+          {
+            "rva": "0x919150",
+            "raw_offset": 9534800,
+            "size": 14,
+            "sha256": "df4a34d1675799d7896c771818e88106033b1fa6a624108724dfd4a013495c5f",
+            "container": "P4G.exe",
+            "source_build": 10836033
+          }
+        ],
+        "index": 3,
+        "registry_count": 10,
+        "archive_selection_flag": "0x1438",
+        "steam_registry_field": {
+          "index": 3,
+          "value": "b_p_k04x2.spr",
+          "source": {
+            "rva": "0x919150",
+            "raw_offset": 9534800,
+            "size": 14,
+            "sha256": "df4a34d1675799d7896c771818e88106033b1fa6a624108724dfd4a013495c5f"
+          }
+        }
+      },
+      "structural_proof": "The paired loader preserves actual actor presence/flag1438 logic, source registry lookup, readiness, adoption and archive release. This actual actor/status member field is identified inside the complete changed resource layout. Status moves from old slot11 to Golden8; old ordinal copying is not allowed.",
+      "route_contract": "battle-panel-member-layout",
+      "required_seams": [
+        "golden-a2-battle-panel: use complete Golden10-member namespace, null actor slot4, actor-presence/flag1438 override, pack completion/adoption/destruction, TV texture stage and two cached handles. Bind all actual Golden panel/status/command/cursor draw consumers and their sprite-part/layout rules; no PS2-only resource/UV/slot fallback and no disabled presentation.",
+        "golden-a2-battle-panel-common: retire the entire old separate battle_01/cammand/corsol resource/handle representation in favor of the positively loaded Golden common composition. Do not invent a guest old-slot to native-slot byte mapping or preserve old sprite names cosmetically."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x00626640",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "battle actor/status sprite registry member",
+      "ps2_live_bytes": 25,
+      "retained_ps2_tail_bytes": 7,
+      "ps2_sha256": "e3c15b647b8d8f66e5fe03296d461f7bca9ab2fb382f510f716838b5afa0811e",
+      "ps2_consumers": [
+        {
+          "function": "0x202890",
+          "name": "btlPanelIsEnabled",
+          "file": "src/Battle/btlPanel.c"
+        }
+      ],
+      "golden": {
+        "kind": "archive-member-registry-field",
+        "value": "b_p_k06x2.spr",
+        "switch_address": "0x71005fede5",
+        "size": 14,
+        "sha256": "b79cb2693a376fa27ad259d7abcf266c6a8cbd93b76d1642b9e7e03ab1f383f3",
+        "steam_spans": [
+          {
+            "rva": "0x919160",
+            "raw_offset": 9534816,
+            "size": 14,
+            "sha256": "b79cb2693a376fa27ad259d7abcf266c6a8cbd93b76d1642b9e7e03ab1f383f3",
+            "container": "P4G.exe",
+            "source_build": 10836033
+          }
+        ],
+        "index": 5,
+        "registry_count": 10,
+        "archive_selection_flag": "0x1438",
+        "steam_registry_field": {
+          "index": 5,
+          "value": "b_p_k06x2.spr",
+          "source": {
+            "rva": "0x919160",
+            "raw_offset": 9534816,
+            "size": 14,
+            "sha256": "b79cb2693a376fa27ad259d7abcf266c6a8cbd93b76d1642b9e7e03ab1f383f3"
+          }
+        }
+      },
+      "structural_proof": "The paired loader preserves actual actor presence/flag1438 logic, source registry lookup, readiness, adoption and archive release. This actual actor/status member field is identified inside the complete changed resource layout. Status moves from old slot11 to Golden8; old ordinal copying is not allowed.",
+      "route_contract": "battle-panel-member-layout",
+      "required_seams": [
+        "golden-a2-battle-panel: use complete Golden10-member namespace, null actor slot4, actor-presence/flag1438 override, pack completion/adoption/destruction, TV texture stage and two cached handles. Bind all actual Golden panel/status/command/cursor draw consumers and their sprite-part/layout rules; no PS2-only resource/UV/slot fallback and no disabled presentation.",
+        "golden-a2-battle-panel-common: retire the entire old separate battle_01/cammand/corsol resource/handle representation in favor of the positively loaded Golden common composition. Do not invent a guest old-slot to native-slot byte mapping or preserve old sprite names cosmetically."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x00626660",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "battle actor/status sprite registry member",
+      "ps2_live_bytes": 25,
+      "retained_ps2_tail_bytes": 7,
+      "ps2_sha256": "125adb6dc21e19e7c881fe2504944ca4069555123a25cf4582a28b7c0eb90665",
+      "ps2_consumers": [
+        {
+          "function": "0x202890",
+          "name": "btlPanelIsEnabled",
+          "file": "src/Battle/btlPanel.c"
+        }
+      ],
+      "golden": {
+        "kind": "archive-member-registry-field",
+        "value": "b_p_k07x2.spr",
+        "switch_address": "0x7100627276",
+        "size": 14,
+        "sha256": "1554a1b158762ceb0fbf64938be79209832533cf093be4b2599cf068f47dae44",
+        "steam_spans": [
+          {
+            "rva": "0x919170",
+            "raw_offset": 9534832,
+            "size": 14,
+            "sha256": "1554a1b158762ceb0fbf64938be79209832533cf093be4b2599cf068f47dae44",
+            "container": "P4G.exe",
+            "source_build": 10836033
+          }
+        ],
+        "index": 6,
+        "registry_count": 10,
+        "archive_selection_flag": "0x1438",
+        "steam_registry_field": {
+          "index": 6,
+          "value": "b_p_k07x2.spr",
+          "source": {
+            "rva": "0x919170",
+            "raw_offset": 9534832,
+            "size": 14,
+            "sha256": "1554a1b158762ceb0fbf64938be79209832533cf093be4b2599cf068f47dae44"
+          }
+        }
+      },
+      "structural_proof": "The paired loader preserves actual actor presence/flag1438 logic, source registry lookup, readiness, adoption and archive release. This actual actor/status member field is identified inside the complete changed resource layout. Status moves from old slot11 to Golden8; old ordinal copying is not allowed.",
+      "route_contract": "battle-panel-member-layout",
+      "required_seams": [
+        "golden-a2-battle-panel: use complete Golden10-member namespace, null actor slot4, actor-presence/flag1438 override, pack completion/adoption/destruction, TV texture stage and two cached handles. Bind all actual Golden panel/status/command/cursor draw consumers and their sprite-part/layout rules; no PS2-only resource/UV/slot fallback and no disabled presentation.",
+        "golden-a2-battle-panel-common: retire the entire old separate battle_01/cammand/corsol resource/handle representation in favor of the positively loaded Golden common composition. Do not invent a guest old-slot to native-slot byte mapping or preserve old sprite names cosmetically."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x00626680",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "battle actor/status sprite registry member",
+      "ps2_live_bytes": 25,
+      "retained_ps2_tail_bytes": 7,
+      "ps2_sha256": "68ab1a398046acbd47f013037a746be929e67a9dfea39f7dc4fe48088cab962f",
+      "ps2_consumers": [
+        {
+          "function": "0x202890",
+          "name": "btlPanelIsEnabled",
+          "file": "src/Battle/btlPanel.c"
+        }
+      ],
+      "golden": {
+        "kind": "archive-member-registry-field",
+        "value": "b_p_k08x2.spr",
+        "switch_address": "0x7100621fe0",
+        "size": 14,
+        "sha256": "4f0d4767f7ac9e97620b323272af76766dae9eaeda63501a66129de28be6857e",
+        "steam_spans": [
+          {
+            "rva": "0x919180",
+            "raw_offset": 9534848,
+            "size": 14,
+            "sha256": "4f0d4767f7ac9e97620b323272af76766dae9eaeda63501a66129de28be6857e",
+            "container": "P4G.exe",
+            "source_build": 10836033
+          }
+        ],
+        "index": 7,
+        "registry_count": 10,
+        "archive_selection_flag": "0x1438",
+        "steam_registry_field": {
+          "index": 7,
+          "value": "b_p_k08x2.spr",
+          "source": {
+            "rva": "0x919180",
+            "raw_offset": 9534848,
+            "size": 14,
+            "sha256": "4f0d4767f7ac9e97620b323272af76766dae9eaeda63501a66129de28be6857e"
+          }
+        }
+      },
+      "structural_proof": "The paired loader preserves actual actor presence/flag1438 logic, source registry lookup, readiness, adoption and archive release. This actual actor/status member field is identified inside the complete changed resource layout. Status moves from old slot11 to Golden8; old ordinal copying is not allowed.",
+      "route_contract": "battle-panel-member-layout",
+      "required_seams": [
+        "golden-a2-battle-panel: use complete Golden10-member namespace, null actor slot4, actor-presence/flag1438 override, pack completion/adoption/destruction, TV texture stage and two cached handles. Bind all actual Golden panel/status/command/cursor draw consumers and their sprite-part/layout rules; no PS2-only resource/UV/slot fallback and no disabled presentation.",
+        "golden-a2-battle-panel-common: retire the entire old separate battle_01/cammand/corsol resource/handle representation in favor of the positively loaded Golden common composition. Do not invent a guest old-slot to native-slot byte mapping or preserve old sprite names cosmetically."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x00626700",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "battle actor/status sprite registry member",
+      "ps2_live_bytes": 28,
+      "retained_ps2_tail_bytes": 4,
+      "ps2_sha256": "f9ac97cbc0ddfb386960b6b7eb341e044091e089b5a1cacb155b9c9c69b2c126",
+      "ps2_consumers": [
+        {
+          "function": "0x202890",
+          "name": "btlPanelIsEnabled",
+          "file": "src/Battle/btlPanel.c"
+        }
+      ],
+      "golden": {
+        "kind": "archive-member-registry-field",
+        "value": "b_badsta01x2.spr",
+        "switch_address": "0x7100606cb8",
+        "size": 17,
+        "sha256": "ea64fa302a85e82b1c7994e8637a17cb2aae792f62873e28233b879f1838d199",
+        "steam_spans": [
+          {
+            "rva": "0x919190",
+            "raw_offset": 9534864,
+            "size": 17,
+            "sha256": "ea64fa302a85e82b1c7994e8637a17cb2aae792f62873e28233b879f1838d199",
+            "container": "P4G.exe",
+            "source_build": 10836033
+          }
+        ],
+        "index": 8,
+        "registry_count": 10,
+        "archive_selection_flag": "0x1438",
+        "steam_registry_field": {
+          "index": 8,
+          "value": "b_badsta01x2.spr",
+          "source": {
+            "rva": "0x919190",
+            "raw_offset": 9534864,
+            "size": 17,
+            "sha256": "ea64fa302a85e82b1c7994e8637a17cb2aae792f62873e28233b879f1838d199"
+          }
+        }
+      },
+      "structural_proof": "The paired loader preserves actual actor presence/flag1438 logic, source registry lookup, readiness, adoption and archive release. This actual actor/status member field is identified inside the complete changed resource layout. Status moves from old slot11 to Golden8; old ordinal copying is not allowed.",
+      "route_contract": "battle-panel-member-layout",
+      "required_seams": [
+        "golden-a2-battle-panel: use complete Golden10-member namespace, null actor slot4, actor-presence/flag1438 override, pack completion/adoption/destruction, TV texture stage and two cached handles. Bind all actual Golden panel/status/command/cursor draw consumers and their sprite-part/layout rules; no PS2-only resource/UV/slot fallback and no disabled presentation.",
+        "golden-a2-battle-panel-common: retire the entire old separate battle_01/cammand/corsol resource/handle representation in favor of the positively loaded Golden common composition. Do not invent a guest old-slot to native-slot byte mapping or preserve old sprite names cosmetically."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x006266a0",
+      "size": 32,
+      "class": "D10c",
+      "role": "old separate battle common sprite representation",
+      "ps2_live_bytes": 27,
+      "retained_ps2_tail_bytes": 5,
+      "ps2_sha256": "6d242febdf87aac54e53767af4e895a280539f8cbc3041050185923851b234a7",
+      "ps2_consumers": [
+        {
+          "function": "0x202890",
+          "name": "btlPanelIsEnabled",
+          "file": "src/Battle/btlPanel.c"
+        }
+      ],
+      "golden": {
+        "kind": "representation-replaced",
+        "replacement": "battle-panel-member-layout"
+      },
+      "structural_proof": "The concrete old12-streamed/16-total loader owns this separate common resource. The corresponding Golden flag1438/actor-gated loader positively installs a10-streamed/12-total replacement layout and the sealed Golden common composition. The old common name/handle field is retired with that resource organization, while real Golden status/command/cursor rendering is mandatory under the route contract. This is not closure from missing strings or cosmetic relevance.",
+      "route_contract": "battle-panel-member-layout",
+      "required_seams": [
+        "golden-a2-battle-panel: use complete Golden10-member namespace, null actor slot4, actor-presence/flag1438 override, pack completion/adoption/destruction, TV texture stage and two cached handles. Bind all actual Golden panel/status/command/cursor draw consumers and their sprite-part/layout rules; no PS2-only resource/UV/slot fallback and no disabled presentation.",
+        "golden-a2-battle-panel-common: retire the entire old separate battle_01/cammand/corsol resource/handle representation in favor of the positively loaded Golden common composition. Do not invent a guest old-slot to native-slot byte mapping or preserve old sprite names cosmetically."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x006266c0",
+      "size": 32,
+      "class": "D10c",
+      "role": "old separate battle common sprite representation",
+      "ps2_live_bytes": 29,
+      "retained_ps2_tail_bytes": 3,
+      "ps2_sha256": "40dd04b1ff27c1a72e505d7558dd261ed6f522062d92eae997b3179eaa41ef0c",
+      "ps2_consumers": [
+        {
+          "function": "0x202890",
+          "name": "btlPanelIsEnabled",
+          "file": "src/Battle/btlPanel.c"
+        }
+      ],
+      "golden": {
+        "kind": "representation-replaced",
+        "replacement": "battle-panel-member-layout"
+      },
+      "structural_proof": "The concrete old12-streamed/16-total loader owns this separate common resource. The corresponding Golden flag1438/actor-gated loader positively installs a10-streamed/12-total replacement layout and the sealed Golden common composition. The old common name/handle field is retired with that resource organization, while real Golden status/command/cursor rendering is mandatory under the route contract. This is not closure from missing strings or cosmetic relevance.",
+      "route_contract": "battle-panel-member-layout",
+      "required_seams": [
+        "golden-a2-battle-panel: use complete Golden10-member namespace, null actor slot4, actor-presence/flag1438 override, pack completion/adoption/destruction, TV texture stage and two cached handles. Bind all actual Golden panel/status/command/cursor draw consumers and their sprite-part/layout rules; no PS2-only resource/UV/slot fallback and no disabled presentation.",
+        "golden-a2-battle-panel-common: retire the entire old separate battle_01/cammand/corsol resource/handle representation in favor of the positively loaded Golden common composition. Do not invent a guest old-slot to native-slot byte mapping or preserve old sprite names cosmetically."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x006266e0",
+      "size": 32,
+      "class": "D10c",
+      "role": "old separate battle common sprite representation",
+      "ps2_live_bytes": 27,
+      "retained_ps2_tail_bytes": 5,
+      "ps2_sha256": "ba668dbcc88ae459659f5599636d7ed5cc33391e01f5c98075086e90ad2f1244",
+      "ps2_consumers": [
+        {
+          "function": "0x202890",
+          "name": "btlPanelIsEnabled",
+          "file": "src/Battle/btlPanel.c"
+        }
+      ],
+      "golden": {
+        "kind": "representation-replaced",
+        "replacement": "battle-panel-member-layout"
+      },
+      "structural_proof": "The concrete old12-streamed/16-total loader owns this separate common resource. The corresponding Golden flag1438/actor-gated loader positively installs a10-streamed/12-total replacement layout and the sealed Golden common composition. The old common name/handle field is retired with that resource organization, while real Golden status/command/cursor rendering is mandatory under the route contract. This is not closure from missing strings or cosmetic relevance.",
+      "route_contract": "battle-panel-member-layout",
+      "required_seams": [
+        "golden-a2-battle-panel: use complete Golden10-member namespace, null actor slot4, actor-presence/flag1438 override, pack completion/adoption/destruction, TV texture stage and two cached handles. Bind all actual Golden panel/status/command/cursor draw consumers and their sprite-part/layout rules; no PS2-only resource/UV/slot fallback and no disabled presentation.",
+        "golden-a2-battle-panel-common: retire the entire old separate battle_01/cammand/corsol resource/handle representation in favor of the positively loaded Golden common composition. Do not invent a guest old-slot to native-slot byte mapping or preserve old sprite names cosmetically."
+      ],
+      "runtime_status": "pending-seam"
+    },
+    {
+      "address": "0x0060abb0",
+      "size": 32,
+      "class": "PROVEN",
+      "role": "battle playback bank path",
+      "ps2_live_bytes": 18,
+      "retained_ps2_tail_bytes": 14,
+      "ps2_sha256": "352326803e4a93b1973ca2246e9924d384dae58c6657c87664b608f45fa051f7",
+      "ps2_consumers": [
+        {
+          "function": "0x1f65d0",
+          "name": "btlSoundLoadPlaybackFile",
+          "file": "src/Battle/btlSound_inferred_001f6100.c"
+        }
+      ],
+      "golden": {
+        "kind": "cstring",
+        "value": "battle/BSV108.BVP",
+        "switch_address": "0x7100610e82",
+        "size": 18,
+        "sha256": "e3413e6584efec2364c25a0b14b75303a0c573f4a950ec1482d7f550758e1ce5",
+        "steam_spans": [
+          {
+            "rva": "0x9189a8",
+            "raw_offset": 9532840,
+            "size": 18,
+            "sha256": "e3413e6584efec2364c25a0b14b75303a0c573f4a950ec1482d7f550758e1ce5",
+            "container": "P4G.exe",
+            "source_build": 10836033
+          }
+        ]
+      },
+      "structural_proof": "The actual indexed loader packet has the same8/5 channel selection, asynchronous wait, enable-mask and battle loaded-flag transition in old1f65d0 and Golden0648e0. These typed state/branch roles establish this path independently of the old string-only M2 candidate.",
+      "route_contract": "battle-voice-pack-loader",
+      "required_seams": [
+        "golden-a2-battle-voice-pack: qualify actual Golden bank selector, BVP request, channel8/5 enable-mask and battle loaded state plus ownership. Bind all native/translated/computed registry aliases; a filename proof does not qualify the BVP payload/sound-bank namespace or the separate tactic-confirm table."
+      ],
+      "runtime_status": "pending-seam"
+    }
+  ],
+  "counts": {
+    "PROVEN": 42,
+    "PROVEN-code": 2,
+    "D10c": 3
+  },
+  "ps2_bytes": 1488,
+  "runtime_status": "pending-seam",
+  "evidence_receipts": [
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\c6b-a2-ps2-readers.txt",
+      "sha256": "2b4b0b410f2dca2c14cdb3eaeb6a3c0a5af4d7b32b88dd274ea2080f16e21908"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\c6b-a2-links.json",
+      "sha256": "4990c91fed4fefebf6fa633d043a16132c302e56184efafca12d68bb53d1dce7"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\c6b-a2-resource-facts.json",
+      "sha256": "dcf62cd7cd9397cb3747a619cda8be83ed209c85ae89f3dd0c741ef95a841c11"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\71001cd290-c6b.txt",
+      "sha256": "a0319bce6604b1b3528cb3ba327047727818fdc4676c6bfd9c907f1ec7b3716c"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\71001cf7b0-c6b.txt",
+      "sha256": "042d3cdbbd484ee9bae856f747cb56b22405525f3918229f18cf252a67e7b935"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\7100281040-c6b.txt",
+      "sha256": "aa03b6b173d88fa2f786a5aa4158ea5be8b467a1d8574c14f4a1bd60973caf66"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\710038e670-c6b.txt",
+      "sha256": "af352c3693a8dbaad767744b3224fad765856020faf6681f268db8fd58048fa5"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\7100385fc0-c6b.txt",
+      "sha256": "b9e5692fbaa08c0a74b4261a035e161a6e07ad281675b426fabecb20bc15fb08"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\71002a61d0-c6b.txt",
+      "sha256": "d2dcedf93880d4a241fef1e3e1ed0198458dd32e211c8e3c2301281931e95def"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\71002a6110-c6b.txt",
+      "sha256": "78dd1f52aacb6768f696755b6168b9380b1901b2ede6c8c5789a0be8ba224009"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\71002a60c0-c6b.txt",
+      "sha256": "ef96805a069323af18a256ea878fd89d8c113b22ff168857feaac44a4477f45a"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\7100084bd0-c6b.txt",
+      "sha256": "e10b945ae36a4c2ea64e7c8cf4f078508e753abd03642d211e6c6664a8d01f35"
+    },
+    {
+      "file": "<scratch>/GoldenRE-notes\\l1\\71000648e0-c6b.txt",
+      "sha256": "4c42593e10268fb8a04441f5da3334a08396d102f3b2f46e88f19cc7b3c9e192"
+    }
+  ]
+}

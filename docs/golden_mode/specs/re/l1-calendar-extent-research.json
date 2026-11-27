@@ -1,0 +1,71 @@
+{
+  "ps2": {
+    "real_base": "0x005e3a00",
+    "column_aliases": [
+      0,
+      2,
+      4
+    ],
+    "next_named_boundary": "0x005e4298",
+    "366_row_view_bytes": 2196,
+    "inventory_column4_live_bytes": 2192,
+    "inventory_tail_bytes": 4,
+    "padding4_zero": true,
+    "table_sha256": "b8e3e19bb8a22529813509bfad4874ed47a186b1f9358bbe4ec27499e42800c0"
+  },
+  "golden": {
+    "nso_relocation_storage": "0x71008808d8",
+    "nso_target": "0x710073f0d8",
+    "steam_base_rva": "0xa4f7e0",
+    "steam_raw": 10805216,
+    "366_row_view_bytes": 2196,
+    "nso_366_view_sha256": "360a0088a46bd9c5ac97107ffae8f192bf5d969e7b985f36a7da8581a10581b0",
+    "steam_366_view_sha256": "360a0088a46bd9c5ac97107ffae8f192bf5d969e7b985f36a7da8581a10581b0",
+    "nso_steam_366_view_equal": true,
+    "nso_next_relocated_pointer_table": "0x710073fd08",
+    "intervening_bytes": 3120,
+    "intervening_6byte_units": 520,
+    "physical_calendar_object_end_proven": false,
+    "note": "366-row logical prefix is not proof of physical array end; following bytes continue calendar-shaped data before next relocated pointer table. Do not bind historical2196-byte column4 candidate.",
+    "successor_c12": {
+      "typed_next_object": "NSO73fd08 is a six-pointer phase-label table: MORNING/FORENOON/LUNCH TIME/AFTERNOON/AFTER SCHOOL/NIGHT, read atc9a68..c9a74. Static relocations occupy73fd08..73fd37. The former73fd38 boundary misses this nearer typed object.",
+      "upper_bound_bytes": 3120,
+      "upper_bound_six_byte_units": 520,
+      "upper_bound_is_declared_row_count": false,
+      "steam_nso_first_difference": 3117,
+      "last_nonzero_nso_byte_offset_before_phase_pointers": 3108,
+      "remaining_extent_blocker": "519 six-byte rows would occupy3114B; NSO has six zero bytes before the phase-pointer table, while Steam has different bytes beginning3117. This is a concrete boundary/padding lead, not proof of519 or520 declared rows. No519/520-row source admission is made.",
+      "phase_reader": "ca7a0 and fallbacksca60c/ca76c select u16+4 iff unsigned(phase-2)<4, otherwiseu16+2. This is not PS2 signed-byte phase loading. ca940 separately loads onlyu8+4 for fusion fallback; do not widen that selector.",
+      "packed_reader": "ca9e0 reads signed16+2/+4; if day>referenceDay+3 and signbit15, choose bits8..14, otherwise lowbyte; combine first+(second<<4). No year modulo is applied to its table index.",
+      "overrides": "ca530 applies global flags only for matching actual currentday/phase. ca640 independently consults signed8depth9b893c/slots and accepts any entry exceptff, then traverses flags1203..1208 ->0/1/2/3/4/7 beforeu16tablefallback. Getterd8640 reads live snapshot-active word759454, not758454; whenactive it bypasses stack, not flag chain. Exact reset/push/pop, saved-real-date/phase/weather, active-store/init/restore and sourceflag restore operations are now recorded in l1-calendar-weather-producers-research.json. Caller domains and runtime lifetimes remain required; full calendar extent is still unproved.",
+      "index_contract": "c9d90 stores the signed16day directly and indexes6*day without modulo. c9fb0 month/day split separately uses signed remainder366. caa50 searches only throughday350 inclusive. These are distinct domains; a blanket365->366 table-index replacement is not a proof.",
+      "scheduler_phase_extension": "d1374..d13ac copies7 eight-byte labels, includingPM_E, into the month/day/phase procedure-name formatter. Do not truncate Golden live phase inputs to the PS2 six-label view.",
+      "producer_research": "l1-calendar-weather-producers-research.json",
+      "extent_prefix_update": "Exactly3114B are equal across Steam/NSO, but this is not a declared519-row proof. Following6B are NSO000000000000 versusSteam000000010100; no directRIP/exactRVA32 tail reference found in bounded ordinary.shared probe. Negative references and differing trailing bytes do not prove padding or a physical end."
+    }
+  },
+  "decision": "OPEN-retain",
+  "fallback_research": {
+    "ps2_bases": [
+      "0x006406f0",
+      "0x00643d00"
+    ],
+    "ps2_inventory_span": 112,
+    "ps2_observed_live_rows": 5,
+    "ps2_live_bytes": 100,
+    "ps2_tail_bytes": 12,
+    "ps2_spans_equal": true,
+    "canonical_l1_selection_contains_these_bases": false,
+    "golden_member_chain": "data.cpk::init_free.bin::init/fclTable.bin::WeatherUnconditionalBonus.ftd",
+    "golden_member_size": 192,
+    "golden_member_sha256": "af67709e48f640fa7a8afb6fa975f896a979fb774ccd4eafb58a8e135d6854d3",
+    "golden_offset": 16,
+    "golden_payload_size": 160,
+    "golden_rows": 8,
+    "golden_stride": 20,
+    "golden_payload_sha256": "400e67f3cd2881ba3a3a75e35036e23757202f62b8eb4ad7632b6bc1d82c2a13",
+    "reader": "Switch173760 resolves exact member;169790 fallback indexes20-byte rows throughca940 calendar+4 selector",
+    "first100_bytes_equal_ps2": false,
+    "scope": "Companion source lead for dated-fusion coherence; not a new selected L1 row and not a runtime-qualified binding. Never fabricate a whole112-byte PS2copy or assume5-row fallback shape."
+  }
+}

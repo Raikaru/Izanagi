@@ -14,6 +14,8 @@
 #include <stdio.h>
 #include <string.h>
 
+void p4_lua_data_fusion_register(lua_State *L);
+
 static const char *const stat_names[P4_DATA_STATS] = {"st", "ma", "en", "ag", "lu"};
 
 static void set_number(lua_State *L, const char *field, double value)
@@ -512,6 +514,7 @@ static int list(lua_State *L, const char *function, int filtered)
 static int data_find(lua_State *L) { return list(L, "find", 1); }
 static int data_all(lua_State *L) { return list(L, "all", 0); }
 
+
 /* main.luau runs after the tables are built; edits belong in data.luau. */
 static int data_edit(lua_State *L)
 {
@@ -605,6 +608,7 @@ void p4_lua_data_initialize(lua_State *L)
     lua_newtable(L);
     luaL_register(L, NULL, read_methods);
     luaL_register(L, NULL, main_methods);
+    p4_lua_data_fusion_register(L);
     lua_newtable(L);
     luaL_register(L, NULL, session_methods);
     lua_setreadonly(L, -1, 1);

@@ -26,9 +26,17 @@ int main(void) {
         if (!lgpl_only(libs[i][1])) bad = 1;
     }
     printf("ffmpeg_license_test: configuration enables gpl/nonfree/version3: %s\n", gpl_conf ? "yes" : "no");
+    /* Golden HCA adds no library or GPL component. A shipping FFmpeg must
+     * include it; distro/development licence reporting remains unchanged. */
+    int hca = avcodec_find_decoder(AV_CODEC_ID_HCA) != NULL;
+    printf("ffmpeg_license_test: HCA decoder: %s\n", hca ? "available" : "missing");
     const char *req = getenv("P4PC_REQUIRE_LGPL");
     if (req && *req == '1' && bad) {
         fprintf(stderr, "ffmpeg_license_test: FAIL release build needs LGPL-only FFmpeg libraries\n");
+        return 1;
+    }
+    if (req && *req == '1' && !hca) {
+        fprintf(stderr, "ffmpeg_license_test: FAIL release build needs the HCA decoder\n");
         return 1;
     }
     return 0;

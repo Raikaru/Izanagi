@@ -68,6 +68,8 @@ Where things are
                       back up your progress.
       p4pc.log        what the game printed on its last run. Attach it when you
                       report a problem.
+      p4pc.prev.log   the run before (attach it if the problem was in that run),
+      p4pc.unclean.log  and the last run that did not end by itself (a crash).
       SLUS_217.82     the game's program file, read from your disc.
 The folder is not inside the unzipped folder, so the zip can be replaced by a newer
 build without touching your saves.

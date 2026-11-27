@@ -88,6 +88,12 @@ int32_t ADXT_GetStat(void *adxt);
 SjObj *SJMEM_Create(void *buf, int32_t bsize);
 void *kwlnProbeHeapBudget(void);
 
+/* The mixer's output limiter (p4snd_soft_limit) bends samples past 0.9 of full scale; the reference is passed through it the same way. */
+static double limited16(double s)
+{
+    return (double)p4snd_soft_limit((float)(s / 32768.0)) * 32768.0;
+}
+
 static int failures;
 
 static void fail(const char *what)
@@ -448,7 +454,7 @@ static int play_one(const char *adxPath, const char *wavPath)
         }
         gain = den > 0.0 ? num / den : 0.0;
         for (j = EDGE; j < n - EDGE; j++) {
-            double x = REF48(j + bestlag) * gain;
+            double x = limited16(REF48(j + bestlag) * gain);
             double e = fabs(x - (double)pcm[(startFrame + j) * 2]);
 
             se += e * e;

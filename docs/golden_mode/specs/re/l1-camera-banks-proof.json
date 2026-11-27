@@ -1,0 +1,985 @@
+{
+  "proof_id": "L1-c6-battle-camera-banks-20261113",
+  "class": "PROVEN",
+  "boundary": "Structural SOURCE proof only; runtime pending-seam; no gameplay or visual equivalence claim.",
+  "source_build": 10836033,
+  "steam_image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+  "switch_version": "1.2",
+  "method": "Recover complete typed banks from selectors, follow ordinary Steam .shared and independent Switch selectors into their common script consumer. Byte equality corroborates an already role-qualified bank; it is not the admission criterion. No .arch decoding.",
+  "script_layout": {
+    "header_bytes": 4,
+    "header_fields": [
+      "u8 count",
+      "u8 flags",
+      "s16 curveMode"
+    ],
+    "script_stride": 244,
+    "rows_per_script": 4,
+    "row_stride": 60,
+    "row_fields": [
+      {
+        "offset": 0,
+        "type": "s16-le",
+        "role": "duration"
+      },
+      {
+        "offset": 2,
+        "type": "u16-le",
+        "role": "positionSource"
+      },
+      {
+        "offset": 4,
+        "type": "3xf32-le",
+        "role": "firstPosition"
+      },
+      {
+        "offset": 16,
+        "type": "3xf32-le",
+        "role": "secondPosition"
+      },
+      {
+        "offset": 28,
+        "type": "u16-le",
+        "role": "focusSource"
+      },
+      {
+        "offset": 30,
+        "type": "u16-le",
+        "role": "auxiliary"
+      },
+      {
+        "offset": 32,
+        "type": "3xf32-le",
+        "role": "firstFocus"
+      },
+      {
+        "offset": 44,
+        "type": "3xf32-le",
+        "role": "secondFocus"
+      },
+      {
+        "offset": 56,
+        "type": "f32-le",
+        "role": "roll"
+      }
+    ],
+    "ps2_type_source": "include/btl_camera_internal.h:24-42",
+    "ps2_interpreter": "src/Battle/btlCamera.c:2473-2714 btlCameraFrameActionStart",
+    "steam_interpreter": "0x7f760: enabled/script/index guards, signed duration at script+4+index*60, byte count at0, next row+4+next*60; 0x800a0 independently returns the same typed row with count and index<4 guards; 0x80170 stores script pointer and reads flags+1."
+  },
+  "preset_layout": {
+    "stride": 52,
+    "fields": [
+      {
+        "offset": 0,
+        "type": "u16-le",
+        "role": "frameCount"
+      },
+      {
+        "offset": 2,
+        "type": "2 bytes",
+        "role": "padding"
+      },
+      {
+        "offset": 4,
+        "type": "3xf32-le",
+        "role": "firstPosition"
+      },
+      {
+        "offset": 16,
+        "type": "3xf32-le",
+        "role": "secondPosition"
+      },
+      {
+        "offset": 28,
+        "type": "3xf32-le",
+        "role": "firstFocus"
+      },
+      {
+        "offset": 40,
+        "type": "3xf32-le",
+        "role": "secondFocus"
+      }
+    ],
+    "selector_correspondence": "PS2 001d0730 and Steam953d0 both select u16 index*3 + fixed2/random-low-bit, stride52. Steam8434e..84524 and Switch710003da40 apply four xyz vectors at+4/+16/+28/+40, rotate by actor quaternion, translate position vectors, and convert u16 frame count /30 to duration. PS2 callers001c17a0 and001c1f70 perform the same field reads.",
+    "interval": {
+      "ps2_base": "0x005fe1d0",
+      "ps2_next_independent_object": "0x00607dd0",
+      "qualified_bytes": 39936,
+      "records": 768,
+      "record_stride": 52,
+      "steam_rva": "0xa25000",
+      "steam_raw_offset": 10631168,
+      "steam_sha256": "88e50872aeb08bb9cd33f252892c4dff3b62e29395e7e3aa879c532195a83fdd",
+      "switch_address": "0x710070afd0",
+      "switch_interval_equal": true,
+      "ps2_interval_sha256": "bdb31f5477775740c451dc4ea96c92dacb359e1f63d0843c3717d6cb8e16da9a"
+    },
+    "extent_basis": "PS2 base5fe1d0 to independently addressed vector607dd0 spans256*3*52. Switch qualified39936-byte span70afd0..714bd0 is immediately followed by independently reader-qualified general-action-style script bank at714bd0. Steam953d0 locates the preset base and its qualified39936-byte interval endsa2ec00; next independently read sky geometry beginsa2ec00 (first y read a2ec04 in b8494). This proves the interval, not an unchecked u16 caller domain.",
+    "partition_rule": "Selected7832-byte partition ends32 bytes into record150. ALL7832 bytes are live; never round down to7800 or label final32 padding. Runtime native whole-table route must use qualified39936-byte bank; no overwrite beyond selected guest partition."
+  },
+  "rows": [
+    {
+      "address": "0x005f78c0",
+      "ps2_partition_bytes": 496,
+      "live_bytes": 488,
+      "tail_bytes": 8,
+      "steam_rva": "0xafc070",
+      "steam_raw_offset": 11511920,
+      "steam_sha256": "21ec63344c1169b91502f92ffe87f15597848165a08f04b12bb62fdf125432ac",
+      "ps2_live_sha256": "21ec63344c1169b91502f92ffe87f15597848165a08f04b12bb62fdf125432ac",
+      "live_equal": true,
+      "switch_address": "0x710071b0d8",
+      "switch_equal": true,
+      "script_headers": [
+        [
+          1,
+          0,
+          1
+        ],
+        [
+          1,
+          0,
+          2
+        ]
+      ],
+      "switch_direct_functions": [
+        "0x71000435d0"
+      ],
+      "bank": "mode-1-pair",
+      "ps2_reader": "0x001cf070",
+      "ps2_symbol": "btlCameraFrameSpawn",
+      "steam_reader": "0x921c0",
+      "selector": "2 scripts; cooperation.mode==1"
+    },
+    {
+      "address": "0x005f7ab0",
+      "ps2_partition_bytes": 496,
+      "live_bytes": 488,
+      "tail_bytes": 8,
+      "steam_rva": "0xafbe80",
+      "steam_raw_offset": 11511424,
+      "steam_sha256": "7de995030cb94cd77832d3f72fbff6f2390132a3c6b9f1646e320ab228e10c3c",
+      "ps2_live_sha256": "7de995030cb94cd77832d3f72fbff6f2390132a3c6b9f1646e320ab228e10c3c",
+      "live_equal": true,
+      "switch_address": "0x710071b2c0",
+      "switch_equal": true,
+      "script_headers": [
+        [
+          2,
+          0,
+          2
+        ],
+        [
+          2,
+          0,
+          2
+        ]
+      ],
+      "switch_direct_functions": [
+        "0x71000435d0"
+      ],
+      "bank": "mode-0-pair",
+      "ps2_reader": "0x001cf070",
+      "ps2_symbol": "btlCameraFrameSpawn",
+      "steam_reader": "0x921c0",
+      "selector": "2 scripts; cooperation.mode==0"
+    },
+    {
+      "address": "0x005f7ca0",
+      "ps2_partition_bytes": 5376,
+      "live_bytes": 5368,
+      "tail_bytes": 8,
+      "steam_rva": "0xafe8b0",
+      "steam_raw_offset": 11522224,
+      "steam_sha256": "d60a047f8a80776b53d7f6fe298ff5d6d2c36b38e851769d20f8116607e49d71",
+      "ps2_live_sha256": "d60a047f8a80776b53d7f6fe298ff5d6d2c36b38e851769d20f8116607e49d71",
+      "live_equal": true,
+      "switch_address": "0x71007160c8",
+      "switch_equal": true,
+      "script_headers": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          3,
+          0,
+          2
+        ],
+        [
+          2,
+          0,
+          2
+        ],
+        [
+          3,
+          0,
+          2
+        ],
+        [
+          2,
+          0,
+          2
+        ],
+        [
+          3,
+          0,
+          2
+        ],
+        [
+          2,
+          0,
+          2
+        ],
+        [
+          3,
+          0,
+          2
+        ],
+        [
+          2,
+          0,
+          2
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          3,
+          0,
+          2
+        ],
+        [
+          3,
+          0,
+          2
+        ],
+        [
+          2,
+          0,
+          2
+        ],
+        [
+          2,
+          0,
+          2
+        ],
+        [
+          3,
+          0,
+          2
+        ],
+        [
+          2,
+          0,
+          2
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "switch_direct_functions": [
+        "0x7100040960"
+      ],
+      "bank": "actor-random-pairs",
+      "ps2_reader": "0x001cb2e0",
+      "ps2_symbol": "btlCameraSpawnRandomWork",
+      "steam_reader": "0x8e050",
+      "selector": "11 character IDs, 2 scripts each; charId*488 + (rand&1)*244"
+    },
+    {
+      "address": "0x005f91a0",
+      "ps2_partition_bytes": 4400,
+      "live_bytes": 4392,
+      "tail_bytes": 8,
+      "steam_rva": "0xafad30",
+      "steam_raw_offset": 11506992,
+      "steam_sha256": "ae303f4ebb827aba67e787bc342ae80469581aebec54e102f3152ac6a69372af",
+      "ps2_live_sha256": "ae303f4ebb827aba67e787bc342ae80469581aebec54e102f3152ac6a69372af",
+      "live_equal": true,
+      "switch_address": "0x71007175c0",
+      "switch_equal": true,
+      "script_headers": [
+        [
+          2,
+          0,
+          2
+        ],
+        [
+          2,
+          0,
+          2
+        ],
+        [
+          2,
+          1,
+          2
+        ],
+        [
+          1,
+          1,
+          2
+        ],
+        [
+          1,
+          0,
+          2
+        ],
+        [
+          3,
+          0,
+          2
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          4,
+          2
+        ],
+        [
+          1,
+          4,
+          2
+        ],
+        [
+          1,
+          4,
+          2
+        ],
+        [
+          1,
+          4,
+          2
+        ],
+        [
+          1,
+          0,
+          2
+        ],
+        [
+          1,
+          0,
+          2
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "switch_direct_functions": [
+        "0x71000409d0"
+      ],
+      "bank": "base-color-random-pairs",
+      "ps2_reader": "0x001cb3a0",
+      "ps2_symbol": "btlCameraSpawnEffectB",
+      "steam_reader": "0x8e0e0",
+      "selector": "9 character slots starting at ID2; (charId-2)*488 + (rand&1)*244; apply base colors first"
+    },
+    {
+      "address": "0x005fa2d0",
+      "ps2_partition_bytes": 4400,
+      "live_bytes": 4392,
+      "tail_bytes": 8,
+      "steam_rva": "0xafd770",
+      "steam_raw_offset": 11517808,
+      "steam_sha256": "f019e694878aa93d68a98f96462568a6e0df1a7aa0d5935b3f8bfc1cbc40f6b2",
+      "ps2_live_sha256": "f019e694878aa93d68a98f96462568a6e0df1a7aa0d5935b3f8bfc1cbc40f6b2",
+      "live_equal": true,
+      "switch_address": "0x71007186e8",
+      "switch_equal": true,
+      "script_headers": [
+        [
+          1,
+          0,
+          2
+        ],
+        [
+          1,
+          0,
+          2
+        ],
+        [
+          1,
+          2,
+          2
+        ],
+        [
+          1,
+          2,
+          2
+        ],
+        [
+          1,
+          1,
+          2
+        ],
+        [
+          1,
+          1,
+          2
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          2
+        ],
+        [
+          2,
+          0,
+          2
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "switch_direct_functions": [
+        "0x7100040a50"
+      ],
+      "bank": "no-target-random-pairs",
+      "ps2_reader": "0x001cb460",
+      "ps2_symbol": "btlCameraFrameRandomCut",
+      "steam_reader": "0x8e180",
+      "selector": "9 character slots starting at ID2; no-target-class gate, mode3 geometry; other branch generic framing"
+    },
+    {
+      "address": "0x005fb400",
+      "ps2_partition_bytes": 5376,
+      "live_bytes": 5368,
+      "tail_bytes": 8,
+      "steam_rva": "0xafc260",
+      "steam_raw_offset": 11512416,
+      "steam_sha256": "7a866fc70275710bfe1729cae9268ea671ac5cebd1991219a68b252f82e4ca29",
+      "ps2_live_sha256": "7a866fc70275710bfe1729cae9268ea671ac5cebd1991219a68b252f82e4ca29",
+      "live_equal": true,
+      "switch_address": "0x7100714bd0",
+      "switch_equal": true,
+      "script_headers": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          2
+        ],
+        [
+          2,
+          0,
+          2
+        ],
+        [
+          2,
+          0,
+          2
+        ],
+        [
+          2,
+          0,
+          2
+        ],
+        [
+          1,
+          0,
+          2
+        ],
+        [
+          2,
+          0,
+          2
+        ],
+        [
+          1,
+          0,
+          2
+        ],
+        [
+          2,
+          0,
+          2
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          2
+        ],
+        [
+          1,
+          0,
+          2
+        ],
+        [
+          1,
+          0,
+          2
+        ],
+        [
+          2,
+          0,
+          2
+        ],
+        [
+          1,
+          0,
+          2
+        ],
+        [
+          2,
+          0,
+          2
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "switch_direct_functions": [
+        "0x7100037910"
+      ],
+      "bank": "general-action-style-pairs",
+      "ps2_reader": "0x001bf3a0",
+      "ps2_symbol": "btlCameraChooseActionStyle",
+      "steam_reader": "0x815b5",
+      "selector": "11 character IDs, 2 scripts each; opening history0x22 and random<26 gates; base-color calls on both sides; geometry1 and updater flag"
+    },
+    {
+      "address": "0x005fc900",
+      "ps2_partition_bytes": 5376,
+      "live_bytes": 5368,
+      "tail_bytes": 8,
+      "steam_rva": "0xaffdc0",
+      "steam_raw_offset": 11527616,
+      "steam_sha256": "c7392ddebacae2bb128c025edb962f466015ba741afd2724abfcd0286e455a0b",
+      "ps2_live_sha256": "c7392ddebacae2bb128c025edb962f466015ba741afd2724abfcd0286e455a0b",
+      "live_equal": true,
+      "switch_address": "0x7100719810",
+      "switch_equal": true,
+      "script_headers": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          1,
+          2
+        ],
+        [
+          1,
+          0,
+          2
+        ],
+        [
+          1,
+          0,
+          2
+        ],
+        [
+          1,
+          0,
+          2
+        ],
+        [
+          1,
+          0,
+          2
+        ],
+        [
+          1,
+          0,
+          2
+        ],
+        [
+          1,
+          0,
+          2
+        ],
+        [
+          1,
+          0,
+          2
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          2
+        ],
+        [
+          1,
+          0,
+          2
+        ],
+        [
+          1,
+          0,
+          2
+        ],
+        [
+          1,
+          0,
+          2
+        ],
+        [
+          1,
+          0,
+          2
+        ],
+        [
+          1,
+          0,
+          2
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "switch_direct_functions": [
+        "0x7100042310"
+      ],
+      "bank": "actor-effect-pairs",
+      "ps2_reader": "0x001cd600",
+      "ps2_symbol": "btlCameraSpawnRandomEffect",
+      "steam_reader": "0x907c0",
+      "selector": "11 character IDs, 2 scripts each; charId*488 + (rand&1)*244"
+    },
+    {
+      "address": "0x005fe1d0",
+      "ps2_partition_bytes": 7832,
+      "live_bytes": 7832,
+      "tail_bytes": 0,
+      "steam_rva": "0xa25000",
+      "steam_raw_offset": 10631168,
+      "steam_sha256": "ac70d1d5493400366d431301a3bfda2a09e7d1cdb004d1bced6eccd6063c4c86",
+      "ps2_live_sha256": "7f556879226b47d075810ec0e9528c11a50b7c5456aa687725b991ac4cb6b5aa",
+      "live_equal": false,
+      "switch_address": "0x710070afd0",
+      "switch_equal": true,
+      "script_headers": null,
+      "switch_direct_functions": [
+        "0x7100039850",
+        "0x710003da40"
+      ],
+      "bank": "child-unit-preset-triplets",
+      "ps2_reader": "0x001d0730",
+      "ps2_symbol": "btlCameraRandomTableEntry",
+      "steam_reader": "0x953d0",
+      "selector": "u16 charId*3 + (fixed ? 2 : rand&1), stride52; four xyz vectors and u16 frame count"
+    },
+    {
+      "address": "0x00633740",
+      "ps2_partition_bytes": 4400,
+      "live_bytes": 4392,
+      "tail_bytes": 8,
+      "steam_rva": "0xaf39a0",
+      "steam_raw_offset": 11477408,
+      "steam_sha256": "391c794b9f13c525df1d4291aeb8881ad81de06293e57ab231d52050326f64b1",
+      "ps2_live_sha256": "391c794b9f13c525df1d4291aeb8881ad81de06293e57ab231d52050326f64b1",
+      "live_equal": true,
+      "switch_address": "0x71006fd3e8",
+      "switch_equal": true,
+      "script_headers": [
+        [
+          1,
+          0,
+          2
+        ],
+        [
+          1,
+          0,
+          2
+        ],
+        [
+          1,
+          2,
+          2
+        ],
+        [
+          1,
+          2,
+          2
+        ],
+        [
+          1,
+          1,
+          2
+        ],
+        [
+          1,
+          1,
+          2
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          2
+        ],
+        [
+          1,
+          0,
+          2
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "switch_direct_functions": [
+        "0x7100007030"
+      ],
+      "bank": "party-no-target-pairs",
+      "ps2_reader": "0x00228a80",
+      "ps2_symbol": "btlCameraSetRandomPartyPose",
+      "steam_reader": "0x3b880",
+      "selector": "no-target-class gate; (u16 charId-2)*488+(rand&1)*244; option8 and geometry3. Other branch reads boss-record presets and is not covered by this source proof."
+    }
+  ],
+  "remaining_module_rows": {
+    "addresses": [
+      "0x00761204",
+      "0x00761250",
+      "0x00761270",
+      "0x00761290"
+    ],
+    "decision": "OPEN-retain",
+    "reason": "Shared camera scalar roles are known in PS2 but no complete Golden scalar-reader correspondence is established by these bank selectors. No D10c or cosmetic retention authorized."
+  },
+  "research_scripts": [
+    "c6_camera_readers.py",
+    "c6_camera_layout.py",
+    "c6_camera_follow.py",
+    "c6_camera_cross.py",
+    "c6_camera_proof.py",
+    "c6_party_camera.py"
+  ],
+  "private_evidence_root": "<scratch>/GoldenRE-notes\\l1",
+  "counts": {
+    "upgraded_objects": 9,
+    "upgraded_ps2_bytes": 38152,
+    "qualified_partition_golden_bytes": 38088,
+    "retained_ps2_tail_bytes": 64,
+    "remaining_cohort_open_objects": 569,
+    "remaining_cohort_open_bytes": 24130
+  },
+  "runtime_requirements": [
+    "Route all listed direct PS2 selectors, their inlined/transformed/native counterparts, and common start/update/interpreter readers through the same sealed source.",
+    "Eight script banks copy only complete244-byte scripts; retain each8-byte PS2 partition tail. Those Golden trailing bytes belong to unrelated strings, counters or float data, not camera scripts.",
+    "Keep all dummy character slots and four row storage slots per script, not only currently active count rows. Do not compact or remap character IDs.",
+    "For preset partition copy exact7832 bytes or bind full qualified39936-byte native bank; do not round the partial last row. Preserve PS2 mode.",
+    "Native compiled static bank consumers require equality/routing witnesses; a guest write alone does not bind them. Runtime pending until GoldenM6b binds/tests all routes."
+  ],
+  "party_bank_role": "0x00633740 is presentation camera data in inferred btlVoice TU, NOT an audio namespace. PS2 src/Battle/btlVoice_inferred.c:1337-1374 and Steam3b880/Switch7100007030 agree on no-target class, ID-2, low random bit, script option8, geometry3 and separate boss-preset branch. The8-byte Golden suffix is unrelated float data; retain PS2 tail."
+}

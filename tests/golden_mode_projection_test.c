@@ -39,12 +39,24 @@ int main(void)
     CHECK(out.skill_elements.size == 624u * 2u && out.skill_elements.data[576u * 2u] == 2);
     CHECK(out.encounter[3].size == 68u * 248u && out.item_metadata.size == 2560u * 68u);
     p4_golden_mode_projection_free(&out);
-    memset(skill_names, 'x', 19);
+    memset(skill_names, 'x', 22); skill_names[22] = 0;
+    memset(persona_names, 'y', 20); persona_names[20] = 0;
+    CHECK(!p4_golden_mode_project(&map, &source, &out, reason, sizeof reason));
+    CHECK(out.skill_names.size == 624u * 23u && out.persona_names.size == 256u * 21u);
+    CHECK(!memcmp(out.skill_names.data, skill_names, 23) && !memcmp(out.persona_names.data, persona_names, 21));
+    p4_golden_mode_projection_free(&out);
+    memset(skill_names, 'x', 23);
     CHECK(p4_golden_mode_project(&map, &source, &out, reason, sizeof reason) == -1);
     CHECK(strstr(reason, "name does not fit") && !out.skill_metadata.data && !out.item_names.data);
-    memset(skill_names, 0, 23); skills[440 * 44 + 1] = 1;
-    CHECK(p4_golden_mode_project(&map, &source, &out, reason, sizeof reason) == -1);
-    CHECK(strstr(reason, "flags") && !out.skill_metadata.data && !out.item_names.data);
+    memset(skill_names, 0, 23);
+    skills[440 * 44 + 1] = 0x10; skills[440 * 44 + 7] = 0xA5;
+    skills[10 * 44 + 1] = 0x1E; skills[10 * 44 + 2] = 0x81; skills[10 * 44 + 3] = 0x42;
+    CHECK(!p4_golden_mode_project(&map, &source, &out, reason, sizeof reason));
+    CHECK(out.skill_golden.bytes == skills && out.skill_golden.size == sizeof skills);
+    CHECK(out.skill_golden.bytes[440 * 44 + 1] == 0x10 && out.skill_golden.bytes[440 * 44 + 7] == 0xA5);
+    CHECK(!memcmp(out.skill_golden.bytes + 10 * 44 + 1, "\x1e\x81\x42", 3));
+    CHECK(out.skill_metadata.data[576 * 40] == 3);
+    p4_golden_mode_projection_free(&out);
     puts("golden_mode_projection: ok");
     return 0;
 }

@@ -164,7 +164,9 @@ typedef struct P4DamageCoverBinding {
 #define P4_SIDE_SINGLE_SLOT 2u /* excludes and is excluded by retail ailments, Dizzy included */
 #define P4_SIDE_SMTV_DECAY 4u  /* each prior landing this battle lowers the next chance */
 #define P4_SIDE_BREAK_ON_HIT 8u /* a later damaging hit clears it (SMT V Sleep, P3 Reload Freeze) */
-#define P4_SIDE_FLAGS 15u
+#define P4_SIDE_END_TURN_TICK 16u /* nonlethal 10% max-HP tick, two turns */
+#define P4_SIDE_NO_ENEMY_RIDER 32u /* enemy sources cannot inflict on party */
+#define P4_SIDE_FLAGS 63u
 #define P4_SIDE_DEFAULT_NONE UINT32_MAX
 #define P4_SIDE_AILMENT_LIMIT 16u
 typedef struct P4SideAilmentDef {

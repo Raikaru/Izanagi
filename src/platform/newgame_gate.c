@@ -23,6 +23,7 @@
 #ifdef P4_MOD_GAME_BINDINGS
 #include "p4pc/mod_fidelity.h"
 #endif
+#include "../render/p4gl_comparison_evidence.h"
 
 /* The loaded field scene's record (retail data word iGpffff9db0, a guest address): field id +0, room +4, flags +0xC. */
 #define iGpffff9db0 ((uint8_t *)P4_G2H(P4_GPDATA(uint32_t, 0x9db0)))
@@ -264,6 +265,7 @@ void p4pc_newgame_gate_frame(unsigned frame)
         if (getenv("P4PC_REF_RGB") != NULL) {
             ok = ok && mad >= 0.0 && (max == NULL || mad <= atof(max));
         }
+        p4gl_comparison_evidence(getenv("P4PC_REF_RGB") != NULL && mad < 0.0, ok, mad, max);
         fprintf(stderr, "p4pc: new-game gate %s at flip %u: field %d room %d (want %d:%d), date index %d (want %d/%d = %d), frame MAD %.4f%% (limit %s)\n", ok ? "PASS" : "FAIL",
                 frame, field, room, wantField, wantRoom, date, wantMonth, wantDay, wantMonth < 0 ? -1 : calDayOfYearFromMonthDay(wantMonth, wantDay), mad, max != NULL ? max : "none");
         fflush(stderr);

@@ -22,6 +22,7 @@
 #include "../platform/config/p4cfg.h"
 #include "p4gl.h"
 #include "p4gl_gl.h"
+#include "p4gl_passcull.h"
 #include "p4gl_profile.h"
 #include "p4gl_readback.h"
 #include "p4pc/gmem.h"
@@ -883,6 +884,7 @@ static GLint filter_mode(uint32_t mode)
 }
 
 static int sBorderMode;
+static int sBorderAddressing; /* the bound texture reads transparent black outside its image (hardware or emulated border addressing) */
 
 /* Wrap code of a RwTextureAddressMode for p4SampleBorder: 0 repeat, 1 mirror, 2 clamp to edge, 3 border. */
 static int border_code(uint32_t mode)
@@ -894,6 +896,11 @@ static int border_code(uint32_t mode)
 int p4gl_texture_border_mode(void)
 {
     return sBorderMode;
+}
+
+int p4gl_texture_samples_border(void)
+{
+    return sBorderAddressing;
 }
 
 /* Atomics take the sampler from RwTexture.filterAddressing, not the immediate-mode
@@ -930,6 +937,7 @@ int p4gl_texture_bind_sampler(uint32_t rasterValue, uint32_t sampler)
     }
 
     sBorderMode = 0;
+    sBorderAddressing = addressU == 4u || addressV == 4u;
     p4gl_glBindTexture(GL_TEXTURE_2D, texture);
     if ((addressU == 4u || addressV == 4u) && !p4gl_gl_border_native()) {
         static int told;
@@ -1524,6 +1532,58 @@ static int im2d_material(int width, int height, int pw, int ph, int nw, int nh, 
     return 1;
 }
 
+/* Alpha-test pass culling for UI draws (p4gl_passcull.h; the atomic draw does the same in p4gl_atomic.c). Under AFAIL = FB_ONLY / RGB_ONLY a draw is two draws: the
+ * passing fragments and the failing ones. Most of the game's HUD sprites use ATST NEVER, so their first draw discards every fragment; others have vertex and texture
+ * alpha that cannot reach the threshold or cannot fall below it. Returns bit 0: the first draw covers nothing, bit 1: the second covers nothing. When one is left,
+ * its test cannot discard anything either, so the caller draws it with the alpha function off (one draw, no inversion uniforms). P4PC_PASSCULL=0 keeps both draws.
+ * NEVER holds for every draw; the bounds need plain geometry (no AA line coverage, no cell transport) and a texture whose alpha range is known. */
+static unsigned im2d_pass_cull(int32_t func, float ref, int line, int cells, const P4Sky2Vertex *v, int32_t numVertices, const uint16_t *indices,
+                               int32_t numIndices, const ImTextureState *texture)
+{
+    static int enabled = -1;
+    float lo = 1e9f, hi = -1e9f;
+    unsigned tlo = 255, thi = 255;
+
+    if (enabled < 0) {
+        enabled = p4gl_gl_feature("P4PC_PASSCULL");
+    }
+    if (!enabled) {
+        return 0u;
+    }
+    if (func == 8) {
+        return 1u; /* NEVER: the first pass discards every fragment */
+    }
+    if (line || cells || numVertices <= 0) {
+        return 0u;
+    }
+    for (int32_t i = 0, n = indices != NULL ? numIndices : numVertices; i < n; i++) {
+        const float a = indices != NULL ? v[indices[i]].a : v[i].a;
+
+        lo = a < lo ? a : lo;
+        hi = a > hi ? a : hi;
+    }
+    if (!(lo >= 0.0f && hi <= 255.0f)) {
+        return 0u; /* NaN or a colour outside the byte range: not bounded */
+    }
+    if (texture->textured) {
+        const uint32_t raster = p4gl_render_state(P4GL_RS_TEXTURERASTER);
+
+        if (texture->textured != 1 || texture->border != 0 || p4gl_texture_samples_border() || raster == 0
+            || !p4gl_raster_alpha_range((const P4RwRaster *)P4_G2H(raster), &tlo, &thi)) {
+            return 0u;
+        }
+    }
+    {
+        const unsigned vlo = (unsigned)lo; /* lo >= 0: truncation is the floor, and the bound only has to be no larger */
+        unsigned vhi = (unsigned)hi;
+
+        if ((float)vhi < hi) {
+            vhi++; /* the ceiling (hi <= 255) */
+        }
+        return p4gl_alpha_pass_cull(func, ref, vlo, vhi, 1.0f, tlo, thi);
+    }
+}
+
 /* Upload once, then replay the same source-ordered runs for AFAIL. No GS log,
  * skip identity, DATE snapshot, or alpha-failure ordering is split by transport. */
 static int32_t im2d_draw(GLenum mode, const P4Sky2Vertex *vertices, int32_t numVertices,
@@ -1541,8 +1601,8 @@ static int32_t im2d_draw(GLenum mode, const P4Sky2Vertex *vertices, int32_t numV
     float canvas[4], bounds[4];
     int clip;
     ImTextureState texture;
-    unsigned configured = 0, inverted = 0;
-    int current = -1;
+    unsigned configured = 0, inverted = 0, cull;
+    int current = -1, single, materialDone = 0;
 
     /* The VBO and destination-alpha copy are refreshed by each actual draw. Nothing here
      * advances guest state; texture uploads and camera/target lifetimes are handled outside. */
@@ -1609,9 +1669,12 @@ static int32_t im2d_draw(GLenum mode, const P4Sky2Vertex *vertices, int32_t numV
                             !line && p4gl_render_state_or(P4GL_RS_ZWRITEENABLE, 1u) != 0u);
     p4gl_glDisable(GL_CULL_FACE);
     p4gl_frame_mask_apply();
+    cull = fbOnly ? im2d_pass_cull(fbFunc, fbRef, line, cells, vertices, numVertices, indices, numIndices, &texture) : 0u;
+    single = cull != 0u;
     for (int pass = 0; pass < (fbOnly ? 2 : 1) && ok; pass++) {
-        const int alphaFunc = fbOnly ? fbFunc : p4gl_sky_alpha_func();
-        const float alphaRef = fbOnly ? fbRef : p4gl_sky_alpha_ref();
+        const int alphaFunc = single ? 0 : fbOnly ? fbFunc : p4gl_sky_alpha_func();
+        const float alphaRef = single ? 0.0f : fbOnly ? fbRef : p4gl_sky_alpha_ref();
+        if (cull & (1u << pass)) continue; /* this draw covers no pixel */
         if (pass) {
             p4gl_glDepthMask(GL_FALSE);
             if (fbOnly == 3) p4gl_frame_mask_rgb_only();
@@ -1630,7 +1693,7 @@ static int32_t im2d_draw(GLenum mode, const P4Sky2Vertex *vertices, int32_t numV
                     p4gl_glUseProgram(sProgram);
                     current = run->cells;
                 }
-                if (pass && !(inverted & bit)) {
+                if (pass && !single && !(inverted & bit)) {
                     p4gl_glUniform1i(sAlphaInvertLocation, 1);
                     inverted |= bit;
                 }
@@ -1644,16 +1707,18 @@ static int32_t im2d_draw(GLenum mode, const P4Sky2Vertex *vertices, int32_t numV
                 }
             }
         } else {
-            if (!pass) {
+            if (!materialDone) {
                 if (!im2d_material(width, height, pw, ph, nw, nh, canvas, bounds, clip, line, 0,
                                    alphaFunc, alphaRef, &texture)) { ok = 0; break; }
-            } else p4gl_glUniform1i(sAlphaInvertLocation, 1);
+                materialDone = 1;
+            }
+            if (pass && !single) p4gl_glUniform1i(sAlphaInvertLocation, 1);
             if (line) p4gl_glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, lineCount);
             else if (!indices) p4gl_glDrawArrays(mode, 0, numVertices);
             else p4gl_glDrawElements(mode, numIndices, GL_UNSIGNED_SHORT, NULL);
         }
     }
-    if (fbOnly && ok) p4gl_glUniform1i(sAlphaInvertLocation, 0);
+    if (fbOnly && !single && ok) p4gl_glUniform1i(sAlphaInvertLocation, 0);
     p4gl_frame_mask_restore();
     p4gl_depth_restore();
     return ok;

@@ -1,0 +1,95 @@
+cmake_minimum_required(VERSION 3.20)
+project(luau_zig_conformance_reference LANGUAGES C CXX)
+# Test reference only; no reference object is linked into the Zig engine.
+get_filename_component(ROOT "${CMAKE_CURRENT_LIST_DIR}/../.." ABSOLUTE)
+set(VENDOR "${ROOT}/third_party/luau")
+foreach(component Common Ast Bytecode Compiler VM)
+  file(GLOB sources CONFIGURE_DEPENDS "${VENDOR}/${component}/src/*.cpp")
+  add_library(ref_${component} STATIC ${sources})
+  target_include_directories(ref_${component} PUBLIC "${VENDOR}/${component}/include")
+  target_compile_features(ref_${component} PUBLIC cxx_std_17)
+  target_compile_definitions(ref_${component} PRIVATE NDEBUG)
+endforeach()
+target_link_libraries(ref_Ast PUBLIC ref_Common)
+target_link_libraries(ref_Bytecode PUBLIC ref_Common)
+target_link_libraries(ref_Compiler PUBLIC ref_Ast ref_Bytecode)
+target_link_libraries(ref_VM PUBLIC ref_Common)
+target_compile_definitions(ref_VM PUBLIC LUA_USE_LONGJMP=1 "$<$<COMPILE_LANGUAGE:CXX>:LUA_API=extern \"C\">")
+target_compile_definitions(ref_Compiler PUBLIC "$<$<COMPILE_LANGUAGE:CXX>:LUACODE_API=extern \"C\">")
+if(NOT MSVC)
+  target_compile_options(ref_VM PRIVATE -fno-exceptions)
+endif()
+add_library(ref_bridge STATIC "${ROOT}/src/platform/mods/luau_c.cpp")
+target_include_directories(ref_bridge PUBLIC "${ROOT}/include")
+target_link_libraries(ref_bridge PUBLIC ref_VM ref_Compiler)
+add_executable(reference_bytecode reference_bytecode.cpp)
+target_link_libraries(reference_bytecode PRIVATE ref_bridge)
+add_executable(reference_runner "${ROOT}/tests/luau_script_runner.c" "${ROOT}/src/platform/content_digest.c")
+target_link_libraries(reference_runner PRIVATE ref_bridge)
+add_executable(reference_sandbox "${ROOT}/tests/luau_sandbox_test.c")
+target_link_libraries(reference_sandbox PRIVATE ref_bridge)
+add_executable(upstream_script_reference upstream_script_host.cpp upstream-0.744/tests/BufferCage.cpp)
+target_link_libraries(upstream_script_reference PRIVATE ref_VM ref_Compiler)
+add_executable(fastcall_reference fastcall_probe.cpp)
+target_link_libraries(fastcall_reference PRIVATE ref_VM ref_Compiler)
+add_executable(fastcall_math_reference fastcall_math_reference.cpp)
+target_include_directories(fastcall_math_reference PRIVATE "${VENDOR}/VM/src")
+target_link_libraries(fastcall_math_reference PRIVATE ref_VM)
+add_executable(upstream_graph_reference upstream_graph.cpp)
+target_link_libraries(upstream_graph_reference PRIVATE ref_Bytecode ref_Ast ref_VM)
+add_executable(buffer_cage_reference buffer_cage_regression.cpp)
+target_link_libraries(buffer_cage_reference PRIVATE ref_VM)
+add_executable(gc_interrupt_reference gc_interrupt_recovery.c)
+target_link_libraries(gc_interrupt_reference PRIVATE ref_VM)
+add_executable(debug_setlocal_reference debug_setlocal_regression.c)
+target_link_libraries(debug_setlocal_reference PRIVATE ref_VM ref_Compiler)
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
+set(UPSTREAM_API_CPP "${CMAKE_CURRENT_BINARY_DIR}/upstream_api_cases.cpp")
+add_custom_command(OUTPUT "${UPSTREAM_API_CPP}"
+  COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_LIST_DIR}/generate_upstream_api.py" "${UPSTREAM_API_CPP}"
+  DEPENDS "${CMAKE_CURRENT_LIST_DIR}/generate_upstream_api.py"
+          "${CMAKE_CURRENT_LIST_DIR}/upstream_inventory.py"
+          "${CMAKE_CURRENT_LIST_DIR}/upstream-0.744/tests/Conformance.test.cpp"
+          "${CMAKE_CURRENT_LIST_DIR}/upstream-0.744/manifest.json"
+          "${CMAKE_CURRENT_LIST_DIR}/upstream-0.744/tests/DirectFieldAccess.test.cpp"
+          "${CMAKE_CURRENT_LIST_DIR}/upstream-0.744/target-manifest.json"
+  VERBATIM)
+add_executable(upstream_api_reference "${UPSTREAM_API_CPP}")
+target_include_directories(upstream_api_reference PRIVATE "${CMAKE_CURRENT_LIST_DIR}" "${CMAKE_CURRENT_LIST_DIR}/upstream-0.744/extern")
+target_link_libraries(upstream_api_reference PRIVATE ref_VM ref_Compiler)
+
+# The candidate is supplied as a Zig-only VM+stdlib library and a separately
+# built Zig compiler bridge object. The upstream libraries above are NOT linked.
+set(LUAU_ZIG_RUNTIME_LIBRARY "" CACHE FILEPATH "Zig VM+stdlib library")
+set(LUAU_ZIG_COMPILER_BRIDGE "" CACHE FILEPATH "Zig conformance compiler bridge object")
+find_program(LUAU_ZIG_EXECUTABLE NAMES zig DOC "Zig executable for the protected-call C ABI regression")
+if(LUAU_ZIG_RUNTIME_LIBRARY AND LUAU_ZIG_EXECUTABLE)
+  enable_testing()
+  set(PROTECTED_REGRESSION "${CMAKE_CURRENT_BINARY_DIR}/protected_c_call_regression${CMAKE_EXECUTABLE_SUFFIX}")
+  set(PROTECTED_REGRESSION_LIBS)
+  if(UNIX)
+    list(APPEND PROTECTED_REGRESSION_LIBS -lm)
+  endif()
+  # zig cc supplies the compiler runtime required by a Zig static archive.
+  add_custom_command(OUTPUT "${PROTECTED_REGRESSION}"
+    COMMAND "${LUAU_ZIG_EXECUTABLE}" cc -std=c11 -O2 "-I${VENDOR}/VM/include"
+            "${CMAKE_CURRENT_LIST_DIR}/protected_c_call_regression.c"
+            "${LUAU_ZIG_RUNTIME_LIBRARY}" ${PROTECTED_REGRESSION_LIBS} -o "${PROTECTED_REGRESSION}"
+    DEPENDS "${CMAKE_CURRENT_LIST_DIR}/protected_c_call_regression.c" "${LUAU_ZIG_RUNTIME_LIBRARY}"
+    VERBATIM)
+  add_custom_target(luau_zig_protected_call DEPENDS "${PROTECTED_REGRESSION}")
+  add_test(NAME luau_zig_protected_call COMMAND "${PROTECTED_REGRESSION}")
+  set_tests_properties(luau_zig_protected_call PROPERTIES LABELS "luau-zig;abi;optimized" TIMEOUT 30)
+elseif(LUAU_ZIG_RUNTIME_LIBRARY)
+  message(STATUS "Protected-call regression unavailable: set LUAU_ZIG_EXECUTABLE to the Zig compiler")
+endif()
+if(LUAU_ZIG_RUNTIME_LIBRARY AND LUAU_ZIG_COMPILER_BRIDGE)
+  add_executable(upstream_script_candidate upstream_script_host.cpp upstream-0.744/tests/BufferCage.cpp "${LUAU_ZIG_COMPILER_BRIDGE}")
+  target_include_directories(upstream_script_candidate PRIVATE "${VENDOR}/VM/include")
+  target_compile_definitions(upstream_script_candidate PRIVATE LUAU_ZIG_CANDIDATE=1 "LUA_API=extern \"C\"")
+  target_link_libraries(upstream_script_candidate PRIVATE "${LUAU_ZIG_RUNTIME_LIBRARY}")
+  add_executable(upstream_api_candidate "${UPSTREAM_API_CPP}" "${LUAU_ZIG_COMPILER_BRIDGE}")
+  target_include_directories(upstream_api_candidate PRIVATE "${VENDOR}/VM/include" "${VENDOR}/Compiler/include" "${CMAKE_CURRENT_LIST_DIR}" "${CMAKE_CURRENT_LIST_DIR}/upstream-0.744/extern")
+  target_compile_definitions(upstream_api_candidate PRIVATE LUAU_ZIG_CANDIDATE=1 "LUA_API=extern \"C\"")
+  target_link_libraries(upstream_api_candidate PRIVATE "${LUAU_ZIG_RUNTIME_LIBRARY}")
+endif()

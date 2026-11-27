@@ -17,6 +17,9 @@ int main(int argc, char **argv)
     if (p4_os_crash_marker_open(argv[3]) || p4_os_crash_marker_set("stale", 5) ||
         p4_os_crash_marker_set(marker, sizeof marker - 1)) return 5;
     if (p4_guest_init() != 0) return 3;
+    /* The context line (build, area) of the player diagnostics: replaced as often as wanted, the last text is the one reported. */
+    p4_os_crash_note_set("build=stale area=f0:r0");
+    p4_os_crash_note_set("build=v9.9-test area=f12:r3 ev 176.1.0 t=42s flip=2520");
     int sig = atoi(argv[2]);
     if (sig == SIGSEGV) {
         /* An actual inaccessible page, not a game fault switch or undefined null write. */

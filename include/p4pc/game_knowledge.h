@@ -84,6 +84,19 @@ int p4_game_knowledge_identity_find(const P4GameKnowledge *state,
 int p4_game_knowledge_replace(P4GameKnowledge *state, const size_t *known_indices, size_t count,
     const P4KnowledgeRetail *retail);
 
+/* Exact battle-retry capture of the observations (known flags and the retail
+ * status/side bits), nothing else. restore refuses, touching nothing, when the
+ * state is no longer the one captured (another snapshot or another key count);
+ * matches is the same test without the copy. */
+typedef struct P4GameKnowledgeCapture P4GameKnowledgeCapture;
+int p4_game_knowledge_capture(const P4GameKnowledge *state, P4GameKnowledgeCapture **out);
+int p4_game_knowledge_capture_matches(const P4GameKnowledge *state, const P4GameKnowledgeCapture *capture);
+int p4_game_knowledge_restore(P4GameKnowledge *state, const P4GameKnowledgeCapture *capture);
+void p4_game_knowledge_capture_free(P4GameKnowledgeCapture *capture);
+/* FNV-1a 64 over the same observations, live and captured (NULL: 0), for witness logs. */
+uint64_t p4_game_knowledge_state_digest(const P4GameKnowledge *state);
+uint64_t p4_game_knowledge_capture_digest(const P4GameKnowledgeCapture *capture);
+
 /* Package handler "game-tables.enemy-knowledge" (expanded element cohorts
  * only): its CPU pass registers the REQUIRED p4pc/enemy-knowledge save block,
  * its runtime pass stages the shared "element-knowledge" completion

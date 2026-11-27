@@ -32,7 +32,11 @@ int32_t func_004e80e0(uint8_t *name);
 static int checks, failures;
 
 #ifndef _WIN32
+#ifdef __ANDROID__
+static char fixtureDirectory[] = "/data/local/tmp/p4pc-cri-size-XXXXXX";   /* (bionic has no /tmp) */
+#else
 static char fixtureDirectory[] = "/tmp/p4pc-cri-size-XXXXXX";
+#endif
 static char fixtureLink[4096];
 
 static void remove_fixture(void)

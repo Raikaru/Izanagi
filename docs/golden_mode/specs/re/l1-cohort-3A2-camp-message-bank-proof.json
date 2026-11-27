@@ -1,0 +1,3931 @@
+{
+  "proof_id": "L1-C3A2-shared-camp-compiled-message-bank-20261114",
+  "owner": "GoldenRE-L1-c6b",
+  "source_images": {
+    "steam": {
+      "build": 10836033,
+      "file": "P4G.exe",
+      "sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+      "data_section_bounds": {
+        "section": ".sdata",
+        "rva_start": "0x887000",
+        "size": 1674240,
+        "raw_start": 8936448
+      },
+      "code_witness_bounds": {
+        "section": ".shared",
+        "rva_start": "0x1000",
+        "size": 8934912,
+        "raw_start": 1536
+      },
+      "runtime_input": "Owned Steam install only; never require NSO or private research cache."
+    },
+    "switch": {
+      "version": "1.2",
+      "nso_sha256": "854c7a1e33de1619abf009fa7f32b8c012960d685c8bf1bf99a92a6a4d0bda1c",
+      "mapped_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+      "base": "0x7100000000",
+      "segments": [
+        {
+          "name": "text",
+          "file_offset": 257,
+          "mapped_offset": 0,
+          "decompressed_size": 5448752,
+          "compressed_size": 3719998,
+          "lz4_compressed": true
+        },
+        {
+          "name": "rodata",
+          "file_offset": 3720255,
+          "mapped_offset": 5451776,
+          "decompressed_size": 1870824,
+          "compressed_size": 990563,
+          "lz4_compressed": true
+        },
+        {
+          "name": "data",
+          "file_offset": 4710818,
+          "mapped_offset": 7323648,
+          "decompressed_size": 1606720,
+          "compressed_size": 439860,
+          "lz4_compressed": true
+        }
+      ],
+      "purpose": "Independent static structural witness, not runtime dependency."
+    }
+  },
+  "source_extraction": "Existing tools/golden_mode/inventory.read_object on the owned Steam install. Every full object was extracted and size/SHA256 checked against the existing source census. No game execution or .arch decode.",
+  "ps2_bank": {
+    "path": "PS2:0x0064a790",
+    "size": 848,
+    "serialized_size": 834,
+    "sha256": "eea5209092f5fba73186ef69146f9bf6d04d41d80e68631030106b42c22a038b",
+    "header_hex": "07000000420300004d5347310000000030030000120000000800000000000200",
+    "record_count": 8,
+    "records": [
+      {
+        "index": 0,
+        "kind": 1,
+        "offset": 112,
+        "label24_hex": "73797374656d5f7965735f6e6f0000000000000000000000",
+        "label": "system_yes_no"
+      },
+      {
+        "index": 1,
+        "kind": 0,
+        "offset": 176,
+        "label24_hex": "73797374656d5f63616d705f636172645f64726f70000000",
+        "label": "system_camp_card_drop"
+      },
+      {
+        "index": 2,
+        "kind": 0,
+        "offset": 276,
+        "label24_hex": "73797374656d5f63616d705f636172645f64726f705f6e67",
+        "label": "system_camp_card_drop_ng"
+      },
+      {
+        "index": 3,
+        "kind": 0,
+        "offset": 384,
+        "label24_hex": "73797374656d5f63616d705f636172645f73657400000000",
+        "label": "system_camp_card_set"
+      },
+      {
+        "index": 4,
+        "kind": 0,
+        "offset": 456,
+        "label24_hex": "73797374656d5f63616d705f636f6e6669675f7469746c65",
+        "label": "system_camp_config_title"
+      },
+      {
+        "index": 5,
+        "kind": 0,
+        "offset": 536,
+        "label24_hex": "73797374656d5f63616d705f71756573745f6f6666657200",
+        "label": "system_camp_quest_offer"
+      },
+      {
+        "index": 6,
+        "kind": 0,
+        "offset": 620,
+        "label24_hex": "73797374656d5f63616d705f71756573745f656e64000000",
+        "label": "system_camp_quest_end"
+      },
+      {
+        "index": 7,
+        "kind": 0,
+        "offset": 704,
+        "label24_hex": "73797374656d5f63616d705f71756573745f666972737400",
+        "label": "system_camp_quest_first"
+      }
+    ]
+  },
+  "golden_resources": [
+    {
+      "path": "data.cpk::init_free.bin::init/cmpTable.bin::camp_msg.bmd",
+      "size": 3776,
+      "serialized_size": 3756,
+      "sha256": "045f07b871490ee2553ce74581bb69475c58f27f349a4167f939d5d2dfde517b",
+      "header_hex": "07000000ac0e00004d53473100000000680e0000440000002100000000000200",
+      "record_count": 33,
+      "records": [
+        {
+          "index": 0,
+          "kind": 1,
+          "offset": 312,
+          "label24_hex": "73797374656d5f7965735f6e6f0000000000000000000000",
+          "label": "system_yes_no"
+        },
+        {
+          "index": 1,
+          "kind": 0,
+          "offset": 384,
+          "label24_hex": "73797374656d5f63616d705f636172645f64726f70000000",
+          "label": "system_camp_card_drop"
+        },
+        {
+          "index": 2,
+          "kind": 0,
+          "offset": 484,
+          "label24_hex": "73797374656d5f63616d705f636172645f64726f705f6e67",
+          "label": "system_camp_card_drop_ng"
+        },
+        {
+          "index": 3,
+          "kind": 0,
+          "offset": 572,
+          "label24_hex": "73797374656d5f63616d705f636172645f73657400000000",
+          "label": "system_camp_card_set"
+        },
+        {
+          "index": 4,
+          "kind": 0,
+          "offset": 652,
+          "label24_hex": "73797374656d5f63616d705f636f6e6669675f7469746c65",
+          "label": "system_camp_config_title"
+        },
+        {
+          "index": 5,
+          "kind": 0,
+          "offset": 740,
+          "label24_hex": "73797374656d5f63616d705f71756573745f6f6666657200",
+          "label": "system_camp_quest_offer"
+        },
+        {
+          "index": 6,
+          "kind": 0,
+          "offset": 836,
+          "label24_hex": "73797374656d5f63616d705f71756573745f656e64000000",
+          "label": "system_camp_quest_end"
+        },
+        {
+          "index": 7,
+          "kind": 0,
+          "offset": 936,
+          "label24_hex": "73797374656d5f63616d705f71756573745f666972737400",
+          "label": "system_camp_quest_first"
+        },
+        {
+          "index": 8,
+          "kind": 0,
+          "offset": 1048,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f616c",
+          "label": "system_camp_skillcard_al"
+        },
+        {
+          "index": 9,
+          "kind": 0,
+          "offset": 1140,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f6368",
+          "label": "system_camp_skillcard_ch"
+        },
+        {
+          "index": 10,
+          "kind": 0,
+          "offset": 1224,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f656e",
+          "label": "system_camp_skillcard_en"
+        },
+        {
+          "index": 11,
+          "kind": 0,
+          "offset": 1312,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f726d",
+          "label": "system_camp_skillcard_rm"
+        },
+        {
+          "index": 12,
+          "kind": 0,
+          "offset": 1412,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f726d",
+          "label": "system_camp_skillcard_rm"
+        },
+        {
+          "index": 13,
+          "kind": 0,
+          "offset": 1496,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f6368",
+          "label": "system_camp_skillcard_ch"
+        },
+        {
+          "index": 14,
+          "kind": 0,
+          "offset": 1592,
+          "label24_hex": "73797374656d5f63616d705f65717569705f6368616e6765",
+          "label": "system_camp_equip_change"
+        },
+        {
+          "index": 15,
+          "kind": 0,
+          "offset": 1680,
+          "label24_hex": "73797374656d5f626f6f6b5f726561640000000000000000",
+          "label": "system_book_read"
+        },
+        {
+          "index": 16,
+          "kind": 0,
+          "offset": 1752,
+          "label24_hex": "73797374656d5f636f6e6669675f63616e63656c00000000",
+          "label": "system_config_cancel"
+        },
+        {
+          "index": 17,
+          "kind": 0,
+          "offset": 1852,
+          "label24_hex": "73797374656d5f63616d705f71756573745f706963747572",
+          "label": "system_camp_quest_pictur"
+        },
+        {
+          "index": 18,
+          "kind": 0,
+          "offset": 2020,
+          "label24_hex": "73797374656d5f636f6e6669675f6974656d5f7265736574",
+          "label": "system_config_item_reset"
+        },
+        {
+          "index": 19,
+          "kind": 0,
+          "offset": 2108,
+          "label24_hex": "73797374656d5f636f6e6669675f6b6579636f6e6669675f",
+          "label": "system_config_keyconfig_"
+        },
+        {
+          "index": 20,
+          "kind": 0,
+          "offset": 2216,
+          "label24_hex": "73797374656d5f636f6e6669675f636f6e6669726d000000",
+          "label": "system_config_confirm"
+        },
+        {
+          "index": 21,
+          "kind": 0,
+          "offset": 2292,
+          "label24_hex": "73797374656d5f636f6e6669675f6e6f745f736574000000",
+          "label": "system_config_not_set"
+        },
+        {
+          "index": 22,
+          "kind": 0,
+          "offset": 2376,
+          "label24_hex": "73797374656d5f636f6e6669675f7461625f6368616e6765",
+          "label": "system_config_tab_change"
+        },
+        {
+          "index": 23,
+          "kind": 0,
+          "offset": 2480,
+          "label24_hex": "73797374656d5f636f6e6669675f6b65795f61737369676e",
+          "label": "system_config_key_assign"
+        },
+        {
+          "index": 24,
+          "kind": 0,
+          "offset": 2700,
+          "label24_hex": "73797374656d5f636f6e6669675f7061645f61737369676e",
+          "label": "system_config_pad_assign"
+        },
+        {
+          "index": 25,
+          "kind": 0,
+          "offset": 2812,
+          "label24_hex": "73797374656d5f636f6e6669675f73706163655f6368616e",
+          "label": "system_config_space_chan"
+        },
+        {
+          "index": 26,
+          "kind": 0,
+          "offset": 2936,
+          "label24_hex": "73797374656d5f63616d705f636f6e6669675f6578697400",
+          "label": "system_camp_config_exit"
+        },
+        {
+          "index": 27,
+          "kind": 0,
+          "offset": 3024,
+          "label24_hex": "73797374656d5f636f6e6669675f7061645f61737369676e",
+          "label": "system_config_pad_assign"
+        },
+        {
+          "index": 28,
+          "kind": 0,
+          "offset": 3148,
+          "label24_hex": "73797374656d5f636f6e6669675f7061645f61737369676e",
+          "label": "system_config_pad_assign"
+        },
+        {
+          "index": 29,
+          "kind": 0,
+          "offset": 3264,
+          "label24_hex": "73797374656d5f636f6e6669675f7061645f61737369676e",
+          "label": "system_config_pad_assign"
+        },
+        {
+          "index": 30,
+          "kind": 0,
+          "offset": 3388,
+          "label24_hex": "73797374656d5f616c62756d5f7265616400000000000000",
+          "label": "system_album_read"
+        },
+        {
+          "index": 31,
+          "kind": 0,
+          "offset": 3460,
+          "label24_hex": "73797374656d5f717569636b5f7361766500000000000000",
+          "label": "system_quick_save"
+        },
+        {
+          "index": 32,
+          "kind": 0,
+          "offset": 3584,
+          "label24_hex": "73797374656d5f717569636b5f736176655f6e6700000000",
+          "label": "system_quick_save_ng"
+        }
+      ],
+      "locale": ""
+    },
+    {
+      "path": "data_c.cpk::init_free.bin::init/cmpTable.bin::camp_msg.bmd",
+      "size": 3392,
+      "serialized_size": 3372,
+      "sha256": "829c948466e6b899a755c508d5cd13ea4eb3e17d9497d3c7ec035eeaeb2de789",
+      "header_hex": "070000002c0d00004d53473100000000e80c0000440000002100000000000200",
+      "record_count": 33,
+      "records": [
+        {
+          "index": 0,
+          "kind": 1,
+          "offset": 312,
+          "label24_hex": "73797374656d5f7965735f6e6f0000000000000000000000",
+          "label": "system_yes_no"
+        },
+        {
+          "index": 1,
+          "kind": 0,
+          "offset": 376,
+          "label24_hex": "73797374656d5f63616d705f636172645f64726f70000000",
+          "label": "system_camp_card_drop"
+        },
+        {
+          "index": 2,
+          "kind": 0,
+          "offset": 468,
+          "label24_hex": "73797374656d5f63616d705f636172645f64726f705f6e67",
+          "label": "system_camp_card_drop_ng"
+        },
+        {
+          "index": 3,
+          "kind": 0,
+          "offset": 552,
+          "label24_hex": "73797374656d5f63616d705f636172645f73657400000000",
+          "label": "system_camp_card_set"
+        },
+        {
+          "index": 4,
+          "kind": 0,
+          "offset": 628,
+          "label24_hex": "73797374656d5f63616d705f636f6e6669675f7469746c65",
+          "label": "system_camp_config_title"
+        },
+        {
+          "index": 5,
+          "kind": 0,
+          "offset": 704,
+          "label24_hex": "73797374656d5f63616d705f71756573745f6f6666657200",
+          "label": "system_camp_quest_offer"
+        },
+        {
+          "index": 6,
+          "kind": 0,
+          "offset": 788,
+          "label24_hex": "73797374656d5f63616d705f71756573745f656e64000000",
+          "label": "system_camp_quest_end"
+        },
+        {
+          "index": 7,
+          "kind": 0,
+          "offset": 872,
+          "label24_hex": "73797374656d5f63616d705f71756573745f666972737400",
+          "label": "system_camp_quest_first"
+        },
+        {
+          "index": 8,
+          "kind": 0,
+          "offset": 972,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f616c",
+          "label": "system_camp_skillcard_al"
+        },
+        {
+          "index": 9,
+          "kind": 0,
+          "offset": 1052,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f6368",
+          "label": "system_camp_skillcard_ch"
+        },
+        {
+          "index": 10,
+          "kind": 0,
+          "offset": 1136,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f656e",
+          "label": "system_camp_skillcard_en"
+        },
+        {
+          "index": 11,
+          "kind": 0,
+          "offset": 1220,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f726d",
+          "label": "system_camp_skillcard_rm"
+        },
+        {
+          "index": 12,
+          "kind": 0,
+          "offset": 1308,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f726d",
+          "label": "system_camp_skillcard_rm"
+        },
+        {
+          "index": 13,
+          "kind": 0,
+          "offset": 1392,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f6368",
+          "label": "system_camp_skillcard_ch"
+        },
+        {
+          "index": 14,
+          "kind": 0,
+          "offset": 1488,
+          "label24_hex": "73797374656d5f63616d705f65717569705f6368616e6765",
+          "label": "system_camp_equip_change"
+        },
+        {
+          "index": 15,
+          "kind": 0,
+          "offset": 1564,
+          "label24_hex": "73797374656d5f626f6f6b5f726561640000000000000000",
+          "label": "system_book_read"
+        },
+        {
+          "index": 16,
+          "kind": 0,
+          "offset": 1636,
+          "label24_hex": "73797374656d5f636f6e6669675f63616e63656c00000000",
+          "label": "system_config_cancel"
+        },
+        {
+          "index": 17,
+          "kind": 0,
+          "offset": 1728,
+          "label24_hex": "73797374656d5f63616d705f71756573745f706963747572",
+          "label": "system_camp_quest_pictur"
+        },
+        {
+          "index": 18,
+          "kind": 0,
+          "offset": 1864,
+          "label24_hex": "73797374656d5f636f6e6669675f6974656d5f7265736574",
+          "label": "system_config_item_reset"
+        },
+        {
+          "index": 19,
+          "kind": 0,
+          "offset": 1936,
+          "label24_hex": "73797374656d5f636f6e6669675f6b6579636f6e6669675f",
+          "label": "system_config_keyconfig_"
+        },
+        {
+          "index": 20,
+          "kind": 0,
+          "offset": 2032,
+          "label24_hex": "73797374656d5f636f6e6669675f636f6e6669726d000000",
+          "label": "system_config_confirm"
+        },
+        {
+          "index": 21,
+          "kind": 0,
+          "offset": 2100,
+          "label24_hex": "73797374656d5f636f6e6669675f6e6f745f736574000000",
+          "label": "system_config_not_set"
+        },
+        {
+          "index": 22,
+          "kind": 0,
+          "offset": 2176,
+          "label24_hex": "73797374656d5f636f6e6669675f7461625f6368616e6765",
+          "label": "system_config_tab_change"
+        },
+        {
+          "index": 23,
+          "kind": 0,
+          "offset": 2260,
+          "label24_hex": "73797374656d5f636f6e6669675f6b65795f61737369676e",
+          "label": "system_config_key_assign"
+        },
+        {
+          "index": 24,
+          "kind": 0,
+          "offset": 2448,
+          "label24_hex": "73797374656d5f636f6e6669675f7061645f61737369676e",
+          "label": "system_config_pad_assign"
+        },
+        {
+          "index": 25,
+          "kind": 0,
+          "offset": 2544,
+          "label24_hex": "73797374656d5f636f6e6669675f73706163655f6368616e",
+          "label": "system_config_space_chan"
+        },
+        {
+          "index": 26,
+          "kind": 0,
+          "offset": 2648,
+          "label24_hex": "73797374656d5f63616d705f636f6e6669675f6578697400",
+          "label": "system_camp_config_exit"
+        },
+        {
+          "index": 27,
+          "kind": 0,
+          "offset": 2724,
+          "label24_hex": "73797374656d5f636f6e6669675f7061645f61737369676e",
+          "label": "system_config_pad_assign"
+        },
+        {
+          "index": 28,
+          "kind": 0,
+          "offset": 2828,
+          "label24_hex": "73797374656d5f636f6e6669675f7061645f61737369676e",
+          "label": "system_config_pad_assign"
+        },
+        {
+          "index": 29,
+          "kind": 0,
+          "offset": 2928,
+          "label24_hex": "73797374656d5f636f6e6669675f7061645f61737369676e",
+          "label": "system_config_pad_assign"
+        },
+        {
+          "index": 30,
+          "kind": 0,
+          "offset": 3032,
+          "label24_hex": "73797374656d5f616c62756d5f7265616400000000000000",
+          "label": "system_album_read"
+        },
+        {
+          "index": 31,
+          "kind": 0,
+          "offset": 3100,
+          "label24_hex": "73797374656d5f717569636b5f7361766500000000000000",
+          "label": "system_quick_save"
+        },
+        {
+          "index": 32,
+          "kind": 0,
+          "offset": 3212,
+          "label24_hex": "73797374656d5f717569636b5f736176655f6e6700000000",
+          "label": "system_quick_save_ng"
+        }
+      ],
+      "locale": "c"
+    },
+    {
+      "path": "data_ck.cpk::init_free.bin::init/cmpTable.bin::camp_msg.bmd",
+      "size": 3360,
+      "serialized_size": 3360,
+      "sha256": "d88f52f3825e302b4adc632b089846bdc90d03c46efbadda8f8794d575e0fb73",
+      "header_hex": "07000000200d00004d53473100000000dc0c0000440000002100000000000200",
+      "record_count": 33,
+      "records": [
+        {
+          "index": 0,
+          "kind": 1,
+          "offset": 312,
+          "label24_hex": "73797374656d5f7965735f6e6f0000000000000000000000",
+          "label": "system_yes_no"
+        },
+        {
+          "index": 1,
+          "kind": 0,
+          "offset": 376,
+          "label24_hex": "73797374656d5f63616d705f636172645f64726f70000000",
+          "label": "system_camp_card_drop"
+        },
+        {
+          "index": 2,
+          "kind": 0,
+          "offset": 464,
+          "label24_hex": "73797374656d5f63616d705f636172645f64726f705f6e67",
+          "label": "system_camp_card_drop_ng"
+        },
+        {
+          "index": 3,
+          "kind": 0,
+          "offset": 544,
+          "label24_hex": "73797374656d5f63616d705f636172645f73657400000000",
+          "label": "system_camp_card_set"
+        },
+        {
+          "index": 4,
+          "kind": 0,
+          "offset": 620,
+          "label24_hex": "73797374656d5f63616d705f636f6e6669675f7469746c65",
+          "label": "system_camp_config_title"
+        },
+        {
+          "index": 5,
+          "kind": 0,
+          "offset": 696,
+          "label24_hex": "73797374656d5f63616d705f71756573745f6f6666657200",
+          "label": "system_camp_quest_offer"
+        },
+        {
+          "index": 6,
+          "kind": 0,
+          "offset": 776,
+          "label24_hex": "73797374656d5f63616d705f71756573745f656e64000000",
+          "label": "system_camp_quest_end"
+        },
+        {
+          "index": 7,
+          "kind": 0,
+          "offset": 856,
+          "label24_hex": "73797374656d5f63616d705f71756573745f666972737400",
+          "label": "system_camp_quest_first"
+        },
+        {
+          "index": 8,
+          "kind": 0,
+          "offset": 956,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f616c",
+          "label": "system_camp_skillcard_al"
+        },
+        {
+          "index": 9,
+          "kind": 0,
+          "offset": 1032,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f6368",
+          "label": "system_camp_skillcard_ch"
+        },
+        {
+          "index": 10,
+          "kind": 0,
+          "offset": 1112,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f656e",
+          "label": "system_camp_skillcard_en"
+        },
+        {
+          "index": 11,
+          "kind": 0,
+          "offset": 1196,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f726d",
+          "label": "system_camp_skillcard_rm"
+        },
+        {
+          "index": 12,
+          "kind": 0,
+          "offset": 1276,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f726d",
+          "label": "system_camp_skillcard_rm"
+        },
+        {
+          "index": 13,
+          "kind": 0,
+          "offset": 1360,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f6368",
+          "label": "system_camp_skillcard_ch"
+        },
+        {
+          "index": 14,
+          "kind": 0,
+          "offset": 1452,
+          "label24_hex": "73797374656d5f63616d705f65717569705f6368616e6765",
+          "label": "system_camp_equip_change"
+        },
+        {
+          "index": 15,
+          "kind": 0,
+          "offset": 1524,
+          "label24_hex": "73797374656d5f626f6f6b5f726561640000000000000000",
+          "label": "system_book_read"
+        },
+        {
+          "index": 16,
+          "kind": 0,
+          "offset": 1596,
+          "label24_hex": "73797374656d5f636f6e6669675f63616e63656c00000000",
+          "label": "system_config_cancel"
+        },
+        {
+          "index": 17,
+          "kind": 0,
+          "offset": 1684,
+          "label24_hex": "73797374656d5f63616d705f71756573745f706963747572",
+          "label": "system_camp_quest_pictur"
+        },
+        {
+          "index": 18,
+          "kind": 0,
+          "offset": 1820,
+          "label24_hex": "73797374656d5f636f6e6669675f6974656d5f7265736574",
+          "label": "system_config_item_reset"
+        },
+        {
+          "index": 19,
+          "kind": 0,
+          "offset": 1900,
+          "label24_hex": "73797374656d5f636f6e6669675f6b6579636f6e6669675f",
+          "label": "system_config_keyconfig_"
+        },
+        {
+          "index": 20,
+          "kind": 0,
+          "offset": 1984,
+          "label24_hex": "73797374656d5f636f6e6669675f636f6e6669726d000000",
+          "label": "system_config_confirm"
+        },
+        {
+          "index": 21,
+          "kind": 0,
+          "offset": 2052,
+          "label24_hex": "73797374656d5f636f6e6669675f6e6f745f736574000000",
+          "label": "system_config_not_set"
+        },
+        {
+          "index": 22,
+          "kind": 0,
+          "offset": 2128,
+          "label24_hex": "73797374656d5f636f6e6669675f7461625f6368616e6765",
+          "label": "system_config_tab_change"
+        },
+        {
+          "index": 23,
+          "kind": 0,
+          "offset": 2220,
+          "label24_hex": "73797374656d5f636f6e6669675f6b65795f61737369676e",
+          "label": "system_config_key_assign"
+        },
+        {
+          "index": 24,
+          "kind": 0,
+          "offset": 2444,
+          "label24_hex": "73797374656d5f636f6e6669675f7061645f61737369676e",
+          "label": "system_config_pad_assign"
+        },
+        {
+          "index": 25,
+          "kind": 0,
+          "offset": 2544,
+          "label24_hex": "73797374656d5f636f6e6669675f73706163655f6368616e",
+          "label": "system_config_space_chan"
+        },
+        {
+          "index": 26,
+          "kind": 0,
+          "offset": 2652,
+          "label24_hex": "73797374656d5f63616d705f636f6e6669675f6578697400",
+          "label": "system_camp_config_exit"
+        },
+        {
+          "index": 27,
+          "kind": 0,
+          "offset": 2732,
+          "label24_hex": "73797374656d5f636f6e6669675f7061645f61737369676e",
+          "label": "system_config_pad_assign"
+        },
+        {
+          "index": 28,
+          "kind": 0,
+          "offset": 2828,
+          "label24_hex": "73797374656d5f636f6e6669675f7061645f61737369676e",
+          "label": "system_config_pad_assign"
+        },
+        {
+          "index": 29,
+          "kind": 0,
+          "offset": 2924,
+          "label24_hex": "73797374656d5f636f6e6669675f7061645f61737369676e",
+          "label": "system_config_pad_assign"
+        },
+        {
+          "index": 30,
+          "kind": 0,
+          "offset": 3020,
+          "label24_hex": "73797374656d5f616c62756d5f7265616400000000000000",
+          "label": "system_album_read"
+        },
+        {
+          "index": 31,
+          "kind": 0,
+          "offset": 3092,
+          "label24_hex": "73797374656d5f717569636b5f7361766500000000000000",
+          "label": "system_quick_save"
+        },
+        {
+          "index": 32,
+          "kind": 0,
+          "offset": 3196,
+          "label24_hex": "73797374656d5f717569636b5f736176655f6e6700000000",
+          "label": "system_quick_save_ng"
+        }
+      ],
+      "locale": "ck"
+    },
+    {
+      "path": "data_de.cpk::init_free.bin::init/cmpTable.bin::camp_msg.bmd",
+      "size": 4096,
+      "serialized_size": 4072,
+      "sha256": "fe043c12c6277aedc9535ebab0e5948e9afca9f944306b71087db6e20f19017b",
+      "header_hex": "07000000e80f00004d53473100000000a40f0000440000002100000000000200",
+      "record_count": 33,
+      "records": [
+        {
+          "index": 0,
+          "kind": 1,
+          "offset": 312,
+          "label24_hex": "73797374656d5f7965735f6e6f0000000000000000000000",
+          "label": "system_yes_no"
+        },
+        {
+          "index": 1,
+          "kind": 0,
+          "offset": 380,
+          "label24_hex": "73797374656d5f63616d705f636172645f64726f70000000",
+          "label": "system_camp_card_drop"
+        },
+        {
+          "index": 2,
+          "kind": 0,
+          "offset": 476,
+          "label24_hex": "73797374656d5f63616d705f636172645f64726f705f6e67",
+          "label": "system_camp_card_drop_ng"
+        },
+        {
+          "index": 3,
+          "kind": 0,
+          "offset": 592,
+          "label24_hex": "73797374656d5f63616d705f636172645f73657400000000",
+          "label": "system_camp_card_set"
+        },
+        {
+          "index": 4,
+          "kind": 0,
+          "offset": 672,
+          "label24_hex": "73797374656d5f63616d705f636f6e6669675f7469746c65",
+          "label": "system_camp_config_title"
+        },
+        {
+          "index": 5,
+          "kind": 0,
+          "offset": 752,
+          "label24_hex": "73797374656d5f63616d705f71756573745f6f6666657200",
+          "label": "system_camp_quest_offer"
+        },
+        {
+          "index": 6,
+          "kind": 0,
+          "offset": 840,
+          "label24_hex": "73797374656d5f63616d705f71756573745f656e64000000",
+          "label": "system_camp_quest_end"
+        },
+        {
+          "index": 7,
+          "kind": 0,
+          "offset": 932,
+          "label24_hex": "73797374656d5f63616d705f71756573745f666972737400",
+          "label": "system_camp_quest_first"
+        },
+        {
+          "index": 8,
+          "kind": 0,
+          "offset": 1032,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f616c",
+          "label": "system_camp_skillcard_al"
+        },
+        {
+          "index": 9,
+          "kind": 0,
+          "offset": 1124,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f6368",
+          "label": "system_camp_skillcard_ch"
+        },
+        {
+          "index": 10,
+          "kind": 0,
+          "offset": 1196,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f656e",
+          "label": "system_camp_skillcard_en"
+        },
+        {
+          "index": 11,
+          "kind": 0,
+          "offset": 1284,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f726d",
+          "label": "system_camp_skillcard_rm"
+        },
+        {
+          "index": 12,
+          "kind": 0,
+          "offset": 1432,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f726d",
+          "label": "system_camp_skillcard_rm"
+        },
+        {
+          "index": 13,
+          "kind": 0,
+          "offset": 1508,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f6368",
+          "label": "system_camp_skillcard_ch"
+        },
+        {
+          "index": 14,
+          "kind": 0,
+          "offset": 1596,
+          "label24_hex": "73797374656d5f63616d705f65717569705f6368616e6765",
+          "label": "system_camp_equip_change"
+        },
+        {
+          "index": 15,
+          "kind": 0,
+          "offset": 1692,
+          "label24_hex": "73797374656d5f626f6f6b5f726561640000000000000000",
+          "label": "system_book_read"
+        },
+        {
+          "index": 16,
+          "kind": 0,
+          "offset": 1756,
+          "label24_hex": "73797374656d5f636f6e6669675f63616e63656c00000000",
+          "label": "system_config_cancel"
+        },
+        {
+          "index": 17,
+          "kind": 0,
+          "offset": 1868,
+          "label24_hex": "73797374656d5f63616d705f71756573745f706963747572",
+          "label": "system_camp_quest_pictur"
+        },
+        {
+          "index": 18,
+          "kind": 0,
+          "offset": 2040,
+          "label24_hex": "73797374656d5f636f6e6669675f6974656d5f7265736574",
+          "label": "system_config_item_reset"
+        },
+        {
+          "index": 19,
+          "kind": 0,
+          "offset": 2124,
+          "label24_hex": "73797374656d5f636f6e6669675f6b6579636f6e6669675f",
+          "label": "system_config_keyconfig_"
+        },
+        {
+          "index": 20,
+          "kind": 0,
+          "offset": 2256,
+          "label24_hex": "73797374656d5f636f6e6669675f636f6e6669726d000000",
+          "label": "system_config_confirm"
+        },
+        {
+          "index": 21,
+          "kind": 0,
+          "offset": 2348,
+          "label24_hex": "73797374656d5f636f6e6669675f6e6f745f736574000000",
+          "label": "system_config_not_set"
+        },
+        {
+          "index": 22,
+          "kind": 0,
+          "offset": 2448,
+          "label24_hex": "73797374656d5f636f6e6669675f7461625f6368616e6765",
+          "label": "system_config_tab_change"
+        },
+        {
+          "index": 23,
+          "kind": 0,
+          "offset": 2560,
+          "label24_hex": "73797374656d5f636f6e6669675f6b65795f61737369676e",
+          "label": "system_config_key_assign"
+        },
+        {
+          "index": 24,
+          "kind": 0,
+          "offset": 2832,
+          "label24_hex": "73797374656d5f636f6e6669675f7061645f61737369676e",
+          "label": "system_config_pad_assign"
+        },
+        {
+          "index": 25,
+          "kind": 0,
+          "offset": 2980,
+          "label24_hex": "73797374656d5f636f6e6669675f73706163655f6368616e",
+          "label": "system_config_space_chan"
+        },
+        {
+          "index": 26,
+          "kind": 0,
+          "offset": 3140,
+          "label24_hex": "73797374656d5f63616d705f636f6e6669675f6578697400",
+          "label": "system_camp_config_exit"
+        },
+        {
+          "index": 27,
+          "kind": 0,
+          "offset": 3224,
+          "label24_hex": "73797374656d5f636f6e6669675f7061645f61737369676e",
+          "label": "system_config_pad_assign"
+        },
+        {
+          "index": 28,
+          "kind": 0,
+          "offset": 3360,
+          "label24_hex": "73797374656d5f636f6e6669675f7061645f61737369676e",
+          "label": "system_config_pad_assign"
+        },
+        {
+          "index": 29,
+          "kind": 0,
+          "offset": 3524,
+          "label24_hex": "73797374656d5f636f6e6669675f7061645f61737369676e",
+          "label": "system_config_pad_assign"
+        },
+        {
+          "index": 30,
+          "kind": 0,
+          "offset": 3692,
+          "label24_hex": "73797374656d5f616c62756d5f7265616400000000000000",
+          "label": "system_album_read"
+        },
+        {
+          "index": 31,
+          "kind": 0,
+          "offset": 3768,
+          "label24_hex": "73797374656d5f717569636b5f7361766500000000000000",
+          "label": "system_quick_save"
+        },
+        {
+          "index": 32,
+          "kind": 0,
+          "offset": 3876,
+          "label24_hex": "73797374656d5f717569636b5f736176655f6e6700000000",
+          "label": "system_quick_save_ng"
+        }
+      ],
+      "locale": "de"
+    },
+    {
+      "path": "data_e.cpk::init_free.bin::init/cmpTable.bin::camp_msg.bmd",
+      "size": 3904,
+      "serialized_size": 3900,
+      "sha256": "60a4adba7eace4de47064b292760e895f919bb1ad220e8849a82a9ca01a4cd45",
+      "header_hex": "070000003c0f00004d53473100000000f80e0000440000002100000000000200",
+      "record_count": 33,
+      "records": [
+        {
+          "index": 0,
+          "kind": 1,
+          "offset": 312,
+          "label24_hex": "73797374656d5f7965735f6e6f0000000000000000000000",
+          "label": "system_yes_no"
+        },
+        {
+          "index": 1,
+          "kind": 0,
+          "offset": 376,
+          "label24_hex": "73797374656d5f63616d705f636172645f64726f70000000",
+          "label": "system_camp_card_drop"
+        },
+        {
+          "index": 2,
+          "kind": 0,
+          "offset": 476,
+          "label24_hex": "73797374656d5f63616d705f636172645f64726f705f6e67",
+          "label": "system_camp_card_drop_ng"
+        },
+        {
+          "index": 3,
+          "kind": 0,
+          "offset": 584,
+          "label24_hex": "73797374656d5f63616d705f636172645f73657400000000",
+          "label": "system_camp_card_set"
+        },
+        {
+          "index": 4,
+          "kind": 0,
+          "offset": 656,
+          "label24_hex": "73797374656d5f63616d705f636f6e6669675f7469746c65",
+          "label": "system_camp_config_title"
+        },
+        {
+          "index": 5,
+          "kind": 0,
+          "offset": 736,
+          "label24_hex": "73797374656d5f63616d705f71756573745f6f6666657200",
+          "label": "system_camp_quest_offer"
+        },
+        {
+          "index": 6,
+          "kind": 0,
+          "offset": 820,
+          "label24_hex": "73797374656d5f63616d705f71756573745f656e64000000",
+          "label": "system_camp_quest_end"
+        },
+        {
+          "index": 7,
+          "kind": 0,
+          "offset": 904,
+          "label24_hex": "73797374656d5f63616d705f71756573745f666972737400",
+          "label": "system_camp_quest_first"
+        },
+        {
+          "index": 8,
+          "kind": 0,
+          "offset": 1016,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f616c",
+          "label": "system_camp_skillcard_al"
+        },
+        {
+          "index": 9,
+          "kind": 0,
+          "offset": 1108,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f6368",
+          "label": "system_camp_skillcard_ch"
+        },
+        {
+          "index": 10,
+          "kind": 0,
+          "offset": 1180,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f656e",
+          "label": "system_camp_skillcard_en"
+        },
+        {
+          "index": 11,
+          "kind": 0,
+          "offset": 1264,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f726d",
+          "label": "system_camp_skillcard_rm"
+        },
+        {
+          "index": 12,
+          "kind": 0,
+          "offset": 1388,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f726d",
+          "label": "system_camp_skillcard_rm"
+        },
+        {
+          "index": 13,
+          "kind": 0,
+          "offset": 1460,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f6368",
+          "label": "system_camp_skillcard_ch"
+        },
+        {
+          "index": 14,
+          "kind": 0,
+          "offset": 1548,
+          "label24_hex": "73797374656d5f63616d705f65717569705f6368616e6765",
+          "label": "system_camp_equip_change"
+        },
+        {
+          "index": 15,
+          "kind": 0,
+          "offset": 1636,
+          "label24_hex": "73797374656d5f626f6f6b5f726561640000000000000000",
+          "label": "system_book_read"
+        },
+        {
+          "index": 16,
+          "kind": 0,
+          "offset": 1700,
+          "label24_hex": "73797374656d5f636f6e6669675f63616e63656c00000000",
+          "label": "system_config_cancel"
+        },
+        {
+          "index": 17,
+          "kind": 0,
+          "offset": 1796,
+          "label24_hex": "73797374656d5f63616d705f71756573745f706963747572",
+          "label": "system_camp_quest_pictur"
+        },
+        {
+          "index": 18,
+          "kind": 0,
+          "offset": 1972,
+          "label24_hex": "73797374656d5f636f6e6669675f6974656d5f7265736574",
+          "label": "system_config_item_reset"
+        },
+        {
+          "index": 19,
+          "kind": 0,
+          "offset": 2056,
+          "label24_hex": "73797374656d5f636f6e6669675f6b6579636f6e6669675f",
+          "label": "system_config_keyconfig_"
+        },
+        {
+          "index": 20,
+          "kind": 0,
+          "offset": 2188,
+          "label24_hex": "73797374656d5f636f6e6669675f636f6e6669726d000000",
+          "label": "system_config_confirm"
+        },
+        {
+          "index": 21,
+          "kind": 0,
+          "offset": 2272,
+          "label24_hex": "73797374656d5f636f6e6669675f6e6f745f736574000000",
+          "label": "system_config_not_set"
+        },
+        {
+          "index": 22,
+          "kind": 0,
+          "offset": 2368,
+          "label24_hex": "73797374656d5f636f6e6669675f7461625f6368616e6765",
+          "label": "system_config_tab_change"
+        },
+        {
+          "index": 23,
+          "kind": 0,
+          "offset": 2476,
+          "label24_hex": "73797374656d5f636f6e6669675f6b65795f61737369676e",
+          "label": "system_config_key_assign"
+        },
+        {
+          "index": 24,
+          "kind": 0,
+          "offset": 2728,
+          "label24_hex": "73797374656d5f636f6e6669675f7061645f61737369676e",
+          "label": "system_config_pad_assign"
+        },
+        {
+          "index": 25,
+          "kind": 0,
+          "offset": 2864,
+          "label24_hex": "73797374656d5f636f6e6669675f73706163655f6368616e",
+          "label": "system_config_space_chan"
+        },
+        {
+          "index": 26,
+          "kind": 0,
+          "offset": 3008,
+          "label24_hex": "73797374656d5f63616d705f636f6e6669675f6578697400",
+          "label": "system_camp_config_exit"
+        },
+        {
+          "index": 27,
+          "kind": 0,
+          "offset": 3096,
+          "label24_hex": "73797374656d5f636f6e6669675f7061645f61737369676e",
+          "label": "system_config_pad_assign"
+        },
+        {
+          "index": 28,
+          "kind": 0,
+          "offset": 3252,
+          "label24_hex": "73797374656d5f636f6e6669675f7061645f61737369676e",
+          "label": "system_config_pad_assign"
+        },
+        {
+          "index": 29,
+          "kind": 0,
+          "offset": 3400,
+          "label24_hex": "73797374656d5f636f6e6669675f7061645f61737369676e",
+          "label": "system_config_pad_assign"
+        },
+        {
+          "index": 30,
+          "kind": 0,
+          "offset": 3548,
+          "label24_hex": "73797374656d5f616c62756d5f7265616400000000000000",
+          "label": "system_album_read"
+        },
+        {
+          "index": 31,
+          "kind": 0,
+          "offset": 3616,
+          "label24_hex": "73797374656d5f717569636b5f7361766500000000000000",
+          "label": "system_quick_save"
+        },
+        {
+          "index": 32,
+          "kind": 0,
+          "offset": 3720,
+          "label24_hex": "73797374656d5f717569636b5f736176655f6e6700000000",
+          "label": "system_quick_save_ng"
+        }
+      ],
+      "locale": "e"
+    },
+    {
+      "path": "data_es.cpk::init_free.bin::init/cmpTable.bin::camp_msg.bmd",
+      "size": 4000,
+      "serialized_size": 3980,
+      "sha256": "e5aaea05032426263aa9a2ea349fa21a39395e51ab6076d1cd6a6f632fc7b890",
+      "header_hex": "070000008c0f00004d53473100000000480f0000440000002100000000000200",
+      "record_count": 33,
+      "records": [
+        {
+          "index": 0,
+          "kind": 1,
+          "offset": 312,
+          "label24_hex": "73797374656d5f7965735f6e6f0000000000000000000000",
+          "label": "system_yes_no"
+        },
+        {
+          "index": 1,
+          "kind": 0,
+          "offset": 376,
+          "label24_hex": "73797374656d5f63616d705f636172645f64726f70000000",
+          "label": "system_camp_card_drop"
+        },
+        {
+          "index": 2,
+          "kind": 0,
+          "offset": 472,
+          "label24_hex": "73797374656d5f63616d705f636172645f64726f705f6e67",
+          "label": "system_camp_card_drop_ng"
+        },
+        {
+          "index": 3,
+          "kind": 0,
+          "offset": 580,
+          "label24_hex": "73797374656d5f63616d705f636172645f73657400000000",
+          "label": "system_camp_card_set"
+        },
+        {
+          "index": 4,
+          "kind": 0,
+          "offset": 656,
+          "label24_hex": "73797374656d5f63616d705f636f6e6669675f7469746c65",
+          "label": "system_camp_config_title"
+        },
+        {
+          "index": 5,
+          "kind": 0,
+          "offset": 744,
+          "label24_hex": "73797374656d5f63616d705f71756573745f6f6666657200",
+          "label": "system_camp_quest_offer"
+        },
+        {
+          "index": 6,
+          "kind": 0,
+          "offset": 832,
+          "label24_hex": "73797374656d5f63616d705f71756573745f656e64000000",
+          "label": "system_camp_quest_end"
+        },
+        {
+          "index": 7,
+          "kind": 0,
+          "offset": 920,
+          "label24_hex": "73797374656d5f63616d705f71756573745f666972737400",
+          "label": "system_camp_quest_first"
+        },
+        {
+          "index": 8,
+          "kind": 0,
+          "offset": 1040,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f616c",
+          "label": "system_camp_skillcard_al"
+        },
+        {
+          "index": 9,
+          "kind": 0,
+          "offset": 1124,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f6368",
+          "label": "system_camp_skillcard_ch"
+        },
+        {
+          "index": 10,
+          "kind": 0,
+          "offset": 1200,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f656e",
+          "label": "system_camp_skillcard_en"
+        },
+        {
+          "index": 11,
+          "kind": 0,
+          "offset": 1292,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f726d",
+          "label": "system_camp_skillcard_rm"
+        },
+        {
+          "index": 12,
+          "kind": 0,
+          "offset": 1420,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f726d",
+          "label": "system_camp_skillcard_rm"
+        },
+        {
+          "index": 13,
+          "kind": 0,
+          "offset": 1496,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f6368",
+          "label": "system_camp_skillcard_ch"
+        },
+        {
+          "index": 14,
+          "kind": 0,
+          "offset": 1584,
+          "label24_hex": "73797374656d5f63616d705f65717569705f6368616e6765",
+          "label": "system_camp_equip_change"
+        },
+        {
+          "index": 15,
+          "kind": 0,
+          "offset": 1672,
+          "label24_hex": "73797374656d5f626f6f6b5f726561640000000000000000",
+          "label": "system_book_read"
+        },
+        {
+          "index": 16,
+          "kind": 0,
+          "offset": 1736,
+          "label24_hex": "73797374656d5f636f6e6669675f63616e63656c00000000",
+          "label": "system_config_cancel"
+        },
+        {
+          "index": 17,
+          "kind": 0,
+          "offset": 1840,
+          "label24_hex": "73797374656d5f63616d705f71756573745f706963747572",
+          "label": "system_camp_quest_pictur"
+        },
+        {
+          "index": 18,
+          "kind": 0,
+          "offset": 2024,
+          "label24_hex": "73797374656d5f636f6e6669675f6974656d5f7265736574",
+          "label": "system_config_item_reset"
+        },
+        {
+          "index": 19,
+          "kind": 0,
+          "offset": 2128,
+          "label24_hex": "73797374656d5f636f6e6669675f6b6579636f6e6669675f",
+          "label": "system_config_keyconfig_"
+        },
+        {
+          "index": 20,
+          "kind": 0,
+          "offset": 2256,
+          "label24_hex": "73797374656d5f636f6e6669675f636f6e6669726d000000",
+          "label": "system_config_confirm"
+        },
+        {
+          "index": 21,
+          "kind": 0,
+          "offset": 2340,
+          "label24_hex": "73797374656d5f636f6e6669675f6e6f745f736574000000",
+          "label": "system_config_not_set"
+        },
+        {
+          "index": 22,
+          "kind": 0,
+          "offset": 2432,
+          "label24_hex": "73797374656d5f636f6e6669675f7461625f6368616e6765",
+          "label": "system_config_tab_change"
+        },
+        {
+          "index": 23,
+          "kind": 0,
+          "offset": 2540,
+          "label24_hex": "73797374656d5f636f6e6669675f6b65795f61737369676e",
+          "label": "system_config_key_assign"
+        },
+        {
+          "index": 24,
+          "kind": 0,
+          "offset": 2800,
+          "label24_hex": "73797374656d5f636f6e6669675f7061645f61737369676e",
+          "label": "system_config_pad_assign"
+        },
+        {
+          "index": 25,
+          "kind": 0,
+          "offset": 2924,
+          "label24_hex": "73797374656d5f636f6e6669675f73706163655f6368616e",
+          "label": "system_config_space_chan"
+        },
+        {
+          "index": 26,
+          "kind": 0,
+          "offset": 3064,
+          "label24_hex": "73797374656d5f63616d705f636f6e6669675f6578697400",
+          "label": "system_camp_config_exit"
+        },
+        {
+          "index": 27,
+          "kind": 0,
+          "offset": 3156,
+          "label24_hex": "73797374656d5f636f6e6669675f7061645f61737369676e",
+          "label": "system_config_pad_assign"
+        },
+        {
+          "index": 28,
+          "kind": 0,
+          "offset": 3308,
+          "label24_hex": "73797374656d5f636f6e6669675f7061645f61737369676e",
+          "label": "system_config_pad_assign"
+        },
+        {
+          "index": 29,
+          "kind": 0,
+          "offset": 3452,
+          "label24_hex": "73797374656d5f636f6e6669675f7061645f61737369676e",
+          "label": "system_config_pad_assign"
+        },
+        {
+          "index": 30,
+          "kind": 0,
+          "offset": 3604,
+          "label24_hex": "73797374656d5f616c62756d5f7265616400000000000000",
+          "label": "system_album_read"
+        },
+        {
+          "index": 31,
+          "kind": 0,
+          "offset": 3672,
+          "label24_hex": "73797374656d5f717569636b5f7361766500000000000000",
+          "label": "system_quick_save"
+        },
+        {
+          "index": 32,
+          "kind": 0,
+          "offset": 3800,
+          "label24_hex": "73797374656d5f717569636b5f736176655f6e6700000000",
+          "label": "system_quick_save_ng"
+        }
+      ],
+      "locale": "es"
+    },
+    {
+      "path": "data_fr.cpk::init_free.bin::init/cmpTable.bin::camp_msg.bmd",
+      "size": 4000,
+      "serialized_size": 4000,
+      "sha256": "422a6dde45ca8e2aebb01e3b184b973d03edfea9f7da99d4ad6ab2f06533352f",
+      "header_hex": "07000000a00f00004d534731000000005c0f0000440000002100000000000200",
+      "record_count": 33,
+      "records": [
+        {
+          "index": 0,
+          "kind": 1,
+          "offset": 312,
+          "label24_hex": "73797374656d5f7965735f6e6f0000000000000000000000",
+          "label": "system_yes_no"
+        },
+        {
+          "index": 1,
+          "kind": 0,
+          "offset": 380,
+          "label24_hex": "73797374656d5f63616d705f636172645f64726f70000000",
+          "label": "system_camp_card_drop"
+        },
+        {
+          "index": 2,
+          "kind": 0,
+          "offset": 480,
+          "label24_hex": "73797374656d5f63616d705f636172645f64726f705f6e67",
+          "label": "system_camp_card_drop_ng"
+        },
+        {
+          "index": 3,
+          "kind": 0,
+          "offset": 584,
+          "label24_hex": "73797374656d5f63616d705f636172645f73657400000000",
+          "label": "system_camp_card_set"
+        },
+        {
+          "index": 4,
+          "kind": 0,
+          "offset": 664,
+          "label24_hex": "73797374656d5f63616d705f636f6e6669675f7469746c65",
+          "label": "system_camp_config_title"
+        },
+        {
+          "index": 5,
+          "kind": 0,
+          "offset": 748,
+          "label24_hex": "73797374656d5f63616d705f71756573745f6f6666657200",
+          "label": "system_camp_quest_offer"
+        },
+        {
+          "index": 6,
+          "kind": 0,
+          "offset": 836,
+          "label24_hex": "73797374656d5f63616d705f71756573745f656e64000000",
+          "label": "system_camp_quest_end"
+        },
+        {
+          "index": 7,
+          "kind": 0,
+          "offset": 924,
+          "label24_hex": "73797374656d5f63616d705f71756573745f666972737400",
+          "label": "system_camp_quest_first"
+        },
+        {
+          "index": 8,
+          "kind": 0,
+          "offset": 1044,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f616c",
+          "label": "system_camp_skillcard_al"
+        },
+        {
+          "index": 9,
+          "kind": 0,
+          "offset": 1136,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f6368",
+          "label": "system_camp_skillcard_ch"
+        },
+        {
+          "index": 10,
+          "kind": 0,
+          "offset": 1216,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f656e",
+          "label": "system_camp_skillcard_en"
+        },
+        {
+          "index": 11,
+          "kind": 0,
+          "offset": 1304,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f726d",
+          "label": "system_camp_skillcard_rm"
+        },
+        {
+          "index": 12,
+          "kind": 0,
+          "offset": 1440,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f726d",
+          "label": "system_camp_skillcard_rm"
+        },
+        {
+          "index": 13,
+          "kind": 0,
+          "offset": 1516,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f6368",
+          "label": "system_camp_skillcard_ch"
+        },
+        {
+          "index": 14,
+          "kind": 0,
+          "offset": 1600,
+          "label24_hex": "73797374656d5f63616d705f65717569705f6368616e6765",
+          "label": "system_camp_equip_change"
+        },
+        {
+          "index": 15,
+          "kind": 0,
+          "offset": 1692,
+          "label24_hex": "73797374656d5f626f6f6b5f726561640000000000000000",
+          "label": "system_book_read"
+        },
+        {
+          "index": 16,
+          "kind": 0,
+          "offset": 1756,
+          "label24_hex": "73797374656d5f636f6e6669675f63616e63656c00000000",
+          "label": "system_config_cancel"
+        },
+        {
+          "index": 17,
+          "kind": 0,
+          "offset": 1884,
+          "label24_hex": "73797374656d5f63616d705f71756573745f706963747572",
+          "label": "system_camp_quest_pictur"
+        },
+        {
+          "index": 18,
+          "kind": 0,
+          "offset": 2052,
+          "label24_hex": "73797374656d5f636f6e6669675f6974656d5f7265736574",
+          "label": "system_config_item_reset"
+        },
+        {
+          "index": 19,
+          "kind": 0,
+          "offset": 2136,
+          "label24_hex": "73797374656d5f636f6e6669675f6b6579636f6e6669675f",
+          "label": "system_config_keyconfig_"
+        },
+        {
+          "index": 20,
+          "kind": 0,
+          "offset": 2264,
+          "label24_hex": "73797374656d5f636f6e6669675f636f6e6669726d000000",
+          "label": "system_config_confirm"
+        },
+        {
+          "index": 21,
+          "kind": 0,
+          "offset": 2356,
+          "label24_hex": "73797374656d5f636f6e6669675f6e6f745f736574000000",
+          "label": "system_config_not_set"
+        },
+        {
+          "index": 22,
+          "kind": 0,
+          "offset": 2456,
+          "label24_hex": "73797374656d5f636f6e6669675f7461625f6368616e6765",
+          "label": "system_config_tab_change"
+        },
+        {
+          "index": 23,
+          "kind": 0,
+          "offset": 2572,
+          "label24_hex": "73797374656d5f636f6e6669675f6b65795f61737369676e",
+          "label": "system_config_key_assign"
+        },
+        {
+          "index": 24,
+          "kind": 0,
+          "offset": 2808,
+          "label24_hex": "73797374656d5f636f6e6669675f7061645f61737369676e",
+          "label": "system_config_pad_assign"
+        },
+        {
+          "index": 25,
+          "kind": 0,
+          "offset": 2928,
+          "label24_hex": "73797374656d5f636f6e6669675f73706163655f6368616e",
+          "label": "system_config_space_chan"
+        },
+        {
+          "index": 26,
+          "kind": 0,
+          "offset": 3080,
+          "label24_hex": "73797374656d5f63616d705f636f6e6669675f6578697400",
+          "label": "system_camp_config_exit"
+        },
+        {
+          "index": 27,
+          "kind": 0,
+          "offset": 3160,
+          "label24_hex": "73797374656d5f636f6e6669675f7061645f61737369676e",
+          "label": "system_config_pad_assign"
+        },
+        {
+          "index": 28,
+          "kind": 0,
+          "offset": 3308,
+          "label24_hex": "73797374656d5f636f6e6669675f7061645f61737369676e",
+          "label": "system_config_pad_assign"
+        },
+        {
+          "index": 29,
+          "kind": 0,
+          "offset": 3452,
+          "label24_hex": "73797374656d5f636f6e6669675f7061645f61737369676e",
+          "label": "system_config_pad_assign"
+        },
+        {
+          "index": 30,
+          "kind": 0,
+          "offset": 3612,
+          "label24_hex": "73797374656d5f616c62756d5f7265616400000000000000",
+          "label": "system_album_read"
+        },
+        {
+          "index": 31,
+          "kind": 0,
+          "offset": 3680,
+          "label24_hex": "73797374656d5f717569636b5f7361766500000000000000",
+          "label": "system_quick_save"
+        },
+        {
+          "index": 32,
+          "kind": 0,
+          "offset": 3792,
+          "label24_hex": "73797374656d5f717569636b5f736176655f6e6700000000",
+          "label": "system_quick_save_ng"
+        }
+      ],
+      "locale": "fr"
+    },
+    {
+      "path": "data_it.cpk::init_free.bin::init/cmpTable.bin::camp_msg.bmd",
+      "size": 4000,
+      "serialized_size": 3980,
+      "sha256": "ac5299e1e0a6146ecf8b332c46e4ebbc22651b656f124c32fec04171f481c7ba",
+      "header_hex": "070000008c0f00004d53473100000000480f0000440000002100000000000200",
+      "record_count": 33,
+      "records": [
+        {
+          "index": 0,
+          "kind": 1,
+          "offset": 312,
+          "label24_hex": "73797374656d5f7965735f6e6f0000000000000000000000",
+          "label": "system_yes_no"
+        },
+        {
+          "index": 1,
+          "kind": 0,
+          "offset": 376,
+          "label24_hex": "73797374656d5f63616d705f636172645f64726f70000000",
+          "label": "system_camp_card_drop"
+        },
+        {
+          "index": 2,
+          "kind": 0,
+          "offset": 468,
+          "label24_hex": "73797374656d5f63616d705f636172645f64726f705f6e67",
+          "label": "system_camp_card_drop_ng"
+        },
+        {
+          "index": 3,
+          "kind": 0,
+          "offset": 580,
+          "label24_hex": "73797374656d5f63616d705f636172645f73657400000000",
+          "label": "system_camp_card_set"
+        },
+        {
+          "index": 4,
+          "kind": 0,
+          "offset": 660,
+          "label24_hex": "73797374656d5f63616d705f636f6e6669675f7469746c65",
+          "label": "system_camp_config_title"
+        },
+        {
+          "index": 5,
+          "kind": 0,
+          "offset": 748,
+          "label24_hex": "73797374656d5f63616d705f71756573745f6f6666657200",
+          "label": "system_camp_quest_offer"
+        },
+        {
+          "index": 6,
+          "kind": 0,
+          "offset": 836,
+          "label24_hex": "73797374656d5f63616d705f71756573745f656e64000000",
+          "label": "system_camp_quest_end"
+        },
+        {
+          "index": 7,
+          "kind": 0,
+          "offset": 924,
+          "label24_hex": "73797374656d5f63616d705f71756573745f666972737400",
+          "label": "system_camp_quest_first"
+        },
+        {
+          "index": 8,
+          "kind": 0,
+          "offset": 1036,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f616c",
+          "label": "system_camp_skillcard_al"
+        },
+        {
+          "index": 9,
+          "kind": 0,
+          "offset": 1140,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f6368",
+          "label": "system_camp_skillcard_ch"
+        },
+        {
+          "index": 10,
+          "kind": 0,
+          "offset": 1216,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f656e",
+          "label": "system_camp_skillcard_en"
+        },
+        {
+          "index": 11,
+          "kind": 0,
+          "offset": 1300,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f726d",
+          "label": "system_camp_skillcard_rm"
+        },
+        {
+          "index": 12,
+          "kind": 0,
+          "offset": 1428,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f726d",
+          "label": "system_camp_skillcard_rm"
+        },
+        {
+          "index": 13,
+          "kind": 0,
+          "offset": 1508,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f6368",
+          "label": "system_camp_skillcard_ch"
+        },
+        {
+          "index": 14,
+          "kind": 0,
+          "offset": 1592,
+          "label24_hex": "73797374656d5f63616d705f65717569705f6368616e6765",
+          "label": "system_camp_equip_change"
+        },
+        {
+          "index": 15,
+          "kind": 0,
+          "offset": 1684,
+          "label24_hex": "73797374656d5f626f6f6b5f726561640000000000000000",
+          "label": "system_book_read"
+        },
+        {
+          "index": 16,
+          "kind": 0,
+          "offset": 1752,
+          "label24_hex": "73797374656d5f636f6e6669675f63616e63656c00000000",
+          "label": "system_config_cancel"
+        },
+        {
+          "index": 17,
+          "kind": 0,
+          "offset": 1852,
+          "label24_hex": "73797374656d5f63616d705f71756573745f706963747572",
+          "label": "system_camp_quest_pictur"
+        },
+        {
+          "index": 18,
+          "kind": 0,
+          "offset": 2044,
+          "label24_hex": "73797374656d5f636f6e6669675f6974656d5f7265736574",
+          "label": "system_config_item_reset"
+        },
+        {
+          "index": 19,
+          "kind": 0,
+          "offset": 2144,
+          "label24_hex": "73797374656d5f636f6e6669675f6b6579636f6e6669675f",
+          "label": "system_config_keyconfig_"
+        },
+        {
+          "index": 20,
+          "kind": 0,
+          "offset": 2272,
+          "label24_hex": "73797374656d5f636f6e6669675f636f6e6669726d000000",
+          "label": "system_config_confirm"
+        },
+        {
+          "index": 21,
+          "kind": 0,
+          "offset": 2352,
+          "label24_hex": "73797374656d5f636f6e6669675f6e6f745f736574000000",
+          "label": "system_config_not_set"
+        },
+        {
+          "index": 22,
+          "kind": 0,
+          "offset": 2448,
+          "label24_hex": "73797374656d5f636f6e6669675f7461625f6368616e6765",
+          "label": "system_config_tab_change"
+        },
+        {
+          "index": 23,
+          "kind": 0,
+          "offset": 2556,
+          "label24_hex": "73797374656d5f636f6e6669675f6b65795f61737369676e",
+          "label": "system_config_key_assign"
+        },
+        {
+          "index": 24,
+          "kind": 0,
+          "offset": 2796,
+          "label24_hex": "73797374656d5f636f6e6669675f7061645f61737369676e",
+          "label": "system_config_pad_assign"
+        },
+        {
+          "index": 25,
+          "kind": 0,
+          "offset": 2924,
+          "label24_hex": "73797374656d5f636f6e6669675f73706163655f6368616e",
+          "label": "system_config_space_chan"
+        },
+        {
+          "index": 26,
+          "kind": 0,
+          "offset": 3068,
+          "label24_hex": "73797374656d5f63616d705f636f6e6669675f6578697400",
+          "label": "system_camp_config_exit"
+        },
+        {
+          "index": 27,
+          "kind": 0,
+          "offset": 3144,
+          "label24_hex": "73797374656d5f636f6e6669675f7061645f61737369676e",
+          "label": "system_config_pad_assign"
+        },
+        {
+          "index": 28,
+          "kind": 0,
+          "offset": 3296,
+          "label24_hex": "73797374656d5f636f6e6669675f7061645f61737369676e",
+          "label": "system_config_pad_assign"
+        },
+        {
+          "index": 29,
+          "kind": 0,
+          "offset": 3432,
+          "label24_hex": "73797374656d5f636f6e6669675f7061645f61737369676e",
+          "label": "system_config_pad_assign"
+        },
+        {
+          "index": 30,
+          "kind": 0,
+          "offset": 3576,
+          "label24_hex": "73797374656d5f616c62756d5f7265616400000000000000",
+          "label": "system_album_read"
+        },
+        {
+          "index": 31,
+          "kind": 0,
+          "offset": 3660,
+          "label24_hex": "73797374656d5f717569636b5f7361766500000000000000",
+          "label": "system_quick_save"
+        },
+        {
+          "index": 32,
+          "kind": 0,
+          "offset": 3780,
+          "label24_hex": "73797374656d5f717569636b5f736176655f6e6700000000",
+          "label": "system_quick_save_ng"
+        }
+      ],
+      "locale": "it"
+    },
+    {
+      "path": "data_k.cpk::init_free.bin::init/cmpTable.bin::camp_msg.bmd",
+      "size": 3776,
+      "serialized_size": 3772,
+      "sha256": "f7931f653908121a35f4ae719d9b5b77e9fea17e75e3b98587e3bcffd1eeccb8",
+      "header_hex": "07000000bc0e00004d53473100000000780e0000440000002100000000000200",
+      "record_count": 33,
+      "records": [
+        {
+          "index": 0,
+          "kind": 1,
+          "offset": 312,
+          "label24_hex": "73797374656d5f7965735f6e6f0000000000000000000000",
+          "label": "system_yes_no"
+        },
+        {
+          "index": 1,
+          "kind": 0,
+          "offset": 380,
+          "label24_hex": "73797374656d5f63616d705f636172645f64726f70000000",
+          "label": "system_camp_card_drop"
+        },
+        {
+          "index": 2,
+          "kind": 0,
+          "offset": 476,
+          "label24_hex": "73797374656d5f63616d705f636172645f64726f705f6e67",
+          "label": "system_camp_card_drop_ng"
+        },
+        {
+          "index": 3,
+          "kind": 0,
+          "offset": 576,
+          "label24_hex": "73797374656d5f63616d705f636172645f73657400000000",
+          "label": "system_camp_card_set"
+        },
+        {
+          "index": 4,
+          "kind": 0,
+          "offset": 660,
+          "label24_hex": "73797374656d5f63616d705f636f6e6669675f7469746c65",
+          "label": "system_camp_config_title"
+        },
+        {
+          "index": 5,
+          "kind": 0,
+          "offset": 748,
+          "label24_hex": "73797374656d5f63616d705f71756573745f6f6666657200",
+          "label": "system_camp_quest_offer"
+        },
+        {
+          "index": 6,
+          "kind": 0,
+          "offset": 844,
+          "label24_hex": "73797374656d5f63616d705f71756573745f656e64000000",
+          "label": "system_camp_quest_end"
+        },
+        {
+          "index": 7,
+          "kind": 0,
+          "offset": 940,
+          "label24_hex": "73797374656d5f63616d705f71756573745f666972737400",
+          "label": "system_camp_quest_first"
+        },
+        {
+          "index": 8,
+          "kind": 0,
+          "offset": 1056,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f616c",
+          "label": "system_camp_skillcard_al"
+        },
+        {
+          "index": 9,
+          "kind": 0,
+          "offset": 1148,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f6368",
+          "label": "system_camp_skillcard_ch"
+        },
+        {
+          "index": 10,
+          "kind": 0,
+          "offset": 1232,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f656e",
+          "label": "system_camp_skillcard_en"
+        },
+        {
+          "index": 11,
+          "kind": 0,
+          "offset": 1328,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f726d",
+          "label": "system_camp_skillcard_rm"
+        },
+        {
+          "index": 12,
+          "kind": 0,
+          "offset": 1428,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f726d",
+          "label": "system_camp_skillcard_rm"
+        },
+        {
+          "index": 13,
+          "kind": 0,
+          "offset": 1516,
+          "label24_hex": "73797374656d5f63616d705f736b696c6c636172645f6368",
+          "label": "system_camp_skillcard_ch"
+        },
+        {
+          "index": 14,
+          "kind": 0,
+          "offset": 1620,
+          "label24_hex": "73797374656d5f63616d705f65717569705f6368616e6765",
+          "label": "system_camp_equip_change"
+        },
+        {
+          "index": 15,
+          "kind": 0,
+          "offset": 1708,
+          "label24_hex": "73797374656d5f626f6f6b5f726561640000000000000000",
+          "label": "system_book_read"
+        },
+        {
+          "index": 16,
+          "kind": 0,
+          "offset": 1788,
+          "label24_hex": "73797374656d5f636f6e6669675f63616e63656c00000000",
+          "label": "system_config_cancel"
+        },
+        {
+          "index": 17,
+          "kind": 0,
+          "offset": 1888,
+          "label24_hex": "73797374656d5f63616d705f71756573745f706963747572",
+          "label": "system_camp_quest_pictur"
+        },
+        {
+          "index": 18,
+          "kind": 0,
+          "offset": 2068,
+          "label24_hex": "73797374656d5f636f6e6669675f6974656d5f7265736574",
+          "label": "system_config_item_reset"
+        },
+        {
+          "index": 19,
+          "kind": 0,
+          "offset": 2160,
+          "label24_hex": "73797374656d5f636f6e6669675f6b6579636f6e6669675f",
+          "label": "system_config_keyconfig_"
+        },
+        {
+          "index": 20,
+          "kind": 0,
+          "offset": 2268,
+          "label24_hex": "73797374656d5f636f6e6669675f636f6e6669726d000000",
+          "label": "system_config_confirm"
+        },
+        {
+          "index": 21,
+          "kind": 0,
+          "offset": 2344,
+          "label24_hex": "73797374656d5f636f6e6669675f6e6f745f736574000000",
+          "label": "system_config_not_set"
+        },
+        {
+          "index": 22,
+          "kind": 0,
+          "offset": 2428,
+          "label24_hex": "73797374656d5f636f6e6669675f7461625f6368616e6765",
+          "label": "system_config_tab_change"
+        },
+        {
+          "index": 23,
+          "kind": 0,
+          "offset": 2528,
+          "label24_hex": "73797374656d5f636f6e6669675f6b65795f61737369676e",
+          "label": "system_config_key_assign"
+        },
+        {
+          "index": 24,
+          "kind": 0,
+          "offset": 2748,
+          "label24_hex": "73797374656d5f636f6e6669675f7061645f61737369676e",
+          "label": "system_config_pad_assign"
+        },
+        {
+          "index": 25,
+          "kind": 0,
+          "offset": 2856,
+          "label24_hex": "73797374656d5f636f6e6669675f73706163655f6368616e",
+          "label": "system_config_space_chan"
+        },
+        {
+          "index": 26,
+          "kind": 0,
+          "offset": 2980,
+          "label24_hex": "73797374656d5f63616d705f636f6e6669675f6578697400",
+          "label": "system_camp_config_exit"
+        },
+        {
+          "index": 27,
+          "kind": 0,
+          "offset": 3068,
+          "label24_hex": "73797374656d5f636f6e6669675f7061645f61737369676e",
+          "label": "system_config_pad_assign"
+        },
+        {
+          "index": 28,
+          "kind": 0,
+          "offset": 3180,
+          "label24_hex": "73797374656d5f636f6e6669675f7061645f61737369676e",
+          "label": "system_config_pad_assign"
+        },
+        {
+          "index": 29,
+          "kind": 0,
+          "offset": 3284,
+          "label24_hex": "73797374656d5f636f6e6669675f7061645f61737369676e",
+          "label": "system_config_pad_assign"
+        },
+        {
+          "index": 30,
+          "kind": 0,
+          "offset": 3392,
+          "label24_hex": "73797374656d5f616c62756d5f7265616400000000000000",
+          "label": "system_album_read"
+        },
+        {
+          "index": 31,
+          "kind": 0,
+          "offset": 3468,
+          "label24_hex": "73797374656d5f717569636b5f7361766500000000000000",
+          "label": "system_quick_save"
+        },
+        {
+          "index": 32,
+          "kind": 0,
+          "offset": 3592,
+          "label24_hex": "73797374656d5f717569636b5f736176655f6e6700000000",
+          "label": "system_quick_save_ng"
+        }
+      ],
+      "locale": "k"
+    }
+  ],
+  "steam_code_witnesses": [
+    {
+      "section": ".shared",
+      "start": "0x1817c0",
+      "end": "0x1818b6",
+      "raw_offset": 1576384,
+      "size": 246,
+      "sha256": "2d9c653391d3a3d6363b1baef87bcfb0bc8493edf4925455524d911347f0f46e",
+      "instructions": [
+        {
+          "pc": "0x1817c0",
+          "mnemonic": "mov",
+          "operands": "qword ptr [rsp + 8], rbx"
+        },
+        {
+          "pc": "0x1817c5",
+          "mnemonic": "mov",
+          "operands": "qword ptr [rsp + 0x10], rbp"
+        },
+        {
+          "pc": "0x1817ca",
+          "mnemonic": "mov",
+          "operands": "qword ptr [rsp + 0x18], rsi"
+        },
+        {
+          "pc": "0x1817cf",
+          "mnemonic": "push",
+          "operands": "rdi"
+        },
+        {
+          "pc": "0x1817d0",
+          "mnemonic": "sub",
+          "operands": "rsp, 0x20"
+        },
+        {
+          "pc": "0x1817d4",
+          "mnemonic": "mov",
+          "operands": "rdi, rcx"
+        },
+        {
+          "pc": "0x1817d7",
+          "mnemonic": "movsxd",
+          "operands": "rbx, edx"
+        },
+        {
+          "pc": "0x1817da",
+          "mnemonic": "lea",
+          "operands": "rcx, [rip + 0x1e32e2ed]"
+        },
+        {
+          "pc": "0x1817e1",
+          "mnemonic": "call",
+          "operands": "0x881a04"
+        },
+        {
+          "pc": "0x1817e6",
+          "mnemonic": "mov",
+          "operands": "rcx, rbx"
+        },
+        {
+          "pc": "0x1817e9",
+          "mnemonic": "call",
+          "operands": "0x503640"
+        },
+        {
+          "pc": "0x1817ee",
+          "mnemonic": "mov",
+          "operands": "r8d, ebx"
+        },
+        {
+          "pc": "0x1817f1",
+          "mnemonic": "mov",
+          "operands": "qword ptr [rip + 0xfe40c8], rax"
+        },
+        {
+          "pc": "0x1817f8",
+          "mnemonic": "mov",
+          "operands": "rdx, rdi"
+        },
+        {
+          "pc": "0x1817fb",
+          "mnemonic": "mov",
+          "operands": "rcx, rax"
+        },
+        {
+          "pc": "0x1817fe",
+          "mnemonic": "call",
+          "operands": "0x4fbf10"
+        },
+        {
+          "pc": "0x181803",
+          "mnemonic": "mov",
+          "operands": "rax, qword ptr [rip + 0xfe40b6]"
+        },
+        {
+          "pc": "0x18180a",
+          "mnemonic": "xor",
+          "operands": "esi, esi"
+        },
+        {
+          "pc": "0x18180c",
+          "mnemonic": "mov",
+          "operands": "ebp, dword ptr [rax]"
+        },
+        {
+          "pc": "0x18180e",
+          "mnemonic": "lea",
+          "operands": "rbx, [rax + 4]"
+        },
+        {
+          "pc": "0x181812",
+          "mnemonic": "mov",
+          "operands": "rdi, rbx"
+        },
+        {
+          "pc": "0x181815",
+          "mnemonic": "test",
+          "operands": "ebp, ebp"
+        },
+        {
+          "pc": "0x181817",
+          "mnemonic": "jle",
+          "operands": "0x181843"
+        },
+        {
+          "pc": "0x181819",
+          "mnemonic": "nop",
+          "operands": "dword ptr [rax]"
+        },
+        {
+          "pc": "0x181820",
+          "mnemonic": "lea",
+          "operands": "rdx, [rip + 0x79a4b1]"
+        },
+        {
+          "pc": "0x181827",
+          "mnemonic": "mov",
+          "operands": "rcx, rdi"
+        },
+        {
+          "pc": "0x18182a",
+          "mnemonic": "call",
+          "operands": "0x825206"
+        },
+        {
+          "pc": "0x18182f",
+          "mnemonic": "test",
+          "operands": "eax, eax"
+        },
+        {
+          "pc": "0x181831",
+          "mnemonic": "je",
+          "operands": "0x1818a3"
+        },
+        {
+          "pc": "0x181833",
+          "mnemonic": "mov",
+          "operands": "eax, dword ptr [rdi + 0x20]"
+        },
+        {
+          "pc": "0x181836",
+          "mnemonic": "inc",
+          "operands": "esi"
+        },
+        {
+          "pc": "0x181838",
+          "mnemonic": "add",
+          "operands": "rdi, 0x24"
+        },
+        {
+          "pc": "0x18183c",
+          "mnemonic": "add",
+          "operands": "rdi, rax"
+        },
+        {
+          "pc": "0x18183f",
+          "mnemonic": "cmp",
+          "operands": "esi, ebp"
+        },
+        {
+          "pc": "0x181841",
+          "mnemonic": "jl",
+          "operands": "0x181820"
+        },
+        {
+          "pc": "0x181843",
+          "mnemonic": "xor",
+          "operands": "edi, edi"
+        },
+        {
+          "pc": "0x181845",
+          "mnemonic": "mov",
+          "operands": "qword ptr [rip + 0xd3f204], rdi"
+        },
+        {
+          "pc": "0x18184c",
+          "mnemonic": "xor",
+          "operands": "edi, edi"
+        },
+        {
+          "pc": "0x18184e",
+          "mnemonic": "test",
+          "operands": "ebp, ebp"
+        },
+        {
+          "pc": "0x181850",
+          "mnemonic": "jle",
+          "operands": "0x181883"
+        },
+        {
+          "pc": "0x181852",
+          "mnemonic": "nop",
+          "operands": "dword ptr [rax]"
+        },
+        {
+          "pc": "0x181856",
+          "mnemonic": "nop",
+          "operands": "word ptr [rax + rax]"
+        },
+        {
+          "pc": "0x181860",
+          "mnemonic": "lea",
+          "operands": "rdx, [rip + 0x79a481]"
+        },
+        {
+          "pc": "0x181867",
+          "mnemonic": "mov",
+          "operands": "rcx, rbx"
+        },
+        {
+          "pc": "0x18186a",
+          "mnemonic": "call",
+          "operands": "0x825206"
+        },
+        {
+          "pc": "0x18186f",
+          "mnemonic": "test",
+          "operands": "eax, eax"
+        },
+        {
+          "pc": "0x181871",
+          "mnemonic": "je",
+          "operands": "0x1818a9"
+        },
+        {
+          "pc": "0x181873",
+          "mnemonic": "mov",
+          "operands": "eax, dword ptr [rbx + 0x20]"
+        },
+        {
+          "pc": "0x181876",
+          "mnemonic": "inc",
+          "operands": "edi"
+        },
+        {
+          "pc": "0x181878",
+          "mnemonic": "add",
+          "operands": "rbx, 0x24"
+        },
+        {
+          "pc": "0x18187c",
+          "mnemonic": "add",
+          "operands": "rbx, rax"
+        },
+        {
+          "pc": "0x18187f",
+          "mnemonic": "cmp",
+          "operands": "edi, ebp"
+        },
+        {
+          "pc": "0x181881",
+          "mnemonic": "jl",
+          "operands": "0x181860"
+        },
+        {
+          "pc": "0x181883",
+          "mnemonic": "mov",
+          "operands": "qword ptr [rip + 0xd3f1ba], 0"
+        },
+        {
+          "pc": "0x18188e",
+          "mnemonic": "mov",
+          "operands": "rbx, qword ptr [rsp + 0x30]"
+        },
+        {
+          "pc": "0x181893",
+          "mnemonic": "mov",
+          "operands": "rbp, qword ptr [rsp + 0x38]"
+        },
+        {
+          "pc": "0x181898",
+          "mnemonic": "mov",
+          "operands": "rsi, qword ptr [rsp + 0x40]"
+        },
+        {
+          "pc": "0x18189d",
+          "mnemonic": "add",
+          "operands": "rsp, 0x20"
+        },
+        {
+          "pc": "0x1818a1",
+          "mnemonic": "pop",
+          "operands": "rdi"
+        },
+        {
+          "pc": "0x1818a2",
+          "mnemonic": "ret",
+          "operands": ""
+        },
+        {
+          "pc": "0x1818a3",
+          "mnemonic": "add",
+          "operands": "rdi, 0x24"
+        },
+        {
+          "pc": "0x1818a7",
+          "mnemonic": "jmp",
+          "operands": "0x181845"
+        },
+        {
+          "pc": "0x1818a9",
+          "mnemonic": "add",
+          "operands": "rbx, 0x24"
+        },
+        {
+          "pc": "0x1818ad",
+          "mnemonic": "mov",
+          "operands": "qword ptr [rip + 0xd3f194], rbx"
+        },
+        {
+          "pc": "0x1818b4",
+          "mnemonic": "jmp",
+          "operands": "0x18188e"
+        }
+      ]
+    },
+    {
+      "section": ".shared",
+      "start": "0x17b6b0",
+      "end": "0x17b706",
+      "raw_offset": 1551536,
+      "size": 86,
+      "sha256": "d663e68e29e69e0e662ff315e6e512900d1dc60ef45a28bac0262eda589b1bdf",
+      "instructions": [
+        {
+          "pc": "0x17b6b0",
+          "mnemonic": "sub",
+          "operands": "rsp, 0x28"
+        },
+        {
+          "pc": "0x17b6b4",
+          "mnemonic": "lea",
+          "operands": "rcx, [rip + 0x1e334413]"
+        },
+        {
+          "pc": "0x17b6bb",
+          "mnemonic": "call",
+          "operands": "0x881a04"
+        },
+        {
+          "pc": "0x17b6c0",
+          "mnemonic": "lea",
+          "operands": "rcx, [rip + 0x98be89]"
+        },
+        {
+          "pc": "0x17b6c7",
+          "mnemonic": "call",
+          "operands": "0x4fb910"
+        },
+        {
+          "pc": "0x17b6cc",
+          "mnemonic": "test",
+          "operands": "rax, rax"
+        },
+        {
+          "pc": "0x17b6cf",
+          "mnemonic": "je",
+          "operands": "0x17b6ed"
+        },
+        {
+          "pc": "0x17b6d1",
+          "mnemonic": "mov",
+          "operands": "rcx, qword ptr [rax + 0x48]"
+        },
+        {
+          "pc": "0x17b6d5",
+          "mnemonic": "cmp",
+          "operands": "dword ptr [rcx + 8], 5"
+        },
+        {
+          "pc": "0x17b6d9",
+          "mnemonic": "jne",
+          "operands": "0x17b6ff"
+        },
+        {
+          "pc": "0x17b6db",
+          "mnemonic": "mov",
+          "operands": "rcx, rax"
+        },
+        {
+          "pc": "0x17b6de",
+          "mnemonic": "call",
+          "operands": "0x4fb850"
+        },
+        {
+          "pc": "0x17b6e3",
+          "mnemonic": "mov",
+          "operands": "eax, 1"
+        },
+        {
+          "pc": "0x17b6e8",
+          "mnemonic": "add",
+          "operands": "rsp, 0x28"
+        },
+        {
+          "pc": "0x17b6ec",
+          "mnemonic": "ret",
+          "operands": ""
+        },
+        {
+          "pc": "0x17b6ed",
+          "mnemonic": "xor",
+          "operands": "ecx, ecx"
+        },
+        {
+          "pc": "0x17b6ef",
+          "mnemonic": "call",
+          "operands": "0x46ac20"
+        },
+        {
+          "pc": "0x17b6f4",
+          "mnemonic": "xor",
+          "operands": "r8d, r8d"
+        },
+        {
+          "pc": "0x17b6f7",
+          "mnemonic": "lea",
+          "operands": "edx, [rax - 1]"
+        },
+        {
+          "pc": "0x17b6fa",
+          "mnemonic": "call",
+          "operands": "0x17b360"
+        },
+        {
+          "pc": "0x17b6ff",
+          "mnemonic": "xor",
+          "operands": "eax, eax"
+        },
+        {
+          "pc": "0x17b701",
+          "mnemonic": "add",
+          "operands": "rsp, 0x28"
+        },
+        {
+          "pc": "0x17b705",
+          "mnemonic": "ret",
+          "operands": ""
+        }
+      ]
+    },
+    {
+      "section": ".shared",
+      "start": "0x17b710",
+      "end": "0x17b769",
+      "raw_offset": 1551632,
+      "size": 89,
+      "sha256": "1732e4538ed6eaf289ed23970f68fc16309032b1f6891d9b9c553925abe3e936",
+      "instructions": [
+        {
+          "pc": "0x17b710",
+          "mnemonic": "sub",
+          "operands": "rsp, 0x28"
+        },
+        {
+          "pc": "0x17b714",
+          "mnemonic": "lea",
+          "operands": "rcx, [rip + 0x1e3343b3]"
+        },
+        {
+          "pc": "0x17b71b",
+          "mnemonic": "call",
+          "operands": "0x881a04"
+        },
+        {
+          "pc": "0x17b720",
+          "mnemonic": "lea",
+          "operands": "rcx, [rip + 0x98be29]"
+        },
+        {
+          "pc": "0x17b727",
+          "mnemonic": "call",
+          "operands": "0x4fb910"
+        },
+        {
+          "pc": "0x17b72c",
+          "mnemonic": "test",
+          "operands": "rax, rax"
+        },
+        {
+          "pc": "0x17b72f",
+          "mnemonic": "je",
+          "operands": "0x17b74d"
+        },
+        {
+          "pc": "0x17b731",
+          "mnemonic": "mov",
+          "operands": "rcx, qword ptr [rax + 0x48]"
+        },
+        {
+          "pc": "0x17b735",
+          "mnemonic": "cmp",
+          "operands": "dword ptr [rcx + 8], 5"
+        },
+        {
+          "pc": "0x17b739",
+          "mnemonic": "jne",
+          "operands": "0x17b762"
+        },
+        {
+          "pc": "0x17b73b",
+          "mnemonic": "mov",
+          "operands": "rcx, rax"
+        },
+        {
+          "pc": "0x17b73e",
+          "mnemonic": "call",
+          "operands": "0x4fb850"
+        },
+        {
+          "pc": "0x17b743",
+          "mnemonic": "mov",
+          "operands": "eax, 1"
+        },
+        {
+          "pc": "0x17b748",
+          "mnemonic": "add",
+          "operands": "rsp, 0x28"
+        },
+        {
+          "pc": "0x17b74c",
+          "mnemonic": "ret",
+          "operands": ""
+        },
+        {
+          "pc": "0x17b74d",
+          "mnemonic": "xor",
+          "operands": "ecx, ecx"
+        },
+        {
+          "pc": "0x17b74f",
+          "mnemonic": "call",
+          "operands": "0x46ac20"
+        },
+        {
+          "pc": "0x17b754",
+          "mnemonic": "mov",
+          "operands": "r8d, 1"
+        },
+        {
+          "pc": "0x17b75a",
+          "mnemonic": "lea",
+          "operands": "edx, [rax - 1]"
+        },
+        {
+          "pc": "0x17b75d",
+          "mnemonic": "call",
+          "operands": "0x17b360"
+        },
+        {
+          "pc": "0x17b762",
+          "mnemonic": "xor",
+          "operands": "eax, eax"
+        },
+        {
+          "pc": "0x17b764",
+          "mnemonic": "add",
+          "operands": "rsp, 0x28"
+        },
+        {
+          "pc": "0x17b768",
+          "mnemonic": "ret",
+          "operands": ""
+        }
+      ]
+    },
+    {
+      "section": ".shared",
+      "start": "0x17ae90",
+      "end": "0x17aecf",
+      "raw_offset": 1549456,
+      "size": 63,
+      "sha256": "d339af6503321a5ef09c71d8ffff5a94fc4ec6c04da99e8afacf4d9bc7f9bbab",
+      "instructions": [
+        {
+          "pc": "0x17ae90",
+          "mnemonic": "mov",
+          "operands": "qword ptr [rsp + 0x18], rbx"
+        },
+        {
+          "pc": "0x17ae95",
+          "mnemonic": "push",
+          "operands": "rdi"
+        },
+        {
+          "pc": "0x17ae96",
+          "mnemonic": "sub",
+          "operands": "rsp, 0xb0"
+        },
+        {
+          "pc": "0x17ae9d",
+          "mnemonic": "mov",
+          "operands": "rax, qword ptr [rip + 0x8a7c0c]"
+        },
+        {
+          "pc": "0x17aea4",
+          "mnemonic": "xor",
+          "operands": "rax, rsp"
+        },
+        {
+          "pc": "0x17aea7",
+          "mnemonic": "mov",
+          "operands": "qword ptr [rsp + 0xa0], rax"
+        },
+        {
+          "pc": "0x17aeaf",
+          "mnemonic": "mov",
+          "operands": "rbx, rcx"
+        },
+        {
+          "pc": "0x17aeb2",
+          "mnemonic": "lea",
+          "operands": "rcx, [rip + 0x1e334c15]"
+        },
+        {
+          "pc": "0x17aeb9",
+          "mnemonic": "call",
+          "operands": "0x881a04"
+        },
+        {
+          "pc": "0x17aebe",
+          "mnemonic": "mov",
+          "operands": "rdi, qword ptr [rbx + 0x48]"
+        },
+        {
+          "pc": "0x17aec2",
+          "mnemonic": "movsxd",
+          "operands": "rax, dword ptr [rdi + 8]"
+        },
+        {
+          "pc": "0x17aec6",
+          "mnemonic": "cmp",
+          "operands": "eax, 6"
+        },
+        {
+          "pc": "0x17aec9",
+          "mnemonic": "ja",
+          "operands": "0x17b11f"
+        }
+      ]
+    },
+    {
+      "section": ".shared",
+      "start": "0x17b1a0",
+      "end": "0x17b1f1",
+      "raw_offset": 1550240,
+      "size": 81,
+      "sha256": "813327841ac2a1a74a497ba55b3633e4e33788f8e57a6c670302627f651891e0",
+      "instructions": [
+        {
+          "pc": "0x17b1a0",
+          "mnemonic": "mov",
+          "operands": "qword ptr [rsp + 0x10], rbx"
+        },
+        {
+          "pc": "0x17b1a5",
+          "mnemonic": "mov",
+          "operands": "qword ptr [rsp + 0x18], rsi"
+        },
+        {
+          "pc": "0x17b1aa",
+          "mnemonic": "mov",
+          "operands": "qword ptr [rsp + 0x20], rdi"
+        },
+        {
+          "pc": "0x17b1af",
+          "mnemonic": "push",
+          "operands": "r14"
+        },
+        {
+          "pc": "0x17b1b1",
+          "mnemonic": "sub",
+          "operands": "rsp, 0x20"
+        },
+        {
+          "pc": "0x17b1b5",
+          "mnemonic": "mov",
+          "operands": "rsi, rcx"
+        },
+        {
+          "pc": "0x17b1b8",
+          "mnemonic": "mov",
+          "operands": "ebx, r8d"
+        },
+        {
+          "pc": "0x17b1bb",
+          "mnemonic": "lea",
+          "operands": "rcx, [rip + 0x1e33490c]"
+        },
+        {
+          "pc": "0x17b1c2",
+          "mnemonic": "mov",
+          "operands": "r14d, edx"
+        },
+        {
+          "pc": "0x17b1c5",
+          "mnemonic": "call",
+          "operands": "0x881a04"
+        },
+        {
+          "pc": "0x17b1ca",
+          "mnemonic": "mov",
+          "operands": "rcx, qword ptr [rip + 0xd4587f]"
+        },
+        {
+          "pc": "0x17b1d1",
+          "mnemonic": "call",
+          "operands": "0x448b60"
+        },
+        {
+          "pc": "0x17b1d6",
+          "mnemonic": "mov",
+          "operands": "byte ptr [rsi + 0xc], al"
+        },
+        {
+          "pc": "0x17b1d9",
+          "mnemonic": "mov",
+          "operands": "edi, 1"
+        },
+        {
+          "pc": "0x17b1de",
+          "mnemonic": "mov",
+          "operands": "dword ptr [rsi + 0x10], r14d"
+        },
+        {
+          "pc": "0x17b1e2",
+          "mnemonic": "test",
+          "operands": "ebx, ebx"
+        },
+        {
+          "pc": "0x17b1e4",
+          "mnemonic": "jne",
+          "operands": "0x17b2da"
+        },
+        {
+          "pc": "0x17b1ea",
+          "mnemonic": "mov",
+          "operands": "rax, qword ptr [rip + 0xd45857]"
+        }
+      ]
+    }
+  ],
+  "nso_code_witnesses": [
+    {
+      "start": "0x71000fbc20",
+      "end": "0x71000fbcc0",
+      "size": 160,
+      "sha256": "63a8ca885cc6deda29f71a79f702465a4c138c8ecc21c923151b292fd7cbf8d6",
+      "instructions": [
+        {
+          "pc": "0x71000fbc20",
+          "mnemonic": "stp",
+          "operands": "x29, x30, [sp, #-0x30]!"
+        },
+        {
+          "pc": "0x71000fbc24",
+          "mnemonic": "str",
+          "operands": "x21, [sp, #0x10]"
+        },
+        {
+          "pc": "0x71000fbc28",
+          "mnemonic": "mov",
+          "operands": "x29, sp"
+        },
+        {
+          "pc": "0x71000fbc2c",
+          "mnemonic": "stp",
+          "operands": "x20, x19, [sp, #0x20]"
+        },
+        {
+          "pc": "0x71000fbc30",
+          "mnemonic": "mov",
+          "operands": "w19, w1"
+        },
+        {
+          "pc": "0x71000fbc34",
+          "mnemonic": "mov",
+          "operands": "x20, x0"
+        },
+        {
+          "pc": "0x71000fbc38",
+          "mnemonic": "adrp",
+          "operands": "x0, #0x710060b000"
+        },
+        {
+          "pc": "0x71000fbc3c",
+          "mnemonic": "add",
+          "operands": "x0, x0, #0xef6"
+        },
+        {
+          "pc": "0x71000fbc40",
+          "mnemonic": "mov",
+          "operands": "w1, #0x2294"
+        },
+        {
+          "pc": "0x71000fbc44",
+          "mnemonic": "bl",
+          "operands": "#0x710039d420"
+        },
+        {
+          "pc": "0x71000fbc48",
+          "mnemonic": "sxtw",
+          "operands": "x0, w19"
+        },
+        {
+          "pc": "0x71000fbc4c",
+          "mnemonic": "mov",
+          "operands": "w1, #0x40000"
+        },
+        {
+          "pc": "0x71000fbc50",
+          "mnemonic": "bl",
+          "operands": "#0x710039d750"
+        },
+        {
+          "pc": "0x71000fbc54",
+          "mnemonic": "adrp",
+          "operands": "x21, #0x71009b8000"
+        },
+        {
+          "pc": "0x71000fbc58",
+          "mnemonic": "mov",
+          "operands": "x1, x20"
+        },
+        {
+          "pc": "0x71000fbc5c",
+          "mnemonic": "str",
+          "operands": "x0, [x21, #0xa28]"
+        },
+        {
+          "pc": "0x71000fbc60",
+          "mnemonic": "mov",
+          "operands": "w2, w19"
+        },
+        {
+          "pc": "0x71000fbc64",
+          "mnemonic": "bl",
+          "operands": "#0x7100338870"
+        },
+        {
+          "pc": "0x71000fbc68",
+          "mnemonic": "ldr",
+          "operands": "x0, [x21, #0xa28]"
+        },
+        {
+          "pc": "0x71000fbc6c",
+          "mnemonic": "adrp",
+          "operands": "x1, #0x7100613000"
+        },
+        {
+          "pc": "0x71000fbc70",
+          "mnemonic": "add",
+          "operands": "x1, x1, #0xacd"
+        },
+        {
+          "pc": "0x71000fbc74",
+          "mnemonic": "mov",
+          "operands": "x2, xzr"
+        },
+        {
+          "pc": "0x71000fbc78",
+          "mnemonic": "bl",
+          "operands": "#0x7100397040"
+        },
+        {
+          "pc": "0x71000fbc7c",
+          "mnemonic": "adrp",
+          "operands": "x8, #0x7100880000"
+        },
+        {
+          "pc": "0x71000fbc80",
+          "mnemonic": "ldr",
+          "operands": "x8, [x8, #0x908]"
+        },
+        {
+          "pc": "0x71000fbc84",
+          "mnemonic": "str",
+          "operands": "x0, [x8]"
+        },
+        {
+          "pc": "0x71000fbc88",
+          "mnemonic": "ldr",
+          "operands": "x0, [x21, #0xa28]"
+        },
+        {
+          "pc": "0x71000fbc8c",
+          "mnemonic": "adrp",
+          "operands": "x1, #0x71005f1000"
+        },
+        {
+          "pc": "0x71000fbc90",
+          "mnemonic": "add",
+          "operands": "x1, x1, #0x663"
+        },
+        {
+          "pc": "0x71000fbc94",
+          "mnemonic": "mov",
+          "operands": "x2, xzr"
+        },
+        {
+          "pc": "0x71000fbc98",
+          "mnemonic": "bl",
+          "operands": "#0x7100397040"
+        },
+        {
+          "pc": "0x71000fbc9c",
+          "mnemonic": "adrp",
+          "operands": "x8, #0x7100880000"
+        },
+        {
+          "pc": "0x71000fbca0",
+          "mnemonic": "ldr",
+          "operands": "x8, [x8, #0x948]"
+        },
+        {
+          "pc": "0x71000fbca4",
+          "mnemonic": "ldr",
+          "operands": "x21, [sp, #0x10]"
+        },
+        {
+          "pc": "0x71000fbca8",
+          "mnemonic": "str",
+          "operands": "x0, [x8]"
+        },
+        {
+          "pc": "0x71000fbcac",
+          "mnemonic": "ldp",
+          "operands": "x20, x19, [sp, #0x20]"
+        },
+        {
+          "pc": "0x71000fbcb0",
+          "mnemonic": "ldp",
+          "operands": "x29, x30, [sp], #0x30"
+        },
+        {
+          "pc": "0x71000fbcb4",
+          "mnemonic": "ret",
+          "operands": ""
+        },
+        {
+          "pc": "0x71000fbcb8",
+          "mnemonic": "udf",
+          "operands": "#0"
+        },
+        {
+          "pc": "0x71000fbcbc",
+          "mnemonic": "udf",
+          "operands": "#0"
+        }
+      ]
+    },
+    {
+      "start": "0x71002c85b0",
+      "end": "0x71002c86f0",
+      "size": 320,
+      "sha256": "67cd62b1062720e840f048123c25bcb4bea34bc139e7688bb5411db98988b327",
+      "instructions": [
+        {
+          "pc": "0x71002c85b0",
+          "mnemonic": "stp",
+          "operands": "x29, x30, [sp, #-0x30]!"
+        },
+        {
+          "pc": "0x71002c85b4",
+          "mnemonic": "str",
+          "operands": "x21, [sp, #0x10]"
+        },
+        {
+          "pc": "0x71002c85b8",
+          "mnemonic": "mov",
+          "operands": "x29, sp"
+        },
+        {
+          "pc": "0x71002c85bc",
+          "mnemonic": "stp",
+          "operands": "x20, x19, [sp, #0x20]"
+        },
+        {
+          "pc": "0x71002c85c0",
+          "mnemonic": "adrp",
+          "operands": "x8, #0x7104a72000"
+        },
+        {
+          "pc": "0x71002c85c4",
+          "mnemonic": "ldr",
+          "operands": "x8, [x8, #0x7a8]"
+        },
+        {
+          "pc": "0x71002c85c8",
+          "mnemonic": "mov",
+          "operands": "x19, x0"
+        },
+        {
+          "pc": "0x71002c85cc",
+          "mnemonic": "cbz",
+          "operands": "x8, #0x71002c8610"
+        },
+        {
+          "pc": "0x71002c85d0",
+          "mnemonic": "adrp",
+          "operands": "x8, #0x7104a72000"
+        },
+        {
+          "pc": "0x71002c85d4",
+          "mnemonic": "ldr",
+          "operands": "x8, [x8, #0x7b0]"
+        },
+        {
+          "pc": "0x71002c85d8",
+          "mnemonic": "cbz",
+          "operands": "x8, #0x71002c8618"
+        },
+        {
+          "pc": "0x71002c85dc",
+          "mnemonic": "adrp",
+          "operands": "x8, #0x7104a72000"
+        },
+        {
+          "pc": "0x71002c85e0",
+          "mnemonic": "ldr",
+          "operands": "x8, [x8, #0x7b8]"
+        },
+        {
+          "pc": "0x71002c85e4",
+          "mnemonic": "cbz",
+          "operands": "x8, #0x71002c8620"
+        },
+        {
+          "pc": "0x71002c85e8",
+          "mnemonic": "adrp",
+          "operands": "x8, #0x7104a72000"
+        },
+        {
+          "pc": "0x71002c85ec",
+          "mnemonic": "ldr",
+          "operands": "x8, [x8, #0x7c0]"
+        },
+        {
+          "pc": "0x71002c85f0",
+          "mnemonic": "cbz",
+          "operands": "x8, #0x71002c8628"
+        },
+        {
+          "pc": "0x71002c85f4",
+          "mnemonic": "adrp",
+          "operands": "x8, #0x7104a72000"
+        },
+        {
+          "pc": "0x71002c85f8",
+          "mnemonic": "ldr",
+          "operands": "x8, [x8, #0x7c8]"
+        },
+        {
+          "pc": "0x71002c85fc",
+          "mnemonic": "cbz",
+          "operands": "x8, #0x71002c8630"
+        },
+        {
+          "pc": "0x71002c8600",
+          "mnemonic": "adrp",
+          "operands": "x0, #0x71005d9000"
+        },
+        {
+          "pc": "0x71002c8604",
+          "mnemonic": "add",
+          "operands": "x0, x0, #0x918"
+        },
+        {
+          "pc": "0x71002c8608",
+          "mnemonic": "mov",
+          "operands": "w1, #0xa6"
+        },
+        {
+          "pc": "0x71002c860c",
+          "mnemonic": "b",
+          "operands": "#0x71002c86cc"
+        },
+        {
+          "pc": "0x71002c8610",
+          "mnemonic": "mov",
+          "operands": "w20, wzr"
+        },
+        {
+          "pc": "0x71002c8614",
+          "mnemonic": "b",
+          "operands": "#0x71002c8634"
+        },
+        {
+          "pc": "0x71002c8618",
+          "mnemonic": "mov",
+          "operands": "w20, #1"
+        },
+        {
+          "pc": "0x71002c861c",
+          "mnemonic": "b",
+          "operands": "#0x71002c8634"
+        },
+        {
+          "pc": "0x71002c8620",
+          "mnemonic": "mov",
+          "operands": "w20, #2"
+        },
+        {
+          "pc": "0x71002c8624",
+          "mnemonic": "b",
+          "operands": "#0x71002c8634"
+        },
+        {
+          "pc": "0x71002c8628",
+          "mnemonic": "mov",
+          "operands": "w20, #3"
+        },
+        {
+          "pc": "0x71002c862c",
+          "mnemonic": "b",
+          "operands": "#0x71002c8634"
+        },
+        {
+          "pc": "0x71002c8630",
+          "mnemonic": "mov",
+          "operands": "w20, #4"
+        },
+        {
+          "pc": "0x71002c8634",
+          "mnemonic": "adrp",
+          "operands": "x0, #0x71005d9000"
+        },
+        {
+          "pc": "0x71002c8638",
+          "mnemonic": "add",
+          "operands": "x0, x0, #0x918"
+        },
+        {
+          "pc": "0x71002c863c",
+          "mnemonic": "mov",
+          "operands": "w1, #0x8d"
+        },
+        {
+          "pc": "0x71002c8640",
+          "mnemonic": "bl",
+          "operands": "#0x710039d420"
+        },
+        {
+          "pc": "0x71002c8644",
+          "mnemonic": "mov",
+          "operands": "w0, #1"
+        },
+        {
+          "pc": "0x71002c8648",
+          "mnemonic": "mov",
+          "operands": "w1, #0x10"
+        },
+        {
+          "pc": "0x71002c864c",
+          "mnemonic": "mov",
+          "operands": "w2, #0x40000"
+        },
+        {
+          "pc": "0x71002c8650",
+          "mnemonic": "bl",
+          "operands": "#0x710039dbd0"
+        },
+        {
+          "pc": "0x71002c8654",
+          "mnemonic": "adrp",
+          "operands": "x21, #0x7104a72000"
+        },
+        {
+          "pc": "0x71002c8658",
+          "mnemonic": "add",
+          "operands": "x21, x21, #0x780"
+        },
+        {
+          "pc": "0x71002c865c",
+          "mnemonic": "add",
+          "operands": "x8, x21, w20, uxtw #3"
+        },
+        {
+          "pc": "0x71002c8660",
+          "mnemonic": "str",
+          "operands": "x0, [x8, #0x28]"
+        },
+        {
+          "pc": "0x71002c8664",
+          "mnemonic": "cbz",
+          "operands": "x0, #0x71002c86ac"
+        },
+        {
+          "pc": "0x71002c8668",
+          "mnemonic": "mov",
+          "operands": "w8, #-1"
+        },
+        {
+          "pc": "0x71002c866c",
+          "mnemonic": "str",
+          "operands": "w8, [x0]"
+        },
+        {
+          "pc": "0x71002c8670",
+          "mnemonic": "str",
+          "operands": "w8, [x0, #8]"
+        },
+        {
+          "pc": "0x71002c8674",
+          "mnemonic": "mov",
+          "operands": "w8, #0x101"
+        },
+        {
+          "pc": "0x71002c8678",
+          "mnemonic": "mov",
+          "operands": "w9, #0xff"
+        },
+        {
+          "pc": "0x71002c867c",
+          "mnemonic": "strh",
+          "operands": "wzr, [x0, #4]"
+        },
+        {
+          "pc": "0x71002c8680",
+          "mnemonic": "strh",
+          "operands": "w8, [x0, #0xc]"
+        },
+        {
+          "pc": "0x71002c8684",
+          "mnemonic": "add",
+          "operands": "x8, x21, x20"
+        },
+        {
+          "pc": "0x71002c8688",
+          "mnemonic": "strb",
+          "operands": "w9, [x8, #0x1c]"
+        },
+        {
+          "pc": "0x71002c868c",
+          "mnemonic": "mov",
+          "operands": "x0, x19"
+        },
+        {
+          "pc": "0x71002c8690",
+          "mnemonic": "bl",
+          "operands": "#0x71002d8240"
+        },
+        {
+          "pc": "0x71002c8694",
+          "mnemonic": "add",
+          "operands": "x8, x21, x20, lsl #3"
+        },
+        {
+          "pc": "0x71002c8698",
+          "mnemonic": "ldr",
+          "operands": "x8, [x8, #0x28]"
+        },
+        {
+          "pc": "0x71002c869c",
+          "mnemonic": "mov",
+          "operands": "w1, wzr"
+        },
+        {
+          "pc": "0x71002c86a0",
+          "mnemonic": "str",
+          "operands": "w0, [x8]"
+        },
+        {
+          "pc": "0x71002c86a4",
+          "mnemonic": "bl",
+          "operands": "#0x71002d65b0"
+        },
+        {
+          "pc": "0x71002c86a8",
+          "mnemonic": "b",
+          "operands": "#0x71002c86d4"
+        },
+        {
+          "pc": "0x71002c86ac",
+          "mnemonic": "ldr",
+          "operands": "w8, [x0]"
+        },
+        {
+          "pc": "0x71002c86b0",
+          "mnemonic": "add",
+          "operands": "x9, x21, x20"
+        },
+        {
+          "pc": "0x71002c86b4",
+          "mnemonic": "mov",
+          "operands": "w10, #0xff"
+        },
+        {
+          "pc": "0x71002c86b8",
+          "mnemonic": "strb",
+          "operands": "w10, [x9, #0x1c]"
+        },
+        {
+          "pc": "0x71002c86bc",
+          "mnemonic": "tbnz",
+          "operands": "w8, #0x1f, #0x71002c868c"
+        },
+        {
+          "pc": "0x71002c86c0",
+          "mnemonic": "adrp",
+          "operands": "x0, #0x71005d9000"
+        },
+        {
+          "pc": "0x71002c86c4",
+          "mnemonic": "add",
+          "operands": "x0, x0, #0x918"
+        },
+        {
+          "pc": "0x71002c86c8",
+          "mnemonic": "mov",
+          "operands": "w1, #0x99"
+        },
+        {
+          "pc": "0x71002c86cc",
+          "mnemonic": "bl",
+          "operands": "#0x7100349960"
+        },
+        {
+          "pc": "0x71002c86d0",
+          "mnemonic": "mov",
+          "operands": "w20, #0xff"
+        },
+        {
+          "pc": "0x71002c86d4",
+          "mnemonic": "mov",
+          "operands": "w0, w20"
+        },
+        {
+          "pc": "0x71002c86d8",
+          "mnemonic": "ldp",
+          "operands": "x20, x19, [sp, #0x20]"
+        },
+        {
+          "pc": "0x71002c86dc",
+          "mnemonic": "ldr",
+          "operands": "x21, [sp, #0x10]"
+        },
+        {
+          "pc": "0x71002c86e0",
+          "mnemonic": "ldp",
+          "operands": "x29, x30, [sp], #0x30"
+        },
+        {
+          "pc": "0x71002c86e4",
+          "mnemonic": "ret",
+          "operands": ""
+        },
+        {
+          "pc": "0x71002c86e8",
+          "mnemonic": "udf",
+          "operands": "#0"
+        },
+        {
+          "pc": "0x71002c86ec",
+          "mnemonic": "udf",
+          "operands": "#0"
+        }
+      ]
+    },
+    {
+      "start": "0x71002d8240",
+      "end": "0x71002d8254",
+      "size": 20,
+      "sha256": "73bfc986090e36450aa8c4eab659dc61d99600b81a38e2a3e62360c90b720098",
+      "instructions": [
+        {
+          "pc": "0x71002d8240",
+          "mnemonic": "stp",
+          "operands": "x29, x30, [sp, #-0x40]!"
+        },
+        {
+          "pc": "0x71002d8244",
+          "mnemonic": "str",
+          "operands": "x28, [sp, #0x10]"
+        },
+        {
+          "pc": "0x71002d8248",
+          "mnemonic": "mov",
+          "operands": "x29, sp"
+        },
+        {
+          "pc": "0x71002d824c",
+          "mnemonic": "stp",
+          "operands": "x22, x21, [sp, #0x20]"
+        },
+        {
+          "pc": "0x71002d8250",
+          "mnemonic": "stp",
+          "operands": "x20, x19, [sp, #0x30]"
+        }
+      ]
+    }
+  ],
+  "steam_shared_bank_slot_refs": [
+    {
+      "function_fragment": "0x1817c0",
+      "pc": "0x181845",
+      "mnemonic": "mov",
+      "operands": "qword ptr [rip + 0xd3f204], rdi",
+      "target": "0xec0a50"
+    },
+    {
+      "function_fragment": "0x17b1a0",
+      "pc": "0x17b1ca",
+      "mnemonic": "mov",
+      "operands": "rcx, qword ptr [rip + 0xd4587f]",
+      "target": "0xec0a50"
+    }
+  ],
+  "route_contracts": {
+    "camp_messages": {
+      "kind": "semantic-complete-compiled-message-bank",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        {
+          "id": "golden-native-driver:camp-message-bank",
+          "kind": "golden-native-driver",
+          "symbol": "golden-native-driver:camp-message-bank",
+          "ps2_address": "0x0064a790",
+          "applies_to_ps2_readers": [
+            "0x001356d0",
+            "0x003540f0",
+            "0x00354280",
+            "0x0035f5b0"
+          ],
+          "requirement": "Replace every old embedded shared-camp-message bank consumer, native/translated/inlined copies and current/slot window adapters with the locale-qualified complete Golden camp_msg.bmd provider. Keep all33 Golden records and new native message/notice selection; do not truncate to8 old messages, copy3776+ bytes into848 guest bytes, replay old message-window handles, retain old display text or guess locale fallback. Native BMD relocation/registration and actual window/renderer providers must qualify before activation.",
+          "proof": "l1-cohort-3A2-camp-message-bank-proof.json"
+        }
+      ],
+      "old_representation": "Embedded MSG1 bank at0064a790: allocation848, file size834,8 records. Last14 old allocation bytes are not message payload and are not retained as Golden padding.",
+      "golden_representation": "Complete camp_msg.bmd member in init_free.bin::init/cmpTable.bin, all33 records. The preserved old8 labels/kinds/indices are bank-structure corroboration, not a text/byte-similarity-only proof or permission to take an8-record subset. Golden adds25 records and changes payloads/localization.",
+      "positive_provider_chain": "NSOfbc20 copies the supplied cmpTable archive into owned native storage and397040 extracts named camp_msg.bmd into the shared bank source reached through GOT880908. Steam1817c0 independently copies and walks the PAK-v2 member directory, compares camp_msg.bmd and stores the member pointer atRVAec0a50. Steam17ae90 and NSOf7050/fc960 consume that shared source through actual message/window provider; the two quest wrappers and callback lifecycle are independently proved in l1-cohort-3A2-quest-script-name-proof.json. Original bank is shared by persona/card, system/configuration and quest notice readers; corresponding preserved label roles0..7 and native shared source establish the complete bank route.",
+      "decoder_contract": "NSO2c85b0 allocates a free current/slot message-window adapter and passes the bank to2d8240, which validates MSG0/MSG1 and registers/relocates the actual native bank. Serialized32-bit offsets, native runtime pointers and guest message-window handles are different representations; no raw object/host-pointer overwrite is permitted. Source proof does not claim all native allocator/assert edge behavior from heuristic C decompilation.",
+      "locale_contract": "Bind the explicitly selected qualified locale variant from this proof: base,data_c,data_ck,data_de,data_e,data_es,data_fr,data_it,data_k. All9 extracted objects have33 records with the same8 original label/kind/index correspondences. Preserve each locale full object/hash, not text copied from PS2, names from one locale plus payload from another, or an invented base/English fallback.",
+      "installation": "The required native bank/window/notice/UI providers own lifetime and decoded state. Replace every old image literal user and translated/inlined/native copy atomically. Keep old partition inactive only until qualified; after binding discard old compiled bank and padding. Keep added Golden record selection, including quest picture and other new UI records, in native consumer logic. No runtime NSO/private-cache input, truncation, legacy text fallback or claimed rendering/runtime acceptance."
+    }
+  },
+  "admissions": [
+    {
+      "address": "0x0064a790",
+      "size": 848,
+      "class": "PROVEN",
+      "role": "complete shared camp/card/configuration/quest MSG1 message bank",
+      "ps2_live_bytes": 834,
+      "retained_ps2_tail_bytes": 0,
+      "ps2_consumers": [
+        {
+          "function": "0x1356d0",
+          "name": "func_001356d0",
+          "file": "src/Camp/cmpPersona.c",
+          "line": 114
+        },
+        {
+          "function": "0x3540f0",
+          "name": "func_003540f0",
+          "file": "src/nmCmdList_inferred_00353b50.c",
+          "line": 556
+        },
+        {
+          "function": "0x354280",
+          "name": "func_00354280",
+          "file": "src/nmCmdList_inferred_00353b50.c",
+          "line": 613
+        },
+        {
+          "function": "0x35f5b0",
+          "name": "func_0035f5b0",
+          "file": "src/Camp/cmpSystem.c",
+          "line": 72
+        }
+      ],
+      "structural_proof": "Original848B object is an8-record shared MSG1 bank, not a motion array. Actual Golden shared-bank producer NSOfbc20 /Steam1817c0 extracts camp_msg.bmd from the loaded cmpTable archive into the native source consumed by the corresponding message/window and quest notice pipeline. The complete extracted Steam object contains33 records, with all original8 label/kind/index roles preserved and25 additional Golden records, in each of9 independently size/hash-qualified locales. Positive producer+shared-consumer structural correspondence establishes the Golden resource object; matching labels alone is not the proof. Use full native compiled-message provider, not an848B prefix or guessed byte/layout conversion.",
+      "required_seams": [
+        {
+          "id": "golden-native-driver:camp-message-bank",
+          "kind": "golden-native-driver",
+          "symbol": "golden-native-driver:camp-message-bank",
+          "ps2_address": "0x0064a790",
+          "applies_to_ps2_readers": [
+            "0x001356d0",
+            "0x003540f0",
+            "0x00354280",
+            "0x0035f5b0"
+          ],
+          "requirement": "Replace every old embedded shared-camp-message bank consumer, native/translated/inlined copies and current/slot window adapters with the locale-qualified complete Golden camp_msg.bmd provider. Keep all33 Golden records and new native message/notice selection; do not truncate to8 old messages, copy3776+ bytes into848 guest bytes, replay old message-window handles, retain old display text or guess locale fallback. Native BMD relocation/registration and actual window/renderer providers must qualify before activation.",
+          "proof": "l1-cohort-3A2-camp-message-bank-proof.json"
+        }
+      ],
+      "route_contract": "camp_messages",
+      "golden": {
+        "container": "Steam-resource-bank-family",
+        "source_build": 10836033,
+        "value_kind": "complete-localized-compiled-message-bank",
+        "components": [
+          {
+            "class": "PROVEN",
+            "container": "Steam-resource-object",
+            "source_build": 10836033,
+            "path": "data.cpk::init_free.bin::init/cmpTable.bin::camp_msg.bmd",
+            "locale": "",
+            "size": 3776,
+            "serialized_size": 3756,
+            "sha256": "045f07b871490ee2553ce74581bb69475c58f27f349a4167f939d5d2dfde517b",
+            "record_count": 33,
+            "mapping_proven": true
+          },
+          {
+            "class": "PROVEN",
+            "container": "Steam-resource-object",
+            "source_build": 10836033,
+            "path": "data_c.cpk::init_free.bin::init/cmpTable.bin::camp_msg.bmd",
+            "locale": "c",
+            "size": 3392,
+            "serialized_size": 3372,
+            "sha256": "829c948466e6b899a755c508d5cd13ea4eb3e17d9497d3c7ec035eeaeb2de789",
+            "record_count": 33,
+            "mapping_proven": true
+          },
+          {
+            "class": "PROVEN",
+            "container": "Steam-resource-object",
+            "source_build": 10836033,
+            "path": "data_ck.cpk::init_free.bin::init/cmpTable.bin::camp_msg.bmd",
+            "locale": "ck",
+            "size": 3360,
+            "serialized_size": 3360,
+            "sha256": "d88f52f3825e302b4adc632b089846bdc90d03c46efbadda8f8794d575e0fb73",
+            "record_count": 33,
+            "mapping_proven": true
+          },
+          {
+            "class": "PROVEN",
+            "container": "Steam-resource-object",
+            "source_build": 10836033,
+            "path": "data_de.cpk::init_free.bin::init/cmpTable.bin::camp_msg.bmd",
+            "locale": "de",
+            "size": 4096,
+            "serialized_size": 4072,
+            "sha256": "fe043c12c6277aedc9535ebab0e5948e9afca9f944306b71087db6e20f19017b",
+            "record_count": 33,
+            "mapping_proven": true
+          },
+          {
+            "class": "PROVEN",
+            "container": "Steam-resource-object",
+            "source_build": 10836033,
+            "path": "data_e.cpk::init_free.bin::init/cmpTable.bin::camp_msg.bmd",
+            "locale": "e",
+            "size": 3904,
+            "serialized_size": 3900,
+            "sha256": "60a4adba7eace4de47064b292760e895f919bb1ad220e8849a82a9ca01a4cd45",
+            "record_count": 33,
+            "mapping_proven": true
+          },
+          {
+            "class": "PROVEN",
+            "container": "Steam-resource-object",
+            "source_build": 10836033,
+            "path": "data_es.cpk::init_free.bin::init/cmpTable.bin::camp_msg.bmd",
+            "locale": "es",
+            "size": 4000,
+            "serialized_size": 3980,
+            "sha256": "e5aaea05032426263aa9a2ea349fa21a39395e51ab6076d1cd6a6f632fc7b890",
+            "record_count": 33,
+            "mapping_proven": true
+          },
+          {
+            "class": "PROVEN",
+            "container": "Steam-resource-object",
+            "source_build": 10836033,
+            "path": "data_fr.cpk::init_free.bin::init/cmpTable.bin::camp_msg.bmd",
+            "locale": "fr",
+            "size": 4000,
+            "serialized_size": 4000,
+            "sha256": "422a6dde45ca8e2aebb01e3b184b973d03edfea9f7da99d4ad6ab2f06533352f",
+            "record_count": 33,
+            "mapping_proven": true
+          },
+          {
+            "class": "PROVEN",
+            "container": "Steam-resource-object",
+            "source_build": 10836033,
+            "path": "data_it.cpk::init_free.bin::init/cmpTable.bin::camp_msg.bmd",
+            "locale": "it",
+            "size": 4000,
+            "serialized_size": 3980,
+            "sha256": "ac5299e1e0a6146ecf8b332c46e4ebbc22651b656f124c32fec04171f481c7ba",
+            "record_count": 33,
+            "mapping_proven": true
+          },
+          {
+            "class": "PROVEN",
+            "container": "Steam-resource-object",
+            "source_build": 10836033,
+            "path": "data_k.cpk::init_free.bin::init/cmpTable.bin::camp_msg.bmd",
+            "locale": "k",
+            "size": 3776,
+            "serialized_size": 3772,
+            "sha256": "f7931f653908121a35f4ae719d9b5b77e9fea17e75e3b98587e3bcffd1eeccb8",
+            "record_count": 33,
+            "mapping_proven": true
+          }
+        ],
+        "runtime_input": "Qualified complete selected-locale Steam camp_msg.bmd and actual Golden native message/window providers; no NSO/private cache."
+      }
+    }
+  ]
+}

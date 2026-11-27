@@ -6,15 +6,27 @@ FROM debian:trixie-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN dpkg --add-architecture i386 \
+ && dpkg --add-architecture amd64 \
  && apt-get update \
  && apt-get install -y --no-install-recommends \
       ca-certificates git python3 python3-pil cmake ninja-build ccache file make \
       clang lld llvm binutils gcc g++ gdb \
       libsdl3-dev libsdl3-0 libavcodec-dev libavutil-dev libswscale-dev \
       libgl1-mesa-dri libglx-mesa0 libegl-mesa0 libgl1 libegl1 libgles2 \
-      xvfb xauth \
-      libc6-dev:i386 libsdl3-dev:i386 libavcodec-dev:i386 libavutil-dev:i386 libswscale-dev:i386 \
+      xvfb xauth curl xz-utils \
+      libc6-dev:i386 libc6-dev:amd64 libsdl3-dev:i386 libavcodec-dev:i386 libavutil-dev:i386 libswscale-dev:i386 \
  && rm -rf /var/lib/apt/lists/*
+
+# Same 2026-11-07 nightly as cmake/zig/pin.cmake, using its native ARM host archive.
+ARG ZIG_VERSION=0.18.0-dev.935+ead8f5a7a
+ARG ZIG_SHA256=37902e91ffbdbaf3e62bf94ba3c7721da13a7d0dbf89a3378d30f5100d3ac0b2
+RUN curl -fsSL --proto '=https' --retry 6 --retry-all-errors --retry-delay 10 -o /tmp/zig.tar.xz https://ziglang.org/builds/zig-aarch64-linux-${ZIG_VERSION}.tar.xz \
+ && echo "${ZIG_SHA256}  /tmp/zig.tar.xz" | sha256sum -c - \
+ && mkdir -p /opt/zig-${ZIG_VERSION} \
+ && tar -xJf /tmp/zig.tar.xz -C /opt/zig-${ZIG_VERSION} --strip-components=1 \
+ && rm /tmp/zig.tar.xz \
+ && test "$(/opt/zig-${ZIG_VERSION}/zig version)" = "${ZIG_VERSION}"
+ENV P4_ZIG=/opt/zig-${ZIG_VERSION}/zig
 
 ENV CCACHE_DIR=/ccache
 WORKDIR /lane

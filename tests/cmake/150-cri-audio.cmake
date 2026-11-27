@@ -13,6 +13,7 @@ set_source_files_properties(cri_sfd_condition_bounds_test.c PROPERTIES
   OBJECT_DEPENDS "${P4_SFD_CONDITIONS_UNIT}")
 add_executable(cri_sfd_condition_bounds_test cri_sfd_condition_bounds_test.c
   "${P4_SFD_CONDITIONS_UNIT}" "${CMAKE_SOURCE_DIR}/src/platform/sfd_condition_guard.c")
+target_sources(cri_sfd_condition_bounds_test PRIVATE "${CMAKE_SOURCE_DIR}/src/platform/golden/c03_guard.c")
 target_include_directories(cri_sfd_condition_bounds_test PRIVATE
   "${P4_DECOMP}/src/cri/re4" "${CMAKE_SOURCE_DIR}/include")
 add_test(NAME cri_sfd_condition_bounds COMMAND cri_sfd_condition_bounds_test)
@@ -128,6 +129,8 @@ add_test(NAME mixer_virtual_silent COMMAND mixer_device_test dummy virtual)
 add_test(NAME mixer_virtual_live COMMAND mixer_device_test dummy live)
 add_test(NAME mixer_virtual_live_no_device COMMAND mixer_device_test none live)
 add_test(NAME mixer_zero_pitch COMMAND mixer_device_test dummy zero-pitch)
+add_test(NAME mixer_diag COMMAND mixer_device_test dummy diag)
+add_test(NAME mixer_limiter COMMAND mixer_device_test dummy limiter)
 set_tests_properties(mixer_virtual_silent mixer_virtual_live mixer_virtual_live_no_device PROPERTIES TIMEOUT 90)
 # Every sound effect bank on the disc through the .hd/.bd/.sq readers (tests/sebank_test.c).
 # Skipped (exit 77) unless P4PC_ISO names the image.

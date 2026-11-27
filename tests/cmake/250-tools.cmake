@@ -56,6 +56,10 @@ add_test(NAME crt_guard COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/crt_
 add_test(NAME printf_rewrite COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/printf_rewrite_test.py")
 add_test(NAME fn_word_rewrite COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/fn_word_rewrite_test.py")
 add_test(NAME null_offset_rewrite COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/null_offset_rewrite_test.py")
+add_test(NAME zig_abi COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/zig_abi_test.py")
+add_test(NAME zig_tool_graph COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/zig_tool_graph_test.py")
+set_tests_properties(zig_tool_graph PROPERTIES TIMEOUT 600)
+add_test(NAME battle_sim_compare COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/battle_sim_compare_test.py")
 add_test(NAME variadic_call_rewrite COMMAND "${P4_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/variadic_call_rewrite_test.py")
 
 # EE 64-bit integer results live entirely in $v0, never a $v0:$v1 pair.

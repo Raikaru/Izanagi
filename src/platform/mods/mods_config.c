@@ -3,6 +3,7 @@
 #include "p4pc/mod_lifecycle.h"
 #include "p4pc/mod_artifacts.h"
 #include "../config/p4cfg.h"
+#include "p4pc/hostpath.h"
 #include "p4pc/os.h"
 #include <SDL3/SDL.h>
 #include <errno.h>
@@ -12,7 +13,7 @@
 
 static const char *configured_root(char path[1200])
 {
-    const char *root = getenv("P4PC_MOD_DIR");
+    const char *root = p4_host_getenv("P4PC_MOD_DIR");
     if (!root || !root[0]) root = p4cfg_get("mods.directory");
     if (root && root[0]) return root;
     const char *config = p4cfg_path();
@@ -59,7 +60,7 @@ static void settings_root(void)
  * the player selects it. P4PC_BUNDLED_MOD_DIR replaces it (empty: none). */
 const char *p4_mods_bundled_root(char path[1200])
 {
-    const char *override = getenv("P4PC_BUNDLED_MOD_DIR");
+    const char *override = p4_host_getenv("P4PC_BUNDLED_MOD_DIR");
     if (override) {
         if (!override[0] || strlen(override) >= 1200) return NULL;
         strcpy(path, override);
@@ -79,7 +80,7 @@ int p4_mods_configured_installations_scan(P4PackageInstallationVisitor visitor, 
     if (!root) return -1;
     /* A fresh settings directory need not contain a mods folder. Only the
      * implicit default may be absent; explicit roots must still be valid. */
-    const char *env_root = getenv("P4PC_MOD_DIR");
+    const char *env_root = p4_host_getenv("P4PC_MOD_DIR");
     const char *ini_root = p4cfg_get("mods.directory");
     if ((!env_root || !env_root[0]) && (!ini_root || !ini_root[0]) &&
             !p4_os_is_dir_nofollow(root)) {

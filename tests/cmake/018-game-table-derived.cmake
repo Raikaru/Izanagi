@@ -5,6 +5,7 @@ get_target_property(_p4_table_derived_sources game_table_boot_test SOURCES)
 list(REMOVE_ITEM _p4_table_derived_sources game_table_boot_test.c)
 list(APPEND _p4_table_derived_sources game_table_derived_test.c
   "${CMAKE_SOURCE_DIR}/src/platform/mods/game_skills_native.c"
+  "${CMAKE_SOURCE_DIR}/src/platform/golden/golden_battle_rows.c"
   "${CMAKE_SOURCE_DIR}/src/platform/mods/game_table_derived_native.c"
   "${CMAKE_SOURCE_DIR}/src/platform/mods/game_table_extents.c")
 list(REMOVE_DUPLICATES _p4_table_derived_sources)

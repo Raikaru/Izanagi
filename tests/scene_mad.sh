@@ -28,6 +28,15 @@ if [ "$rc" -eq 0 ] && [ "${P4PC_TITLE_EDGES:-0}" = 1 ]; then
     fi
     "$edge_python" "$(dirname "$0")/title_edges.py" "$out" "${out}.win.png" >> "$work/boot.log" 2>&1 || rc=$?
 fi
+# P4PC_REGION_MAD=x0,y0,x1,y1,limit: the mean absolute difference of that box of the frame from the same box of the reference (reference
+# pixels, 640x448), judged against its own limit (tests/region_mad.py). A small local defect hides in the whole-frame number.
+if [ "$rc" -eq 0 ] && [ -n "${P4PC_REGION_MAD:-}" ]; then
+    if [ -n "${P4PC_PYTHON:-}" ]; then region_python=$P4PC_PYTHON
+    elif command -v python3 >/dev/null 2>&1; then region_python=python3
+    else region_python=python
+    fi
+    "$region_python" "$(dirname "$0")/region_mad.py" "$out" "$ref" "${P4PC_REGION_MAD%,*}" "${P4PC_REGION_MAD##*,}" >> "$work/boot.log" 2>&1 || rc=$?
+fi
 cat "$work/boot.log"
 if [ "$rc" -ne 0 ] && [ -f "$out" ]; then cp "$out" "$work/frame.png" || exit 1; fi
 exit "$rc"

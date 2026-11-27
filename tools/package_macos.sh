@@ -122,6 +122,7 @@ for f in FFmpeg-LGPL-2.1.txt SDL3-zlib.txt LodePNG-zlib.txt cgltf-MIT.txt Luau-M
          sky2hook-permission.txt; do
   cp "$root/third_party/licenses/$f" "$stage/$name/licenses/"
 done
+cp "$root/third_party/licenses/bcdec-MIT.txt" "$stage/$name/licenses/"
 cp "$root/third_party/miniz/LICENSE" "$stage/$name/licenses/miniz-MIT.txt"
 [ -f "$deps/share/angle/LICENSES.chromium.html" ] && [ -f "$deps/share/angle/Electron-LICENSE.txt" ] || {
   echo "package_macos: ANGLE/Electron licence files are missing from the Electron zip (ci/macos/build_deps.sh must extract LICENSE and LICENSES.chromium.html)" >&2; exit 1; }
@@ -134,7 +135,9 @@ tar -C "$root" -czf "$stage/$name/source/luau-source.tar.gz" third_party/luau th
 # the exact tarball ci/macos/build_deps.sh pins, fetched and sha256-checked again here.
 curl -fsSL --retry 6 --retry-all-errors --retry-delay 10 "https://ffmpeg.org/releases/ffmpeg-$ffver.tar.xz" -o "$stage/$name/source/ffmpeg-$ffver.tar.xz"
 echo "$ffsha  $stage/$name/source/ffmpeg-$ffver.tar.xz" | shasum -a 256 -c -
-cp "$root/ci/macos/build_deps.sh" "$stage/$name/source/"
+mkdir -p "$stage/$name/source/ci/macos"
+cp "$root/ci/macos/build_deps.sh" "$stage/$name/source/ci/macos/"
+cp "$root/ci/ffmpeg-7.1.1-hca-window-alignment.patch" "$stage/$name/source/ci/"
 {
   printf 'Toolchain provenance for macOS %s\n\nCompiler (llvm-mingw %s, macOS host build):\n' "$arch" "$(cat "$deps/llvm/release")"
   "$deps/llvm/bin/clang" --version

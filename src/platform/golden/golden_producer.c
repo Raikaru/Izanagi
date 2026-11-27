@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "p4pc/hostpath.h"
 
 /* The package's [setting] keys, one per phase-1 group. */
 static const struct {
@@ -73,7 +74,7 @@ static int whole_span(const P4GoldenRows *rows)
 static int produce(void *user, const P4TableDerivedRequest *request, P4TableDerivedSink *sink, char *error, size_t capacity)
 {
     unsigned selected = 0;
-    const char *configured = getenv("P4PC_GOLDEN");
+    const char *configured = p4_host_getenv("P4PC_GOLDEN");
     char directory[1024], value[16];
     P4GoldenSource source;
     P4GoldenBuild build;

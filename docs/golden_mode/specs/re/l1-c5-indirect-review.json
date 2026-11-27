@@ -1,0 +1,2110 @@
+{
+  "proof_id": "L1-C5-indirect-review-20261113",
+  "boundary": "Static partition/loader research only. OPEN rows are not source proofs or absence proofs. Two rows transferred to c6 excluded; Main-transferred626fe0 included.",
+  "counts": {
+    "PROVEN": 61,
+    "OPEN-retain": 16,
+    "PROVEN-code": 0,
+    "PROVEN-layout": 0,
+    "D10a": 0,
+    "D10b": 0,
+    "D10c": 0,
+    "qualified_ps2_partition_bytes": 57223,
+    "open_ps2_partition_bytes": 2043,
+    "current_assigned_objects": 77,
+    "current_assigned_ps2_bytes": 59266
+  },
+  "rows": [
+    {
+      "address": "0x005dd86c",
+      "size": 4364,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "group": "party_hp_sp",
+      "proof": "l1-c5-typed-enclosing-banks-proof.json",
+      "reason": "Typed enclosing bank or literal, actual pointer loader and Golden source role are established; runtime remains pending-seam."
+    },
+    {
+      "address": "0x005f0068",
+      "size": 24,
+      "decision": "OPEN-retain",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual dereference/typed field and corresponding Golden reader remain unproved. Retain OPEN; no-reference and inferred module names do not establish absence.",
+      "next_operation": "Trace actual enclosing object and loader before selecting Golden module; qualify full logical field/index domain and source extent.",
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x5efda0",
+          "target": "0x6d2f64",
+          "parent": "0x005efd98",
+          "depth": 2,
+          "consumers": [
+            "fldResourceRequestEntryLoads"
+          ]
+        },
+        {
+          "storage": "0x5f1880",
+          "target": "0x6d2f64",
+          "parent": "0x005f1878",
+          "depth": 2,
+          "consumers": [
+            "K_Cmd_CREATE_FLD_MDL"
+          ]
+        },
+        {
+          "storage": "0x5e2724",
+          "target": "0x5df5f8",
+          "parent": "0x005e2200",
+          "depth": 3,
+          "consumers": [
+            "func_001067f0"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x005f0870",
+      "size": 24,
+      "decision": "OPEN-retain",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual dereference/typed field and corresponding Golden reader remain unproved. Retain OPEN; no-reference and inferred module names do not establish absence.",
+      "next_operation": "Trace actual enclosing object and loader before selecting Golden module; qualify full logical field/index domain and source extent.",
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x5f08c8",
+          "target": "0x5f0870",
+          "parent": "0x005f08b0",
+          "depth": 1,
+          "consumers": [
+            "func_001823d0",
+            "func_0026ba60"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x005f5170",
+      "size": 48,
+      "decision": "OPEN-retain",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual dereference/typed field and corresponding Golden reader remain unproved. Retain OPEN; no-reference and inferred module names do not establish absence.",
+      "next_operation": "Trace actual enclosing object and loader before selecting Golden module; qualify full logical field/index domain and source extent.",
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x5f51f8",
+          "target": "0x5f5170",
+          "parent": "0x005f51e0",
+          "depth": 1,
+          "consumers": [
+            "func_0018a010"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x005f57d0",
+      "size": 16,
+      "decision": "OPEN-retain",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual dereference/typed field and corresponding Golden reader remain unproved. Retain OPEN; no-reference and inferred module names do not establish absence.",
+      "next_operation": "Trace actual enclosing object and loader before selecting Golden module; qualify full logical field/index domain and source extent.",
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x5f5870",
+          "target": "0x5f57d0",
+          "parent": "0x005f5830",
+          "depth": 1,
+          "consumers": [
+            "func_0018efe0"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x005f57e0",
+      "size": 16,
+      "decision": "OPEN-retain",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual dereference/typed field and corresponding Golden reader remain unproved. Retain OPEN; no-reference and inferred module names do not establish absence.",
+      "next_operation": "Trace actual enclosing object and loader before selecting Golden module; qualify full logical field/index domain and source extent.",
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x5f58d0",
+          "target": "0x5f57e0",
+          "parent": "0x005f5830",
+          "depth": 1,
+          "consumers": [
+            "func_0018efe0"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x005f65e0",
+      "size": 32,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "group": "battle_table_filenames",
+      "proof": "l1-c5-typed-enclosing-banks-proof.json",
+      "reason": "Typed enclosing bank or literal, actual pointer loader and Golden source role are established; runtime remains pending-seam."
+    },
+    {
+      "address": "0x005f6620",
+      "size": 32,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "group": "battle_table_filenames",
+      "proof": "l1-c5-typed-enclosing-banks-proof.json",
+      "reason": "Typed enclosing bank or literal, actual pointer loader and Golden source role are established; runtime remains pending-seam."
+    },
+    {
+      "address": "0x005f6640",
+      "size": 32,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "group": "battle_table_filenames",
+      "proof": "l1-c5-typed-enclosing-banks-proof.json",
+      "reason": "Typed enclosing bank or literal, actual pointer loader and Golden source role are established; runtime remains pending-seam."
+    },
+    {
+      "address": "0x005f6660",
+      "size": 32,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "group": "battle_table_filenames",
+      "proof": "l1-c5-typed-enclosing-banks-proof.json",
+      "reason": "Typed enclosing bank or literal, actual pointer loader and Golden source role are established; runtime remains pending-seam."
+    },
+    {
+      "address": "0x005f6680",
+      "size": 32,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "group": "battle_table_filenames",
+      "proof": "l1-c5-typed-enclosing-banks-proof.json",
+      "reason": "Typed enclosing bank or literal, actual pointer loader and Golden source role are established; runtime remains pending-seam."
+    },
+    {
+      "address": "0x005f66a0",
+      "size": 32,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "group": "battle_table_filenames",
+      "proof": "l1-c5-typed-enclosing-banks-proof.json",
+      "reason": "Typed enclosing bank or literal, actual pointer loader and Golden source role are established; runtime remains pending-seam."
+    },
+    {
+      "address": "0x005f6d68",
+      "size": 24,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual typed action name field with complete38->42 or20->21 record identities and real initialization/update/state/list producers; runtime pending-seam.",
+      "next_operation": "Recover full action-state descriptor and actual label load, establish state-ID correspondence and prefix/tail extent before source admission.",
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x5f6e4c",
+          "target": "0x5f6d68",
+          "parent": "0x005f6e20",
+          "depth": 1,
+          "consumers": [
+            "btlActionSetState",
+            "btlActionSetStateWithDelay",
+            "func_001b0930",
+            "func_001b0a60"
+          ]
+        }
+      ],
+      "group": "action_state_labels",
+      "proof": "l1-c5-action-encounter-labels-proof.json",
+      "enclosing_phase_descriptor": {
+        "ps2_table": "0x5f6e20",
+        "ps2_stride": 12,
+        "ps2_state_id": 3,
+        "golden_state_id": 3,
+        "actual_pointer_storage": "0x5f6e4c",
+        "golden_record": "0xa24c58",
+        "golden_stride": 24,
+        "golden_name_offset": 16
+      }
+    },
+    {
+      "address": "0x005f6dc8",
+      "size": 16,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual typed action name field with complete38->42 or20->21 record identities and real initialization/update/state/list producers; runtime pending-seam.",
+      "next_operation": "Recover full action-state descriptor and actual label load, establish state-ID correspondence and prefix/tail extent before source admission.",
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x5f6ef4",
+          "target": "0x5f6dc8",
+          "parent": "0x005f6e20",
+          "depth": 1,
+          "consumers": [
+            "btlActionSetState",
+            "btlActionSetStateWithDelay",
+            "func_001b0930",
+            "func_001b0a60"
+          ]
+        }
+      ],
+      "group": "action_state_labels",
+      "proof": "l1-c5-action-encounter-labels-proof.json",
+      "enclosing_phase_descriptor": {
+        "ps2_table": "0x5f6e20",
+        "ps2_stride": 12,
+        "ps2_state_id": 17,
+        "golden_state_id": 19,
+        "actual_pointer_storage": "0x5f6ef4",
+        "golden_record": "0xa24dd8",
+        "golden_stride": 24,
+        "golden_name_offset": 16
+      }
+    },
+    {
+      "address": "0x005f6de8",
+      "size": 16,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual typed action name field with complete38->42 or20->21 record identities and real initialization/update/state/list producers; runtime pending-seam.",
+      "next_operation": "Recover full action-state descriptor and actual label load, establish state-ID correspondence and prefix/tail extent before source admission.",
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x5f6f78",
+          "target": "0x5f6de8",
+          "parent": "0x005f6e20",
+          "depth": 1,
+          "consumers": [
+            "btlActionSetState",
+            "btlActionSetStateWithDelay",
+            "func_001b0930",
+            "func_001b0a60"
+          ]
+        }
+      ],
+      "group": "action_state_labels",
+      "proof": "l1-c5-action-encounter-labels-proof.json",
+      "enclosing_phase_descriptor": {
+        "ps2_table": "0x5f6e20",
+        "ps2_stride": 12,
+        "ps2_state_id": 28,
+        "golden_state_id": 32,
+        "actual_pointer_storage": "0x5f6f78",
+        "golden_record": "0xa24f10",
+        "golden_stride": 24,
+        "golden_name_offset": 16
+      }
+    },
+    {
+      "address": "0x005f6e08",
+      "size": 24,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual typed action name field with complete38->42 or20->21 record identities and real initialization/update/state/list producers; runtime pending-seam.",
+      "next_operation": "Recover full action-state descriptor and actual label load, establish state-ID correspondence and prefix/tail extent before source admission.",
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x5f6fc0",
+          "target": "0x5f6e08",
+          "parent": "0x005f6e20",
+          "depth": 1,
+          "consumers": [
+            "btlActionSetState",
+            "btlActionSetStateWithDelay",
+            "func_001b0930",
+            "func_001b0a60"
+          ]
+        }
+      ],
+      "group": "action_state_labels",
+      "proof": "l1-c5-action-encounter-labels-proof.json",
+      "enclosing_phase_descriptor": {
+        "ps2_table": "0x5f6e20",
+        "ps2_stride": 12,
+        "ps2_state_id": 34,
+        "golden_state_id": 38,
+        "actual_pointer_storage": "0x5f6fc0",
+        "golden_record": "0xa24fa0",
+        "golden_stride": 24,
+        "golden_name_offset": 16
+      }
+    },
+    {
+      "address": "0x005f7140",
+      "size": 16,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual typed encounter name field with complete38->42 or20->21 record identities and real initialization/update/state/list producers; runtime pending-seam.",
+      "next_operation": "Trace actual enclosing object and loader before selecting Golden module; qualify full logical field/index domain and source extent.",
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x5f71d0",
+          "target": "0x5f7140",
+          "parent": "0x005f7184",
+          "depth": 1,
+          "consumers": [
+            "func_001b5fe0"
+          ]
+        }
+      ],
+      "group": "encounter_state_labels",
+      "proof": "l1-c5-action-encounter-labels-proof.json",
+      "enclosing_phase_descriptor": {
+        "ps2_table": "0x5f7180",
+        "ps2_stride": 12,
+        "ps2_state_id": 6,
+        "golden_state_id": 6,
+        "actual_pointer_storage": "0x5f71d0",
+        "golden_record": "0xa30480",
+        "golden_stride": 24,
+        "golden_name_offset": 16
+      }
+    },
+    {
+      "address": "0x005f7160",
+      "size": 16,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual typed encounter name field with complete38->42 or20->21 record identities and real initialization/update/state/list producers; runtime pending-seam.",
+      "next_operation": "Trace actual enclosing object and loader before selecting Golden module; qualify full logical field/index domain and source extent.",
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x5f7218",
+          "target": "0x5f7160",
+          "parent": "0x005f7184",
+          "depth": 1,
+          "consumers": [
+            "func_001b5fe0"
+          ]
+        }
+      ],
+      "group": "encounter_state_labels",
+      "proof": "l1-c5-action-encounter-labels-proof.json",
+      "enclosing_phase_descriptor": {
+        "ps2_table": "0x5f7180",
+        "ps2_stride": 12,
+        "ps2_state_id": 12,
+        "golden_state_id": 13,
+        "actual_pointer_storage": "0x5f7218",
+        "golden_record": "0xa30528",
+        "golden_stride": 24,
+        "golden_name_offset": 16
+      }
+    },
+    {
+      "address": "0x005f7170",
+      "size": 16,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual typed encounter name field with complete38->42 or20->21 record identities and real initialization/update/state/list producers; runtime pending-seam.",
+      "next_operation": "Trace actual enclosing object and loader before selecting Golden module; qualify full logical field/index domain and source extent.",
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x5f7230",
+          "target": "0x5f7170",
+          "parent": "0x005f7184",
+          "depth": 1,
+          "consumers": [
+            "func_001b5fe0"
+          ]
+        }
+      ],
+      "group": "encounter_state_labels",
+      "proof": "l1-c5-action-encounter-labels-proof.json",
+      "enclosing_phase_descriptor": {
+        "ps2_table": "0x5f7180",
+        "ps2_stride": 12,
+        "ps2_state_id": 14,
+        "golden_state_id": 15,
+        "actual_pointer_storage": "0x5f7230",
+        "golden_record": "0xa30558",
+        "golden_stride": 24,
+        "golden_name_offset": 16
+      }
+    },
+    {
+      "address": "0x005f72c0",
+      "size": 16,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual typed camera descriptor name field, matching state identity/flags/callback presence in both Golden images, actual override/32-byte setter and per-frame readers; runtime pending-seam.",
+      "next_operation": "Trace the descriptor label field/debug or diagnostic reader itself, then pair ordered Golden descriptor field; callback-bank correspondence alone does not qualify labels.",
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x5f7534",
+          "target": "0x5f72c0",
+          "parent": "0x005f74c0",
+          "depth": 1,
+          "consumers": [
+            "func_001bc660",
+            "func_001bd7d0"
+          ]
+        }
+      ],
+      "group": "camera_state_labels",
+      "proof": "l1-c5-camera-state-labels-proof.json",
+      "enclosing_camera_descriptor": {
+        "ps2_table": "0x005f74c0",
+        "ps2_stride": 20,
+        "state_id": 5,
+        "name_pointer_offset": 16,
+        "actual_pointer_storage": "0x5f7534",
+        "golden_record": "0xafa320",
+        "golden_stride": 32,
+        "golden_name_offset": 24
+      }
+    },
+    {
+      "address": "0x005f72e0",
+      "size": 16,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual typed camera descriptor name field, matching state identity/flags/callback presence in both Golden images, actual override/32-byte setter and per-frame readers; runtime pending-seam.",
+      "next_operation": "Trace the descriptor label field/debug or diagnostic reader itself, then pair ordered Golden descriptor field; callback-bank correspondence alone does not qualify labels.",
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x5f7584",
+          "target": "0x5f72e0",
+          "parent": "0x005f74c0",
+          "depth": 1,
+          "consumers": [
+            "func_001bc660",
+            "func_001bd7d0"
+          ]
+        }
+      ],
+      "group": "camera_state_labels",
+      "proof": "l1-c5-camera-state-labels-proof.json",
+      "enclosing_camera_descriptor": {
+        "ps2_table": "0x005f74c0",
+        "ps2_stride": 20,
+        "state_id": 9,
+        "name_pointer_offset": 16,
+        "actual_pointer_storage": "0x5f7584",
+        "golden_record": "0xafa3a0",
+        "golden_stride": 32,
+        "golden_name_offset": 24
+      }
+    },
+    {
+      "address": "0x005f7430",
+      "size": 16,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual typed camera descriptor name field, matching state identity/flags/callback presence in both Golden images, actual override/32-byte setter and per-frame readers; runtime pending-seam.",
+      "next_operation": "Trace the descriptor label field/debug or diagnostic reader itself, then pair ordered Golden descriptor field; callback-bank correspondence alone does not qualify labels.",
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x5f7750",
+          "target": "0x5f7430",
+          "parent": "0x005f74c0",
+          "depth": 1,
+          "consumers": [
+            "func_001bc660",
+            "func_001bd7d0"
+          ]
+        }
+      ],
+      "group": "camera_state_labels",
+      "proof": "l1-c5-camera-state-labels-proof.json",
+      "enclosing_camera_descriptor": {
+        "ps2_table": "0x005f74c0",
+        "ps2_stride": 20,
+        "state_id": 32,
+        "name_pointer_offset": 16,
+        "actual_pointer_storage": "0x5f7750",
+        "golden_record": "0xafa680",
+        "golden_stride": 32,
+        "golden_name_offset": 24
+      }
+    },
+    {
+      "address": "0x005f7440",
+      "size": 16,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual typed camera descriptor name field, matching state identity/flags/callback presence in both Golden images, actual override/32-byte setter and per-frame readers; runtime pending-seam.",
+      "next_operation": "Trace the descriptor label field/debug or diagnostic reader itself, then pair ordered Golden descriptor field; callback-bank correspondence alone does not qualify labels.",
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x5f77dc",
+          "target": "0x5f7440",
+          "parent": "0x005f74c0",
+          "depth": 1,
+          "consumers": [
+            "func_001bc660",
+            "func_001bd7d0"
+          ]
+        }
+      ],
+      "group": "camera_state_labels",
+      "proof": "l1-c5-camera-state-labels-proof.json",
+      "enclosing_camera_descriptor": {
+        "ps2_table": "0x005f74c0",
+        "ps2_stride": 20,
+        "state_id": 39,
+        "name_pointer_offset": 16,
+        "actual_pointer_storage": "0x5f77dc",
+        "golden_record": "0xafa760",
+        "golden_stride": 32,
+        "golden_name_offset": 24
+      }
+    },
+    {
+      "address": "0x005f7470",
+      "size": 16,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual typed camera descriptor name field, matching state identity/flags/callback presence in both Golden images, actual override/32-byte setter and per-frame readers; runtime pending-seam.",
+      "next_operation": "Trace the descriptor label field/debug or diagnostic reader itself, then pair ordered Golden descriptor field; callback-bank correspondence alone does not qualify labels.",
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x5f782c",
+          "target": "0x5f7470",
+          "parent": "0x005f74c0",
+          "depth": 1,
+          "consumers": [
+            "func_001bc660",
+            "func_001bd7d0"
+          ]
+        }
+      ],
+      "group": "camera_state_labels",
+      "proof": "l1-c5-camera-state-labels-proof.json",
+      "enclosing_camera_descriptor": {
+        "ps2_table": "0x005f74c0",
+        "ps2_stride": 20,
+        "state_id": 43,
+        "name_pointer_offset": 16,
+        "actual_pointer_storage": "0x5f782c",
+        "golden_record": "0xafa7e0",
+        "golden_stride": 32,
+        "golden_name_offset": 24
+      }
+    },
+    {
+      "address": "0x00600068",
+      "size": 34,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "group": "camera_presets",
+      "proof": "l1-c5-typed-enclosing-banks-proof.json",
+      "reason": "Typed enclosing bank or literal, actual pointer loader and Golden source role are established; runtime remains pending-seam."
+    },
+    {
+      "address": "0x00600114",
+      "size": 128,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "group": "camera_presets",
+      "proof": "l1-c5-typed-enclosing-banks-proof.json",
+      "reason": "Typed enclosing bank or literal, actual pointer loader and Golden source role are established; runtime remains pending-seam."
+    },
+    {
+      "address": "0x00600194",
+      "size": 728,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "group": "camera_presets",
+      "proof": "l1-c5-typed-enclosing-banks-proof.json",
+      "reason": "Typed enclosing bank or literal, actual pointer loader and Golden source role are established; runtime remains pending-seam."
+    },
+    {
+      "address": "0x0060046c",
+      "size": 798,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "group": "camera_presets",
+      "proof": "l1-c5-typed-enclosing-banks-proof.json",
+      "reason": "Typed enclosing bank or literal, actual pointer loader and Golden source role are established; runtime remains pending-seam."
+    },
+    {
+      "address": "0x0060078a",
+      "size": 30278,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "group": "camera_presets",
+      "proof": "l1-c5-typed-enclosing-banks-proof.json",
+      "reason": "Typed enclosing bank or literal, actual pointer loader and Golden source role are established; runtime remains pending-seam."
+    },
+    {
+      "address": "0x00609630",
+      "size": 16,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual typed condition name field in complete namespace with real packed-opcode/AI-record/target consumers; guessed parent callback columns are not bank bases. Runtime pending-seam.",
+      "next_operation": "Recover AI command/target dispatch descriptor label offset and actual logging/use, separately from AICALC bytecode/resource tables; pair Golden command identities before mapping literals.",
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x6098fc",
+          "target": "0x609630",
+          "parent": "0x006098bc",
+          "depth": 1,
+          "consumers": [
+            "btlAiSelectStatusCommand"
+          ]
+        }
+      ],
+      "group": "AI_condition_labels",
+      "proof": "l1-c5-ai-condition-target-labels-proof.json",
+      "enclosing_ai_descriptor": {
+        "ps2_table": "0x609850",
+        "ps2_count": 78,
+        "ps2_stride": 12,
+        "opcode": 14,
+        "name_pointer_offset": 4,
+        "actual_pointer_storage": "0x6098fc",
+        "golden_record": "0xaf9900",
+        "golden_stride": 24,
+        "golden_name_offset": 8
+      }
+    },
+    {
+      "address": "0x00609770",
+      "size": 16,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual typed condition name field in complete namespace with real packed-opcode/AI-record/target consumers; guessed parent callback columns are not bank bases. Runtime pending-seam.",
+      "next_operation": "Recover AI command/target dispatch descriptor label offset and actual logging/use, separately from AICALC bytecode/resource tables; pair Golden command identities before mapping literals.",
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x609adc",
+          "target": "0x609770",
+          "parent": "0x00609a78",
+          "depth": 1,
+          "consumers": [
+            "func_001e0f60"
+          ]
+        }
+      ],
+      "group": "AI_condition_labels",
+      "proof": "l1-c5-ai-condition-target-labels-proof.json",
+      "enclosing_ai_descriptor": {
+        "ps2_table": "0x609850",
+        "ps2_count": 78,
+        "ps2_stride": 12,
+        "opcode": 54,
+        "name_pointer_offset": 4,
+        "actual_pointer_storage": "0x609adc",
+        "golden_record": "0xaf9cc0",
+        "golden_stride": 24,
+        "golden_name_offset": 8
+      }
+    },
+    {
+      "address": "0x006097e0",
+      "size": 16,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual typed condition name field in complete namespace with real packed-opcode/AI-record/target consumers; guessed parent callback columns are not bank bases. Runtime pending-seam.",
+      "next_operation": "Recover AI command/target dispatch descriptor label offset and actual logging/use, separately from AICALC bytecode/resource tables; pair Golden command identities before mapping literals.",
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x609b6c",
+          "target": "0x6097e0",
+          "parent": "0x00609a78",
+          "depth": 1,
+          "consumers": [
+            "func_001e0f60"
+          ]
+        }
+      ],
+      "group": "AI_condition_labels",
+      "proof": "l1-c5-ai-condition-target-labels-proof.json",
+      "enclosing_ai_descriptor": {
+        "ps2_table": "0x609850",
+        "ps2_count": 78,
+        "ps2_stride": 12,
+        "opcode": 66,
+        "name_pointer_offset": 4,
+        "actual_pointer_storage": "0x609b6c",
+        "golden_record": "0xaf9de0",
+        "golden_stride": 24,
+        "golden_name_offset": 8
+      }
+    },
+    {
+      "address": "0x006097f0",
+      "size": 16,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual typed condition name field in complete namespace with real packed-opcode/AI-record/target consumers; guessed parent callback columns are not bank bases. Runtime pending-seam.",
+      "next_operation": "Recover AI command/target dispatch descriptor label offset and actual logging/use, separately from AICALC bytecode/resource tables; pair Golden command identities before mapping literals.",
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x609b9c",
+          "target": "0x6097f0",
+          "parent": "0x00609b8c",
+          "depth": 1,
+          "consumers": [
+            "func_001e3ce0"
+          ]
+        }
+      ],
+      "group": "AI_condition_labels",
+      "proof": "l1-c5-ai-condition-target-labels-proof.json",
+      "enclosing_ai_descriptor": {
+        "ps2_table": "0x609850",
+        "ps2_count": 78,
+        "ps2_stride": 12,
+        "opcode": 70,
+        "name_pointer_offset": 4,
+        "actual_pointer_storage": "0x609b9c",
+        "golden_record": "0xaf9e40",
+        "golden_stride": 24,
+        "golden_name_offset": 8
+      }
+    },
+    {
+      "address": "0x00609840",
+      "size": 16,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual typed condition name field in complete namespace with real packed-opcode/AI-record/target consumers; guessed parent callback columns are not bank bases. Runtime pending-seam.",
+      "next_operation": "Recover AI command/target dispatch descriptor label offset and actual logging/use, separately from AICALC bytecode/resource tables; pair Golden command identities before mapping literals.",
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x609be4",
+          "target": "0x609840",
+          "parent": "0x00609b8c",
+          "depth": 1,
+          "consumers": [
+            "func_001e3ce0"
+          ]
+        }
+      ],
+      "group": "AI_condition_labels",
+      "proof": "l1-c5-ai-condition-target-labels-proof.json",
+      "enclosing_ai_descriptor": {
+        "ps2_table": "0x609850",
+        "ps2_count": 78,
+        "ps2_stride": 12,
+        "opcode": 76,
+        "name_pointer_offset": 4,
+        "actual_pointer_storage": "0x609be4",
+        "golden_record": "0xaf9ed0",
+        "golden_stride": 24,
+        "golden_name_offset": 8
+      }
+    },
+    {
+      "address": "0x00609c28",
+      "size": 16,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual typed target_selector name field in complete namespace with real packed-opcode/AI-record/target consumers; guessed parent callback columns are not bank bases. Runtime pending-seam.",
+      "next_operation": "Recover AI command/target dispatch descriptor label offset and actual logging/use, separately from AICALC bytecode/resource tables; pair Golden command identities before mapping literals.",
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x609d8c",
+          "target": "0x609c28",
+          "parent": "0x00609d80",
+          "depth": 1,
+          "consumers": [
+            "func_001e53a0"
+          ]
+        }
+      ],
+      "group": "AI_target_selector_labels",
+      "proof": "l1-c5-ai-condition-target-labels-proof.json",
+      "enclosing_ai_descriptor": {
+        "ps2_table": "0x609ce0",
+        "ps2_count": 40,
+        "ps2_stride": 8,
+        "opcode": 21,
+        "name_pointer_offset": 4,
+        "actual_pointer_storage": "0x609d8c",
+        "golden_record": "0xafa0b0",
+        "golden_stride": 16,
+        "golden_name_offset": 8
+      }
+    },
+    {
+      "address": "0x00609c48",
+      "size": 16,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual typed target_selector name field in complete namespace with real packed-opcode/AI-record/target consumers; guessed parent callback columns are not bank bases. Runtime pending-seam.",
+      "next_operation": "Recover AI command/target dispatch descriptor label offset and actual logging/use, separately from AICALC bytecode/resource tables; pair Golden command identities before mapping literals.",
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x609d9c",
+          "target": "0x609c48",
+          "parent": "0x00609d80",
+          "depth": 1,
+          "consumers": [
+            "func_001e53a0"
+          ]
+        }
+      ],
+      "group": "AI_target_selector_labels",
+      "proof": "l1-c5-ai-condition-target-labels-proof.json",
+      "enclosing_ai_descriptor": {
+        "ps2_table": "0x609ce0",
+        "ps2_count": 40,
+        "ps2_stride": 8,
+        "opcode": 23,
+        "name_pointer_offset": 4,
+        "actual_pointer_storage": "0x609d9c",
+        "golden_record": "0xafa0d0",
+        "golden_stride": 16,
+        "golden_name_offset": 8
+      }
+    },
+    {
+      "address": "0x00609cc8",
+      "size": 24,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual typed target_selector name field in complete namespace with real packed-opcode/AI-record/target consumers; guessed parent callback columns are not bank bases. Runtime pending-seam.",
+      "next_operation": "Recover AI command/target dispatch descriptor label offset and actual logging/use, separately from AICALC bytecode/resource tables; pair Golden command identities before mapping literals.",
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x609e0c",
+          "target": "0x609cc8",
+          "parent": "0x00609df0",
+          "depth": 1,
+          "consumers": [
+            "func_001e5ad0"
+          ]
+        }
+      ],
+      "group": "AI_target_selector_labels",
+      "proof": "l1-c5-ai-condition-target-labels-proof.json",
+      "enclosing_ai_descriptor": {
+        "ps2_table": "0x609ce0",
+        "ps2_count": 40,
+        "ps2_stride": 8,
+        "opcode": 37,
+        "name_pointer_offset": 4,
+        "actual_pointer_storage": "0x609e0c",
+        "golden_record": "0xafa1b0",
+        "golden_stride": 16,
+        "golden_name_offset": 8
+      }
+    },
+    {
+      "address": "0x0061646f",
+      "size": 754,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [
+        {
+          "target": "0x0061646f",
+          "storage": "0x5e0610",
+          "cstring_base": "0x5e0608",
+          "cstring": "Amrita Soda",
+          "classification": "numeric false pointer: interior of NUL-terminated printable string; not a pointer field"
+        }
+      ],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual party modelId=unit.charId, enemy-only remapping guard, packed model filename/entry0-SE/entry1-cue loader and real native animation-row consumer establish the complete actor7 Golden bank. Default season1 is bc007_c1, not bc008. Native logical-bank cutover, not a legacy754-byte offset copy; runtime pending-seam.",
+      "next_operation": "Bind actual selected model PAC, owned SE/cue state, native animation-index producer and real audio/RNG/frame/lifetime consumers through GoldenM6b.",
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x5e2e64",
+          "target": "0x5e0608",
+          "parent": "0x005e2200",
+          "depth": 2,
+          "consumers": [
+            "func_001067f0"
+          ]
+        }
+      ],
+      "true_enclosing_bank": {
+        "base": "0x0060ac00",
+        "end": "0x00618ac0",
+        "size": 57024,
+        "seasons": 2,
+        "characters_per_season": 11,
+        "character_stride": 2592,
+        "rows": 27,
+        "columns": 8,
+        "cell_stride": 12,
+        "fields": "s8variants[4] (only first3 consumed),s32flags,s16slotId,s16pad; actual mdlSE.c:23-28/155-254 reader"
+      },
+      "selected_views": [
+        {
+          "ps2_season_bank": 1,
+          "ps2_character_id": 7,
+          "character_bank_base": "0x616240",
+          "selected_bank_byte_range": [
+            559,
+            1313
+          ],
+          "whole_bank_nonempty_cells": 15
+        }
+      ],
+      "typed_enclosure_source": "l1-c5-rankup-message-bank-proof.json",
+      "group": "native-model-sound-cue-bank",
+      "proof": "l1-c5-model-sound-cue-bank-proof.json",
+      "runtime_status": "pending-seam",
+      "native_bank": {
+        "default_season1_member": "data.cpk::model/pack/bc007_c1.pac::bc007_c1.se::bc007_c1.bin",
+        "size": 3072,
+        "rows": 32,
+        "columns": 8,
+        "cell_stride": 12,
+        "projection": "none; complete native bank and actual native motion-row producer/consumer cutover"
+      }
+    },
+    {
+      "address": "0x00617461",
+      "size": 1293,
+      "decision": "OPEN-retain",
+      "false_pointer_rejections": [
+        {
+          "target": "0x00617461",
+          "storage": "0x5dea80",
+          "cstring_base": "0x5dea78",
+          "cstring": "Kakitsubata",
+          "classification": "numeric false pointer: interior of NUL-terminated printable string; not a pointer field"
+        }
+      ],
+      "numeric_leads_not_proof": true,
+      "reason": "Still need actual old actor/season -> Golden model/cache/costume resource identity and logical motion-row correspondence before selecting a specific3072-byte source. Do not use repeatedFFFF disabled cells as an anchor, assume char7 equals model008, or infer global row order across27->32 expansion. Numeric Amrita Soda/Kakitsubata routes remain positively rejected.",
+      "next_operation": "Trace actual Golden model SE record/cache type/id/costume selection to packed entry1, then establish old actor/season and27-to32 motion-row correspondence. Do not pair repeated disabled bytes with bc008.",
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x5e2248",
+          "target": "0x5dea78",
+          "parent": "0x005e2200",
+          "depth": 2,
+          "consumers": [
+            "func_001067f0"
+          ]
+        }
+      ],
+      "true_enclosing_bank": {
+        "base": "0x0060ac00",
+        "end": "0x00618ac0",
+        "size": 57024,
+        "seasons": 2,
+        "characters_per_season": 11,
+        "character_stride": 2592,
+        "rows": 27,
+        "columns": 8,
+        "cell_stride": 12,
+        "fields": "s8variants[4] (only first3 consumed),s32flags,s16slotId,s16pad; actual mdlSE.c:23-28/155-254 reader"
+      },
+      "selected_views": [
+        {
+          "ps2_season_bank": 1,
+          "ps2_character_id": 8,
+          "character_bank_base": "0x616c60",
+          "selected_bank_byte_range": [
+            2049,
+            2592
+          ],
+          "whole_bank_nonempty_cells": 24
+        },
+        {
+          "ps2_season_bank": 1,
+          "ps2_character_id": 9,
+          "character_bank_base": "0x617680",
+          "selected_bank_byte_range": [
+            0,
+            750
+          ],
+          "whole_bank_nonempty_cells": 216
+        }
+      ],
+      "typed_enclosure_source": "l1-c5-rankup-message-bank-proof.json"
+    },
+    {
+      "address": "0x00626520",
+      "size": 16,
+      "decision": "OPEN-retain",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual dereference/typed field and corresponding Golden reader remain unproved. Retain OPEN; no-reference and inferred module names do not establish absence.",
+      "next_operation": "Trace actual enclosing object and loader before selecting Golden module; qualify full logical field/index domain and source extent.",
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x62658c",
+          "target": "0x626520",
+          "parent": "0x0062656c",
+          "depth": 1,
+          "consumers": [
+            "func_00202180"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x00626530",
+      "size": 16,
+      "decision": "OPEN-retain",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual dereference/typed field and corresponding Golden reader remain unproved. Retain OPEN; no-reference and inferred module names do not establish absence.",
+      "next_operation": "Trace actual enclosing object and loader before selecting Golden module; qualify full logical field/index domain and source extent.",
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x626594",
+          "target": "0x626530",
+          "parent": "0x0062656c",
+          "depth": 1,
+          "consumers": [
+            "func_00202180"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x00626fe0",
+      "size": 623,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "group": "analysis_model_placement",
+      "proof": "l1-c5-typed-enclosing-banks-proof.json",
+      "reason": "Typed enclosing bank or literal, actual pointer loader and Golden source role are established; runtime remains pending-seam."
+    },
+    {
+      "address": "0x0062724f",
+      "size": 7441,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [
+        {
+          "target": "0x0062724f",
+          "storage": "0x5e1af8",
+          "cstring_base": "0x5e1af0",
+          "cstring": "Genuine Orb",
+          "classification": "numeric false pointer: interior of NUL-terminated printable string; not a pointer field"
+        },
+        {
+          "target": "0x0062724f",
+          "storage": "0x5e1ddc",
+          "cstring_base": "0x5e1dd0",
+          "cstring": "Error-Prone Orb",
+          "classification": "numeric false pointer: interior of NUL-terminated printable string; not a pointer field"
+        }
+      ],
+      "numeric_leads_not_proof": true,
+      "group": "analysis_model_placement",
+      "proof": "l1-c5-typed-enclosing-banks-proof.json",
+      "reason": "Typed enclosing bank or literal, actual pointer loader and Golden source role are established; runtime remains pending-seam."
+    },
+    {
+      "address": "0x00629110",
+      "size": 32,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual GP pointer/real calendar loader -> Golden ARC/named-member/native lifecycle graph and full package receipts. Runtime pending-seam.",
+      "next_operation": "Trace actual enclosing object and loader before selecting Golden module; qualify full logical field/index domain and source extent.",
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x763690",
+          "target": "0x629110",
+          "parent": "0x00763690",
+          "depth": 1,
+          "consumers": [
+            "func_00221770"
+          ]
+        }
+      ],
+      "group": "result_shuffle_resource_identities",
+      "proof": "l1-c5-result-shuffle-resource-identities-proof.json",
+      "enclosing_resource_identity": {
+        "ps2_pointer_field": "0x763690",
+        "native_value_kind": "resource-package-path",
+        "variant": 0,
+        "source": "battle/result/simple_w.arc",
+        "proof": "l1-c5-result-shuffle-resource-identities-proof.json"
+      }
+    },
+    {
+      "address": "0x00629130",
+      "size": 32,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual GP pointer/real calendar loader -> Golden ARC/named-member/native lifecycle graph and full package receipts. Runtime pending-seam.",
+      "next_operation": "Trace actual enclosing object and loader before selecting Golden module; qualify full logical field/index domain and source extent.",
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x763694",
+          "target": "0x629130",
+          "parent": "0x00763690",
+          "depth": 1,
+          "consumers": [
+            "func_00221770"
+          ]
+        }
+      ],
+      "group": "result_shuffle_resource_identities",
+      "proof": "l1-c5-result-shuffle-resource-identities-proof.json",
+      "enclosing_resource_identity": {
+        "ps2_pointer_field": "0x763694",
+        "native_value_kind": "resource-package-path",
+        "variant": 1,
+        "source": "battle/result/simple_s.arc",
+        "proof": "l1-c5-result-shuffle-resource-identities-proof.json"
+      }
+    },
+    {
+      "address": "0x00629150",
+      "size": 32,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual old archive-entry0/1 -> Golden sysmsg0/1 member/parent948/950 value correspondence, including independent persona paired arguments and live copy/use/free graph. Not a scalar filename replacement or all-ID equivalence. Runtime pending-seam.",
+      "next_operation": "Trace actual enclosing object and loader before selecting Golden module; qualify full logical field/index domain and source extent.",
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x7636a0",
+          "target": "0x629150",
+          "parent": "0x007636a0",
+          "depth": 1,
+          "consumers": [
+            "func_00221770"
+          ]
+        }
+      ],
+      "group": "result_shuffle_resource_identities",
+      "proof": "l1-c5-result-shuffle-resource-identities-proof.json",
+      "enclosing_resource_identity": {
+        "ps2_pointer_field": "0x7636a0",
+        "native_value_kind": "logical-native-member-bank",
+        "variant": "actual-current-day-window",
+        "source": "BattleResultMessageSet",
+        "proof": "l1-c5-result-shuffle-resource-identities-proof.json"
+      }
+    },
+    {
+      "address": "0x00632e79",
+      "size": 2247,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [
+        {
+          "target": "0x00632e79",
+          "storage": "0x713000",
+          "cstring_base": "0x712ff8",
+          "cstring": "sdkSfdply.c",
+          "classification": "numeric false pointer: interior of NUL-terminated printable string; not a pointer field"
+        },
+        {
+          "target": "0x00632e79",
+          "storage": "0x7146ac",
+          "cstring_base": "0x7146a0",
+          "cstring": "effBattleOnly.c",
+          "classification": "numeric false pointer: interior of NUL-terminated printable string; not a pointer field"
+        }
+      ],
+      "numeric_leads_not_proof": true,
+      "group": "effect_camera_scripts",
+      "proof": "l1-c5-typed-enclosing-banks-proof.json",
+      "reason": "Typed enclosing bank or literal, actual pointer loader and Golden source role are established; runtime remains pending-seam."
+    },
+    {
+      "address": "0x0063696e",
+      "size": 194,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [
+        {
+          "target": "0x0063696e",
+          "storage": "0x5e0698",
+          "cstring_base": "0x5e0690",
+          "cstring": "Super Sonic",
+          "classification": "numeric false pointer: interior of NUL-terminated printable string; not a pointer field"
+        }
+      ],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual localized pointer loader, complete ordered four-message identities and live category/rank/parameter/slot graph establish source; runtime pending-seam.",
+      "enclosing_ps2_message_bank": {
+        "base": "0x00636850",
+        "size": 465,
+        "magic": "MSG1",
+        "count": 4,
+        "selected_live_prefix_bytes": 179,
+        "selected_tail_bytes": 15
+      },
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x5e2e88",
+          "target": "0x5e0690",
+          "parent": "0x005e2200",
+          "depth": 2,
+          "consumers": [
+            "func_001067f0"
+          ]
+        }
+      ],
+      "group": "rankup_message_bank",
+      "proof": "l1-c5-rankup-message-bank-proof.json"
+    },
+    {
+      "address": "0x00636d90",
+      "size": 32,
+      "decision": "OPEN-retain",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual dereference/typed field and corresponding Golden reader remain unproved. Retain OPEN; no-reference and inferred module names do not establish absence.",
+      "next_operation": "Trace actual enclosing object and loader before selecting Golden module; qualify full logical field/index domain and source extent.",
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x6371d0",
+          "target": "0x636d90",
+          "parent": "0x00637190",
+          "depth": 1,
+          "consumers": [
+            "func_0025db00",
+            "func_0025dd30",
+            "func_0025e170",
+            "func_0025e8f0"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x00636de0",
+      "size": 32,
+      "decision": "OPEN-retain",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual dereference/typed field and corresponding Golden reader remain unproved. Retain OPEN; no-reference and inferred module names do not establish absence.",
+      "next_operation": "Trace actual enclosing object and loader before selecting Golden module; qualify full logical field/index domain and source extent.",
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x6371e8",
+          "target": "0x636de0",
+          "parent": "0x00637190",
+          "depth": 1,
+          "consumers": [
+            "func_0025db00",
+            "func_0025dd30",
+            "func_0025e170",
+            "func_0025e8f0"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x00636e40",
+      "size": 32,
+      "decision": "OPEN-retain",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual dereference/typed field and corresponding Golden reader remain unproved. Retain OPEN; no-reference and inferred module names do not establish absence.",
+      "next_operation": "Trace actual enclosing object and loader before selecting Golden module; qualify full logical field/index domain and source extent.",
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x637200",
+          "target": "0x636e40",
+          "parent": "0x00637190",
+          "depth": 1,
+          "consumers": [
+            "func_0025db00",
+            "func_0025dd30",
+            "func_0025e170",
+            "func_0025e8f0"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x0063a880",
+      "size": 352,
+      "decision": "OPEN-retain",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "reason": "mt_scene contour data has a candidate enclosing pointer-table owner63a330; full shape count, per-shape vertex extents and actual indexed geometry consumer have not been recovered. A near-equal352-byte window is not structural proof.",
+      "next_operation": "Trace actual enclosing object and loader before selecting Golden module; qualify full logical field/index domain and source extent.",
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x63aa74",
+          "target": "0x63a880",
+          "parent": "0x0063aa30",
+          "depth": 1,
+          "consumers": [
+            "func_00267b20"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x0063f400",
+      "size": 32,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "group": "persistent_help_member_names",
+      "proof": "l1-c5-typed-enclosing-banks-proof.json",
+      "reason": "Typed enclosing bank or literal, actual pointer loader and Golden source role are established; runtime remains pending-seam."
+    },
+    {
+      "address": "0x0063f420",
+      "size": 32,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "group": "persistent_help_member_names",
+      "proof": "l1-c5-typed-enclosing-banks-proof.json",
+      "reason": "Typed enclosing bank or literal, actual pointer loader and Golden source role are established; runtime remains pending-seam."
+    },
+    {
+      "address": "0x0063f440",
+      "size": 32,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "group": "persistent_help_member_names",
+      "proof": "l1-c5-typed-enclosing-banks-proof.json",
+      "reason": "Typed enclosing bank or literal, actual pointer loader and Golden source role are established; runtime remains pending-seam."
+    },
+    {
+      "address": "0x0063f460",
+      "size": 32,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "group": "persistent_help_member_names",
+      "proof": "l1-c5-typed-enclosing-banks-proof.json",
+      "reason": "Typed enclosing bank or literal, actual pointer loader and Golden source role are established; runtime remains pending-seam."
+    },
+    {
+      "address": "0x0063f480",
+      "size": 32,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "group": "persistent_help_member_names",
+      "proof": "l1-c5-typed-enclosing-banks-proof.json",
+      "reason": "Typed enclosing bank or literal, actual pointer loader and Golden source role are established; runtime remains pending-seam."
+    },
+    {
+      "address": "0x0063f4a0",
+      "size": 32,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "group": "persistent_help_member_names",
+      "proof": "l1-c5-typed-enclosing-banks-proof.json",
+      "reason": "Typed enclosing bank or literal, actual pointer loader and Golden source role are established; runtime remains pending-seam."
+    },
+    {
+      "address": "0x0063f4c0",
+      "size": 32,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "group": "persistent_help_member_names",
+      "proof": "l1-c5-typed-enclosing-banks-proof.json",
+      "reason": "Typed enclosing bank or literal, actual pointer loader and Golden source role are established; runtime remains pending-seam."
+    },
+    {
+      "address": "0x0063f4e0",
+      "size": 32,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "group": "persistent_help_member_names",
+      "proof": "l1-c5-typed-enclosing-banks-proof.json",
+      "reason": "Typed enclosing bank or literal, actual pointer loader and Golden source role are established; runtime remains pending-seam."
+    },
+    {
+      "address": "0x0063f500",
+      "size": 32,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "group": "persistent_help_member_names",
+      "proof": "l1-c5-typed-enclosing-banks-proof.json",
+      "reason": "Typed enclosing bank or literal, actual pointer loader and Golden source role are established; runtime remains pending-seam."
+    },
+    {
+      "address": "0x0064253a",
+      "size": 43,
+      "decision": "OPEN-retain",
+      "false_pointer_rejections": [
+        {
+          "target": "0x0064253a",
+          "storage": "0x753c18",
+          "cstring_base": "0x753bf8",
+          "cstring": "internal alignment error. _bstag:%d",
+          "classification": "numeric false pointer: interior of NUL-terminated printable string; not a pointer field"
+        }
+      ],
+      "numeric_leads_not_proof": true,
+      "reason": "One or more apparent indirect routes are positively rejected as NUL-terminated string interiors; no true enclosing reader or Golden source role is yet established for this selected object.",
+      "next_operation": "Trace actual enclosing object and loader before selecting Golden module; qualify full logical field/index domain and source extent.",
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x753c18",
+          "target": "0x64253a",
+          "parent": "0x00753bf8",
+          "depth": 1,
+          "consumers": [
+            "func_0041e4d8"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x00645240",
+      "size": 3877,
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "decision": "PROVEN",
+      "group": "weapon_message_bank",
+      "proof": "l1-c5-weapon-message-bank-proof.json",
+      "reason": "Actual loader/publication/parser/selectors and complete32-label join prove source correspondence to full53-entry Golden MSG1 resource; runtime pending-seam."
+    },
+    {
+      "address": "0x0064616f",
+      "size": 1021,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [
+        {
+          "target": "0x0064616f",
+          "storage": "0x63c370",
+          "cstring_base": "0x63c368",
+          "cstring": "evtEditLoad",
+          "classification": "numeric false pointer: interior of NUL-terminated printable string; not a pointer field"
+        }
+      ],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual loader/publication/parser/selectors and complete32-label join prove source correspondence to full53-entry Golden MSG1 resource; runtime pending-seam.",
+      "enclosing_ps2_message_bank": {
+        "base": 6574656,
+        "size": 11421,
+        "magic": "MSG1",
+        "count": 32
+      },
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x63c370",
+          "target": "0x64616f",
+          "parent": "0x0063c368",
+          "depth": 1,
+          "consumers": [
+            "func_002862a0",
+            "func_00286350"
+          ]
+        }
+      ],
+      "group": "weapon_message_bank",
+      "proof": "l1-c5-weapon-message-bank-proof.json"
+    },
+    {
+      "address": "0x00646673",
+      "size": 685,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [
+        {
+          "target": "0x00646673",
+          "storage": "0x712aec",
+          "cstring_base": "0x712ae0",
+          "cstring": "sfd/P4CT001.sfd",
+          "classification": "numeric false pointer: interior of NUL-terminated printable string; not a pointer field"
+        },
+        {
+          "target": "0x00646673",
+          "storage": "0x712afc",
+          "cstring_base": "0x712af0",
+          "cstring": "sfd/P4CT002.sfd",
+          "classification": "numeric false pointer: interior of NUL-terminated printable string; not a pointer field"
+        },
+        {
+          "target": "0x00646673",
+          "storage": "0x712b0c",
+          "cstring_base": "0x712b00",
+          "cstring": "sfd/P4CT003.sfd",
+          "classification": "numeric false pointer: interior of NUL-terminated printable string; not a pointer field"
+        },
+        {
+          "target": "0x00646673",
+          "storage": "0x712b1c",
+          "cstring_base": "0x712b10",
+          "cstring": "sfd/P4CT004.sfd",
+          "classification": "numeric false pointer: interior of NUL-terminated printable string; not a pointer field"
+        },
+        {
+          "target": "0x00646673",
+          "storage": "0x712b2c",
+          "cstring_base": "0x712b20",
+          "cstring": "sfd/P4CT005.sfd",
+          "classification": "numeric false pointer: interior of NUL-terminated printable string; not a pointer field"
+        },
+        {
+          "target": "0x00646673",
+          "storage": "0x712b3c",
+          "cstring_base": "0x712b30",
+          "cstring": "sfd/P4CT006.sfd",
+          "classification": "numeric false pointer: interior of NUL-terminated printable string; not a pointer field"
+        },
+        {
+          "target": "0x00646673",
+          "storage": "0x712b4c",
+          "cstring_base": "0x712b40",
+          "cstring": "sfd/P4CT007.sfd",
+          "classification": "numeric false pointer: interior of NUL-terminated printable string; not a pointer field"
+        },
+        {
+          "target": "0x00646673",
+          "storage": "0x712b5c",
+          "cstring_base": "0x712b50",
+          "cstring": "sfd/P4CT008.sfd",
+          "classification": "numeric false pointer: interior of NUL-terminated printable string; not a pointer field"
+        },
+        {
+          "target": "0x00646673",
+          "storage": "0x712b6c",
+          "cstring_base": "0x712b60",
+          "cstring": "sfd/P4CT009.sfd",
+          "classification": "numeric false pointer: interior of NUL-terminated printable string; not a pointer field"
+        },
+        {
+          "target": "0x00646673",
+          "storage": "0x712b7c",
+          "cstring_base": "0x712b70",
+          "cstring": "sfd/P4CT010.sfd",
+          "classification": "numeric false pointer: interior of NUL-terminated printable string; not a pointer field"
+        },
+        {
+          "target": "0x00646673",
+          "storage": "0x712b8c",
+          "cstring_base": "0x712b80",
+          "cstring": "sfd/P4CT011.sfd",
+          "classification": "numeric false pointer: interior of NUL-terminated printable string; not a pointer field"
+        },
+        {
+          "target": "0x00646673",
+          "storage": "0x712b9c",
+          "cstring_base": "0x712b90",
+          "cstring": "sfd/P4CT012.sfd",
+          "classification": "numeric false pointer: interior of NUL-terminated printable string; not a pointer field"
+        },
+        {
+          "target": "0x00646673",
+          "storage": "0x712bcc",
+          "cstring_base": "0x712bc0",
+          "cstring": "sfd/P4CT014.sfd",
+          "classification": "numeric false pointer: interior of NUL-terminated printable string; not a pointer field"
+        },
+        {
+          "target": "0x00646673",
+          "storage": "0x712bdc",
+          "cstring_base": "0x712bd0",
+          "cstring": "sfd/P4CT015.sfd",
+          "classification": "numeric false pointer: interior of NUL-terminated printable string; not a pointer field"
+        },
+        {
+          "target": "0x00646673",
+          "storage": "0x712bec",
+          "cstring_base": "0x712be0",
+          "cstring": "sfd/P4CT016.sfd",
+          "classification": "numeric false pointer: interior of NUL-terminated printable string; not a pointer field"
+        },
+        {
+          "target": "0x00646673",
+          "storage": "0x712bfc",
+          "cstring_base": "0x712bf0",
+          "cstring": "sfd/P4CT017.sfd",
+          "classification": "numeric false pointer: interior of NUL-terminated printable string; not a pointer field"
+        },
+        {
+          "target": "0x00646673",
+          "storage": "0x712c0c",
+          "cstring_base": "0x712c00",
+          "cstring": "sfd/P4CT018.sfd",
+          "classification": "numeric false pointer: interior of NUL-terminated printable string; not a pointer field"
+        },
+        {
+          "target": "0x00646673",
+          "storage": "0x712c1c",
+          "cstring_base": "0x712c10",
+          "cstring": "sfd/P4CT019.sfd",
+          "classification": "numeric false pointer: interior of NUL-terminated printable string; not a pointer field"
+        },
+        {
+          "target": "0x00646673",
+          "storage": "0x712c2c",
+          "cstring_base": "0x712c20",
+          "cstring": "sfd/P4CT020.sfd",
+          "classification": "numeric false pointer: interior of NUL-terminated printable string; not a pointer field"
+        },
+        {
+          "target": "0x00646673",
+          "storage": "0x712c3c",
+          "cstring_base": "0x712c30",
+          "cstring": "sfd/P4CTOP1.sfd",
+          "classification": "numeric false pointer: interior of NUL-terminated printable string; not a pointer field"
+        },
+        {
+          "target": "0x00646673",
+          "storage": "0x712c4c",
+          "cstring_base": "0x712c40",
+          "cstring": "sfd/P4CTOP2.sfd",
+          "classification": "numeric false pointer: interior of NUL-terminated printable string; not a pointer field"
+        }
+      ],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual loader/publication/parser/selectors and complete32-label join prove source correspondence to full53-entry Golden MSG1 resource; runtime pending-seam.",
+      "enclosing_ps2_message_bank": {
+        "base": 6574656,
+        "size": 11421,
+        "magic": "MSG1",
+        "count": 32
+      },
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x712c7c",
+          "target": "0x712ae0",
+          "parent": "0x00712c74",
+          "depth": 2,
+          "consumers": [
+            "func_00468ff0"
+          ]
+        }
+      ],
+      "group": "weapon_message_bank",
+      "proof": "l1-c5-weapon-message-bank-proof.json"
+    },
+    {
+      "address": "0x00646961",
+      "size": 768,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [
+        {
+          "target": "0x00646961",
+          "storage": "0x5e0958",
+          "cstring_base": "0x5e0950",
+          "cstring": "Second Maid",
+          "classification": "numeric false pointer: interior of NUL-terminated printable string; not a pointer field"
+        }
+      ],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual loader/publication/parser/selectors and complete32-label join prove source correspondence to full53-entry Golden MSG1 resource; runtime pending-seam.",
+      "enclosing_ps2_message_bank": {
+        "base": 6574656,
+        "size": 11421,
+        "magic": "MSG1",
+        "count": 32
+      },
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x5e2f58",
+          "target": "0x5e0950",
+          "parent": "0x005e2200",
+          "depth": 2,
+          "consumers": [
+            "func_001067f0"
+          ]
+        }
+      ],
+      "group": "weapon_message_bank",
+      "proof": "l1-c5-weapon-message-bank-proof.json"
+    },
+    {
+      "address": "0x00646c61",
+      "size": 257,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [
+        {
+          "target": "0x00646c61",
+          "storage": "0x7621e4",
+          "cstring_base": "0x7621e0",
+          "cstring": "Emerald",
+          "classification": "numeric false pointer: interior of NUL-terminated printable string; not a pointer field"
+        }
+      ],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual loader/publication/parser/selectors and complete32-label join prove source correspondence to full53-entry Golden MSG1 resource; runtime pending-seam.",
+      "enclosing_ps2_message_bank": {
+        "base": 6574656,
+        "size": 11421,
+        "magic": "MSG1",
+        "count": 32
+      },
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x5e2edc",
+          "target": "0x7621e0",
+          "parent": "0x005e2200",
+          "depth": 2,
+          "consumers": [
+            "func_001067f0"
+          ]
+        }
+      ],
+      "group": "weapon_message_bank",
+      "proof": "l1-c5-weapon-message-bank-proof.json"
+    },
+    {
+      "address": "0x00646d62",
+      "size": 208,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [
+        {
+          "target": "0x00646d62",
+          "storage": "0x63faec",
+          "cstring_base": "0x63fad0",
+          "cstring": "facility/mes/fcl_dialog_msg.bmd",
+          "classification": "numeric false pointer: interior of NUL-terminated printable string; not a pointer field"
+        },
+        {
+          "target": "0x00646d62",
+          "storage": "0x644e7c",
+          "cstring_base": "0x644e60",
+          "cstring": "facility/mes/p4_combine_msg.bmd",
+          "classification": "numeric false pointer: interior of NUL-terminated printable string; not a pointer field"
+        }
+      ],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual loader/publication/parser/selectors and complete32-label join prove source correspondence to full53-entry Golden MSG1 resource; runtime pending-seam.",
+      "enclosing_ps2_message_bank": {
+        "base": 6574656,
+        "size": 11421,
+        "magic": "MSG1",
+        "count": 32
+      },
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x63faec",
+          "target": "0x646d62",
+          "parent": "0x0063fad0",
+          "depth": 1,
+          "consumers": [
+            "func_002be530"
+          ]
+        },
+        {
+          "storage": "0x644e7c",
+          "target": "0x646d62",
+          "parent": "0x00644e60",
+          "depth": 1,
+          "consumers": [
+            "func_00331390"
+          ]
+        }
+      ],
+      "group": "weapon_message_bank",
+      "proof": "l1-c5-weapon-message-bank-proof.json"
+    },
+    {
+      "address": "0x00646e32",
+      "size": 47,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual loader/publication/parser/selectors and complete32-label join prove source correspondence to full53-entry Golden MSG1 resource; runtime pending-seam.",
+      "enclosing_ps2_message_bank": {
+        "base": 6574656,
+        "size": 11421,
+        "magic": "MSG1",
+        "count": 32
+      },
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x75dcec",
+          "target": "0x646e32",
+          "parent": "0x0075dce8",
+          "depth": 1,
+          "consumers": [
+            "func_004fcb60"
+          ]
+        }
+      ],
+      "group": "weapon_message_bank",
+      "proof": "l1-c5-weapon-message-bank-proof.json"
+    },
+    {
+      "address": "0x00646f47",
+      "size": 794,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [
+        {
+          "target": "0x00646f47",
+          "storage": "0x762bb4",
+          "cstring_base": "0x762bb0",
+          "cstring": "Man-God",
+          "classification": "numeric false pointer: interior of NUL-terminated printable string; not a pointer field"
+        }
+      ],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual loader/publication/parser/selectors and complete32-label join prove source correspondence to full53-entry Golden MSG1 resource; runtime pending-seam.",
+      "enclosing_ps2_message_bank": {
+        "base": 6574656,
+        "size": 11421,
+        "magic": "MSG1",
+        "count": 32
+      },
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x5e35b8",
+          "target": "0x762bb0",
+          "parent": "0x005e2200",
+          "depth": 2,
+          "consumers": [
+            "func_001067f0"
+          ]
+        }
+      ],
+      "group": "weapon_message_bank",
+      "proof": "l1-c5-weapon-message-bank-proof.json"
+    },
+    {
+      "address": "0x0064726f",
+      "size": 191,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [
+        {
+          "target": "0x0064726f",
+          "storage": "0x5dea50",
+          "cstring_base": "0x5dea48",
+          "cstring": "Great Sword",
+          "classification": "numeric false pointer: interior of NUL-terminated printable string; not a pointer field"
+        },
+        {
+          "target": "0x0064726f",
+          "storage": "0x5deaec",
+          "cstring_base": "0x5deae0",
+          "cstring": "Myth-like Sword",
+          "classification": "numeric false pointer: interior of NUL-terminated printable string; not a pointer field"
+        },
+        {
+          "target": "0x0064726f",
+          "storage": "0x5deb2c",
+          "cstring_base": "0x5deb20",
+          "cstring": "Tajikarao Sword",
+          "classification": "numeric false pointer: interior of NUL-terminated printable string; not a pointer field"
+        },
+        {
+          "target": "0x0064726f",
+          "storage": "0x5e18e8",
+          "cstring_base": "0x5e18e0",
+          "cstring": "Yellow Cord",
+          "classification": "numeric false pointer: interior of NUL-terminated printable string; not a pointer field"
+        },
+        {
+          "target": "0x0064726f",
+          "storage": "0x5e1c20",
+          "cstring_base": "0x5e1c18",
+          "cstring": "Azalea Cord",
+          "classification": "numeric false pointer: interior of NUL-terminated printable string; not a pointer field"
+        }
+      ],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual loader/publication/parser/selectors and complete32-label join prove source correspondence to full53-entry Golden MSG1 resource; runtime pending-seam.",
+      "enclosing_ps2_message_bank": {
+        "base": 6574656,
+        "size": 11421,
+        "magic": "MSG1",
+        "count": 32
+      },
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x5e223c",
+          "target": "0x5dea48",
+          "parent": "0x005e2200",
+          "depth": 2,
+          "consumers": [
+            "func_001067f0"
+          ]
+        }
+      ],
+      "group": "weapon_message_bank",
+      "proof": "l1-c5-weapon-message-bank-proof.json"
+    },
+    {
+      "address": "0x0064732e",
+      "size": 802,
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "decision": "PROVEN",
+      "group": "weapon_message_bank",
+      "proof": "l1-c5-weapon-message-bank-proof.json",
+      "reason": "Actual loader/publication/parser/selectors and complete32-label join prove source correspondence to full53-entry Golden MSG1 resource; runtime pending-seam."
+    },
+    {
+      "address": "0x0064b090",
+      "size": 48,
+      "decision": "OPEN-retain",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual dereference/typed field and corresponding Golden reader remain unproved. Retain OPEN; no-reference and inferred module names do not establish absence.",
+      "next_operation": "Trace actual enclosing object and loader before selecting Golden module; qualify full logical field/index domain and source extent.",
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x64b29c",
+          "target": "0x64b090",
+          "parent": "0x0064b1e0",
+          "depth": 1,
+          "consumers": [
+            "func_00354490"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x0064e9e0",
+      "size": 32,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual GP pointer/real calendar loader -> Golden ARC/named-member/native lifecycle graph and full package receipts. Runtime pending-seam.",
+      "next_operation": "Trace actual enclosing object and loader before selecting Golden module; qualify full logical field/index domain and source extent.",
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x763ab8",
+          "target": "0x64e9e0",
+          "parent": "0x00763ab8",
+          "depth": 1,
+          "consumers": [
+            "func_003741f0"
+          ]
+        }
+      ],
+      "group": "result_shuffle_resource_identities",
+      "proof": "l1-c5-result-shuffle-resource-identities-proof.json",
+      "enclosing_resource_identity": {
+        "ps2_pointer_field": "0x763ab8",
+        "native_value_kind": "resource-package-path",
+        "variant": 0,
+        "source": "battle/result/shuffle.arc",
+        "proof": "l1-c5-result-shuffle-resource-identities-proof.json"
+      }
+    },
+    {
+      "address": "0x0064ea00",
+      "size": 32,
+      "decision": "PROVEN",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual GP pointer/real calendar loader -> Golden ARC/named-member/native lifecycle graph and full package receipts. Runtime pending-seam.",
+      "next_operation": "Trace actual enclosing object and loader before selecting Golden module; qualify full logical field/index domain and source extent.",
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x763abc",
+          "target": "0x64ea00",
+          "parent": "0x00763ab8",
+          "depth": 1,
+          "consumers": [
+            "func_003741f0"
+          ]
+        }
+      ],
+      "group": "result_shuffle_resource_identities",
+      "proof": "l1-c5-result-shuffle-resource-identities-proof.json",
+      "enclosing_resource_identity": {
+        "ps2_pointer_field": "0x763abc",
+        "native_value_kind": "resource-package-path",
+        "variant": 1,
+        "source": "battle/result/shuffle.arc",
+        "proof": "l1-c5-result-shuffle-resource-identities-proof.json"
+      }
+    },
+    {
+      "address": "0x0064ec60",
+      "size": 16,
+      "decision": "OPEN-retain",
+      "false_pointer_rejections": [],
+      "numeric_leads_not_proof": true,
+      "reason": "Actual dereference/typed field and corresponding Golden reader remain unproved. Retain OPEN; no-reference and inferred module names do not establish absence.",
+      "next_operation": "Trace actual enclosing object and loader before selecting Golden module; qualify full logical field/index domain and source extent.",
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x763ad4",
+          "target": "0x64ec60",
+          "parent": "0x00763ad4",
+          "depth": 1,
+          "consumers": [
+            "func_00379240",
+            "func_00381a70"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x00757475",
+      "size": 35,
+      "decision": "OPEN-retain",
+      "false_pointer_rejections": [
+        {
+          "target": "0x00757475",
+          "storage": "0x5df660",
+          "cstring_base": "0x5df658",
+          "cstring": "Breeze Tutu",
+          "classification": "numeric false pointer: interior of NUL-terminated printable string; not a pointer field"
+        }
+      ],
+      "numeric_leads_not_proof": true,
+      "reason": "One or more apparent indirect routes are positively rejected as NUL-terminated string interiors; no true enclosing reader or Golden source role is yet established for this selected object.",
+      "next_operation": "Trace actual enclosing object and loader before selecting Golden module; qualify full logical field/index domain and source extent.",
+      "raw_pointer_parent_leads": [
+        {
+          "storage": "0x5e2744",
+          "target": "0x5df658",
+          "parent": "0x005e2200",
+          "depth": 2,
+          "consumers": [
+            "func_001067f0"
+          ]
+        }
+      ]
+    }
+  ],
+  "prior_batch_counts": {
+    "PROVEN": 24,
+    "PROVEN-layout": 0,
+    "PROVEN-code": 0,
+    "D10a": 0,
+    "D10b": 0,
+    "D10c": 0,
+    "qualified_ps2_partition_bytes": 47121,
+    "OPEN-retain": 51,
+    "open_ps2_partition_bytes": 7466,
+    "current_assigned_objects": 75,
+    "current_assigned_ps2_bytes": 54587,
+    "ownership_changes": "Original76/54874 minus626172+626372 (2/910) to c6, plus626fe0 (1/623) from c6; all changes Main approved."
+  },
+  "revision": 3,
+  "supporting_nonL1_objects": [
+    {
+      "address": "0x00636850",
+      "size": 286,
+      "supplier": "golden-exe",
+      "m2_match": "identical286/286",
+      "canonical_L1_row": false,
+      "reason": "M2typed record has no golden_check=true; do not add or count this prefix in the canonical1043 ledger."
+    }
+  ]
+}

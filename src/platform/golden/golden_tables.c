@@ -118,9 +118,8 @@ static int placeholder(const uint8_t *name, size_t width)
 static const uint8_t *base_skill_name(const Ctx *ctx, uint32_t id) { return ctx->skill_names.bytes + id * SKILL_NAME_WIDTH; }
 
 /* Golden 0x2C-byte skill row to PS2's 0x28: Golden widens the flag byte at 0
- * to a word (bytes 1..3) and pads after bytes 1..3 (byte 7). 0 when the row
- * fits PS2's layout exactly, 1 when Golden-only high flag bits were dropped
- * (only Golden-only skills use them), -1 out of range. */
+ * to a word (bytes 1..3) and pads after bytes 1..3 (byte 7). Return 1 if
+ * widened flags or padding cannot be represented, 0 if they fit, -1 if absent. */
 static int skill_row(const Ctx *ctx, uint32_t id, uint8_t out[SKILL_ROW])
 {
     const P4GoldenSpan *span = golden_span(ctx, P4_GOLDEN_SKILL, 1, G_SKILL_ACTIVE * G_SKILL_ROW);

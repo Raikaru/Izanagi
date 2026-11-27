@@ -4,6 +4,7 @@
  * refused in synchronous UI callbacks and save snapshots and record semantic
  * use of the mod. Work happens later at the frame boundary. */
 #include "native_bindings.h"
+#include "p4pc/mod_numbers.h"
 #include "p4pc/mod_services.h"
 #include "p4pc/gmem.h"
 #include <math.h>
@@ -207,7 +208,7 @@ static float pose_field(lua_State *L, const char *name, float current)
     float value = current;
     if (!lua_isnil(L, -1)) {
         luaL_checktype(L, -1, LUA_TNUMBER);
-        value = (float)lua_tonumber(L, -1);
+        value = (float)p4_mod_f64_canonical(lua_tonumber(L, -1));
     }
     lua_pop(L, 1);
     return value;

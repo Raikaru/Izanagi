@@ -5,10 +5,13 @@
  * a fusion and a party Persona, and refusals that refuse the package with a
  * readable reason. No native stage, guest heap or gameplay claim. */
 #include "game_table_derived_internal.h"
+#include "../src/platform/golden/golden_mode_cache_publish.h"
+#include "p4pc/os.h"
 #include "p4pc/game_data_catalog.h"
 #include "p4pc/game_data_edit.h"
 #include "p4pc/game_damage_cover.h"
 #include "p4pc/game_table_boot.h"
+#include "p4pc/game_mode.h"
 #include "p4pc/game_elements.h"
 #include "p4pc/game_enemies.h"
 #include "p4pc/game_enemies_native.h"
@@ -41,7 +44,10 @@ int p4_game_side_ailment_prepare(const P4GameTables *tables)
 void p4_game_side_ailment_publish(void) { }
 void p4_game_side_ailment_session_end(void) { }
 static const char *mode;
+static const char *fixture_root;
 static unsigned prepares;
+static P4GameMode fixture_game_mode = P4_GAME_MODE_PS2;
+P4GameMode p4_game_mode(void) { return fixture_game_mode; }
 
 _Noreturn void p4_package_boot_runtime_failed(const char *reason)
 { fprintf(stderr, "Unexpected data-edit boot recovery: %s\n", reason); abort(); }
@@ -210,11 +216,34 @@ static uint32_t live(P4GameTableInputKind kind, uint32_t span, uint32_t header, 
     assert(arena_next <= ARENA + ARENA_SIZE);
     return base;
 }
+/* The seal exposes both original PS2 widths and Golden's wider rows. */
+static void name_views(void)
+{
+    static const uint8_t ps2_skill[2][19] = {"First", "PS2 skill name max"};
+    static const uint8_t ps2_persona[2][17] = {"First", "PS2 persona max!"};
+    static const uint8_t golden_skill[2][23] = {"First", "Golden Skill Name Wide"};
+    static const uint8_t golden_persona[2][21] = {"First", "Golden Persona Wide"};
+    P4DataBanks view = {0};
+    char name[32];
+    view.skill_name = &ps2_skill[0][0]; view.skill_names = 2; view.skill_name_stride = 19;
+    view.persona_name = &ps2_persona[0][0]; view.persona_names = 2; view.persona_name_stride = 17;
+    p4_data_catalog_seal_view(&view);
+    assert(!strcmp(p4_data_catalog_name(P4_DATA_SKILL, 1, name, sizeof name), "PS2 skill name max"));
+    assert(!strcmp(p4_data_catalog_name(P4_DATA_PERSONA, 1, name, sizeof name), "PS2 persona max!"));
+    fixture_game_mode = P4_GAME_MODE_GOLDEN;
+    view.skill_name = &golden_skill[0][0]; view.skill_name_stride = 23;
+    view.persona_name = &golden_persona[0][0]; view.persona_name_stride = 21;
+    assert(!strcmp(p4_data_catalog_name(P4_DATA_SKILL, 1, name, sizeof name), "Golden Skill Name Wide"));
+    assert(!strcmp(p4_data_catalog_name(P4_DATA_PERSONA, 1, name, sizeof name), "Golden Persona Wide"));
+    fixture_game_mode = P4_GAME_MODE_PS2;
+    p4_data_catalog_seal_view(NULL);
+}
 static void session(void)
 {
     if (p4t_guest_map(0x00764000u, 0x2000u) || p4t_guest_map(ARENA, ARENA_SIZE)) exit(77);
     char error[768];
     assert(p4_data_session_begin("edits.one", 0, error, sizeof error)); /* nothing loaded yet */
+    name_views();
     live(P4_TABLE_INPUT_SKILL, 0, 0, 0x007644A4); live(P4_TABLE_INPUT_SKILL, 1, 0, 0x007644A8);
     live(P4_TABLE_INPUT_MSG, 1, 0, 0x00764538); live(P4_TABLE_INPUT_MSG, 2, 0, 0x00764534);
     live(P4_TABLE_INPUT_MSG, 3, 0, 0x00764530);
@@ -300,10 +329,83 @@ static int item_names(void)
     memcpy(P4_G2H(0x005F4090u + 8u * 27u), "Example Castle 33F", 19);
     return 0;
 }
+static int cache_table_order(const void *a, const void *b)
+{ return strcmp(((const P4GoldenCacheTable *)a)->name, ((const P4GoldenCacheTable *)b)->name); }
+static int accept_cached_declarations(void *context, P4GameTablesDefinitionBuilder *builder,
+    const P4GoldenCacheTable *extra, size_t count, char *reason, size_t capacity)
+{ (void)context; (void)builder; (void)extra; (void)count; (void)reason; (void)capacity; return 0; }
+/* Run after the real catalog provider requested Golden capture, before the
+ * table builder. Inputs are synthetic and released immediately after capture. */
+static int golden_catalog_fixture(void *unused)
+{
+    (void)unused;
+    static uint8_t msg[32768], items[1536 * 24], original_msg[32768], original_items[1536 * 24];
+    const size_t widths[] = {21, 23, 21, 21}, counts[] = {32, 576, 336, 256};
+    size_t offset = 0, starts[4];
+    for (unsigned block = 0; block < 4; ++block) {
+        size_t n = widths[block] * counts[block];
+        msg[offset] = (uint8_t)n; msg[offset + 1] = (uint8_t)(n >> 8);
+        msg[offset + 2] = (uint8_t)(n >> 16); msg[offset + 3] = (uint8_t)(n >> 24);
+        starts[block] = offset + 4;
+        offset = (offset + 4 + n + 15) & ~(size_t)15;
+    }
+    memcpy(msg + starts[0] + 21, "Golden Arcana", 14);
+    memcpy(msg + starts[1] + 23, "Golden Skill Name Wide", 23);
+    memcpy(msg + starts[3] + 21, "Golden Persona Wide", 20);
+    memcpy(items + 24, "Golden Item Name Wide", 22);
+    assert(p4_data_catalog_capture_golden(msg, offset - 1, items, sizeof items));
+    /* MSG4 is a fifth empty packed span. All native banks and item names pass
+     * through a real cache store and verified load before catalog capture. */
+    offset += 16;
+    static uint8_t banks[P4_TABLE_INPUT_COUNT][176];
+    static const unsigned blocks[] = {1,2,3,5,6,5,1,3,11};
+    P4GoldenCacheTable tables[P4_TABLE_INPUT_COUNT + 1], extra[] = {{"decl/item-names", NULL, 0}};
+    for (unsigned i = 0; i < P4_TABLE_INPUT_COUNT; ++i)
+        tables[i] = (P4GoldenCacheTable){p4_game_table_input_label((P4GameTableInputKind)i), banks[i], blocks[i] * 16u};
+    tables[P4_TABLE_INPUT_MSG].data = msg; tables[P4_TABLE_INPUT_MSG].size = offset;
+    tables[P4_TABLE_INPUT_COUNT] = (P4GoldenCacheTable){"decl/item-names", items, sizeof items};
+    qsort(tables, P4_TABLE_INPUT_COUNT + 1, sizeof tables[0], cache_table_order);
+    char pref[1024], install[1024], program[1024], reason[192];
+    snprintf(pref, sizeof pref, "%s/cache-pref", fixture_root);
+    snprintf(install, sizeof install, "%s/cache-install", fixture_root);
+    snprintf(program, sizeof program, "%s/cache-program", fixture_root);
+    assert(!p4_os_mkdir(pref) && !p4_os_mkdir(install) && !p4_os_mkdir(program));
+    P4GoldenCachePaths paths = {pref, install, program, NULL};
+    P4GoldenCacheIdentityEntry sources[] = {{"fixture", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}};
+    P4GoldenCacheIdentityEntry versions[] = {{"schema", "1"}};
+    P4GoldenCacheIdentity identity = {sources, 1, versions, 1};
+    char cache_key[65];
+    memcpy(original_msg, msg, offset); memcpy(original_items, items, sizeof items);
+    if (p4_golden_cache_store(&paths, &identity, tables, P4_TABLE_INPUT_COUNT + 1, cache_key, reason, sizeof reason)) {
+        fprintf(stderr, "synthetic cache store: %s\n", reason);
+        abort();
+    }
+    msg[starts[1] + 23] = 'X'; items[24] = 'X';
+    P4GoldenModeCachePlan plan = {&paths, &identity, tables, P4_TABLE_INPUT_COUNT + 1, extra, 1,
+                                  accept_cached_declarations, NULL};
+    P4GameTablesDefinitionBuilder *builder = p4_game_tables_boot_builder();
+    assert(builder && builder->input_mask);
+    assert(!p4_golden_mode_cache_publish(&plan, builder, reason, sizeof reason));
+    /* Keys must come from the verified cache, not the mutated source arrays. */
+    memset(msg, 0, sizeof msg); memset(items, 0, sizeof items);
+    assert(!strcmp(p4_data_catalog_arcana(1), "Golden Arcana"));
+    assert(!strcmp(p4_data_catalog_key(P4_DATA_SKILL, 1), "p4:skill:golden-skill-name-wide"));
+    assert(!strcmp(p4_data_catalog_key(P4_DATA_PERSONA, 1), "p4:persona:golden-persona-wide"));
+    assert(!strcmp(p4_data_catalog_key(P4_DATA_ITEM, 1), "p4:item:golden-item-name-wide"));
+    char name[32];
+    assert(!strcmp(p4_data_catalog_name(P4_DATA_ITEM, 1, name, sizeof name), "Golden Item Name Wide"));
+    p4_data_catalog_golden_rollback();
+    assert(!p4_data_catalog_arcana(1));
+    assert(!p4_data_catalog_capture_golden(original_msg, offset, original_items, sizeof original_items));
+    assert(!strcmp(p4_data_catalog_arcana(1), "Golden Arcana"));
+    return -1; /* exercise package-provider rollback as well */
+}
 int main(int argc, char **argv)
 {
     if (argc != 4) return 2;
     mode = argv[1];
+    fixture_root = argv[2];
+    if (is("golden-capture")) fixture_game_mode = P4_GAME_MODE_GOLDEN;
     if (item_names()) return 77;
     const int success = is("good") || is("none") || is("session") || is("original");
     static const P4PackageClient client = {.diagnostic_name = "data edit fixture", .manifest_name = "mod.ini",
@@ -311,6 +413,10 @@ int main(int argc, char **argv)
     static const char *const dependencies[] = {P4_GAME_TABLES_BOOT_PROVIDER, NULL};
     static const P4PackageHandler observer = {.name = "data-edit-fixture", .prepare = prepare, .publish = publish,
         .boot_phase = P4_PACKAGE_BOOT_UI, .dependencies = dependencies};
+    static const char *const catalog_dependency[] = {"game-data.catalog", NULL};
+    static const P4PackageHandler capture = {.name = "game-data.catalog-test", .prepare = golden_catalog_fixture,
+        .boot_phase = P4_PACKAGE_BOOT_TABLES, .dependencies = catalog_dependency};
+    if (is("golden-capture")) assert(!p4_package_handler_register(&capture));
     assert(!p4_package_handler_register(&observer));
     assert(!p4_package_handler_register(&p4_game_tables_sources_boot_provider));
     assert(!p4_package_handler_register(&p4_game_data_boot_provider));
@@ -320,6 +426,10 @@ int main(int argc, char **argv)
     const int result = p4_package_registry_publish();
     if (success) assert(!result && prepares == 1);
     else assert(result && !prepares && !p4_data_edits_count());
+    if (is("golden-capture")) {
+        const char *why = NULL;
+        assert(p4_data_catalog_ready(&why) && why && strstr(why, "not captured"));
+    }
     if (is("session")) session();
     assert(!p4_game_tables_boot_session_end());
     assert(!p4_data_edits_count() && !p4_data_edits_conflict_count() && !p4_game_tables_derived_layer_count());

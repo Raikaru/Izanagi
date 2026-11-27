@@ -610,7 +610,7 @@ static void side_ailments(void)
     P4SideAilmentDef bad = side;
     strcpy(bad.key, "test:freeze-again");
     assert(p4_game_tables_side_ailment(tables, "test", &bad) == P4_TABLE_CONFLICT); /* One row per leaf. */
-    bad.leaf = 23; bad.flags = 16; assert(p4_game_tables_side_ailment(tables, "test", &bad) == P4_TABLE_INVALID);
+    bad.leaf = 23; bad.flags = 64; assert(p4_game_tables_side_ailment(tables, "test", &bad) == P4_TABLE_INVALID);
     bad.flags = P4_SIDE_LOSE_TURN; bad.transfer = 101; assert(p4_game_tables_side_ailment(tables, "test", &bad) == P4_TABLE_INVALID);
     bad.transfer = 0;
     bad.flags = P4_SIDE_LOSE_TURN; bad.enemy_scale = 101; assert(p4_game_tables_side_ailment(tables, "test", &bad) == P4_TABLE_INVALID);

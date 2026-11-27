@@ -1,0 +1,967 @@
+{
+  "schema": 1,
+  "cohort": 4,
+  "date": "2026-11-13",
+  "author": "GoldenRE-L1-c4",
+  "initial_receipt": "docs/golden_mode/specs/re/l1-directory-migration-proof.json",
+  "contract": "docs/golden_mode/specs/re/l1-directory-resource-routes.md",
+  "source_counts_this_batch": {
+    "D10c": {
+      "objects": 13,
+      "ps2_bytes": 30086
+    },
+    "OPEN-retain": {
+      "objects": 0,
+      "ps2_bytes": 0
+    }
+  },
+  "current_owned_directory_counts": {
+    "D10c": {
+      "objects": 56,
+      "ps2_bytes": 72730
+    },
+    "OPEN-retain": {
+      "objects": 0,
+      "ps2_bytes": 0
+    }
+  },
+  "transferred_to_c6": {
+    "objects": 4,
+    "ps2_bytes": 2476,
+    "addresses": [
+      "0x005dcaf8",
+      "0x005dcb28",
+      "0x005dcb98",
+      "0x005dcc6c"
+    ],
+    "authority": "Main 2026-11-13 explicit ownership transfer; this batch never edits their rows."
+  },
+  "runtime_qualified": false,
+  "runtime_status": "pending-seam",
+  "owner_direction": [
+    "M10 implements required Golden resource routes; absence of current runtime binder is not a source-proof blocker.",
+    "Main explicitly admits0058a760 representation-only with paired generic PM route, no E826 assets/rename, fail-closed reads, and M11 event-script obligation."
+  ],
+  "proof_scope": "Positive replacement of static PS2 CVM directory routing, not per-asset byte equality or a claim every PS2 filename survives. Golden producers and archives choose Golden assets. Do not revive absent old assets or copy sector tables.",
+  "rows": [
+    {
+      "address": "0x0056d430",
+      "root": "0x0056d430",
+      "size": 224,
+      "offset": 0,
+      "live_size": 216,
+      "header_count": 4,
+      "volume": "VOL",
+      "path": "\\EFFECT\\",
+      "ps2_file_count": 2,
+      "golden_subtree_count": 91,
+      "same_basename_count": 0,
+      "matched_path_examples": [],
+      "source_sha256": "6f6ba53d8c0c712c60ba0772a23af44dfd002553dc80c1afb11cac2c8e485005",
+      "decision": "D10c",
+      "route_class": "effects",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:effects"
+      ],
+      "resource_route_contract": "docs/golden_mode/specs/re/l1-directory-resource-routes.md"
+    },
+    {
+      "address": "0x0058a760",
+      "root": "0x0058a760",
+      "size": 224,
+      "offset": 0,
+      "live_size": 216,
+      "header_count": 4,
+      "volume": "VOL",
+      "path": "\\EVENT\\E820\\",
+      "ps2_file_count": 2,
+      "golden_subtree_count": 0,
+      "same_basename_count": 0,
+      "matched_path_examples": [],
+      "source_sha256": "380dc9fb1e5b0aaffe2e89b169db7afb02556d63ca8637cf117eecc726457cb4",
+      "decision": "D10c",
+      "route_class": "event-polymovie",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:event-polymovie"
+      ],
+      "resource_route_contract": "docs/golden_mode/specs/re/l1-directory-resource-routes.md",
+      "m11_obligations": [
+        "Confirm Golden event scripts never request E826_021.PM1 or E826_022.PM1; reopen row if they do."
+      ],
+      "absence_scope": "PS2 static directory representation only; no E826->E862 rename and no Golden E826 asset source is admitted.",
+      "ps2_names": [
+        "E826_021.PM1",
+        "E826_022.PM1"
+      ]
+    },
+    {
+      "address": "0x005957e0",
+      "root": "0x005957e0",
+      "size": 1184,
+      "offset": 0,
+      "live_size": 1176,
+      "header_count": 24,
+      "volume": "VOL",
+      "path": "\\FACILITY\\",
+      "ps2_file_count": 20,
+      "golden_subtree_count": 8,
+      "same_basename_count": 0,
+      "matched_path_examples": [],
+      "source_sha256": "cd054a6baf60efbe3bf4ca855c93af8f41ebb3f3d3b51136c3c2ba73f214c311",
+      "decision": "D10c",
+      "route_class": "facility",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:facility"
+      ],
+      "resource_route_contract": "docs/golden_mode/specs/re/l1-directory-resource-routes.md"
+    },
+    {
+      "address": "0x005a4450",
+      "root": "0x005a4450",
+      "size": 1424,
+      "offset": 0,
+      "live_size": 1416,
+      "header_count": 29,
+      "volume": "VOL",
+      "path": "\\MODEL\\FIELD\\",
+      "ps2_file_count": 27,
+      "golden_subtree_count": 37,
+      "same_basename_count": 0,
+      "matched_path_examples": [],
+      "source_sha256": "2181904786347862485b1845b4dec8a167eab4ac09fa7856909a7b521579b1f2",
+      "decision": "D10c",
+      "route_class": "model-field",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:model-field"
+      ],
+      "resource_route_contract": "docs/golden_mode/specs/re/l1-directory-resource-routes.md"
+    },
+    {
+      "address": "0x005a49e0",
+      "root": "0x005a49e0",
+      "size": 3960,
+      "offset": 0,
+      "live_size": 43320,
+      "header_count": 902,
+      "volume": "VOL",
+      "path": "\\MODEL\\NPC\\",
+      "ps2_file_count": 900,
+      "golden_subtree_count": 1327,
+      "same_basename_count": 0,
+      "matched_path_examples": [],
+      "source_sha256": "e95f8d3c76dd0d613429ad85d370b868a7457870afa45588f4692086e8923179",
+      "decision": "D10c",
+      "route_class": "model-npc",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:model-npc"
+      ],
+      "resource_route_contract": "docs/golden_mode/specs/re/l1-directory-resource-routes.md"
+    },
+    {
+      "address": "0x005c0c20",
+      "root": "0x005c0c20",
+      "size": 1040,
+      "offset": 0,
+      "live_size": 1032,
+      "header_count": 21,
+      "volume": "VOL",
+      "path": "\\SOUND\\BATTLE\\",
+      "ps2_file_count": 19,
+      "golden_subtree_count": 0,
+      "same_basename_count": 0,
+      "matched_path_examples": [],
+      "source_sha256": "ac76e5b36229ff80e875d4a1e346975cd6e0be351c26e41337cd76c8c935092a",
+      "decision": "D10c",
+      "route_class": "audio-battle",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:audio-battle"
+      ],
+      "resource_route_contract": "docs/golden_mode/specs/re/l1-directory-resource-routes.md"
+    },
+    {
+      "address": "0x005c1030",
+      "root": "0x005c1030",
+      "size": 12574,
+      "offset": 0,
+      "live_size": 14856,
+      "header_count": 309,
+      "volume": "VOL",
+      "path": "\\SOUND\\EVENT\\",
+      "ps2_file_count": 307,
+      "golden_subtree_count": 0,
+      "same_basename_count": 0,
+      "matched_path_examples": [],
+      "source_sha256": "9780f58cffd928e3f47a219e8dcb0145348eb6aee184cfca989b408d570e165f",
+      "decision": "D10c",
+      "route_class": "audio-event",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:audio-event"
+      ],
+      "resource_route_contract": "docs/golden_mode/specs/re/l1-directory-resource-routes.md"
+    },
+    {
+      "address": "0x005c414e",
+      "root": "0x005c1030",
+      "size": 514,
+      "offset": 12574,
+      "live_size": 14856,
+      "header_count": 309,
+      "volume": "VOL",
+      "path": "\\SOUND\\EVENT\\",
+      "ps2_file_count": 307,
+      "golden_subtree_count": 0,
+      "same_basename_count": 0,
+      "matched_path_examples": [],
+      "source_sha256": "9780f58cffd928e3f47a219e8dcb0145348eb6aee184cfca989b408d570e165f",
+      "decision": "D10c",
+      "route_class": "audio-event",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:audio-event"
+      ],
+      "resource_route_contract": "docs/golden_mode/specs/re/l1-directory-resource-routes.md"
+    },
+    {
+      "address": "0x005c454c",
+      "root": "0x005c1030",
+      "size": 1268,
+      "offset": 13596,
+      "live_size": 14856,
+      "header_count": 309,
+      "volume": "VOL",
+      "path": "\\SOUND\\EVENT\\",
+      "ps2_file_count": 307,
+      "golden_subtree_count": 0,
+      "same_basename_count": 0,
+      "matched_path_examples": [],
+      "source_sha256": "9780f58cffd928e3f47a219e8dcb0145348eb6aee184cfca989b408d570e165f",
+      "decision": "D10c",
+      "route_class": "audio-event",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:audio-event"
+      ],
+      "resource_route_contract": "docs/golden_mode/specs/re/l1-directory-resource-routes.md"
+    },
+    {
+      "address": "0x005c4a40",
+      "root": "0x005c4a40",
+      "size": 517,
+      "offset": 0,
+      "live_size": 600,
+      "header_count": 12,
+      "volume": "VOL",
+      "path": "\\SPU\\",
+      "ps2_file_count": 10,
+      "golden_subtree_count": 0,
+      "same_basename_count": 0,
+      "matched_path_examples": [],
+      "source_sha256": "1fcb4a0b04121c4e471dfaffea4e7041c39e005cdc7c876b5f70ce6bb573f6c4",
+      "decision": "D10c",
+      "route_class": "audio-common",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:audio-common"
+      ],
+      "resource_route_contract": "docs/golden_mode/specs/re/l1-directory-resource-routes.md"
+    },
+    {
+      "address": "0x005c554b",
+      "root": "0x005c4ec0",
+      "size": 3589,
+      "offset": 1675,
+      "live_size": 5256,
+      "header_count": 109,
+      "volume": "BGM",
+      "path": "\\",
+      "ps2_file_count": 107,
+      "golden_subtree_count": 0,
+      "same_basename_count": 0,
+      "matched_path_examples": [],
+      "source_sha256": "0001131eca08bc731da5b247e29bfda7b8a07920cf2aa80e12c2773115c998d8",
+      "decision": "D10c",
+      "route_class": "audio-bgm",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:audio-bgm"
+      ],
+      "resource_route_contract": "docs/golden_mode/specs/re/l1-directory-resource-routes.md"
+    },
+    {
+      "address": "0x005c6350",
+      "root": "0x005c6350",
+      "size": 272,
+      "offset": 0,
+      "live_size": 264,
+      "header_count": 5,
+      "volume": "BTL",
+      "path": "\\",
+      "ps2_file_count": 0,
+      "golden_subtree_count": 0,
+      "same_basename_count": 0,
+      "matched_path_examples": [],
+      "source_sha256": "b245bc2d4fc2a3edada1a56f8f0307db70fbb154111eb66767942bdea325fa18",
+      "decision": "D10c",
+      "route_class": "battle-root",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:battle-root"
+      ],
+      "resource_route_contract": "docs/golden_mode/specs/re/l1-directory-resource-routes.md"
+    },
+    {
+      "address": "0x005db850",
+      "root": "0x005db850",
+      "size": 3296,
+      "offset": 0,
+      "live_size": 3288,
+      "header_count": 68,
+      "volume": "ENV",
+      "path": "\\",
+      "ps2_file_count": 66,
+      "golden_subtree_count": 0,
+      "same_basename_count": 0,
+      "matched_path_examples": [],
+      "source_sha256": "042be51c5557c2223ff241653f00c94db255250a765d23004a8e57e2d77987d2",
+      "decision": "D10c",
+      "route_class": "audio-env",
+      "runtime_status": "pending-seam",
+      "required_seams": [
+        "golden-resource-route:audio-env"
+      ],
+      "resource_route_contract": "docs/golden_mode/specs/re/l1-directory-resource-routes.md"
+    }
+  ],
+  "sources": [
+    {
+      "children": 22,
+      "kind": "pak-v2",
+      "path": "data.cpk::init_free.bin::system/effect/effpack.bin",
+      "sha256": "5d044b2b1060dd2caefdd1210fc093af274bd974d097f15732c865fcbd7c7b3b",
+      "signature": "rw-chunk-16",
+      "size": 208540
+    },
+    {
+      "path": "data.cpk::init_free.bin::battle/effect/z0.tmx",
+      "sha256": "436c8f7ca1d4fa5205446a4d29cd6b317cff4be257851958eec1f5a23d65de35",
+      "signature": "tmx",
+      "size": 8320
+    },
+    {
+      "path": "data.cpk::init.bin::event/npc_def.dat",
+      "sha256": "9a139fed1aa3e584e812654023df937eaf5bcc562fef64a6a4042f5be38a7885",
+      "signature": "magic:dc050000",
+      "size": 1508
+    },
+    {
+      "path": "data.cpk::model/field/fc_01_00.AMD",
+      "sha256": "97946a90c321986afd156af3cfb03c629ea49b85c8793c8d28656aca80458294",
+      "signature": "amd-chunk",
+      "size": 362816
+    },
+    {
+      "path": "data.cpk::model/npc/n1001_0.AMD",
+      "sha256": "62b68e27529bcbfcfd06f4d6fcb772ca063723c09f545699102f947072c60b49",
+      "signature": "amd-chunk",
+      "size": 316160
+    },
+    {
+      "children": 21,
+      "kind": "pak-v2",
+      "path": "data.cpk::facility/cmbroot.arc",
+      "sha256": "01a43163bbcb3219c83fbce401251d1ed78a143b51c35e63cc267dcee10f0760",
+      "signature": "magic:15000000",
+      "size": 16444344
+    },
+    {
+      "path": "data.cpk::facility/cmbroot.arc::velvet_01x2.spr",
+      "sha256": "e555fe7b5a8d843ff881de9789cfd32267fa04bf83de50fcf15e088198d72e9f",
+      "signature": "spr",
+      "size": 5265408
+    },
+    {
+      "path": "data.cpk::facility/cmbroot.arc::bonus_expx2.spr",
+      "sha256": "23f822badb25f8484545d8404828d3640969a06f4879fd3a3d7e075f49254840",
+      "signature": "spr",
+      "size": 2363392
+    },
+    {
+      "path": "data.cpk::facility/cmbroot.arc::ps_model.bin",
+      "sha256": "1de0840c267f4064ef1ceac8e594d548bef1131dc25a7f04f918f53bd53baeeb",
+      "signature": "magic:00010000",
+      "size": 16672
+    },
+    {
+      "children": 5,
+      "kind": "pak-v2",
+      "path": "data.cpk::facility/weapon.arc",
+      "sha256": "84e774367a75607a3fbff729d61b4282975436e762d693c8cca54921e59d787e",
+      "signature": "magic:05000000",
+      "size": 1822072
+    }
+  ],
+  "golden_audio": {
+    "banks": [
+      {
+        "source": "data.cpk::sound/adx2/bgm/snd00_bgm.acb",
+        "size": 821664,
+        "sha256": "55dc9632f03e8f4724d786d038bd5387c5e24087601574a5a65fac8e6cda0485",
+        "cue_count": 900,
+        "shapes": {
+          "root": {
+            "columns": 96,
+            "declared_row_width": 415,
+            "computed_row_storage": 439,
+            "rows": 1,
+            "ignored_extension_columns": [
+              "PaddingArea",
+              "StreamAwbTocWork",
+              "StreamAwbAfs2Header"
+            ],
+            "unclaimed_row_region": 24
+          },
+          "CueTable": {
+            "columns": 10,
+            "declared_row_width": 29,
+            "computed_row_storage": 29,
+            "rows": 900,
+            "ignored_extension_columns": [],
+            "unclaimed_row_region": 0
+          },
+          "CueNameTable": {
+            "columns": 2,
+            "declared_row_width": 6,
+            "computed_row_storage": 6,
+            "rows": 900,
+            "ignored_extension_columns": [],
+            "unclaimed_row_region": 0
+          }
+        }
+      },
+      {
+        "source": "data.cpk::sound/adx2/bgm_en/snd00_bgm.acb",
+        "size": 423456,
+        "sha256": "fffe2b854470d4194f9d23800e5ebcc6ade421cfd1188e02cc1cd618de5bdfcd",
+        "cue_count": 900,
+        "shapes": {
+          "root": {
+            "columns": 96,
+            "declared_row_width": 415,
+            "computed_row_storage": 439,
+            "rows": 1,
+            "ignored_extension_columns": [
+              "PaddingArea",
+              "StreamAwbTocWork",
+              "StreamAwbAfs2Header"
+            ],
+            "unclaimed_row_region": 24
+          },
+          "CueTable": {
+            "columns": 10,
+            "declared_row_width": 29,
+            "computed_row_storage": 29,
+            "rows": 900,
+            "ignored_extension_columns": [],
+            "unclaimed_row_region": 0
+          },
+          "CueNameTable": {
+            "columns": 2,
+            "declared_row_width": 6,
+            "computed_row_storage": 6,
+            "rows": 900,
+            "ignored_extension_columns": [],
+            "unclaimed_row_region": 0
+          }
+        }
+      },
+      {
+        "source": "data.cpk::sound/adx2/comse/snd04_comse.acb",
+        "size": 7160608,
+        "sha256": "1f057a660a122f1ec91eccb6d05a818d0839ceb38775d98759a10f55dcf22324",
+        "cue_count": 249,
+        "shapes": {
+          "root": {
+            "columns": 96,
+            "declared_row_width": 415,
+            "computed_row_storage": 439,
+            "rows": 1,
+            "ignored_extension_columns": [
+              "PaddingArea",
+              "StreamAwbTocWork",
+              "StreamAwbAfs2Header"
+            ],
+            "unclaimed_row_region": 24
+          },
+          "CueTable": {
+            "columns": 10,
+            "declared_row_width": 29,
+            "computed_row_storage": 29,
+            "rows": 249,
+            "ignored_extension_columns": [],
+            "unclaimed_row_region": 0
+          },
+          "CueNameTable": {
+            "columns": 2,
+            "declared_row_width": 6,
+            "computed_row_storage": 6,
+            "rows": 249,
+            "ignored_extension_columns": [],
+            "unclaimed_row_region": 0
+          }
+        }
+      }
+    ],
+    "source_parser_boundary": "Bounded metadata-only reader decodes named root prefix and complete CueTable/CueNameTable. ACB root declares row width415 but column storage439 with24bytes extra region; three appended columns are explicitly not parsed. Nested cue tables have exact declared/storage widths29 and6. Existing CPK UTF reader rejects this ACB variant; no production parser, verify or threshold was weakened. This receipt is not a full ACB playback parser.",
+    "legacy_name_joins": [
+      {
+        "address": "0x005c0c20",
+        "joined_count": 17,
+        "unmatched_ps2_names": [
+          "BOKO.ADX",
+          "EM109_END.ADX"
+        ],
+        "examples": [
+          {
+            "ps2_name": "EM100_END.AHX",
+            "golden_cue_name": "em100_end",
+            "cue_id": 1903
+          },
+          {
+            "ps2_name": "EM101_END.AHX",
+            "golden_cue_name": "em101_end",
+            "cue_id": 1904
+          },
+          {
+            "ps2_name": "EM102_END.AHX",
+            "golden_cue_name": "em102_end",
+            "cue_id": 1905
+          },
+          {
+            "ps2_name": "EM103_END.AHX",
+            "golden_cue_name": "em103_end",
+            "cue_id": 1906
+          }
+        ]
+      },
+      {
+        "address": "0x005c1030",
+        "joined_count": 305,
+        "unmatched_ps2_names": [
+          "EVE_125.ADX",
+          "EVE_525.ADX"
+        ],
+        "examples": [
+          {
+            "ps2_name": "EVE_001.ADX",
+            "golden_cue_name": "eve_001",
+            "cue_id": 1001
+          },
+          {
+            "ps2_name": "EVE_002.ADX",
+            "golden_cue_name": "eve_002",
+            "cue_id": 1002
+          },
+          {
+            "ps2_name": "EVE_003.ADX",
+            "golden_cue_name": "eve_003",
+            "cue_id": 1003
+          },
+          {
+            "ps2_name": "EVE_004.ADX",
+            "golden_cue_name": "eve_004",
+            "cue_id": 1004
+          }
+        ]
+      },
+      {
+        "address": "0x005c414e",
+        "joined_count": 305,
+        "unmatched_ps2_names": [
+          "EVE_125.ADX",
+          "EVE_525.ADX"
+        ],
+        "examples": [
+          {
+            "ps2_name": "EVE_001.ADX",
+            "golden_cue_name": "eve_001",
+            "cue_id": 1001
+          },
+          {
+            "ps2_name": "EVE_002.ADX",
+            "golden_cue_name": "eve_002",
+            "cue_id": 1002
+          },
+          {
+            "ps2_name": "EVE_003.ADX",
+            "golden_cue_name": "eve_003",
+            "cue_id": 1003
+          },
+          {
+            "ps2_name": "EVE_004.ADX",
+            "golden_cue_name": "eve_004",
+            "cue_id": 1004
+          }
+        ]
+      },
+      {
+        "address": "0x005c454c",
+        "joined_count": 305,
+        "unmatched_ps2_names": [
+          "EVE_125.ADX",
+          "EVE_525.ADX"
+        ],
+        "examples": [
+          {
+            "ps2_name": "EVE_001.ADX",
+            "golden_cue_name": "eve_001",
+            "cue_id": 1001
+          },
+          {
+            "ps2_name": "EVE_002.ADX",
+            "golden_cue_name": "eve_002",
+            "cue_id": 1002
+          },
+          {
+            "ps2_name": "EVE_003.ADX",
+            "golden_cue_name": "eve_003",
+            "cue_id": 1003
+          },
+          {
+            "ps2_name": "EVE_004.ADX",
+            "golden_cue_name": "eve_004",
+            "cue_id": 1004
+          }
+        ]
+      },
+      {
+        "address": "0x005c554b",
+        "joined_count": 56,
+        "unmatched_ps2_names": [
+          "100.ADX",
+          "101.ADX",
+          "102.ADX",
+          "103.ADX",
+          "104.ADX",
+          "105.ADX",
+          "106.ADX",
+          "107.ADX",
+          "108.ADX",
+          "109.ADX",
+          "110.ADX",
+          "111.ADX",
+          "112.ADX",
+          "113.ADX",
+          "114.ADX",
+          "115.ADX",
+          "60.ADX",
+          "62.ADX",
+          "63.ADX",
+          "70.ADX",
+          "71.ADX",
+          "72.ADX",
+          "73.ADX",
+          "74.ADX",
+          "75.ADX",
+          "76.ADX",
+          "77.ADX",
+          "78.ADX",
+          "79.ADX",
+          "80.ADX",
+          "81.ADX",
+          "82.ADX",
+          "83.ADX",
+          "84.ADX",
+          "85.ADX",
+          "86.ADX",
+          "87.ADX",
+          "88.ADX",
+          "89.ADX",
+          "90.ADX",
+          "91.ADX",
+          "92.ADX",
+          "93.ADX",
+          "94.ADX",
+          "95.ADX",
+          "96.ADX",
+          "97.ADX",
+          "98.ADX",
+          "99.ADX",
+          "DUMMY.ADX",
+          "THEME.ADX"
+        ],
+        "examples": [
+          {
+            "ps2_name": "01.ADX",
+            "golden_cue_name": "bgm_001",
+            "cue_id": 1
+          },
+          {
+            "ps2_name": "02.ADX",
+            "golden_cue_name": "bgm_002",
+            "cue_id": 2
+          },
+          {
+            "ps2_name": "03.ADX",
+            "golden_cue_name": "bgm_003",
+            "cue_id": 3
+          },
+          {
+            "ps2_name": "04.ADX",
+            "golden_cue_name": "bgm_004",
+            "cue_id": 4
+          }
+        ]
+      },
+      {
+        "address": "0x005db850",
+        "joined_count": 66,
+        "unmatched_ps2_names": [],
+        "examples": [
+          {
+            "ps2_name": "ENV_301.ADX",
+            "golden_cue_name": "env_301",
+            "cue_id": 301
+          },
+          {
+            "ps2_name": "ENV_302.ADX",
+            "golden_cue_name": "env_302",
+            "cue_id": 302
+          },
+          {
+            "ps2_name": "ENV_303.ADX",
+            "golden_cue_name": "env_303",
+            "cue_id": 303
+          },
+          {
+            "ps2_name": "ENV_304.ADX",
+            "golden_cue_name": "env_304",
+            "cue_id": 304
+          }
+        ]
+      }
+    ],
+    "explicit_cues": [
+      {
+        "id": 1,
+        "name": "BGM_001",
+        "reference_type": 3,
+        "reference_index": 1
+      },
+      {
+        "id": 60,
+        "name": "BGM060_ENV380",
+        "reference_type": 3,
+        "reference_index": 60
+      },
+      {
+        "id": 301,
+        "name": "ENV_301",
+        "reference_type": 3,
+        "reference_index": 63
+      },
+      {
+        "id": 366,
+        "name": "ENV_366",
+        "reference_type": 3,
+        "reference_index": 128
+      },
+      {
+        "id": 1001,
+        "name": "EVE_001",
+        "reference_type": 3,
+        "reference_index": 169
+      },
+      {
+        "id": 1125,
+        "name": "dammy_3",
+        "reference_type": 3,
+        "reference_index": 293
+      },
+      {
+        "id": 1525,
+        "name": "dammy_20",
+        "reference_type": 3,
+        "reference_index": 580
+      },
+      {
+        "id": 1900,
+        "name": "SK_100",
+        "reference_type": 3,
+        "reference_index": 682
+      },
+      {
+        "id": 1903,
+        "name": "EM100_END",
+        "reference_type": 3,
+        "reference_index": 685
+      },
+      {
+        "id": 1907,
+        "name": "dammy_0",
+        "reference_type": 3,
+        "reference_index": 689
+      },
+      {
+        "id": 1912,
+        "name": "dammy_5",
+        "reference_type": 3,
+        "reference_index": 694
+      }
+    ],
+    "common_families": {
+      "comse": 132,
+      "bse": 117,
+      "cue_formula": "(family==0 ?10000:20000) +100*sequence +cue; other family returns without playback",
+      "producer": "NSO3a36d0 -> channel4 common bank; source slot4 loaded by276da0",
+      "label_disagreements": [
+        {
+          "name": "bse05_07",
+          "actual_cue_id": 20508,
+          "id_inferred_from_label_not_authorized": 20507
+        },
+        {
+          "name": "bse05_08",
+          "actual_cue_id": 20507,
+          "id_inferred_from_label_not_authorized": 20508
+        }
+      ],
+      "identity_rule": "Preserve actual CueTable.CueId. Native producer arithmetic is not a parser for CueName labels: bse05_07/08 labels are swapped relative to IDs20507/20508."
+    },
+    "bank_initialization": "276da0 loads slots0,21 BGM/alternate-language ACB+AWB;4 COMSE ACB;13/14/15 and17/18/19 battle voice AWB.276c30 waits readiness then publishes0->channels0,2,3;4->channel4;13/14/15 multiplexed channel1 slots1/2/3.",
+    "bank_scheduler": "3a3dc0 scans22 banks; queued(used1,state1) creates ACB with binder and logical path+0x16, memory ACB or AWB by type; sets state3 only on nonnull handle.3a1fc0 detaches referencing channels then releases ACB/AWB and clears state.",
+    "locale_selector": {
+      "getter": "3112c0",
+      "setter": "3112b0",
+      "pointer_slot": "0x00881290",
+      "state": "0x050a7300",
+      "state_storage": "NSO BSS (same pinned image as initial receipt)",
+      "hydration": "1136e0 reads SYSTEM/Voice, default formatted decimal0, atoi result passed in w0 at113748 to setter.",
+      "default": 0,
+      "alternate_map": [
+        17,
+        18,
+        19,
+        20,
+        21
+      ],
+      "normalizer": "3a11f0 maps banks13/14/15/16/0 to17/18/19/20/21 only with nonzero Voice, ready base+alternate; type2 AWB uses candidate, ACB candidate additionally requires cue-existence query3ee8a8. No text-locale assumption."
+    },
+    "ps2_triplet_registration": "00712390 row0 three empty names; row1 spu/comse.hd/bd/sq; row2 spu/bse.hd/bd/sq. Legacy physical bank/IOP transfer graph replaced by Golden ACB family names and actual CRI binder/Atom players. No TEST/BSE.SE deadness claim.",
+    "voice_state_storage_proof": {
+      "source": "Pinned NSO header as decoded in l1c-sidecar-bss.json",
+      "receipt_sha256": "1fd8d07946069ca6ed7da566150c960b13222f360a2baa8d583288c2fdba257d",
+      "data_memory_offset": "0x6fc000",
+      "data_size": 1606720,
+      "bss_size": 493882304,
+      "bss_start": "0x884440",
+      "bss_end": "0x1df85000",
+      "voice_state": "0x050a7300",
+      "initial_value": 0,
+      "scope": "Process-initial BSS zero; config reader1136e0 subsequently hydrates SYSTEM/Voice. Zero is not an unconditional language override."
+    },
+    "bank_scheduler_valid_type_scope": "Nonnull-handle readiness claim concerns the authored valid types0(fileACB),1(memoryACB),2(AWB), not an invalid bank type outside the producers contract."
+  },
+  "golden_facility_descriptor": {
+    "descriptor": "0x764fe0",
+    "parent": "facility/weapon.arc",
+    "path_array": "0x764f98",
+    "counts": [
+      1,
+      2,
+      0
+    ],
+    "paths": [
+      "facility/msg_weapon.bmd",
+      "facility/weapon.bf",
+      "facility/weapon.ctb",
+      "facility/weaponx2.plg",
+      "facility/shop_daidarax2.spr"
+    ]
+  },
+  "golden_models": {
+    "registration": "280d10 ->385e60 installs280d60 name callback in51c8f40;385f30 dispatches that slot. PS2 counterpart2312e0 registers2308a0.",
+    "field_kind": 9,
+    "field_path": "model/field/fc_%02d_%02d.AMD; high/low bytes of model id",
+    "npc_kind": 5,
+    "npc_path": "281430 uses event/npc_def.dat count+4 records+8, four-byte id/mask records; native calendar/context selectors choose variant; id>0xc4f selectsnpc2. No old RMD filename or variant table reused.",
+    "battle_union": "MODEL_BTL legacy enemy/persona/pack resource paths are now model/enemy,model/persona,model/pack logical/cache namespaces through the same registered callback. BTL root has directories only: BATTLE,MODEL_BTL,SKILL.",
+    "direct_file_boundary": "Some player/enemy models are members of PAC/cache sources, not top-level CPK members. Preserve280f30 PAC path decision and use actual Golden full-member names; do not reject a valid cache source based on zero direct CPK files."
+  },
+  "reproduction": {
+    "private_root": "<scratch>/GoldenRE-notes\\l1",
+    "scripts": {
+      "c4_remaining_anchors.py": "f6f8846a1b2c37d4467fc813edc74031439a7e7634c66a13871b8931d6834923",
+      "c4_remaining_join.py": "a6ed364e77317217d09684a74b677bbe30673ab50925590459db6269710fb3cc",
+      "c4_audio_callers.py": "79f52b444b1a8e7f42eda075db931627d400185d3e1d54cb2e73dd77339ee5a2",
+      "c4_facility_owners.py": "b12746e076049b780ab632740db8b232bb48dbfccb9a9de6ee242e65f7647740",
+      "c4_acb_header.py": "e19d346db1fb52b1b1eedf8fe7922e111c6f30c4bf239f999cc20d974aa2b830",
+      "c4_acb_prefix.py": "67332a0de945b3bb3ad0b0bb8f999b27731003d74b2f306ac1c28129a465b88d",
+      "c4_audio_model_join.py": "d9af9b95817c41d88fc09f7a3bb871b8ca3d9b7b0f5048245f638d332e349fb2",
+      "c4_successor_evidence.py": "3b024651a132c90b590da0b75bc9a7da019d45774c18014353091f93041ffa2c",
+      "c4_selector_state.py": "d2f16cc27896427645f5b12469f33ae135a64dfd3c7eae0398e4656be92b2b4c",
+      "c4_config_callers.py": "87c99b46338ad7ba688eba80c0ac8e582f2d714708c5a4608faebcdddce25816",
+      "c4_producer_instructions.py": "3743503d445b96d18d2e5854bd549849dd1c47bc195a56b0e3761e18c8a2a88f",
+      "c4_facility_successor.py": "a09087ef3be6857cd9727b5d47b161fe15a7b2d25f34435c13dedbb2970030b2",
+      "c4_followup_proof.py": "e856058ed32633be6e01ffc43a22919c51d444a9f8cb561dd0e4275137af5be0"
+    },
+    "workers": [
+      "7100280d10-l1c3.txt",
+      "7100280d60-l1c3.txt",
+      "7100280f30-l1c3.txt",
+      "7100281430-l1c3.txt",
+      "7100385e60-l1c3.txt",
+      "7100385f30-l1c3.txt",
+      "710034dc40-l1c3.txt",
+      "7100276da0-l1c3.txt",
+      "7100276c30-l1c3.txt",
+      "71003a1610-l1c3.txt",
+      "71003a1ec0-l1c3.txt",
+      "71003a2330-l1c3.txt",
+      "71003a23f0-l1c3.txt",
+      "71003a1370-l1c3.txt",
+      "71003a1fc0-l1c3.txt",
+      "71003a27d0-l1c3.txt",
+      "71003a36d0-l1c3.txt",
+      "71003a3dc0-l1c3.txt",
+      "71003a11f0-l1c3.txt",
+      "71003112b0-l1c3.txt",
+      "71003112c0-l1c3.txt",
+      "71001136e0-l1c3.txt",
+      "710014d4c0-l1c3.txt",
+      "7100148680-l1c3.txt",
+      "71000060a0-l1c3.txt",
+      "7100154bf0-l1c3.txt",
+      "7100153150-l1c3.txt",
+      "71001987f0-l1c3.txt",
+      "7100198910-l1c3.txt",
+      "71002e4e30-l1c3.txt"
+    ],
+    "instruction_receipts": [
+      "c4-successor-instructions.txt",
+      "c4-producer-instructions.txt",
+      "c4-facility-successor-instructions.txt"
+    ],
+    "not_used_as_evidence": [
+      "Mistyped15d4f0 is a fusion-state fragment,1975a0 is a destructor fragment not a constructor,276f20 is an initialization-tail fragment,1136f4 misses its prologue; corrected154bf0 and1136e0 supply actual evidence.",
+      "Existing utf_table failed on ACB root appended columns; bounded research prefix reader reports ignored columns, never substitutes for runtime ACB parsing."
+    ],
+    "checks_not_run": [
+      "build",
+      "unit tests",
+      "verify",
+      "objdiff",
+      "CI",
+      "BBV",
+      "game/emulator",
+      "runtime binder"
+    ],
+    "publication": "fetch/rebase and expected-old-value CAS; no remote push"
+  }
+}

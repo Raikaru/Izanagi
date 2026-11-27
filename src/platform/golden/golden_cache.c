@@ -232,6 +232,15 @@ static int load_at(const char *dir, const char *expected, P4GoldenCacheTable *ta
         if (strcmp(actual,digest)) goto bad;
     }
     if (strcmp(cursor,"\n]\n")) goto bad;
+    for (size_t i = 0; i < count; ++i) if (!strcmp(tables[i].name, "image-index.json")) {
+        size_t image_size;
+        if (join(path, dir, "image-index.json")) goto bad;
+        uint8_t *image_index = read_file(path, META_CAP, &image_size);
+        int mismatch = !image_index || image_size != tables[i].size ||
+            memcmp(image_index, tables[i].data, image_size);
+        free(image_index);
+        if (mismatch) goto bad;
+    }
     free(index); return 0;
 bad:
     free(index); p4_golden_cache_free(tables,count); return 1;
@@ -265,8 +274,8 @@ static int remove_entry(const char *dir)
     if (p4_os_is_dir_nofollow(r.dir)) {
         if (p4_os_list_dir_utf8(r.dir,remove_object,&r) || r.bad || p4_os_rmdir(r.dir)) return -1;
     }
-    const char *files[] = {"manifest.json","tables-index.json"};
-    for (size_t i = 0; i < 2; ++i) {
+    const char *files[] = {"manifest.json","tables-index.json","image-index.json"};
+    for (size_t i = 0; i < sizeof files / sizeof files[0]; ++i) {
         if (join(path,dir,files[i])) return -1;
         if (p4_os_is_file_nofollow(path) && p4_os_remove_utf8(path)) return -1;
     }
@@ -308,6 +317,10 @@ int p4_golden_cache_store(const P4GoldenCachePaths *paths, const P4GoldenCacheId
     memcpy(m+msize-2,suffix,(size_t)suffix_size+1);
     if (join(path,stage,"manifest.json") || write_file(path,m,strlen(m)) ||
         join(path,stage,"tables-index.json") || write_file(path,index,b.used)) goto io;
+    for (size_t i = 0; i < count; ++i) if (!strcmp(tables[i].name, "image-index.json")) {
+        if (join(path, stage, "image-index.json") ||
+            write_file(path, tables[i].data, tables[i].size)) goto io;
+    }
     if (p4_os_is_dir_nofollow(dir) && remove_entry(dir)) goto io;
     if (p4_os_rename(stage,dir)) goto io;
     {

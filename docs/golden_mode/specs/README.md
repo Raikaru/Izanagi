@@ -57,3 +57,33 @@ expect: <one-line JSON>
 `expect` keys: `ftd`/`dat`: `rows`, `payload` (hex); `tbl`: `spans` (hex list); `itemtbl`: `sections`
 (`[rows, row size, payload hex]` list, row sizes 68 then 24); `pak`: `variant` and `entries`
 (`[name, payload hex]` list). A vector whose `expect` is `null` must be refused by the container reader.
+
+## Workstation provenance
+
+Source receipts use the following stable placeholders, not a researcher's
+workstation paths. Match roots case-insensitively, accepting slash and escaped
+backslash spellings; apply the more specific installation roots first.
+
+| Workstation root shape | Neutral root |
+|---|---|
+| `<drive>:/Users/<user>/Projects/Persona 3 Decomp/source/Persona4-Decompilation` | `<decomp>` |
+| `<drive>:/Users/<user>/Projects/_scratch` | `<scratch>` |
+| `<drive>:/Users/<user>/AppData/Local/Programs/Python/Python312` | `<python>` |
+| `<drive>:/Program Files [(x86)]/Steam/steamapps/common/Persona 4 Golden` | `<steam-install>` |
+| `<drive>:/Program Files [(x86)]/Git` | `<git-install>` |
+| `<drive>:/p4pc-{scratch,local,test}` | `<scratch>` |
+| `<drive>:/p4pc-work` | `<worktree>` |
+| `<drive>:/Users/<user>`, `/home/<user>`, `/Users/<user>` | `<home>` |
+| `/mnt/<drive-letter>` | `<drive>` |
+
+Only the root and its immediately following separator are normalized; historical
+suffix spelling is retained. These are provenance locations, never runtime
+dependencies. Do not change source values, addresses, classes or game-image
+hashes. A receipt digest that hashes a changed provenance document must be
+recomputed from that document, without weakening the hash check.
+
+Embedded game/build strings, including `D:/Projects/P4G-NSW/...` and SDK build
+paths, are evidence and remain verbatim. Both L0 and L1 publication gates reject
+workstation-local provenance anywhere in the complete committed spec tree,
+including unchanged files; the rules live in `tools/golden_mode/re_spec_provenance.py`.
+

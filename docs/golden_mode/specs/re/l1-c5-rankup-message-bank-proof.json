@@ -1,0 +1,526 @@
+{
+  "proof_id": "L1-C5-rankup-message-bank-20261113",
+  "class": "PROVEN",
+  "runtime_status": "pending-seam",
+  "scope": "One selected L1 partition63696e/194B of the complete social-category gain/rank-up bank. Prefix636850/286B is already an identical golden-exe supplier outside the1043L1selection, not another OPEN admission. Source proof only.",
+  "ps2": {
+    "base": "0x00636850",
+    "size": 465,
+    "entry_count": 4,
+    "header": [
+      7,
+      465,
+      826757965,
+      0,
+      456,
+      9,
+      4
+    ],
+    "sha256": "f6c9ca258c85b29100603bb2f2e198b7ce8bf8cb64c46933a209d7d9048d2e20",
+    "ordered_kind_name": [
+      [
+        0,
+        "MSG_UP_A"
+      ],
+      [
+        0,
+        "MSG_UP_B"
+      ],
+      [
+        0,
+        "MSG_UP_C"
+      ],
+      [
+        0,
+        "MSG_RNK_UP"
+      ]
+    ]
+  },
+  "locale_table": {
+    "steam_rva": "0x914910",
+    "steam_raw_offset": 9516304,
+    "switch_address": "0x7100796598",
+    "entries": 9,
+    "pointer_stride": 8,
+    "switch_pointer_relocation": "0x880fd8 ->796598",
+    "selector_storage_switch": "0x1d201960",
+    "selector_load": "2b24d0 reads pointer through880540;2b24dc loads signed32-bit index;2b24e0 loads table[index]*8,2b24e4 calls2c85b0. No guessed table or shifted M2 source window.",
+    "extent_proof": "Exactly nine contiguous pointers target complete4-entry MSG1 banks with identical ordered identity sequence in both native images. Immediately following pointers are non-bank scalar values (Switch c8141ffff05f2; Steam100000000); independent reader starts at the firsttable entry, not M2candidate interior.",
+    "ordinary_steam_reader": "No corresponding ordinary Steam reader is claimed: nearby419b40 refs are before this table and unrelated. Complete Steam payloads and ordered pointers corroborate the actual ordinary NSO selector/task correspondence; no.arch decoding."
+  },
+  "localized_banks": [
+    {
+      "locale_slot": 0,
+      "size": 445,
+      "entry_count": 4,
+      "sha256": "340c4aa0bfcbd192546defbb3f4aba2659f9bbecc04c9e7827430c5b64af7384",
+      "header": [
+        7,
+        445,
+        826757965,
+        0,
+        436,
+        9,
+        4
+      ],
+      "steam": {
+        "container": "P4G.exe",
+        "section": ".xpdata",
+        "rva": "0xaab570",
+        "raw_offset": 11181424,
+        "offset": 570736,
+        "size": 445,
+        "sha256": "340c4aa0bfcbd192546defbb3f4aba2659f9bbecc04c9e7827430c5b64af7384",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true,
+        "source_build": 10836033
+      },
+      "switch_address": "0x710079554d"
+    },
+    {
+      "locale_slot": 1,
+      "size": 465,
+      "entry_count": 4,
+      "sha256": "f6c9ca258c85b29100603bb2f2e198b7ce8bf8cb64c46933a209d7d9048d2e20",
+      "header": [
+        7,
+        465,
+        826757965,
+        0,
+        456,
+        9,
+        4
+      ],
+      "steam": {
+        "container": "P4G.exe",
+        "section": ".xpdata",
+        "rva": "0xaab730",
+        "raw_offset": 11181872,
+        "offset": 571184,
+        "size": 465,
+        "sha256": "f6c9ca258c85b29100603bb2f2e198b7ce8bf8cb64c46933a209d7d9048d2e20",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true,
+        "source_build": 10836033
+      },
+      "switch_address": "0x710079570a"
+    },
+    {
+      "locale_slot": 2,
+      "size": 477,
+      "entry_count": 4,
+      "sha256": "8d56474cb0c82d971539b63a2be4b83e9aaa9b158ef6a74372279a17084f4c31",
+      "header": [
+        7,
+        477,
+        826757965,
+        0,
+        468,
+        9,
+        4
+      ],
+      "steam": {
+        "container": "P4G.exe",
+        "section": ".xpdata",
+        "rva": "0xaab960",
+        "raw_offset": 11182432,
+        "offset": 571744,
+        "size": 477,
+        "sha256": "8d56474cb0c82d971539b63a2be4b83e9aaa9b158ef6a74372279a17084f4c31",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true,
+        "source_build": 10836033
+      },
+      "switch_address": "0x71007958db"
+    },
+    {
+      "locale_slot": 3,
+      "size": 437,
+      "entry_count": 4,
+      "sha256": "e20d5b97dece858fbc77de84c093c55cd608df55f91c93d29c5d520fab42acba",
+      "header": [
+        7,
+        437,
+        826757965,
+        0,
+        428,
+        9,
+        4
+      ],
+      "steam": {
+        "container": "P4G.exe",
+        "section": ".xpdata",
+        "rva": "0xaaad60",
+        "raw_offset": 11179360,
+        "offset": 568672,
+        "size": 437,
+        "sha256": "e20d5b97dece858fbc77de84c093c55cd608df55f91c93d29c5d520fab42acba",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true,
+        "source_build": 10836033
+      },
+      "switch_address": "0x7100795ab8"
+    },
+    {
+      "locale_slot": 4,
+      "size": 429,
+      "entry_count": 4,
+      "sha256": "1041d1fb0638521c31272f1583ab1c75753e1273f94ba5390efa897889cbe08c",
+      "header": [
+        7,
+        429,
+        826757965,
+        0,
+        420,
+        9,
+        4
+      ],
+      "steam": {
+        "container": "P4G.exe",
+        "section": ".xpdata",
+        "rva": "0xaaaf40",
+        "raw_offset": 11179840,
+        "offset": 569152,
+        "size": 429,
+        "sha256": "1041d1fb0638521c31272f1583ab1c75753e1273f94ba5390efa897889cbe08c",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true,
+        "source_build": 10836033
+      },
+      "switch_address": "0x7100795c6d"
+    },
+    {
+      "locale_slot": 5,
+      "size": 457,
+      "entry_count": 4,
+      "sha256": "275a5a8142f78cffb06354cd0df4d359961757ec91d8f94fa20bbc3e94370864",
+      "header": [
+        7,
+        457,
+        826757965,
+        0,
+        448,
+        9,
+        4
+      ],
+      "steam": {
+        "container": "P4G.exe",
+        "section": ".xpdata",
+        "rva": "0xaaab90",
+        "raw_offset": 11178896,
+        "offset": 568208,
+        "size": 457,
+        "sha256": "275a5a8142f78cffb06354cd0df4d359961757ec91d8f94fa20bbc3e94370864",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true,
+        "source_build": 10836033
+      },
+      "switch_address": "0x7100795e1a"
+    },
+    {
+      "locale_slot": 6,
+      "size": 481,
+      "entry_count": 4,
+      "sha256": "2733dac893126e87ddcb500db2f857b9bcb45f2acb3c2b7fd6783be378e41085",
+      "header": [
+        7,
+        481,
+        826757965,
+        0,
+        472,
+        9,
+        4
+      ],
+      "steam": {
+        "container": "P4G.exe",
+        "section": ".xpdata",
+        "rva": "0xaab310",
+        "raw_offset": 11180816,
+        "offset": 570128,
+        "size": 481,
+        "sha256": "2733dac893126e87ddcb500db2f857b9bcb45f2acb3c2b7fd6783be378e41085",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true,
+        "source_build": 10836033
+      },
+      "switch_address": "0x7100795fe3"
+    },
+    {
+      "locale_slot": 7,
+      "size": 517,
+      "entry_count": 4,
+      "sha256": "945b16d45069d39f2eb5d6da00b8aee1d607e73a8fd2eceed333ccab7fdc6ec5",
+      "header": [
+        7,
+        517,
+        826757965,
+        0,
+        508,
+        9,
+        4
+      ],
+      "steam": {
+        "container": "P4G.exe",
+        "section": ".xpdata",
+        "rva": "0xaab0f0",
+        "raw_offset": 11180272,
+        "offset": 569584,
+        "size": 517,
+        "sha256": "945b16d45069d39f2eb5d6da00b8aee1d607e73a8fd2eceed333ccab7fdc6ec5",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true,
+        "source_build": 10836033
+      },
+      "switch_address": "0x71007961c4"
+    },
+    {
+      "locale_slot": 8,
+      "size": 461,
+      "entry_count": 4,
+      "sha256": "de915114d851b40206cef51b15eaf0513d775fb5e20c47e21044ae26c08e8f56",
+      "header": [
+        7,
+        461,
+        826757965,
+        0,
+        452,
+        9,
+        4
+      ],
+      "steam": {
+        "container": "P4G.exe",
+        "section": ".xpdata",
+        "rva": "0xaaa9c0",
+        "raw_offset": 11178432,
+        "offset": 567744,
+        "size": 461,
+        "sha256": "de915114d851b40206cef51b15eaf0513d775fb5e20c47e21044ae26c08e8f56",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true,
+        "source_build": 10836033
+      },
+      "switch_address": "0x71007963c9"
+    }
+  ],
+  "reader_correspondence": {
+    "ps2": "shdScript.c:51-127 /25c790 uses465-byte bank636850, gainselector0..2/categoryname0, updates live category score capped999, rank-change message3 with old/new names1/2, and real slotlifetime.",
+    "switch": "2b2460..2b26ec independent actual resource/icon/stream/slot/gainselector/state/score/rank/substitution/teardown graph; work obtained39fbb0. See ordinary instruction receipt and fixedworker output; key ABI and pointer loads independently checked.",
+    "parser": "2c85b0->2d8240->2d8440 validatesMSG0/1, preserves complete relocation/header/entry data and builds native pointer-width work. This is the same established parser family as the weapon/panel bank proofs.",
+    "rationale": "Typed consumer/state producer and complete ordered four-message identity prove source role. English bank equality corroborates that role; it is not the admission criterion."
+  },
+  "required_seams": [
+    {
+      "owner": "shdScriptCategoryTaskUpdate / create / script command",
+      "ps2_addresses": [
+        "0x0025c790",
+        "0x0025cbc0",
+        "0x0025ccb0"
+      ],
+      "requirement": "Golden-only full localized four-entry MSG1 bank for resource identity636850; use actual signed selector loaded via NSO880540 and nine-pointer table796598 (Steam914910). Seal all nine complete banks; slot1 is byte-exact English source465B, other slots are positional identities, not guessed language names. Do not hardcodeEnglish or derive unknown languages by visual text. Existing host language producer must supply the same positional selector0..8 throughout task creation and message lifetime; route direct/translated/inlined/native BMD allocation, offsets, relocation and encoding through the full selected bank."
+    },
+    {
+      "owner": "category task live input and score/rank state",
+      "requirement": "Task work is four32-bit fields state/index/value/slot, created with actual script category selector and increment, slot initialized-1. Golden2b2460 calls39fbb0 for this actual work and follows states0/1/2. State0 selects icon400-or-c01 from actual resource availability, starts sound0/0/4/3, creates slot then substitutes category name from11dce0->2cca80(32B) at variable0. Actual gain-message selector11f560(category,increment) must yield0..2 (assert otherwise); no fake category or zero increment. State1 waits message completion, restarts slot, obtains old rank112c00, adds actual signed increment to actual current score112be0(1,category), caps positive result999, stores112e40, recomputesrank. Preserve real score/rank storage, extra Golden notification2b3620 and invalidcategory>4 assertion; source proof does not qualify the category point/rank table itself."
+    },
+    {
+      "owner": "rank-change messages, substitutions and teardown",
+      "requirement": "If rank unchanged, destroy slot andfinish. If changed, actual new rank112c00 and oldrank feed11cf20, copies32-byte old/new rank strings into variables1/2, categoryname into0, plays1/0/3/0 and shows message3; then state2 polls/restarts/destroys. IDs0/1/2/3 preserve exact ordered message-kind/name identities in every locale; no remap is needed. Preserve slot validity-1 failure and per-frame stepping, callbacks and task lifetime. Source-backed service must cover unselected gaps via resource seam, never write host pointers or largerlocale bytes over465-byte PS2 image."
+    },
+    {
+      "owner": "selected partition edges and qualification",
+      "requirement": "636850/286 is wholly inside the old file;63696e/194 has179old file bytes followed by15alignment bytes. Preserve all15PS2tail bytes at636a21..636a2f (next taskname636a30), even though otherlocale bank lengths vary. Use native full-bank resource routing; do not map old offsets into differentlocale texts. Qualify gainmessage0..2, failedslot, rank/no-rank cases, category0/4, score999 boundary, allthreevariables, allnine locale slots and complete teardown before runtimebound."
+    }
+  ],
+  "nonselected_prefix_support": {
+    "address": "0x00636850",
+    "size": 286,
+    "supplier": "golden-exe",
+    "m2_match": "identical286/286",
+    "canonical_L1_row": false,
+    "reason": "M2typed record has no golden_check=true; do not add or count this prefix in the canonical1043 ledger."
+  },
+  "admissions": [
+    {
+      "address": "0x0063696e",
+      "ps2_size": 194,
+      "role": "partition of localized social-category gain/rank-up MSG1 bank",
+      "golden": {
+        "kind": "localized-logical-bank",
+        "container": "P4G.exe",
+        "source_group": "L1-C5-rankup-message-bank-20261113",
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "locale_source_list": "localized_banks",
+        "english_source": {
+          "container": "P4G.exe",
+          "section": ".xpdata",
+          "rva": "0xaab730",
+          "raw_offset": 11181872,
+          "offset": 571184,
+          "size": 465,
+          "sha256": "f6c9ca258c85b29100603bb2f2e198b7ce8bf8cb64c46933a209d7d9048d2e20",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true,
+          "source_build": 10836033
+        },
+        "entry_count": 4,
+        "locale_slots": 9
+      },
+      "layout": {
+        "kind": "semantic-localized-message-bank",
+        "ps2_bank_offset": 286,
+        "ps2_live_size": 179,
+        "retained_tail": {
+          "offset": 179,
+          "size": 15
+        },
+        "copy_policy": "route complete selected-locale bank; preserve old alignment tail, no arbitrary partial offset mapping"
+      },
+      "required_seams": [
+        {
+          "owner": "shdScriptCategoryTaskUpdate / create / script command",
+          "ps2_addresses": [
+            "0x0025c790",
+            "0x0025cbc0",
+            "0x0025ccb0"
+          ],
+          "requirement": "Golden-only full localized four-entry MSG1 bank for resource identity636850; use actual signed selector loaded via NSO880540 and nine-pointer table796598 (Steam914910). Seal all nine complete banks; slot1 is byte-exact English source465B, other slots are positional identities, not guessed language names. Do not hardcodeEnglish or derive unknown languages by visual text. Existing host language producer must supply the same positional selector0..8 throughout task creation and message lifetime; route direct/translated/inlined/native BMD allocation, offsets, relocation and encoding through the full selected bank."
+        },
+        {
+          "owner": "category task live input and score/rank state",
+          "requirement": "Task work is four32-bit fields state/index/value/slot, created with actual script category selector and increment, slot initialized-1. Golden2b2460 calls39fbb0 for this actual work and follows states0/1/2. State0 selects icon400-or-c01 from actual resource availability, starts sound0/0/4/3, creates slot then substitutes category name from11dce0->2cca80(32B) at variable0. Actual gain-message selector11f560(category,increment) must yield0..2 (assert otherwise); no fake category or zero increment. State1 waits message completion, restarts slot, obtains old rank112c00, adds actual signed increment to actual current score112be0(1,category), caps positive result999, stores112e40, recomputesrank. Preserve real score/rank storage, extra Golden notification2b3620 and invalidcategory>4 assertion; source proof does not qualify the category point/rank table itself."
+        },
+        {
+          "owner": "rank-change messages, substitutions and teardown",
+          "requirement": "If rank unchanged, destroy slot andfinish. If changed, actual new rank112c00 and oldrank feed11cf20, copies32-byte old/new rank strings into variables1/2, categoryname into0, plays1/0/3/0 and shows message3; then state2 polls/restarts/destroys. IDs0/1/2/3 preserve exact ordered message-kind/name identities in every locale; no remap is needed. Preserve slot validity-1 failure and per-frame stepping, callbacks and task lifetime. Source-backed service must cover unselected gaps via resource seam, never write host pointers or largerlocale bytes over465-byte PS2 image."
+        },
+        {
+          "owner": "selected partition edges and qualification",
+          "requirement": "636850/286 is wholly inside the old file;63696e/194 has179old file bytes followed by15alignment bytes. Preserve all15PS2tail bytes at636a21..636a2f (next taskname636a30), even though otherlocale bank lengths vary. Use native full-bank resource routing; do not map old offsets into differentlocale texts. Qualify gainmessage0..2, failedslot, rank/no-rank cases, category0/4, score999 boundary, allthreevariables, allnine locale slots and complete teardown before runtimebound."
+        }
+      ]
+    }
+  ],
+  "open_character_cue_research": [
+    {
+      "address": "0x0061646f",
+      "size": 754,
+      "decision": "OPEN-retain",
+      "true_enclosing_bank": {
+        "base": "0x0060ac00",
+        "end": "0x00618ac0",
+        "size": 57024,
+        "seasons": 2,
+        "characters_per_season": 11,
+        "character_stride": 2592,
+        "rows": 27,
+        "columns": 8,
+        "cell_stride": 12,
+        "fields": "s8variants[4] (only first3 consumed),s32flags,s16slotId,s16pad; actual mdlSE.c:23-28/155-254 reader"
+      },
+      "selected_views": [
+        {
+          "ps2_season_bank": 1,
+          "ps2_character_id": 7,
+          "character_bank_base": "0x616240",
+          "selected_bank_byte_range": [
+            559,
+            1313
+          ],
+          "whole_bank_nonempty_cells": 15
+        }
+      ],
+      "true_pointer_loader": "btlSoundGetCharacterBank001f7650 selects genus0 actor charId*0xa20 plus0x6f60 when calendar dayflagbit0 clear; btlUnitApplyModelState0019d670 mode4 and btlEncounterFinishSetup0022b870 publish returned bank to Model.motion.request; mdlSeFillEntryState0047e0f0 consumes27x8grid, not geometry or item names.",
+      "golden_reader_lead": "Ordinary NSO38f800 is independently decompiled actual mdlSE cell consumer: same12byte fields/96byte row/three variants/slot-1 suppression/flags, but rowdomain0..31 (32rows), cellbank from state+16.38f360 modelSE loader copies actual packedresource entry1 and publishes it to that state field; optional localized stream from entry2/0 remains separate. M2candidate bc008_c1.se::bc008_c1.bin/3072B is consistent with32x8x12 cue data, NOT a proven mesh or actor/season match.",
+      "remaining_blocker": "Still need actual old actor/season -> Golden model/cache/costume resource identity and logical motion-row correspondence before selecting a specific3072-byte source. Do not use repeatedFFFF disabled cells as an anchor, assume char7 equals model008, or infer global row order across27->32 expansion. Numeric Amrita Soda/Kakitsubata routes remain positively rejected.",
+      "rejected_probe": "38ec20 is mdlManager geometry lookup, not the mdlSE cell reader; never use its misleading nearby bound31 as a cue proof."
+    },
+    {
+      "address": "0x00617461",
+      "size": 1293,
+      "decision": "OPEN-retain",
+      "true_enclosing_bank": {
+        "base": "0x0060ac00",
+        "end": "0x00618ac0",
+        "size": 57024,
+        "seasons": 2,
+        "characters_per_season": 11,
+        "character_stride": 2592,
+        "rows": 27,
+        "columns": 8,
+        "cell_stride": 12,
+        "fields": "s8variants[4] (only first3 consumed),s32flags,s16slotId,s16pad; actual mdlSE.c:23-28/155-254 reader"
+      },
+      "selected_views": [
+        {
+          "ps2_season_bank": 1,
+          "ps2_character_id": 8,
+          "character_bank_base": "0x616c60",
+          "selected_bank_byte_range": [
+            2049,
+            2592
+          ],
+          "whole_bank_nonempty_cells": 24
+        },
+        {
+          "ps2_season_bank": 1,
+          "ps2_character_id": 9,
+          "character_bank_base": "0x617680",
+          "selected_bank_byte_range": [
+            0,
+            750
+          ],
+          "whole_bank_nonempty_cells": 216
+        }
+      ],
+      "true_pointer_loader": "btlSoundGetCharacterBank001f7650 selects genus0 actor charId*0xa20 plus0x6f60 when calendar dayflagbit0 clear; btlUnitApplyModelState0019d670 mode4 and btlEncounterFinishSetup0022b870 publish returned bank to Model.motion.request; mdlSeFillEntryState0047e0f0 consumes27x8grid, not geometry or item names.",
+      "golden_reader_lead": "Ordinary NSO38f800 is independently decompiled actual mdlSE cell consumer: same12byte fields/96byte row/three variants/slot-1 suppression/flags, but rowdomain0..31 (32rows), cellbank from state+16.38f360 modelSE loader copies actual packedresource entry1 and publishes it to that state field; optional localized stream from entry2/0 remains separate. M2candidate bc008_c1.se::bc008_c1.bin/3072B is consistent with32x8x12 cue data, NOT a proven mesh or actor/season match.",
+      "remaining_blocker": "Still need actual old actor/season -> Golden model/cache/costume resource identity and logical motion-row correspondence before selecting a specific3072-byte source. Do not use repeatedFFFF disabled cells as an anchor, assume char7 equals model008, or infer global row order across27->32 expansion. Numeric Amrita Soda/Kakitsubata routes remain positively rejected.",
+      "rejected_probe": "38ec20 is mdlManager geometry lookup, not the mdlSE cell reader; never use its misleading nearby bound31 as a cue proof."
+    }
+  ],
+  "counts": {
+    "new_PROVEN": 1,
+    "new_ps2_partition_bytes": 194,
+    "cohort_PROVEN": 35,
+    "cohort_proven_bytes": 55965,
+    "cohort_OPEN_retain": 42,
+    "cohort_open_bytes": 3301,
+    "assigned_objects": 77,
+    "assigned_ps2_bytes": 59266,
+    "PROVEN-code": 0,
+    "PROVEN-layout": 0,
+    "D10a": 0,
+    "D10b": 0,
+    "D10c": 0
+  },
+  "embedded_reader_contract_constants": [
+    {
+      "class": "PROVEN-code",
+      "canonical_row_admission": false,
+      "role": "rank task positive score cap",
+      "value": 999,
+      "ordinary_nso_evidence": [
+        "0x71002b25f0 compare",
+        "0x71002b25f4 immediate",
+        "0x71002b25f8 signed select"
+      ],
+      "runtime_authoring": "Authored Golden-only control constant, never read NSO at runtime."
+    },
+    {
+      "class": "PROVEN-code",
+      "canonical_row_admission": false,
+      "role": "available icon resource and fallback",
+      "values": [
+        1024,
+        3073
+      ],
+      "ordinary_nso_evidence": [
+        "0x71002b2498/249c",
+        "0x71002b24a8",
+        "0x71002b24ac conditional select"
+      ],
+      "runtime_authoring": "Authored constants with actual resource-availability producer; no assumed always-available icon."
+    }
+  ]
+}

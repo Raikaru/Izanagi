@@ -1,4 +1,4 @@
---!capability stage.damage@3
+--!capability stage.damage@4
 -- p4.damage.on: Luau final-damage modifiers in the native damage stage (datCalcSkillAmount 0x00235520).
 -- One eligible HP-damage hit (final-damage stage), frozen.
 export type P4DamageSide = "party" | "enemy"
@@ -10,6 +10,7 @@ export type P4DamageHit = {
     source_status: number, -- the attacker's DatUnit ailment word before this action
     target_side: P4DamageSide, target_id: number,
     target_status: number, -- the target's DatUnit ailment word before this action
+    target_side_ailment: number?, -- held side-ailment leaf before this action
     origin_side: P4DamageSide, origin_id: number, -- the unit aimed at; differs from target only when reflected
     hit_kind: "normal" | "critical" | "weak" | "other",
     element: number?, reflected: boolean,

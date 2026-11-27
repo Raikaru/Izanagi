@@ -82,7 +82,18 @@ native yield.
 
 Lua executes under its own nearest-rounding floating-point environment, without
 flushing denormals, on every platform, so `string.format` and arithmetic agree
-between Windows, Linux and Android. Typed
+between Windows, Linux and Android. The sign and payload of a NaN produced by
+arithmetic still depend on the CPU, so a NaN never reaches the game with them:
+a NaN written to guest memory (`p4.mem.write`, `f32` and `f64`) or passed to the host as a
+native call or hook argument or result, or returned from a stage callback or camera
+pose, becomes the canonical quiet NaN (binary64 `0x7ff8000000000000`, binary32
+`0x7fc00000`); finite numbers, infinities and signed zeros pass through unmodified.
+The experimental Zig Luau runtime (`luau-zig`) applies the same rule to every NaN its libraries
+write out as bytes or text (`buffer.writef32`/`writef64`, `string.pack` `f`, `d` and `n` in
+either byte order, `tostring`, concatenation and `string.format` `%e`, `%f`, `%g` and
+upper-case forms: `nan`/`NAN`, never `-nan`), so the same script gives the same output on every
+platform. This differs on purpose from reference Luau, whose raw bytes and `%g` text show the
+CPU's NaN sign. Arithmetic and values inside the VM are unchanged. Typed
 native calls restore the caller's game environment; native changes to that
 environment survive the eventual return to the game, including error paths.
 An escaping init/hook/event error preserves its bounded diagnostic for the native
@@ -980,6 +991,7 @@ and the game is unchanged.
 | `battle_protection_item` | Before a held party item is selected as a Light/Dark death-protection replacement in battle (`authorize.battle_protection_item@1`). A denial skips the item before inventory spending and continues the native passive and social-link checks. It does not restrict ordinary item commands or field item use. | character (party ID), item (native item ID), element (6 Light, 7 Dark) |
 | `weapon_fusion` | the Velvet Room WEAPON FUSION command (capability `authorize.weapon_fusion@1`). Stage 0 (offer) is asked before its row is shown; a denial hides the row. Stage 1 (commit) is asked at the forge safe point before revalidation, fee or consumption; a denial spends nothing and the forge page shows the reason. Queueing a forge validates it before this commit-stage decision. The `fusion` operation never covers it. | stage (0 offer, 1 commit), character (party character ID), vessel (item ID; 0 at offer), persona (Persona ID; 0 at offer), signature (0 or 1) |
 | `retry` (capability `authorize.retry@1`) | a lost field battle, once per defeat, before the `p4.battle.defeat` handler is asked (below) | encounter, source (1 field script encounter, 0 shadow touched on the field) |
+| `item_use` (`authorize.item_use@1`) | Before native field item application, custom field-category callbacks, battle item-list confirmation, accepted whole-party revival, the party AI item setter, and party item actions at READY. Menu refusal keeps the list active; battle refusal selects native wait, including its normal recovery/status behavior. Classified party AI writes are conditionally restored on refusal. Generic inventory changes and the separate death-protection item remain outside this operation. Custom-category effects are unspecified; Challenge refuses them while NO FIELD RECOVERY is active, even if a callback might only cure status. | source (0 field, 1 battle item list, 2 revival, 3 custom field category, 4 party AI item setter, 5 party battle READY), item (ID), effect (field effect ID for source 0; 0 otherwise) |
 
 Unknown operations are refused. Browsing and compendium rows of the Velvet Room
 are not fusion and are never gated.
@@ -1020,15 +1032,16 @@ the mod's to arrange through hooks. Like authorizers, the callback runs in
 snapshot mode; an error or an invalid lineup enters mod recovery.
 
 `p4.battle.defeat(callback)` (capability `battle.defeat@1`) registers the one
-handler that answers a lost field battle before its Game Over; a second
+handler that answers a lost field or script battle before its Game Over; a second
 registration while one exists is refused. A field battle ends in
 `FldEvent_FieldToBattle` (0x172e00) state 12, which starts the Game Over
 procedure when the field leader's group (`D_007EF9F8`) is defeated (KO bit
 0x80000 or HP 0). Before that state runs, the callback receives a readonly
 `{name = "defeat", encounter, source, polls, allowed, reason, party}`:
-`source` is `field` for a field script's encounter request (0x174680: story
-bosses such as the Avenger Knight) or `collision` for a shadow touched on the
-field; `polls` counts the earlier calls for this defeat; `allowed` is false,
+`source` is `field` for a field event's encounter request (0x174680: story
+bosses such as the Avenger Knight), `script` for a battle a script starts with
+`btlScriptStartEncounter` (0x1932f0: story bosses such as Shadow Yukiko), or
+`collision` for a shadow touched on the field; `polls` counts the earlier calls for this defeat; `allowed` is false,
 with the `reason`, when a `retry` authorizer refused or the battle start was
 not recorded; `party` lists the fighters' battle-start `{id, hp, sp, ailments}`.
 It returns:
@@ -1043,15 +1056,38 @@ The snapshot is taken in a native observer before `btlTaskCreate` builds each
 battle: the ten playable characters' 0x30-byte DatUnit records, complete party
 slots, Persona stock and selection, protagonist equipment, inventory, social
 records, flags, script values, money, retail enemy knowledge, and every 0x12C-byte enemy group
-of the setup. A field battle's groups
+of the setup. The two native sidecars that keep battle-relevant state outside guest memory are
+snapshotted as well: the expanded item table's quantity, availability and equipment references,
+and the enemy-knowledge observations (known keys and the retail status and side bits). A field battle's groups
 belong to the field, so they are still live after the loss. Consumed items are
 refunded: retry treats the lost battle as if it never happened. The random
 generator and other state outside these ranges are not restored. The lost
-battle grants no rewards, the retried one its own. Retry is refused with a
-visible reason when expanded item or enemy-knowledge sidecars are active,
-because their state is not part of the snapshot. Script-sequence battles
-(`btlScriptStartEncounter`, 0x1932f0) and
-`p4.encounter.launch` never reach this state and keep their own outcome. The
+battle grants no rewards, the retried one its own. Both sidecars are restored exactly, so a retry that
+follows a lost battle also forgets what it learned and refunds what it used. A
+retry is refused with a visible reason naming the state when a sidecar could
+not be captured at the battle start (for example, out of memory) or is no longer
+the table or store that was captured; the Game Over then runs as in retail. `p4.encounter.launch`
+battles never reach either seam and keep their own outcome.
+
+A script battle never reaches state 12: it runs in sequence 6, whose Start
+callback (0x102e70) calls `btlTaskCreate`, and the script that started it polls
+`btlScriptResolvePartyDeath` (0x193450) each frame. That call answers "not yet"
+while the battle context (gp-0x4c54) exists; once the battle is gone it starts
+the Game Over procedure when the protagonist's record is dead, and otherwise
+revives fallen allies. That poll is the seam: with the battle gone and the
+protagonist dead, the same handler is asked before the call reads him. `nil`
+lets the call run untouched, so the script starts the Game Over as in retail;
+`"hold"` shows the call a placeholder battle context for that poll, so the
+script keeps waiting (after 18000 holds the Game Over runs); `"retry"` copies
+the snapshot back, rebuilds the party's and the encounter's groups from the
+recorded setup the way 0x1932f0 builds them (a script battle's enemy groups
+are freed with it, so they are re-created, not copied back) and starts the
+battle again with `btlTaskCreate`, so the script never sees the loss. A retry is refused, naming the
+reason, when a party member of the battle is not a playable record, the battle
+has more than one enemy group, or a sidecar cannot be restored. A script cannot
+tell the engine that a lost battle is not a Game Over (a scripted forced loss),
+so the handler decides by encounter: hard mode offers a retry only for its boss
+class. The
 callback runs like an event callback (it may draw overlays, read
 `p4.input.action` and log); an error enters the native mod recovery. Both
 observers are created disabled with the first handler and run only while an
@@ -1194,7 +1230,7 @@ that is not a valid loaded encounter. `p4.encounter.launch(id)` requires a
 ready fixed field whose entry the service observed, a valid record and no other
 request. At the frame boundary it asks the `encounter` authorizers, then
 starts the battle through the shared form of `btlScriptStartEncounter`
-(0x1932f0, `src/platform/battle_sim/entry.c`): the hero and the current party,
+(0x1932f0, `src/platform/battle_sim/entry.zig`): the hero and the current party,
 the record's formation and sequence 6. When the battle sequence finishes and
 the game has not requested another scene, the service returns to the observed
 origin field through the same field request as a warp. After a defeat (outcome
@@ -1308,6 +1344,7 @@ table and returns a number, or nil to leave the hit alone:
 | `source_side`, `source_id` | `"party"` or `"enemy"`, and the attacker's DatUnit ID |
 | `target_side`, `target_id` | the unit taking the damage |
 | `source_status`, `target_status` | each unit's DatUnit ailment word for this hit, as the retail equation reads it: committed before this action, never including the ailments the action itself inflicts |
+| `target_side_ailment` (`stage.damage@4`) | the held side-ailment leaf, or nil; snapshotted for this exact target before the action commits |
 | `origin_side`, `origin_id` | the unit the hit was aimed at; differs from the target only when `reflected` |
 | `hit_kind` | `"normal"`, `"critical"`, `"weak"` or `"other"` |
 | `element` | the resolved element leaf, or nil |

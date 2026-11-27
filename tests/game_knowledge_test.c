@@ -622,6 +622,42 @@ static void save_transactions(const P4PackageProvider *package)
     p4_mod_save_load_commit(load); load = NULL;
     assert(known_key(state, 301, UINT32_MAX, slash.element) == 1 && known_key(state, 300, UINT32_MAX, ko) == 0);
     assert(p4_game_knowledge_retail(state)->status[201] == 0x02u);
+    {   /* Battle retry: what a lost battle learns is forgotten exactly, and a save written after it is the
+         * same block as one written before the battle. */
+        P4GameKnowledgeCapture *retry = NULL;
+        P4ModSaveCapture *after = NULL;
+        const uint64_t digest = p4_game_knowledge_state_digest(state);
+        assert(digest && p4_game_knowledge_capture(NULL, &retry) == P4_TABLE_INVALID && !retry);
+        assert(p4_game_knowledge_battle_capture(&retry) == P4_TABLE_OK && retry);
+        assert(digest == p4_game_knowledge_capture_digest(retry) && digest == p4_game_knowledge_battle_digest() &&
+            p4_game_knowledge_battle_matches(retry) == P4_TABLE_OK);
+        const P4GameActionFrame fire = {.element = element(1, P4_CHANNEL_DAMAGE)};
+        assert(observe(300, UINT32_MAX, fire) == P4_TABLE_OK && known_key(state, 300, UINT32_MAX, fire.element) == 1);
+        assert(p4_game_knowledge_status_observe(state, 200, 12) == P4_TABLE_OK);
+        assert(p4_game_knowledge_status_observe(state, 201, 15) == P4_TABLE_OK);
+        assert(p4_game_knowledge_state_digest(state) != digest);
+        assert(p4_game_knowledge_battle_restore(retry) == P4_TABLE_OK);
+        assert(p4_game_knowledge_state_digest(state) == digest && p4_game_knowledge_battle_digest() == digest);
+        assert(known_key(state, 300, UINT32_MAX, fire.element) == 0 && known_key(state, 301, UINT32_MAX, slash.element) == 1);
+        assert(p4_game_knowledge_retail(state)->status[200] == 0 && p4_game_knowledge_retail(state)->status[201] == 0x02u);
+        assert(p4_mod_save_capture_image(&image, &after, error, sizeof error) == 0 && after &&
+            after->sidecar_size == capture->sidecar_size && !memcmp(after->sidecar, capture->sidecar, after->sidecar_size));
+        p4_mod_save_capture_free(after);
+        /* Fail closed: no capture, or a store that is no longer the captured one, touches nothing. */
+        assert(p4_game_knowledge_restore(state, NULL) == P4_TABLE_CONFLICT &&
+            p4_game_knowledge_battle_matches(NULL) == P4_TABLE_CONFLICT &&
+            p4_game_knowledge_battle_restore(NULL) == P4_TABLE_CONFLICT);
+        P4GameTables *other_tables = fixture();
+        P4GameKnowledge *other = NULL;
+        assert(p4_game_knowledge_create(other_tables, &other) == P4_TABLE_OK);
+        assert(p4_game_knowledge_capture_matches(other, retry) == P4_TABLE_CONFLICT);
+        assert(p4_game_knowledge_status_observe(other, 7, 9) == P4_TABLE_OK);
+        const uint64_t foreign = p4_game_knowledge_state_digest(other);
+        assert(p4_game_knowledge_restore(other, retry) == P4_TABLE_CONFLICT && p4_game_knowledge_state_digest(other) == foreign);
+        p4_game_knowledge_destroy(other); p4_game_tables_destroy(other_tables);
+        p4_game_knowledge_capture_free(retry);
+        assert(!p4_game_knowledge_state_digest(NULL) && !p4_game_knowledge_capture_digest(NULL));
+    }
     assert(p4_mod_save_stage_image(&image, NULL, 0, &load, error, sizeof error) == 0 && load);
     p4_mod_save_load_commit(load); load = NULL;
     assert(known_key(state, 300, UINT32_MAX, slash.element) == 0 && !p4_game_knowledge_retail(state)->status[201]);

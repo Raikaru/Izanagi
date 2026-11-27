@@ -15,6 +15,7 @@
 #define P4PC_PLATFORM_CONFIG_P4CFG_H
 
 #include <stddef.h>
+#include <stdint.h>
 
 /* Finds and parses the file (once; later calls do nothing). Safe to call from any thread before the game starts. */
 void p4cfg_load(void);
@@ -28,6 +29,11 @@ const char *p4cfg_get(const char *key);
 int p4cfg_int(const char *key, int def);
 double p4cfg_float(const char *key, double def);
 const char *p4cfg_str(const char *key, const char *def);
+
+/* Private Golden HCA key, entered only in [golden] hca_key as 1..16 hex digits
+ * (optional 0x prefix). 1 present, 0 empty/zero, -1 invalid; never a diagnostic
+ * string. Generic getters return "[redacted]" for a nonempty private key. */
+int p4cfg_hca_key(uint64_t *key);
 
 /* The file in use, or NULL (none found, or P4PC_CONFIG=none). */
 const char *p4cfg_path(void);

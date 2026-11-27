@@ -3,6 +3,13 @@ if(NOT P4_ANDROID64)
   target_link_libraries(p4pc m ${P4_SDL3_LIB} ${P4_FFMPEG_LIBS})
   target_compile_options(p4pc PRIVATE -fno-builtin)
   target_compile_definitions(p4pc PRIVATE ${P4_PORT_DEFINES})
+  option(P4_GOLDEN_VFS_WITNESS "Enable the PS2 dormant-source witness hook (development only)" OFF)
+  if(P4_GOLDEN_VFS_WITNESS)
+    if(CMAKE_BUILD_TYPE MATCHES "^(Release|RelWithDebInfo|MinSizeRel)$")
+      message(FATAL_ERROR "P4_GOLDEN_VFS_WITNESS is not allowed in release builds")
+    endif()
+    target_compile_definitions(p4pc PRIVATE P4PC_GOLDEN_VFS_WITNESS=1)
+  endif()
   if(P4_WIN32)
     # A GUI subsystem prevents Windows from allocating a visible console for
     # an automated launch; retain the ordinary main() startup and redirected stdio.

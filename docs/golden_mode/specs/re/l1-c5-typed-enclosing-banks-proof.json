@@ -1,0 +1,1847 @@
+{
+  "proof_id": "L1-C5-typed-enclosing-banks-20261113",
+  "scope": "Cohort 5 plus Main-transferred00626fe0; excludes626172/626372 transferred to cohort6. Structural SOURCE proofs, not runtime binding or behavior equivalence. Twenty-four admissions.",
+  "method": "Typed enclosing objects and actual pointer loaders supersede inferred M2 partition kinds and numeric aligned-word parent scans. Source extents are independently bounded before choosing a Golden module. Ordinary Steam .shared and Switch NSO only; no .arch decoding or execution.",
+  "source_images": {
+    "steam_build": 10836033,
+    "steam_image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+    "switch_version": "1.2",
+    "nso_mapped_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+    "switch_purpose": "Independent static witness only; runtime reads owned Steam source, never NSO."
+  },
+  "groups": {
+    "camera_presets": {
+      "ps2_base": "0x005fe1d0",
+      "ps2_end": "0x00607dd0",
+      "records": 768,
+      "triplets": 256,
+      "stride": 52,
+      "golden_bank": {
+        "container": "P4G.exe",
+        "section": ".xpdata",
+        "offset": 20480,
+        "rva": "0xa25000",
+        "raw_offset": 10631168,
+        "size": 39936,
+        "sha256": "88e50872aeb08bb9cd33f252892c4dff3b62e29395e7e3aa879c532195a83fdd",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "switch_address": "0x710070afd0",
+        "switch_span_equal": true
+      },
+      "ps2_bank_sha256": "bdb31f5477775740c451dc4ea96c92dacb359e1f63d0843c3717d6cb8e16da9a",
+      "reader_proof": "btlCamera.c:2458-2465 (001d0730): u16 ID*3+(fixed?2:RNG&1), stride52. Exact MIPS address formation001d076c/770=005fe1d0. Steam953d0..9541d has same u16 ID, triplet and low-bit selector;9540e loads basea25000. Steam8434e..84524 and Switch003da40 consume four xyz vectors+4/+16/+28/+40 and u16 frame count/30. Independent Switch selector0039850. Existing l1-camera-banks-proof.json independently establishes complete39936-byte bank, end607dd0 and independent Steam next geometrya2ec00.",
+      "numeric_false_pointer": {
+        "storage": "0x00649ffc",
+        "value": "0x0060078a",
+        "enclosing_object": "item-shop message BMD at0x00647ee0",
+        "actual_halfwords": [
+          "0x078a",
+          "0x0060"
+        ],
+        "evidence": "Bytes at649fe0..649fff are a sequence of two-byte encoded message glyph/control units;649ffc is interior message payload, not a pointer field. y_fclTalk.c itemShopTalkUpdate00332060 passes only the BMD BASE647ee0 to nmMesWindowAcquire; the flagged/calendar selector reads a different table6450e0 at stride12. No load or dereference of a pointer at649ffc appears in that consumer. Thus the numeric candidate cannot establish talk ownership of60078a; actual camera base+typed interval does establish camera ownership.",
+        "limits": "Not a general proof that arbitrary aligned address-looking words are nonpointers."
+      },
+      "required_seams": [
+        {
+          "owner": "btlCameraRandomTableEntry",
+          "ps2_addresses": [
+            "0x001d0730"
+          ],
+          "requirement": "Direct, translated, inline and native selectors use this complete Golden768-record bank, u16 charId triplets, fixedslot2/randomslot0or1; preserve PS2 mode. Do not split by M2 f32 partitions or route via item-shop messages."
+        },
+        {
+          "owner": "btlCameraFrameRandomEntry / btlCameraEntrRandomFrame",
+          "ps2_addresses": [
+            "0x001c17a0",
+            "0x001c1f70"
+          ],
+          "requirement": "Read all four xyz vectors and u16 duration/30 coherently from selected Golden preset. Use complete39936-byte source for native whole-bank access, not just any selected slice. charId is the actor/child identity feeding the existing selector; preserve fixed/random input and RNG consumption; do not interpret a byte-offset partition as an index domain. Runtime witnesses must cover triplet IDs0,50,51,255, both random bits and fixedslot2, including every cross-partition record."
+        }
+      ]
+    },
+    "party_hp_sp": {
+      "ps2_physical_base": "0x005dd870",
+      "ps2_logical_biased_bases": [
+        "0x005dd844",
+        "0x005dd846"
+      ],
+      "ps2_physical_end": "0x005de974",
+      "records": 99,
+      "stride": 44,
+      "record_type": "11 pairs of u16 HP/SP indexed by signed character ID",
+      "golden_bank": {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "offset": 547552,
+        "rva": "0x90cae0",
+        "raw_offset": 9484000,
+        "size": 4356,
+        "sha256": "88795bd395dc2bc08bed4ac39607d1359de8a8091d0f9234367108e838eff677",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "switch_address": "0x710075accc",
+        "switch_span_equal": true
+      },
+      "ps2_source_sha256": "88795bd395dc2bc08bed4ac39607d1359de8a8091d0f9234367108e838eff677",
+      "extent_proof": "99*44=4356 bytes; PS2 independently named Golf Club string begins5de978 after4-byte zero alignment. Golden independent two-byte index getter221ca0 at221cb5 addresses90dbe4, exactly after the HP/SP interval; no following item table is admitted. Switch static relocation880980->75accc; ordinary1125f0/1122670 actual pointer loads, stride44 and-44/-42 halfword offsets. Steam ordinarycf3f0/cf480 branches distinguish flag4 direct-record from party data and select same u8 level;19f840/19f8b0 independently repeat party access.",
+      "producer_evidence": "g_data.c:613-644; datCalc.c:177-218. Required domain is live non-flag4 party level1..99; malformed or enemy-exempt levels are not claimed part of this99-row bank.",
+      "selected_partition": "5dd86c/4364 =4 leading out-of-table bytes +4356 table bytes +4 trailing alignment. Both retained regions are explicitly non-source-qualified; never let a whole-window byte score redefine this extent.",
+      "required_seams": [
+        {
+          "owner": "datGetLevelTableFirstValue / datGetLevelTableSecondValue",
+          "ps2_addresses": [
+            "0x001053b0",
+            "0x00105460"
+          ],
+          "requirement": "Golden-only complete99x44-byte party HP/SP bank. Address=bank+(level-1)*44+signedCharacterId*4+(SP?2:0). PS2 bias base5dd844/846+level*44 is intentionally one row before physical data5dd870. Golden Steam cf3f0/cf480 and19f840/19f8b0 use physical90cae0/e2 with -44 bias; NSO1125c0/112640 agrees. Do not copy M2 candidate90cadc: its first4 bytes belong to preceding unrelated storage. Guest source view begins at selected address+4, copies4356 bytes, retains4-byte head and4-byte tail."
+        },
+        {
+          "owner": "live party identity and level producers / datCalcMaxHp / datCalcMaxSp",
+          "ps2_addresses": [
+            "0x00231e20",
+            "0x00231ef0"
+          ],
+          "requirement": "Preserve live character selector1..10 and corresponding party unit, not a guessed skill/persona-ID key. Getter uses stored level for flag4/id1, otherwise persona-record level; zero level asserts. Setter caps non-flag4 levels99. Party-table domain is level1..99, eleven pairs per44-byte row, character0 placeholder. Steam enemy/flag4 direct-record branch stays distinct from party-table reads; never route direct enemy HP/SP through this bank. Native/inlined maxHP/SP and all five known TU paths must agree. Witness both getters for every supported character/level, especially levels1/99 and character10; source equality is not a runtime witness."
+        }
+      ]
+    },
+    "analysis_model_placement": {
+      "ps2_base": "0x00626fe0",
+      "ps2_end": "0x00628f60",
+      "ps2_records": 336,
+      "golden_records": 368,
+      "stride": 24,
+      "fields": [
+        {
+          "offset": 0,
+          "type": "f32",
+          "role": "x"
+        },
+        {
+          "offset": 4,
+          "type": "f32",
+          "role": "y"
+        },
+        {
+          "offset": 8,
+          "type": "f32",
+          "role": "z"
+        },
+        {
+          "offset": 12,
+          "type": "f32",
+          "role": "pitch"
+        },
+        {
+          "offset": 16,
+          "type": "f32",
+          "role": "yaw"
+        },
+        {
+          "offset": 20,
+          "type": "u8",
+          "role": "positive yaw limit"
+        },
+        {
+          "offset": 21,
+          "type": "u8",
+          "role": "negative yaw limit"
+        },
+        {
+          "offset": 22,
+          "type": "2 bytes",
+          "role": "padding"
+        }
+      ],
+      "golden_bank": {
+        "container": "P4G.exe",
+        "section": ".xpdata",
+        "offset": 149264,
+        "rva": "0xa44710",
+        "raw_offset": 10759952,
+        "size": 8832,
+        "sha256": "42d4289941f8fa7a5245a508e78df70b361162f1370d5ba4abe4021c70eddf79",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "switch_address": "0x7100733e40",
+        "switch_span_equal": true
+      },
+      "golden_fallback": {
+        "container": "P4G.exe",
+        "section": ".xpdata",
+        "offset": 907096,
+        "rva": "0xafd758",
+        "raw_offset": 11517784,
+        "size": 24,
+        "sha256": "5676ca19df22d27446accd0d636162338901bb5ec828b54b49f9d56fd8e98ce7",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "switch_address": "0x710062ded4",
+        "switch_span_equal": true
+      },
+      "ps2_bank_sha256": "06bc9f7e0294d1a71f975ba4d683fbb0051d22c835fbc6a10ac01b0d2dbc780d",
+      "ps2_type_and_reader": "btlPanelAnalyze.c:59-64,373-500: genus1 selects D626fe0[charId] at stride24, otherwise628f60 fallback; reads five floats and two bytes then projects/rotates/queues actual actor model.",
+      "steam_reader": "e0884 enclosing ordinary function: e08ce u16charId, e08d5 multiply3, e08d9 basea44710,e08e0 multiply8 -> stride24; non-genus1 e08e6 selectsafd758. e09d7/e09f8 byte limits+20/+21 and e0a0a..e0b2c matching transform fields.",
+      "switch_reader": "863e0 enclosing function:8662c genus byte+162,8663c u16charId+164,86644 loads relocated880808->733e40,86648 stride24;86678/67c fallback62ded4.",
+      "extent_proof": "PS2336x24 ends at separately selected fallback628f60. NSO733e40+368*24=7360c0, which is a distinct u16 geometry-index table loaded through relocation880820 by8b3a4/8da80;880818->736234 is another geometry coordinate view. This is an independently used boundary, not simply the next numeric pointer. Full8832-byte NSO table occurs exactly at Steam reader-qualifieda44710 with matching hash. No global compiler order assumption; Steam following bytes need not match NSO next object.",
+      "required_seams": [
+        {
+          "owner": "btlPanelLoadModels",
+          "ps2_addresses": [
+            "0x00219130"
+          ],
+          "requirement": "Native/translated/inlined analysis-model readers must share the full Golden368x24-byte bank and separate Golden24-byte fallback. Live selector is action.unit genus==1 -> u16charId positional row; other genera use fallback, not row0. PS2 has336 rows; new Golden32 rows are part of source, not prefix-copied into guest memory. Bind exact7441-byte selected view at bank+623 only; native whole-bank path reads all8832 qualified bytes."
+        },
+        {
+          "owner": "analysis actor identity, transform and projection state",
+          "ps2_addresses": [
+            "0x00219130"
+          ],
+          "requirement": "Model clones/replacements retain actual selected unit/action identity; do not substitute persona roster order. Preserve frame>=5 state3 gate, user-input yaw accumulation, positive/negative byte limits at+20/+21, translationf32+0/+4/+8 and pitch/yaw+12/+16, opacity/model lifetime. Use Golden renderer/projection transform, not PS2 pixel formula on HD coordinates: ordinary Steam e0a1d adds720,e0a30 adds272,e0a49 divides-960,e0a55 divides-540,e0a77 adds550; corresponding native matrix and view-window inputs must be coherent. Input center128/deadzone48 and per-frame yaw timestep/RNG-free behavior are live state contracts, not authored constants read from a random enclosing span. Verify actor IDs25/26/335/336/367, genus fallback, positive/negative yaw clamps, replacement and release. No runtime or visual equality claim."
+        }
+      ]
+    },
+    "effect_camera_scripts": {
+      "ps2_base": "0x00632240",
+      "ps2_live_end": "0x00633738",
+      "ps2_next_bank": "0x00633740",
+      "scripts": 22,
+      "characters": 11,
+      "scripts_per_character": 2,
+      "script_stride": 244,
+      "script_header_bytes": 4,
+      "rows_per_script": 4,
+      "row_stride": 60,
+      "golden_bank": {
+        "container": "P4G.exe",
+        "section": ".xpdata",
+        "offset": 833248,
+        "rva": "0xaeb6e0",
+        "raw_offset": 11443936,
+        "size": 5368,
+        "sha256": "4ddcc606e34b78797b783cd32e83a3aea28ae43f46df3ad37bef594aa19b6dfd",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "switch_address": "0x71006fe540",
+        "switch_span_equal": true
+      },
+      "headers": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          3,
+          0,
+          2
+        ],
+        [
+          2,
+          0,
+          2
+        ],
+        [
+          3,
+          0,
+          2
+        ],
+        [
+          2,
+          0,
+          2
+        ],
+        [
+          3,
+          0,
+          2
+        ],
+        [
+          2,
+          0,
+          2
+        ],
+        [
+          2,
+          0,
+          2
+        ],
+        [
+          2,
+          0,
+          2
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          3,
+          0,
+          2
+        ],
+        [
+          2,
+          0,
+          2
+        ],
+        [
+          2,
+          0,
+          2
+        ],
+        [
+          2,
+          0,
+          2
+        ],
+        [
+          3,
+          0,
+          2
+        ],
+        [
+          2,
+          0,
+          2
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "reader_proof": "PS2 btlVoice_inferred.c:1311-1327 actual pointer-loader: base632240+charId*488+(RNG&1)*244, option8, geometry3. Steam3b7d0..3b84e matches action.unit pointer path/u16charId, single lowbit RNG, multiply244, baseaeb6e0 at3b817 and common80170 consumer. Switcha080..a0e8 independently matches same graph and6fe540 base. See l1-camera-banks-proof.json for established typed four-row interpreter, not inferred TU ownership.",
+      "extent_proof": "PS2 11*2*244=5368 bytes then8 alignment before independently reader-qualified party-script bank633740. Steam immediately followingaeb6e0+5368 is an independently read byte-remap table (3f48c refs); Switch6ffa38 is independently read by4000. Both Golden banks end exactly after22 complete scripts, not at arbitrary M2 probe end. Steam8 following bytes are0003020104040004, explicitly not PS2 padding.",
+      "false_pointer_rejections": [
+        {
+          "target": "0x00632e79",
+          "storage": "0x713000",
+          "cstring_base": "0x712ff8",
+          "cstring": "sdkSfdply.c",
+          "classification": "numeric false pointer: interior of NUL-terminated printable string; not a pointer field"
+        },
+        {
+          "target": "0x00632e79",
+          "storage": "0x7146ac",
+          "cstring_base": "0x7146a0",
+          "cstring": "effBattleOnly.c",
+          "classification": "numeric false pointer: interior of NUL-terminated printable string; not a pointer field"
+        }
+      ],
+      "required_seams": [
+        {
+          "owner": "btlCameraStartRandomEffect",
+          "ps2_addresses": [
+            "0x002289b0"
+          ],
+          "requirement": "Use actual action.unit u16charId, two scripts percharacter, randomlowbit exactly once, option8 and geometry3; no character-minus-two adjustment (that belongs to a different633740 bank). Route direct/native/inlined script interpreter80170/7f760/800a0 equivalents to the complete5368-byte Golden bank. Character-domain0..10 includes disabled zero-count scripts; do not compact those slots or treat zero headers as unused objects. Selected2247-byte partition has2239 source bytes and8 PS2 alignment bytes to retain."
+        },
+        {
+          "owner": "camera script live state and interpreter",
+          "ps2_addresses": [
+            "0x002289b0"
+          ],
+          "requirement": "Preserve action/unit lifetime, script count/flags, current row index, elapsed frame and four60-byte rows. Signed duration/next-row transitions and flags must use the existing coherent script consumer established in l1-camera-banks-proof.json. Witness characters0/1/5/6/8/9/10 with both random bits, empty scripts and cross-row transitions; do not claim a runtime match from unchanged bank bytes."
+        }
+      ]
+    },
+    "persistent_help_member_names": {
+      "ps2_pointer_table": "0x0063f520",
+      "pointer_count": 9,
+      "ps2_reader": "y_fclShop.c:119-145 /002bdf20 copies9filename-pointer words then H_Cdvd_LookupRequest->nmMesWindowInstallHandle slots0..8. Every pointer value independently checked against the nine32-byte selected strings.",
+      "golden_reader": "Ordinary Switch174430:158-176 uses exact same ordered help categories, explicit slots0..8, named member lookup397040 in loaded init/datMsg.pak followed by18b250 install. This is the same real loader already established in cohort3 archive-path proof; not a module-label or filename-similarity admission. Golden extra help banks9..12 remain separate.",
+      "steam_correspondence": "Each complete NUL-terminated member name is unique in allowed Steam.sdata and equal to the independent NSO literal consumed by174430. Steam may also store preceding help/ bytes, but the qualified semantic source is the actual Golden member name substring (without help/), not M2 whole32-byte windows.",
+      "limits": "Two initial top-level archive lookups failed because datMsg.pak is nested in init.bin; corrected data_e.cpk::init.bin::init/datMsg.pak succeeds, pak-v2 with13members. All9names were located; complete member sizes, declared BMD headers and hashes are recorded. This is not an implementation of handle storage, selectors or lifetime.",
+      "slots": [
+        {
+          "slot": 0,
+          "address": "0x0063f400",
+          "member_name": "datWeaponHelp.bmd"
+        },
+        {
+          "slot": 1,
+          "address": "0x0063f420",
+          "member_name": "datArmorHelp.bmd"
+        },
+        {
+          "slot": 2,
+          "address": "0x0063f440",
+          "member_name": "datAccessoryHelp.bmd"
+        },
+        {
+          "slot": 3,
+          "address": "0x0063f460",
+          "member_name": "datAddEffectHelp.bmd"
+        },
+        {
+          "slot": 4,
+          "address": "0x0063f480",
+          "member_name": "datItemHelp.bmd"
+        },
+        {
+          "slot": 5,
+          "address": "0x0063f4a0",
+          "member_name": "datEventItemHelp.bmd"
+        },
+        {
+          "slot": 6,
+          "address": "0x0063f4c0",
+          "member_name": "datSkillHelp.bmd"
+        },
+        {
+          "slot": 7,
+          "address": "0x0063f4e0",
+          "member_name": "datMaterialHelp.bmd"
+        },
+        {
+          "slot": 8,
+          "address": "0x0063f500",
+          "member_name": "datQuestHelp.bmd"
+        }
+      ],
+      "archive_members": [
+        {
+          "member": "data_e.cpk::init.bin::init/datMsg.pak::datWeaponHelp.bmd",
+          "offset": 40,
+          "size": 22816,
+          "sha256": "73e6d88e18943bc94ff6462b00bf5073821a6b5c8c02a256170cb3beb87f8958",
+          "header": [
+            7,
+            22797,
+            826757965,
+            0,
+            22284,
+            513,
+            256
+          ]
+        },
+        {
+          "member": "data_e.cpk::init.bin::init/datMsg.pak::datArmorHelp.bmd",
+          "offset": 22892,
+          "size": 20768,
+          "sha256": "49b4558c7d73139d1a936286e9d0b0efdb90c66a190d98aecbfeb189b1e6aea8",
+          "header": [
+            7,
+            20757,
+            826757965,
+            0,
+            20244,
+            513,
+            256
+          ]
+        },
+        {
+          "member": "data_e.cpk::init.bin::init/datMsg.pak::datAccessoryHelp.bmd",
+          "offset": 43696,
+          "size": 21696,
+          "sha256": "0cd7f6fdbdf3c06b34cdd5ed7fd77f2ea1059ad450231f818f57b3da44ad7e26",
+          "header": [
+            7,
+            21689,
+            826757965,
+            0,
+            21176,
+            513,
+            256
+          ]
+        },
+        {
+          "member": "data_e.cpk::init.bin::init/datMsg.pak::datAddEffectHelp.bmd",
+          "offset": 112476,
+          "size": 13504,
+          "sha256": "edf207ff1a6ba7cfda9cf269017260dd4350c16ef6312929fd44523011136706",
+          "header": [
+            7,
+            13479,
+            826757965,
+            0,
+            13084,
+            395,
+            197
+          ]
+        },
+        {
+          "member": "data_e.cpk::init.bin::init/datMsg.pak::datItemHelp.bmd",
+          "offset": 65428,
+          "size": 25216,
+          "sha256": "80e28b4070b93717ce94d0d247622194ce01165d09873b5ddc03ee9a2c8d7cb7",
+          "header": [
+            7,
+            25185,
+            826757965,
+            0,
+            24672,
+            513,
+            256
+          ]
+        },
+        {
+          "member": "data_e.cpk::init.bin::init/datMsg.pak::datEventItemHelp.bmd",
+          "offset": 90680,
+          "size": 21760,
+          "sha256": "6e87df113ba54b03868bd6878f9fae9af49df2471563c45e380228d7a0deb795",
+          "header": [
+            7,
+            21757,
+            826757965,
+            0,
+            21244,
+            513,
+            256
+          ]
+        },
+        {
+          "member": "data_e.cpk::init.bin::init/datMsg.pak::datSkillHelp.bmd",
+          "offset": 126016,
+          "size": 49920,
+          "sha256": "094b2ced1f78b64e8aee165783be612eb712ae2f982c98d35df001024e09b6b4",
+          "header": [
+            7,
+            49889,
+            826757965,
+            0,
+            48672,
+            1217,
+            608
+          ]
+        },
+        {
+          "member": "data_e.cpk::init.bin::init/datMsg.pak::datMaterialHelp.bmd",
+          "offset": 175972,
+          "size": 31136,
+          "sha256": "c6d065e5bcd4ad30b732863e0d4b277214600f883a96f641284f56f2f7a92509",
+          "header": [
+            7,
+            31129,
+            826757965,
+            0,
+            30616,
+            513,
+            256
+          ]
+        },
+        {
+          "member": "data_e.cpk::init.bin::init/datMsg.pak::datQuestHelp.bmd",
+          "offset": 207144,
+          "size": 11008,
+          "sha256": "729e02f4c159318967fa48ef43469592f97f02723bddd4d54a5e3f7168f780b1",
+          "header": [
+            7,
+            10985,
+            826757965,
+            0,
+            10812,
+            173,
+            86
+          ]
+        }
+      ]
+    },
+    "battle_table_filenames": {
+      "ps2_table": "0x005f66c0",
+      "ps2_descriptor_count": 8,
+      "ps2_descriptor_stride": 164,
+      "golden_descriptor_count": 8,
+      "golden_descriptor_stride": 328,
+      "golden_variant_bases": [
+        "0x71c1a0",
+        "0x71cbe0",
+        "0x71d620",
+        "0x71e098"
+      ],
+      "actual_readers": "PS2 btlUnit_inferred_00193840.c:193-251 actual filename-first-word load, packed-length+16-alignment loop and destination publication;1939e0 advances8descriptors. Switch58200..583bc independently selects four descriptor variants by live mode and synchronous argument; each of the six corresponding filename relocation slots across all four arrays is independently checked. Common58aa0 loads actual filename at58ad4 and58af4, reads packed-block sizes at58b68 and publishes destinations at58b78, advances16-byte descriptor-block entries, then releases request. Structural producer/consumer correspondence, not numeric pointer scans.",
+      "source_boundary": "Complete NUL-terminated unique Steam.sdata literal equals each actual NSO descriptor filename; no archive-payload or code/AI-data equivalence implied.",
+      "slots": [
+        {
+          "address": "0x005f65e0",
+          "slot": 0,
+          "switch_descriptor_slots": [
+            "0x71c1a0",
+            "0x71cbe0",
+            "0x71d620",
+            "0x71e098"
+          ]
+        },
+        {
+          "address": "0x005f6620",
+          "slot": 3,
+          "switch_descriptor_slots": [
+            "0x71c578",
+            "0x71cfb8",
+            "0x71d9f8",
+            "0x71e470"
+          ]
+        },
+        {
+          "address": "0x005f6640",
+          "slot": 4,
+          "switch_descriptor_slots": [
+            "0x71c6c0",
+            "0x71d100",
+            "0x71db40",
+            "0x71e5b8"
+          ]
+        },
+        {
+          "address": "0x005f6660",
+          "slot": 5,
+          "switch_descriptor_slots": [
+            "0x71c808",
+            "0x71d248",
+            "0x71dc88",
+            "0x71e700"
+          ]
+        },
+        {
+          "address": "0x005f6680",
+          "slot": 6,
+          "switch_descriptor_slots": [
+            "0x71c950",
+            "0x71d390",
+            "0x71ddd0",
+            "0x71e848"
+          ]
+        },
+        {
+          "address": "0x005f66a0",
+          "slot": 7,
+          "switch_descriptor_slots": [
+            "0x71ca98",
+            "0x71d4d8",
+            "0x71df18",
+            "0x71e990"
+          ]
+        }
+      ]
+    }
+  },
+  "admissions": [
+    {
+      "address": "0x00600068",
+      "ps2_size": 34,
+      "group": "camera_presets",
+      "role": "interior byte partition of indexed camera preset triplets",
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".xpdata",
+        "offset": 28312,
+        "rva": "0xa26e98",
+        "raw_offset": 10639000,
+        "size": 34,
+        "sha256": "267e5a9229b2a9d5d9b6e056a2eb7b29a262796a3a5308197081469483e39385",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "switch_address": "0x710070ce68",
+        "switch_span_equal": true
+      },
+      "layout": {
+        "kind": "partial-logical-bank-copy",
+        "live_size": 34,
+        "bank_byte_offset": 7832,
+        "first_record": 150,
+        "first_record_byte": 32,
+        "end_record_exclusive_byte": 7866,
+        "ps2_stride": 52,
+        "golden_stride": 52,
+        "tail_policy": "no extra partition tail; copy exact selected bytes, including partial records and in-record padding",
+        "retained_tail": {
+          "offset": 34,
+          "size": 0
+        }
+      },
+      "required_seams": [
+        {
+          "owner": "btlCameraRandomTableEntry",
+          "ps2_addresses": [
+            "0x001d0730"
+          ],
+          "requirement": "Direct, translated, inline and native selectors use this complete Golden768-record bank, u16 charId triplets, fixedslot2/randomslot0or1; preserve PS2 mode. Do not split by M2 f32 partitions or route via item-shop messages."
+        },
+        {
+          "owner": "btlCameraFrameRandomEntry / btlCameraEntrRandomFrame",
+          "ps2_addresses": [
+            "0x001c17a0",
+            "0x001c1f70"
+          ],
+          "requirement": "Read all four xyz vectors and u16 duration/30 coherently from selected Golden preset. Use complete39936-byte source for native whole-bank access, not just any selected slice. charId is the actor/child identity feeding the existing selector; preserve fixed/random input and RNG consumption; do not interpret a byte-offset partition as an index domain. Runtime witnesses must cover triplet IDs0,50,51,255, both random bits and fixedslot2, including every cross-partition record."
+        }
+      ]
+    },
+    {
+      "address": "0x00600114",
+      "ps2_size": 128,
+      "group": "camera_presets",
+      "role": "interior byte partition of indexed camera preset triplets",
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".xpdata",
+        "offset": 28484,
+        "rva": "0xa26f44",
+        "raw_offset": 10639172,
+        "size": 128,
+        "sha256": "5ebef7aeb2039a3cf1dbf6ec7a2c7c50508c941a6fb8af8c91afc4700a1cd7a5",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "switch_address": "0x710070cf14",
+        "switch_span_equal": true
+      },
+      "layout": {
+        "kind": "partial-logical-bank-copy",
+        "live_size": 128,
+        "bank_byte_offset": 8004,
+        "first_record": 153,
+        "first_record_byte": 48,
+        "end_record_exclusive_byte": 8132,
+        "ps2_stride": 52,
+        "golden_stride": 52,
+        "tail_policy": "no extra partition tail; copy exact selected bytes, including partial records and in-record padding",
+        "retained_tail": {
+          "offset": 128,
+          "size": 0
+        }
+      },
+      "required_seams": [
+        {
+          "owner": "btlCameraRandomTableEntry",
+          "ps2_addresses": [
+            "0x001d0730"
+          ],
+          "requirement": "Direct, translated, inline and native selectors use this complete Golden768-record bank, u16 charId triplets, fixedslot2/randomslot0or1; preserve PS2 mode. Do not split by M2 f32 partitions or route via item-shop messages."
+        },
+        {
+          "owner": "btlCameraFrameRandomEntry / btlCameraEntrRandomFrame",
+          "ps2_addresses": [
+            "0x001c17a0",
+            "0x001c1f70"
+          ],
+          "requirement": "Read all four xyz vectors and u16 duration/30 coherently from selected Golden preset. Use complete39936-byte source for native whole-bank access, not just any selected slice. charId is the actor/child identity feeding the existing selector; preserve fixed/random input and RNG consumption; do not interpret a byte-offset partition as an index domain. Runtime witnesses must cover triplet IDs0,50,51,255, both random bits and fixedslot2, including every cross-partition record."
+        }
+      ]
+    },
+    {
+      "address": "0x00600194",
+      "ps2_size": 728,
+      "group": "camera_presets",
+      "role": "interior byte partition of indexed camera preset triplets",
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".xpdata",
+        "offset": 28612,
+        "rva": "0xa26fc4",
+        "raw_offset": 10639300,
+        "size": 728,
+        "sha256": "bd40e5baa35f4c7364a892e72e175710cbb8670a9ae9df45f4e459fc05c14eea",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "switch_address": "0x710070cf94",
+        "switch_span_equal": true
+      },
+      "layout": {
+        "kind": "partial-logical-bank-copy",
+        "live_size": 728,
+        "bank_byte_offset": 8132,
+        "first_record": 156,
+        "first_record_byte": 20,
+        "end_record_exclusive_byte": 8860,
+        "ps2_stride": 52,
+        "golden_stride": 52,
+        "tail_policy": "no extra partition tail; copy exact selected bytes, including partial records and in-record padding",
+        "retained_tail": {
+          "offset": 728,
+          "size": 0
+        }
+      },
+      "required_seams": [
+        {
+          "owner": "btlCameraRandomTableEntry",
+          "ps2_addresses": [
+            "0x001d0730"
+          ],
+          "requirement": "Direct, translated, inline and native selectors use this complete Golden768-record bank, u16 charId triplets, fixedslot2/randomslot0or1; preserve PS2 mode. Do not split by M2 f32 partitions or route via item-shop messages."
+        },
+        {
+          "owner": "btlCameraFrameRandomEntry / btlCameraEntrRandomFrame",
+          "ps2_addresses": [
+            "0x001c17a0",
+            "0x001c1f70"
+          ],
+          "requirement": "Read all four xyz vectors and u16 duration/30 coherently from selected Golden preset. Use complete39936-byte source for native whole-bank access, not just any selected slice. charId is the actor/child identity feeding the existing selector; preserve fixed/random input and RNG consumption; do not interpret a byte-offset partition as an index domain. Runtime witnesses must cover triplet IDs0,50,51,255, both random bits and fixedslot2, including every cross-partition record."
+        }
+      ]
+    },
+    {
+      "address": "0x0060046c",
+      "ps2_size": 798,
+      "group": "camera_presets",
+      "role": "interior byte partition of indexed camera preset triplets",
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".xpdata",
+        "offset": 29340,
+        "rva": "0xa2729c",
+        "raw_offset": 10640028,
+        "size": 798,
+        "sha256": "8703d5c169edd2364fb039279044e7c9e969e6aed88afe7c8beb91c37fdb9450",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "switch_address": "0x710070d26c",
+        "switch_span_equal": true
+      },
+      "layout": {
+        "kind": "partial-logical-bank-copy",
+        "live_size": 798,
+        "bank_byte_offset": 8860,
+        "first_record": 170,
+        "first_record_byte": 20,
+        "end_record_exclusive_byte": 9658,
+        "ps2_stride": 52,
+        "golden_stride": 52,
+        "tail_policy": "no extra partition tail; copy exact selected bytes, including partial records and in-record padding",
+        "retained_tail": {
+          "offset": 798,
+          "size": 0
+        }
+      },
+      "required_seams": [
+        {
+          "owner": "btlCameraRandomTableEntry",
+          "ps2_addresses": [
+            "0x001d0730"
+          ],
+          "requirement": "Direct, translated, inline and native selectors use this complete Golden768-record bank, u16 charId triplets, fixedslot2/randomslot0or1; preserve PS2 mode. Do not split by M2 f32 partitions or route via item-shop messages."
+        },
+        {
+          "owner": "btlCameraFrameRandomEntry / btlCameraEntrRandomFrame",
+          "ps2_addresses": [
+            "0x001c17a0",
+            "0x001c1f70"
+          ],
+          "requirement": "Read all four xyz vectors and u16 duration/30 coherently from selected Golden preset. Use complete39936-byte source for native whole-bank access, not just any selected slice. charId is the actor/child identity feeding the existing selector; preserve fixed/random input and RNG consumption; do not interpret a byte-offset partition as an index domain. Runtime witnesses must cover triplet IDs0,50,51,255, both random bits and fixedslot2, including every cross-partition record."
+        }
+      ]
+    },
+    {
+      "address": "0x0060078a",
+      "ps2_size": 30278,
+      "group": "camera_presets",
+      "role": "interior byte partition of indexed camera preset triplets",
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".xpdata",
+        "offset": 30138,
+        "rva": "0xa275ba",
+        "raw_offset": 10640826,
+        "size": 30278,
+        "sha256": "10be080af64c87fbfcc50e6f0f2cd35a242d8ee6135f5059fdabe0b657b16b1f",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "switch_address": "0x710070d58a",
+        "switch_span_equal": true
+      },
+      "layout": {
+        "kind": "partial-logical-bank-copy",
+        "live_size": 30278,
+        "bank_byte_offset": 9658,
+        "first_record": 185,
+        "first_record_byte": 38,
+        "end_record_exclusive_byte": 39936,
+        "ps2_stride": 52,
+        "golden_stride": 52,
+        "tail_policy": "no extra partition tail; copy exact selected bytes, including partial records and in-record padding",
+        "retained_tail": {
+          "offset": 30278,
+          "size": 0
+        }
+      },
+      "required_seams": [
+        {
+          "owner": "btlCameraRandomTableEntry",
+          "ps2_addresses": [
+            "0x001d0730"
+          ],
+          "requirement": "Direct, translated, inline and native selectors use this complete Golden768-record bank, u16 charId triplets, fixedslot2/randomslot0or1; preserve PS2 mode. Do not split by M2 f32 partitions or route via item-shop messages."
+        },
+        {
+          "owner": "btlCameraFrameRandomEntry / btlCameraEntrRandomFrame",
+          "ps2_addresses": [
+            "0x001c17a0",
+            "0x001c1f70"
+          ],
+          "requirement": "Read all four xyz vectors and u16 duration/30 coherently from selected Golden preset. Use complete39936-byte source for native whole-bank access, not just any selected slice. charId is the actor/child identity feeding the existing selector; preserve fixed/random input and RNG consumption; do not interpret a byte-offset partition as an index domain. Runtime witnesses must cover triplet IDs0,50,51,255, both random bits and fixedslot2, including every cross-partition record."
+        }
+      ]
+    },
+    {
+      "address": "0x005dd86c",
+      "ps2_size": 4364,
+      "group": "party_hp_sp",
+      "role": "99-level party HP/SP bank with4-byte prefix and4-byte tail outside physical object",
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "offset": 547552,
+        "rva": "0x90cae0",
+        "raw_offset": 9484000,
+        "size": 4356,
+        "sha256": "88795bd395dc2bc08bed4ac39607d1359de8a8091d0f9234367108e838eff677",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "switch_address": "0x710075accc",
+        "switch_span_equal": true
+      },
+      "layout": {
+        "kind": "interior-copy-with-retained-edges",
+        "ps2_offset": 4,
+        "source_offset": 0,
+        "live_size": 4356,
+        "ps2_stride": 44,
+        "golden_stride": 44,
+        "retain_ps2_head": 4,
+        "retained_tail": {
+          "offset": 4360,
+          "size": 4
+        },
+        "tail_policy": "retain exact4-byte head and4-byte tail; do not source from90cadc"
+      },
+      "required_seams": [
+        {
+          "owner": "datGetLevelTableFirstValue / datGetLevelTableSecondValue",
+          "ps2_addresses": [
+            "0x001053b0",
+            "0x00105460"
+          ],
+          "requirement": "Golden-only complete99x44-byte party HP/SP bank. Address=bank+(level-1)*44+signedCharacterId*4+(SP?2:0). PS2 bias base5dd844/846+level*44 is intentionally one row before physical data5dd870. Golden Steam cf3f0/cf480 and19f840/19f8b0 use physical90cae0/e2 with -44 bias; NSO1125c0/112640 agrees. Do not copy M2 candidate90cadc: its first4 bytes belong to preceding unrelated storage. Guest source view begins at selected address+4, copies4356 bytes, retains4-byte head and4-byte tail."
+        },
+        {
+          "owner": "live party identity and level producers / datCalcMaxHp / datCalcMaxSp",
+          "ps2_addresses": [
+            "0x00231e20",
+            "0x00231ef0"
+          ],
+          "requirement": "Preserve live character selector1..10 and corresponding party unit, not a guessed skill/persona-ID key. Getter uses stored level for flag4/id1, otherwise persona-record level; zero level asserts. Setter caps non-flag4 levels99. Party-table domain is level1..99, eleven pairs per44-byte row, character0 placeholder. Steam enemy/flag4 direct-record branch stays distinct from party-table reads; never route direct enemy HP/SP through this bank. Native/inlined maxHP/SP and all five known TU paths must agree. Witness both getters for every supported character/level, especially levels1/99 and character10; source equality is not a runtime witness."
+        }
+      ]
+    },
+    {
+      "address": "0x0062724f",
+      "ps2_size": 7441,
+      "group": "analysis_model_placement",
+      "role": "interior partition of analysis actor placement rows, not a message/AI bank",
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".xpdata",
+        "offset": 149887,
+        "rva": "0xa4497f",
+        "raw_offset": 10760575,
+        "size": 7441,
+        "sha256": "6a7be7d7f44f7771042a383887f94faa3497a70b3dcc6fbf23fcc3769251494a",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "switch_address": "0x71007340af",
+        "switch_span_equal": true
+      },
+      "layout": {
+        "kind": "partial-expanded-logical-bank-copy",
+        "live_size": 7441,
+        "bank_byte_offset": 623,
+        "first_record": 25,
+        "first_record_byte": 23,
+        "ps2_bank_records": 336,
+        "golden_bank_records": 368,
+        "ps2_stride": 24,
+        "golden_stride": 24,
+        "tail_policy": "no extra partition tail; final record335 is complete, first byte is final in-record pad byte of row25",
+        "retained_tail": {
+          "offset": 7441,
+          "size": 0
+        }
+      },
+      "required_seams": [
+        {
+          "owner": "btlPanelLoadModels",
+          "ps2_addresses": [
+            "0x00219130"
+          ],
+          "requirement": "Native/translated/inlined analysis-model readers must share the full Golden368x24-byte bank and separate Golden24-byte fallback. Live selector is action.unit genus==1 -> u16charId positional row; other genera use fallback, not row0. PS2 has336 rows; new Golden32 rows are part of source, not prefix-copied into guest memory. Bind exact7441-byte selected view at bank+623 only; native whole-bank path reads all8832 qualified bytes."
+        },
+        {
+          "owner": "analysis actor identity, transform and projection state",
+          "ps2_addresses": [
+            "0x00219130"
+          ],
+          "requirement": "Model clones/replacements retain actual selected unit/action identity; do not substitute persona roster order. Preserve frame>=5 state3 gate, user-input yaw accumulation, positive/negative byte limits at+20/+21, translationf32+0/+4/+8 and pitch/yaw+12/+16, opacity/model lifetime. Use Golden renderer/projection transform, not PS2 pixel formula on HD coordinates: ordinary Steam e0a1d adds720,e0a30 adds272,e0a49 divides-960,e0a55 divides-540,e0a77 adds550; corresponding native matrix and view-window inputs must be coherent. Input center128/deadzone48 and per-frame yaw timestep/RNG-free behavior are live state contracts, not authored constants read from a random enclosing span. Verify actor IDs25/26/335/336/367, genus fallback, positive/negative yaw clamps, replacement and release. No runtime or visual equality claim."
+        }
+      ]
+    },
+    {
+      "address": "0x00632e79",
+      "ps2_size": 2247,
+      "group": "effect_camera_scripts",
+      "role": "interior partition of effect camera scripts, not movie or effect-file data",
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".xpdata",
+        "offset": 836377,
+        "rva": "0xaec319",
+        "raw_offset": 11447065,
+        "size": 2239,
+        "sha256": "7fcbb7a88fa96077b872fdd94aaae6e448164885c349fe1dde05b2829fd7f6d8",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "switch_address": "0x71006ff179",
+        "switch_span_equal": true
+      },
+      "layout": {
+        "kind": "partial-logical-bank-prefix-copy",
+        "bank_byte_offset": 3129,
+        "first_script": 12,
+        "first_script_byte": 201,
+        "live_size": 2239,
+        "ps2_stride": 244,
+        "golden_stride": 244,
+        "retained_tail": {
+          "offset": 2239,
+          "size": 8
+        },
+        "tail_policy": "retain8-byte PS2 alignment tail; Golden next remap table is not padding"
+      },
+      "required_seams": [
+        {
+          "owner": "btlCameraStartRandomEffect",
+          "ps2_addresses": [
+            "0x002289b0"
+          ],
+          "requirement": "Use actual action.unit u16charId, two scripts percharacter, randomlowbit exactly once, option8 and geometry3; no character-minus-two adjustment (that belongs to a different633740 bank). Route direct/native/inlined script interpreter80170/7f760/800a0 equivalents to the complete5368-byte Golden bank. Character-domain0..10 includes disabled zero-count scripts; do not compact those slots or treat zero headers as unused objects. Selected2247-byte partition has2239 source bytes and8 PS2 alignment bytes to retain."
+        },
+        {
+          "owner": "camera script live state and interpreter",
+          "ps2_addresses": [
+            "0x002289b0"
+          ],
+          "requirement": "Preserve action/unit lifetime, script count/flags, current row index, elapsed frame and four60-byte rows. Signed duration/next-row transitions and flags must use the existing coherent script consumer established in l1-camera-banks-proof.json. Witness characters0/1/5/6/8/9/10 with both random bits, empty scripts and cross-row transitions; do not claim a runtime match from unchanged bank bytes."
+        }
+      ]
+    },
+    {
+      "address": "0x00626fe0",
+      "ps2_size": 623,
+      "group": "analysis_model_placement",
+      "role": "prefix partition of analysis model placement bank; Main approved transfer from cohort6 on2026-11-13",
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".xpdata",
+        "offset": 149264,
+        "rva": "0xa44710",
+        "raw_offset": 10759952,
+        "size": 623,
+        "sha256": "3e34bcc0693579619104b52c6a7e8755b95a27bb978f6ac9a21961b39884610e",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "switch_address": "0x7100733e40",
+        "switch_span_equal": true
+      },
+      "layout": {
+        "kind": "partial-expanded-logical-bank-copy",
+        "live_size": 623,
+        "bank_byte_offset": 0,
+        "first_record": 0,
+        "first_record_byte": 0,
+        "ps2_bank_records": 336,
+        "golden_bank_records": 368,
+        "ps2_stride": 24,
+        "golden_stride": 24,
+        "tail_policy": "no extra partition tail; ends immediately before final padding byte of row25",
+        "retained_tail": {
+          "offset": 623,
+          "size": 0
+        }
+      },
+      "required_seams": [
+        {
+          "owner": "btlPanelLoadModels",
+          "ps2_addresses": [
+            "0x00219130"
+          ],
+          "requirement": "Native/translated/inlined analysis-model readers must share the full Golden368x24-byte bank and separate Golden24-byte fallback. Live selector is action.unit genus==1 -> u16charId positional row; other genera use fallback, not row0. PS2 has336 rows; new Golden32 rows are part of source, not prefix-copied into guest memory. Bind exact7441-byte selected view at bank+623 only; native whole-bank path reads all8832 qualified bytes."
+        },
+        {
+          "owner": "analysis actor identity, transform and projection state",
+          "ps2_addresses": [
+            "0x00219130"
+          ],
+          "requirement": "Model clones/replacements retain actual selected unit/action identity; do not substitute persona roster order. Preserve frame>=5 state3 gate, user-input yaw accumulation, positive/negative byte limits at+20/+21, translationf32+0/+4/+8 and pitch/yaw+12/+16, opacity/model lifetime. Use Golden renderer/projection transform, not PS2 pixel formula on HD coordinates: ordinary Steam e0a1d adds720,e0a30 adds272,e0a49 divides-960,e0a55 divides-540,e0a77 adds550; corresponding native matrix and view-window inputs must be coherent. Input center128/deadzone48 and per-frame yaw timestep/RNG-free behavior are live state contracts, not authored constants read from a random enclosing span. Verify actor IDs25/26/335/336/367, genus fallback, positive/negative yaw clamps, replacement and release. No runtime or visual equality claim."
+        }
+      ]
+    },
+    {
+      "address": "0x0063f400",
+      "ps2_size": 32,
+      "group": "persistent_help_member_names",
+      "role": "persistent help message member name",
+      "slot": 0,
+      "member_name": "datWeaponHelp.bmd",
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "offset": 683304,
+        "rva": "0x92dd28",
+        "raw_offset": 9619752,
+        "size": 18,
+        "sha256": "99d4039705bb9337ae2bf20a6ed40b335cabc5bed32deb959cc59117a1f9e07e",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "switch_address": "0x71005e4092",
+        "switch_span_equal": true
+      },
+      "layout": {
+        "kind": "prefix-copy",
+        "live_size": 18,
+        "ps2_stride": 1,
+        "golden_stride": 1,
+        "retained_tail": {
+          "offset": 18,
+          "size": 14
+        },
+        "tail_policy": "retain PS2 partition bytes after qualified NUL; switch from virtual help/path to Golden named-member lookup"
+      },
+      "required_seams": [
+        {
+          "owner": "fclShopLoadMessageResources / Golden help-bank installer",
+          "ps2_addresses": [
+            "0x002bdf20"
+          ],
+          "requirement": "Golden-only resolver uses init/datMsg.pak (already proved0063f550) and exact NUL-terminated member datWeaponHelp.bmd for persistent help slot0. PS2 pointer table63f520 has nineactualfilename pointers and bdf20 copies9 then looks uprequests and installs slots0..8. Golden174430 resolves named members and calls18b250 with matching explicit slot; no raw copy of nine32-bit request pointers into host handles, no assumption that Golden extra slots9..12 fit PS2 count9. Direct/translated/inline/native loader must use the same qualified filename; resolve from the Golden archive namespace, not PS2 help/ virtual directory."
+        },
+        {
+          "owner": "persistent help state producers and consumers",
+          "requirement": "Bind Golden prefix18 bytes at selected32-byte address, retain14 PS2 tail bytes. Couple resolution to real archive loaded/readiness state and persistent slot0 publication, release/reload lifecycle, not a zero/fake message handle. Handle storage/normalization/selectors remain obligations of full shop-bank seam; this row proves filename role and source, not their implementation. Witness category slot0 against corresponding loaded member, including destroy/reload and error handling without filename fallbacks."
+        }
+      ]
+    },
+    {
+      "address": "0x0063f420",
+      "ps2_size": 32,
+      "group": "persistent_help_member_names",
+      "role": "persistent help message member name",
+      "slot": 1,
+      "member_name": "datArmorHelp.bmd",
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "offset": 683280,
+        "rva": "0x92dd10",
+        "raw_offset": 9619728,
+        "size": 17,
+        "sha256": "01d72e3e4953e329c66ff513a1aafd13b4723784924fbcfb79cb20a0fd5f96a5",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "switch_address": "0x7100625078",
+        "switch_span_equal": true
+      },
+      "layout": {
+        "kind": "prefix-copy",
+        "live_size": 17,
+        "ps2_stride": 1,
+        "golden_stride": 1,
+        "retained_tail": {
+          "offset": 17,
+          "size": 15
+        },
+        "tail_policy": "retain PS2 partition bytes after qualified NUL; switch from virtual help/path to Golden named-member lookup"
+      },
+      "required_seams": [
+        {
+          "owner": "fclShopLoadMessageResources / Golden help-bank installer",
+          "ps2_addresses": [
+            "0x002bdf20"
+          ],
+          "requirement": "Golden-only resolver uses init/datMsg.pak (already proved0063f550) and exact NUL-terminated member datArmorHelp.bmd for persistent help slot1. PS2 pointer table63f520 has nineactualfilename pointers and bdf20 copies9 then looks uprequests and installs slots0..8. Golden174430 resolves named members and calls18b250 with matching explicit slot; no raw copy of nine32-bit request pointers into host handles, no assumption that Golden extra slots9..12 fit PS2 count9. Direct/translated/inline/native loader must use the same qualified filename; resolve from the Golden archive namespace, not PS2 help/ virtual directory."
+        },
+        {
+          "owner": "persistent help state producers and consumers",
+          "requirement": "Bind Golden prefix17 bytes at selected32-byte address, retain15 PS2 tail bytes. Couple resolution to real archive loaded/readiness state and persistent slot1 publication, release/reload lifecycle, not a zero/fake message handle. Handle storage/normalization/selectors remain obligations of full shop-bank seam; this row proves filename role and source, not their implementation. Witness category slot1 against corresponding loaded member, including destroy/reload and error handling without filename fallbacks."
+        }
+      ]
+    },
+    {
+      "address": "0x0063f440",
+      "ps2_size": 32,
+      "group": "persistent_help_member_names",
+      "role": "persistent help message member name",
+      "slot": 2,
+      "member_name": "datAccessoryHelp.bmd",
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "offset": 683352,
+        "rva": "0x92dd58",
+        "raw_offset": 9619800,
+        "size": 21,
+        "sha256": "342f1ffcd672172ce1922c831cf01a48a098b68f694f2f3c3e1ca20601f87710",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "switch_address": "0x71005fc610",
+        "switch_span_equal": true
+      },
+      "layout": {
+        "kind": "prefix-copy",
+        "live_size": 21,
+        "ps2_stride": 1,
+        "golden_stride": 1,
+        "retained_tail": {
+          "offset": 21,
+          "size": 11
+        },
+        "tail_policy": "retain PS2 partition bytes after qualified NUL; switch from virtual help/path to Golden named-member lookup"
+      },
+      "required_seams": [
+        {
+          "owner": "fclShopLoadMessageResources / Golden help-bank installer",
+          "ps2_addresses": [
+            "0x002bdf20"
+          ],
+          "requirement": "Golden-only resolver uses init/datMsg.pak (already proved0063f550) and exact NUL-terminated member datAccessoryHelp.bmd for persistent help slot2. PS2 pointer table63f520 has nineactualfilename pointers and bdf20 copies9 then looks uprequests and installs slots0..8. Golden174430 resolves named members and calls18b250 with matching explicit slot; no raw copy of nine32-bit request pointers into host handles, no assumption that Golden extra slots9..12 fit PS2 count9. Direct/translated/inline/native loader must use the same qualified filename; resolve from the Golden archive namespace, not PS2 help/ virtual directory."
+        },
+        {
+          "owner": "persistent help state producers and consumers",
+          "requirement": "Bind Golden prefix21 bytes at selected32-byte address, retain11 PS2 tail bytes. Couple resolution to real archive loaded/readiness state and persistent slot2 publication, release/reload lifecycle, not a zero/fake message handle. Handle storage/normalization/selectors remain obligations of full shop-bank seam; this row proves filename role and source, not their implementation. Witness category slot2 against corresponding loaded member, including destroy/reload and error handling without filename fallbacks."
+        }
+      ]
+    },
+    {
+      "address": "0x0063f460",
+      "ps2_size": 32,
+      "group": "persistent_help_member_names",
+      "role": "persistent help message member name",
+      "slot": 3,
+      "member_name": "datAddEffectHelp.bmd",
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "offset": 683328,
+        "rva": "0x92dd40",
+        "raw_offset": 9619776,
+        "size": 21,
+        "sha256": "e74f537fb67265c6414d91e1cf596dbd67aaa81c5369222d390ac5d45679268a",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "switch_address": "0x7100607501",
+        "switch_span_equal": true
+      },
+      "layout": {
+        "kind": "prefix-copy",
+        "live_size": 21,
+        "ps2_stride": 1,
+        "golden_stride": 1,
+        "retained_tail": {
+          "offset": 21,
+          "size": 11
+        },
+        "tail_policy": "retain PS2 partition bytes after qualified NUL; switch from virtual help/path to Golden named-member lookup"
+      },
+      "required_seams": [
+        {
+          "owner": "fclShopLoadMessageResources / Golden help-bank installer",
+          "ps2_addresses": [
+            "0x002bdf20"
+          ],
+          "requirement": "Golden-only resolver uses init/datMsg.pak (already proved0063f550) and exact NUL-terminated member datAddEffectHelp.bmd for persistent help slot3. PS2 pointer table63f520 has nineactualfilename pointers and bdf20 copies9 then looks uprequests and installs slots0..8. Golden174430 resolves named members and calls18b250 with matching explicit slot; no raw copy of nine32-bit request pointers into host handles, no assumption that Golden extra slots9..12 fit PS2 count9. Direct/translated/inline/native loader must use the same qualified filename; resolve from the Golden archive namespace, not PS2 help/ virtual directory."
+        },
+        {
+          "owner": "persistent help state producers and consumers",
+          "requirement": "Bind Golden prefix21 bytes at selected32-byte address, retain11 PS2 tail bytes. Couple resolution to real archive loaded/readiness state and persistent slot3 publication, release/reload lifecycle, not a zero/fake message handle. Handle storage/normalization/selectors remain obligations of full shop-bank seam; this row proves filename role and source, not their implementation. Witness category slot3 against corresponding loaded member, including destroy/reload and error handling without filename fallbacks."
+        }
+      ]
+    },
+    {
+      "address": "0x0063f480",
+      "ps2_size": 32,
+      "group": "persistent_help_member_names",
+      "role": "persistent help message member name",
+      "slot": 4,
+      "member_name": "datItemHelp.bmd",
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "offset": 683400,
+        "rva": "0x92dd88",
+        "raw_offset": 9619848,
+        "size": 16,
+        "sha256": "4524033b579b311def0a4b1d94765d8a26feeb959e279685af7352cb511a1115",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "switch_address": "0x71006141b0",
+        "switch_span_equal": true
+      },
+      "layout": {
+        "kind": "prefix-copy",
+        "live_size": 16,
+        "ps2_stride": 1,
+        "golden_stride": 1,
+        "retained_tail": {
+          "offset": 16,
+          "size": 16
+        },
+        "tail_policy": "retain PS2 partition bytes after qualified NUL; switch from virtual help/path to Golden named-member lookup"
+      },
+      "required_seams": [
+        {
+          "owner": "fclShopLoadMessageResources / Golden help-bank installer",
+          "ps2_addresses": [
+            "0x002bdf20"
+          ],
+          "requirement": "Golden-only resolver uses init/datMsg.pak (already proved0063f550) and exact NUL-terminated member datItemHelp.bmd for persistent help slot4. PS2 pointer table63f520 has nineactualfilename pointers and bdf20 copies9 then looks uprequests and installs slots0..8. Golden174430 resolves named members and calls18b250 with matching explicit slot; no raw copy of nine32-bit request pointers into host handles, no assumption that Golden extra slots9..12 fit PS2 count9. Direct/translated/inline/native loader must use the same qualified filename; resolve from the Golden archive namespace, not PS2 help/ virtual directory."
+        },
+        {
+          "owner": "persistent help state producers and consumers",
+          "requirement": "Bind Golden prefix16 bytes at selected32-byte address, retain16 PS2 tail bytes. Couple resolution to real archive loaded/readiness state and persistent slot4 publication, release/reload lifecycle, not a zero/fake message handle. Handle storage/normalization/selectors remain obligations of full shop-bank seam; this row proves filename role and source, not their implementation. Witness category slot4 against corresponding loaded member, including destroy/reload and error handling without filename fallbacks."
+        }
+      ]
+    },
+    {
+      "address": "0x0063f4a0",
+      "ps2_size": 32,
+      "group": "persistent_help_member_names",
+      "role": "persistent help message member name",
+      "slot": 5,
+      "member_name": "datEventItemHelp.bmd",
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "offset": 683376,
+        "rva": "0x92dd70",
+        "raw_offset": 9619824,
+        "size": 21,
+        "sha256": "4b5068966f2279f8ce33520ed7eabc17968cddc6637a40cffcd073efb3d0a92d",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "switch_address": "0x71005d91d5",
+        "switch_span_equal": true
+      },
+      "layout": {
+        "kind": "prefix-copy",
+        "live_size": 21,
+        "ps2_stride": 1,
+        "golden_stride": 1,
+        "retained_tail": {
+          "offset": 21,
+          "size": 11
+        },
+        "tail_policy": "retain PS2 partition bytes after qualified NUL; switch from virtual help/path to Golden named-member lookup"
+      },
+      "required_seams": [
+        {
+          "owner": "fclShopLoadMessageResources / Golden help-bank installer",
+          "ps2_addresses": [
+            "0x002bdf20"
+          ],
+          "requirement": "Golden-only resolver uses init/datMsg.pak (already proved0063f550) and exact NUL-terminated member datEventItemHelp.bmd for persistent help slot5. PS2 pointer table63f520 has nineactualfilename pointers and bdf20 copies9 then looks uprequests and installs slots0..8. Golden174430 resolves named members and calls18b250 with matching explicit slot; no raw copy of nine32-bit request pointers into host handles, no assumption that Golden extra slots9..12 fit PS2 count9. Direct/translated/inline/native loader must use the same qualified filename; resolve from the Golden archive namespace, not PS2 help/ virtual directory."
+        },
+        {
+          "owner": "persistent help state producers and consumers",
+          "requirement": "Bind Golden prefix21 bytes at selected32-byte address, retain11 PS2 tail bytes. Couple resolution to real archive loaded/readiness state and persistent slot5 publication, release/reload lifecycle, not a zero/fake message handle. Handle storage/normalization/selectors remain obligations of full shop-bank seam; this row proves filename role and source, not their implementation. Witness category slot5 against corresponding loaded member, including destroy/reload and error handling without filename fallbacks."
+        }
+      ]
+    },
+    {
+      "address": "0x0063f4c0",
+      "ps2_size": 32,
+      "group": "persistent_help_member_names",
+      "role": "persistent help message member name",
+      "slot": 6,
+      "member_name": "datSkillHelp.bmd",
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "offset": 683440,
+        "rva": "0x92ddb0",
+        "raw_offset": 9619888,
+        "size": 17,
+        "sha256": "eb9d64177e9e4ed76b48f387739ed7bb606dfa91fe376f96a670de772b9bf422",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "switch_address": "0x71006141c0",
+        "switch_span_equal": true
+      },
+      "layout": {
+        "kind": "prefix-copy",
+        "live_size": 17,
+        "ps2_stride": 1,
+        "golden_stride": 1,
+        "retained_tail": {
+          "offset": 17,
+          "size": 15
+        },
+        "tail_policy": "retain PS2 partition bytes after qualified NUL; switch from virtual help/path to Golden named-member lookup"
+      },
+      "required_seams": [
+        {
+          "owner": "fclShopLoadMessageResources / Golden help-bank installer",
+          "ps2_addresses": [
+            "0x002bdf20"
+          ],
+          "requirement": "Golden-only resolver uses init/datMsg.pak (already proved0063f550) and exact NUL-terminated member datSkillHelp.bmd for persistent help slot6. PS2 pointer table63f520 has nineactualfilename pointers and bdf20 copies9 then looks uprequests and installs slots0..8. Golden174430 resolves named members and calls18b250 with matching explicit slot; no raw copy of nine32-bit request pointers into host handles, no assumption that Golden extra slots9..12 fit PS2 count9. Direct/translated/inline/native loader must use the same qualified filename; resolve from the Golden archive namespace, not PS2 help/ virtual directory."
+        },
+        {
+          "owner": "persistent help state producers and consumers",
+          "requirement": "Bind Golden prefix17 bytes at selected32-byte address, retain15 PS2 tail bytes. Couple resolution to real archive loaded/readiness state and persistent slot6 publication, release/reload lifecycle, not a zero/fake message handle. Handle storage/normalization/selectors remain obligations of full shop-bank seam; this row proves filename role and source, not their implementation. Witness category slot6 against corresponding loaded member, including destroy/reload and error handling without filename fallbacks."
+        }
+      ]
+    },
+    {
+      "address": "0x0063f4e0",
+      "ps2_size": 32,
+      "group": "persistent_help_member_names",
+      "role": "persistent help message member name",
+      "slot": 7,
+      "member_name": "datMaterialHelp.bmd",
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "offset": 683416,
+        "rva": "0x92dd98",
+        "raw_offset": 9619864,
+        "size": 20,
+        "sha256": "c0cab345c96dadd7be7cf8e7b011417b63ba7251a82e4aaa794d987d92a01687",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "switch_address": "0x71006141d1",
+        "switch_span_equal": true
+      },
+      "layout": {
+        "kind": "prefix-copy",
+        "live_size": 20,
+        "ps2_stride": 1,
+        "golden_stride": 1,
+        "retained_tail": {
+          "offset": 20,
+          "size": 12
+        },
+        "tail_policy": "retain PS2 partition bytes after qualified NUL; switch from virtual help/path to Golden named-member lookup"
+      },
+      "required_seams": [
+        {
+          "owner": "fclShopLoadMessageResources / Golden help-bank installer",
+          "ps2_addresses": [
+            "0x002bdf20"
+          ],
+          "requirement": "Golden-only resolver uses init/datMsg.pak (already proved0063f550) and exact NUL-terminated member datMaterialHelp.bmd for persistent help slot7. PS2 pointer table63f520 has nineactualfilename pointers and bdf20 copies9 then looks uprequests and installs slots0..8. Golden174430 resolves named members and calls18b250 with matching explicit slot; no raw copy of nine32-bit request pointers into host handles, no assumption that Golden extra slots9..12 fit PS2 count9. Direct/translated/inline/native loader must use the same qualified filename; resolve from the Golden archive namespace, not PS2 help/ virtual directory."
+        },
+        {
+          "owner": "persistent help state producers and consumers",
+          "requirement": "Bind Golden prefix20 bytes at selected32-byte address, retain12 PS2 tail bytes. Couple resolution to real archive loaded/readiness state and persistent slot7 publication, release/reload lifecycle, not a zero/fake message handle. Handle storage/normalization/selectors remain obligations of full shop-bank seam; this row proves filename role and source, not their implementation. Witness category slot7 against corresponding loaded member, including destroy/reload and error handling without filename fallbacks."
+        }
+      ]
+    },
+    {
+      "address": "0x0063f500",
+      "ps2_size": 32,
+      "group": "persistent_help_member_names",
+      "role": "persistent help message member name",
+      "slot": 8,
+      "member_name": "datQuestHelp.bmd",
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "offset": 683488,
+        "rva": "0x92dde0",
+        "raw_offset": 9619936,
+        "size": 17,
+        "sha256": "13d82bf94712c10790e4d1637e5db4287b5e32b96ec73c3b0ebe7cbb87a8f737",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "switch_address": "0x71005d3617",
+        "switch_span_equal": true
+      },
+      "layout": {
+        "kind": "prefix-copy",
+        "live_size": 17,
+        "ps2_stride": 1,
+        "golden_stride": 1,
+        "retained_tail": {
+          "offset": 17,
+          "size": 15
+        },
+        "tail_policy": "retain PS2 partition bytes after qualified NUL; switch from virtual help/path to Golden named-member lookup"
+      },
+      "required_seams": [
+        {
+          "owner": "fclShopLoadMessageResources / Golden help-bank installer",
+          "ps2_addresses": [
+            "0x002bdf20"
+          ],
+          "requirement": "Golden-only resolver uses init/datMsg.pak (already proved0063f550) and exact NUL-terminated member datQuestHelp.bmd for persistent help slot8. PS2 pointer table63f520 has nineactualfilename pointers and bdf20 copies9 then looks uprequests and installs slots0..8. Golden174430 resolves named members and calls18b250 with matching explicit slot; no raw copy of nine32-bit request pointers into host handles, no assumption that Golden extra slots9..12 fit PS2 count9. Direct/translated/inline/native loader must use the same qualified filename; resolve from the Golden archive namespace, not PS2 help/ virtual directory."
+        },
+        {
+          "owner": "persistent help state producers and consumers",
+          "requirement": "Bind Golden prefix17 bytes at selected32-byte address, retain15 PS2 tail bytes. Couple resolution to real archive loaded/readiness state and persistent slot8 publication, release/reload lifecycle, not a zero/fake message handle. Handle storage/normalization/selectors remain obligations of full shop-bank seam; this row proves filename role and source, not their implementation. Witness category slot8 against corresponding loaded member, including destroy/reload and error handling without filename fallbacks."
+        }
+      ]
+    },
+    {
+      "address": "0x005f65e0",
+      "ps2_size": 32,
+      "group": "battle_table_filenames",
+      "role": "packed battle table filename at typed load-descriptor slot",
+      "slot": 0,
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "offset": 595488,
+        "rva": "0x918620",
+        "raw_offset": 9531936,
+        "size": 17,
+        "sha256": "e384dababd77f754584b30e10918d27b4d5304db5fb5528b9610252f225506c0",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "switch_address": "0x71005f930e",
+        "switch_span_equal": true
+      },
+      "switch_descriptor_slots": [
+        "0x71c1a0",
+        "0x71cbe0",
+        "0x71d620",
+        "0x71e098"
+      ],
+      "layout": {
+        "kind": "prefix-copy",
+        "live_size": 17,
+        "retained_tail": {
+          "offset": 17,
+          "size": 15
+        },
+        "tail_policy": "retain PS2 bytes following qualified NUL"
+      },
+      "required_seams": [
+        {
+          "owner": "btlUnitLoadBlocksFromFile / btlUnitLoadStep",
+          "ps2_addresses": [
+            "0x00193840",
+            "0x001939e0"
+          ],
+          "requirement": "Use complete Golden NUL-terminated filenamebattle/SKILL.TBL at descriptor slot0; the filename is identical in all four Golden mode-specific descriptor arrays. Actual first-word loader dereference is PS2193840->H_Cdvd_AcquireDirectory and NSO58ad4/58af4->398470/397d20. Native/inlined readers must not retain a compiled PS2 filename copy; prefix17 bytes is Golden-sourced, retain remaining15 PS2 partition bytes. This admission does not copy descriptor structs or any host pointers into guest RAM."
+        },
+        {
+          "owner": "real battle table request, readiness and destination producers",
+          "requirement": "Preserve selected battle-load variant, async vs sync request state, eight-descriptor cursor and packed-block consumer namespace for slot0. Golden58200 chooses one of four328-byte descriptor arrays; common58aa0 handles existing request/preloaded lookup, readiness, payload,16-byte source/destination block alignment, publication and release. PS2 descriptors are164 bytes, block destinations8 bytes vs Golden16: do not raw-copy or equate their pointer widths. Identical filename role is proven across all four variants; this is not a claim that table payload schemas, AI bytecode blocks or numerical combat parameters are equivalent. M6b must bind Golden-owned files to actual consumers without PS2 fallback or fake handles."
+        }
+      ]
+    },
+    {
+      "address": "0x005f6620",
+      "ps2_size": 32,
+      "group": "battle_table_filenames",
+      "role": "packed battle table filename at typed load-descriptor slot",
+      "slot": 3,
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "offset": 595544,
+        "rva": "0x918658",
+        "raw_offset": 9531992,
+        "size": 19,
+        "sha256": "25e30e79377712fbd788ae2df8842fa447827f3e5829ff5bed1acf82ae7ec79e",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "switch_address": "0x710060135e",
+        "switch_span_equal": true
+      },
+      "switch_descriptor_slots": [
+        "0x71c578",
+        "0x71cfb8",
+        "0x71d9f8",
+        "0x71e470"
+      ],
+      "layout": {
+        "kind": "prefix-copy",
+        "live_size": 19,
+        "retained_tail": {
+          "offset": 19,
+          "size": 13
+        },
+        "tail_policy": "retain PS2 bytes following qualified NUL"
+      },
+      "required_seams": [
+        {
+          "owner": "btlUnitLoadBlocksFromFile / btlUnitLoadStep",
+          "ps2_addresses": [
+            "0x00193840",
+            "0x001939e0"
+          ],
+          "requirement": "Use complete Golden NUL-terminated filenamebattle/PERSONA.TBL at descriptor slot3; the filename is identical in all four Golden mode-specific descriptor arrays. Actual first-word loader dereference is PS2193840->H_Cdvd_AcquireDirectory and NSO58ad4/58af4->398470/397d20. Native/inlined readers must not retain a compiled PS2 filename copy; prefix19 bytes is Golden-sourced, retain remaining13 PS2 partition bytes. This admission does not copy descriptor structs or any host pointers into guest RAM."
+        },
+        {
+          "owner": "real battle table request, readiness and destination producers",
+          "requirement": "Preserve selected battle-load variant, async vs sync request state, eight-descriptor cursor and packed-block consumer namespace for slot3. Golden58200 chooses one of four328-byte descriptor arrays; common58aa0 handles existing request/preloaded lookup, readiness, payload,16-byte source/destination block alignment, publication and release. PS2 descriptors are164 bytes, block destinations8 bytes vs Golden16: do not raw-copy or equate their pointer widths. Identical filename role is proven across all four variants; this is not a claim that table payload schemas, AI bytecode blocks or numerical combat parameters are equivalent. M6b must bind Golden-owned files to actual consumers without PS2 fallback or fake handles."
+        }
+      ]
+    },
+    {
+      "address": "0x005f6640",
+      "ps2_size": 32,
+      "group": "battle_table_filenames",
+      "role": "packed battle table filename at typed load-descriptor slot",
+      "slot": 4,
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "offset": 595568,
+        "rva": "0x918670",
+        "raw_offset": 9532016,
+        "size": 19,
+        "sha256": "6306346d511e3401793a21de5cb99cbb33d4248e13a7fe2d06cd68a891d26cd9",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "switch_address": "0x7100601371",
+        "switch_span_equal": true
+      },
+      "switch_descriptor_slots": [
+        "0x71c6c0",
+        "0x71d100",
+        "0x71db40",
+        "0x71e5b8"
+      ],
+      "layout": {
+        "kind": "prefix-copy",
+        "live_size": 19,
+        "retained_tail": {
+          "offset": 19,
+          "size": 13
+        },
+        "tail_policy": "retain PS2 bytes following qualified NUL"
+      },
+      "required_seams": [
+        {
+          "owner": "btlUnitLoadBlocksFromFile / btlUnitLoadStep",
+          "ps2_addresses": [
+            "0x00193840",
+            "0x001939e0"
+          ],
+          "requirement": "Use complete Golden NUL-terminated filenamebattle/ENCOUNT.TBL at descriptor slot4; the filename is identical in all four Golden mode-specific descriptor arrays. Actual first-word loader dereference is PS2193840->H_Cdvd_AcquireDirectory and NSO58ad4/58af4->398470/397d20. Native/inlined readers must not retain a compiled PS2 filename copy; prefix19 bytes is Golden-sourced, retain remaining13 PS2 partition bytes. This admission does not copy descriptor structs or any host pointers into guest RAM."
+        },
+        {
+          "owner": "real battle table request, readiness and destination producers",
+          "requirement": "Preserve selected battle-load variant, async vs sync request state, eight-descriptor cursor and packed-block consumer namespace for slot4. Golden58200 chooses one of four328-byte descriptor arrays; common58aa0 handles existing request/preloaded lookup, readiness, payload,16-byte source/destination block alignment, publication and release. PS2 descriptors are164 bytes, block destinations8 bytes vs Golden16: do not raw-copy or equate their pointer widths. Identical filename role is proven across all four variants; this is not a claim that table payload schemas, AI bytecode blocks or numerical combat parameters are equivalent. M6b must bind Golden-owned files to actual consumers without PS2 fallback or fake handles."
+        }
+      ]
+    },
+    {
+      "address": "0x005f6660",
+      "ps2_size": 32,
+      "group": "battle_table_filenames",
+      "role": "packed battle table filename at typed load-descriptor slot",
+      "slot": 5,
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "offset": 595592,
+        "rva": "0x918688",
+        "raw_offset": 9532040,
+        "size": 18,
+        "sha256": "d3b7e3b406fe381522c73686482bac4024145db7b42ee7716136cc1698eafa78",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "switch_address": "0x71006271f5",
+        "switch_span_equal": true
+      },
+      "switch_descriptor_slots": [
+        "0x71c808",
+        "0x71d248",
+        "0x71dc88",
+        "0x71e700"
+      ],
+      "layout": {
+        "kind": "prefix-copy",
+        "live_size": 18,
+        "retained_tail": {
+          "offset": 18,
+          "size": 14
+        },
+        "tail_policy": "retain PS2 bytes following qualified NUL"
+      },
+      "required_seams": [
+        {
+          "owner": "btlUnitLoadBlocksFromFile / btlUnitLoadStep",
+          "ps2_addresses": [
+            "0x00193840",
+            "0x001939e0"
+          ],
+          "requirement": "Use complete Golden NUL-terminated filenamebattle/EFFECT.TBL at descriptor slot5; the filename is identical in all four Golden mode-specific descriptor arrays. Actual first-word loader dereference is PS2193840->H_Cdvd_AcquireDirectory and NSO58ad4/58af4->398470/397d20. Native/inlined readers must not retain a compiled PS2 filename copy; prefix18 bytes is Golden-sourced, retain remaining14 PS2 partition bytes. This admission does not copy descriptor structs or any host pointers into guest RAM."
+        },
+        {
+          "owner": "real battle table request, readiness and destination producers",
+          "requirement": "Preserve selected battle-load variant, async vs sync request state, eight-descriptor cursor and packed-block consumer namespace for slot5. Golden58200 chooses one of four328-byte descriptor arrays; common58aa0 handles existing request/preloaded lookup, readiness, payload,16-byte source/destination block alignment, publication and release. PS2 descriptors are164 bytes, block destinations8 bytes vs Golden16: do not raw-copy or equate their pointer widths. Identical filename role is proven across all four variants; this is not a claim that table payload schemas, AI bytecode blocks or numerical combat parameters are equivalent. M6b must bind Golden-owned files to actual consumers without PS2 fallback or fake handles."
+        }
+      ]
+    },
+    {
+      "address": "0x005f6680",
+      "ps2_size": 32,
+      "group": "battle_table_filenames",
+      "role": "packed battle table filename at typed load-descriptor slot",
+      "slot": 6,
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "offset": 595616,
+        "rva": "0x9186a0",
+        "raw_offset": 9532064,
+        "size": 17,
+        "sha256": "4f119b5149fbc755881de1a87631345d7e06a561af24a2d7c0738388fdf59f22",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "switch_address": "0x71005f931f",
+        "switch_span_equal": true
+      },
+      "switch_descriptor_slots": [
+        "0x71c950",
+        "0x71d390",
+        "0x71ddd0",
+        "0x71e848"
+      ],
+      "layout": {
+        "kind": "prefix-copy",
+        "live_size": 17,
+        "retained_tail": {
+          "offset": 17,
+          "size": 15
+        },
+        "tail_policy": "retain PS2 bytes following qualified NUL"
+      },
+      "required_seams": [
+        {
+          "owner": "btlUnitLoadBlocksFromFile / btlUnitLoadStep",
+          "ps2_addresses": [
+            "0x00193840",
+            "0x001939e0"
+          ],
+          "requirement": "Use complete Golden NUL-terminated filenamebattle/MODEL.TBL at descriptor slot6; the filename is identical in all four Golden mode-specific descriptor arrays. Actual first-word loader dereference is PS2193840->H_Cdvd_AcquireDirectory and NSO58ad4/58af4->398470/397d20. Native/inlined readers must not retain a compiled PS2 filename copy; prefix17 bytes is Golden-sourced, retain remaining15 PS2 partition bytes. This admission does not copy descriptor structs or any host pointers into guest RAM."
+        },
+        {
+          "owner": "real battle table request, readiness and destination producers",
+          "requirement": "Preserve selected battle-load variant, async vs sync request state, eight-descriptor cursor and packed-block consumer namespace for slot6. Golden58200 chooses one of four328-byte descriptor arrays; common58aa0 handles existing request/preloaded lookup, readiness, payload,16-byte source/destination block alignment, publication and release. PS2 descriptors are164 bytes, block destinations8 bytes vs Golden16: do not raw-copy or equate their pointer widths. Identical filename role is proven across all four variants; this is not a claim that table payload schemas, AI bytecode blocks or numerical combat parameters are equivalent. M6b must bind Golden-owned files to actual consumers without PS2 fallback or fake handles."
+        }
+      ]
+    },
+    {
+      "address": "0x005f66a0",
+      "ps2_size": 32,
+      "group": "battle_table_filenames",
+      "role": "packed battle table filename at typed load-descriptor slot",
+      "slot": 7,
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "offset": 595640,
+        "rva": "0x9186b8",
+        "raw_offset": 9532088,
+        "size": 18,
+        "sha256": "3ad7f42f0af5cb13f7ff517b6514f70c09be8e012987595be8000acfd2afe2ef",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "mapping_proven": true,
+        "switch_address": "0x71005f6834",
+        "switch_span_equal": true
+      },
+      "switch_descriptor_slots": [
+        "0x71ca98",
+        "0x71d4d8",
+        "0x71df18",
+        "0x71e990"
+      ],
+      "layout": {
+        "kind": "prefix-copy",
+        "live_size": 18,
+        "retained_tail": {
+          "offset": 18,
+          "size": 14
+        },
+        "tail_policy": "retain PS2 bytes following qualified NUL"
+      },
+      "required_seams": [
+        {
+          "owner": "btlUnitLoadBlocksFromFile / btlUnitLoadStep",
+          "ps2_addresses": [
+            "0x00193840",
+            "0x001939e0"
+          ],
+          "requirement": "Use complete Golden NUL-terminated filenamebattle/AICALC.TBL at descriptor slot7; the filename is identical in all four Golden mode-specific descriptor arrays. Actual first-word loader dereference is PS2193840->H_Cdvd_AcquireDirectory and NSO58ad4/58af4->398470/397d20. Native/inlined readers must not retain a compiled PS2 filename copy; prefix18 bytes is Golden-sourced, retain remaining14 PS2 partition bytes. This admission does not copy descriptor structs or any host pointers into guest RAM."
+        },
+        {
+          "owner": "real battle table request, readiness and destination producers",
+          "requirement": "Preserve selected battle-load variant, async vs sync request state, eight-descriptor cursor and packed-block consumer namespace for slot7. Golden58200 chooses one of four328-byte descriptor arrays; common58aa0 handles existing request/preloaded lookup, readiness, payload,16-byte source/destination block alignment, publication and release. PS2 descriptors are164 bytes, block destinations8 bytes vs Golden16: do not raw-copy or equate their pointer widths. Identical filename role is proven across all four variants; this is not a claim that table payload schemas, AI bytecode blocks or numerical combat parameters are equivalent. M6b must bind Golden-owned files to actual consumers without PS2 fallback or fake handles."
+        }
+      ]
+    }
+  ],
+  "counts": {
+    "PROVEN": 24,
+    "PROVEN-layout": 0,
+    "PROVEN-code": 0,
+    "D10a": 0,
+    "D10b": 0,
+    "D10c": 0,
+    "qualified_ps2_partition_bytes": 47121,
+    "OPEN-retain": 51,
+    "open_ps2_partition_bytes": 7466,
+    "current_assigned_objects": 75,
+    "current_assigned_ps2_bytes": 54587,
+    "ownership_changes": "Original76/54874 minus626172+626372 (2/910) to c6, plus626fe0 (1/623) from c6; all changes Main approved."
+  }
+}

@@ -1,0 +1,11 @@
+# Public tree gitleaks config: the default rules plus one path allowlist.
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Pinned upstream Luau git blob IDs in the conformance manifests are public object hashes, not credentials."
+paths = ['''(^|/)luau-zig/tests/upstream-0\.744/(target-)?manifest\.json$''']
+
+[[allowlists]]
+description = "The made-up HCA key 0x123456789abcdef0 in two test fixtures (the private golden.hca_key setting's parser and decoder tests) is not a credential."
+paths = ['''(^|/)tests/(config_test\.c|golden_audio_test\.py)$''']

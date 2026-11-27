@@ -3,6 +3,8 @@
 #include "p4pc/game_encounters.h"
 #include "p4pc/game_enemies.h"
 #include "p4pc/game_items_native.h"
+#include "p4pc/game_mode.h"
+#include "p4pc/golden_names_native.h"
 #include "p4pc/game_personas.h"
 #include "p4pc/game_skills_native.h"
 #include "p4pc/game_table_derived.h"
@@ -412,7 +414,10 @@ static uint32_t stride(P4GameTableInputKind input, uint32_t span, uint32_t *head
     case P4_TABLE_INPUT_SKILL: return span == 0 ? P4_SKILL_ELEMENT_SIZE : span == 1 ? P4_SKILL_ROW_SIZE : 0;
     case P4_TABLE_INPUT_UNIT:
         return span == 0 ? P4_ENEMY_ROW_SIZE : span == 1 ? P4_ENEMY_AFFINITY_SIZE : span == 2 ? P4_PERSONA_AFFINITY_SIZE : 0;
-    case P4_TABLE_INPUT_MSG: return span == 1 ? 19u : span == 2 ? P4_ENEMY_NAME_SIZE : span == 3 ? P4_PERSONA_NAME_SIZE : 0;
+    case P4_TABLE_INPUT_MSG:
+        return span == 1 ? (p4_game_mode() == P4_GAME_MODE_GOLDEN ? P4_GOLDEN_SKILL_NAME_SIZE : 19u) :
+            span == 2 ? P4_ENEMY_NAME_SIZE :
+            span == 3 ? (p4_game_mode() == P4_GAME_MODE_GOLDEN ? P4_GOLDEN_PERSONA_NAME_SIZE : P4_PERSONA_NAME_SIZE) : 0;
     case P4_TABLE_INPUT_PERSONA:
         return span == 0 ? P4_PERSONA_METADATA_SIZE : span == 1 ? P4_PERSONA_GROWTH_SIZE :
             span == 5 ? P4_PERSONA_CANDIDATES_SIZE : 0;

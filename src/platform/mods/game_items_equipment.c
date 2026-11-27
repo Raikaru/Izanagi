@@ -1,4 +1,6 @@
 #include "p4pc/game_items.h"
+#include "p4pc/game_mode.h"
+#include "p4pc/golden_items_native.h"
 #include <string.h>
 
 _Static_assert(sizeof(P4GameItemEquipmentRow) == 4, "native equipment row ABI");
@@ -40,6 +42,8 @@ extern int32_t datItemCount(int16_t id);
 uint16_t p4_game_tables_items_native_inventory_refresh(void *work)
 {
     P4GameItemInventoryRow *rows = p4_game_tables_items_native_inventory_rows(work);
+    if (p4_game_mode() == P4_GAME_MODE_GOLDEN)
+        return p4_golden_item_native_inventory(rows, p4_game_tables_items_native_inventory_capacity());
     uint16_t count = 0;
     for (uint32_t id = 0x300; id < 0x600; ++id) {
         int16_t quantity = (int16_t)(datItemCount((int16_t)id) & 255);

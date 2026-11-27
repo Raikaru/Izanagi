@@ -22,6 +22,11 @@ vf0, broadcasts and aliases retain scalar result bits. Other CPUs keep the scala
 `vu0_helpers` compares 262,144 deterministic edge/full-bit-pattern cases across masks
 and broadcasts on both host ABI variants.
 
+## Player telemetry
+
+Player runs log frame-time statistics per area, game-thread CPU time and audio underruns without any switch; see
+[diagnostics](diagnostics.md). The switches below are for investigations.
+
 ## Profiling
 
 - `P4PC_PROFILE=<hz>` samples the game thread (`src/platform/profile.c`): Linux SIGPROF
@@ -74,7 +79,8 @@ and broadcasts on both host ABI variants.
   allocation burst; such full-output diagnostic stalls are not shipping hitches.
   Disabled span hooks read no clock, format no records, and resolve no paths.
   Enabled logging is diagnostic overhead, not an unprofiled speed measurement.
-- `P4PC_GLSTATS=1` reports driver calls and swap time every 1000 frames.
+- `P4PC_GLSTATS=1` reports driver calls and swap time every 1000 frames (it runs the driver on the game thread; see
+  [render thread](render_thread.md)).
 - `P4PC_PACE_TRACE=<csv path>` records paced scheduler-return intervals and main
   host-thread CPU accounting as `flip,timestamp_ns,period_ns,thread_cpu_ns,thread_cpu_delta_ns`,
   using the same observer as `P4PC_PACE_LOG`. CPU-accounting failure is `UINT64_MAX`,
@@ -83,6 +89,11 @@ and broadcasts on both host ABI variants.
   forced termination can lose the final partial buffer. This measures scheduler
   cadence, not display scanout. The game normally presents at **30 Hz** on the
   60 Hz scheduler: use **>40 ms** for hitches, not the legacy logger's >20 ms count.
+- `P4PC_PACING=carry|legacy` chooses how a real-time run paces the game's 60 Hz tick ([video presentation](video_presentation.md#pacing)): `carry`
+  (the player default) runs the scheduler on virtual time and paces it from the host clock, so a frame that needs up to two ticks of CPU still
+  flips every two ticks; `legacy` counts the host clock itself, and a frame over one tick (16.7 ms) of CPU work drops to 3-4 ticks. `P4PC_PACE_LOG=1` adds
+  the carried time's sleeps, resyncs and lateness to its 600-flip line. `P4PC_KT_WHY=1` prints every wait of the game thread over 0.4 ms per flip, with
+  the call chain and the waker of a sleep.
 - `P4PC_GPU_TRACE=<csv path>` enables native ARB timer-query timestamps on desktop
   GL or EXT disjoint-timer-query timestamps on GLES/ANGLE. Four preallocated banks
   impose at least two frames of result latency. Results are fetched only after
@@ -114,6 +125,41 @@ and broadcasts on both host ABI variants.
 
 Do not use an intrusive Windows sampled run as the unprofiled speed measurement.
 The same profiler works with `p4pc_viewer`.
+
+## Draw-call savings that keep the picture identical
+
+The translation to GL is measured by the records a frame sends to the driver (`P4PC_RENDER_THREAD_STATS=1` prints them per frame) and, on a phone, by the time the render
+thread needs for them. Each saving below has an environment switch (`=0` restores the old behaviour, for A/B captures and for diagnosing a driver) and changes no pixel.
+
+- **Alpha-test pass culling** (`P4PC_PASSCULL`). The game's models use the GS alpha test with the failure mode "write the colour, skip the depth write", which the port draws
+  as two draws: fragments that pass the test, then fragments that fail it. The fragment alpha is the product of the vertex, material and texture alpha, and each factor is
+  interpolated or filtered, so the product stays inside the product of the ranges (the port keeps the smallest and largest alpha of each material's triangles, of each
+  skinned mesh per upload, and of each plain texture it uploads). With a margin above the fragment shader's float error, a draw whose fragments cannot all pass skips the
+  first pass and one whose fragments cannot fail skips the second (`src/render/p4gl_passcull.h`, tested against the shader's comparison by `alpha_pass_cull`). Textures
+  with padding, border addressing, frame and camera textures and authored or movie uploads are treated as unknown, so they keep both passes. In a crowded street (North
+  Shopping District, a phone with an Adreno 650) 394 of the 790 model draws per frame were such second passes: 313 of them were dropped, draws per frame fell from 992 to
+  679 and the records sent to the driver from 6481 to 5075, with identical captures at three frames.
+
+- **The same pass culling for UI and effect draws** (`P4PC_PASSCULL`). Immediate-mode (Im2D) sprites and Im3D/PTank effects use the same failure mode, and a typical HUD
+  sprite uses ATST NEVER: its first draw discards every fragment and its second draws all of them. A NEVER draw now issues only the second draw with the alpha function
+  switched off (it cannot discard anything), which also removes the two uniform calls that inverted the test around it. Im2D draws whose vertex and texture alpha bounds decide
+  the test get the same treatment as model draws (plain triangles only; AA lines, rectangle-cell transport, frame or camera textures, border addressing and textures with an
+  unknown alpha range keep both draws). North Shopping District on the phone (Adreno 650): the ~100 HUD quads of the frame went from 4 records per quad (two draws, two
+  uniform calls) to 1 draw.
+
+- **One vertex array per cached mesh** (`P4PC_ATOMIC_VAO`). A model's cached vertex and index buffers and its four attribute pointers are set up once in a vertex array
+  object, and a draw binds that one object instead of two buffers and four pointers (six records became one). A freed cache entry hands its vertex array to the next entry
+  built; the GL table has no `glDeleteVertexArrays`, and every reuse rebinds both buffers and all four pointers. North Shopping on the phone: 5075 records per frame
+  became 3947 (the render thread's measured busy time 12.5 to 11.2 ms), with identical captures.
+
+- **One uniform call per model draw** (packed per-draw values). A model draw used to set about a dozen uniforms (matrices, light directions and colours, fog, the
+  alpha test, the material colour and flags), each a recorded call. The atomic shaders now read all of them from one array of 20 `vec4` (`uD`), written by one
+  `glUniform4fv` when the values differ from what the program holds. The shader code is unchanged (macros name the array's parts) and every value is the same float, so the
+  pixels are the same bytes; integers and flags travel as small exact floats.
+
+- **Merged draw runs** (render thread, `P4PC_RT_MERGE`). Runs of three or more "upload four vertices, draw the strip" pairs (HUD sprites, text) become one upload and one draw
+  in the render thread's executor, with the last pair left alone (see `render_thread.md`). The picture is unchanged: the primitives keep their order and the joins between strips
+  are zero-area triangles. Per frame on the phone: the castle floor has 5 runs and 258 driver calls saved, North Shopping District 100 saved and the school classroom 106.
 
 ## GL state and draw windows
 

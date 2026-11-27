@@ -11,21 +11,24 @@ see licenses/NOTICE.txt.
 
 FFmpeg libraries (usr/lib/libavcodec.so.*, libavutil.so.*, libswscale.so.*)
   FFmpeg @FFMPEG_VER@, https://ffmpeg.org, GNU Lesser General Public License version 2.1 or
-  later (licenses/FFmpeg-LGPL-2.1.txt). Built from the unmodified release tarball
+  later (licenses/FFmpeg-LGPL-2.1.txt). Modified from the release tarball
   ffmpeg-@FFMPEG_VER@.tar.xz (https://ffmpeg.org/releases/ffmpeg-@FFMPEG_VER@.tar.xz, sha256
   @FFMPEG_SHA@) with --disable-gpl --disable-nonfree and only these components
-  enabled: libavcodec (MPEG-2 video decoder and parser, ADX audio decoder) and
+  enabled: libavcodec (MPEG-2 video decoder and parser, ADX and HCA audio decoders) and
   libswscale. The configure options and build recipe are in the port's source
   (ci/win32/build_deps.sh, triple x86_64-linux-gnu). The libraries are separate shared
   objects: you may replace them with your own build of FFmpeg @FFMPEG_VER@ of the same ABI,
   which is what the LGPL asks of a program that uses them. usr/bin/p4pc contains no
-  FFmpeg code. Complete sources and build recipe are in usr/share/p4pc/source.
+  FFmpeg code. Complete sources are in usr/share/p4pc/source: the upstream
+  archive, ci/win32/build_deps.sh and ci/ffmpeg-7.1.1-hca-window-alignment.patch.
+  That LGPL patch aligns only HCA's window; no coefficients or arithmetic change.
 
 SDL3 (usr/lib/libSDL3.so.*)
   Simple DirectMedia Layer @SDL_VER@, https://libsdl.org, zlib license
   (licenses/SDL3-zlib.txt). Unmodified release build.
 
 LodePNG 20261006: zlib license (licenses/LodePNG-zlib.txt).
+bcdec 0.985 (Sergii Kudlai), BC7 decoding: MIT option (licenses/bcdec-MIT.txt).
 
 cgltf 1.15 (Johannes Kuhlmann): MIT license (licenses/cgltf-MIT.txt).
 

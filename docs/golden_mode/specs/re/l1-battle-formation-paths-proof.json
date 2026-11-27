@@ -1,0 +1,35 @@
+{
+  "schema":1,
+  "proof_id":"L1-c12-battle-formation-paths",
+  "decision":"PROVEN",
+  "runtime_status":"pending-seam",
+  "ps2_reader":"0x001d69f0 btlFormationFormatName; decomp18016afe6 src/Battle/btlFormation.c1540..1551",
+  "role":"Select the test BED resource path when battle resource-mode bit0 is set; otherwise format skill/ plus the low16-bit input identifier as uppercase hexadecimal with minimum width3 and .BED suffix.",
+  "sources":[
+    {"address":"0x00609570","ps2_size":24,"steam_rva":"0x917f88","steam_raw":9530248,"nso_address":"0x71005ebb37","live_size":20,"sha256":"a82a9abba1fb13de31bf76129e92047ba0183e142d61dd1bcb25f0ec39b0d818","value":"battle/BTL_TEST.BED","tail_bytes":4},
+    {"address":"0x00609588","ps2_size":24,"steam_rva":"0x917fa8","steam_raw":9530280,"nso_address":"0x7100618f16","live_size":11,"sha256":"65139b46f404e53a0beb5824ddf5b558dddd57a2ba0677f2907893a1e1cb2441","value":"%s%03X.BED","tail_bytes":13}
+  ],
+  "consumer_correspondence":[
+    {"image":"Steam build10836033 ordinary .shared","address":"0x9a690..0x9a6f2","evidence":"Preserve low16 input and destination pointer. Test battle-state byte+20 bit0. Set branch passes test literal917f88 to formatter38180; clear branch passes format917fa8, fixed prefix917f9c and zero-extended16-bit identifier. Helper tailcalls the same formatter. Inlined source references at4da79/58403/5d654 and format references4da91/5841c/5d66d corroborate the shared path role."},
+    {"image":"Switch1.2 ordinary NSO","address":"0x7100049260..0x71000492b0","evidence":"Test battle-state byte+20 bit0. Clear branch masks identifierffff, supplies prefix61393d and format618f16, tailcalls530a20(destination,format,prefix,id). Set branch loads first16bytes from5ebb37 and writes final BED-NUL word atdestination+16: exact20-byte path, not a24-byte source window."}
+  ],
+  "producer_contract":{
+    "mode":"Real current battle resource-mode bit0, not hardcoded test/normal mode.",
+    "identifier":"Caller's low16-bit formation/effect resource identifier; preserve uppercase%03X minimum-width semantics, including four-digit IDs.",
+    "fixed_prefix":"Both Golden builds use complete skill/ NUL string: Steam917f9c, NSO61393d. PS2D00763388 also contains skill/ NUL. This is a proven fixed formatter argument, not an unresolved live producer or newly counted selected object.",
+    "destination":"Actual caller-owned resource-path buffer forwarded unchanged; source correspondence does not certify that asset-loading routes are bound."
+  },
+  "layout":"Prefix-copy20B and11B respectively, includingNUL. Preserve4B/13BPS2partitiontails; Steam adjacent skill/ and battle/ strings are not tail data for these rows.",
+  "required_seams":[
+    {"ps2_addresses":["0x001d69f0"],"action":"Bind both formatter argument sources and all translated/inlined/native equivalents. Use one coherent mode/identifier selector, not independent guessed string windows. Preserve the fixed Golden skill/ prefix argument."},
+    {"action":"Cover actual battle resource-mode producers, low16 identifier propagation and destination-buffer ownership. Do not replace mode by a default or shorten four-digit hex IDs. Runtime fixtures must exercise both branches and an ID abovefff."},
+    {"action":"Qualify Golden BED resource loading/name routing separately; installing strings alone proves neither resource availability nor M10 routing. Original PS2 mode and partition tails remain unchanged."}
+  ],
+  "synthetic_vectors":[
+    {"mode_bit0":1,"id":5,"path":"battle/BTL_TEST.BED"},
+    {"mode_bit0":0,"id":5,"path":"skill/005.BED"},
+    {"mode_bit0":0,"id":65541,"path":"skill/005.BED"},
+    {"mode_bit0":0,"id":4660,"path":"skill/1234.BED"}
+  ],
+  "qualification":"Static complete-span hashes and typed consumer/selector proof only; no game/emulator, runtime asset load, unit suite, build, BBV or protected .arch decode. Prior matcher score was not lowered or treated as admission."
+}

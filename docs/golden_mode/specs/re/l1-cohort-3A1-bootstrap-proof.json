@@ -1,0 +1,467 @@
+{
+  "proof_id": "L1-C3A1-bootstrap-resource-and-registration-20261113",
+  "scope": "Four retained A1 objects112PS2B; complete source values and all direct PS2 users plus necessary companion resource protocol. Source proof only, runtime pending-seam. Old A history and transferred A2 component untouched.",
+  "source_images": {
+    "steam": {
+      "build": 10836033,
+      "file": "P4G.exe",
+      "sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+      "data_section_bounds": {
+        "section": ".sdata",
+        "rva_start": "0x887000",
+        "size": 1674240,
+        "raw_start": 8936448
+      },
+      "code_witness_bounds": {
+        "section": ".shared",
+        "rva_start": "0x1000",
+        "size": 8934912,
+        "raw_start": 1536
+      },
+      "runtime_input": "Owned Steam install only; never require NSO or private research cache."
+    },
+    "switch": {
+      "version": "1.2",
+      "nso_sha256": "854c7a1e33de1619abf009fa7f32b8c012960d685c8bf1bf99a92a6a4d0bda1c",
+      "mapped_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+      "base": "0x7100000000",
+      "segments": [
+        {
+          "name": "text",
+          "file_offset": 257,
+          "mapped_offset": 0,
+          "decompressed_size": 5448752,
+          "compressed_size": 3719998,
+          "lz4_compressed": true
+        },
+        {
+          "name": "rodata",
+          "file_offset": 3720255,
+          "mapped_offset": 5451776,
+          "decompressed_size": 1870824,
+          "compressed_size": 990563,
+          "lz4_compressed": true
+        },
+        {
+          "name": "data",
+          "file_offset": 4710818,
+          "mapped_offset": 7323648,
+          "decompressed_size": 1606720,
+          "compressed_size": 439860,
+          "lz4_compressed": true
+        }
+      ],
+      "purpose": "Independent static structural witness, not runtime dependency."
+    }
+  },
+  "icon_bank_context": {
+    "ps2_pointer_table": "0x0063b4f0",
+    "ps2_live_size": 104,
+    "nso_pointer_table": "0x7100792ac0",
+    "nso_live_size": 208,
+    "entry_count": 26,
+    "entries": [
+      {
+        "index": 0,
+        "ps2_address": "0x63b1b0",
+        "ps2_name": "event/_ICON1.EPL",
+        "nso_address": "0x71005e1d98",
+        "golden_member_key": "_ICON1.EPL"
+      },
+      {
+        "index": 1,
+        "ps2_address": "0x63b1d0",
+        "ps2_name": "event/_ICON2.EPL",
+        "nso_address": "0x710060f4b1",
+        "golden_member_key": "_ICON2.EPL"
+      },
+      {
+        "index": 2,
+        "ps2_address": "0x63b1f0",
+        "ps2_name": "event/_ICON3.EPL",
+        "nso_address": "0x710060a4e1",
+        "golden_member_key": "_ICON3.EPL"
+      },
+      {
+        "index": 3,
+        "ps2_address": "0x63b210",
+        "ps2_name": "event/_ICON4.EPL",
+        "nso_address": "0x71005e74f2",
+        "golden_member_key": "_ICON4.EPL"
+      },
+      {
+        "index": 4,
+        "ps2_address": "0x63b230",
+        "ps2_name": "event/_ICON5.EPL",
+        "nso_address": "0x7100611e7b",
+        "golden_member_key": "_ICON5.EPL"
+      },
+      {
+        "index": 5,
+        "ps2_address": "0x63b250",
+        "ps2_name": "event/_ICON6.EPL",
+        "nso_address": "0x71005f76bc",
+        "golden_member_key": "_ICON6.EPL"
+      },
+      {
+        "index": 6,
+        "ps2_address": "0x63b270",
+        "ps2_name": "event/_ICON7.EPL",
+        "nso_address": "0x71005d3dc2",
+        "golden_member_key": "_ICON7.EPL"
+      },
+      {
+        "index": 7,
+        "ps2_address": "0x63b290",
+        "ps2_name": "event/_ICON8.EPL",
+        "nso_address": "0x71005ffc5d",
+        "golden_member_key": "_ICON8.EPL"
+      },
+      {
+        "index": 8,
+        "ps2_address": "0x63b2b0",
+        "ps2_name": "event/_ICON9.EPL",
+        "nso_address": "0x7100614984",
+        "golden_member_key": "_ICON9.EPL"
+      },
+      {
+        "index": 9,
+        "ps2_address": "0x63b2d0",
+        "ps2_name": "event/_ICON10.EPL",
+        "nso_address": "0x71005ef590",
+        "golden_member_key": "_ICON10.EPL"
+      },
+      {
+        "index": 10,
+        "ps2_address": "0x63b2f0",
+        "ps2_name": "event/_ICON11.EPL",
+        "nso_address": "0x71005e74fd",
+        "golden_member_key": "_ICON11.EPL"
+      },
+      {
+        "index": 11,
+        "ps2_address": "0x63b310",
+        "ps2_name": "event/_ICON12.EPL",
+        "nso_address": "0x71005ec9fe",
+        "golden_member_key": "_ICON12.EPL"
+      },
+      {
+        "index": 12,
+        "ps2_address": "0x63b330",
+        "ps2_name": "event/_ICON13.EPL",
+        "nso_address": "0x7100619e62",
+        "golden_member_key": "_ICON13.EPL"
+      },
+      {
+        "index": 13,
+        "ps2_address": "0x63b350",
+        "ps2_name": "event/_ICON14.EPL",
+        "nso_address": "0x7100622f2f",
+        "golden_member_key": "_ICON14.EPL"
+      },
+      {
+        "index": 14,
+        "ps2_address": "0x63b370",
+        "ps2_name": "event/_ICON15.EPL",
+        "nso_address": "0x7100627ff5",
+        "golden_member_key": "_ICON15.EPL"
+      },
+      {
+        "index": 15,
+        "ps2_address": "0x63b390",
+        "ps2_name": "event/_ICON16.EPL",
+        "nso_address": "0x71005fcd63",
+        "golden_member_key": "_ICON16.EPL"
+      },
+      {
+        "index": 16,
+        "ps2_address": "0x63b3b0",
+        "ps2_name": "event/_ICON17.EPL",
+        "nso_address": "0x710061498f",
+        "golden_member_key": "_ICON17.EPL"
+      },
+      {
+        "index": 17,
+        "ps2_address": "0x63b3d0",
+        "ps2_name": "event/_ICON18.EPL",
+        "nso_address": "0x7100628001",
+        "golden_member_key": "_ICON18.EPL"
+      },
+      {
+        "index": 18,
+        "ps2_address": "0x63b3f0",
+        "ps2_name": "event/_ICON19.EPL",
+        "nso_address": "0x71005defb5",
+        "golden_member_key": "_ICON19.EPL"
+      },
+      {
+        "index": 19,
+        "ps2_address": "0x63b410",
+        "ps2_name": "event/_ICON20.EPL",
+        "nso_address": "0x71005fcd6f",
+        "golden_member_key": "_ICON20.EPL"
+      },
+      {
+        "index": 20,
+        "ps2_address": "0x63b430",
+        "ps2_name": "event/_ICON21.EPL",
+        "nso_address": "0x71005defc1",
+        "golden_member_key": "_ICON21.EPL"
+      },
+      {
+        "index": 21,
+        "ps2_address": "0x63b450",
+        "ps2_name": "event/_ICON22.EPL",
+        "nso_address": "0x71005defcd",
+        "golden_member_key": "_ICON22.EPL"
+      },
+      {
+        "index": 22,
+        "ps2_address": "0x63b470",
+        "ps2_name": "event/_ICON23.EPL",
+        "nso_address": "0x71005dbf3b",
+        "golden_member_key": "_ICON23.EPL"
+      },
+      {
+        "index": 23,
+        "ps2_address": "0x63b490",
+        "ps2_name": "event/_ICON24.EPL",
+        "nso_address": "0x71005f76c7",
+        "golden_member_key": "_ICON24.EPL"
+      },
+      {
+        "index": 24,
+        "ps2_address": "0x63b4b0",
+        "ps2_name": "event/_ICON25.EPL",
+        "nso_address": "0x7100619e6e",
+        "golden_member_key": "_ICON25.EPL"
+      },
+      {
+        "index": 25,
+        "ps2_address": "0x63b4d0",
+        "ps2_name": "event/_ICON26.EPL",
+        "nso_address": "0x71005fa222",
+        "golden_member_key": "_ICON26.EPL"
+      }
+    ],
+    "reader_bound_caveat": "Both selected task readers accept unsigned index26: old rejects>26, Golden rejects>=27. But both physical tables have ONLY26 pointers. Old index26 reads mt_sceneIcon.c bytes; Golden index26 reads following1.0 float word with no relocation. Never invent a27th member, silently clamp to26 or claim index26 is safe. This is a pending runtime input-domain/consumer qualification issue, not an admission of the separate pointer table.",
+    "all_identified_ps2_table_users": [
+      "0x0026d890"
+    ],
+    "all_named_golden_archive_users": [
+      "0x71002a6080",
+      "0x71002a60c0",
+      "0x71002a61d0"
+    ],
+    "identity_proof": "Sync archive preload, member resolution for explicit _ICON1..26 and state0/1 effect attachment into resource kinds1/3 with old-handle release establish the complete corresponding bank role. Golden uses cache-based archive/member lookup and bare member keys rather than event/ prefixed old keys."
+  },
+  "code_witnesses": [
+    {
+      "platform": "Switch1.2 ordinary code",
+      "start": "0x7100277680",
+      "end": "0x7100277760",
+      "size": 224,
+      "sha256": "4ca6f8cd1894b68fc3aae8e5fe2843bce834166a97e685338f75152606a778b9"
+    },
+    {
+      "platform": "Switch1.2 ordinary code",
+      "start": "0x7100111c10",
+      "end": "0x7100111c90",
+      "size": 128,
+      "sha256": "0ee32f2b4f4def9dc287a6c454bde2d4dd2cb2725e292beb1045b12599546666"
+    },
+    {
+      "platform": "Switch1.2 ordinary code",
+      "start": "0x71001f6110",
+      "end": "0x71001f6190",
+      "size": 128,
+      "sha256": "7568e5b401788a19e1d4e29a7faff1d1a274042f2ae5e78b72113cc0698a20ee"
+    },
+    {
+      "platform": "Switch1.2 ordinary code",
+      "start": "0x71001f6190",
+      "end": "0x71001f61d0",
+      "size": 64,
+      "sha256": "f9ea895d49d738784f1be5b9d90414d0d959aa929b9939233c60c7c10d22dbd0"
+    },
+    {
+      "platform": "Switch1.2 ordinary code",
+      "start": "0x71001f61c0",
+      "end": "0x71001f61c8",
+      "size": 8,
+      "sha256": "9b46f0f311ddcb23d2737b01e5883dc9cac15c8e1f0315842adce04127d73f2d"
+    },
+    {
+      "platform": "Switch1.2 ordinary code",
+      "start": "0x71001bda10",
+      "end": "0x71001bdbd0",
+      "size": 448,
+      "sha256": "e629d7dce7a1195453ca002a58b6c1cac288619b620dd9527f758f50556b633c"
+    },
+    {
+      "platform": "Switch1.2 ordinary code",
+      "start": "0x71002a6080",
+      "end": "0x71002a60b0",
+      "size": 48,
+      "sha256": "cbd92b471f76226c9d14f59e5729377abf4f9983db7d6c3b591e69b56bfe9162"
+    },
+    {
+      "platform": "Switch1.2 ordinary code",
+      "start": "0x71002a60c0",
+      "end": "0x71002a6110",
+      "size": 80,
+      "sha256": "6d3472042e9ebcb37e466d244a6a2f208b12675dc25d655964450db943ecaa2f"
+    },
+    {
+      "platform": "Switch1.2 ordinary code",
+      "start": "0x71002a61d0",
+      "end": "0x71002a62c0",
+      "size": 240,
+      "sha256": "4fd804c59714144a0f8f5ebac255f4b5d7a996ff2994905df965ce60ee28fc13"
+    }
+  ],
+  "admissions": [
+    {
+      "address": "0x005e46a0",
+      "ps2_size": 32,
+      "role": "bootstrap item-table source",
+      "all_ps2_literal_users": [
+        "0x001117c0"
+      ],
+      "companion_ps2_users": [],
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "source_build": 10836033,
+        "rva": "0x93f0b0",
+        "offset": 753840,
+        "raw_offset": 9690288,
+        "size": 17,
+        "sha256": "634976a30415ad36f97215743e8ac896a7e87cf5808f14e03f67000f2bc9b0fb",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true,
+        "source_group": "L1-C3A1-bootstrap-resource-and-registration-20261113",
+        "corroborating_nso_address": "0x71005e73b6",
+        "nso_materialized_reference_pcs": [
+          "0x71002776a4",
+          "0x71002776bc",
+          "0x71002776f8"
+        ],
+        "structural_reader_platform": "Switch1.2 ordinary code, original PS2 source/MIPS"
+      },
+      "structural_correspondence": "The staged init reader requests this source at state0, waits for readiness, consumes the blob through the item-table installer, releases the transient request and finishes with-1. Golden adds cached-object lookup, falls through state0 in the same call when ready and installs via111c10, which copies into the item-data buffer and rebuilds count-dependent68B-record pointers. These deltas are explicit, not an old raw-data-layout claim.",
+      "installation": {
+        "kind": "prefix-copy",
+        "live_size": 17,
+        "retain_ps2_tail": 15,
+        "requirement": "Install complete17B qualified Golden source prefix at0x005e46a0, retain15PS2 tail bytes and cover all translated/inlined/compiled-native copies of the listed user. Registration and paired lookup/teardown must share one identity; preserve real handle/return domains, priority, parent/child and callback ownership. Native work growth is correspondence evidence, never permission to overwrite guest structs. Resource values require qualified Golden-aware loaders and separate payload/runtime qualification, not PS2 raw-layout compatibility. Steam-only runtime input; NSO/private files are static witnesses. Runtime pending-seam. Preserve Golden cache-hit/same-call install and its size-bearing item installer; do not force an extra frame or blindly memcpy the Golden file into a PS2 item layout."
+      }
+    },
+    {
+      "address": "0x005efb60",
+      "ps2_size": 32,
+      "role": "one-shot script hierarchy shutdown identity",
+      "all_ps2_literal_users": [
+        "0x0014b990"
+      ],
+      "companion_ps2_users": [],
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "source_build": 10836033,
+        "rva": "0x93d210",
+        "offset": 746000,
+        "raw_offset": 9682448,
+        "size": 24,
+        "sha256": "ccfbf764af9e7de45a13d2f7873428ab1b9faad83b8b70961ddf229f164a75b1",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true,
+        "source_group": "L1-C3A1-bootstrap-resource-and-registration-20261113",
+        "corroborating_nso_address": "0x710060a35d",
+        "nso_materialized_reference_pcs": [
+          "0x71001f614c"
+        ],
+        "structural_reader_platform": "Switch1.2 ordinary code, original PS2 source/MIPS"
+      },
+      "structural_correspondence": "Original MIPS allocation4->Golden8B stores the supplied script task after creating a null-parent priority15 helper. Its callback destroys that task hierarchy and returns-1; Golden additionally zeroes the work handle. The destructor frees the work. Ordinary1f6174..1f6184 preserves the actual created-task return in x0 despite worker declaring void; allocation failure leaves0.",
+      "installation": {
+        "kind": "prefix-copy",
+        "live_size": 24,
+        "retain_ps2_tail": 8,
+        "requirement": "Install complete24B qualified Golden source prefix at0x005efb60, retain8PS2 tail bytes and cover all translated/inlined/compiled-native copies of the listed user. Registration and paired lookup/teardown must share one identity; preserve real handle/return domains, priority, parent/child and callback ownership. Native work growth is correspondence evidence, never permission to overwrite guest structs. Resource values require qualified Golden-aware loaders and separate payload/runtime qualification, not PS2 raw-layout compatibility. Steam-only runtime input; NSO/private files are static witnesses. Runtime pending-seam."
+      }
+    },
+    {
+      "address": "0x005efc28",
+      "ps2_size": 24,
+      "role": "transition controller identity",
+      "all_ps2_literal_users": [
+        "0x0014ec50"
+      ],
+      "companion_ps2_users": [],
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "source_build": 10836033,
+        "rva": "0x930208",
+        "offset": 692744,
+        "raw_offset": 9629192,
+        "size": 12,
+        "sha256": "218e782443410f012ab27b5fbd0e155af84acae93289f9028e2e8b1cb4fe5574",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true,
+        "source_group": "L1-C3A1-bootstrap-resource-and-registration-20261113",
+        "corroborating_nso_address": "0x7100601b2f",
+        "nso_materialized_reference_pcs": [
+          "0x71001bda58"
+        ],
+        "structural_reader_platform": "Switch1.2 ordinary code, original PS2 source/MIPS"
+      },
+      "structural_correspondence": "Both constructors allocate80->96B, register priority15 with paired update/free callbacks, and store the caller mode. Modes0/1 create an EPL child252->304B using the complete field/TRAEST.EPL source, request flag0 and exact duration83/50 respectively; child allocation failure stores0 while preserving the parent task. Other modes create no child. These two branch-specific durations/resource/ownership relations establish identity independently of the name.",
+      "installation": {
+        "kind": "prefix-copy",
+        "live_size": 12,
+        "retain_ps2_tail": 12,
+        "requirement": "Install complete12B qualified Golden source prefix at0x005efc28, retain12PS2 tail bytes and cover all translated/inlined/compiled-native copies of the listed user. Registration and paired lookup/teardown must share one identity; preserve real handle/return domains, priority, parent/child and callback ownership. Native work growth is correspondence evidence, never permission to overwrite guest structs. Resource values require qualified Golden-aware loaders and separate payload/runtime qualification, not PS2 raw-layout compatibility. Steam-only runtime input; NSO/private files are static witnesses. Runtime pending-seam."
+      }
+    },
+    {
+      "address": "0x0063b568",
+      "ps2_size": 24,
+      "role": "complete scene-icon archive source",
+      "all_ps2_literal_users": [
+        "0x0026d840"
+      ],
+      "companion_ps2_users": [
+        "0x0026d890"
+      ],
+      "golden": {
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "source_build": 10836033,
+        "rva": "0x9424c8",
+        "offset": 767176,
+        "raw_offset": 9703624,
+        "size": 15,
+        "sha256": "f39371516402fdec930f1e7b7063d2c2b3d0cbe8daa84dac6f0bbd2048330b12",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true,
+        "source_group": "L1-C3A1-bootstrap-resource-and-registration-20261113",
+        "corroborating_nso_address": "0x7100622f20",
+        "nso_materialized_reference_pcs": [
+          "0x71002a608c",
+          "0x71002a60d8",
+          "0x71002a627c"
+        ],
+        "structural_reader_platform": "Switch1.2 ordinary code, original PS2 source/MIPS"
+      },
+      "structural_correspondence": "Old sync preload and Golden2a6080 load/wait the complete archive. The companion bank has26 explicit corresponding _ICON members; the state0/1 task resolves a member, creates an effect, releases a previous handle and attaches to resource classes1/3. Golden uses cached archive and bare member keys. The exact full bank and actual index26 out-of-table caveat are recorded; no fabricated27th entry or payload/renderer equivalence is admitted.",
+      "installation": {
+        "kind": "prefix-copy",
+        "live_size": 15,
+        "retain_ps2_tail": 9,
+        "requirement": "Install complete15B qualified Golden source prefix at0x0063b568, retain9PS2 tail bytes and cover all translated/inlined/compiled-native copies of the listed user. Registration and paired lookup/teardown must share one identity; preserve real handle/return domains, priority, parent/child and callback ownership. Native work growth is correspondence evidence, never permission to overwrite guest structs. Resource values require qualified Golden-aware loaders and separate payload/runtime qualification, not PS2 raw-layout compatibility. Steam-only runtime input; NSO/private files are static witnesses. Runtime pending-seam. Companion icon task26d890 must route all26 exact bare Golden member keys through the archive-aware provider; every native cached lookup copy must use the same qualified archive. Preserve documented reader-bound behavior; index26 is not a valid declared member and needs input-domain/consumer qualification before closure. No new clamp/default or invented27th key."
+      }
+    }
+  ]
+}

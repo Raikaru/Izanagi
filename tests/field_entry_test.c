@@ -6,9 +6,12 @@
 #include <string.h>
 #include "p4pc/gmem.h"
 
+#ifndef P4_GUEST_SLOW_CC
+#define P4_GUEST_SLOW_CC /* the 32-bit guest model has no slow paths; the stubs below are unused there */
+#endif
 static uint8_t memory[P4_GUEST_SIZE];
 uint8_t *p4_guest_base = memory;
-void *p4_g2h_slow(uint32_t address) { (void)address; abort(); }
+void *p4_g2h_slow(uint32_t address) P4_GUEST_SLOW_CC { (void)address; abort(); }
 uint64_t p4_os_now_ns(void) { return 0; }
 int64_t calGetDayEntryByPhase(int32_t day, uint32_t phase)
 {

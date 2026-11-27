@@ -13,6 +13,13 @@
  * in p4pc-crash.log beside P4PC_LOG_FILE (or stderr without a log path). Windows: vectored
  * exception diagnostics to stderr. Fatal faults exit with 128 + signal (Windows: 139). */
 void p4_os_init(void);
+/* The build id (include/p4pc/build_id.h) the fatal-fault report names on its first lines, so a crash report says which build crashed. Copied
+ * (truncated to 95 bytes) into a static buffer the handler reads without allocating; call once at startup, before or after p4_os_init. */
+void p4_os_crash_build_set(const char *id);
+
+/* A line of context (build, system, where in the game) that the fatal-fault report prints as `p4pc: context: <text>` right after its first line, so a crash log
+ * says which build and area it is from. The text is copied (at most 255 bytes) and may be replaced as often as wanted from any thread; the handler only reads it. */
+void p4_os_crash_note_set(const char *text);
 
 /* First statement of each executable entry, before registering other exit handlers.
  * Captures the original argument vector; P4PC_TEST_RESTART=<marker> exercises a
@@ -177,8 +184,10 @@ int p4_os_extended_path(char *path, size_t capacity);
 int p4_os_resolved_path(const char *path,char *out,size_t capacity);
 /* Creates one directory (mode 0777 on Linux). Returns 0, or -1 with errno set. */
 int p4_os_mkdir(const char *path);
-/* UTF-8 path variants for private files that cannot use the active Windows
- * ANSI codepage. fopen accepts only "rb" and "wb"; no fd: syntax. */
+/* UTF-8 path variants for private files that cannot use the active Windows ANSI codepage: thin wrappers of include/p4pc/hostpath.h,
+ * which is what new code uses (p4_host_fopen / p4_host_remove / p4_host_mkdir / p4_host_stat / p4_host_getenv). fopen accepts r/w/a plus
+ * any of "+bx"; no fd: syntax. The Windows implementations of p4_os_mkdir, p4_os_fopen_rb, p4_os_list_dir, p4_os_rename, p4_os_rmdir,
+ * p4_os_replace_file* and p4_os_setenv are UTF-8 too: a path never goes through the ANSI codepage. */
 FILE *p4_os_fopen_utf8(const char *path, const char *mode);
 int p4_os_mkdir_utf8(const char *path);
 int p4_os_remove_utf8(const char *path);

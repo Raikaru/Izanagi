@@ -42,6 +42,27 @@ static void vectors(void)
     CHECK(bits_of(p4_mod_f32_decode(UINT32_C(0x7f800001))) == UINT64_C(0x7ff8000020000000));
     CHECK(p4_mod_f32_encode(number_of(UINT64_C(0xfff0000000000001))) == UINT32_C(0xffc00000));
     CHECK(bits_of(p4_mod_f64_quiet(number_of(UINT64_C(0xfff0000000000123)))) == UINT64_C(0xfff8000000000123));
+    /* Write-side policy: every NaN becomes the canonical quiet NaN; nothing else changes. */
+    static const uint64_t nans[] = {
+        UINT64_C(0x7ff8000000000000), UINT64_C(0xfff8000000000000), UINT64_C(0x7ff0000000000001),
+        UINT64_C(0xfff0000000000001), UINT64_C(0x7ff8000000001234), UINT64_C(0xfff800000000abcd),
+        UINT64_C(0x7fffffffffffffff), UINT64_C(0xffffffffffffffff), UINT64_C(0x7ff00000ffffffff),
+    };
+    for (size_t i = 0; i < sizeof nans / sizeof nans[0]; i++) {
+        CHECK(bits_of(p4_mod_f64_canonical(number_of(nans[i]))) == UINT64_C(0x7ff8000000000000));
+        CHECK(p4_mod_f32_encode_canonical(number_of(nans[i])) == UINT32_C(0x7fc00000));
+    }
+    static const uint64_t kept[] = {
+        0, UINT64_C(0x8000000000000000), UINT64_C(0x3ff0000000000000), UINT64_C(0xbff8000000000000),
+        UINT64_C(0x7ff0000000000000), UINT64_C(0xfff0000000000000), 1, UINT64_C(0x000fffffffffffff),
+        UINT64_C(0x7fefffffffffffff), UINT64_C(0xffefffffffffffff),
+    };
+    for (size_t i = 0; i < sizeof kept / sizeof kept[0]; i++) {
+        CHECK(bits_of(p4_mod_f64_canonical(number_of(kept[i]))) == kept[i]);
+        CHECK(p4_mod_f32_encode_canonical(number_of(kept[i])) == p4_mod_f32_encode(number_of(kept[i])));
+    }
+    /* The read side is unchanged: it still preserves sign and payload. */
+    CHECK(bits_of(p4_mod_f64_quiet(number_of(UINT64_C(0xfff8000000000123)))) == UINT64_C(0xfff8000000000123));
     uint32_t state = 7;
     for (unsigned i = 0; i < 100000; i++) {
         state = state * UINT32_C(1664525) + UINT32_C(1013904223);

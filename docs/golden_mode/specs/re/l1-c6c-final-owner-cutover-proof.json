@@ -1,0 +1,608 @@
+{
+  "proof_id": "L1-c6C-final-owner-cutovers-20261113",
+  "scope": "Only the final seven exact setC rows; no other owner decisions, global totals or shared prose changed. Structural source proof, never runtime closure.",
+  "source_pins": {
+    "steam_build": 10836033,
+    "steam_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+    "ps2_elf_sha256": "f90675b8a38138ddb5dc5cdf641550f41800fcb86bb499c586073e964fb41836",
+    "switch_version": "1.2",
+    "switch_mapped_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+    "switch_nso_sha256": "854c7a1e33de1619abf009fa7f32b8c012960d685c8bf1bf99a92a6a4d0bda1c",
+    "ps2_decomp_revision": "18016afe6"
+  },
+  "method": "Positive actual producer/consumer/caller graph and replacement representation. Only ordinary Steam.shared and data plus static NSO/PS2 analysis; no.arch decoding, game execution, label-only, no-reference, byte-similarity or visual-similarity closure. Workers started at interior addresses are explicitly not treated as complete function boundaries.",
+  "runtime_status": "pending-seam",
+  "route_contract": "docs/golden_mode/specs/re/l1-c6c-native-render-routes.md",
+  "rows": [
+    {
+      "address": "0x006267d0",
+      "size": 32,
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "6124f2f84f2955e5e8ac7c33549972d48ca0a5dc84ce0795a746d1e9e6930035",
+        "readers": [
+          {
+            "function": "0x202be0",
+            "name": "func_00202be0",
+            "file": "src/Battle/btlPanel.c"
+          }
+        ]
+      },
+      "source": {
+        "kind": "retired-PS2-texture-raster-replaced-by-native-procedural-advantage-background",
+        "native_owner": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x7100085210",
+          "size": 1968,
+          "sha256": "aa6450e8932e31853a36a45afaec221716c5d8183d27dd490f299b4a436d8f6e",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+          "extent_kind": "bounded observed instruction span; not an inferred function extent"
+        },
+        "native_background": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x71000859c0",
+          "size": 256,
+          "sha256": "5af200c28d30fd85e3159c530e171aabe0865ef5e11eec23469b3d2e9b15723e",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+          "extent_kind": "bounded observed instruction span; not an inferred function extent"
+        },
+        "native_circle": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x71002e4220",
+          "size": 512,
+          "sha256": "09b690d31197c5ec648dfd123fb0e73fa374eda52815fa9791928e52e61c4fa0",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+          "extent_kind": "bounded observed instruction span; not an inferred function extent"
+        }
+      },
+      "structural_correspondence": "The corsol_08.tmx name is misleading: PS2202be0 uploads it and stores the returned raster at gp-4b90 (202c34). A raw aligned MIPS load/store scan independently finds the getter21be60 and the two raster binds21bf54/21cb04 inside21be80, whose actual purpose is the battle advantage start background, not a targeting cursor. Golden NSO85210 is the corresponding48-tick two-kind advantage controller: kind1 chooses blue and the other kind red; both call859c0 before the same common-SPR advantage fragments.859c0 draws the corresponding background procedurally through2e4220 at center484,268, xscale1.05, yscale1,36 segments, with real0/3/33/48 phase boundaries,175 base radius and800/1600 animated expansion.2e4220 constructs center plus closed trig ring with24-byte colored vertices, selects untextured primitive9 through33e760/33b860(9,0), and submits through3938d0 or393ac0. There is no texture argument in this positively identified replacement operation. The separate PS2 uploaded raster/image-literal resource is retired; the advantage effect itself remains required.",
+      "required_seams": [
+        "battle-advantage-background:replace202be0/gp-4b90/getter21be60/all21be80-raster-bind aliases with native85210/859c0/2e4220 producer and complete native timing, colors, depth, blend and queue ABI; do not load corsol_08 or substitute another texture",
+        "battle-advantage-background:bind real native common-SPR resource and all advantage fragments/audio/controller state together; no omitted background or retained old raster path"
+      ],
+      "census_correction": {
+        "old_filename_does_not_establish_role": "corsol is an advantage-background raster, not target selection",
+        "raw_gp_scan_hits": [
+          "202c34",
+          "21be60",
+          "21bf54",
+          "21cb04"
+        ],
+        "native_common_SPR_GOT": "8807f8",
+        "native_common_SPR_RELA_target": "733f58",
+        "native_common_SPR_name": "init/btl/b_p_com02x2.spr"
+      }
+    },
+    {
+      "address": "0x0063ed80",
+      "size": 48,
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "d72620f49b1260ba26c97039d016d4c30a712c8c945b80c0027fff5a57e49b54",
+        "readers": [
+          {
+            "function": "0x2a6e30",
+            "name": "func_002a6e30",
+            "file": "src/Kernel/mc.c"
+          }
+        ]
+      },
+      "source": {
+        "kind": "retired-six-XY-untextured-scroll-triangles-replaced-by-SPR-glyph-composition",
+        "steam_asset": {
+          "path": "data.cpk::memcard/mcPanel.arc::p4g_savespr01.spr",
+          "parent_size": 1197640,
+          "parent_sha256": "2f354b5bf380cee9858b891a787220b5a9ac571d94b2e9ce4220a6e9218697ec",
+          "offset": 40,
+          "size": 1197600,
+          "sha256": "5e71dcec1f646a19f347e54f6f5cdefb9cc379232cc03b59f9c31be53b29e48a",
+          "signature": "spr",
+          "header_hex": "010000000000000053505230200000001046120008002f002000000060000000"
+        },
+        "native_loader": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x7100278ef0",
+          "size": 256,
+          "sha256": "4c398f86df03d2f036535407f9c025e944fde5d06677dbe7c7a019afa8edc6f3",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+          "extent_kind": "bounded observed instruction span; not an inferred function extent"
+        },
+        "native_scroll_draw": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x710027a600",
+          "size": 2048,
+          "sha256": "3949983c94590432a338089b2a32382ea83edf08b213505e563e2feefa567567",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+          "extent_kind": "bounded observed instruction span; not an inferred function extent"
+        }
+      },
+      "structural_correspondence": "PS22a6e30 called by2a5f00 copies exactly six f32XY points [(13,0),(0,13),(26,13),(0,0),(13,13),(26,0)], draws upper/lower untextured triangles and circle fans, and animates them with the old pulse/fade counters. Golden is positively a different widget representation: actual mcPanel state machine278ef0 requests memcard/p4g_savespr01.spr qualified by memcard/mcPanel.arc, adopts it through34be60 into work+4100 and binds a16-slot selection/count/input state (+3534/+3536). Main renderer279d30 uses that exact adopted SPR for upper glyphs1b/1a at x19,y234/245 plus native animation and lower glyphs25/26 at x19,y415/407, with endpoint predicates selected>=1 and selected<15. Native phase/counter state is+40e8/+40e4 with the actual0/3/5/8 clock and sin offsets, not the old six positions. Actual Steam mcPanel.arc was read and parsed in full: one1197600-byte SPR0 member, eight textures and47 parts, which includes all four real selected entry indices. This is positive replacement of old literal triangle geometry by the actual Golden SPR-encoded glyph/widget pipeline, not a claim that save navigation vanished.",
+      "required_seams": [
+        "save-scroll-indicators:replace old six-point/circle-fan producer and its complete2a5f00/2a6e30 draw/state graph with native278ef0/279d30 adopted-SPR four-entry composition and actual16-slot input/endpoints, alpha, clock and lifetime",
+        "save-scroll-indicators:decode sealed actual Steam SPR and preserve47-part/eight-texture domains and native entries1b/1a/25/26; no PS2 triangle fallback or visual-similarity substitution"
+      ],
+      "replacement_layout": {
+        "sprite_count": 47,
+        "texture_count": 8,
+        "upper_entries": [
+          27,
+          26
+        ],
+        "lower_entries": [
+          37,
+          38
+        ],
+        "slots": 16,
+        "resource_work_offset": "4100"
+      }
+    },
+    {
+      "address": "0x0063ee50",
+      "size": 16,
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "01c09779bba850aba607d3b0aaa92240adecb1e82f798b97a863895589cccc12",
+        "readers": [
+          {
+            "function": "0x2aaf20",
+            "name": "titleVisualSubmitRect",
+            "file": "src/Main/titleVisual.c"
+          },
+          {
+            "function": "0x2ab380",
+            "name": "titleVisualSubmitSprite",
+            "file": "src/Main/titleVisual.c"
+          },
+          {
+            "function": "0x2ab790",
+            "name": "titleVisualSubmitModel",
+            "file": "src/Main/titleVisual.c"
+          },
+          {
+            "function": "0x2abb30",
+            "name": "titleVisualDrawMaskedModel",
+            "file": "src/Main/titleVisual.c"
+          }
+        ]
+      },
+      "source": {
+        "kind": "retired-per-primitive-PS2-title-heap-packet-allocation-site",
+        "native_title_factory": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x7100268660",
+          "size": 160,
+          "sha256": "4b8610201df9bb3c919a734d4513cd534050dc838c301d22ebac738a73cfc6cf",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+          "extent_kind": "bounded observed instruction span; not an inferred function extent"
+        },
+        "native_callback_installation": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x7100268c5c",
+          "size": 128,
+          "sha256": "3f2322adfa894e0c28b15a2437525c43cb93fe728976922e047837190d91d13b",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+          "extent_kind": "bounded observed instruction span; not an inferred function extent"
+        },
+        "native_background_draw": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x710026b910",
+          "size": 592,
+          "sha256": "0c0e04c54bfd1fead02921a5f03a02a366e8a6d8eb8f227a79cedd277b5888bd",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+          "extent_kind": "bounded observed instruction span; not an inferred function extent"
+        },
+        "native_title_SPR_draw": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x710026be60",
+          "size": 256,
+          "sha256": "93debf1a1448e586eafd7ba5ebf5e8faf6e2e5ed216ae16dff230ed9cc1d8fc0",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+          "extent_kind": "bounded observed instruction span; not an inferred function extent"
+        },
+        "native_eight_vertex_draw": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x710026f5e0",
+          "size": 1024,
+          "sha256": "5275563ec42e4b9a9bd386993f5ed9435a7b403e67c74cac61d738c2e64a11f5",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+          "extent_kind": "bounded observed instruction span; not an inferred function extent"
+        }
+      },
+      "structural_correspondence": "The literal is the allocation-source filename for PS2 titleVisual helpers2aaf20(rect28-byte packet),2ab380(SPR28-byte packet),2ab790(model96-byte packet),2abb30(masked-model brackets), not the main titleDraw.c filename. Actual callers124f70/126090/1265a0 build the old deferred RenderWare title packet protocol. Golden title remains live, but positively uses another representation: factory268660 allocates native5630-byte work and creates titleDrawProc with268700/26b660;268700 installs ten native queue callbacks at work+5280,+52e0,+5340,+53a0,+5400,+5460,+54c0,+5520,+5580,+55e0, including26b910,26be60 and26e320.26b910 constructs the actual four24-byte native colored vertices on its stack and submits them through3938d0;26be60 draws actual adopted-SPR title elements through1ba260;26f5e0 constructs the actual eight-vertex animated textured geometry and twelve indices on its stack before3938d0. The26e350 worker start is explicitly an interior span of installed callback26e320, not a standalone function. These observed native owner-internal geometry/SPR/queue operations replace the old titleVisual per-primitive heap-record format and its filename field. It would be incorrect to rename this source tag to titleDraw.c and continue allocating/dispatching the old titleVisual packets.",
+      "required_seams": [
+        "title-render-protocol:replace all four old titleVisual packet helpers and direct/inlined callers with the complete native titleDrawProc owner/queue/SPR/model/geometry/lifetime pipeline; no old heap packets, RenderWare mask brackets or filename-tag aliases",
+        "title-render-protocol:bind native camera/material/draw ordering,24-byte vertex and actual index/SPR contracts; maintain all title phases, masks and effects rather than suppressing their draws"
+      ],
+      "old_allocation_sites": [
+        {
+          "function": "2aaf20",
+          "packet_bytes": 28
+        },
+        {
+          "function": "2ab380",
+          "packet_bytes": 28
+        },
+        {
+          "function": "2ab790",
+          "packet_bytes": 96
+        },
+        {
+          "function": "2abb30",
+          "role": "masked-model packet brackets"
+        }
+      ],
+      "native_callback_values": [
+        "26b910",
+        "26bb60",
+        "26bbb0",
+        "26be60",
+        "26cd20",
+        "26cdd0",
+        "26e320",
+        "26ee20",
+        "26ee90",
+        "26ef10"
+      ]
+    },
+    {
+      "address": "0x0063f188",
+      "size": 24,
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "d0609effebb8d0df68322236b5895e7c8a61aa42b306fcc6d414cfefdadc2b73",
+        "readers": [
+          {
+            "function": "0x2b5c90",
+            "name": "func_002b5c90",
+            "file": "src/Yajima/y_draw.c"
+          }
+        ]
+      },
+      "source": {
+        "kind": "retired-generic-YazyDrawBox-scheduler-widget-replaced-by-owner-internal-composition",
+        "native_shop": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x71001b15d0",
+          "size": 160,
+          "sha256": "b60df24474619ec6c45a4db74c59bd5f16e1efe9b5ad97198c2688866f29fa8d",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+          "extent_kind": "bounded observed instruction span; not an inferred function extent"
+        },
+        "native_shop_draw": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x71001b2900",
+          "size": 256,
+          "sha256": "e967e5203a06700a53bc8ceea0548cc60867ac3af8fbbd408611c3179049ea78",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+          "extent_kind": "bounded observed instruction span; not an inferred function extent"
+        },
+        "native_fusion": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x7100159720",
+          "size": 272,
+          "sha256": "129ed948779c2b600004451de32485fa4f11feb8a23f795299c1bc0febc23d03",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+          "extent_kind": "bounded observed instruction span; not an inferred function extent"
+        },
+        "native_card_effect": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x7100150a00",
+          "size": 224,
+          "sha256": "5abe3f81306465457ac7ed310ce45f2980cd5b1a202e1a06b4a6eb03b6a314a9",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+          "extent_kind": "bounded observed instruction span; not an inferred function extent"
+        },
+        "native_card_queue_producer": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x7100150ae0",
+          "size": 288,
+          "sha256": "47751d094268a81f7fcbec228a122e6f47dea4999110465677669dfc729be23c",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+          "extent_kind": "bounded observed instruction span; not an inferred function extent"
+        },
+        "native_card_composite_draw": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x7100151620",
+          "size": 256,
+          "sha256": "86c46be287d9dfff8f3cd56f92c6e673871a4e00b92af969593dbd5f3aa7a092",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+          "extent_kind": "bounded observed instruction span; not an inferred function extent"
+        },
+        "native_card_fade_draw": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x7100152410",
+          "size": 512,
+          "sha256": "f5aedfe122a332899374a587d812c6dd5a28a91c3a645473fab6e45325644770",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+          "extent_kind": "bounded observed instruction span; not an inferred function extent"
+        }
+      },
+      "structural_correspondence": "PS22b5c90 creates YazyDrawBox, a190-hex-byte separately scheduled animated rectangle with four corner colors and legacy tween/bounds/order work. An independent aligned raw-JAL scan finds exactly11 direct callsites in four owning producers:2ca830 (four shop value panels),2e7510 (the old shop-staging full-screen black child),2e8410 (five fusion header/arrow/border children),348c40 (five-bar card-effect creation loop). These finite old owners are positively replaced, not cosmetically renamed: registered Golden weapon/item entries278290/2782d0 instantiate Native ShopBase descriptors/PLG/CTB/BF/SPRs and owner callbacks1b2900/18beb0 rather than the old value-panel/black-child graph; native fusion159720 owns its distinct work and native draw/search children; native card-effect150a00 owns2b80 bytes, creates fcl_cmb_effect with150ae0/1514c0 and publishes owner-internal draw nodes151620/152410 at+2ad0/+2b30 with its own work pointers.150ae0 queues those nodes through393550 and drives actual persona/card actors and native effect state.151620 constructs actual native indexed eight-vertex and four-vertex colored/textured composites and submits through3938d0;152410 reads actual16-byte color/timing entries through work+2a40, advances native clock, derives alpha in percent, constructs the full-screen960x540 four-vertex quad on its stack, copies96 bytes to the real native transient buffer and submits through33fb30. The old generic separate rectangle task/type/190-byte work abstraction has no field in these actual replacement owner protocols. This decision retires that old abstraction only: rectangles, borders, blackout/transition behavior, value highlights and card-effect bars must all be provided by the complete real Golden owners.",
+      "required_seams": [
+        "generic-box-retirement:cut over all11 old direct calls and every computed/inlined constructor/accessor/setter/tween/destructor alias across the four enumerated owners to the complete native shop/field-entry/fusion/card-effect owner graphs; do not retain or invent a generic YazyDrawBox task",
+        "generic-box-retirement:use actual native owner geometry, render nodes, interpolation/clock, lifecycle and resource identities; do not drop rectangles/highlights/blackout/borders/effects because the old child representation is retired"
+      ],
+      "old_raw_JAL_call_sites": [
+        "2ca8dc",
+        "2ca910",
+        "2ca940",
+        "2ca970",
+        "2e75b4",
+        "2e8c74",
+        "2e8d4c",
+        "2e8e1c",
+        "2e8ee8",
+        "2e8fb8",
+        "348ccc"
+      ],
+      "related_owned_proof": "docs/golden_mode/specs/re/l1-c6c-facility-native-proof.json"
+    },
+    {
+      "address": "0x0063f1b0",
+      "size": 32,
+      "decision": "PROVEN",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "959dbdcb269c1ba7d1e54d151c2a1b4751821fe7fbf483ebee6b5fa28459fc72",
+        "readers": [
+          {
+            "function": "0x2b74f0",
+            "name": "func_002b74f0",
+            "file": "src/Yajima/y_draw.c"
+          }
+        ]
+      },
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".xpdata",
+        "rva": "0xb09228",
+        "raw_offset": 11565608,
+        "size": 17,
+        "sha256": "bf38b0342eee346bdf8c792aa2b7d4de763888dc22896264ddacde7564873bdc",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "structural_correspondence": "PS22b74f0 creates y_spr_draw_pack_proc, the old generic780-record/100-hex-stride SPR pool task; its sole direct owner constructor is fusion2e8410. The corresponding Golden rendering scheduler field is the specialized fcl_combine_draw child: actual Steam.shared23f940 allocates34198-hex-byte native work and at23f9d1 supplies b09228 inRCX, priorityC6 and callback236b90 to4fb670, then attaches it to the actual fcl_combine owner and creates the separate fcl_combine_search child fromb090e8. Native159720 independently allocates34030-hex-byte work, supplies exact763fb8 name inx1, priorityC6 and15eec0 inx5 to39f2b0, attaches the search child, publishes main draw15ef40 at work+38 and search1655a0 at+98 with actual self-work pointers. This is the source-proven replacement owner/render-child scheduler identity, not equality of work layout or permission to rename the old generic pool while retaining its implementation.",
+      "required_seams": [
+        "fusion-render-task:bind exact Golden fcl_combine_draw identity to complete actual native owner/child/create/attach/deferred-queue/update/destruction contract, including separate fcl_combine_search and actual callbacks",
+        "fusion-render-task:retire old780-slot/100-stride pool ABI and all old global pool setters/lookups; native Steam34198 and Switch34030 work layouts are distinct and must not be guessed identical"
+      ],
+      "golden_string": "fcl_combine_draw",
+      "switch": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x7100763fb8",
+        "size": 17,
+        "sha256": "bf38b0342eee346bdf8c792aa2b7d4de763888dc22896264ddacde7564873bdc",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "steam_span_alternatives": [
+        {
+          "container": "P4G.exe",
+          "source_build": 10836033,
+          "section": ".xpdata",
+          "rva": "0xb09228",
+          "raw_offset": 11565608,
+          "size": 17,
+          "sha256": "bf38b0342eee346bdf8c792aa2b7d4de763888dc22896264ddacde7564873bdc",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        }
+      ],
+      "ps2_live_bytes": 21,
+      "ps2_alignment_tail_bytes": 11,
+      "tail_policy": "Do not source Golden suffix bytes. Retain only inert zero alignment; all live uses take the sealed Golden string, including when longer than PS2 storage. No truncation or guest overrun.",
+      "native_constructor": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x7100159720",
+        "size": 272,
+        "sha256": "129ed948779c2b600004451de32485fa4f11feb8a23f795299c1bc0febc23d03",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+        "extent_kind": "bounded observed instruction span; not an inferred function extent"
+      },
+      "steam_constructor": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".shared",
+        "rva": "0x23f940",
+        "raw_offset": 2355008,
+        "size": 326,
+        "sha256": "ae766c1c462019c89f2f258e0dede6c3aae4660b66c40fc311b65db10c673dc8",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      }
+    },
+    {
+      "address": "0x007495c0",
+      "size": 64,
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "afd780d215fd32a1d67d41357039b6d48e63d276d9365f531a4a8f50538dcfd8",
+        "readers": [
+          {
+            "function": "0x329310",
+            "name": "func_00329310",
+            "file": "src/Event/Fcl/y_fclCombineDraw.c"
+          }
+        ]
+      },
+      "source": {
+        "kind": "retired-thirteen-per-label-centering-adjustments-replaced-by-native-count-profile-header-layout",
+        "steam_native_profile_bank": {
+          "container": "P4G.exe",
+          "source_build": 10836033,
+          "section": ".sdata",
+          "rva": "0x90e5b0",
+          "raw_offset": 9490864,
+          "size": 48,
+          "sha256": "db20d28ef4416e7817069051087e7b8be95b3e6dc7e2c2a49f7f16ef38f7fd0e",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        },
+        "switch_native_profile_bank": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x71006335a8",
+          "size": 48,
+          "sha256": "db20d28ef4416e7817069051087e7b8be95b3e6dc7e2c2a49f7f16ef38f7fd0e",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+        },
+        "steam_profile_reader": {
+          "container": "P4G.exe",
+          "source_build": 10836033,
+          "section": ".shared",
+          "rva": "0x22fc60",
+          "raw_offset": 2290272,
+          "size": 243,
+          "sha256": "75d498c7ef0ed72cfc903bf825e7d5ecadfcff3dc6471257170d1ed74d1731c7",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        },
+        "native_search_header": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x71001655a0",
+          "size": 4608,
+          "sha256": "c07c91016bc17802f0469a45efcef28cb96c6ac793aa842b89dae749356b5381",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+          "extent_kind": "bounded observed instruction span; not an inferred function extent"
+        }
+      },
+      "structural_correspondence": "This row is NOT linex2.dat. PS2329310 uses thirteen per-label f32X corrections [13,12,10,10,10,10,14,11,12,1,3,2,6] (52 live bytes plus12 zero alignment), a seven-column viewport, X105+61*column+correction[label], old SPR13f+label skipping14b, and common14b sublabel for labels3..11. Golden1655a0 is positively the corresponding search-header composition: count/selected/first-visible at work+1464/+1466/+1468, main labelsSPR(index+2), special last labelF, common sublabelE for index>2 with34/42 native offset. Native replaces old per-label corrections with complete count-profile geometry: min(count,6)-3 selects one of four12-byte triples at6335a8, [(248,72,6),(186,46,6),(150,26,6),(124,14,6)], interpreted as column stride, common glyphX offset and common glyphY offset. Stable branch starts X92, draws six visible columns and increments by selected stride; tween branch uses actual native scroll fields and the same profile. Steam.shared22fc60 independently clamps count to6, subtracts3, computes12-byte stride and reads the corresponding entire48-byte bank90e5b0. Thus the old13-label-specific centering coefficients have been replaced by a count-dependent geometry and a different actual SPR namespace, not hidden in the nLine bank and not safe to retain/scale. The actual replacement source is sealed as part of the route, not mapped as a false thirteen-element value array.",
+      "required_seams": [
+        "fusion-search-header:replace every329310/direct/inlined old header and shadow/pool reader with complete native1655a0 count/selection/scroll/tween/clipping/draw producer; bind actual three-to-six-count profile source and full native SPR namespace; no13-offset PS2 bank or seven-column fallback",
+        "fusion-search-header:seal actual Steam48-byte profile bank90e5b0 and native signed count/stride/profile domain, native header main/common/last SPR mapping, colors, viewport masks, shadows and render ABI together"
+      ],
+      "old_layout": {
+        "live_f32": 13,
+        "alignment_bytes": 12,
+        "values": [
+          13,
+          12,
+          10,
+          10,
+          10,
+          10,
+          14,
+          11,
+          12,
+          1,
+          3,
+          2,
+          6
+        ]
+      },
+      "replacement_layout": {
+        "source_size": 48,
+        "profiles": 4,
+        "stride": 12,
+        "fields": [
+          "column_stride",
+          "common_glyph_x_offset",
+          "common_glyph_y_offset"
+        ],
+        "values": [
+          248.0,
+          72.0,
+          6.0,
+          186.0,
+          46.0,
+          6.0,
+          150.0,
+          26.0,
+          6.0,
+          124.0,
+          14.0,
+          6.0
+        ],
+        "profile_index": "min(column_count,6)-3",
+        "visible_columns": 6,
+        "initial_column_x": 92,
+        "main_entry": "index+2",
+        "last_entry": 15,
+        "common_entry": 14
+      }
+    },
+    {
+      "address": "0x00760018",
+      "size": 32,
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "b74e90fd44daf8034d9ef42c0fe0031051a3da90bba78ea61ea0769f6098a90b",
+        "readers": [
+          {
+            "function": "0x510bc0",
+            "name": "MWSST_Create",
+            "basis": "actual parent pointer materialized at510c28/510c34 and error callback510c44; original inventory reader corrected in census_correction"
+          }
+        ]
+      },
+      "source": {
+        "kind": "retired-Sofdec-MWSST-stream-joint-worksize-diagnostic-in-new-USM-Mana-player-protocol",
+        "native_registered_MOVIE_entry": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x7100278350",
+          "size": 52,
+          "sha256": "ca133a4efddc18c037bd0f1187a7bdea9287dc5c62e72f075daf6f6092243772",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+          "extent_kind": "bounded observed instruction span; not an inferred function extent"
+        },
+        "native_movie_task": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x71002e6be0",
+          "size": 256,
+          "sha256": "596e2f7117ea2ef72f5e9c8ba42dfb0cc05a079c6bdc73e6e6d0a996165ab198",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+          "extent_kind": "bounded observed instruction span; not an inferred function extent"
+        },
+        "native_movie_state": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x71003a0b80",
+          "size": 384,
+          "sha256": "aa780651eb62a4e3984b926e3bc1bf41c7f8d39754337065cd8334abffadfa18",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+          "extent_kind": "bounded observed instruction span; not an inferred function extent"
+        },
+        "native_filename_and_player_creation": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x7100347010",
+          "size": 448,
+          "sha256": "86ebba0e68c214654df94d201dd7984b1e6b2cc83b1f809921075057f38c4cc0",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+          "extent_kind": "bounded observed instruction span; not an inferred function extent"
+        },
+        "native_Mana_allocator": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x710043f610",
+          "size": 1024,
+          "sha256": "798539bee9d3c410af06e69c6e268375dee4d98d9df878fd98b483f1e6ed8cc5",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+          "extent_kind": "bounded observed instruction span; not an inferred function extent"
+        }
+      },
+      "structural_correspondence": "Correct the old linear-reader census before deciding:760018 is an interior suffix of the actual CString beginning760008, E303111: MWSST_Create: worksize is short., plus its inert zero tail. It is NOT an LSC_Create/flow-limit diagnostic. The purported reader4e96d8/4e9708 is false:4e9700 is BLTZL(v1,4e971c),4e9704 LUI(a0,76) executes only on the taken branch; non-taken4e9708 annuls that LUI and loads the original LSC pointer+18. Taken branch uses75bcb0 via4e9720, not760018. The actual parent is used by MWSST_Create510bc0 at510c28..510c44 after stream-core creation510e40 returns null, followed by old SJ creation510740/510808/510870. Golden positively replaces that old movie-stream/joint allocation protocol: registered MOVIE278350 tail-calls2e6be0, which creates sdkMovie movie-play task3a0b80/3a10b0 and forwards the selected filename/callback state.3a0b80 builds the actual data path and calls347010;347010 rewrites the last three template extension bytes from mp4 to usm, creates the actual native player43f610(0,0), installs read/end callbacks and sets/starts the selected USM through440a60/440ac0.43f610 explicitly verifies Mana initialization, computes native work through43f540, uses user allocation43ad50 for(0,0), and constructs a600-byte player plus actual native subobjects; its new optional supplied-work rejection and failure strings are the native criMana_Create API, not the old MWSST/SJ work object. The old MWSST interior image literal/error ABI retires with that positively replaced subsystem. The mp4 template and historic vita source pathname do not prove the actual codec: the observed live extension rewrite and criMana_Create body do.",
+      "required_seams": [
+        "movie-stream-backend:replace all actual old MWSST/SJ/create/error-callback aliases with full Golden sdkMovie\u2192USM\u2192Mana filename/allocator/player/start/poll/draw/stop/release and audio/callback/error contracts; never read or display the old interior diagnostic as an LSC value",
+        "movie-stream-backend:bind actual Golden filename-template selection plus mp4-to-usm rewrite, native player ownership and allocator/error domains; do not run or decode protected Steam.arch and do not substitute a fake player"
+      ],
+      "census_correction": {
+        "false_inventory_reader": "4e96d8",
+        "false_linear_materialization": "4e9700 BLTZL;4e9704 LUI a0,76;4e9708 LW v0,18(a0)",
+        "branch_likely_delay_rule": "LUI is annulled on fallthrough, so LW uses the input pointer, not760000",
+        "true_branch_error_string": "75bcb0",
+        "parent_address": "760008",
+        "parent_size": 42,
+        "parent_sha256": "ec7fee8848fd5850b1020f01707101a81cc79a9f91d946f2031268b9e4f7a199",
+        "actual_parent_reader": "510bc0",
+        "actual_parent_use_span": "510c28..510c44",
+        "parent_text": "E303111: MWSST_Create: worksize is short.",
+        "selected_suffix_offset": 16,
+        "old_diagnostic_call": "4ee018"
+      }
+    }
+  ]
+}

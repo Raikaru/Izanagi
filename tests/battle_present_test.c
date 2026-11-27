@@ -407,6 +407,8 @@ u8 *D_0076449C = (u8 *)&turn_battle;
 u8 *iGpffffb3ac = (u8 *)&turn_battle;
 static BtlAction *turn_actor;
 static int turn_boss_window;
+static unsigned eligible_starts;
+void p4_golden_ai_native_eligible_start(void *action) { assert(action == turn_actor); ++eligible_starts; }
 u32 datCalcIsDead(void *unit, s32 hp) { (void)unit; (void)hp; return 0; }
 void btlUnitSelectRecordTable(u8 *action) { (void)action; }
 void btlTargetClearWork(void *work) { (void)work; }
@@ -461,10 +463,12 @@ static void owner_start_presentation(void)
     enter_start(actor, 0x21);
     btlActionStartInit(turn_actor);
     assert(turn_battle.protagonistTurns == 1);
+    assert(eligible_starts == 1);
     assert(queue(29, 100, P4_PRESENT_BANNER, P4_PRESENT_TURN_START, "OTHER", NULL, 16) == 0);
     enter_start(actor, 0x21);
     btlActionStartInit(turn_actor);
     assert(turn_battle.protagonistTurns == 2 && p4_battle_present_pending == 1);
+    assert(eligible_starts == 2);
     p4_battle_present_remove_owner(29);
     assert(p4_battle_present_pending == 0);
     turn_battle.protagonistTurns = 0;
@@ -476,6 +480,7 @@ static void owner_start_presentation(void)
     btlActionStartInit(turn_actor);
     assert(P4_G16(actor + 0x0c) == 0x16 && p4_battle_present_pending == 1);
     assert(turn_battle.protagonistTurns == 0);
+    assert(eligible_starts == 2);
 
     /* Retry after boss talk: the real queue parks before the counter. */
     turn_boss_window = 0;
@@ -485,6 +490,7 @@ static void owner_start_presentation(void)
     assert(P4_G16(actor + 0x0c) == 0x16 && P4_G16(actor + 0x43c) == 2);
     assert(P4_FN_G2H(P4_G32(actor + 0x440)) == (void *)p4_battle_present_poll);
     assert(turn_battle.protagonistTurns == 0);
+    assert(eligible_starts == 2);
     assert(p4_battle_present_poll() == 1 && panel.starts == starts + 1);
     assert(run_until_done(100) > 0);
 
@@ -493,11 +499,13 @@ static void owner_start_presentation(void)
     enter_start(actor, 0x16);
     btlActionStartInit(turn_actor);
     assert(P4_G16(actor + 0x0c) == 0x16 && turn_battle.protagonistTurns == 0);
+    assert(eligible_starts == 2);
     assert(p4_battle_present_poll() == 1);
     assert(run_until_done(100) > 0 && p4_battle_present_pending == 0);
     enter_start(actor, 0x16);
     btlActionStartInit(turn_actor);
     assert(turn_battle.protagonistTurns == 1);
+    assert(eligible_starts == 3);
     P4_G32(battle + 0x174) = actions[0];
     turn_actor = NULL;
 }

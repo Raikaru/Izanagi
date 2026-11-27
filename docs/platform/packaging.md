@@ -137,8 +137,12 @@ Linux, macOS and Android handle SIGSEGV, SIGBUS, SIGILL, SIGFPE and SIGABRT. A c
 in the app's internal files directory. It records signal/code, fault address,
 registers, instruction/module offset, a native stack and the same guest address /
 coroutine guard-page note as Windows. Android additionally writes tag `p4pc` to
-logcat and the next launcher visit names the retained log. Normal startup does
-not truncate it. Automated tools may select a private `P4PC_LOG_FILE`.
+logcat, and the next launcher visit offers **Export logs** (a zip of the crash log,
+`boot.log`, the previous logs, the settings without paths and the device facts: the internal
+files directory is not reachable otherwise). Normal startup does
+not truncate it. Automated tools may select a private `P4PC_LOG_FILE`. A player run's report
+begins with a `p4pc: context:` line (build, area, time) set by the diagnostics
+([diagnostics](diagnostics.md)).
 
 An alternate signal stack protects the game thread's report from stack exhaustion.
 The minimal first record uses `write`; libc backtracing and symbol lookup are

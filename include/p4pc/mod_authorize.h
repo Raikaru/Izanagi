@@ -15,6 +15,7 @@ enum P4ModOperation {
     P4_MOD_AUTH_BATTLE_PROTECTION_ITEM = 2, /* ctx: character, item, element */
     P4_MOD_AUTH_WEAPON_FUSION = 3, /* ctx: stage, character, vessel, persona, signature */
     P4_MOD_AUTH_RETRY = 4,     /* ctx: encounter, source (include/p4pc/mod_defeat.h) */
+    P4_MOD_AUTH_ITEM_USE = 5, /* ctx: source, item, effect */
     P4_MOD_AUTH_COUNT
 };
 /* weapon_fusion stages: OFFER before its Velvet command row is shown (vessel,

@@ -1,0 +1,3989 @@
+{
+  "proof_id": "L1-C5-action-encounter-labels-20261113",
+  "class": "PROVEN",
+  "runtime_status": "pending-seam",
+  "scope": "Seven selected action/encounter descriptor name literals only. Complete enclosing table roles and state identity maps support their value correspondence; callback code is not admitted merely because names match.",
+  "sources": {
+    "steam_build": 10836033,
+    "steam_image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+    "nso": "Switch1.2 mapped main.nso",
+    "policy": "Static data and ordinary Steam .shared code only; no protected .arch decode, game/emulator execution, byte-similarity proof or no-reference absence inference."
+  },
+  "descriptor_fields": {
+    "ps2": {
+      "stride": 12,
+      "init": 0,
+      "update": 4,
+      "name": 8
+    },
+    "golden": {
+      "stride": 24,
+      "init": 0,
+      "update": 8,
+      "name": 16
+    }
+  },
+  "banks": {
+    "action": {
+      "oldroot": "0x5f6e20",
+      "nso_root": "0x709a40",
+      "ps2_next": {
+        "record": "0x5f6fe8",
+        "values": [
+          "0x74746162",
+          "0x682e656c",
+          "0x0"
+        ],
+        "name": "",
+        "valid": false
+      },
+      "ps2_records": [
+        {
+          "record": "0x5f6e20",
+          "values": [
+            "0x1a0640",
+            "0x1a0650",
+            "0x7631ac"
+          ],
+          "name": "NON",
+          "valid": true
+        },
+        {
+          "record": "0x5f6e2c",
+          "values": [
+            "0x1a0660",
+            "0x1a0670",
+            "0x7631b0"
+          ],
+          "name": "STANDBY",
+          "valid": true
+        },
+        {
+          "record": "0x5f6e38",
+          "values": [
+            "0x1a06d0",
+            "0x1a0b00",
+            "0x7631b8"
+          ],
+          "name": "START",
+          "valid": true
+        },
+        {
+          "record": "0x5f6e44",
+          "values": [
+            "0x1a0f40",
+            "0x1a1100",
+            "0x5f6d68"
+          ],
+          "name": "START HOME",
+          "valid": true
+        },
+        {
+          "record": "0x5f6e50",
+          "values": [
+            "0x1a1190",
+            "0x1a13e0",
+            "0x5f6d80"
+          ],
+          "name": "CHANGE FORMATION",
+          "valid": true
+        },
+        {
+          "record": "0x5f6e5c",
+          "values": [
+            "0x1a1450",
+            "0x1a17d0",
+            "0x7631c0"
+          ],
+          "name": "COMMAND",
+          "valid": true
+        },
+        {
+          "record": "0x5f6e68",
+          "values": [
+            "0x1a1c80",
+            "0x1a1ea0",
+            "0x7631c8"
+          ],
+          "name": "TARGET",
+          "valid": true
+        },
+        {
+          "record": "0x5f6e74",
+          "values": [
+            "0x1a24a0",
+            "0x1a24b0",
+            "0x7631d0"
+          ],
+          "name": "ANALYZE",
+          "valid": true
+        },
+        {
+          "record": "0x5f6e80",
+          "values": [
+            "0x1a2ad0",
+            "0x1a2b50",
+            "0x7631d8"
+          ],
+          "name": "AI",
+          "valid": true
+        },
+        {
+          "record": "0x5f6e8c",
+          "values": [
+            "0x1a2c10",
+            "0x1a2c70",
+            "0x7631e0"
+          ],
+          "name": "AUTO",
+          "valid": true
+        },
+        {
+          "record": "0x5f6e98",
+          "values": [
+            "0x1a2d60",
+            "0x1a2d70",
+            "0x7631e8"
+          ],
+          "name": "SUPPORT",
+          "valid": true
+        },
+        {
+          "record": "0x5f6ea4",
+          "values": [
+            "0x1a31a0",
+            "0x1a31e0",
+            "0x7631f0"
+          ],
+          "name": "BAD",
+          "valid": true
+        },
+        {
+          "record": "0x5f6eb0",
+          "values": [
+            "0x1a3840",
+            "0x1a3d50",
+            "0x5f6d98"
+          ],
+          "name": "COOPERATE",
+          "valid": true
+        },
+        {
+          "record": "0x5f6ebc",
+          "values": [
+            "0x1a3df0",
+            "0x1a3f90",
+            "0x5f6da8"
+          ],
+          "name": "PURSUIT_MES",
+          "valid": true
+        },
+        {
+          "record": "0x5f6ec8",
+          "values": [
+            "0x1a4390",
+            "0x1a43a0",
+            "0x7631f8"
+          ],
+          "name": "PURSUIT",
+          "valid": true
+        },
+        {
+          "record": "0x5f6ed4",
+          "values": [
+            "0x1a47f0",
+            "0x1a4800",
+            "0x763200"
+          ],
+          "name": "READY",
+          "valid": true
+        },
+        {
+          "record": "0x5f6ee0",
+          "values": [
+            "0x1a4c80",
+            "0x1a55a0",
+            "0x5f6db8"
+          ],
+          "name": "MOVE TARGET",
+          "valid": true
+        },
+        {
+          "record": "0x5f6eec",
+          "values": [
+            "0x1a5650",
+            "0x1a58e0",
+            "0x5f6dc8"
+          ],
+          "name": "MOVE HOME",
+          "valid": true
+        },
+        {
+          "record": "0x5f6ef8",
+          "values": [
+            "0x1a5990",
+            "0x1a59a0",
+            "0x763208"
+          ],
+          "name": "ATTACK",
+          "valid": true
+        },
+        {
+          "record": "0x5f6f04",
+          "values": [
+            "0x1a7710",
+            "0x1a7720",
+            "0x763210"
+          ],
+          "name": "SKILL",
+          "valid": true
+        },
+        {
+          "record": "0x5f6f10",
+          "values": [
+            "0x1abba0",
+            "0x1abbb0",
+            "0x763218"
+          ],
+          "name": "SUMMON",
+          "valid": true
+        },
+        {
+          "record": "0x5f6f1c",
+          "values": [
+            "0x1ac500",
+            "0x1ac5b0",
+            "0x763220"
+          ],
+          "name": "ASSIST",
+          "valid": true
+        },
+        {
+          "record": "0x5f6f28",
+          "values": [
+            "0x1ac620",
+            "0x1ac6a0",
+            "0x763228"
+          ],
+          "name": "EVENT",
+          "valid": true
+        },
+        {
+          "record": "0x5f6f34",
+          "values": [
+            "0x1ac6f0",
+            "0x1ac700",
+            "0x763230"
+          ],
+          "name": "ERROR",
+          "valid": true
+        },
+        {
+          "record": "0x5f6f40",
+          "values": [
+            "0x1acb10",
+            "0x1acbb0",
+            "0x763238"
+          ],
+          "name": "ENDURE",
+          "valid": true
+        },
+        {
+          "record": "0x5f6f4c",
+          "values": [
+            "0x1acf40",
+            "0x1acf50",
+            "0x763240"
+          ],
+          "name": "WAIT",
+          "valid": true
+        },
+        {
+          "record": "0x5f6f58",
+          "values": [
+            "0x1adb80",
+            "0x1ade10",
+            "0x763248"
+          ],
+          "name": "PERSONA",
+          "valid": true
+        },
+        {
+          "record": "0x5f6f64",
+          "values": [
+            "0x1ade90",
+            "0x1adea0",
+            "0x5f6dd8"
+          ],
+          "name": "BAD DAMAGE",
+          "valid": true
+        },
+        {
+          "record": "0x5f6f70",
+          "values": [
+            "0x1ad280",
+            "0x1ad3e0",
+            "0x5f6de8"
+          ],
+          "name": "ESCAPE_MES",
+          "valid": true
+        },
+        {
+          "record": "0x5f6f7c",
+          "values": [
+            "0x1ad540",
+            "0x1ad550",
+            "0x763250"
+          ],
+          "name": "ESCAPE",
+          "valid": true
+        },
+        {
+          "record": "0x5f6f88",
+          "values": [
+            "0x1ae3d0",
+            "0x1ae800",
+            "0x5f6df8"
+          ],
+          "name": "ROUNDUP_MES",
+          "valid": true
+        },
+        {
+          "record": "0x5f6f94",
+          "values": [
+            "0x1aec20",
+            "0x1aed50",
+            "0x763258"
+          ],
+          "name": "ROUNDUP",
+          "valid": true
+        },
+        {
+          "record": "0x5f6fa0",
+          "values": [
+            "0x1af9d0",
+            "0x1af9e0",
+            "0x763260"
+          ],
+          "name": "PACKET",
+          "valid": true
+        },
+        {
+          "record": "0x5f6fac",
+          "values": [
+            "0x1afa50",
+            "0x1afb50",
+            "0x763268"
+          ],
+          "name": "END",
+          "valid": true
+        },
+        {
+          "record": "0x5f6fb8",
+          "values": [
+            "0x1b0020",
+            "0x1b0260",
+            "0x5f6e08"
+          ],
+          "name": "END HOME",
+          "valid": true
+        },
+        {
+          "record": "0x5f6fc4",
+          "values": [
+            "0x1b0300",
+            "0x1b0460",
+            "0x763270"
+          ],
+          "name": "DEAD",
+          "valid": true
+        },
+        {
+          "record": "0x5f6fd0",
+          "values": [
+            "0x1b0590",
+            "0x1b05d0",
+            "0x763278"
+          ],
+          "name": "EXIT",
+          "valid": true
+        },
+        {
+          "record": "0x5f6fdc",
+          "values": [
+            "0x1b07c0",
+            "0x1b07d0",
+            "0x763280"
+          ],
+          "name": "TEST",
+          "valid": true
+        }
+      ],
+      "nso_next": {
+        "record": "0x709e30",
+        "values": [
+          "0x5d89be",
+          "0x5e6309",
+          "0x1"
+        ],
+        "name": "",
+        "valid": false
+      },
+      "nso_records": [
+        {
+          "record": "0x709a40",
+          "values": [
+            "0xac20",
+            "0xac30",
+            "0x5fbb38"
+          ],
+          "name": "NON",
+          "valid": true
+        },
+        {
+          "record": "0x709a58",
+          "values": [
+            "0xac40",
+            "0xac50",
+            "0x5d5a34"
+          ],
+          "name": "STANDBY",
+          "valid": true
+        },
+        {
+          "record": "0x709a70",
+          "values": [
+            "0xacc0",
+            "0xb0e0",
+            "0x5e62f6"
+          ],
+          "name": "START",
+          "valid": true
+        },
+        {
+          "record": "0x709a88",
+          "values": [
+            "0xb540",
+            "0xb6b0",
+            "0x618ebb"
+          ],
+          "name": "START HOME",
+          "valid": true
+        },
+        {
+          "record": "0x709aa0",
+          "values": [
+            "0xb760",
+            "0xb920",
+            "0x6162f1"
+          ],
+          "name": "CHANGE FORMATION",
+          "valid": true
+        },
+        {
+          "record": "0x709ab8",
+          "values": [
+            "0xb980",
+            "0xbc50",
+            "0x61ed37"
+          ],
+          "name": "COMMAND",
+          "valid": true
+        },
+        {
+          "record": "0x709ad0",
+          "values": [
+            "0xc060",
+            "0xc1c0",
+            "0x5fed4c"
+          ],
+          "name": "TARGET",
+          "valid": true
+        },
+        {
+          "record": "0x709ae8",
+          "values": [
+            "0xc750",
+            "0xc760",
+            "0x5d2d5c"
+          ],
+          "name": "ANALYZE",
+          "valid": true
+        },
+        {
+          "record": "0x709b00",
+          "values": [
+            "0xcce0",
+            "0xcd60",
+            "0x610e39"
+          ],
+          "name": "AI",
+          "valid": true
+        },
+        {
+          "record": "0x709b18",
+          "values": [
+            "0xce30",
+            "0xce80",
+            "0x5f67e9"
+          ],
+          "name": "AUTO",
+          "valid": true
+        },
+        {
+          "record": "0x709b30",
+          "values": [
+            "0xcf60",
+            "0xcf70",
+            "0x5e62fc"
+          ],
+          "name": "SUPPORT",
+          "valid": true
+        },
+        {
+          "record": "0x709b48",
+          "values": [
+            "0xd240",
+            "0xd270",
+            "0x618ec6"
+          ],
+          "name": "BAD",
+          "valid": true
+        },
+        {
+          "record": "0x709b60",
+          "values": [
+            "0xd790",
+            "0xdc50",
+            "0x5ee534"
+          ],
+          "name": "COOPERATE",
+          "valid": true
+        },
+        {
+          "record": "0x709b78",
+          "values": [
+            "0xdce0",
+            "0xde30",
+            "0x5e92e8"
+          ],
+          "name": "PURSUIT_MES",
+          "valid": true
+        },
+        {
+          "record": "0x709b90",
+          "values": [
+            "0xe1c0",
+            "0xe1d0",
+            "0x5e3779"
+          ],
+          "name": "PURSUIT",
+          "valid": true
+        },
+        {
+          "record": "0x709ba8",
+          "values": [
+            "0xe540",
+            "0xf860",
+            "0x5d2d64"
+          ],
+          "name": "UNION",
+          "valid": true
+        },
+        {
+          "record": "0x709bc0",
+          "values": [
+            "0xf9c0",
+            "0xfcc0",
+            "0x5ee53e"
+          ],
+          "name": "BIKE_PURSUIT",
+          "valid": true
+        },
+        {
+          "record": "0x709bd8",
+          "values": [
+            "0x10f70",
+            "0x10f80",
+            "0x60bd6a"
+          ],
+          "name": "READY",
+          "valid": true
+        },
+        {
+          "record": "0x709bf0",
+          "values": [
+            "0x113c0",
+            "0x119d0",
+            "0x5f15a7"
+          ],
+          "name": "MOVE TARGET",
+          "valid": true
+        },
+        {
+          "record": "0x709c08",
+          "values": [
+            "0x11a60",
+            "0x11c00",
+            "0x618eca"
+          ],
+          "name": "MOVE HOME",
+          "valid": true
+        },
+        {
+          "record": "0x709c20",
+          "values": [
+            "0x11c90",
+            "0x11ca0",
+            "0x60974a"
+          ],
+          "name": "ATTACK",
+          "valid": true
+        },
+        {
+          "record": "0x709c38",
+          "values": [
+            "0x13340",
+            "0x13350",
+            "0x5fbb3c"
+          ],
+          "name": "SKILL",
+          "valid": true
+        },
+        {
+          "record": "0x709c50",
+          "values": [
+            "0x16d60",
+            "0x16d70",
+            "0x5d2d6a"
+          ],
+          "name": "SUMMON",
+          "valid": true
+        },
+        {
+          "record": "0x709c68",
+          "values": [
+            "0x17470",
+            "0x17af0",
+            "0x5e3781"
+          ],
+          "name": "ASSIST",
+          "valid": true
+        },
+        {
+          "record": "0x709c80",
+          "values": [
+            "0x17b70",
+            "0x17d90",
+            "0x61ed3f"
+          ],
+          "name": "ANALYZESKILL",
+          "valid": true
+        },
+        {
+          "record": "0x709c98",
+          "values": [
+            "0x17e10",
+            "0x17f10",
+            "0x5e6304"
+          ],
+          "name": "YELL",
+          "valid": true
+        },
+        {
+          "record": "0x709cb0",
+          "values": [
+            "0x18010",
+            "0x18080",
+            "0x606c1a"
+          ],
+          "name": "EVENT",
+          "valid": true
+        },
+        {
+          "record": "0x709cc8",
+          "values": [
+            "0x180e0",
+            "0x180f0",
+            "0x60403d"
+          ],
+          "name": "ERROR",
+          "valid": true
+        },
+        {
+          "record": "0x709ce0",
+          "values": [
+            "0x183b0",
+            "0x18430",
+            "0x610e3c"
+          ],
+          "name": "ENDURE",
+          "valid": true
+        },
+        {
+          "record": "0x709cf8",
+          "values": [
+            "0x18700",
+            "0x18710",
+            "0x5f67ee"
+          ],
+          "name": "WAIT",
+          "valid": true
+        },
+        {
+          "record": "0x709d10",
+          "values": [
+            "0x189d0",
+            "0x18b80",
+            "0x5dae2d"
+          ],
+          "name": "PERSONA",
+          "valid": true
+        },
+        {
+          "record": "0x709d28",
+          "values": [
+            "0x18c40",
+            "0x18c50",
+            "0x616302"
+          ],
+          "name": "BAD DAMAGE",
+          "valid": true
+        },
+        {
+          "record": "0x709d40",
+          "values": [
+            "0x18f20",
+            "0x19030",
+            "0x5fed53"
+          ],
+          "name": "ESCAPE_MES",
+          "valid": true
+        },
+        {
+          "record": "0x709d58",
+          "values": [
+            "0x19160",
+            "0x19170",
+            "0x621ee1"
+          ],
+          "name": "ESCAPE",
+          "valid": true
+        },
+        {
+          "record": "0x709d70",
+          "values": [
+            "0x19690",
+            "0x19990",
+            "0x5f92af"
+          ],
+          "name": "ROUNDUP_MES",
+          "valid": true
+        },
+        {
+          "record": "0x709d88",
+          "values": [
+            "0x19da0",
+            "0x19f00",
+            "0x5d89b6"
+          ],
+          "name": "ROUNDUP",
+          "valid": true
+        },
+        {
+          "record": "0x709da0",
+          "values": [
+            "0x1ada0",
+            "0x1adb0",
+            "0x5dddd1"
+          ],
+          "name": "PACKET",
+          "valid": true
+        },
+        {
+          "record": "0x709db8",
+          "values": [
+            "0x1ae10",
+            "0x1af20",
+            "0x606c20"
+          ],
+          "name": "END",
+          "valid": true
+        },
+        {
+          "record": "0x709dd0",
+          "values": [
+            "0x1b320",
+            "0x1b4f0",
+            "0x5d2d71"
+          ],
+          "name": "END HOME",
+          "valid": true
+        },
+        {
+          "record": "0x709de8",
+          "values": [
+            "0x1b5a0",
+            "0x1b6f0",
+            "0x5fbb42"
+          ],
+          "name": "DEAD",
+          "valid": true
+        },
+        {
+          "record": "0x709e00",
+          "values": [
+            "0x1b800",
+            "0x1b820",
+            "0x5ee54b"
+          ],
+          "name": "EXIT",
+          "valid": true
+        },
+        {
+          "record": "0x709e18",
+          "values": [
+            "0x1b9b0",
+            "0x1b9c0",
+            "0x621ee8"
+          ],
+          "name": "TEST",
+          "valid": true
+        }
+      ],
+      "steam_root": "0xa24c10",
+      "steam_records": [
+        {
+          "record": "0xa24c10",
+          "values": [
+            "0x48480",
+            "0x48490",
+            "0x90a780"
+          ],
+          "name": "NON"
+        },
+        {
+          "record": "0xa24c28",
+          "values": [
+            "0x484a0",
+            "0x484b0",
+            "0x90a788"
+          ],
+          "name": "STANDBY"
+        },
+        {
+          "record": "0xa24c40",
+          "values": [
+            "0x48540",
+            "0x48970",
+            "0x90a790"
+          ],
+          "name": "START"
+        },
+        {
+          "record": "0xa24c58",
+          "values": [
+            "0x48df0",
+            "0x48fb0",
+            "0x90a798"
+          ],
+          "name": "START HOME"
+        },
+        {
+          "record": "0xa24c70",
+          "values": [
+            "0x49090",
+            "0x493c0",
+            "0x90a7a8"
+          ],
+          "name": "CHANGE FORMATION"
+        },
+        {
+          "record": "0xa24c88",
+          "values": [
+            "0x49410",
+            "0x49970",
+            "0x90a7c0"
+          ],
+          "name": "COMMAND"
+        },
+        {
+          "record": "0xa24ca0",
+          "values": [
+            "0x49dd0",
+            "0x4a050",
+            "0x90a7c8"
+          ],
+          "name": "TARGET"
+        },
+        {
+          "record": "0xa24cb8",
+          "values": [
+            "0x4a710",
+            "0x4a740",
+            "0x90a7d0"
+          ],
+          "name": "ANALYZE"
+        },
+        {
+          "record": "0xa24cd0",
+          "values": [
+            "0x4b010",
+            "0x4b0a0",
+            "0x90a7d8"
+          ],
+          "name": "AI"
+        },
+        {
+          "record": "0xa24ce8",
+          "values": [
+            "0x4b220",
+            "0x4b2c0",
+            "0x90a7dc"
+          ],
+          "name": "AUTO"
+        },
+        {
+          "record": "0xa24d00",
+          "values": [
+            "0x4b3b0",
+            "0x4b3c0",
+            "0x90a7e8"
+          ],
+          "name": "SUPPORT"
+        },
+        {
+          "record": "0xa24d18",
+          "values": [
+            "0x4b7c0",
+            "0x4b7f0",
+            "0x90a7f0"
+          ],
+          "name": "BAD"
+        },
+        {
+          "record": "0xa24d30",
+          "values": [
+            "0x4c320",
+            "0x4c990",
+            "0x90a7f8"
+          ],
+          "name": "COOPERATE"
+        },
+        {
+          "record": "0xa24d48",
+          "values": [
+            "0x4ca40",
+            "0x4cc10",
+            "0x90a808"
+          ],
+          "name": "PURSUIT_MES"
+        },
+        {
+          "record": "0xa24d60",
+          "values": [
+            "0x4d090",
+            "0x4d0a0",
+            "0x90a818"
+          ],
+          "name": "PURSUIT"
+        },
+        {
+          "record": "0xa24d78",
+          "values": [
+            "0x4f7a0",
+            "0x51050",
+            "0x90a820"
+          ],
+          "name": "UNION"
+        },
+        {
+          "record": "0xa24d90",
+          "values": [
+            "0x4d510",
+            "0x4d800",
+            "0x90a828"
+          ],
+          "name": "BIKE_PURSUIT"
+        },
+        {
+          "record": "0xa24da8",
+          "values": [
+            "0x51120",
+            "0x51130",
+            "0x90a838"
+          ],
+          "name": "READY"
+        },
+        {
+          "record": "0xa24dc0",
+          "values": [
+            "0x515b0",
+            "0x51e10",
+            "0x90a840"
+          ],
+          "name": "MOVE TARGET"
+        },
+        {
+          "record": "0xa24dd8",
+          "values": [
+            "0x51e70",
+            "0x52040",
+            "0x90a850"
+          ],
+          "name": "MOVE HOME"
+        },
+        {
+          "record": "0xa24df0",
+          "values": [
+            "0x520a0",
+            "0x520b0",
+            "0x90a85c"
+          ],
+          "name": "ATTACK"
+        },
+        {
+          "record": "0xa24e08",
+          "values": [
+            "0x54150",
+            "0x54160",
+            "0x90a864"
+          ],
+          "name": "SKILL"
+        },
+        {
+          "record": "0xa24e20",
+          "values": [
+            "0x581d0",
+            "0x581e0",
+            "0x90a86c"
+          ],
+          "name": "SUMMON"
+        },
+        {
+          "record": "0xa24e38",
+          "values": [
+            "0x592d0",
+            "0x5a000",
+            "0x90a874"
+          ],
+          "name": "ASSIST"
+        },
+        {
+          "record": "0xa24e50",
+          "values": [
+            "0x58d70",
+            "0x59270",
+            "0x90a880"
+          ],
+          "name": "ANALYZESKILL"
+        },
+        {
+          "record": "0xa24e68",
+          "values": [
+            "0x5a060",
+            "0x5a200",
+            "0x90a890"
+          ],
+          "name": "YELL"
+        },
+        {
+          "record": "0xa24e80",
+          "values": [
+            "0x5a320",
+            "0x5a340",
+            "0x90a898"
+          ],
+          "name": "EVENT"
+        },
+        {
+          "record": "0xa24e98",
+          "values": [
+            "0x5a3a0",
+            "0x5a3b0",
+            "0x90a8a0"
+          ],
+          "name": "ERROR"
+        },
+        {
+          "record": "0xa24eb0",
+          "values": [
+            "0x5a7b0",
+            "0x5a850",
+            "0x90a8a8"
+          ],
+          "name": "ENDURE"
+        },
+        {
+          "record": "0xa24ec8",
+          "values": [
+            "0x5ac40",
+            "0x5ac50",
+            "0x90a8b0"
+          ],
+          "name": "WAIT"
+        },
+        {
+          "record": "0xa24ee0",
+          "values": [
+            "0x5bc50",
+            "0x5bf00",
+            "0x90a8b8"
+          ],
+          "name": "PERSONA"
+        },
+        {
+          "record": "0xa24ef8",
+          "values": [
+            "0x5bfc0",
+            "0x5bfd0",
+            "0x90a8c0"
+          ],
+          "name": "BAD DAMAGE"
+        },
+        {
+          "record": "0xa24f10",
+          "values": [
+            "0x5b030",
+            "0x5b210",
+            "0x90a8d0"
+          ],
+          "name": "ESCAPE_MES"
+        },
+        {
+          "record": "0xa24f28",
+          "values": [
+            "0x5b490",
+            "0x5b4a0",
+            "0x90a8dc"
+          ],
+          "name": "ESCAPE"
+        },
+        {
+          "record": "0xa24f40",
+          "values": [
+            "0x5c470",
+            "0x5c910",
+            "0x90a8e8"
+          ],
+          "name": "ROUNDUP_MES"
+        },
+        {
+          "record": "0xa24f58",
+          "values": [
+            "0x5cec0",
+            "0x5d0d0",
+            "0x90a8f8"
+          ],
+          "name": "ROUNDUP"
+        },
+        {
+          "record": "0xa24f70",
+          "values": [
+            "0x5ecc0",
+            "0x5ecd0",
+            "0x90a900"
+          ],
+          "name": "PACKET"
+        },
+        {
+          "record": "0xa24f88",
+          "values": [
+            "0x5ed20",
+            "0x5ee10",
+            "0x90a908"
+          ],
+          "name": "END"
+        },
+        {
+          "record": "0xa24fa0",
+          "values": [
+            "0x5f400",
+            "0x5f5e0",
+            "0x90a910"
+          ],
+          "name": "END HOME"
+        },
+        {
+          "record": "0xa24fb8",
+          "values": [
+            "0x5f6d0",
+            "0x5f820",
+            "0x90a91c"
+          ],
+          "name": "DEAD"
+        },
+        {
+          "record": "0xa24fd0",
+          "values": [
+            "0x5f960",
+            "0x5f9a0",
+            "0x90a924"
+          ],
+          "name": "EXIT"
+        },
+        {
+          "record": "0xa24fe8",
+          "values": [
+            "0x5fbb0",
+            "0x5fbc0",
+            "0x90a92c"
+          ],
+          "name": "TEST"
+        }
+      ],
+      "readers": [
+        {
+          "platform": "switch",
+          "start": "0x710000a220",
+          "end": "0x710000a490",
+          "refs": [
+            {
+              "pc": 485331346076,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            },
+            {
+              "pc": 485331346256,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x710000a490",
+          "end": "0x710000a590",
+          "refs": [
+            {
+              "pc": 485331346800,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x710000a590",
+          "end": "0x710000a5c0",
+          "refs": [
+            {
+              "pc": 485331346864,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x710000aa80",
+          "end": "0x710000acc0",
+          "refs": [
+            {
+              "pc": 485331348608,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            },
+            {
+              "pc": 485331348644,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x710000acc0",
+          "end": "0x710000b0e0",
+          "refs": [
+            {
+              "pc": 485331348820,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            },
+            {
+              "pc": 485331348932,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            },
+            {
+              "pc": 485331348972,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            },
+            {
+              "pc": 485331349388,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            },
+            {
+              "pc": 485331349576,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            },
+            {
+              "pc": 485331349624,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            },
+            {
+              "pc": 485331349668,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x710000b0e0",
+          "end": "0x710000b540",
+          "refs": [
+            {
+              "pc": 485331350336,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            },
+            {
+              "pc": 485331350384,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            },
+            {
+              "pc": 485331350780,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            },
+            {
+              "pc": 485331350808,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x710000b540",
+          "end": "0x710000b6b0",
+          "refs": [
+            {
+              "pc": 485331351112,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x710000b6b0",
+          "end": "0x710000b760",
+          "refs": [
+            {
+              "pc": 485331351344,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x710000b920",
+          "end": "0x710000b980",
+          "refs": [
+            {
+              "pc": 485331351904,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x710000b980",
+          "end": "0x710000bc50",
+          "refs": [
+            {
+              "pc": 485331352456,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x710000bc50",
+          "end": "0x710000c060",
+          "refs": [
+            {
+              "pc": 485331352940,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            },
+            {
+              "pc": 485331353332,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            },
+            {
+              "pc": 485331353428,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            },
+            {
+              "pc": 485331353672,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x710000c1c0",
+          "end": "0x710000c760",
+          "refs": [
+            {
+              "pc": 485331354516,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            },
+            {
+              "pc": 485331354664,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            },
+            {
+              "pc": 485331355300,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x710000c760",
+          "end": "0x710000cce0",
+          "refs": [
+            {
+              "pc": 485331356372,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x710000cce0",
+          "end": "0x710000cd60",
+          "refs": [
+            {
+              "pc": 485331356992,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x710000cd60",
+          "end": "0x710000ce30",
+          "refs": [
+            {
+              "pc": 485331357160,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x710000ce80",
+          "end": "0x710000cf70",
+          "refs": [
+            {
+              "pc": 485331357504,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x710000cf70",
+          "end": "0x710000d240",
+          "refs": [
+            {
+              "pc": 485331357728,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            },
+            {
+              "pc": 485331357776,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            },
+            {
+              "pc": 485331357840,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x710000d270",
+          "end": "0x710000d790",
+          "refs": [
+            {
+              "pc": 485331358788,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            },
+            {
+              "pc": 485331359328,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            },
+            {
+              "pc": 485331359376,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            },
+            {
+              "pc": 485331359588,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x710000dc50",
+          "end": "0x710000dce0",
+          "refs": [
+            {
+              "pc": 485331360968,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x710000dce0",
+          "end": "0x710000de30",
+          "refs": [
+            {
+              "pc": 485331361284,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x710000de30",
+          "end": "0x710000e1d0",
+          "refs": [
+            {
+              "pc": 485331361472,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            },
+            {
+              "pc": 485331361792,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            },
+            {
+              "pc": 485331361820,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x710000e1d0",
+          "end": "0x710000e540",
+          "refs": [
+            {
+              "pc": 485331363056,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x710000f860",
+          "end": "0x710000f9c0",
+          "refs": [
+            {
+              "pc": 485331368120,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x710000fcc0",
+          "end": "0x7100010f80",
+          "refs": [
+            {
+              "pc": 485331373844,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            },
+            {
+              "pc": 485331373872,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x7100010f80",
+          "end": "0x71000113c0",
+          "refs": [
+            {
+              "pc": 485331374208,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            },
+            {
+              "pc": 485331374292,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            },
+            {
+              "pc": 485331374328,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            },
+            {
+              "pc": 485331374376,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            },
+            {
+              "pc": 485331374412,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            },
+            {
+              "pc": 485331374460,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            },
+            {
+              "pc": 485331374556,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            },
+            {
+              "pc": 485331374688,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x71000119d0",
+          "end": "0x7100011a60",
+          "refs": [
+            {
+              "pc": 485331376704,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x7100011a60",
+          "end": "0x7100011c00",
+          "refs": [
+            {
+              "pc": 485331377008,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x7100011c00",
+          "end": "0x7100011ca0",
+          "refs": [
+            {
+              "pc": 485331377264,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x7100011ca0",
+          "end": "0x710001337c",
+          "refs": [
+            {
+              "pc": 485331382968,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            },
+            {
+              "pc": 485331382996,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x710001337c",
+          "end": "0x7100016d70",
+          "refs": [
+            {
+              "pc": 485331397636,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            },
+            {
+              "pc": 485331397664,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x7100016d70",
+          "end": "0x7100017470",
+          "refs": [
+            {
+              "pc": 485331399708,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            },
+            {
+              "pc": 485331399736,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x7100017af0",
+          "end": "0x7100017b70",
+          "refs": [
+            {
+              "pc": 485331401556,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x7100017d90",
+          "end": "0x7100017e10",
+          "refs": [
+            {
+              "pc": 485331402216,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x7100017f10",
+          "end": "0x7100018010",
+          "refs": [
+            {
+              "pc": 485331402736,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x7100018080",
+          "end": "0x7100018430",
+          "refs": [
+            {
+              "pc": 485331402956,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            },
+            {
+              "pc": 485331403628,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            },
+            {
+              "pc": 485331403656,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            },
+            {
+              "pc": 485331403808,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x7100018430",
+          "end": "0x7100018710",
+          "refs": [
+            {
+              "pc": 485331404496,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x7100018710",
+          "end": "0x71000189d0",
+          "refs": [
+            {
+              "pc": 485331405188,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            },
+            {
+              "pc": 485331405224,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x7100018b80",
+          "end": "0x7100018c50",
+          "refs": [
+            {
+              "pc": 485331405780,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x7100018c50",
+          "end": "0x7100018f20",
+          "refs": [
+            {
+              "pc": 485331406576,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x7100019030",
+          "end": "0x7100019170",
+          "refs": [
+            {
+              "pc": 485331407024,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            },
+            {
+              "pc": 485331407080,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x7100019170",
+          "end": "0x7100019690",
+          "refs": [
+            {
+              "pc": 485331408268,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x7100019990",
+          "end": "0x7100019da0",
+          "refs": [
+            {
+              "pc": 485331409928,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x7100019f20",
+          "end": "0x710001adb0",
+          "refs": [
+            {
+              "pc": 485331414356,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x710001adb0",
+          "end": "0x710001ae10",
+          "refs": [
+            {
+              "pc": 485331414512,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x710001ae10",
+          "end": "0x710001af20",
+          "refs": [
+            {
+              "pc": 485331414632,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x710001af20",
+          "end": "0x710001b320",
+          "refs": [
+            {
+              "pc": 485331415368,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            },
+            {
+              "pc": 485331415540,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            },
+            {
+              "pc": 485331415612,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            },
+            {
+              "pc": 485331415796,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x710001b320",
+          "end": "0x710001b4f0",
+          "refs": [
+            {
+              "pc": 485331416036,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x710001b4f0",
+          "end": "0x710001b5a0",
+          "refs": [
+            {
+              "pc": 485331416440,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x710001b6f0",
+          "end": "0x710001b820",
+          "refs": [
+            {
+              "pc": 485331416952,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            },
+            {
+              "pc": 485331417048,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x710001b820",
+          "end": "0x710001b9f0",
+          "refs": [
+            {
+              "pc": 485331417556,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x710001b9f0",
+          "end": "0x710001bb30",
+          "refs": [
+            {
+              "pc": 485331417632,
+              "target": 485338683968,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "steam",
+          "start": "0x48f64",
+          "end": "0x48faa",
+          "refs": [
+            {
+              "pc": 298883,
+              "target": 10636304,
+              "string": null,
+              "argument": null,
+              "width": 8
+            }
+          ]
+        },
+        {
+          "platform": "steam",
+          "start": "0x48fdb",
+          "end": "0x49088",
+          "refs": [
+            {
+              "pc": 299115,
+              "target": 10636304,
+              "string": null,
+              "argument": null,
+              "width": 8
+            }
+          ]
+        },
+        {
+          "platform": "steam",
+          "start": "0x4a76d",
+          "end": "0x4accf",
+          "refs": [
+            {
+              "pc": 305407,
+              "target": 10636304,
+              "string": null,
+              "argument": null,
+              "width": 8
+            }
+          ]
+        },
+        {
+          "platform": "steam",
+          "start": "0x4c990",
+          "end": "0x4ca05",
+          "refs": [
+            {
+              "pc": 313821,
+              "target": 10636304,
+              "string": null,
+              "argument": null,
+              "width": 8
+            }
+          ]
+        },
+        {
+          "platform": "steam",
+          "start": "0x51e10",
+          "end": "0x51e6d",
+          "refs": [
+            {
+              "pc": 335447,
+              "target": 10636304,
+              "string": null,
+              "argument": null,
+              "width": 8
+            }
+          ]
+        },
+        {
+          "platform": "steam",
+          "start": "0x51ffd",
+          "end": "0x52034",
+          "refs": [
+            {
+              "pc": 335903,
+              "target": 10636304,
+              "string": null,
+              "argument": null,
+              "width": 8
+            }
+          ]
+        },
+        {
+          "platform": "steam",
+          "start": "0x52040",
+          "end": "0x5209d",
+          "refs": [
+            {
+              "pc": 336007,
+              "target": 10636304,
+              "string": null,
+              "argument": null,
+              "width": 8
+            }
+          ]
+        },
+        {
+          "platform": "steam",
+          "start": "0x5a340",
+          "end": "0x5a396",
+          "refs": [
+            {
+              "pc": 369521,
+              "target": 10636304,
+              "string": null,
+              "argument": null,
+              "width": 8
+            }
+          ]
+        },
+        {
+          "platform": "steam",
+          "start": "0x5a7b0",
+          "end": "0x5a84a",
+          "refs": [
+            {
+              "pc": 370722,
+              "target": 10636304,
+              "string": null,
+              "argument": null,
+              "width": 8
+            }
+          ]
+        },
+        {
+          "platform": "steam",
+          "start": "0x5abb2",
+          "end": "0x5ac2c",
+          "refs": [
+            {
+              "pc": 371718,
+              "target": 10636304,
+              "string": null,
+              "argument": null,
+              "width": 8
+            }
+          ]
+        },
+        {
+          "platform": "steam",
+          "start": "0x5bf00",
+          "end": "0x5bfb8",
+          "refs": [
+            {
+              "pc": 376646,
+              "target": 10636304,
+              "string": null,
+              "argument": null,
+              "width": 8
+            }
+          ]
+        },
+        {
+          "platform": "steam",
+          "start": "0x5fc40",
+          "end": "0x5fc8b",
+          "refs": [
+            {
+              "pc": 392299,
+              "target": 10636304,
+              "string": null,
+              "argument": null,
+              "width": 8
+            }
+          ]
+        },
+        {
+          "platform": "steam",
+          "start": "0x5fd50",
+          "end": "0x5fe9b",
+          "refs": [
+            {
+              "pc": 392839,
+              "target": 10636304,
+              "string": null,
+              "argument": null,
+              "width": 8
+            }
+          ]
+        },
+        {
+          "platform": "steam",
+          "start": "0x5ff49",
+          "end": "0x6008c",
+          "refs": [
+            {
+              "pc": 393045,
+              "target": 10636304,
+              "string": null,
+              "argument": null,
+              "width": 8
+            }
+          ]
+        }
+      ],
+      "old_to_golden_state_ids": [
+        {
+          "ps2": 0,
+          "golden": 0,
+          "name": "NON"
+        },
+        {
+          "ps2": 1,
+          "golden": 1,
+          "name": "STANDBY"
+        },
+        {
+          "ps2": 2,
+          "golden": 2,
+          "name": "START"
+        },
+        {
+          "ps2": 3,
+          "golden": 3,
+          "name": "START HOME"
+        },
+        {
+          "ps2": 4,
+          "golden": 4,
+          "name": "CHANGE FORMATION"
+        },
+        {
+          "ps2": 5,
+          "golden": 5,
+          "name": "COMMAND"
+        },
+        {
+          "ps2": 6,
+          "golden": 6,
+          "name": "TARGET"
+        },
+        {
+          "ps2": 7,
+          "golden": 7,
+          "name": "ANALYZE"
+        },
+        {
+          "ps2": 8,
+          "golden": 8,
+          "name": "AI"
+        },
+        {
+          "ps2": 9,
+          "golden": 9,
+          "name": "AUTO"
+        },
+        {
+          "ps2": 10,
+          "golden": 10,
+          "name": "SUPPORT"
+        },
+        {
+          "ps2": 11,
+          "golden": 11,
+          "name": "BAD"
+        },
+        {
+          "ps2": 12,
+          "golden": 12,
+          "name": "COOPERATE"
+        },
+        {
+          "ps2": 13,
+          "golden": 13,
+          "name": "PURSUIT_MES"
+        },
+        {
+          "ps2": 14,
+          "golden": 14,
+          "name": "PURSUIT"
+        },
+        {
+          "ps2": 15,
+          "golden": 17,
+          "name": "READY"
+        },
+        {
+          "ps2": 16,
+          "golden": 18,
+          "name": "MOVE TARGET"
+        },
+        {
+          "ps2": 17,
+          "golden": 19,
+          "name": "MOVE HOME"
+        },
+        {
+          "ps2": 18,
+          "golden": 20,
+          "name": "ATTACK"
+        },
+        {
+          "ps2": 19,
+          "golden": 21,
+          "name": "SKILL"
+        },
+        {
+          "ps2": 20,
+          "golden": 22,
+          "name": "SUMMON"
+        },
+        {
+          "ps2": 21,
+          "golden": 23,
+          "name": "ASSIST"
+        },
+        {
+          "ps2": 22,
+          "golden": 26,
+          "name": "EVENT"
+        },
+        {
+          "ps2": 23,
+          "golden": 27,
+          "name": "ERROR"
+        },
+        {
+          "ps2": 24,
+          "golden": 28,
+          "name": "ENDURE"
+        },
+        {
+          "ps2": 25,
+          "golden": 29,
+          "name": "WAIT"
+        },
+        {
+          "ps2": 26,
+          "golden": 30,
+          "name": "PERSONA"
+        },
+        {
+          "ps2": 27,
+          "golden": 31,
+          "name": "BAD DAMAGE"
+        },
+        {
+          "ps2": 28,
+          "golden": 32,
+          "name": "ESCAPE_MES"
+        },
+        {
+          "ps2": 29,
+          "golden": 33,
+          "name": "ESCAPE"
+        },
+        {
+          "ps2": 30,
+          "golden": 34,
+          "name": "ROUNDUP_MES"
+        },
+        {
+          "ps2": 31,
+          "golden": 35,
+          "name": "ROUNDUP"
+        },
+        {
+          "ps2": 32,
+          "golden": 36,
+          "name": "PACKET"
+        },
+        {
+          "ps2": 33,
+          "golden": 37,
+          "name": "END"
+        },
+        {
+          "ps2": 34,
+          "golden": 38,
+          "name": "END HOME"
+        },
+        {
+          "ps2": 35,
+          "golden": 39,
+          "name": "DEAD"
+        },
+        {
+          "ps2": 36,
+          "golden": 40,
+          "name": "EXIT"
+        },
+        {
+          "ps2": 37,
+          "golden": 41,
+          "name": "TEST"
+        }
+      ],
+      "source_span_receipts": {
+        "ps2_size": 456,
+        "ps2_sha256": "d0c6567ac6a842baa35843386bed022c51dcf3a3742296e0e4d1a5045880074f",
+        "steam_size": 1008,
+        "steam_sha256": "2bf0369c34e717c95880fa5747272df1dc2d5bc40c4c442263063e244c5f007d",
+        "nso_size": 1008,
+        "nso_sha256": "a9e080790cc3b9e7a988324b4ec1cc1432a8f43cf897c78318943a0670f171f6"
+      }
+    },
+    "encounter": {
+      "oldroot": "0x5f7180",
+      "nso_root": "0x71f8a0",
+      "ps2_next": {
+        "record": "0x5f7270",
+        "values": [
+          "0x33302566",
+          "0x30255f64",
+          "0x625f6433"
+        ],
+        "name": "",
+        "valid": false
+      },
+      "ps2_records": [
+        {
+          "record": "0x5f7180",
+          "values": [
+            "0x0",
+            "0x0",
+            "0x763288"
+          ],
+          "name": "NULL",
+          "valid": true
+        },
+        {
+          "record": "0x5f718c",
+          "values": [
+            "0x1b18c0",
+            "0x1b18d0",
+            "0x763290"
+          ],
+          "name": "NON",
+          "valid": true
+        },
+        {
+          "record": "0x5f7198",
+          "values": [
+            "0x1b18e0",
+            "0x1b1940",
+            "0x763298"
+          ],
+          "name": "INIT",
+          "valid": true
+        },
+        {
+          "record": "0x5f71a4",
+          "values": [
+            "0x1b19a0",
+            "0x1b19c0",
+            "0x5f7110"
+          ],
+          "name": "SCENE_SET",
+          "valid": true
+        },
+        {
+          "record": "0x5f71b0",
+          "values": [
+            "0x1b1b20",
+            "0x1b1b30",
+            "0x5f7120"
+          ],
+          "name": "CONTINUOUS",
+          "valid": true
+        },
+        {
+          "record": "0x5f71bc",
+          "values": [
+            "0x1b1d70",
+            "0x1b2380",
+            "0x5f7130"
+          ],
+          "name": "UNIT_CREATE",
+          "valid": true
+        },
+        {
+          "record": "0x5f71c8",
+          "values": [
+            "0x1b33c0",
+            "0x1b36b0",
+            "0x5f7140"
+          ],
+          "name": "UNIT_LOAD",
+          "valid": true
+        },
+        {
+          "record": "0x5f71d4",
+          "values": [
+            "0x1b3790",
+            "0x1b3870",
+            "0x7632a0"
+          ],
+          "name": "START",
+          "valid": true
+        },
+        {
+          "record": "0x5f71e0",
+          "values": [
+            "0x1b39f0",
+            "0x1b3a00",
+            "0x7632a8"
+          ],
+          "name": "ACTION",
+          "valid": true
+        },
+        {
+          "record": "0x5f71ec",
+          "values": [
+            "0x1b3f00",
+            "0x1b3fb0",
+            "0x5f7150"
+          ],
+          "name": "REVIVAL_MES",
+          "valid": true
+        },
+        {
+          "record": "0x5f71f8",
+          "values": [
+            "0x1b4060",
+            "0x1b4630",
+            "0x7632b0"
+          ],
+          "name": "REVIVAL",
+          "valid": true
+        },
+        {
+          "record": "0x5f7204",
+          "values": [
+            "0x1b4880",
+            "0x1b5300",
+            "0x7632b8"
+          ],
+          "name": "WIN",
+          "valid": true
+        },
+        {
+          "record": "0x5f7210",
+          "values": [
+            "0x1b4760",
+            "0x1b47a0",
+            "0x5f7160"
+          ],
+          "name": "ENEMY DEAD",
+          "valid": true
+        },
+        {
+          "record": "0x5f721c",
+          "values": [
+            "0x1b54e0",
+            "0x1b5620",
+            "0x7632c0"
+          ],
+          "name": "LOSE",
+          "valid": true
+        },
+        {
+          "record": "0x5f7228",
+          "values": [
+            "0x1b5710",
+            "0x1b57f0",
+            "0x5f7170"
+          ],
+          "name": "FADE_OUT",
+          "valid": true
+        },
+        {
+          "record": "0x5f7234",
+          "values": [
+            "0x1b5970",
+            "0x1b5d30",
+            "0x7632c8"
+          ],
+          "name": "END",
+          "valid": true
+        },
+        {
+          "record": "0x5f7240",
+          "values": [
+            "0x1b5da0",
+            "0x1b5db0",
+            "0x7632d0"
+          ],
+          "name": "RESULT",
+          "valid": true
+        },
+        {
+          "record": "0x5f724c",
+          "values": [
+            "0x1b5e40",
+            "0x1b5e60",
+            "0x7632d8"
+          ],
+          "name": "EXIT",
+          "valid": true
+        },
+        {
+          "record": "0x5f7258",
+          "values": [
+            "0x1b5ec0",
+            "0x1b5ed0",
+            "0x7632e0"
+          ],
+          "name": "TEST",
+          "valid": true
+        },
+        {
+          "record": "0x5f7264",
+          "values": [
+            "0x1b5f00",
+            "0x1b5f30",
+            "0x7632e8"
+          ],
+          "name": "MC",
+          "valid": true
+        }
+      ],
+      "nso_next": {
+        "record": "0x71fa98",
+        "values": [
+          "0xeffff0001ffff",
+          "0xeffff000effff",
+          "0x4ffff0001ffff"
+        ],
+        "name": "",
+        "valid": false
+      },
+      "nso_records": [
+        {
+          "record": "0x71f8a0",
+          "values": [
+            "0x0",
+            "0x0",
+            "0x5e936f"
+          ],
+          "name": "NULL",
+          "valid": true
+        },
+        {
+          "record": "0x71f8b8",
+          "values": [
+            "0x5bd40",
+            "0x5bd50",
+            "0x5fbb38"
+          ],
+          "name": "NON",
+          "valid": true
+        },
+        {
+          "record": "0x71f8d0",
+          "values": [
+            "0x5bd60",
+            "0x5bec0",
+            "0x5e6385"
+          ],
+          "name": "INIT",
+          "valid": true
+        },
+        {
+          "record": "0x71f8e8",
+          "values": [
+            "0x5bf10",
+            "0x5bf20",
+            "0x5fed9f"
+          ],
+          "name": "SCENE_SET",
+          "valid": true
+        },
+        {
+          "record": "0x71f900",
+          "values": [
+            "0x5bff0",
+            "0x5c010",
+            "0x5dde0c"
+          ],
+          "name": "CONTINUOUS",
+          "valid": true
+        },
+        {
+          "record": "0x71f918",
+          "values": [
+            "0x5c1c0",
+            "0x5c710",
+            "0x621f6f"
+          ],
+          "name": "UNIT_CREATE",
+          "valid": true
+        },
+        {
+          "record": "0x71f930",
+          "values": [
+            "0x5d360",
+            "0x5d650",
+            "0x5feda9"
+          ],
+          "name": "UNIT_LOAD",
+          "valid": true
+        },
+        {
+          "record": "0x71f948",
+          "values": [
+            "0x5d700",
+            "0x5d7b0",
+            "0x5e62f6"
+          ],
+          "name": "START",
+          "valid": true
+        },
+        {
+          "record": "0x71f960",
+          "values": [
+            "0x5d8d0",
+            "0x5d8e0",
+            "0x5e9374"
+          ],
+          "name": "ACTION",
+          "valid": true
+        },
+        {
+          "record": "0x71f978",
+          "values": [
+            "0x5dcb0",
+            "0x5dd50",
+            "0x5dde17"
+          ],
+          "name": "REVIVAL_MES",
+          "valid": true
+        },
+        {
+          "record": "0x71f990",
+          "values": [
+            "0x5ddd0",
+            "0x5e270",
+            "0x5fedb3"
+          ],
+          "name": "REVIVAL",
+          "valid": true
+        },
+        {
+          "record": "0x71f9a8",
+          "values": [
+            "0x5e350",
+            "0x5e820",
+            "0x606c86"
+          ],
+          "name": "REVIVALRISE",
+          "valid": true
+        },
+        {
+          "record": "0x71f9c0",
+          "values": [
+            "0x5e8f0",
+            "0x5ef90",
+            "0x60e57f"
+          ],
+          "name": "WIN",
+          "valid": true
+        },
+        {
+          "record": "0x71f9d8",
+          "values": [
+            "0x5f110",
+            "0x5f150",
+            "0x5e638a"
+          ],
+          "name": "ENEMY DEAD",
+          "valid": true
+        },
+        {
+          "record": "0x71f9f0",
+          "values": [
+            "0x5f1e0",
+            "0x5f2d0",
+            "0x610e7d"
+          ],
+          "name": "LOSE",
+          "valid": true
+        },
+        {
+          "record": "0x71fa08",
+          "values": [
+            "0x5f3a0",
+            "0x5f440",
+            "0x624765"
+          ],
+          "name": "FADE_OUT",
+          "valid": true
+        },
+        {
+          "record": "0x71fa20",
+          "values": [
+            "0x5f550",
+            "0x5f9a0",
+            "0x606c20"
+          ],
+          "name": "END",
+          "valid": true
+        },
+        {
+          "record": "0x71fa38",
+          "values": [
+            "0x5fa10",
+            "0x5fa20",
+            "0x60bdc9"
+          ],
+          "name": "RESULT",
+          "valid": true
+        },
+        {
+          "record": "0x71fa50",
+          "values": [
+            "0x5faa0",
+            "0x5fab0",
+            "0x5ee54b"
+          ],
+          "name": "EXIT",
+          "valid": true
+        },
+        {
+          "record": "0x71fa68",
+          "values": [
+            "0x5fb00",
+            "0x5fb10",
+            "0x621ee8"
+          ],
+          "name": "TEST",
+          "valid": true
+        },
+        {
+          "record": "0x71fa80",
+          "values": [
+            "0x5fb30",
+            "0x5fb70",
+            "0x609780"
+          ],
+          "name": "MC",
+          "valid": true
+        }
+      ],
+      "steam_root": "0xa303f0",
+      "steam_records": [
+        {
+          "record": "0xa303f0",
+          "values": [
+            "0x0",
+            "0x0",
+            "0x918820"
+          ],
+          "name": "NULL"
+        },
+        {
+          "record": "0xa30408",
+          "values": [
+            "0xb1830",
+            "0xb1840",
+            "0x90a780"
+          ],
+          "name": "NON"
+        },
+        {
+          "record": "0xa30420",
+          "values": [
+            "0xb1860",
+            "0xb1950",
+            "0x918828"
+          ],
+          "name": "INIT"
+        },
+        {
+          "record": "0xa30438",
+          "values": [
+            "0xb19b0",
+            "0xb19e0",
+            "0x918830"
+          ],
+          "name": "SCENE_SET"
+        },
+        {
+          "record": "0xa30450",
+          "values": [
+            "0xb1ca0",
+            "0xb1cd0",
+            "0x918840"
+          ],
+          "name": "CONTINUOUS"
+        },
+        {
+          "record": "0xa30468",
+          "values": [
+            "0xb1f90",
+            "0xb24d0",
+            "0x918850"
+          ],
+          "name": "UNIT_CREATE"
+        },
+        {
+          "record": "0xa30480",
+          "values": [
+            "0xb3ca0",
+            "0xb4060",
+            "0x918860"
+          ],
+          "name": "UNIT_LOAD"
+        },
+        {
+          "record": "0xa30498",
+          "values": [
+            "0xb4120",
+            "0xb4240",
+            "0x90a790"
+          ],
+          "name": "START"
+        },
+        {
+          "record": "0xa304b0",
+          "values": [
+            "0xb43e0",
+            "0xb43f0",
+            "0x91886c"
+          ],
+          "name": "ACTION"
+        },
+        {
+          "record": "0xa304c8",
+          "values": [
+            "0xb49e0",
+            "0xb4b00",
+            "0x918878"
+          ],
+          "name": "REVIVAL_MES"
+        },
+        {
+          "record": "0xa304e0",
+          "values": [
+            "0xb4ba0",
+            "0xb53e0",
+            "0x918888"
+          ],
+          "name": "REVIVAL"
+        },
+        {
+          "record": "0xa304f8",
+          "values": [
+            "0xb54d0",
+            "0xb5ca0",
+            "0x918890"
+          ],
+          "name": "REVIVALRISE"
+        },
+        {
+          "record": "0xa30510",
+          "values": [
+            "0xb5ec0",
+            "0xb6ac0",
+            "0x91889c"
+          ],
+          "name": "WIN"
+        },
+        {
+          "record": "0xa30528",
+          "values": [
+            "0xb5d80",
+            "0xb5dd0",
+            "0x9188a0"
+          ],
+          "name": "ENEMY DEAD"
+        },
+        {
+          "record": "0xa30540",
+          "values": [
+            "0xb6ca0",
+            "0xb6df0",
+            "0x9188ac"
+          ],
+          "name": "LOSE"
+        },
+        {
+          "record": "0xa30558",
+          "values": [
+            "0xb6ed0",
+            "0xb6f90",
+            "0x9188b8"
+          ],
+          "name": "FADE_OUT"
+        },
+        {
+          "record": "0xa30570",
+          "values": [
+            "0xb70a0",
+            "0xb75e0",
+            "0x90a908"
+          ],
+          "name": "END"
+        },
+        {
+          "record": "0xa30588",
+          "values": [
+            "0xb7660",
+            "0xb7670",
+            "0x9188c4"
+          ],
+          "name": "RESULT"
+        },
+        {
+          "record": "0xa305a0",
+          "values": [
+            "0xb7710",
+            "0xb7730",
+            "0x90a924"
+          ],
+          "name": "EXIT"
+        },
+        {
+          "record": "0xa305b8",
+          "values": [
+            "0xb7780",
+            "0xb7790",
+            "0x90a92c"
+          ],
+          "name": "TEST"
+        },
+        {
+          "record": "0xa305d0",
+          "values": [
+            "0xb77c0",
+            "0xb7840",
+            "0x9188cc"
+          ],
+          "name": "MC"
+        }
+      ],
+      "readers": [
+        {
+          "platform": "switch",
+          "start": "0x710005fb90",
+          "end": "0x710005fbd0",
+          "refs": [
+            {
+              "pc": 485331696560,
+              "target": 485338773664,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x710005fbf0",
+          "end": "0x710005fc90",
+          "refs": [
+            {
+              "pc": 485331696656,
+              "target": 485338773664,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "switch",
+          "start": "0x710005fc90",
+          "end": "0x710005fce0",
+          "refs": [
+            {
+              "pc": 485331696828,
+              "target": 485338773664,
+              "string": null,
+              "argument": null,
+              "width": null
+            }
+          ]
+        },
+        {
+          "platform": "steam",
+          "start": "0xb7880",
+          "end": "0xb78c1",
+          "refs": [
+            {
+              "pc": 751793,
+              "target": 10683376,
+              "string": null,
+              "argument": null,
+              "width": 8
+            }
+          ]
+        },
+        {
+          "platform": "steam",
+          "start": "0xb7930",
+          "end": "0xb79da",
+          "refs": [
+            {
+              "pc": 751945,
+              "target": 10683376,
+              "string": null,
+              "argument": null,
+              "width": 8
+            }
+          ]
+        }
+      ],
+      "old_to_golden_state_ids": [
+        {
+          "ps2": 0,
+          "golden": 0,
+          "name": "NULL"
+        },
+        {
+          "ps2": 1,
+          "golden": 1,
+          "name": "NON"
+        },
+        {
+          "ps2": 2,
+          "golden": 2,
+          "name": "INIT"
+        },
+        {
+          "ps2": 3,
+          "golden": 3,
+          "name": "SCENE_SET"
+        },
+        {
+          "ps2": 4,
+          "golden": 4,
+          "name": "CONTINUOUS"
+        },
+        {
+          "ps2": 5,
+          "golden": 5,
+          "name": "UNIT_CREATE"
+        },
+        {
+          "ps2": 6,
+          "golden": 6,
+          "name": "UNIT_LOAD"
+        },
+        {
+          "ps2": 7,
+          "golden": 7,
+          "name": "START"
+        },
+        {
+          "ps2": 8,
+          "golden": 8,
+          "name": "ACTION"
+        },
+        {
+          "ps2": 9,
+          "golden": 9,
+          "name": "REVIVAL_MES"
+        },
+        {
+          "ps2": 10,
+          "golden": 10,
+          "name": "REVIVAL"
+        },
+        {
+          "ps2": 11,
+          "golden": 12,
+          "name": "WIN"
+        },
+        {
+          "ps2": 12,
+          "golden": 13,
+          "name": "ENEMY DEAD"
+        },
+        {
+          "ps2": 13,
+          "golden": 14,
+          "name": "LOSE"
+        },
+        {
+          "ps2": 14,
+          "golden": 15,
+          "name": "FADE_OUT"
+        },
+        {
+          "ps2": 15,
+          "golden": 16,
+          "name": "END"
+        },
+        {
+          "ps2": 16,
+          "golden": 17,
+          "name": "RESULT"
+        },
+        {
+          "ps2": 17,
+          "golden": 18,
+          "name": "EXIT"
+        },
+        {
+          "ps2": 18,
+          "golden": 19,
+          "name": "TEST"
+        },
+        {
+          "ps2": 19,
+          "golden": 20,
+          "name": "MC"
+        }
+      ],
+      "source_span_receipts": {
+        "ps2_size": 240,
+        "ps2_sha256": "75324a1780f263b17ac6a5dce66c1ac404a1362aec5f9bc1c1d091c5404e270a",
+        "steam_size": 504,
+        "steam_sha256": "28f07cd12160db0f751453ede140f6963d9460883daa730b838be9d24525fcc8",
+        "nso_size": 504,
+        "nso_sha256": "696bda342649ec9268da57b6a279df6f24b0e857d5e6d0605fd25af95adc3cee"
+      }
+    }
+  },
+  "steam_reader_instructions": [
+    {
+      "rva": "0x5fd50",
+      "end": "0x5fe9b",
+      "section": ".shared",
+      "sha256": "5b5908f8341dd1bc1e1411e23227cd30081cfe4155900252a031ac5106c2a719",
+      "table": "0xa24c10",
+      "table_refs": [
+        "0x5fe87"
+      ],
+      "indirect_calls": [
+        {
+          "pc": "0x5fe87",
+          "operand": "qword ptr [rip + 0x9c4d83]"
+        }
+      ]
+    },
+    {
+      "rva": "0x5ff49",
+      "end": "0x6008c",
+      "section": ".shared",
+      "sha256": "286768c227ce1fc2ce536d9911640ffb1425b5e93c0e7ada62a1af46a654c02e",
+      "table": "0xa24c10",
+      "table_refs": [
+        "0x5ff55"
+      ],
+      "indirect_calls": [
+        {
+          "pc": "0x5ffd4",
+          "operand": "qword ptr [rsi + rdx*8]"
+        },
+        {
+          "pc": "0x5fff7",
+          "operand": "qword ptr [rsi + rdx*8 + 8]"
+        }
+      ]
+    },
+    {
+      "rva": "0xb7880",
+      "end": "0xb78c1",
+      "section": ".shared",
+      "sha256": "0da21067ee45277a89d3cb1ce5b0323a97d770cc050970ecd0c149631e7fdb07",
+      "table": "0xa303f0",
+      "table_refs": [
+        "0xb78b1"
+      ],
+      "indirect_calls": []
+    },
+    {
+      "rva": "0xb7930",
+      "end": "0xb79da",
+      "section": ".shared",
+      "sha256": "f1bbd39cbadc3e1ae55ca6c454f67fb0f3ca33ee8c1d74493c882f771ee4e6a0",
+      "table": "0xa303f0",
+      "table_refs": [
+        "0xb7949"
+      ],
+      "indirect_calls": [
+        {
+          "pc": "0xb7972",
+          "operand": "qword ptr [rdi + rdx*8]"
+        },
+        {
+          "pc": "0xb7993",
+          "operand": "qword ptr [rdi + rdx*8 + 8]"
+        }
+      ]
+    }
+  ],
+  "reader_correspondence": {
+    "action": {
+      "ps2_create": "001b0930; btlAction_inferred_001b0930.c:83-119",
+      "ps2_list_update": "001b0a60; same:122-183, pendingstate*12 init and currentstate*12+4 update",
+      "nso_create": "a490..a590, worker0, real0x528 allocation/list publication/init0",
+      "nso_set_state": "a590..a5c0, worker0, requestedu16*24 init",
+      "nso_list_update": "1b9f0..1bb30, worker0, actual action list/pending/float clock and callback+8",
+      "nso_table_got": "880590 ->709a40"
+    },
+    "encounter": {
+      "ps2_set_phase": "001b5f70; btlMain_inferred_001b5ec0.c:151-162",
+      "ps2_update": "001b5fe0; same:170-196, actual phasework+2fc, 12-byte init/update records",
+      "ps2_reset": "001b60a0; same:198-209",
+      "nso_set_phase": "5fb90..5fbd0, worker0",
+      "nso_update": "5fbf0..5fc90, worker0",
+      "nso_reset": "5fc90..5fce0, worker0",
+      "nso_table_got": "880698 ->71f8a0",
+      "actual_phase_work": "battle+458, currentu32+0, pendingu32+4, elapsedfloat+8, previousfloat+c"
+    }
+  },
+  "negative_evidence": [
+    {
+      "requirement": "Action table is38 PS2 records, not35: DEAD/EXIT/TEST continue after END HOME. Golden has42, not39. Whole typed callback/name parsing plus actual indexed reader fixes both boundaries."
+    },
+    {
+      "requirement": "Encounter table begins5f7180, not5f7190; labels are fields+8 of12-byte records. Golden uses24-byte records, not an inferred56-byte structure based on one name gap."
+    },
+    {
+      "requirement": "Name ESCAPE_MES has both camera and action references. Actual action pointer field selects709d50/Steam a24f20, not camera70aa28/afa3b8."
+    }
+  ],
+  "required_seams": [
+    {
+      "owner": "Golden action/encounter name field supplier",
+      "requirement": "Route selected Golden label values by typed descriptor identities, never an unqualified string match or a camera-table ESCAPE_MES reference. Author exact qualified NUL-terminated names and preserve only listed PS2 alignment tails. Cover actual direct/translated/inlined/native references and PS2 mode isolation. Host function/name pointers must never be copied into guest pointer tables."
+    },
+    {
+      "owner": "action live state producers and list lifecycle",
+      "requirement": "Actual Golden allocationa490 creates0x528-byte action, clears it, initializes target/real UID and monotonic wrapping action ID, actual RNG(60) delay and previous/next links at518/520, publishes battle.actions+1c0, currentu16 state+c=0 and invokes init0. a590 publishes actual requestedu16 state, oldstate+10 and resets float elapsed+24 before init callback through42*24 table. Actual listupdate1b9f0 reads pendingstate+e and float delay+14, advances using real engine delta277bb0*0.5, commits delayed transition then init; enabled state invokes callback+8, increments actual float elapsed, otherwise unlinks/releases marked nodes while preserving next. Bind actual action/unit references, current/pending/old states, flags1c/20 and frame clock, not fabricated static state samples. This is reader/name correspondence, not proof of callback gameplay equivalence."
+    },
+    {
+      "owner": "encounter phase live state and transitions",
+      "requirement": "Actual Golden setphase5fb90 publishes realu32 phase at battle+458, clears elapsed460/464, invokes init. Update5fbf0 commits pending+45c, invokes init, clears pending, dispatches current update+8, stores actual nonzero returned nextphase as pending, snapshots elapsed and adds real delta277bb0*0.5. Reset5fc90 enters1, invokes init, clears pending after callback. Preserve actual phase-work pointer, scene/unit/round producers, callbacks and task lifetime; no zeroed synthetic battle phase."
+    },
+    {
+      "owner": "Golden enum identity and qualification",
+      "requirement": "Use complete old-to-Golden identity maps below, not equal numeric index assumptions. Action38->42 inserts UNION/BIKE_PURSUIT at15/16 and ANALYZESKILL/YELL at24/25. Encounter20->21 inserts REVIVALRISE11. Selected mappings are action3->3,17->19,28->32,34->38 and encounter6->6,12->13,14->15. Qualify selected values and tails, real immediate/delayed transitions, enabled/blocked/released action-list paths, actual returned encounter transition, reset, mode isolation and distinct camera/action ESCAPE_MES roles before runtime closure."
+    }
+  ],
+  "admissions": [
+    {
+      "address": "0x005f6d68",
+      "ps2_size": 24,
+      "role": "action phase descriptor name",
+      "name": "START HOME",
+      "ps2_state_id": 3,
+      "golden_state_id": 3,
+      "golden": {
+        "kind": "typed-record-name",
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x90a798",
+        "raw_offset": 9474968,
+        "offset": 538520,
+        "size": 11,
+        "sha256": "92a7c6ac2b47b7cd590be290089fd41e4c93d1ce03dec8b2ca0ffae8138605ed",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "source_group": "L1-C5-action-encounter-labels-20261113",
+        "mapping_proven": true,
+        "descriptor_rva": "0xa24c58",
+        "descriptor_stride": 24,
+        "name_field_offset": 16,
+        "state_id": 3,
+        "nso_name": "0x618ebb",
+        "nso_descriptor": "0x709a88"
+      },
+      "layout": {
+        "kind": "nul-terminated-name-with-retained-alignment",
+        "ps2_live_size": 11,
+        "retained_tail": {
+          "offset": 11,
+          "size": 13,
+          "sha256": "dd46c3eebb1884ff3b5258c0a2fc9398e560a29e0780d4b53869b6254aa46a96"
+        },
+        "copy_policy": "Golden authoritative name including NUL; preserve observed zero alignment tail, no pointer-table byte copy"
+      },
+      "required_seams": [
+        {
+          "owner": "Golden action/encounter name field supplier",
+          "requirement": "Route selected Golden label values by typed descriptor identities, never an unqualified string match or a camera-table ESCAPE_MES reference. Author exact qualified NUL-terminated names and preserve only listed PS2 alignment tails. Cover actual direct/translated/inlined/native references and PS2 mode isolation. Host function/name pointers must never be copied into guest pointer tables."
+        },
+        {
+          "owner": "action live state producers and list lifecycle",
+          "requirement": "Actual Golden allocationa490 creates0x528-byte action, clears it, initializes target/real UID and monotonic wrapping action ID, actual RNG(60) delay and previous/next links at518/520, publishes battle.actions+1c0, currentu16 state+c=0 and invokes init0. a590 publishes actual requestedu16 state, oldstate+10 and resets float elapsed+24 before init callback through42*24 table. Actual listupdate1b9f0 reads pendingstate+e and float delay+14, advances using real engine delta277bb0*0.5, commits delayed transition then init; enabled state invokes callback+8, increments actual float elapsed, otherwise unlinks/releases marked nodes while preserving next. Bind actual action/unit references, current/pending/old states, flags1c/20 and frame clock, not fabricated static state samples. This is reader/name correspondence, not proof of callback gameplay equivalence."
+        },
+        {
+          "owner": "encounter phase live state and transitions",
+          "requirement": "Actual Golden setphase5fb90 publishes realu32 phase at battle+458, clears elapsed460/464, invokes init. Update5fbf0 commits pending+45c, invokes init, clears pending, dispatches current update+8, stores actual nonzero returned nextphase as pending, snapshots elapsed and adds real delta277bb0*0.5. Reset5fc90 enters1, invokes init, clears pending after callback. Preserve actual phase-work pointer, scene/unit/round producers, callbacks and task lifetime; no zeroed synthetic battle phase."
+        },
+        {
+          "owner": "Golden enum identity and qualification",
+          "requirement": "Use complete old-to-Golden identity maps below, not equal numeric index assumptions. Action38->42 inserts UNION/BIKE_PURSUIT at15/16 and ANALYZESKILL/YELL at24/25. Encounter20->21 inserts REVIVALRISE11. Selected mappings are action3->3,17->19,28->32,34->38 and encounter6->6,12->13,14->15. Qualify selected values and tails, real immediate/delayed transitions, enabled/blocked/released action-list paths, actual returned encounter transition, reset, mode isolation and distinct camera/action ESCAPE_MES roles before runtime closure."
+        }
+      ]
+    },
+    {
+      "address": "0x005f6dc8",
+      "ps2_size": 16,
+      "role": "action phase descriptor name",
+      "name": "MOVE HOME",
+      "ps2_state_id": 17,
+      "golden_state_id": 19,
+      "golden": {
+        "kind": "typed-record-name",
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x90a850",
+        "raw_offset": 9475152,
+        "offset": 538704,
+        "size": 10,
+        "sha256": "48566ba396a3d7f6a0c24a041ddd58b354a07d2dfde7b7a4a80339c1c7f180f2",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "source_group": "L1-C5-action-encounter-labels-20261113",
+        "mapping_proven": true,
+        "descriptor_rva": "0xa24dd8",
+        "descriptor_stride": 24,
+        "name_field_offset": 16,
+        "state_id": 19,
+        "nso_name": "0x618eca",
+        "nso_descriptor": "0x709c08"
+      },
+      "layout": {
+        "kind": "nul-terminated-name-with-retained-alignment",
+        "ps2_live_size": 10,
+        "retained_tail": {
+          "offset": 10,
+          "size": 6,
+          "sha256": "b0f66adc83641586656866813fd9dd0b8ebb63796075661ba45d1aa8089e1d44"
+        },
+        "copy_policy": "Golden authoritative name including NUL; preserve observed zero alignment tail, no pointer-table byte copy"
+      },
+      "required_seams": [
+        {
+          "owner": "Golden action/encounter name field supplier",
+          "requirement": "Route selected Golden label values by typed descriptor identities, never an unqualified string match or a camera-table ESCAPE_MES reference. Author exact qualified NUL-terminated names and preserve only listed PS2 alignment tails. Cover actual direct/translated/inlined/native references and PS2 mode isolation. Host function/name pointers must never be copied into guest pointer tables."
+        },
+        {
+          "owner": "action live state producers and list lifecycle",
+          "requirement": "Actual Golden allocationa490 creates0x528-byte action, clears it, initializes target/real UID and monotonic wrapping action ID, actual RNG(60) delay and previous/next links at518/520, publishes battle.actions+1c0, currentu16 state+c=0 and invokes init0. a590 publishes actual requestedu16 state, oldstate+10 and resets float elapsed+24 before init callback through42*24 table. Actual listupdate1b9f0 reads pendingstate+e and float delay+14, advances using real engine delta277bb0*0.5, commits delayed transition then init; enabled state invokes callback+8, increments actual float elapsed, otherwise unlinks/releases marked nodes while preserving next. Bind actual action/unit references, current/pending/old states, flags1c/20 and frame clock, not fabricated static state samples. This is reader/name correspondence, not proof of callback gameplay equivalence."
+        },
+        {
+          "owner": "encounter phase live state and transitions",
+          "requirement": "Actual Golden setphase5fb90 publishes realu32 phase at battle+458, clears elapsed460/464, invokes init. Update5fbf0 commits pending+45c, invokes init, clears pending, dispatches current update+8, stores actual nonzero returned nextphase as pending, snapshots elapsed and adds real delta277bb0*0.5. Reset5fc90 enters1, invokes init, clears pending after callback. Preserve actual phase-work pointer, scene/unit/round producers, callbacks and task lifetime; no zeroed synthetic battle phase."
+        },
+        {
+          "owner": "Golden enum identity and qualification",
+          "requirement": "Use complete old-to-Golden identity maps below, not equal numeric index assumptions. Action38->42 inserts UNION/BIKE_PURSUIT at15/16 and ANALYZESKILL/YELL at24/25. Encounter20->21 inserts REVIVALRISE11. Selected mappings are action3->3,17->19,28->32,34->38 and encounter6->6,12->13,14->15. Qualify selected values and tails, real immediate/delayed transitions, enabled/blocked/released action-list paths, actual returned encounter transition, reset, mode isolation and distinct camera/action ESCAPE_MES roles before runtime closure."
+        }
+      ]
+    },
+    {
+      "address": "0x005f6de8",
+      "ps2_size": 16,
+      "role": "action phase descriptor name",
+      "name": "ESCAPE_MES",
+      "ps2_state_id": 28,
+      "golden_state_id": 32,
+      "golden": {
+        "kind": "typed-record-name",
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x90a8d0",
+        "raw_offset": 9475280,
+        "offset": 538832,
+        "size": 11,
+        "sha256": "03dc25aceaa1479c9f09fd686e2a7ec3e1e550907ef45c0fbe3a81c28d3d74be",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "source_group": "L1-C5-action-encounter-labels-20261113",
+        "mapping_proven": true,
+        "descriptor_rva": "0xa24f10",
+        "descriptor_stride": 24,
+        "name_field_offset": 16,
+        "state_id": 32,
+        "nso_name": "0x5fed53",
+        "nso_descriptor": "0x709d40"
+      },
+      "layout": {
+        "kind": "nul-terminated-name-with-retained-alignment",
+        "ps2_live_size": 11,
+        "retained_tail": {
+          "offset": 11,
+          "size": 5,
+          "sha256": "8855508aade16ec573d21e6a485dfd0a7624085c1a14b5ecdd6485de0c6839a4"
+        },
+        "copy_policy": "Golden authoritative name including NUL; preserve observed zero alignment tail, no pointer-table byte copy"
+      },
+      "required_seams": [
+        {
+          "owner": "Golden action/encounter name field supplier",
+          "requirement": "Route selected Golden label values by typed descriptor identities, never an unqualified string match or a camera-table ESCAPE_MES reference. Author exact qualified NUL-terminated names and preserve only listed PS2 alignment tails. Cover actual direct/translated/inlined/native references and PS2 mode isolation. Host function/name pointers must never be copied into guest pointer tables."
+        },
+        {
+          "owner": "action live state producers and list lifecycle",
+          "requirement": "Actual Golden allocationa490 creates0x528-byte action, clears it, initializes target/real UID and monotonic wrapping action ID, actual RNG(60) delay and previous/next links at518/520, publishes battle.actions+1c0, currentu16 state+c=0 and invokes init0. a590 publishes actual requestedu16 state, oldstate+10 and resets float elapsed+24 before init callback through42*24 table. Actual listupdate1b9f0 reads pendingstate+e and float delay+14, advances using real engine delta277bb0*0.5, commits delayed transition then init; enabled state invokes callback+8, increments actual float elapsed, otherwise unlinks/releases marked nodes while preserving next. Bind actual action/unit references, current/pending/old states, flags1c/20 and frame clock, not fabricated static state samples. This is reader/name correspondence, not proof of callback gameplay equivalence."
+        },
+        {
+          "owner": "encounter phase live state and transitions",
+          "requirement": "Actual Golden setphase5fb90 publishes realu32 phase at battle+458, clears elapsed460/464, invokes init. Update5fbf0 commits pending+45c, invokes init, clears pending, dispatches current update+8, stores actual nonzero returned nextphase as pending, snapshots elapsed and adds real delta277bb0*0.5. Reset5fc90 enters1, invokes init, clears pending after callback. Preserve actual phase-work pointer, scene/unit/round producers, callbacks and task lifetime; no zeroed synthetic battle phase."
+        },
+        {
+          "owner": "Golden enum identity and qualification",
+          "requirement": "Use complete old-to-Golden identity maps below, not equal numeric index assumptions. Action38->42 inserts UNION/BIKE_PURSUIT at15/16 and ANALYZESKILL/YELL at24/25. Encounter20->21 inserts REVIVALRISE11. Selected mappings are action3->3,17->19,28->32,34->38 and encounter6->6,12->13,14->15. Qualify selected values and tails, real immediate/delayed transitions, enabled/blocked/released action-list paths, actual returned encounter transition, reset, mode isolation and distinct camera/action ESCAPE_MES roles before runtime closure."
+        }
+      ]
+    },
+    {
+      "address": "0x005f6e08",
+      "ps2_size": 24,
+      "role": "action phase descriptor name",
+      "name": "END HOME",
+      "ps2_state_id": 34,
+      "golden_state_id": 38,
+      "golden": {
+        "kind": "typed-record-name",
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x90a910",
+        "raw_offset": 9475344,
+        "offset": 538896,
+        "size": 9,
+        "sha256": "d98712fe460058776c17b3db060b68d747d352353c976942b88195393f29da23",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "source_group": "L1-C5-action-encounter-labels-20261113",
+        "mapping_proven": true,
+        "descriptor_rva": "0xa24fa0",
+        "descriptor_stride": 24,
+        "name_field_offset": 16,
+        "state_id": 38,
+        "nso_name": "0x5d2d71",
+        "nso_descriptor": "0x709dd0"
+      },
+      "layout": {
+        "kind": "nul-terminated-name-with-retained-alignment",
+        "ps2_live_size": 9,
+        "retained_tail": {
+          "offset": 9,
+          "size": 15,
+          "sha256": "5322fecfc92a5e3248a297a3df3eddfb9bd9049504272e4f572b87fa36d4b3bd"
+        },
+        "copy_policy": "Golden authoritative name including NUL; preserve observed zero alignment tail, no pointer-table byte copy"
+      },
+      "required_seams": [
+        {
+          "owner": "Golden action/encounter name field supplier",
+          "requirement": "Route selected Golden label values by typed descriptor identities, never an unqualified string match or a camera-table ESCAPE_MES reference. Author exact qualified NUL-terminated names and preserve only listed PS2 alignment tails. Cover actual direct/translated/inlined/native references and PS2 mode isolation. Host function/name pointers must never be copied into guest pointer tables."
+        },
+        {
+          "owner": "action live state producers and list lifecycle",
+          "requirement": "Actual Golden allocationa490 creates0x528-byte action, clears it, initializes target/real UID and monotonic wrapping action ID, actual RNG(60) delay and previous/next links at518/520, publishes battle.actions+1c0, currentu16 state+c=0 and invokes init0. a590 publishes actual requestedu16 state, oldstate+10 and resets float elapsed+24 before init callback through42*24 table. Actual listupdate1b9f0 reads pendingstate+e and float delay+14, advances using real engine delta277bb0*0.5, commits delayed transition then init; enabled state invokes callback+8, increments actual float elapsed, otherwise unlinks/releases marked nodes while preserving next. Bind actual action/unit references, current/pending/old states, flags1c/20 and frame clock, not fabricated static state samples. This is reader/name correspondence, not proof of callback gameplay equivalence."
+        },
+        {
+          "owner": "encounter phase live state and transitions",
+          "requirement": "Actual Golden setphase5fb90 publishes realu32 phase at battle+458, clears elapsed460/464, invokes init. Update5fbf0 commits pending+45c, invokes init, clears pending, dispatches current update+8, stores actual nonzero returned nextphase as pending, snapshots elapsed and adds real delta277bb0*0.5. Reset5fc90 enters1, invokes init, clears pending after callback. Preserve actual phase-work pointer, scene/unit/round producers, callbacks and task lifetime; no zeroed synthetic battle phase."
+        },
+        {
+          "owner": "Golden enum identity and qualification",
+          "requirement": "Use complete old-to-Golden identity maps below, not equal numeric index assumptions. Action38->42 inserts UNION/BIKE_PURSUIT at15/16 and ANALYZESKILL/YELL at24/25. Encounter20->21 inserts REVIVALRISE11. Selected mappings are action3->3,17->19,28->32,34->38 and encounter6->6,12->13,14->15. Qualify selected values and tails, real immediate/delayed transitions, enabled/blocked/released action-list paths, actual returned encounter transition, reset, mode isolation and distinct camera/action ESCAPE_MES roles before runtime closure."
+        }
+      ]
+    },
+    {
+      "address": "0x005f7140",
+      "ps2_size": 16,
+      "role": "encounter phase descriptor name",
+      "name": "UNIT_LOAD",
+      "ps2_state_id": 6,
+      "golden_state_id": 6,
+      "golden": {
+        "kind": "typed-record-name",
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x918860",
+        "raw_offset": 9532512,
+        "offset": 596064,
+        "size": 10,
+        "sha256": "f535f02621a34390a30e5fc5f6ebde9afa55c89ebc962152744b24d416002ed7",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "source_group": "L1-C5-action-encounter-labels-20261113",
+        "mapping_proven": true,
+        "descriptor_rva": "0xa30480",
+        "descriptor_stride": 24,
+        "name_field_offset": 16,
+        "state_id": 6,
+        "nso_name": "0x5feda9",
+        "nso_descriptor": "0x71f930"
+      },
+      "layout": {
+        "kind": "nul-terminated-name-with-retained-alignment",
+        "ps2_live_size": 10,
+        "retained_tail": {
+          "offset": 10,
+          "size": 6,
+          "sha256": "b0f66adc83641586656866813fd9dd0b8ebb63796075661ba45d1aa8089e1d44"
+        },
+        "copy_policy": "Golden authoritative name including NUL; preserve observed zero alignment tail, no pointer-table byte copy"
+      },
+      "required_seams": [
+        {
+          "owner": "Golden action/encounter name field supplier",
+          "requirement": "Route selected Golden label values by typed descriptor identities, never an unqualified string match or a camera-table ESCAPE_MES reference. Author exact qualified NUL-terminated names and preserve only listed PS2 alignment tails. Cover actual direct/translated/inlined/native references and PS2 mode isolation. Host function/name pointers must never be copied into guest pointer tables."
+        },
+        {
+          "owner": "action live state producers and list lifecycle",
+          "requirement": "Actual Golden allocationa490 creates0x528-byte action, clears it, initializes target/real UID and monotonic wrapping action ID, actual RNG(60) delay and previous/next links at518/520, publishes battle.actions+1c0, currentu16 state+c=0 and invokes init0. a590 publishes actual requestedu16 state, oldstate+10 and resets float elapsed+24 before init callback through42*24 table. Actual listupdate1b9f0 reads pendingstate+e and float delay+14, advances using real engine delta277bb0*0.5, commits delayed transition then init; enabled state invokes callback+8, increments actual float elapsed, otherwise unlinks/releases marked nodes while preserving next. Bind actual action/unit references, current/pending/old states, flags1c/20 and frame clock, not fabricated static state samples. This is reader/name correspondence, not proof of callback gameplay equivalence."
+        },
+        {
+          "owner": "encounter phase live state and transitions",
+          "requirement": "Actual Golden setphase5fb90 publishes realu32 phase at battle+458, clears elapsed460/464, invokes init. Update5fbf0 commits pending+45c, invokes init, clears pending, dispatches current update+8, stores actual nonzero returned nextphase as pending, snapshots elapsed and adds real delta277bb0*0.5. Reset5fc90 enters1, invokes init, clears pending after callback. Preserve actual phase-work pointer, scene/unit/round producers, callbacks and task lifetime; no zeroed synthetic battle phase."
+        },
+        {
+          "owner": "Golden enum identity and qualification",
+          "requirement": "Use complete old-to-Golden identity maps below, not equal numeric index assumptions. Action38->42 inserts UNION/BIKE_PURSUIT at15/16 and ANALYZESKILL/YELL at24/25. Encounter20->21 inserts REVIVALRISE11. Selected mappings are action3->3,17->19,28->32,34->38 and encounter6->6,12->13,14->15. Qualify selected values and tails, real immediate/delayed transitions, enabled/blocked/released action-list paths, actual returned encounter transition, reset, mode isolation and distinct camera/action ESCAPE_MES roles before runtime closure."
+        }
+      ]
+    },
+    {
+      "address": "0x005f7160",
+      "ps2_size": 16,
+      "role": "encounter phase descriptor name",
+      "name": "ENEMY DEAD",
+      "ps2_state_id": 12,
+      "golden_state_id": 13,
+      "golden": {
+        "kind": "typed-record-name",
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x9188a0",
+        "raw_offset": 9532576,
+        "offset": 596128,
+        "size": 11,
+        "sha256": "299aaea12bf97248edeb697a44f70c201be4ac0c0b204705c775ae72575fd402",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "source_group": "L1-C5-action-encounter-labels-20261113",
+        "mapping_proven": true,
+        "descriptor_rva": "0xa30528",
+        "descriptor_stride": 24,
+        "name_field_offset": 16,
+        "state_id": 13,
+        "nso_name": "0x5e638a",
+        "nso_descriptor": "0x71f9d8"
+      },
+      "layout": {
+        "kind": "nul-terminated-name-with-retained-alignment",
+        "ps2_live_size": 11,
+        "retained_tail": {
+          "offset": 11,
+          "size": 5,
+          "sha256": "8855508aade16ec573d21e6a485dfd0a7624085c1a14b5ecdd6485de0c6839a4"
+        },
+        "copy_policy": "Golden authoritative name including NUL; preserve observed zero alignment tail, no pointer-table byte copy"
+      },
+      "required_seams": [
+        {
+          "owner": "Golden action/encounter name field supplier",
+          "requirement": "Route selected Golden label values by typed descriptor identities, never an unqualified string match or a camera-table ESCAPE_MES reference. Author exact qualified NUL-terminated names and preserve only listed PS2 alignment tails. Cover actual direct/translated/inlined/native references and PS2 mode isolation. Host function/name pointers must never be copied into guest pointer tables."
+        },
+        {
+          "owner": "action live state producers and list lifecycle",
+          "requirement": "Actual Golden allocationa490 creates0x528-byte action, clears it, initializes target/real UID and monotonic wrapping action ID, actual RNG(60) delay and previous/next links at518/520, publishes battle.actions+1c0, currentu16 state+c=0 and invokes init0. a590 publishes actual requestedu16 state, oldstate+10 and resets float elapsed+24 before init callback through42*24 table. Actual listupdate1b9f0 reads pendingstate+e and float delay+14, advances using real engine delta277bb0*0.5, commits delayed transition then init; enabled state invokes callback+8, increments actual float elapsed, otherwise unlinks/releases marked nodes while preserving next. Bind actual action/unit references, current/pending/old states, flags1c/20 and frame clock, not fabricated static state samples. This is reader/name correspondence, not proof of callback gameplay equivalence."
+        },
+        {
+          "owner": "encounter phase live state and transitions",
+          "requirement": "Actual Golden setphase5fb90 publishes realu32 phase at battle+458, clears elapsed460/464, invokes init. Update5fbf0 commits pending+45c, invokes init, clears pending, dispatches current update+8, stores actual nonzero returned nextphase as pending, snapshots elapsed and adds real delta277bb0*0.5. Reset5fc90 enters1, invokes init, clears pending after callback. Preserve actual phase-work pointer, scene/unit/round producers, callbacks and task lifetime; no zeroed synthetic battle phase."
+        },
+        {
+          "owner": "Golden enum identity and qualification",
+          "requirement": "Use complete old-to-Golden identity maps below, not equal numeric index assumptions. Action38->42 inserts UNION/BIKE_PURSUIT at15/16 and ANALYZESKILL/YELL at24/25. Encounter20->21 inserts REVIVALRISE11. Selected mappings are action3->3,17->19,28->32,34->38 and encounter6->6,12->13,14->15. Qualify selected values and tails, real immediate/delayed transitions, enabled/blocked/released action-list paths, actual returned encounter transition, reset, mode isolation and distinct camera/action ESCAPE_MES roles before runtime closure."
+        }
+      ]
+    },
+    {
+      "address": "0x005f7170",
+      "ps2_size": 16,
+      "role": "encounter phase descriptor name",
+      "name": "FADE_OUT",
+      "ps2_state_id": 14,
+      "golden_state_id": 15,
+      "golden": {
+        "kind": "typed-record-name",
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x9188b8",
+        "raw_offset": 9532600,
+        "offset": 596152,
+        "size": 9,
+        "sha256": "91e10c801628ace77dd2780a99512d3f71e65d5ebb77045a8f887b20faf89b0d",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "source_group": "L1-C5-action-encounter-labels-20261113",
+        "mapping_proven": true,
+        "descriptor_rva": "0xa30558",
+        "descriptor_stride": 24,
+        "name_field_offset": 16,
+        "state_id": 15,
+        "nso_name": "0x624765",
+        "nso_descriptor": "0x71fa08"
+      },
+      "layout": {
+        "kind": "nul-terminated-name-with-retained-alignment",
+        "ps2_live_size": 9,
+        "retained_tail": {
+          "offset": 9,
+          "size": 7,
+          "sha256": "837885c8f8091aeaeb9ec3c3f85a6ff470a415e610b8ba3e49f9b33c9cf9d619"
+        },
+        "copy_policy": "Golden authoritative name including NUL; preserve observed zero alignment tail, no pointer-table byte copy"
+      },
+      "required_seams": [
+        {
+          "owner": "Golden action/encounter name field supplier",
+          "requirement": "Route selected Golden label values by typed descriptor identities, never an unqualified string match or a camera-table ESCAPE_MES reference. Author exact qualified NUL-terminated names and preserve only listed PS2 alignment tails. Cover actual direct/translated/inlined/native references and PS2 mode isolation. Host function/name pointers must never be copied into guest pointer tables."
+        },
+        {
+          "owner": "action live state producers and list lifecycle",
+          "requirement": "Actual Golden allocationa490 creates0x528-byte action, clears it, initializes target/real UID and monotonic wrapping action ID, actual RNG(60) delay and previous/next links at518/520, publishes battle.actions+1c0, currentu16 state+c=0 and invokes init0. a590 publishes actual requestedu16 state, oldstate+10 and resets float elapsed+24 before init callback through42*24 table. Actual listupdate1b9f0 reads pendingstate+e and float delay+14, advances using real engine delta277bb0*0.5, commits delayed transition then init; enabled state invokes callback+8, increments actual float elapsed, otherwise unlinks/releases marked nodes while preserving next. Bind actual action/unit references, current/pending/old states, flags1c/20 and frame clock, not fabricated static state samples. This is reader/name correspondence, not proof of callback gameplay equivalence."
+        },
+        {
+          "owner": "encounter phase live state and transitions",
+          "requirement": "Actual Golden setphase5fb90 publishes realu32 phase at battle+458, clears elapsed460/464, invokes init. Update5fbf0 commits pending+45c, invokes init, clears pending, dispatches current update+8, stores actual nonzero returned nextphase as pending, snapshots elapsed and adds real delta277bb0*0.5. Reset5fc90 enters1, invokes init, clears pending after callback. Preserve actual phase-work pointer, scene/unit/round producers, callbacks and task lifetime; no zeroed synthetic battle phase."
+        },
+        {
+          "owner": "Golden enum identity and qualification",
+          "requirement": "Use complete old-to-Golden identity maps below, not equal numeric index assumptions. Action38->42 inserts UNION/BIKE_PURSUIT at15/16 and ANALYZESKILL/YELL at24/25. Encounter20->21 inserts REVIVALRISE11. Selected mappings are action3->3,17->19,28->32,34->38 and encounter6->6,12->13,14->15. Qualify selected values and tails, real immediate/delayed transitions, enabled/blocked/released action-list paths, actual returned encounter transition, reset, mode isolation and distinct camera/action ESCAPE_MES roles before runtime closure."
+        }
+      ]
+    }
+  ],
+  "counts": {
+    "new_PROVEN": 7,
+    "new_ps2_partition_bytes": 128,
+    "cohort_PROVEN": 47,
+    "cohort_proven_bytes": 56173,
+    "cohort_OPEN_retain": 30,
+    "cohort_open_bytes": 3093,
+    "assigned_objects": 77,
+    "assigned_ps2_bytes": 59266,
+    "PROVEN-code": 0,
+    "PROVEN-layout": 0,
+    "D10a": 0,
+    "D10b": 0,
+    "D10c": 0
+  }
+}

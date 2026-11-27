@@ -12,7 +12,13 @@
 #define _GNU_SOURCE
 #define _FILE_OFFSET_BITS 64
 #include <errno.h>
+#ifdef __ANDROID__
+/* bionic has no backtrace (only the P4_SIGDEBUG and crash diagnostics use it) and no getcontext/makecontext (child_run uses the port's own coroutines). */
+static inline int backtrace(void **buffer, int size) { (void)buffer; (void)size; return 0; }
+static inline void backtrace_symbols_fd(void *const *buffer, int size, int fd) { (void)buffer; (void)size; (void)fd; }
+#else
 #include <execinfo.h>
+#endif
 #include <math.h>
 #include <setjmp.h>
 #include <signal.h>
@@ -1720,6 +1726,9 @@ static void test_function(const Sig *s, unsigned ncases, unsigned only_case, Rep
  * a private stack and the main stack is made read-only: such a write faults (a deterministic "native crashed") instead of
  * corrupting the harness's frames, which showed up as "stack smashing detected" or a hang depending on where the stack was. */
 #include <ucontext.h>
+#ifdef __ANDROID__
+#include "p4pc/os.h"
+#endif
 static void run_one(const Sig *s, unsigned ncases, unsigned only_case, Report *rep);
 static ucontext_t g_child_uc;
 static struct { const Sig *s; unsigned ncases, only_case; FILE *rf; } g_child;
@@ -1753,12 +1762,21 @@ static void child_run(const Sig *s, unsigned ncases, unsigned only_case, FILE *r
     const size_t size = 0x400000;
     void *stk = mmap((void *)(uintptr_t)(sizeof(void *) == 4 ? 0x40000000u : 0u), size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | (sizeof(void *) == 4 ? MAP_FIXED_NOREPLACE : 0), -1, 0);
     if (stk == MAP_FAILED) _exit(3);
+#ifdef __ANDROID__
+    {
+        p4_coro *here = p4_coro_adopt();
+        p4_coro *child = p4_coro_create(stk, size, child_entry);
+        if (!here || !child) _exit(3);
+        p4_coro_switch(here, child);
+    }
+#else
     getcontext(&g_child_uc);
     g_child_uc.uc_stack.ss_sp = stk;
     g_child_uc.uc_stack.ss_size = size;
     g_child_uc.uc_link = NULL;
     makecontext(&g_child_uc, child_entry, 0);
     setcontext(&g_child_uc);
+#endif
     _exit(3);
 }
 

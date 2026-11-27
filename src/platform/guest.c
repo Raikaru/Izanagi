@@ -47,6 +47,14 @@ size_t p4_guest_image_size;
 static void (**init_fns)(void);
 static size_t n_init, cap_init;
 static int inited;
+static void *(*arena_factory)(size_t, size_t);
+
+int p4_guest_arena_factory(void *(*factory)(size_t, size_t))
+{
+    if (inited || arena_factory || !factory) return -1;
+    arena_factory = factory;
+    return 0;
+}
 
 void p4_guest_on_init(void (*fn)(void))
 {
@@ -89,8 +97,13 @@ int p4_guest_init(void)
     /* At a multiple of 4 GB when the address space allows it: then the low 32 bits of a host pointer into the block ARE its guest address (as on i386), whatever
      * ASLR does to the upper half. Words of the allocator's links and of other host pointers that the game reads before writing them (fresh heap memory) then
      * hold the same 32-bit value every run, and the one the i386 build holds. */
-    void *p = p4_os_reserve_aligned(0x100000000ull + 0x1000, P4_GUEST_SIZE, 0x100000000ull);
-    if (!p) p = p4_os_reserve_anywhere(0x100000000ull + 0x1000, P4_GUEST_SIZE);
+    void *p;
+    if (arena_factory) {
+        p = arena_factory(0x100000000ull + 0x1000, P4_GUEST_SIZE);
+    } else {
+        p = p4_os_reserve_aligned(0x100000000ull + 0x1000, P4_GUEST_SIZE, 0x100000000ull);
+        if (!p) p = p4_os_reserve_anywhere(0x100000000ull + 0x1000, P4_GUEST_SIZE);
+    }
     if (!p) return -1;
     p4_guest_base = (uint8_t *)p;
     uintptr_t lo, hi;
@@ -167,7 +180,7 @@ void p4_guest_window(uint32_t guest, void *host, size_t size)
     if (n_windows < 8 && host && size) windows[n_windows++] = (Window){guest, (uint8_t *)host, size};
 }
 
-void *p4_g2h_slow(uint32_t a)
+void *p4_g2h_slow(uint32_t a) P4_GUEST_SLOW_CC
 {
     if (!a) return NULL;
     for (int i = 0; i < n_windows; i++)
@@ -177,7 +190,7 @@ void *p4_g2h_slow(uint32_t a)
     return (void *)(p4_guest_base + a);
 }
 
-uint32_t p4_h2g_slow(const void *p)
+uint32_t p4_h2g_slow(const void *p) P4_GUEST_SLOW_CC
 {
     if (!p) return 0;
     /* a "pointer" below the first page is an offset: address arithmetic on a null pointer at run time. The decomp's offsetof

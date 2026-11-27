@@ -1,0 +1,983 @@
+{
+  "proof_id": "L1-c6C-code-and-replaced-audio-20261113",
+  "scope": "Exact setC owned rows only.007495c0 remains owned here after Main correction, but is not part of this proof batch.",
+  "runtime_status": "pending-seam",
+  "source_pins": {
+    "steam_build": 10836033,
+    "steam_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+    "switch_version": "1.2",
+    "switch_mapped_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+    "switch_nso_sha256": "854c7a1e33de1619abf009fa7f32b8c012960d685c8bf1bf99a92a6a4d0bda1c",
+    "ps2_elf_sha256": "f90675b8a38138ddb5dc5cdf641550f41800fcb86bb499c586073e964fb41836",
+    "ps2_decomp_revision": "18016afe6"
+  },
+  "counts": {
+    "PROVEN": {
+      "objects": 7,
+      "ps2_bytes": 184
+    },
+    "PROVEN-code": {
+      "objects": 2,
+      "ps2_bytes": 104
+    },
+    "D10c": {
+      "objects": 9,
+      "ps2_bytes": 288
+    }
+  },
+  "rows": [
+    {
+      "address": "0x00636710",
+      "size": 32,
+      "decision": "PROVEN",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "9c4ad609f395c3d8a65addc70d56f05dcab2ee81f87d0780d7d41ddc88cdcc1c",
+        "readers": [
+          {
+            "function": "0x257900",
+            "name": "func_00257900",
+            "file": "src/cmmRankUp.c"
+          }
+        ]
+      },
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".sdata",
+        "rva": "0x91cdb8",
+        "raw_offset": 9550264,
+        "size": 24,
+        "sha256": "237e5b22353b56785d0d2aec6271039f4ae26b9064f9c57c751c04445b8f02a4",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "structural_correspondence": "PS2257900 cmmRankUpDraw and Golden NSO1274d0 corresponding full mode/timeline dispatchers both load CMY04_06 at the matching later rank-up effect branch through the resource/effect creation pipeline. Steam1c14b0 has this exact filename argument. This is the final owned rank-up effect path; bankprefix636850 remains excluded.",
+      "required_seams": [
+        "rankup-effect:CMY04_06-mode-timeline-producer",
+        "rankup-effect:resource-and-parent-effect-lifetime"
+      ],
+      "golden_string": "event_data/CMY04_06.EPL",
+      "switch": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x710061eedd",
+        "size": 24,
+        "sha256": "237e5b22353b56785d0d2aec6271039f4ae26b9064f9c57c751c04445b8f02a4",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "steam_span_alternatives": [
+        {
+          "container": "P4G.exe",
+          "source_build": 10836033,
+          "section": ".sdata",
+          "rva": "0x91cdb8",
+          "raw_offset": 9550264,
+          "size": 24,
+          "sha256": "237e5b22353b56785d0d2aec6271039f4ae26b9064f9c57c751c04445b8f02a4",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        }
+      ],
+      "ps2_live_bytes": 24,
+      "ps2_alignment_tail_bytes": 8,
+      "tail_policy": "Do not source Golden suffix bytes. Retain only inert zero alignment; all live uses take the sealed Golden string, including when longer than PS2 storage. No truncation or guest overrun."
+    },
+    {
+      "address": "0x0064f260",
+      "size": 32,
+      "decision": "PROVEN",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "847ae67aa6a767ce9825f9d3629cdd2f6935085cc67bb4e57a8fbc81e07f2b80",
+        "readers": [
+          {
+            "function": "0x38f7f0",
+            "name": "func_0038f7f0",
+            "file": "src/Main/OpEd/ed_res.c"
+          }
+        ]
+      },
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".sdata",
+        "rva": "0x942fe8",
+        "raw_offset": 9706472,
+        "size": 18,
+        "sha256": "031d785e777ccdfe6bda49826644b005c02ed589825e7552353532a85ce97406",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "structural_correspondence": "PS238f7f0 checks ending-work existence and unloaded bit, requests oped/p4staff.bin with flag1, stores its handle and sets loaded bit. NSO2c1ab0 checks Golden staff work4a70d78, bit0 at+4, submits397d20(oped/p4gstaff.bin,1), stores handle+10 and sets bit. Positive request-field replacement independently corroborates c4 staff route; no string-similarity inference.",
+      "required_seams": [
+        "staff-source:Golden-ending-work-producer",
+        "staff-source:request-poll-read-release-and-Golden-credit-consumers"
+      ],
+      "golden_string": "oped/p4gstaff.bin",
+      "switch": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x7100607c07",
+        "size": 18,
+        "sha256": "031d785e777ccdfe6bda49826644b005c02ed589825e7552353532a85ce97406",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "steam_span_alternatives": [
+        {
+          "container": "P4G.exe",
+          "source_build": 10836033,
+          "section": ".sdata",
+          "rva": "0x942fe8",
+          "raw_offset": 9706472,
+          "size": 18,
+          "sha256": "031d785e777ccdfe6bda49826644b005c02ed589825e7552353532a85ce97406",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        }
+      ],
+      "ps2_live_bytes": 17,
+      "ps2_alignment_tail_bytes": 15,
+      "tail_policy": "Do not source Golden suffix bytes. Retain only inert zero alignment; all live uses take the sealed Golden string, including when longer than PS2 storage. No truncation or guest overrun."
+    },
+    {
+      "address": "0x00641b50",
+      "size": 32,
+      "decision": "PROVEN",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "269cb88a445e80a37d5f8147806e89f2bc2b783def9c89c3df73f930c387bac4",
+        "readers": [
+          {
+            "function": "0x3097e0",
+            "name": "func_003097e0",
+            "file": "src/Event/Fcl/y_fclCombine.c"
+          }
+        ]
+      },
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".sdata",
+        "rva": "0x92d190",
+        "raw_offset": 9616784,
+        "size": 22,
+        "sha256": "53b105a1c535ccdcb5c6fefd76803508f1edd09cec014f2ae6734e2182cb1604",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "structural_correspondence": "PS23097e0 requests facility/effect/GAT07_01.EPL into combine-work cardSpriteTask. Golden152660 guards resource statebits40000400 and requests facility/GAT07_01.EPL with parent facility/cmbroot.arc through2e4e30, publishes handle+2a90 and preload state2. Corresponding combine effect family also requests cmbeff.tbl,E_PER,PER3,card_l and psc_basic. Positive typed resource publication replaces the old loose namespace.",
+      "required_seams": [
+        "combine-card-effect:parent-qualified-cmbroot-GAT07_01",
+        "combine-card-effect:preload-state-resource-take-and-release"
+      ],
+      "golden_string": "facility/GAT07_01.EPL",
+      "switch": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x71006047df",
+        "size": 22,
+        "sha256": "53b105a1c535ccdcb5c6fefd76803508f1edd09cec014f2ae6734e2182cb1604",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "steam_span_alternatives": [
+        {
+          "container": "P4G.exe",
+          "source_build": 10836033,
+          "section": ".sdata",
+          "rva": "0x92d190",
+          "raw_offset": 9616784,
+          "size": 22,
+          "sha256": "53b105a1c535ccdcb5c6fefd76803508f1edd09cec014f2ae6734e2182cb1604",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        }
+      ],
+      "ps2_live_bytes": 29,
+      "ps2_alignment_tail_bytes": 3,
+      "tail_policy": "Do not source Golden suffix bytes. Retain only inert zero alignment; all live uses take the sealed Golden string, including when longer than PS2 storage. No truncation or guest overrun."
+    },
+    {
+      "address": "0x00644d90",
+      "size": 32,
+      "decision": "PROVEN",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "6e65c29f3de254f93c7bcd202d1b48bfc7e8f52d44a72409da903eba40ab5313",
+        "readers": [
+          {
+            "function": "0x330f20",
+            "name": "func_00330f20",
+            "file": "src/Event/Fcl/y_fclCombineDraw.c"
+          }
+        ]
+      },
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".sdata",
+        "rva": "0x92d2f8",
+        "raw_offset": 9617144,
+        "size": 25,
+        "sha256": "1e950786173867c364a6832b3a5e60ce5c9fbdfc930d355eebc6d2cb1b24eb52",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "structural_correspondence": "PS2330f20 waits and loads bonus_exp01.spr into the combine draw sprite request. Golden154bf0 state2 loads bonus_expx2.spr from cmbroot.arc into handle+110; state3 polls2e4fc0 and creates parsed sprite through34be60 into work+180, later releases owned handle. This is the shared combine bonus-display source slot, not an assertion that SPR entries or pixel coordinates match.",
+      "required_seams": [
+        "combine-bonus:parent-qualified-cmbroot-source",
+        "combine-bonus:Golden-SPR-entry-namespace-and-lifecycle"
+      ],
+      "golden_string": "facility/bonus_expx2.spr",
+      "switch": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x7100627947",
+        "size": 25,
+        "sha256": "1e950786173867c364a6832b3a5e60ce5c9fbdfc930d355eebc6d2cb1b24eb52",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "steam_span_alternatives": [
+        {
+          "container": "P4G.exe",
+          "source_build": 10836033,
+          "section": ".sdata",
+          "rva": "0x92d2f8",
+          "raw_offset": 9617144,
+          "size": 25,
+          "sha256": "1e950786173867c364a6832b3a5e60ce5c9fbdfc930d355eebc6d2cb1b24eb52",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        }
+      ],
+      "ps2_live_bytes": 25,
+      "ps2_alignment_tail_bytes": 7,
+      "tail_policy": "Do not source Golden suffix bytes. Retain only inert zero alignment; all live uses take the sealed Golden string, including when longer than PS2 storage. No truncation or guest overrun."
+    },
+    {
+      "address": "0x00644e30",
+      "size": 24,
+      "decision": "PROVEN",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "7b2fd23615865374213ecd22d44c7b529ed8f23c857c7f0a7da2b62d03237c57",
+        "readers": [
+          {
+            "function": "0x330f20",
+            "name": "func_00330f20",
+            "file": "src/Event/Fcl/y_fclCombineDraw.c"
+          },
+          {
+            "function": "0x331390",
+            "name": "func_00331390",
+            "file": "src/Event/Fcl/y_fclCombineDraw.c"
+          }
+        ]
+      },
+      "source": {
+        "container": "P4G.exe",
+        "source_build": 10836033,
+        "section": ".sdata",
+        "rva": "0x92d3b0",
+        "raw_offset": 9617328,
+        "size": 21,
+        "sha256": "67ebf7d1a493142470229eefebd869c2d9a208d750e86ebc07d351621ffc6fa1",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "mapping_proven": true
+      },
+      "structural_correspondence": "PS2330f20 installs message-window data from help/datMyth.bmd, and331390 owns its directory. Golden154bf0 state2 requests facility/datMyth.bmd under cmbroot.arc into work+140; state3 polls, allocates/copies whole declared payload to work+198 and publishes it via18b250(slotD,data). This actual myth-message resource slot correspondence is not a BMD payload or old-entry-ID proof.",
+      "required_seams": [
+        "combine-myth:parent-qualified-resource-and-slotD-publication",
+        "combine-myth:Golden-BMD-parser-locale-message-IDs-and-lifetime"
+      ],
+      "golden_string": "facility/datMyth.bmd",
+      "switch": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x7100611798",
+        "size": 21,
+        "sha256": "67ebf7d1a493142470229eefebd869c2d9a208d750e86ebc07d351621ffc6fa1",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "steam_span_alternatives": [
+        {
+          "container": "P4G.exe",
+          "source_build": 10836033,
+          "section": ".sdata",
+          "rva": "0x92d3b0",
+          "raw_offset": 9617328,
+          "size": 21,
+          "sha256": "67ebf7d1a493142470229eefebd869c2d9a208d750e86ebc07d351621ffc6fa1",
+          "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+          "mapping_proven": true
+        }
+      ],
+      "ps2_live_bytes": 17,
+      "ps2_alignment_tail_bytes": 7,
+      "tail_policy": "Do not source Golden suffix bytes. Retain only inert zero alignment; all live uses take the sealed Golden string, including when longer than PS2 storage. No truncation or guest overrun."
+    },
+    {
+      "address": "0x00636260",
+      "size": 48,
+      "decision": "PROVEN-code",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "eaeee233a3f2cf80afac10cbd847d4ca76d5d05e86b136b4cadb19282fcf6082",
+        "readers": [
+          {
+            "function": "0x252a60",
+            "name": "func_00252a60",
+            "file": "src/cmmRankUp.c"
+          }
+        ]
+      },
+      "source": {
+        "kind": "authored-Golden-code-constant",
+        "switch": {
+          "container": "Switch 1.2 mapped NSO",
+          "address": "0x7100631ce4",
+          "size": 40,
+          "sha256": "fd1222f2de8b7aec5e98b2b44f0acc7e9323cb867e37e86d0228827fd4861b83",
+          "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+        },
+        "steam_spans": [
+          {
+            "container": "P4G.exe",
+            "source_build": 10836033,
+            "section": ".sdata",
+            "rva": "0x968540",
+            "raw_offset": 9859392,
+            "size": 16,
+            "sha256": "c6a8f4ad70c2fa6c77d697ce40cdabdfb14cd33de07898f43819b937738ec33f",
+            "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+            "mapping_proven": true
+          },
+          {
+            "container": "P4G.exe",
+            "source_build": 10836033,
+            "section": ".sdata",
+            "rva": "0x968880",
+            "raw_offset": 9860224,
+            "size": 16,
+            "sha256": "d700d7980f5e0b2da6e15be54b2dd2f327768cd4cfb396989312e5aa1f793975",
+            "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+            "mapping_proven": true
+          },
+          {
+            "container": "P4G.exe",
+            "source_build": 10836033,
+            "section": ".sdata",
+            "rva": "0x96535c",
+            "raw_offset": 9846620,
+            "size": 4,
+            "sha256": "3116d3c286fdab0a3f84830f7b7417912606f58818f01d6814504544b6a4b37d",
+            "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+            "mapping_proven": true
+          },
+          {
+            "container": "P4G.exe",
+            "source_build": 10836033,
+            "section": ".sdata",
+            "rva": "0x965644",
+            "raw_offset": 9847364,
+            "size": 4,
+            "sha256": "09cac3cb1c5526fdbc218c7780a20139c8694798522b12c83d5f1b9c4a7dbc7c",
+            "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+            "mapping_proven": true
+          }
+        ],
+        "logical_sha256": "fd1222f2de8b7aec5e98b2b44f0acc7e9323cb867e37e86d0228827fd4861b83"
+      },
+      "structural_correspondence": "PS2252a60 before frame41 initializes five x/y positions and selects floor(5*RNG) for sparkle pool3. Steam1b806d..1b80ce constructs same five pairs on stack from four separate source spans and indexes rcx*8. NSO121ffc..1228b0 reads631ce4+floor(5*RNG)*8 for same pool after the random-radius sparkle, copiesXY and randomtimer into32-byte record. Complete40bytes equal independently reconstructed Steam. M2contiguous968870 is rejected, as its first40bytes mix unrelated constants.",
+      "required_seams": [
+        "rankup-sparkle:author-exact-five-pair-Golden-source",
+        "rankup-sparkle:pool3-selector-and-RNG-call-order",
+        "rankup-sparkle:Golden-float-frame-crossings-not-PS2-integer-equality"
+      ],
+      "golden_values": [
+        [
+          77.0,
+          27.0
+        ],
+        [
+          112.0,
+          83.0
+        ],
+        [
+          70.0,
+          131.0
+        ],
+        [
+          62.0,
+          205.0
+        ],
+        [
+          102.0,
+          237.0
+        ]
+      ],
+      "layout": {
+        "records": 5,
+        "stride": 8,
+        "type": "2xf32le"
+      },
+      "ps2_live_bytes": 40,
+      "ps2_alignment_tail_bytes": 8,
+      "installation": "Author exact constant; no NSO runtime read. Retain only8inertzero tail bytes."
+    },
+    {
+      "address": "0x0063bab0",
+      "size": 56,
+      "decision": "PROVEN-code",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "8f93c17ee970f3fd04e366965d0d174d826d209188c0b796c0fdd8cd4d0bb31c",
+        "readers": [
+          {
+            "function": "0x2709b0",
+            "name": "func_002709b0",
+            "file": "src/frFont_inferred_00270100.c"
+          }
+        ]
+      },
+      "source": {
+        "kind": "authored-Golden-code-constant",
+        "switch_reader": "0x71002cb7e0..0x71002cb880",
+        "logical_sha256": "f8126fa1a968d2c5a0c3fe24e1c74d8b7278bfd3e66661281e64081a8122a170",
+        "steam_corroboration": "Not established; no Steam literal span admitted."
+      },
+      "structural_correspondence": "PS22709b0 copies seven8-byte Shift-JIS weekday names, gates on fontmode, indexes calGetWeekOfYear(datGetDateIndex())*8, copies and layouts text. NSO2cb7e0 constructs exactlyseven8-byte UTF8 weekday slots on stack, checks font-mode bits, gets currentdatec9d40, weekdayc9ec0, copies selected8-byte slot through2cca80 then updates/layouts through2cc270/2cc3a0. The same typed weekday-display field, ordered Sunday through Saturday, is proven from actual command and7-slot selector, not glyph visual similarity. The M2 English combine-message window is unrelated.",
+      "required_seams": [
+        "font-weekday:author-seven-exact-UTF8-slots",
+        "font-weekday:Golden-mode-gate-date-weekday-domain-and-font-encoding",
+        "font-weekday:every-command-context-native-copy"
+      ],
+      "golden_values": [
+        "\u65e5",
+        "\u6708",
+        "\u706b",
+        "\u6c34",
+        "\u6728",
+        "\u91d1",
+        "\u571f"
+      ],
+      "golden_words_u64": [
+        "0xa597e6",
+        "0x889ce6",
+        "0xab81e7",
+        "0xb4b0e6",
+        "0xa89ce6",
+        "0x9187e9",
+        "0x9f9ce5"
+      ],
+      "layout": {
+        "records": 7,
+        "stride": 8,
+        "encoding": "UTF-8 NUL-terminated then zero-fill"
+      },
+      "installation": "Compile exact56-byteUTF8 table; never interpret with PS2 Shift-JIS decoder or read NSO at runtime."
+    },
+    {
+      "address": "0x007144b8",
+      "size": 16,
+      "decision": "PROVEN",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "d9fe151d64b9991e11797b6bd922d623996515fa5220b0ba2c2ca72b851907d1",
+        "readers": [
+          {
+            "function": "0x4abe80",
+            "name": "effModelCreate",
+            "file": "src/Graphics/Model/effModel.c"
+          },
+          {
+            "function": "0x4ac640",
+            "name": "effModelCreateDrawable",
+            "file": "src/Graphics/Model/effModel.c"
+          }
+        ]
+      },
+      "source": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x71005facfd",
+        "size": 69,
+        "sha256": "bfbcbe1240e3b4d921038f06889a96c395a3f5ba07b20514da24d51c73e2d748",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "structural_correspondence": "PS24abe80/4ac640 use effMisc.h in the allocation source-file ABI before allocating9C/BC bytes, initialize tint -1 and transforms, copy source payload68/A4, optionally construct owned model, and for drawable set callback and valid frame range. Golden361d70/362440 allocateA8/C8 with the same exact68/A4 payload and corresponding model ownership; source descriptor resource+50 is validated by38b790 before361bd0 constructs model. Drawable362440 installs callback362bf0, flags visibility and model option40000, then checks signed start/end frame range. Both materialize include/effect/./effMisc.h in x0 at39d420 before allocation. Actual model ctor field and distinctive payload/callback/frame-range sequence establish correspondence. No claim is made that unrelated trail constructors have this include spelling.",
+      "required_seams": [
+        "model-diagnostic:exact-allocation-source-ABI-and-include-path",
+        "model-diagnostic:68-A4-payload-ownership-and-Golden-model-constructors"
+      ],
+      "golden_string": "D:/Projects/P4G-NSW/xrd654v/P4G_NX/../sdk/include/effect/./effMisc.h",
+      "ps2_live_bytes": 10,
+      "ps2_alignment_tail_bytes": 6,
+      "steam_corroboration": "No direct Steam filename dispatch instructions asserted. The full NSO source-file field is proven from corresponding typed constructors.",
+      "tail_policy": "Actual Golden full diagnostic path; NUL ownership independent of original16-byte storage. Do not truncate or read NSO at runtime."
+    },
+    {
+      "address": "0x00713e20",
+      "size": 16,
+      "decision": "PROVEN",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "d9fe151d64b9991e11797b6bd922d623996515fa5220b0ba2c2ca72b851907d1",
+        "readers": [
+          {
+            "function": "0x492e70",
+            "name": "effTrackAllocInstance",
+            "file": "src/Graphics/Effect/effPolygonTrack.c"
+          },
+          {
+            "function": "0x492f20",
+            "name": "effTrackCreateFromEmitter",
+            "file": "src/Graphics/Effect/effPolygonTrack.c"
+          },
+          {
+            "function": "0x4933a0",
+            "name": "effTrackCreateFromSource",
+            "file": "src/Graphics/Effect/effPolygonTrack.c"
+          },
+          {
+            "function": "0x493530",
+            "name": "effTrackCreateFromSourceCopy",
+            "file": "src/Graphics/Effect/effPolygonTrack.c"
+          }
+        ]
+      },
+      "source": {
+        "container": "Switch 1.2 mapped NSO",
+        "address": "0x710060af99",
+        "size": 85,
+        "sha256": "d4437fffc5869b5228af07ff9a2c2ed9e28bbd8c88254619b071c952cd5b2c00",
+        "image_sha256": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637"
+      },
+      "structural_correspondence": "PS2492e70/492f20/4933a0/493530 allocate38-byte polygon-track instances: derive count from emitter/source timing, cap100, initialize count, packedcolor -1, scale1 and active1; construct path geometry and optional source-state copy. Golden37e6f0 derives source count and caps100, allocates48-byte instance via39dbd0 after39d420 with this exact full include spelling, writes the same count/color/scale/active fields, calls geometry builder37e870 then path rebinder35b590. Golden37f010 and37f1b0 perform source-derived equivalent allocation and source rebind;37f1b0 additionally copies actual state through36c820 and preserves source flag. These are the three actual corresponding emitter/source/clone consumers, not model constructors361d70/362440, which use another include spelling. Decompiler warnings occur on assert-unreachable tails; source decision uses the observed normal constructor paths, argument sites, allocation size and count/color/scale/active assignments.",
+      "required_seams": [
+        "trail-diagnostic:all-three-native-emitter-source-clone-allocation-sites",
+        "trail-diagnostic:full-Golden-include-path-ABI-and-native-lifetime"
+      ],
+      "golden_string": "D:/Projects/P4G-NSW/xrd654v/P4G_NX/../sdk/include/model/../effect/after/../effMisc.h",
+      "ps2_live_bytes": 10,
+      "ps2_alignment_tail_bytes": 6,
+      "steam_corroboration": "No direct PC include spelling asserted; exact NSO typed diagnostic field is the admitted source.",
+      "tail_policy": "Author full path with NUL, not an old16-byte truncated suffix; runtime never reads NSO."
+    },
+    {
+      "address": "0x00635c00",
+      "size": 32,
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "908fe7144453791dafda7d5562018c6b83656485145015544663eaa6a538ca09",
+        "readers": [
+          {
+            "function": "0x2518d0",
+            "name": "cmmRankUpPlayRankSound",
+            "file": "src/comuTimerSequence_inferred_00250ad0.c"
+          }
+        ]
+      },
+      "source": {
+        "kind": "Golden-Atom-cue-route",
+        "cue_id": 1516,
+        "cue_name": "eve_516",
+        "channel": 2,
+        "banks": [
+          0,
+          21
+        ],
+        "source_bank_proof": "docs/golden_mode/specs/re/l1-directory-migration-followup-proof.json"
+      },
+      "structural_correspondence": "PS2 native producer calls sdkSndStartChannel(2, sound/EVENT/EVE_516.ADX). Golden NSO124cd0 rank1..9 or10 instead supplies channel2 and exact numericcue 1516 to3a27d0; no filename is consumed at this producer. Actual Golden CueTable joins independently seal eve_516/1516. The former ADX filename object has been positively replaced by bank/cue identity in the corresponding state branch. This is representation-only D10c, not removal of the required sound or acoustic equivalence.",
+      "required_seams": [
+        "audio-event:actual-cue-1516-state-producer-and-channel2",
+        "audio-event:registered-banks0-21-and-Voice-normalizer",
+        "audio-event:real-cue-program-playback-readiness-release-no-ADX-fallback"
+      ],
+      "resource_route_contract": "docs/golden_mode/specs/re/l1-directory-resource-routes.md",
+      "absence_scope": "PS2 loose-ADX filename representation only. Golden audio remains REQUIRED.",
+      "runtime_contract": "RegistercommonACF andbanks0/21; channel2 initiallybank0 via276c30.3a27d0 applies3a11f0 Voice partner and actual-cue existence, not fixedEnglish fallback. Use exact CueTable.CueId, never AWB index; preserve readiness/channel/bank lifetimes.",
+      "required_sources": [
+        "data.cpk::sound/adx2/common.acf",
+        "data.cpk::sound/adx2/bgm/snd00_bgm.acb",
+        "data.cpk::sound/adx2/bgm/snd00_bgm.awb",
+        "data.cpk::sound/adx2/bgm_en/snd00_bgm.acb",
+        "data.cpk::sound/adx2/bgm_en/snd00_bgm.awb"
+      ],
+      "deviation": "Until seam qualification the runtime remains PS2 and L1-open; no cosmetic retention exemption or runtime closure."
+    },
+    {
+      "address": "0x00635c20",
+      "size": 32,
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "327d36f245403bc38405b8bf2e94ab5eb1dfef226f3db68c2dacf94cb8210240",
+        "readers": [
+          {
+            "function": "0x2518d0",
+            "name": "cmmRankUpPlayRankSound",
+            "file": "src/comuTimerSequence_inferred_00250ad0.c"
+          }
+        ]
+      },
+      "source": {
+        "kind": "Golden-Atom-cue-route",
+        "cue_id": 1500,
+        "cue_name": "eve_500",
+        "channel": 2,
+        "banks": [
+          0,
+          21
+        ],
+        "source_bank_proof": "docs/golden_mode/specs/re/l1-directory-migration-followup-proof.json"
+      },
+      "structural_correspondence": "PS2 native producer calls sdkSndStartChannel(2, sound/EVENT/EVE_500.ADX). Golden NSO124cd0 rank0 instead supplies channel2 and exact numericcue 1500 to3a27d0; no filename is consumed at this producer. Actual Golden CueTable joins independently seal eve_500/1500. The former ADX filename object has been positively replaced by bank/cue identity in the corresponding state branch. This is representation-only D10c, not removal of the required sound or acoustic equivalence.",
+      "required_seams": [
+        "audio-event:actual-cue-1500-state-producer-and-channel2",
+        "audio-event:registered-banks0-21-and-Voice-normalizer",
+        "audio-event:real-cue-program-playback-readiness-release-no-ADX-fallback"
+      ],
+      "resource_route_contract": "docs/golden_mode/specs/re/l1-directory-resource-routes.md",
+      "absence_scope": "PS2 loose-ADX filename representation only. Golden audio remains REQUIRED.",
+      "runtime_contract": "RegistercommonACF andbanks0/21; channel2 initiallybank0 via276c30.3a27d0 applies3a11f0 Voice partner and actual-cue existence, not fixedEnglish fallback. Use exact CueTable.CueId, never AWB index; preserve readiness/channel/bank lifetimes.",
+      "required_sources": [
+        "data.cpk::sound/adx2/common.acf",
+        "data.cpk::sound/adx2/bgm/snd00_bgm.acb",
+        "data.cpk::sound/adx2/bgm/snd00_bgm.awb",
+        "data.cpk::sound/adx2/bgm_en/snd00_bgm.acb",
+        "data.cpk::sound/adx2/bgm_en/snd00_bgm.awb"
+      ],
+      "deviation": "Until seam qualification the runtime remains PS2 and L1-open; no cosmetic retention exemption or runtime closure."
+    },
+    {
+      "address": "0x00635c40",
+      "size": 32,
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "4e2d1b64ef8d32f99921f08c83c37bb722590948533f58d457aca0c1aaf7b615",
+        "readers": [
+          {
+            "function": "0x2518d0",
+            "name": "cmmRankUpPlayRankSound",
+            "file": "src/comuTimerSequence_inferred_00250ad0.c"
+          }
+        ]
+      },
+      "source": {
+        "kind": "Golden-Atom-cue-route",
+        "cue_id": 1501,
+        "cue_name": "eve_501",
+        "channel": 2,
+        "banks": [
+          0,
+          21
+        ],
+        "source_bank_proof": "docs/golden_mode/specs/re/l1-directory-migration-followup-proof.json"
+      },
+      "structural_correspondence": "PS2 native producer calls sdkSndStartChannel(2, sound/EVENT/EVE_501.ADX). Golden NSO124cd0 rank11 instead supplies channel2 and exact numericcue 1501 to3a27d0; no filename is consumed at this producer. Actual Golden CueTable joins independently seal eve_501/1501. The former ADX filename object has been positively replaced by bank/cue identity in the corresponding state branch. This is representation-only D10c, not removal of the required sound or acoustic equivalence.",
+      "required_seams": [
+        "audio-event:actual-cue-1501-state-producer-and-channel2",
+        "audio-event:registered-banks0-21-and-Voice-normalizer",
+        "audio-event:real-cue-program-playback-readiness-release-no-ADX-fallback"
+      ],
+      "resource_route_contract": "docs/golden_mode/specs/re/l1-directory-resource-routes.md",
+      "absence_scope": "PS2 loose-ADX filename representation only. Golden audio remains REQUIRED.",
+      "runtime_contract": "RegistercommonACF andbanks0/21; channel2 initiallybank0 via276c30.3a27d0 applies3a11f0 Voice partner and actual-cue existence, not fixedEnglish fallback. Use exact CueTable.CueId, never AWB index; preserve readiness/channel/bank lifetimes.",
+      "required_sources": [
+        "data.cpk::sound/adx2/common.acf",
+        "data.cpk::sound/adx2/bgm/snd00_bgm.acb",
+        "data.cpk::sound/adx2/bgm/snd00_bgm.awb",
+        "data.cpk::sound/adx2/bgm_en/snd00_bgm.acb",
+        "data.cpk::sound/adx2/bgm_en/snd00_bgm.awb"
+      ],
+      "deviation": "Until seam qualification the runtime remains PS2 and L1-open; no cosmetic retention exemption or runtime closure."
+    },
+    {
+      "address": "0x00635c60",
+      "size": 32,
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "b79b7cd531dba4f2555b9579c1bac3fe19c01eea2a153aba61dba9d6a69a62fb",
+        "readers": [
+          {
+            "function": "0x2518d0",
+            "name": "cmmRankUpPlayRankSound",
+            "file": "src/comuTimerSequence_inferred_00250ad0.c"
+          }
+        ]
+      },
+      "source": {
+        "kind": "Golden-Atom-cue-route",
+        "cue_id": 1502,
+        "cue_name": "eve_502",
+        "channel": 2,
+        "banks": [
+          0,
+          21
+        ],
+        "source_bank_proof": "docs/golden_mode/specs/re/l1-directory-migration-followup-proof.json"
+      },
+      "structural_correspondence": "PS2 native producer calls sdkSndStartChannel(2, sound/EVENT/EVE_502.ADX). Golden NSO124cd0 rank12 instead supplies channel2 and exact numericcue 1502 to3a27d0; no filename is consumed at this producer. Actual Golden CueTable joins independently seal eve_502/1502. The former ADX filename object has been positively replaced by bank/cue identity in the corresponding state branch. This is representation-only D10c, not removal of the required sound or acoustic equivalence.",
+      "required_seams": [
+        "audio-event:actual-cue-1502-state-producer-and-channel2",
+        "audio-event:registered-banks0-21-and-Voice-normalizer",
+        "audio-event:real-cue-program-playback-readiness-release-no-ADX-fallback"
+      ],
+      "resource_route_contract": "docs/golden_mode/specs/re/l1-directory-resource-routes.md",
+      "absence_scope": "PS2 loose-ADX filename representation only. Golden audio remains REQUIRED.",
+      "runtime_contract": "RegistercommonACF andbanks0/21; channel2 initiallybank0 via276c30.3a27d0 applies3a11f0 Voice partner and actual-cue existence, not fixedEnglish fallback. Use exact CueTable.CueId, never AWB index; preserve readiness/channel/bank lifetimes.",
+      "required_sources": [
+        "data.cpk::sound/adx2/common.acf",
+        "data.cpk::sound/adx2/bgm/snd00_bgm.acb",
+        "data.cpk::sound/adx2/bgm/snd00_bgm.awb",
+        "data.cpk::sound/adx2/bgm_en/snd00_bgm.acb",
+        "data.cpk::sound/adx2/bgm_en/snd00_bgm.awb"
+      ],
+      "deviation": "Until seam qualification the runtime remains PS2 and L1-open; no cosmetic retention exemption or runtime closure."
+    },
+    {
+      "address": "0x00635c80",
+      "size": 32,
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "f382768bcc477eeb3349d840535d17b13df4250711a1442ee0b3181201fbb35c",
+        "readers": [
+          {
+            "function": "0x257900",
+            "name": "func_00257900",
+            "file": "src/cmmRankUp.c"
+          }
+        ]
+      },
+      "source": {
+        "kind": "Golden-Atom-cue-route",
+        "cue_id": 1521,
+        "cue_name": "eve_521",
+        "channel": 2,
+        "banks": [
+          0,
+          21
+        ],
+        "source_bank_proof": "docs/golden_mode/specs/re/l1-directory-migration-followup-proof.json"
+      },
+      "structural_correspondence": "PS2 native producer calls sdkSndStartChannel(2, sound/EVENT/EVE_521.ADX). Golden NSO1274d0 matching rank-up sound timing instead supplies channel2 and exact numericcue 1521 to3a27d0; no filename is consumed at this producer. Actual Golden CueTable joins independently seal eve_521/1521. The former ADX filename object has been positively replaced by bank/cue identity in the corresponding state branch. This is representation-only D10c, not removal of the required sound or acoustic equivalence.",
+      "required_seams": [
+        "audio-event:actual-cue-1521-state-producer-and-channel2",
+        "audio-event:registered-banks0-21-and-Voice-normalizer",
+        "audio-event:real-cue-program-playback-readiness-release-no-ADX-fallback"
+      ],
+      "resource_route_contract": "docs/golden_mode/specs/re/l1-directory-resource-routes.md",
+      "absence_scope": "PS2 loose-ADX filename representation only. Golden audio remains REQUIRED.",
+      "runtime_contract": "RegistercommonACF andbanks0/21; channel2 initiallybank0 via276c30.3a27d0 applies3a11f0 Voice partner and actual-cue existence, not fixedEnglish fallback. Use exact CueTable.CueId, never AWB index; preserve readiness/channel/bank lifetimes.",
+      "required_sources": [
+        "data.cpk::sound/adx2/common.acf",
+        "data.cpk::sound/adx2/bgm/snd00_bgm.acb",
+        "data.cpk::sound/adx2/bgm/snd00_bgm.awb",
+        "data.cpk::sound/adx2/bgm_en/snd00_bgm.acb",
+        "data.cpk::sound/adx2/bgm_en/snd00_bgm.awb"
+      ],
+      "deviation": "Until seam qualification the runtime remains PS2 and L1-open; no cosmetic retention exemption or runtime closure."
+    },
+    {
+      "address": "0x00635ca0",
+      "size": 32,
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "dbba1e1319ee8954ecfb24486241e99c564b161d7058757ea67361dc842c6d89",
+        "readers": [
+          {
+            "function": "0x257900",
+            "name": "func_00257900",
+            "file": "src/cmmRankUp.c"
+          }
+        ]
+      },
+      "source": {
+        "kind": "Golden-Atom-cue-route",
+        "cue_id": 1517,
+        "cue_name": "eve_517",
+        "channel": 2,
+        "banks": [
+          0,
+          21
+        ],
+        "source_bank_proof": "docs/golden_mode/specs/re/l1-directory-migration-followup-proof.json"
+      },
+      "structural_correspondence": "PS2 native producer calls sdkSndStartChannel(2, sound/EVENT/EVE_517.ADX). Golden NSO1274d0 matching later rank-up sound timing instead supplies channel2 and exact numericcue 1517 to3a27d0; no filename is consumed at this producer. Actual Golden CueTable joins independently seal eve_517/1517. The former ADX filename object has been positively replaced by bank/cue identity in the corresponding state branch. This is representation-only D10c, not removal of the required sound or acoustic equivalence.",
+      "required_seams": [
+        "audio-event:actual-cue-1517-state-producer-and-channel2",
+        "audio-event:registered-banks0-21-and-Voice-normalizer",
+        "audio-event:real-cue-program-playback-readiness-release-no-ADX-fallback"
+      ],
+      "resource_route_contract": "docs/golden_mode/specs/re/l1-directory-resource-routes.md",
+      "absence_scope": "PS2 loose-ADX filename representation only. Golden audio remains REQUIRED.",
+      "runtime_contract": "RegistercommonACF andbanks0/21; channel2 initiallybank0 via276c30.3a27d0 applies3a11f0 Voice partner and actual-cue existence, not fixedEnglish fallback. Use exact CueTable.CueId, never AWB index; preserve readiness/channel/bank lifetimes.",
+      "required_sources": [
+        "data.cpk::sound/adx2/common.acf",
+        "data.cpk::sound/adx2/bgm/snd00_bgm.acb",
+        "data.cpk::sound/adx2/bgm/snd00_bgm.awb",
+        "data.cpk::sound/adx2/bgm_en/snd00_bgm.acb",
+        "data.cpk::sound/adx2/bgm_en/snd00_bgm.awb"
+      ],
+      "deviation": "Until seam qualification the runtime remains PS2 and L1-open; no cosmetic retention exemption or runtime closure."
+    },
+    {
+      "address": "0x006366d0",
+      "size": 32,
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "8c98693b0767307e4b7d63484e2a20ada45875cc035bd2856a67f04601de0173",
+        "readers": [
+          {
+            "function": "0x257900",
+            "name": "func_00257900",
+            "file": "src/cmmRankUp.c"
+          }
+        ]
+      },
+      "source": {
+        "kind": "Golden-Atom-cue-route",
+        "cue_id": 1522,
+        "cue_name": "eve_522",
+        "channel": 2,
+        "banks": [
+          0,
+          21
+        ],
+        "source_bank_proof": "docs/golden_mode/specs/re/l1-directory-migration-followup-proof.json"
+      },
+      "structural_correspondence": "PS2 native producer calls sdkSndStartChannel(2, sound/EVENT/EVE_522.ADX). Golden NSO1274d0 matching rank-up EVE522 timing instead supplies channel2 and exact numericcue 1522 to3a27d0; no filename is consumed at this producer. Actual Golden CueTable joins independently seal eve_522/1522. The former ADX filename object has been positively replaced by bank/cue identity in the corresponding state branch. This is representation-only D10c, not removal of the required sound or acoustic equivalence.",
+      "required_seams": [
+        "audio-event:actual-cue-1522-state-producer-and-channel2",
+        "audio-event:registered-banks0-21-and-Voice-normalizer",
+        "audio-event:real-cue-program-playback-readiness-release-no-ADX-fallback"
+      ],
+      "resource_route_contract": "docs/golden_mode/specs/re/l1-directory-resource-routes.md",
+      "absence_scope": "PS2 loose-ADX filename representation only. Golden audio remains REQUIRED.",
+      "runtime_contract": "RegistercommonACF andbanks0/21; channel2 initiallybank0 via276c30.3a27d0 applies3a11f0 Voice partner and actual-cue existence, not fixedEnglish fallback. Use exact CueTable.CueId, never AWB index; preserve readiness/channel/bank lifetimes.",
+      "required_sources": [
+        "data.cpk::sound/adx2/common.acf",
+        "data.cpk::sound/adx2/bgm/snd00_bgm.acb",
+        "data.cpk::sound/adx2/bgm/snd00_bgm.awb",
+        "data.cpk::sound/adx2/bgm_en/snd00_bgm.acb",
+        "data.cpk::sound/adx2/bgm_en/snd00_bgm.awb"
+      ],
+      "deviation": "Until seam qualification the runtime remains PS2 and L1-open; no cosmetic retention exemption or runtime closure."
+    },
+    {
+      "address": "0x0063faf0",
+      "size": 32,
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "39ca94a06ad3583382f0d455bb537ece7f0b67c851038116daf59a9965f97f60",
+        "readers": [
+          {
+            "function": "0x2be530",
+            "name": "func_002be530",
+            "file": "src/Event/Fcl/y_fclShopDraw.c"
+          }
+        ]
+      },
+      "source": {
+        "kind": "Golden-Atom-cue-route",
+        "cue_id": 1807,
+        "cue_name": "eve_807",
+        "channel": 2,
+        "banks": [
+          0,
+          21
+        ],
+        "source_bank_proof": "docs/golden_mode/specs/re/l1-directory-migration-followup-proof.json"
+      },
+      "structural_correspondence": "PS2 native producer calls sdkSndStartChannel(2, sound/EVENT/EVE_807.ADX). Golden NSO198930 shop-state purchase/message transition instead supplies channel2 and exact numericcue 1807 to3a27d0; no filename is consumed at this producer. Actual Golden CueTable joins independently seal eve_807/1807. The former ADX filename object has been positively replaced by bank/cue identity in the corresponding state branch. This is representation-only D10c, not removal of the required sound or acoustic equivalence.",
+      "required_seams": [
+        "audio-event:actual-cue-1807-state-producer-and-channel2",
+        "audio-event:registered-banks0-21-and-Voice-normalizer",
+        "audio-event:real-cue-program-playback-readiness-release-no-ADX-fallback"
+      ],
+      "resource_route_contract": "docs/golden_mode/specs/re/l1-directory-resource-routes.md",
+      "absence_scope": "PS2 loose-ADX filename representation only. Golden audio remains REQUIRED.",
+      "runtime_contract": "RegistercommonACF andbanks0/21; channel2 initiallybank0 via276c30.3a27d0 applies3a11f0 Voice partner and actual-cue existence, not fixedEnglish fallback. Use exact CueTable.CueId, never AWB index; preserve readiness/channel/bank lifetimes.",
+      "required_sources": [
+        "data.cpk::sound/adx2/common.acf",
+        "data.cpk::sound/adx2/bgm/snd00_bgm.acb",
+        "data.cpk::sound/adx2/bgm/snd00_bgm.awb",
+        "data.cpk::sound/adx2/bgm_en/snd00_bgm.acb",
+        "data.cpk::sound/adx2/bgm_en/snd00_bgm.awb"
+      ],
+      "deviation": "Until seam qualification the runtime remains PS2 and L1-open; no cosmetic retention exemption or runtime closure."
+    },
+    {
+      "address": "0x0064a5b0",
+      "size": 32,
+      "decision": "D10c",
+      "runtime_status": "pending-seam",
+      "ps2": {
+        "sha256": "6fd9cd00685ae92ddcc739d4c48fe2fa483161bfddc6ae206af889b608ef210f",
+        "readers": [
+          {
+            "function": "0x33fc80",
+            "name": "func_0033fc80",
+            "file": "src/Event/y_CmbCardEff.c"
+          },
+          {
+            "function": "0x3407f0",
+            "name": "func_003407f0",
+            "file": "src/Event/y_CmbCardEff.c"
+          },
+          {
+            "function": "0x341640",
+            "name": "func_00341640",
+            "file": "src/Event/y_CmbCardEff.c"
+          },
+          {
+            "function": "0x3427a0",
+            "name": "func_003427a0",
+            "file": "src/Event/y_CmbCardEff.c"
+          },
+          {
+            "function": "0x343cf0",
+            "name": "func_00343cf0",
+            "file": "src/Event/y_CmbCardEff.c"
+          },
+          {
+            "function": "0x345700",
+            "name": "func_00345700",
+            "file": "src/Event/y_CmbCardEff.c"
+          }
+        ]
+      },
+      "source": {
+        "kind": "Golden-Atom-cue-route",
+        "cue_id": 1804,
+        "cue_name": "eve_804",
+        "channel": 2,
+        "banks": [
+          0,
+          21
+        ],
+        "source_bank_proof": "docs/golden_mode/specs/re/l1-directory-migration-followup-proof.json"
+      },
+      "structural_correspondence": "PS2 native producer calls sdkSndStartChannel(2, sound/EVENT/EVE_804.ADX). Golden NSO150ae0 combine-card effect input/result transition instead supplies channel2 and exact numericcue 1804 to3a27d0; no filename is consumed at this producer. Actual Golden CueTable joins independently seal eve_804/1804. The former ADX filename object has been positively replaced by bank/cue identity in the corresponding state branch. This is representation-only D10c, not removal of the required sound or acoustic equivalence.",
+      "required_seams": [
+        "audio-event:actual-cue-1804-state-producer-and-channel2",
+        "audio-event:registered-banks0-21-and-Voice-normalizer",
+        "audio-event:real-cue-program-playback-readiness-release-no-ADX-fallback"
+      ],
+      "resource_route_contract": "docs/golden_mode/specs/re/l1-directory-resource-routes.md",
+      "absence_scope": "PS2 loose-ADX filename representation only. Golden audio remains REQUIRED.",
+      "runtime_contract": "RegistercommonACF andbanks0/21; channel2 initiallybank0 via276c30.3a27d0 applies3a11f0 Voice partner and actual-cue existence, not fixedEnglish fallback. Use exact CueTable.CueId, never AWB index; preserve readiness/channel/bank lifetimes.",
+      "required_sources": [
+        "data.cpk::sound/adx2/common.acf",
+        "data.cpk::sound/adx2/bgm/snd00_bgm.acb",
+        "data.cpk::sound/adx2/bgm/snd00_bgm.awb",
+        "data.cpk::sound/adx2/bgm_en/snd00_bgm.acb",
+        "data.cpk::sound/adx2/bgm_en/snd00_bgm.awb"
+      ],
+      "deviation": "Until seam qualification the runtime remains PS2 and L1-open; no cosmetic retention exemption or runtime closure."
+    }
+  ]
+}

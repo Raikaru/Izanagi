@@ -316,8 +316,8 @@ static void scalar_bytes(lua_State *L, int index, const Scalar *s, unsigned char
     } else if (s->real) {
         luaL_checktype(L, index, LUA_TNUMBER);
         double value = lua_tonumber(L, index);
-        if (s->size == 4) bits = p4_mod_f32_encode(value);
-        else { value = p4_mod_f64_quiet(value); memcpy(&bits, &value, sizeof bits); }
+        if (s->size == 4) bits = p4_mod_f32_encode_canonical(value);
+        else { value = p4_mod_f64_canonical(value); memcpy(&bits, &value, sizeof bits); }
     } else if (s->size == 8) bits = p4_lua_wide(L, index);
     else {
         unsigned width = s->size * 8;

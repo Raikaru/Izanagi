@@ -224,23 +224,10 @@ void p4_lua_battle_decide_initialize(lua_State *L)
     lua_pushliteral(L, "p4 battle decider"); lua_setfield(L, -2, "__metatable");
     lua_setreadonly(L, -1, 1);
     lua_pop(L, 1);
-    /* p4.battle may already hold other battle services (formation): the
-     * namespace becomes one read-only table with theirs and this one. */
     lua_newtable(L);
-    lua_getfield(L, -2, "battle");
-    if (lua_istable(L, -1)) {
-        lua_pushnil(L);
-        while (lua_next(L, -2)) {
-            lua_pushvalue(L, -2);
-            lua_insert(L, -2);
-            lua_settable(L, -5);
-        }
-    }
-    lua_pop(L, 1);
     lua_pushcfunction(L, add_decider, "p4.battle.decide");
     lua_setfield(L, -2, "decide");
-    lua_setreadonly(L, -1, 1);
-    lua_setfield(L, -2, "battle");
+    p4_lua_namespace_merge(L, "battle");
 }
 void p4_lua_battle_decide_close(P4LuaMod *mod)
 {

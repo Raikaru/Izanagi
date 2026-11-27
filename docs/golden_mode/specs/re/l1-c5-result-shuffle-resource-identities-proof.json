@@ -1,0 +1,1569 @@
+{
+  "proof_id": "L1-C5-result-shuffle-resource-identities-20261113",
+  "class": "PROVEN",
+  "runtime_status": "pending-seam",
+  "scope": "Five selected legacy resource-identity literals: four path-valued counterparts and one explicitly semantic ordered message-bank counterpart. No old/native payload or callback-code equivalence claim.",
+  "sources": {
+    "steam_build": 10836033,
+    "steam_image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+    "nso": "Switch1.2 static mapped main.nso",
+    "policy": "Static archive/data/code research only. No game/emulator, protected.arch decoding, no-reference absence proof or similarity admission."
+  },
+  "ps2_pointer_loaders": {
+    "result": {
+      "paths": [
+        "0x00629110",
+        "0x00629130"
+      ],
+      "actual_pointer_array": "0x00763690",
+      "gp_alias": "iGpffffa5a0[2]",
+      "reader": "btlResultSimpleSetupEntries00221770, btlResultSimple.c:1164-1199, actual date/day flag, asynchronous directory plus separate br_msg request"
+    },
+    "message": {
+      "path": "0x00629150",
+      "pointer": "0x007636a0",
+      "gp_alias": "iGpffffa5b0",
+      "consumers": "simple/hero result windows use entry0; btlResultFriendPsLvUp.c:176-185 passes actual entries0/1 to shdPersonaLevelUpCreate then partyId5/RNG3+468 voice branch"
+    },
+    "shuffle": {
+      "paths": [
+        "0x0064e9e0",
+        "0x0064ea00"
+      ],
+      "pointer_array": "0x00763ab8",
+      "gp_alias": "iGpffffa9c8[2]",
+      "reader": "btlShuffleDrawLoadSprites003741f0, btlShuffleDraw.c:315-331, actual negated day-window bit0 and loadPhase0"
+    }
+  },
+  "golden_resource_layout": {
+    "steam_paths": {
+      "battle/result/simple_w.arc": "0x91a538",
+      "battle/result/simple_s.arc": "0x91a558",
+      "battle/result/shuffle.arc": "0x91a798"
+    },
+    "steam_path_pointer_array": "0x90b9e0",
+    "nso_path_pointer_array": "0x73bb78",
+    "nso_result_member_variants": [
+      {
+        "variant": 0,
+        "members": [
+          {
+            "field": "0x73bb38",
+            "literal": "0x5f9392",
+            "value": "battle/result/result01x2.spr"
+          },
+          {
+            "field": "0x73bb40",
+            "literal": "0x5fbc05",
+            "value": "battle/result/chara_rslt_wntrx2.spr"
+          },
+          {
+            "field": "0x73bb48",
+            "literal": "0x5ebbc2",
+            "value": "battle/result/sysmsg0_br.bmd"
+          },
+          {
+            "field": "0x73bb50",
+            "literal": "0x611003",
+            "value": "battle/result/sysmsg1_br.bmd"
+          }
+        ]
+      },
+      {
+        "variant": 1,
+        "members": [
+          {
+            "field": "0x73bb58",
+            "literal": "0x5f9392",
+            "value": "battle/result/result01x2.spr"
+          },
+          {
+            "field": "0x73bb60",
+            "literal": "0x6247f2",
+            "value": "battle/result/chara_rslt_smrx2.spr"
+          },
+          {
+            "field": "0x73bb68",
+            "literal": "0x5ebbc2",
+            "value": "battle/result/sysmsg0_br.bmd"
+          },
+          {
+            "field": "0x73bb70",
+            "literal": "0x611003",
+            "value": "battle/result/sysmsg1_br.bmd"
+          }
+        ]
+      }
+    ],
+    "nso_shuffle_member_variants": [
+      {
+        "variant": 0,
+        "members": [
+          {
+            "field": "0x73c080",
+            "literal": "0x5ebc27",
+            "value": "battle/result/sf_time01x2.spr"
+          },
+          {
+            "field": "0x73c088",
+            "literal": "0x61bccf",
+            "value": "battle/result/sf_time02x2.spr"
+          },
+          {
+            "field": "0x73c090",
+            "literal": "0x5f689e",
+            "value": "battle/result/sf_time03x2.spr"
+          }
+        ]
+      },
+      {
+        "variant": 1,
+        "members": [
+          {
+            "field": "0x73c098",
+            "literal": "0x5ebc27",
+            "value": "battle/result/sf_time01x2.spr"
+          },
+          {
+            "field": "0x73c0a0",
+            "literal": "0x61bccf",
+            "value": "battle/result/sf_time02x2.spr"
+          },
+          {
+            "field": "0x73c0a8",
+            "literal": "0x5e6400",
+            "value": "battle/result/sf_time04x2.spr"
+          }
+        ]
+      }
+    ],
+    "steam_readers": [
+      {
+        "start": "0x108213",
+        "end": "0x1083a4",
+        "refs": [
+          {
+            "pc": 1081940,
+            "target": 9545624,
+            "string": "abd2fd7afba8cb15e0e3f0ae2a05a16fc27777ea0a2b800b2877fba161dfd99e",
+            "argument": 2,
+            "width": 8
+          },
+          {
+            "pc": 1082003,
+            "target": 9545624,
+            "string": "abd2fd7afba8cb15e0e3f0ae2a05a16fc27777ea0a2b800b2877fba161dfd99e",
+            "argument": 2,
+            "width": 8
+          },
+          {
+            "pc": 1082067,
+            "target": 9545624,
+            "string": "abd2fd7afba8cb15e0e3f0ae2a05a16fc27777ea0a2b800b2877fba161dfd99e",
+            "argument": 2,
+            "width": 8
+          },
+          {
+            "pc": 1082095,
+            "target": 9545624,
+            "string": "abd2fd7afba8cb15e0e3f0ae2a05a16fc27777ea0a2b800b2877fba161dfd99e",
+            "argument": 2,
+            "width": 8
+          },
+          {
+            "pc": 1082202,
+            "target": 9545624,
+            "string": "abd2fd7afba8cb15e0e3f0ae2a05a16fc27777ea0a2b800b2877fba161dfd99e",
+            "argument": 0,
+            "width": 8
+          },
+          {
+            "pc": 1082236,
+            "target": 9545624,
+            "string": "abd2fd7afba8cb15e0e3f0ae2a05a16fc27777ea0a2b800b2877fba161dfd99e",
+            "argument": 0,
+            "width": 8
+          }
+        ]
+      },
+      {
+        "start": "0x112fb0",
+        "end": "0x11318c",
+        "refs": [
+          {
+            "pc": 1126440,
+            "target": 9545624,
+            "string": "abd2fd7afba8cb15e0e3f0ae2a05a16fc27777ea0a2b800b2877fba161dfd99e",
+            "argument": 2,
+            "width": 8
+          },
+          {
+            "pc": 1126499,
+            "target": 9545624,
+            "string": "abd2fd7afba8cb15e0e3f0ae2a05a16fc27777ea0a2b800b2877fba161dfd99e",
+            "argument": 2,
+            "width": 8
+          },
+          {
+            "pc": 1126563,
+            "target": 9545624,
+            "string": "abd2fd7afba8cb15e0e3f0ae2a05a16fc27777ea0a2b800b2877fba161dfd99e",
+            "argument": 2,
+            "width": 8
+          },
+          {
+            "pc": 1126591,
+            "target": 9545624,
+            "string": "abd2fd7afba8cb15e0e3f0ae2a05a16fc27777ea0a2b800b2877fba161dfd99e",
+            "argument": 2,
+            "width": 8
+          },
+          {
+            "pc": 1126698,
+            "target": 9545624,
+            "string": "abd2fd7afba8cb15e0e3f0ae2a05a16fc27777ea0a2b800b2877fba161dfd99e",
+            "argument": 0,
+            "width": 8
+          },
+          {
+            "pc": 1126732,
+            "target": 9545624,
+            "string": "abd2fd7afba8cb15e0e3f0ae2a05a16fc27777ea0a2b800b2877fba161dfd99e",
+            "argument": 0,
+            "width": 8
+          }
+        ]
+      }
+    ]
+  },
+  "package_receipts": [
+    {
+      "path": "data_e.cpk::battle/result/simple_w.arc",
+      "size": 664180,
+      "sha256": "9ca59e3354b7e90369974eb72c169e9e504f87f4c372d35dce53f6097c74cba0",
+      "header32": "04000000726573756c74303178322e7370720000000000000000000000000000",
+      "container_kind": "pak-v2",
+      "members": [
+        {
+          "name": "result01x2.spr",
+          "offset": 40,
+          "size": 134528,
+          "sha256": "4aec93e92802a6cd28740dd74454c35903687927342d3e0ecc2100de5b4596e0",
+          "header16": "01000000000000005350523020000000"
+        },
+        {
+          "name": "chara_rslt_wntrx2.spr",
+          "offset": 134604,
+          "size": 524736,
+          "sha256": "3c2aed9aa959388ea7c318ac2bbb86e9912db53c0c3a3bb5b7dcc40773b571e9",
+          "header16": "01000000000000005350523020000000"
+        },
+        {
+          "name": "sysmsg0_br.bmd",
+          "offset": 659376,
+          "size": 3168,
+          "sha256": "2fb3f1cd5abf624b77258d4ab44ebacbeb59dc99370f0c7e2480e35211c74fc8",
+          "header16": "07000000530c00004d53473100000000"
+        },
+        {
+          "name": "sysmsg1_br.bmd",
+          "offset": 662580,
+          "size": 1600,
+          "sha256": "4b8fb79436fd2400c4acba4ef63d4f23040f5229ce9dd736a1c1033ad802a79f",
+          "header16": "070000003b0600004d53473100000000"
+        }
+      ]
+    },
+    {
+      "path": "data_e.cpk::battle/result/simple_s.arc",
+      "size": 664180,
+      "sha256": "03e32369d68353c5541e579617f1058126e8f0ea4c81431ebaee39b35cba5e13",
+      "header32": "04000000726573756c74303178322e7370720000000000000000000000000000",
+      "container_kind": "pak-v2",
+      "members": [
+        {
+          "name": "result01x2.spr",
+          "offset": 40,
+          "size": 134528,
+          "sha256": "4aec93e92802a6cd28740dd74454c35903687927342d3e0ecc2100de5b4596e0",
+          "header16": "01000000000000005350523020000000"
+        },
+        {
+          "name": "chara_rslt_smrx2.spr",
+          "offset": 134604,
+          "size": 524736,
+          "sha256": "f60c02bc119a08630ec2ae52327a7631703eb1c80ba4d6556e51b41e48c44766",
+          "header16": "01000000000000005350523020000000"
+        },
+        {
+          "name": "sysmsg0_br.bmd",
+          "offset": 659376,
+          "size": 3168,
+          "sha256": "2fb3f1cd5abf624b77258d4ab44ebacbeb59dc99370f0c7e2480e35211c74fc8",
+          "header16": "07000000530c00004d53473100000000"
+        },
+        {
+          "name": "sysmsg1_br.bmd",
+          "offset": 662580,
+          "size": 1600,
+          "sha256": "4b8fb79436fd2400c4acba4ef63d4f23040f5229ce9dd736a1c1033ad802a79f",
+          "header16": "070000003b0600004d53473100000000"
+        }
+      ]
+    },
+    {
+      "path": "data_e.cpk::battle/result/shuffle.arc",
+      "size": 6130060,
+      "sha256": "a7a99fb54f33fbd984ef3e2cb33f278d41e6a68bf487b014a8df34c7c81ddc03",
+      "header32": "1200000073665f74696d65303178322e73707200000000000000000000000000",
+      "container_kind": "pak-v2",
+      "members": [
+        {
+          "name": "sf_time01x2.spr",
+          "offset": 40,
+          "size": 4738176,
+          "sha256": "e5fe03c8bf644fc6c999258c9f3b998acfa3ceaad734ef677d41ab337f2b1423",
+          "header16": "01000000000000005350523020000000"
+        },
+        {
+          "name": "sf_time02x2.spr",
+          "offset": 4738252,
+          "size": 526816,
+          "sha256": "fb648f6b93e9820fa8a9fd553b830effb2abc4135ca29f4855de5abc2977479d",
+          "header16": "01000000000000005350523020000000"
+        },
+        {
+          "name": "sf_time03x2.spr",
+          "offset": 5265104,
+          "size": 262464,
+          "sha256": "521bbc5b57ac876b78d3ea12f6ffd57f7837ffb93236654f15f3d282438367e6",
+          "header16": "01000000000000005350523020000000"
+        },
+        {
+          "name": "sf_time04x2.spr",
+          "offset": 5527604,
+          "size": 262464,
+          "sha256": "5fcc64bbe6ef4dee5cd3a75600a610ae1bf569e3ac066e5b1205a8421470b7e4",
+          "header16": "01000000000000005350523020000000"
+        },
+        {
+          "name": "SHUFF_01.EPL",
+          "offset": 5790104,
+          "size": 8864,
+          "sha256": "59627e77df24e98b1aec5cf22a9c47495e145505c6fea06b5b0429b3427a7fad",
+          "header16": "00000000000000000000000000000000"
+        },
+        {
+          "name": "SHUFF_02.EPL",
+          "offset": 5799004,
+          "size": 9760,
+          "sha256": "58c0739b468638264c6d3534bd2b2c6f5af07a3e6d878fc4104351a4f01b9dad",
+          "header16": "00000000000000000000000000000000"
+        },
+        {
+          "name": "SHUFF_03.EPL",
+          "offset": 5808800,
+          "size": 14688,
+          "sha256": "c50a3a6c14cb67013b24aa7f12833c401ef5ef7f5bb823ec4a45916b1d996782",
+          "header16": "00000000000000000000000000000000"
+        },
+        {
+          "name": "SHUFF_04.EPL",
+          "offset": 5823524,
+          "size": 9568,
+          "sha256": "2ac489ffa035960b485696279cdcdc702e512321dfec3c5de3e0533354ac27ef",
+          "header16": "00000000000000000000000000000000"
+        },
+        {
+          "name": "SHUFF_05.EPL",
+          "offset": 5833128,
+          "size": 10144,
+          "sha256": "1c02f0750e4a6e99932d04af21a9752ae50b80597201fbc7ce944bdde2b45432",
+          "header16": "00000000000000000000000000000000"
+        },
+        {
+          "name": "SHUFF_06.EPL",
+          "offset": 5843308,
+          "size": 15104,
+          "sha256": "a7756c94b0471c8bedc1447c499df3233be21f8992655205858fb1e97e7d7c96",
+          "header16": "00000000000000000000000000000000"
+        },
+        {
+          "name": "SHUFFLE01.EPL",
+          "offset": 5858448,
+          "size": 6368,
+          "sha256": "bb7e2d674c4b18778f6f7b02304159ee7a192b90f38406353bd32754207244b5",
+          "header16": "00000000cdcc4c3e000000000000803f"
+        },
+        {
+          "name": "SHUFF_09.EPL",
+          "offset": 5864852,
+          "size": 1600,
+          "sha256": "7db6177b81d30997b063517caf3b0a1a1781a7363f3219940aaa1d3deef01bb4",
+          "header16": "00000000000000000000000000000000"
+        },
+        {
+          "name": "btlShuffleMsg.bmd",
+          "offset": 5866488,
+          "size": 14560,
+          "sha256": "7c765b1affde67ce7fa14fcc109c1207f17ad180ce461467b0ee3db3844438ac",
+          "header16": "07000000e03800004d53473100000000"
+        },
+        {
+          "name": "btlShuffleHelp.bmd",
+          "offset": 5881084,
+          "size": 4352,
+          "sha256": "e74bc7e5c8527535614e646d6b69af67a0941467fe13b5097bad4a646ebd5ad3",
+          "header16": "07000000fb1000004d53473100000000"
+        },
+        {
+          "name": "btlShuffleHelp0.bmd",
+          "offset": 5885472,
+          "size": 640,
+          "sha256": "f62bef197332b41ab5eb4206596324145be1398e640b16f845a024ea9b867cbc",
+          "header16": "07000000620200004d53473100000000"
+        },
+        {
+          "name": "btlShuffleCardHelp.bmd",
+          "offset": 5886148,
+          "size": 3296,
+          "sha256": "c0142f869ec6c41cc4a2892b7c50cce1b635cd68844f7c4de444eb77474fa954",
+          "header16": "07000000dd0c00004d53473100000000"
+        },
+        {
+          "name": "psc_basic.bin",
+          "offset": 5889480,
+          "size": 235008,
+          "sha256": "3993de4b4f27853ea462f87141d1c55d5920afe8601736b4181460a2110400b1",
+          "header16": "64000000070000004000000040040100"
+        },
+        {
+          "name": "btlSflTable.bin",
+          "offset": 6124524,
+          "size": 5536,
+          "sha256": "b25c6db55884c86788a28463aaedb9b4596e0c3f6b2607567f8b51e28dd136f5",
+          "header16": "0500000062746c53666c446966666963"
+        }
+      ]
+    },
+    {
+      "path": "data.cpk::battle/result/simple_w.arc",
+      "size": 664116,
+      "sha256": "7cc35e704e41df10f42048008b0a50cebd00e01815f53052d8359cbffced3c7e",
+      "header32": "04000000726573756c74303178322e7370720000000000000000000000000000",
+      "container_kind": "pak-v2",
+      "members": [
+        {
+          "name": "result01x2.spr",
+          "offset": 40,
+          "size": 134528,
+          "sha256": "4aec93e92802a6cd28740dd74454c35903687927342d3e0ecc2100de5b4596e0",
+          "header16": "01000000000000005350523020000000"
+        },
+        {
+          "name": "chara_rslt_wntrx2.spr",
+          "offset": 134604,
+          "size": 524736,
+          "sha256": "3c2aed9aa959388ea7c318ac2bbb86e9912db53c0c3a3bb5b7dcc40773b571e9",
+          "header16": "01000000000000005350523020000000"
+        },
+        {
+          "name": "sysmsg0_br.bmd",
+          "offset": 659376,
+          "size": 3264,
+          "sha256": "8ca2f7e8cab9010c9f5e8a3938362c12a1fa6c65497b8da38e66294bfa8a98b4",
+          "header16": "07000000af0c00004d53473100000000"
+        },
+        {
+          "name": "sysmsg1_br.bmd",
+          "offset": 662676,
+          "size": 1440,
+          "sha256": "50c5ae80e9eb77f8eaed263d602d5e0202c1347bfe666ba3c06994d82ad1ac2b",
+          "header16": "07000000930500004d53473100000000"
+        }
+      ]
+    },
+    {
+      "path": "data.cpk::battle/result/simple_s.arc",
+      "size": 664116,
+      "sha256": "966e3f46845da2bb2d0e36d4daf5819179dcaac5c359961a58af10ba297e2f42",
+      "header32": "04000000726573756c74303178322e7370720000000000000000000000000000",
+      "container_kind": "pak-v2",
+      "members": [
+        {
+          "name": "result01x2.spr",
+          "offset": 40,
+          "size": 134528,
+          "sha256": "4aec93e92802a6cd28740dd74454c35903687927342d3e0ecc2100de5b4596e0",
+          "header16": "01000000000000005350523020000000"
+        },
+        {
+          "name": "chara_rslt_smrx2.spr",
+          "offset": 134604,
+          "size": 524736,
+          "sha256": "f60c02bc119a08630ec2ae52327a7631703eb1c80ba4d6556e51b41e48c44766",
+          "header16": "01000000000000005350523020000000"
+        },
+        {
+          "name": "sysmsg0_br.bmd",
+          "offset": 659376,
+          "size": 3264,
+          "sha256": "8ca2f7e8cab9010c9f5e8a3938362c12a1fa6c65497b8da38e66294bfa8a98b4",
+          "header16": "07000000af0c00004d53473100000000"
+        },
+        {
+          "name": "sysmsg1_br.bmd",
+          "offset": 662676,
+          "size": 1440,
+          "sha256": "50c5ae80e9eb77f8eaed263d602d5e0202c1347bfe666ba3c06994d82ad1ac2b",
+          "header16": "07000000930500004d53473100000000"
+        }
+      ]
+    },
+    {
+      "path": "data.cpk::battle/result/shuffle.arc",
+      "size": 4557100,
+      "sha256": "69b20601b35130af0e0d6643c97974f2962ee96d1365e6289cc10f10a4707acd",
+      "header32": "1200000073665f74696d65303178322e73707200000000000000000000000000",
+      "container_kind": "pak-v2",
+      "members": [
+        {
+          "name": "sf_time01x2.spr",
+          "offset": 40,
+          "size": 3166176,
+          "sha256": "fd94419231d1df344ef17d60bd59d124c67db94f215300cc3a759702b6993765",
+          "header16": "01000000000000005350523020000000"
+        },
+        {
+          "name": "sf_time02x2.spr",
+          "offset": 3166252,
+          "size": 526816,
+          "sha256": "fb648f6b93e9820fa8a9fd553b830effb2abc4135ca29f4855de5abc2977479d",
+          "header16": "01000000000000005350523020000000"
+        },
+        {
+          "name": "sf_time03x2.spr",
+          "offset": 3693104,
+          "size": 262464,
+          "sha256": "521bbc5b57ac876b78d3ea12f6ffd57f7837ffb93236654f15f3d282438367e6",
+          "header16": "01000000000000005350523020000000"
+        },
+        {
+          "name": "sf_time04x2.spr",
+          "offset": 3955604,
+          "size": 262464,
+          "sha256": "5fcc64bbe6ef4dee5cd3a75600a610ae1bf569e3ac066e5b1205a8421470b7e4",
+          "header16": "01000000000000005350523020000000"
+        },
+        {
+          "name": "SHUFF_01.EPL",
+          "offset": 4218104,
+          "size": 8864,
+          "sha256": "59627e77df24e98b1aec5cf22a9c47495e145505c6fea06b5b0429b3427a7fad",
+          "header16": "00000000000000000000000000000000"
+        },
+        {
+          "name": "SHUFF_02.EPL",
+          "offset": 4227004,
+          "size": 9760,
+          "sha256": "58c0739b468638264c6d3534bd2b2c6f5af07a3e6d878fc4104351a4f01b9dad",
+          "header16": "00000000000000000000000000000000"
+        },
+        {
+          "name": "SHUFF_03.EPL",
+          "offset": 4236800,
+          "size": 14688,
+          "sha256": "c50a3a6c14cb67013b24aa7f12833c401ef5ef7f5bb823ec4a45916b1d996782",
+          "header16": "00000000000000000000000000000000"
+        },
+        {
+          "name": "SHUFF_04.EPL",
+          "offset": 4251524,
+          "size": 9568,
+          "sha256": "2ac489ffa035960b485696279cdcdc702e512321dfec3c5de3e0533354ac27ef",
+          "header16": "00000000000000000000000000000000"
+        },
+        {
+          "name": "SHUFF_05.EPL",
+          "offset": 4261128,
+          "size": 10144,
+          "sha256": "1c02f0750e4a6e99932d04af21a9752ae50b80597201fbc7ce944bdde2b45432",
+          "header16": "00000000000000000000000000000000"
+        },
+        {
+          "name": "SHUFF_06.EPL",
+          "offset": 4271308,
+          "size": 15104,
+          "sha256": "a7756c94b0471c8bedc1447c499df3233be21f8992655205858fb1e97e7d7c96",
+          "header16": "00000000000000000000000000000000"
+        },
+        {
+          "name": "SHUFFLE01.EPL",
+          "offset": 4286448,
+          "size": 6368,
+          "sha256": "bb7e2d674c4b18778f6f7b02304159ee7a192b90f38406353bd32754207244b5",
+          "header16": "00000000cdcc4c3e000000000000803f"
+        },
+        {
+          "name": "SHUFF_09.EPL",
+          "offset": 4292852,
+          "size": 1600,
+          "sha256": "7db6177b81d30997b063517caf3b0a1a1781a7363f3219940aaa1d3deef01bb4",
+          "header16": "00000000000000000000000000000000"
+        },
+        {
+          "name": "btlShuffleMsg.bmd",
+          "offset": 4294488,
+          "size": 13984,
+          "sha256": "9300504dfb8148209b93f4c933a12f8ee88140b3abf571c98cf559eecd2f77d3",
+          "header16": "07000000943600004d53473100000000"
+        },
+        {
+          "name": "btlShuffleHelp.bmd",
+          "offset": 4308508,
+          "size": 4224,
+          "sha256": "9d9d480207cbe2a9b93b7ff0df383565a6653a4604e30c07071f088ed602c79f",
+          "header16": "07000000801000004d53473100000000"
+        },
+        {
+          "name": "btlShuffleHelp0.bmd",
+          "offset": 4312768,
+          "size": 576,
+          "sha256": "95f474e57fa05a1b8edf3cd072825dae2beeff010e5ac92a696a8c48e9813d66",
+          "header16": "070000002e0200004d53473100000000"
+        },
+        {
+          "name": "btlShuffleCardHelp.bmd",
+          "offset": 4313380,
+          "size": 3104,
+          "sha256": "526d667e47d4e95e8e182598a96a21d9d2e7c8bf2b6d320aadd7f8ee7a70027f",
+          "header16": "07000000190c00004d53473100000000"
+        },
+        {
+          "name": "psc_basic.bin",
+          "offset": 4316520,
+          "size": 235008,
+          "sha256": "3993de4b4f27853ea462f87141d1c55d5920afe8601736b4181460a2110400b1",
+          "header16": "64000000070000004000000040040100"
+        },
+        {
+          "name": "btlSflTable.bin",
+          "offset": 4551564,
+          "size": 5536,
+          "sha256": "b25c6db55884c86788a28463aaedb9b4596e0c3f6b2607567f8b51e28dd136f5",
+          "header16": "0500000062746c53666c446966666963"
+        }
+      ]
+    }
+  ],
+  "message_members": [
+    {
+      "path": "data_e.cpk::battle/result/simple_w.arc::sysmsg0_br.bmd",
+      "logical_bank_index": 0,
+      "member_size": 3168,
+      "declared_size": 3155,
+      "header": [
+        7,
+        3155,
+        826757965,
+        0,
+        3088,
+        67,
+        29
+      ],
+      "full_sha256": "2fb3f1cd5abf624b77258d4ab44ebacbeb59dc99370f0c7e2480e35211c74fc8",
+      "declared_sha256": "9f12436042b4a5ea391c0383ce28efe4105c8b670ec539b88b9984dd699c1ff0",
+      "entries": [
+        {
+          "index": 0,
+          "kind": 0,
+          "label": "BR_PERSONA_LVUP"
+        },
+        {
+          "index": 1,
+          "kind": 0,
+          "label": "BR_PERSONA_LVUP0"
+        },
+        {
+          "index": 2,
+          "kind": 0,
+          "label": "BR_PLAYER_LVUP0"
+        },
+        {
+          "index": 3,
+          "kind": 0,
+          "label": "BR_PLAYER_LVUP"
+        },
+        {
+          "index": 4,
+          "kind": 0,
+          "label": "BR_PLAYER_BUFFADD0"
+        },
+        {
+          "index": 5,
+          "kind": 0,
+          "label": "BR_PLAYER_BUFFADD1"
+        },
+        {
+          "index": 6,
+          "kind": 0,
+          "label": "BR_PLAYER_PARAMUP"
+        },
+        {
+          "index": 7,
+          "kind": 0,
+          "label": "BR_PERSONA_SHIFT"
+        },
+        {
+          "index": 8,
+          "kind": 0,
+          "label": "BR_PERSONA_SKILLSHIFTCAN"
+        },
+        {
+          "index": 9,
+          "kind": 0,
+          "label": "BRP_GETSKILL"
+        },
+        {
+          "index": 10,
+          "kind": 0,
+          "label": "BRP_RMSKILL"
+        },
+        {
+          "index": 11,
+          "kind": 0,
+          "label": "BRP_RMSKILL_Q"
+        },
+        {
+          "index": 12,
+          "kind": 1,
+          "label": "BRP_RMSKILL_Q_YN"
+        },
+        {
+          "index": 13,
+          "kind": 0,
+          "label": "BRP_RMSKILL0"
+        },
+        {
+          "index": 14,
+          "kind": 0,
+          "label": "BRP_RMSKILL1"
+        },
+        {
+          "index": 15,
+          "kind": 0,
+          "label": "BRP_RMSKILL2"
+        },
+        {
+          "index": 16,
+          "kind": 0,
+          "label": "BRP_SHIFT"
+        },
+        {
+          "index": 17,
+          "kind": 1,
+          "label": "BRP_SHIFT_YN"
+        },
+        {
+          "index": 18,
+          "kind": 0,
+          "label": "BRP_SHIFT0"
+        },
+        {
+          "index": 19,
+          "kind": 0,
+          "label": "BRP_SHIFT1"
+        },
+        {
+          "index": 20,
+          "kind": 0,
+          "label": "BRP_SKILLSHIFT"
+        },
+        {
+          "index": 21,
+          "kind": 0,
+          "label": "BRP_SKILLSHIFTCANCEL"
+        },
+        {
+          "index": 22,
+          "kind": 0,
+          "label": "BRP_SKILLSHIFTUP"
+        },
+        {
+          "index": 23,
+          "kind": 0,
+          "label": "BRP_SKILLSHIFTCHANGE"
+        },
+        {
+          "index": 24,
+          "kind": 0,
+          "label": "BR_YUUKIUP0"
+        },
+        {
+          "index": 25,
+          "kind": 0,
+          "label": "BR_FRIEND_PS_LVUP0"
+        },
+        {
+          "index": 26,
+          "kind": 0,
+          "label": "BR_FRIEND_PERSONA_LVUP"
+        },
+        {
+          "index": 27,
+          "kind": 0,
+          "label": "BRP_FRIEND_RMSKILL_Q"
+        },
+        {
+          "index": 28,
+          "kind": 1,
+          "label": "BRP_FRIEND_RMSKILL_Q_YN"
+        }
+      ]
+    },
+    {
+      "path": "data_e.cpk::battle/result/simple_w.arc::sysmsg1_br.bmd",
+      "logical_bank_index": 1,
+      "member_size": 1600,
+      "declared_size": 1595,
+      "header": [
+        7,
+        1595,
+        826757965,
+        0,
+        1572,
+        23,
+        11
+      ],
+      "full_sha256": "4b8fb79436fd2400c4acba4ef63d4f23040f5229ce9dd736a1c1033ad802a79f",
+      "declared_sha256": "e6ea8ce4e32e221369378c83613e60a1ca460d5dcada6fcafdc971eade69882f",
+      "entries": [
+        {
+          "index": 0,
+          "kind": 0,
+          "label": "BR_RISE_GETSKILL_TRDEYE"
+        },
+        {
+          "index": 1,
+          "kind": 0,
+          "label": "BR_RISE_GETSKILL_ENMY_S"
+        },
+        {
+          "index": 2,
+          "kind": 0,
+          "label": "BR_RISE_GETSKILL_TRSR_S"
+        },
+        {
+          "index": 3,
+          "kind": 0,
+          "label": "BR_RISE_GETSKILL_W_SACH"
+        },
+        {
+          "index": 4,
+          "kind": 0,
+          "label": "BR_RISE_GETSKILL_IYA_HP"
+        },
+        {
+          "index": 5,
+          "kind": 0,
+          "label": "BR_RISE_GETSKILL_Z_ESCP"
+        },
+        {
+          "index": 6,
+          "kind": 0,
+          "label": "BR_RISE_GETSKILL_IYA_SP"
+        },
+        {
+          "index": 7,
+          "kind": 0,
+          "label": "BR_RISE_GETSKILL_HPSONG"
+        },
+        {
+          "index": 8,
+          "kind": 0,
+          "label": "BR_RISE_GETSKILL_SPSONG"
+        },
+        {
+          "index": 9,
+          "kind": 0,
+          "label": "BR_RISE_GETSKILL_H_ANYZ"
+        },
+        {
+          "index": 10,
+          "kind": 0,
+          "label": "BR_RISE_GETSKILL_F_ANYZ"
+        }
+      ]
+    },
+    {
+      "path": "data.cpk::battle/result/simple_w.arc::sysmsg0_br.bmd",
+      "logical_bank_index": 0,
+      "member_size": 3264,
+      "declared_size": 3247,
+      "header": [
+        7,
+        3247,
+        826757965,
+        0,
+        3180,
+        67,
+        29
+      ],
+      "full_sha256": "8ca2f7e8cab9010c9f5e8a3938362c12a1fa6c65497b8da38e66294bfa8a98b4",
+      "declared_sha256": "5d886b02ae45703ea4fe25fb96580efc37182206ac8c1bd3976bec3552c72b15",
+      "entries": [
+        {
+          "index": 0,
+          "kind": 0,
+          "label": "BR_PERSONA_LVUP"
+        },
+        {
+          "index": 1,
+          "kind": 0,
+          "label": "BR_PERSONA_LVUP0"
+        },
+        {
+          "index": 2,
+          "kind": 0,
+          "label": "BR_PLAYER_LVUP0"
+        },
+        {
+          "index": 3,
+          "kind": 0,
+          "label": "BR_PLAYER_LVUP"
+        },
+        {
+          "index": 4,
+          "kind": 0,
+          "label": "BR_PLAYER_BUFFADD0"
+        },
+        {
+          "index": 5,
+          "kind": 0,
+          "label": "BR_PLAYER_BUFFADD1"
+        },
+        {
+          "index": 6,
+          "kind": 0,
+          "label": "BR_PLAYER_PARAMUP"
+        },
+        {
+          "index": 7,
+          "kind": 0,
+          "label": "BR_PERSONA_SHIFT"
+        },
+        {
+          "index": 8,
+          "kind": 0,
+          "label": "BR_PERSONA_SKILLSHIFTCAN"
+        },
+        {
+          "index": 9,
+          "kind": 0,
+          "label": "BRP_GETSKILL"
+        },
+        {
+          "index": 10,
+          "kind": 0,
+          "label": "BRP_RMSKILL"
+        },
+        {
+          "index": 11,
+          "kind": 0,
+          "label": "BRP_RMSKILL_Q"
+        },
+        {
+          "index": 12,
+          "kind": 1,
+          "label": "BRP_RMSKILL_Q_YN"
+        },
+        {
+          "index": 13,
+          "kind": 0,
+          "label": "BRP_RMSKILL0"
+        },
+        {
+          "index": 14,
+          "kind": 0,
+          "label": "BRP_RMSKILL1"
+        },
+        {
+          "index": 15,
+          "kind": 0,
+          "label": "BRP_RMSKILL2"
+        },
+        {
+          "index": 16,
+          "kind": 0,
+          "label": "BRP_SHIFT"
+        },
+        {
+          "index": 17,
+          "kind": 1,
+          "label": "BRP_SHIFT_YN"
+        },
+        {
+          "index": 18,
+          "kind": 0,
+          "label": "BRP_SHIFT0"
+        },
+        {
+          "index": 19,
+          "kind": 0,
+          "label": "BRP_SHIFT1"
+        },
+        {
+          "index": 20,
+          "kind": 0,
+          "label": "BRP_SKILLSHIFT"
+        },
+        {
+          "index": 21,
+          "kind": 0,
+          "label": "BRP_SKILLSHIFTCANCEL"
+        },
+        {
+          "index": 22,
+          "kind": 0,
+          "label": "BRP_SKILLSHIFTUP"
+        },
+        {
+          "index": 23,
+          "kind": 0,
+          "label": "BRP_SKILLSHIFTCHANGE"
+        },
+        {
+          "index": 24,
+          "kind": 0,
+          "label": "BR_YUUKIUP0"
+        },
+        {
+          "index": 25,
+          "kind": 0,
+          "label": "BR_FRIEND_PS_LVUP0"
+        },
+        {
+          "index": 26,
+          "kind": 0,
+          "label": "BR_FRIEND_PERSONA_LVUP"
+        },
+        {
+          "index": 27,
+          "kind": 0,
+          "label": "BRP_FRIEND_RMSKILL_Q"
+        },
+        {
+          "index": 28,
+          "kind": 1,
+          "label": "BRP_FRIEND_RMSKILL_Q_YN"
+        }
+      ]
+    },
+    {
+      "path": "data.cpk::battle/result/simple_w.arc::sysmsg1_br.bmd",
+      "logical_bank_index": 1,
+      "member_size": 1440,
+      "declared_size": 1427,
+      "header": [
+        7,
+        1427,
+        826757965,
+        0,
+        1404,
+        23,
+        11
+      ],
+      "full_sha256": "50c5ae80e9eb77f8eaed263d602d5e0202c1347bfe666ba3c06994d82ad1ac2b",
+      "declared_sha256": "9a7d509ef0e3cc3d961760fe98183858508442e33d2a313198ed837714f88794",
+      "entries": [
+        {
+          "index": 0,
+          "kind": 0,
+          "label": "BR_RISE_GETSKILL_TRDEYE"
+        },
+        {
+          "index": 1,
+          "kind": 0,
+          "label": "BR_RISE_GETSKILL_ENMY_S"
+        },
+        {
+          "index": 2,
+          "kind": 0,
+          "label": "BR_RISE_GETSKILL_TRSR_S"
+        },
+        {
+          "index": 3,
+          "kind": 0,
+          "label": "BR_RISE_GETSKILL_W_SACH"
+        },
+        {
+          "index": 4,
+          "kind": 0,
+          "label": "BR_RISE_GETSKILL_IYA_HP"
+        },
+        {
+          "index": 5,
+          "kind": 0,
+          "label": "BR_RISE_GETSKILL_Z_ESCP"
+        },
+        {
+          "index": 6,
+          "kind": 0,
+          "label": "BR_RISE_GETSKILL_IYA_SP"
+        },
+        {
+          "index": 7,
+          "kind": 0,
+          "label": "BR_RISE_GETSKILL_HPSONG"
+        },
+        {
+          "index": 8,
+          "kind": 0,
+          "label": "BR_RISE_GETSKILL_SPSONG"
+        },
+        {
+          "index": 9,
+          "kind": 0,
+          "label": "BR_RISE_GETSKILL_H_ANYZ"
+        },
+        {
+          "index": 10,
+          "kind": 0,
+          "label": "BR_RISE_GETSKILL_F_ANYZ"
+        }
+      ]
+    }
+  ],
+  "nso_code_evidence": {
+    "simple_request": {
+      "start": "0xa2070",
+      "end": "0xa2150",
+      "worker_status": 0,
+      "sha256": "ad74996b9fc0ef2fc491833bd10820f24a450a8f87e5db5c5516b05188bf6e8b"
+    },
+    "simple_ready_copy_block": {
+      "start": "0xa19f0",
+      "end": "0xa1b80",
+      "kind": "observed code block, not guessed function boundary",
+      "sha256": "5d43ac592ec0df80ac3822d554d7837d770c1c712c6378f6756d7cbd3d9a4ad5",
+      "facts": "all4 actual requests polled; sprite banks448/450; two owned BMD copies inparent948/950; native requests released only after readiness"
+    },
+    "message_consumer_pair": {
+      "start": "0x9fc8c",
+      "end": "0x9fccc",
+      "sha256": "fa4ca01db1622ef3a392345a177d9a8a26be6f942bcbe05b901717647f749078",
+      "facts": "x3=parent948,x4=parent950, call2aa240; same ensuing partyId5, RNG3+1d4 control anchor as actual old paired entries0/1 caller"
+    },
+    "message_notice": {
+      "pc": "0xa1db4",
+      "golden_record": 24,
+      "label": "BR_YUUKIUP0",
+      "old_record": 23,
+      "evidence": "actual message-open mainbuffer948 then show24; compare old btlResultSimple.c:441-443 show23, not an inferred unchanged ordinal"
+    },
+    "message_release": {
+      "start": "0x9e8d0",
+      "end": "0x9e910",
+      "sha256": "3b88e17ab1ea9d59f61b581f08c2ec93ec2ebe76458936f834b66f4ddf9e02e8",
+      "facts": "actual parent cleanup frees each nonnull948/950 buffer before parentwork"
+    },
+    "shuffle_request": {
+      "start": "0xab7c0",
+      "end": "0xab9c0",
+      "worker_status": 0,
+      "sha256": "2cc3c1e24642722fca7f18fe3c59f449e9e9ebfac19c072d8b7cca58a07cb0e2"
+    },
+    "shuffle_adoption": {
+      "start": "0xab9c0",
+      "end": "0xac110",
+      "worker_status": 0,
+      "sha256": "90c30a9bafaf3a284a168a8a3fc8b1c9c10bf8591d1172bdff65cfbb00a0a1a9",
+      "facts": "real phase0/1/2 readiness, recipient data, copies and request release; no PS2 stream-copy assumption"
+    }
+  },
+  "negative_evidence": [
+    {
+      "finding": "Allthree old result filename rows had the same unqualified M2 candidate91a538(simple_w.arc). Actual two-element selector proves simple_s belongs to91a558; br_msg belongs to the native message pair, not an arbitrary simple_w string."
+    },
+    {
+      "finding": "The two old shuffle container names do not prove distinct native files: actual source always requests shuffle.arc, with the real variant retained in its named sprite-member row."
+    },
+    {
+      "finding": "Full native members are opaque authoritative resource spans, not partial equal-byte probes. Source members can include bytes beyond declared MSG1 size; complete copied/member size is preserved."
+    }
+  ],
+  "required_seams": [
+    {
+      "owner": "real calendar and locale resource producers",
+      "requirement": "Preserve actual signed16 current-date producerC9D40 and day-window flag getterCABA0; selector is(~flags)&1, index0 when bit0=1, index1 otherwise. The original PS2 result/shuffle loaders use the same negated bit0 form, but Golden resource values/shape differ. Do not fake date/flag state or hardcode one variant. Resolve logical paths through the actual selected-locale CPK mount; e/Japanese receipts corroborate packages, not permission to forceEnglish or infer all payloads equal. Filename source proof does not qualify the calendar data or UI asset payload semantics."
+    },
+    {
+      "owner": "native simple-result package producer and readiness",
+      "requirement": "Golden a2070 gets actual task work39fbb0, picks2-path array73bb78 and4-member variant row73bb38+index*32. Asset request2e4e30(member,0,selectedArc) publishes handles atwork5a0/5a8/5b0/5b8. Actual blocka19f8..a1a24 polls2e4fc0 for allfour; then request.data+8 sprite payloads become actual sprite banks448/450 via34be60. Wait real decoder readiness34bac0 before use/release. Do not feed native PAK-v2/SPR data into PS2 directory/sprite layouts or merely replace filename bytes without cutting over all file/adopt/draw consumers."
+    },
+    {
+      "owner": "native result-message pair and parent/child lifetime",
+      "requirement": "Legacy br_msg.bin has no single Golden pathname replacement. Bind its actual archive-entry0/1 consumers to the ordered native message set [sysmsg0_br.bmd,sysmsg1_br.bmd] inside the selected simple_w/s.arc. Blocka1a44..a1b0c reads complete actual member data/size, allocates/copies into real parent(work610) buffers948/950. Normal result/hero message opens use948; persona level-up creation receives948/950 as argumentsx3/x4 at9fc94/9fc98->2aa240, matching old entry0/1 argument order and independent partyId5/RNG3+468 control context. Parent destroy9e8d0 frees both buffers thenwork. Retain owned copies through real child-task/message lifetime; requests release2e5130 only after copy/adoption readiness. This is a PROVEN native member-bank counterpart, not a fabricated br_msg path, raw offset copy, all-message-ID equivalence or already-bound runtime supplier."
+    },
+    {
+      "owner": "actual Golden message record and result-state consumers",
+      "requirement": "Use real parent awards/party/XP/persona/notice state, script variables and callback flow. Source graph proves named member roles, not all old message ordinal identities: old simple notice23 explicitly becomes Golden24(BR_YUUKIUP0) at a1db4, while observed simple1/2 remain1/2. Bind all main/hero/friend/persona and shared level-up callers to actual Golden label/record identities using complete29/11 directories below; never blindly reuse old message numbers or truncate full native members to declared header size. The result message bank and all child consumers must be real, not an unused diagnostic shadow or standalone observer."
+    },
+    {
+      "owner": "unified shuffle package and actual stateful adoption",
+      "requirement": "Both old shuffle_w.bin/shuffle_s.bin requests become the actual single shuffle.arc container, but the real day-window index STILL selects three member names via73c080+index*24. Nativeab7c0 requests18 handles1cee8..1cf70:3sprites,9effect requests(including duplicateSHUFFLE01),4BMD,psc_basic,btlSflTable; resets phase1cf78=0. ab9c0 waits all18 through2e4fc0, adopts three sprite banks1ce58/60/68, copies actual typed payloads and starts psc viaC8E70, then phase1 waits34bac0 and aab00 before releasing/zeroing requests2e5130, validates native message at1ced0 through2d8240, and publishes phase2 complete. Preserve actual shuffle context/card/pattern/result state, named-member views and recipient lifetimes; no PS2 blob-index reinterpretation, fake ready bits or early freeing."
+    },
+    {
+      "owner": "mode isolation, selected object edges and runtime qualification",
+      "requirement": "Four path-valued rows author exact Golden NUL-terminated ARC names. When shuffle names shorten, zero the former semantic suffix between newNUL and oldNUL; retain only recorded old zero alignment tails. br_msg row requires the native two-member message-bank primitive, not a scalar path/string copier. Qualify both actual calendar variants, locale mount, ready/not-ready transitions, all named recipient buffers/handles, real message ID24 notice, persona paired arguments, request release and parent teardown, including every direct/translated/inlined/native legacy reference before runtimebound. Source class remains pending-seam until GoldenM6b binds and witnesses these real paths."
+    }
+  ],
+  "admissions": [
+    {
+      "address": "0x00629110",
+      "ps2_size": 32,
+      "role": "seasonal result package path",
+      "variant": 0,
+      "ps2_pointer_field": "0x763690",
+      "name": "battle/result/simple_w.arc",
+      "golden": {
+        "kind": "resource-package-path",
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x91a538",
+        "raw_offset": 9539896,
+        "offset": 603448,
+        "size": 27,
+        "sha256": "d482ab9b05e9c1b9e980b5ce12fa51788bdd3749120f2e9ef5a3b9c02b2e2cfd",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "source_group": "L1-C5-result-shuffle-resource-identities-20261113",
+        "mapping_proven": true,
+        "nso_literal": "0x6139ab",
+        "variant": 0,
+        "asset_receipts": "package_receipts"
+      },
+      "layout": {
+        "kind": "semantic-native-archive-filename",
+        "ps2_live_size": 27,
+        "golden_live_size": 27,
+        "zero_former_semantic_suffix": {
+          "offset": 27,
+          "size": 0
+        },
+        "retained_tail": {
+          "offset": 27,
+          "size": 5,
+          "sha256": "8855508aade16ec573d21e6a485dfd0a7624085c1a14b5ecdd6485de0c6839a4"
+        },
+        "copy_policy": "Author Golden NUL path, clear shortened old semantic suffix, preserve only recorded zero alignment. Route actual native member/cache readers, never PS2 archive decoders."
+      },
+      "required_seams": [
+        {
+          "owner": "real calendar and locale resource producers",
+          "requirement": "Preserve actual signed16 current-date producerC9D40 and day-window flag getterCABA0; selector is(~flags)&1, index0 when bit0=1, index1 otherwise. The original PS2 result/shuffle loaders use the same negated bit0 form, but Golden resource values/shape differ. Do not fake date/flag state or hardcode one variant. Resolve logical paths through the actual selected-locale CPK mount; e/Japanese receipts corroborate packages, not permission to forceEnglish or infer all payloads equal. Filename source proof does not qualify the calendar data or UI asset payload semantics."
+        },
+        {
+          "owner": "native simple-result package producer and readiness",
+          "requirement": "Golden a2070 gets actual task work39fbb0, picks2-path array73bb78 and4-member variant row73bb38+index*32. Asset request2e4e30(member,0,selectedArc) publishes handles atwork5a0/5a8/5b0/5b8. Actual blocka19f8..a1a24 polls2e4fc0 for allfour; then request.data+8 sprite payloads become actual sprite banks448/450 via34be60. Wait real decoder readiness34bac0 before use/release. Do not feed native PAK-v2/SPR data into PS2 directory/sprite layouts or merely replace filename bytes without cutting over all file/adopt/draw consumers."
+        },
+        {
+          "owner": "native result-message pair and parent/child lifetime",
+          "requirement": "Legacy br_msg.bin has no single Golden pathname replacement. Bind its actual archive-entry0/1 consumers to the ordered native message set [sysmsg0_br.bmd,sysmsg1_br.bmd] inside the selected simple_w/s.arc. Blocka1a44..a1b0c reads complete actual member data/size, allocates/copies into real parent(work610) buffers948/950. Normal result/hero message opens use948; persona level-up creation receives948/950 as argumentsx3/x4 at9fc94/9fc98->2aa240, matching old entry0/1 argument order and independent partyId5/RNG3+468 control context. Parent destroy9e8d0 frees both buffers thenwork. Retain owned copies through real child-task/message lifetime; requests release2e5130 only after copy/adoption readiness. This is a PROVEN native member-bank counterpart, not a fabricated br_msg path, raw offset copy, all-message-ID equivalence or already-bound runtime supplier."
+        },
+        {
+          "owner": "actual Golden message record and result-state consumers",
+          "requirement": "Use real parent awards/party/XP/persona/notice state, script variables and callback flow. Source graph proves named member roles, not all old message ordinal identities: old simple notice23 explicitly becomes Golden24(BR_YUUKIUP0) at a1db4, while observed simple1/2 remain1/2. Bind all main/hero/friend/persona and shared level-up callers to actual Golden label/record identities using complete29/11 directories below; never blindly reuse old message numbers or truncate full native members to declared header size. The result message bank and all child consumers must be real, not an unused diagnostic shadow or standalone observer."
+        },
+        {
+          "owner": "unified shuffle package and actual stateful adoption",
+          "requirement": "Both old shuffle_w.bin/shuffle_s.bin requests become the actual single shuffle.arc container, but the real day-window index STILL selects three member names via73c080+index*24. Nativeab7c0 requests18 handles1cee8..1cf70:3sprites,9effect requests(including duplicateSHUFFLE01),4BMD,psc_basic,btlSflTable; resets phase1cf78=0. ab9c0 waits all18 through2e4fc0, adopts three sprite banks1ce58/60/68, copies actual typed payloads and starts psc viaC8E70, then phase1 waits34bac0 and aab00 before releasing/zeroing requests2e5130, validates native message at1ced0 through2d8240, and publishes phase2 complete. Preserve actual shuffle context/card/pattern/result state, named-member views and recipient lifetimes; no PS2 blob-index reinterpretation, fake ready bits or early freeing."
+        },
+        {
+          "owner": "mode isolation, selected object edges and runtime qualification",
+          "requirement": "Four path-valued rows author exact Golden NUL-terminated ARC names. When shuffle names shorten, zero the former semantic suffix between newNUL and oldNUL; retain only recorded old zero alignment tails. br_msg row requires the native two-member message-bank primitive, not a scalar path/string copier. Qualify both actual calendar variants, locale mount, ready/not-ready transitions, all named recipient buffers/handles, real message ID24 notice, persona paired arguments, request release and parent teardown, including every direct/translated/inlined/native legacy reference before runtimebound. Source class remains pending-seam until GoldenM6b binds and witnesses these real paths."
+        }
+      ]
+    },
+    {
+      "address": "0x00629130",
+      "ps2_size": 32,
+      "role": "seasonal result package path",
+      "variant": 1,
+      "ps2_pointer_field": "0x763694",
+      "name": "battle/result/simple_s.arc",
+      "golden": {
+        "kind": "resource-package-path",
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x91a558",
+        "raw_offset": 9539928,
+        "offset": 603480,
+        "size": 27,
+        "sha256": "2a1b26a309e15e952eb6279477a72ef48962a4d2bd3afac90274b896f20f2478",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "source_group": "L1-C5-result-shuffle-resource-identities-20261113",
+        "mapping_proven": true,
+        "nso_literal": "0x5d2e91",
+        "variant": 1,
+        "asset_receipts": "package_receipts"
+      },
+      "layout": {
+        "kind": "semantic-native-archive-filename",
+        "ps2_live_size": 27,
+        "golden_live_size": 27,
+        "zero_former_semantic_suffix": {
+          "offset": 27,
+          "size": 0
+        },
+        "retained_tail": {
+          "offset": 27,
+          "size": 5,
+          "sha256": "8855508aade16ec573d21e6a485dfd0a7624085c1a14b5ecdd6485de0c6839a4"
+        },
+        "copy_policy": "Author Golden NUL path, clear shortened old semantic suffix, preserve only recorded zero alignment. Route actual native member/cache readers, never PS2 archive decoders."
+      },
+      "required_seams": [
+        {
+          "owner": "real calendar and locale resource producers",
+          "requirement": "Preserve actual signed16 current-date producerC9D40 and day-window flag getterCABA0; selector is(~flags)&1, index0 when bit0=1, index1 otherwise. The original PS2 result/shuffle loaders use the same negated bit0 form, but Golden resource values/shape differ. Do not fake date/flag state or hardcode one variant. Resolve logical paths through the actual selected-locale CPK mount; e/Japanese receipts corroborate packages, not permission to forceEnglish or infer all payloads equal. Filename source proof does not qualify the calendar data or UI asset payload semantics."
+        },
+        {
+          "owner": "native simple-result package producer and readiness",
+          "requirement": "Golden a2070 gets actual task work39fbb0, picks2-path array73bb78 and4-member variant row73bb38+index*32. Asset request2e4e30(member,0,selectedArc) publishes handles atwork5a0/5a8/5b0/5b8. Actual blocka19f8..a1a24 polls2e4fc0 for allfour; then request.data+8 sprite payloads become actual sprite banks448/450 via34be60. Wait real decoder readiness34bac0 before use/release. Do not feed native PAK-v2/SPR data into PS2 directory/sprite layouts or merely replace filename bytes without cutting over all file/adopt/draw consumers."
+        },
+        {
+          "owner": "native result-message pair and parent/child lifetime",
+          "requirement": "Legacy br_msg.bin has no single Golden pathname replacement. Bind its actual archive-entry0/1 consumers to the ordered native message set [sysmsg0_br.bmd,sysmsg1_br.bmd] inside the selected simple_w/s.arc. Blocka1a44..a1b0c reads complete actual member data/size, allocates/copies into real parent(work610) buffers948/950. Normal result/hero message opens use948; persona level-up creation receives948/950 as argumentsx3/x4 at9fc94/9fc98->2aa240, matching old entry0/1 argument order and independent partyId5/RNG3+468 control context. Parent destroy9e8d0 frees both buffers thenwork. Retain owned copies through real child-task/message lifetime; requests release2e5130 only after copy/adoption readiness. This is a PROVEN native member-bank counterpart, not a fabricated br_msg path, raw offset copy, all-message-ID equivalence or already-bound runtime supplier."
+        },
+        {
+          "owner": "actual Golden message record and result-state consumers",
+          "requirement": "Use real parent awards/party/XP/persona/notice state, script variables and callback flow. Source graph proves named member roles, not all old message ordinal identities: old simple notice23 explicitly becomes Golden24(BR_YUUKIUP0) at a1db4, while observed simple1/2 remain1/2. Bind all main/hero/friend/persona and shared level-up callers to actual Golden label/record identities using complete29/11 directories below; never blindly reuse old message numbers or truncate full native members to declared header size. The result message bank and all child consumers must be real, not an unused diagnostic shadow or standalone observer."
+        },
+        {
+          "owner": "unified shuffle package and actual stateful adoption",
+          "requirement": "Both old shuffle_w.bin/shuffle_s.bin requests become the actual single shuffle.arc container, but the real day-window index STILL selects three member names via73c080+index*24. Nativeab7c0 requests18 handles1cee8..1cf70:3sprites,9effect requests(including duplicateSHUFFLE01),4BMD,psc_basic,btlSflTable; resets phase1cf78=0. ab9c0 waits all18 through2e4fc0, adopts three sprite banks1ce58/60/68, copies actual typed payloads and starts psc viaC8E70, then phase1 waits34bac0 and aab00 before releasing/zeroing requests2e5130, validates native message at1ced0 through2d8240, and publishes phase2 complete. Preserve actual shuffle context/card/pattern/result state, named-member views and recipient lifetimes; no PS2 blob-index reinterpretation, fake ready bits or early freeing."
+        },
+        {
+          "owner": "mode isolation, selected object edges and runtime qualification",
+          "requirement": "Four path-valued rows author exact Golden NUL-terminated ARC names. When shuffle names shorten, zero the former semantic suffix between newNUL and oldNUL; retain only recorded old zero alignment tails. br_msg row requires the native two-member message-bank primitive, not a scalar path/string copier. Qualify both actual calendar variants, locale mount, ready/not-ready transitions, all named recipient buffers/handles, real message ID24 notice, persona paired arguments, request release and parent teardown, including every direct/translated/inlined/native legacy reference before runtimebound. Source class remains pending-seam until GoldenM6b binds and witnesses these real paths."
+        }
+      ]
+    },
+    {
+      "address": "0x0064e9e0",
+      "ps2_size": 32,
+      "role": "unified shuffle package path",
+      "variant": 0,
+      "ps2_pointer_field": "0x763ab8",
+      "name": "battle/result/shuffle.arc",
+      "golden": {
+        "kind": "resource-package-path",
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x91a798",
+        "raw_offset": 9540504,
+        "offset": 604056,
+        "size": 26,
+        "sha256": "b98d4f4ab738e096e36ac3c155172cdc0a7601a245f6c4cd8b825794f4821fef",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "source_group": "L1-C5-result-shuffle-resource-identities-20261113",
+        "mapping_proven": true,
+        "nso_literal": "0x60423b",
+        "variant": 0,
+        "asset_receipts": "package_receipts"
+      },
+      "layout": {
+        "kind": "semantic-native-archive-filename",
+        "ps2_live_size": 28,
+        "golden_live_size": 26,
+        "zero_former_semantic_suffix": {
+          "offset": 26,
+          "size": 2
+        },
+        "retained_tail": {
+          "offset": 28,
+          "size": 4,
+          "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+        },
+        "copy_policy": "Author Golden NUL path, clear shortened old semantic suffix, preserve only recorded zero alignment. Route actual native member/cache readers, never PS2 archive decoders."
+      },
+      "required_seams": [
+        {
+          "owner": "real calendar and locale resource producers",
+          "requirement": "Preserve actual signed16 current-date producerC9D40 and day-window flag getterCABA0; selector is(~flags)&1, index0 when bit0=1, index1 otherwise. The original PS2 result/shuffle loaders use the same negated bit0 form, but Golden resource values/shape differ. Do not fake date/flag state or hardcode one variant. Resolve logical paths through the actual selected-locale CPK mount; e/Japanese receipts corroborate packages, not permission to forceEnglish or infer all payloads equal. Filename source proof does not qualify the calendar data or UI asset payload semantics."
+        },
+        {
+          "owner": "native simple-result package producer and readiness",
+          "requirement": "Golden a2070 gets actual task work39fbb0, picks2-path array73bb78 and4-member variant row73bb38+index*32. Asset request2e4e30(member,0,selectedArc) publishes handles atwork5a0/5a8/5b0/5b8. Actual blocka19f8..a1a24 polls2e4fc0 for allfour; then request.data+8 sprite payloads become actual sprite banks448/450 via34be60. Wait real decoder readiness34bac0 before use/release. Do not feed native PAK-v2/SPR data into PS2 directory/sprite layouts or merely replace filename bytes without cutting over all file/adopt/draw consumers."
+        },
+        {
+          "owner": "native result-message pair and parent/child lifetime",
+          "requirement": "Legacy br_msg.bin has no single Golden pathname replacement. Bind its actual archive-entry0/1 consumers to the ordered native message set [sysmsg0_br.bmd,sysmsg1_br.bmd] inside the selected simple_w/s.arc. Blocka1a44..a1b0c reads complete actual member data/size, allocates/copies into real parent(work610) buffers948/950. Normal result/hero message opens use948; persona level-up creation receives948/950 as argumentsx3/x4 at9fc94/9fc98->2aa240, matching old entry0/1 argument order and independent partyId5/RNG3+468 control context. Parent destroy9e8d0 frees both buffers thenwork. Retain owned copies through real child-task/message lifetime; requests release2e5130 only after copy/adoption readiness. This is a PROVEN native member-bank counterpart, not a fabricated br_msg path, raw offset copy, all-message-ID equivalence or already-bound runtime supplier."
+        },
+        {
+          "owner": "actual Golden message record and result-state consumers",
+          "requirement": "Use real parent awards/party/XP/persona/notice state, script variables and callback flow. Source graph proves named member roles, not all old message ordinal identities: old simple notice23 explicitly becomes Golden24(BR_YUUKIUP0) at a1db4, while observed simple1/2 remain1/2. Bind all main/hero/friend/persona and shared level-up callers to actual Golden label/record identities using complete29/11 directories below; never blindly reuse old message numbers or truncate full native members to declared header size. The result message bank and all child consumers must be real, not an unused diagnostic shadow or standalone observer."
+        },
+        {
+          "owner": "unified shuffle package and actual stateful adoption",
+          "requirement": "Both old shuffle_w.bin/shuffle_s.bin requests become the actual single shuffle.arc container, but the real day-window index STILL selects three member names via73c080+index*24. Nativeab7c0 requests18 handles1cee8..1cf70:3sprites,9effect requests(including duplicateSHUFFLE01),4BMD,psc_basic,btlSflTable; resets phase1cf78=0. ab9c0 waits all18 through2e4fc0, adopts three sprite banks1ce58/60/68, copies actual typed payloads and starts psc viaC8E70, then phase1 waits34bac0 and aab00 before releasing/zeroing requests2e5130, validates native message at1ced0 through2d8240, and publishes phase2 complete. Preserve actual shuffle context/card/pattern/result state, named-member views and recipient lifetimes; no PS2 blob-index reinterpretation, fake ready bits or early freeing."
+        },
+        {
+          "owner": "mode isolation, selected object edges and runtime qualification",
+          "requirement": "Four path-valued rows author exact Golden NUL-terminated ARC names. When shuffle names shorten, zero the former semantic suffix between newNUL and oldNUL; retain only recorded old zero alignment tails. br_msg row requires the native two-member message-bank primitive, not a scalar path/string copier. Qualify both actual calendar variants, locale mount, ready/not-ready transitions, all named recipient buffers/handles, real message ID24 notice, persona paired arguments, request release and parent teardown, including every direct/translated/inlined/native legacy reference before runtimebound. Source class remains pending-seam until GoldenM6b binds and witnesses these real paths."
+        }
+      ]
+    },
+    {
+      "address": "0x0064ea00",
+      "ps2_size": 32,
+      "role": "unified shuffle package path",
+      "variant": 1,
+      "ps2_pointer_field": "0x763abc",
+      "name": "battle/result/shuffle.arc",
+      "golden": {
+        "kind": "resource-package-path",
+        "container": "P4G.exe",
+        "section": ".sdata",
+        "rva": "0x91a798",
+        "raw_offset": 9540504,
+        "offset": 604056,
+        "size": 26,
+        "sha256": "b98d4f4ab738e096e36ac3c155172cdc0a7601a245f6c4cd8b825794f4821fef",
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "source_build": 10836033,
+        "source_group": "L1-C5-result-shuffle-resource-identities-20261113",
+        "mapping_proven": true,
+        "nso_literal": "0x60423b",
+        "variant": 1,
+        "asset_receipts": "package_receipts"
+      },
+      "layout": {
+        "kind": "semantic-native-archive-filename",
+        "ps2_live_size": 28,
+        "golden_live_size": 26,
+        "zero_former_semantic_suffix": {
+          "offset": 26,
+          "size": 2
+        },
+        "retained_tail": {
+          "offset": 28,
+          "size": 4,
+          "sha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+        },
+        "copy_policy": "Author Golden NUL path, clear shortened old semantic suffix, preserve only recorded zero alignment. Route actual native member/cache readers, never PS2 archive decoders."
+      },
+      "required_seams": [
+        {
+          "owner": "real calendar and locale resource producers",
+          "requirement": "Preserve actual signed16 current-date producerC9D40 and day-window flag getterCABA0; selector is(~flags)&1, index0 when bit0=1, index1 otherwise. The original PS2 result/shuffle loaders use the same negated bit0 form, but Golden resource values/shape differ. Do not fake date/flag state or hardcode one variant. Resolve logical paths through the actual selected-locale CPK mount; e/Japanese receipts corroborate packages, not permission to forceEnglish or infer all payloads equal. Filename source proof does not qualify the calendar data or UI asset payload semantics."
+        },
+        {
+          "owner": "native simple-result package producer and readiness",
+          "requirement": "Golden a2070 gets actual task work39fbb0, picks2-path array73bb78 and4-member variant row73bb38+index*32. Asset request2e4e30(member,0,selectedArc) publishes handles atwork5a0/5a8/5b0/5b8. Actual blocka19f8..a1a24 polls2e4fc0 for allfour; then request.data+8 sprite payloads become actual sprite banks448/450 via34be60. Wait real decoder readiness34bac0 before use/release. Do not feed native PAK-v2/SPR data into PS2 directory/sprite layouts or merely replace filename bytes without cutting over all file/adopt/draw consumers."
+        },
+        {
+          "owner": "native result-message pair and parent/child lifetime",
+          "requirement": "Legacy br_msg.bin has no single Golden pathname replacement. Bind its actual archive-entry0/1 consumers to the ordered native message set [sysmsg0_br.bmd,sysmsg1_br.bmd] inside the selected simple_w/s.arc. Blocka1a44..a1b0c reads complete actual member data/size, allocates/copies into real parent(work610) buffers948/950. Normal result/hero message opens use948; persona level-up creation receives948/950 as argumentsx3/x4 at9fc94/9fc98->2aa240, matching old entry0/1 argument order and independent partyId5/RNG3+468 control context. Parent destroy9e8d0 frees both buffers thenwork. Retain owned copies through real child-task/message lifetime; requests release2e5130 only after copy/adoption readiness. This is a PROVEN native member-bank counterpart, not a fabricated br_msg path, raw offset copy, all-message-ID equivalence or already-bound runtime supplier."
+        },
+        {
+          "owner": "actual Golden message record and result-state consumers",
+          "requirement": "Use real parent awards/party/XP/persona/notice state, script variables and callback flow. Source graph proves named member roles, not all old message ordinal identities: old simple notice23 explicitly becomes Golden24(BR_YUUKIUP0) at a1db4, while observed simple1/2 remain1/2. Bind all main/hero/friend/persona and shared level-up callers to actual Golden label/record identities using complete29/11 directories below; never blindly reuse old message numbers or truncate full native members to declared header size. The result message bank and all child consumers must be real, not an unused diagnostic shadow or standalone observer."
+        },
+        {
+          "owner": "unified shuffle package and actual stateful adoption",
+          "requirement": "Both old shuffle_w.bin/shuffle_s.bin requests become the actual single shuffle.arc container, but the real day-window index STILL selects three member names via73c080+index*24. Nativeab7c0 requests18 handles1cee8..1cf70:3sprites,9effect requests(including duplicateSHUFFLE01),4BMD,psc_basic,btlSflTable; resets phase1cf78=0. ab9c0 waits all18 through2e4fc0, adopts three sprite banks1ce58/60/68, copies actual typed payloads and starts psc viaC8E70, then phase1 waits34bac0 and aab00 before releasing/zeroing requests2e5130, validates native message at1ced0 through2d8240, and publishes phase2 complete. Preserve actual shuffle context/card/pattern/result state, named-member views and recipient lifetimes; no PS2 blob-index reinterpretation, fake ready bits or early freeing."
+        },
+        {
+          "owner": "mode isolation, selected object edges and runtime qualification",
+          "requirement": "Four path-valued rows author exact Golden NUL-terminated ARC names. When shuffle names shorten, zero the former semantic suffix between newNUL and oldNUL; retain only recorded old zero alignment tails. br_msg row requires the native two-member message-bank primitive, not a scalar path/string copier. Qualify both actual calendar variants, locale mount, ready/not-ready transitions, all named recipient buffers/handles, real message ID24 notice, persona paired arguments, request release and parent teardown, including every direct/translated/inlined/native legacy reference before runtimebound. Source class remains pending-seam until GoldenM6b binds and witnesses these real paths."
+        }
+      ]
+    },
+    {
+      "address": "0x00629150",
+      "ps2_size": 32,
+      "role": "result-message ordered native member-bank identity",
+      "ps2_pointer_field": "0x7636a0",
+      "name": "BattleResultMessageSet",
+      "golden": {
+        "kind": "logical-native-member-bank",
+        "container": "Golden logical VFS through current selected simple_w.arc/simple_s.arc",
+        "source_build": 10836033,
+        "source_group": "L1-C5-result-shuffle-resource-identities-20261113",
+        "mapping_proven": true,
+        "image_sha256": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+        "ordered_members": [
+          "sysmsg0_br.bmd",
+          "sysmsg1_br.bmd"
+        ],
+        "native_buffers": [
+          "parent+0x948",
+          "parent+0x950"
+        ],
+        "variant_packages": [
+          "battle/result/simple_w.arc",
+          "battle/result/simple_s.arc"
+        ],
+        "source_spans": "message_members and package_receipts; actual EXE/NSO member-name fields in golden_resource_layout",
+        "scalar_path_replacement": false
+      },
+      "layout": {
+        "kind": "semantic-native-two-member-result-message-bank",
+        "ps2_original_filename": "battle/result/br_msg.bin",
+        "ps2_live_size": 25,
+        "retained_tail": {
+          "offset": 25,
+          "size": 7,
+          "sha256": "837885c8f8091aeaeb9ec3c3f85a6ff470a415e610b8ba3e49f9b33c9cf9d619"
+        },
+        "native_value_shape": "two real owned native MSG1 buffers in actual parent slots948/950, consumed in observed order by result/persona children",
+        "copy_policy": "Native bank authoring required: acquire actual paired members, copy/publish real owned buffers, route all legacy entry0/1 consumers and preserve lifetime. No invented standalone br_msg filename, arbitrary first-file choice, raw byte/string supplier, old-ID assumption or unused shadow."
+      },
+      "required_seams": [
+        {
+          "owner": "real calendar and locale resource producers",
+          "requirement": "Preserve actual signed16 current-date producerC9D40 and day-window flag getterCABA0; selector is(~flags)&1, index0 when bit0=1, index1 otherwise. The original PS2 result/shuffle loaders use the same negated bit0 form, but Golden resource values/shape differ. Do not fake date/flag state or hardcode one variant. Resolve logical paths through the actual selected-locale CPK mount; e/Japanese receipts corroborate packages, not permission to forceEnglish or infer all payloads equal. Filename source proof does not qualify the calendar data or UI asset payload semantics."
+        },
+        {
+          "owner": "native simple-result package producer and readiness",
+          "requirement": "Golden a2070 gets actual task work39fbb0, picks2-path array73bb78 and4-member variant row73bb38+index*32. Asset request2e4e30(member,0,selectedArc) publishes handles atwork5a0/5a8/5b0/5b8. Actual blocka19f8..a1a24 polls2e4fc0 for allfour; then request.data+8 sprite payloads become actual sprite banks448/450 via34be60. Wait real decoder readiness34bac0 before use/release. Do not feed native PAK-v2/SPR data into PS2 directory/sprite layouts or merely replace filename bytes without cutting over all file/adopt/draw consumers."
+        },
+        {
+          "owner": "native result-message pair and parent/child lifetime",
+          "requirement": "Legacy br_msg.bin has no single Golden pathname replacement. Bind its actual archive-entry0/1 consumers to the ordered native message set [sysmsg0_br.bmd,sysmsg1_br.bmd] inside the selected simple_w/s.arc. Blocka1a44..a1b0c reads complete actual member data/size, allocates/copies into real parent(work610) buffers948/950. Normal result/hero message opens use948; persona level-up creation receives948/950 as argumentsx3/x4 at9fc94/9fc98->2aa240, matching old entry0/1 argument order and independent partyId5/RNG3+468 control context. Parent destroy9e8d0 frees both buffers thenwork. Retain owned copies through real child-task/message lifetime; requests release2e5130 only after copy/adoption readiness. This is a PROVEN native member-bank counterpart, not a fabricated br_msg path, raw offset copy, all-message-ID equivalence or already-bound runtime supplier."
+        },
+        {
+          "owner": "actual Golden message record and result-state consumers",
+          "requirement": "Use real parent awards/party/XP/persona/notice state, script variables and callback flow. Source graph proves named member roles, not all old message ordinal identities: old simple notice23 explicitly becomes Golden24(BR_YUUKIUP0) at a1db4, while observed simple1/2 remain1/2. Bind all main/hero/friend/persona and shared level-up callers to actual Golden label/record identities using complete29/11 directories below; never blindly reuse old message numbers or truncate full native members to declared header size. The result message bank and all child consumers must be real, not an unused diagnostic shadow or standalone observer."
+        },
+        {
+          "owner": "unified shuffle package and actual stateful adoption",
+          "requirement": "Both old shuffle_w.bin/shuffle_s.bin requests become the actual single shuffle.arc container, but the real day-window index STILL selects three member names via73c080+index*24. Nativeab7c0 requests18 handles1cee8..1cf70:3sprites,9effect requests(including duplicateSHUFFLE01),4BMD,psc_basic,btlSflTable; resets phase1cf78=0. ab9c0 waits all18 through2e4fc0, adopts three sprite banks1ce58/60/68, copies actual typed payloads and starts psc viaC8E70, then phase1 waits34bac0 and aab00 before releasing/zeroing requests2e5130, validates native message at1ced0 through2d8240, and publishes phase2 complete. Preserve actual shuffle context/card/pattern/result state, named-member views and recipient lifetimes; no PS2 blob-index reinterpretation, fake ready bits or early freeing."
+        },
+        {
+          "owner": "mode isolation, selected object edges and runtime qualification",
+          "requirement": "Four path-valued rows author exact Golden NUL-terminated ARC names. When shuffle names shorten, zero the former semantic suffix between newNUL and oldNUL; retain only recorded old zero alignment tails. br_msg row requires the native two-member message-bank primitive, not a scalar path/string copier. Qualify both actual calendar variants, locale mount, ready/not-ready transitions, all named recipient buffers/handles, real message ID24 notice, persona paired arguments, request release and parent teardown, including every direct/translated/inlined/native legacy reference before runtimebound. Source class remains pending-seam until GoldenM6b binds and witnesses these real paths."
+        }
+      ]
+    }
+  ],
+  "counts": {
+    "new_PROVEN": 5,
+    "new_ps2_partition_bytes": 160,
+    "cohort_PROVEN": 60,
+    "cohort_proven_bytes": 56469,
+    "cohort_OPEN_retain": 17,
+    "cohort_open_bytes": 2797,
+    "assigned_objects": 77,
+    "assigned_ps2_bytes": 59266,
+    "PROVEN-code": 0,
+    "PROVEN-layout": 0,
+    "D10a": 0,
+    "D10b": 0,
+    "D10c": 0
+  }
+}

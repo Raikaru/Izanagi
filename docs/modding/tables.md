@@ -2126,6 +2126,11 @@ rows, the `transfer` attribute and the `P4_SIDE_BREAK_ON_HIT` flag;
 `table-source.status@3` adds the `enemy-scale` attribute. Hard mode's
 Freeze and Shock are the first users (leaves 24 and 25 are reserved for
 `p4pc.hardmode`; their affinity-only rows use separate `[element-header]` art).
+Revision `table-source.status@4` adds end-of-turn ticks (flag 16) and the
+enemy-to-party rider refusal (flag 32). A tick is 10% of max HP, floored,
+nonlethal, and expires after two ticks; the hard-mode boss entity set uses
+3% instead. `stage.damage@4` exposes the held `target_side_ailment` leaf on
+the immutable hit snapshot.
 
 ```xml
 <element id="24" flags="4" family="24" order="24" key="p4pc.hardmode:freeze"

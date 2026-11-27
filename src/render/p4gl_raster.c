@@ -59,6 +59,7 @@ typedef struct RasterSlot {
     uint8_t mipL;       /* TEX1.L (func_003f68a0): 0..3 */
     P4ContentRaster *content;
     uint8_t content_origin;
+    uint8_t aKnown, aLo, aHi; /* the alpha range of the uploaded pixels (p4gl_raster_alpha_range); valid only while aKnown */
 } RasterSlot;
 
 static RasterSlot sSlots[P4GL_RASTER_SLOTS];
@@ -114,6 +115,7 @@ static RasterSlot *slotClaim(P4RwRaster *key)
         freeSlot->texW = freeSlot->texH = 0;
         freeSlot->content = NULL;
         freeSlot->content_origin = P4_TEXTURE_UNKNOWN;
+        freeSlot->aKnown = 0;
     }
     return freeSlot;
 }
@@ -365,6 +367,7 @@ static int32_t pow2Ceil(int32_t v)
  * top-left corner; the padding is transparent black and is not sampled by those coordinates. */
 static void uploadRgba8(RasterSlot *s, int32_t w, int32_t h, const uint8_t *rgba)
 {
+    s->aKnown = 0; /* whoever knows the pixels sets it after this call */
     if (p4_battle_sim_renderless) {
         if (!s->texture) p4gl_glGenTextures(1, &s->texture);
         return;
@@ -393,6 +396,42 @@ static void uploadRgba8(RasterSlot *s, int32_t w, int32_t h, const uint8_t *rgba
     p4gl_glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, rgba);
 }
 
+/* The alpha range of a texture's pixels, kept for the alpha-test pass culling of the atomic draw (p4gl_passcull.h): a draw whose fragment alpha cannot reach the
+ * test's threshold, or cannot fall short of it, needs only one of the two passes the GS's FB_ONLY failure mode costs. Only a plain texture raster of power-of-two size
+ * qualifies: a padded texture's transparent margin and a frame or camera texture's GPU-written pixels are not in these bytes. */
+static void noteAlphaRange(const P4RwRaster *r, RasterSlot *s, const uint8_t *rgba)
+{
+    const uint32_t type = r->cType & P4_RASTER_TYPE_MASK;
+    const int32_t w = r->width, h = r->height;
+    uint8_t lo = 255, hi = 0;
+
+    s->aKnown = 0;
+    if ((type != P4_RASTER_TYPE_NORMAL && type != P4_RASTER_TYPE_TEXTURE) || s->frame || w <= 0 || h <= 0 || pow2Ceil(w) != w || pow2Ceil(h) != h) {
+        return;
+    }
+    for (size_t i = 3, n = (size_t)w * (size_t)h * 4u; i < n; i += 4) {
+        const uint8_t a = rgba[i];
+
+        lo = a < lo ? a : lo;
+        hi = a > hi ? a : hi;
+    }
+    s->aLo = lo;
+    s->aHi = hi;
+    s->aKnown = 1;
+}
+
+int p4gl_raster_alpha_range(const P4RwRaster *r, unsigned *lo, unsigned *hi)
+{
+    const RasterSlot *s = r != NULL ? slotFind(r) : NULL;
+
+    if (s == NULL || !s->aKnown || s->texture == 0) {
+        return 0;
+    }
+    *lo = s->aLo;
+    *hi = s->aHi;
+    return 1;
+}
+
 /* Converts and uploads the whole level 0 shadow. Returns 0 on success. */
 static int uploadRaster(P4RwRaster *r, RasterSlot *s)
 {
@@ -411,6 +450,7 @@ static int uploadRaster(P4RwRaster *r, RasterSlot *s)
     convertToRgba8(r, s->pixels, rgba);
     if (p4_texture_dump_active()) captureRaster(r,s,rgba);
     uploadRgba8(s, r->width, r->height, rgba);
+    noteAlphaRange(r, s, rgba);
     free(rgba);
     return 0;
 }
@@ -885,6 +925,7 @@ static RenderTarget *targetPrepare(P4RwRaster *r)
     }
     t->width = s->texW = (int32_t)w;
     t->height = s->texH = (int32_t)h;
+    s->aKnown = 0;
     return t;
 }
 
@@ -1000,6 +1041,7 @@ static void frameCopy(RasterSlot *s)
         s->texW = w;
         s->texH = h;
     }
+    s->aKnown = 0;
     if (sCopyFbo == 0) {
         p4gl_glGenFramebuffers(1, &sCopyFbo);
     }

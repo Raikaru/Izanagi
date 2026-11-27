@@ -1,4 +1,5 @@
 #include "p4pc/packs.h"
+#include "p4pc/hostpath.h"
 #include "p4pc/os.h"
 #include "../config/p4cfg.h"
 #include <errno.h>
@@ -9,7 +10,7 @@
 /* The same precedence is used for on-demand discovery and startup. */
 static const char *configured_root(char path[1200], int *explicit_root)
 {
-    const char *root = getenv("P4PC_PACK_DIR");
+    const char *root = p4_host_getenv("P4PC_PACK_DIR");
     if (!root || !root[0]) root = p4cfg_get("packs.directory");
     *explicit_root = root && root[0];
     if (*explicit_root) return root;

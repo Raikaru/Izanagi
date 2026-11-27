@@ -1,0 +1,750 @@
+{
+  "proof_id": "L1-C5-native-model-sound-cue-bank-20261113",
+  "class": "PROVEN",
+  "runtime_status": "pending-seam",
+  "scope": "Only selected0061646f/754B. The1293-byte00617461 partition crosses actor8/9 and remains OPEN; absent bc009 paths and equal disabled/live cell counts do not close it.",
+  "method": "Typed old selector/publisher/cell reader -> actual native battle model identity producer/constructor -> native packed file loader -> Steam SE entry1 span -> actual native animation-row producer and cell reader. No visual/byte similarity admission.",
+  "sources": {
+    "steam_build": 10836033,
+    "steam_exe": "0f327c7669e6cac72aaf355181b1e51edd12fee4d71709fc1802dbf0da70546e",
+    "mapped_nso": "3ca371347fed826c5e8d110cbbe7388ca894bee185fa8db0abdb75dc36805637",
+    "original_ps2_elf": "f90675b8a38138ddb5dc5cdf641550f41800fcb86bb499c586073e964fb41836",
+    "policy": "Static code/data/archive analysis only; no game/emulator or protected.arch decode."
+  },
+  "ps2": {
+    "selected_address": "0x0061646f",
+    "selected_size": 754,
+    "selected_sha256": "571fefde06bcf055b353894c5aafa3873ac34e0f03b2a1f0217506c5443c8e01",
+    "bank_base": "0x0060ac00",
+    "bank_size": 57024,
+    "seasons": 2,
+    "actors_per_season": 11,
+    "actor_stride": 2592,
+    "actor_grid": [
+      27,
+      8,
+      12
+    ],
+    "selector": "btlSoundGetCharacterBank001f7650: genus0,base60ac00+charId*a20+(dayflags bit0?0:6f60); no charId-1 or other bias.",
+    "selected_view": {
+      "season": 1,
+      "char_id": 7,
+      "bank_base": "0x00616240",
+      "old_range": [
+        559,
+        1313
+      ],
+      "bank_sha256": "60a96c3ff6042db49a088ce52c8f44f61438909372a3302abf869d64d26507d3"
+    },
+    "publishers": [
+      "btlUnitApplyModelState0019d7a0(mode4); the0019d670 filename prefix is NOT this function address",
+      "btlEncounterFinishSetup0022b870"
+    ],
+    "reader": "mdlSE.c mdlSeFillEntryState0047e0f0, typed12-byte cells with first3 signed variants,u32flags,+8signed16slot; old row count27.",
+    "false_pointer": "PS25e0610 is within the Amrita Soda string, not an actual pointer to61646f; numeric string-parent leads do not supply bank identity."
+  },
+  "native_functions": [
+    {
+      "address": "0x7100005bd0",
+      "end": "0x7100005c20",
+      "sha256": "12e8ceb30d87617dbda54256635cabb3a8bb68526241e31400107cead078695c",
+      "role": "Only enemy genus1/id0x111 can remap to modeltype2/id0x110; party genus0 is not remapped here.",
+      "extent": "metadata range"
+    },
+    {
+      "address": "0x710005fcf0",
+      "end": "0x710005fdf0",
+      "sha256": "c4de507027d4d057189ad9c7afeccc8250f5e0c7bd3534bc5333517a1fb03453",
+      "role": "Actual unit list publishes packet modelId from unit+0xa4, not charId+1.",
+      "extent": "metadata range"
+    },
+    {
+      "address": "0x710006bee0",
+      "end": "0x710006bf90",
+      "sha256": "696abe263c451d74772a35004fbfbc3a0a7121b1bf3b068c1bcc8ee118d210f8",
+      "role": "Packet0x111/0x18-byte work owns unit pointer+0, default u16type+8=unit.genus(+0xa2)+1 and u16id+10=caller modelId; callbacks6bf90/6c070.",
+      "extent": "metadata range"
+    },
+    {
+      "address": "0x710006bf90",
+      "end": "0x710006c070",
+      "sha256": "1d55760f7c645f7e9a30270823b14ca6065e0d7ef732f3e2bc4dfd25aff772a9",
+      "role": "Existing model header404/406 compared to packet; real unit model owner+c60 is reused or actual cached model cloned.",
+      "extent": "metadata range"
+    },
+    {
+      "address": "0x710006c070",
+      "end": "0x710006c5c0",
+      "sha256": "d71c31de993ff0f45459712da9608ae4c5e566c6de06dd4f1da6ce491a1ed100",
+      "role": "Actual packet async data readiness, cache/clone or387c80 construction, publish unit+c60, wait actual model387350 then motion-state38f4d0 before scene adoption.",
+      "extent": "metadata range"
+    },
+    {
+      "address": "0x710006a3f0",
+      "end": "0x710006a720",
+      "sha256": "eb71105ac64a5aa24ff3f990dc4721374a29d91dbe6c212f874a5c73c318e306",
+      "role": "Actual battle generic motion -> native animation index via genus*34 table62d790, enemy override and hero index28/forced27 overrides; passes index into38a130 for real unit+c60, layer0.",
+      "extent": "metadata range"
+    },
+    {
+      "address": "0x7100280d10",
+      "end": "0x7100280d60",
+      "sha256": "83105e154127de36b08821d99c756d90bc0a71e2015ad0b6b20cc7c3ead33726",
+      "role": "Registers real game model hooks with385e60, including280d60 path,280f20 packed predicate,280f30 packed pathname,281240 sidecar SE requester.",
+      "extent": "metadata range"
+    },
+    {
+      "address": "0x7100280d60",
+      "end": "0x7100280f30",
+      "sha256": "82cef44365fc11ff9da420b4eecd6c70ec3a8ebcf64eabe80c53a0be16f58320",
+      "role": "Type1 model path uses actual equipment112e90(id,3), signed calendarC9D40/CABA0 for equipment0x700, costume arithmetic, flag1438 hero special and002050 mode override; emits model/player/bc%03X[_c%x].AMD.",
+      "extent": "metadata range"
+    },
+    {
+      "address": "0x7100280f20",
+      "end": "0x7100280f30",
+      "sha256": "455d1a5d9a5274d0cdf1f4acec12c788500cf1ee524695302a9d2c17a8397be2",
+      "role": "Positive packed-resource predicate: u16 model type<3.",
+      "extent": "leaf code span to next metadata entry;280f20 predicate is independently disassembled/decompiled, not part of preceding280d60 CFG"
+    },
+    {
+      "address": "0x7100280f30",
+      "end": "0x7100281040",
+      "sha256": "c86459ec176326f50e4ea14ad19b57fffc964fd243de674db3f0a06b48434fef",
+      "role": "Packed filename uses actual selected model filename stem, changes AMD suffix to pac and joins model/pack/; no id bias.",
+      "extent": "metadata range"
+    },
+    {
+      "address": "0x7100281240",
+      "end": "0x7100281400",
+      "sha256": "6c51511b5152f76a7327f14c183d5f7058003e02857e701e4bb7b28f3aed9640",
+      "role": "Actual model header type404/id406 and backing SE atEA0 drive sidecar requests; actual equipment/date costume selection, model/player/bc%03X[_c%x].se; type2 enemy alternative. Prefer actual adopted packed resource, not independent guessed filename.",
+      "extent": "metadata range"
+    },
+    {
+      "address": "0x7100385e60",
+      "end": "0x7100385f30",
+      "sha256": "aa2dbd60a75ad616af710632444e5cf8272ca6886c2a0d21011c974c52115680",
+      "role": "Installs game callbacks into actual mdlManager callback slots51c8f40..70.",
+      "extent": "metadata range"
+    },
+    {
+      "address": "0x7100387130",
+      "end": "0x7100387350",
+      "sha256": "fea592c4554cce5510a27281f5772615df30a9bf9be309262e4dfd5d7307454b",
+      "role": "Allocates0x1110-byte SDK model, stores constructor type/id directly at404/406; initializes real motion state atEA0.",
+      "extent": "metadata range"
+    },
+    {
+      "address": "0x7100387c80",
+      "end": "0x7100387d50",
+      "sha256": "5e65c67de1f2778944f3bfc16ca83c73eae1d20bd05a3b21cdedea0e8b40dcca",
+      "role": "For actual packed predicate, request data entry1 -> model constructor387b70, entry0 ->38f220(real model+EA0,type,id,SE data,size). Nonpacked uses model directly.",
+      "extent": "metadata range"
+    },
+    {
+      "address": "0x7100388580",
+      "end": "0x7100388600",
+      "sha256": "214da496b722975f236144c7fa3671039b2bdaebf9d3eb094ea8a977204b27ba",
+      "role": "Clone constructor copies exact original model header type404/id406; no +1 actor-ID reinterpretation.",
+      "extent": "metadata range"
+    },
+    {
+      "address": "0x710038a130",
+      "end": "0x710038a480",
+      "sha256": "6519fc8845e4165e8aa1fb4b1a21f8363568aae679f66ba839116426d6ac49b5",
+      "role": "Actual valid animation is adopted into real model layer; when layer0 and sound not suppressed, invokes38f6a0(model+EA0,actual animationId,blend), not legacy generic motion ordinal.",
+      "extent": "metadata range"
+    },
+    {
+      "address": "0x710038f360",
+      "end": "0x710038f4d0",
+      "sha256": "04330a15c7c31ba5ce4a387c46ee59330b0885b96f9b9cf51095da9a80a627a9",
+      "role": "SE stream entry2 when actual voice language3112c0 permits and present, otherwise0. Separately entry1 copied into owned backingrecord+8 and published as motionstate+16 cue grid. No stream-language-dependent cue index.",
+      "extent": "metadata range"
+    },
+    {
+      "address": "0x710038f4d0",
+      "end": "0x710038f5e0",
+      "sha256": "01b6d3feb33be3e2bbd69fa7b55c8513fa6ef92cd01abae7c00497920eab2150",
+      "role": "Polls real pending request398080, adopts398380 data through38f360, releases397cd0 and clearsrequest; waits actual audio readiness3a1370/activation3a23f0 before ready flags.",
+      "extent": "metadata range"
+    },
+    {
+      "address": "0x710038f5e0",
+      "end": "0x710038f610",
+      "sha256": "ad8fd24cff3ef19f4be6a4737faf8d7ff27b3d1611209b637006947360c4700e",
+      "role": "Shared SE clone increments backingrecord refcount+0x18, publishes actual record and record+8 cue pointer into destination state+16.",
+      "extent": "metadata range"
+    },
+    {
+      "address": "0x710038f640",
+      "end": "0x710038f6a0",
+      "sha256": "56907f4b3acf3fe9dc455d8825f405746b3c2711478570948b6f74fd92815f94",
+      "role": "Clears owner state backingrecord; decrements actual refcount+0x18; at0 releases real audio channel3a1fc0 and owned stream/cue buffers and record.",
+      "extent": "metadata range"
+    },
+    {
+      "address": "0x710038f6a0",
+      "end": "0x710038f800",
+      "sha256": "454d415f773c01691584e78f79cd312fbc61655de75abd386a2ec41ae9b219da",
+      "role": "Ready/enable guards, real no-grid branch, normal row request38f800(state,0,animationId), stores current row/blend/retry; preserves new type1 repeated-animation19 and14 special cases.",
+      "extent": "metadata range"
+    },
+    {
+      "address": "0x710038f800",
+      "end": "0x710038fa70",
+      "sha256": "b36469b10a0b5a15a37c43562f84f2d5e92ea38ae3930cd67f828d2e212dc69d",
+      "role": "Actual grid bound is row<=31,column<=7; cell address=state.cueGrid+row*96+column*12. Signed16 slot+8=-1 suppresses. Reads first3 signed variants and u32flags+4; native RNG33b010 and current audio slot/flags determine actual cue.",
+      "extent": "metadata range"
+    },
+    {
+      "address": "0x710038fa70",
+      "end": "0x710038fc00",
+      "sha256": "bd00577b812213d4464ef83f306d9ccc1072a30b408f29b983841722fb2d2aad",
+      "role": "Actual per-model SE tick polls request readiness, uses real float clock277bb0*0.5, actual audio operations and successive columns through38f800(current real row); stops beyond7.",
+      "extent": "metadata range"
+    },
+    {
+      "address": "0x7100396fa0",
+      "end": "0x7100397040",
+      "sha256": "5cb2666ed8b20b8c5decb484611d9756fb1834a7785e04555601e87ca4a7dd0e",
+      "role": "Native PAK-v2 indexed getter: u32count then36-byte header(u8name[32],u32size), sequential size+36 walk. Returns exact declared member; bounded trailer is not member payload.",
+      "extent": "metadata range"
+    }
+  ],
+  "native_motion_index_table": {
+    "nso_address": "0x710062d790",
+    "rows": 3,
+    "stride": 34,
+    "values": [
+      [
+        0,
+        2,
+        14,
+        13,
+        3,
+        4,
+        5,
+        6,
+        0,
+        16,
+        17,
+        18,
+        15,
+        7,
+        8,
+        9,
+        10,
+        1,
+        13,
+        19,
+        20,
+        22,
+        21,
+        12,
+        11,
+        6,
+        23,
+        24,
+        25,
+        26,
+        28,
+        29,
+        30,
+        31
+      ],
+      [
+        0,
+        3,
+        2,
+        1,
+        4,
+        4,
+        0,
+        4,
+        5,
+        8,
+        9,
+        10,
+        7,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        11,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        1,
+        2,
+        3,
+        4,
+        0,
+        5,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    ],
+    "sha256": "a929b0f17557703ff08bb93424abe97ed145444960325bfe786a21735e2647cb"
+  },
+  "ordinary_steam_motion_reader": {
+    "function_rva": "0xc6a30",
+    "end_rva": "0xc6b5b",
+    "section": ".shared",
+    "raw_offset": 811056,
+    "sha256": "9c0fd6bef4e2ee1c931f171414a775ad2d40562a4aa2ab6c5f4330f2840890aa",
+    "disassembly": [
+      "0xc6a30 mov qword ptr [rsp + 8], rbx",
+      "0xc6a35 push rdi",
+      "0xc6a36 sub rsp, 0x20",
+      "0xc6a3a mov rdi, rcx",
+      "0xc6a3d movzx ebx, dx",
+      "0xc6a40 lea rcx, [rip + 0x1e3e9087]",
+      "0xc6a47 call 0x881a04",
+      "0xc6a4c movzx edx, byte ptr [rdi + 0xa2]",
+      "0xc6a53 mov r8d, edx",
+      "0xc6a56 test edx, edx",
+      "0xc6a58 je 0xc6b16",
+      "0xc6a5e sub r8d, 1",
+      "0xc6a62 je 0xc6a7b",
+      "0xc6a64 cmp r8d, 1",
+      "0xc6a68 je 0xc6b16",
+      "0xc6a6e xor eax, eax",
+      "0xc6a70 mov rbx, qword ptr [rsp + 0x30]",
+      "0xc6a75 add rsp, 0x20",
+      "0xc6a79 pop rdi",
+      "0xc6a7a ret ",
+      "0xc6a7b cmp dl, 1",
+      "0xc6a7e jne 0xc6b16",
+      "0xc6a84 mov rax, qword ptr [rip + 0xdf9e65]",
+      "0xc6a8b mov rcx, qword ptr [rax + 0x11c8]",
+      "0xc6a92 test rcx, rcx",
+      "0xc6a95 je 0xc6b16",
+      "0xc6a97 movzx r8d, word ptr [rdi + 0xa4]",
+      "0xc6a9f mov r9d, 0x10d",
+      "0xc6aa5 cmp r8w, r9w",
+      "0xc6aa9 je 0xc6b09",
+      "0xc6aab mov r9d, 0x10f",
+      "0xc6ab1 cmp r8w, r9w",
+      "0xc6ab5 je 0xc6ae4",
+      "0xc6ab7 jbe 0xc6ac5",
+      "0xc6ab9 mov r9d, 0x111",
+      "0xc6abf cmp r8w, r9w",
+      "0xc6ac3 jbe 0xc6b09",
+      "0xc6ac5 movzx r9d, bx",
+      "0xc6ac9 movzx r8d, byte ptr [r9 + rax + 0x11a0]",
+      "0xc6ad2 test r8b, r8b",
+      "0xc6ad5 js 0xc6add",
+      "0xc6ad7 movsx eax, r8b",
+      "0xc6adb jmp 0xc6b10",
+      "0xc6add movzx eax, byte ptr [r9 + rcx]",
+      "0xc6ae2 jmp 0xc6b10",
+      "0xc6ae4 test bx, bx",
+      "0xc6ae7 je 0xc6aef",
+      "0xc6ae9 cmp bx, 0x12",
+      "0xc6aed jne 0xc6b09",
+      "0xc6aef cmp word ptr [rax + 0x11d0], 3",
+      "0xc6af7 je 0xc6b09",
+      "0xc6af9 mov eax, 0xb",
+      "0xc6afe mov rbx, qword ptr [rsp + 0x30]",
+      "0xc6b03 add rsp, 0x20",
+      "0xc6b07 pop rdi",
+      "0xc6b08 ret ",
+      "0xc6b09 movzx eax, bx",
+      "0xc6b0c movzx eax, byte ptr [rax + rcx]",
+      "0xc6b10 cmp ax, -1",
+      "0xc6b14 jne 0xc6b50",
+      "0xc6b16 imul rcx, rdx, 0x22",
+      "0xc6b1a movzx eax, bx",
+      "0xc6b1d add rcx, rax",
+      "0xc6b20 lea rax, [rip + 0x844339]",
+      "0xc6b27 test dword ptr [rdi + 0xc8], 0x100",
+      "0xc6b31 movzx eax, byte ptr [rcx + rax]",
+      "0xc6b35 je 0xc6b50",
+      "0xc6b37 test dl, dl",
+      "0xc6b39 jne 0xc6b50",
+      "0xc6b3b cmp word ptr [rdi + 0xa4], 1",
+      "0xc6b43 jne 0xc6b50",
+      "0xc6b45 cmp bx, 1",
+      "0xc6b49 jne 0xc6b50",
+      "0xc6b4b mov eax, 0x1c",
+      "0xc6b50 mov rbx, qword ptr [rsp + 0x30]",
+      "0xc6b55 add rsp, 0x20",
+      "0xc6b59 pop rdi",
+      "0xc6b5a ret "
+    ]
+  },
+  "packages": [
+    {
+      "path": "data.cpk::model/pack/bc007.pac",
+      "kind": "pak-v2",
+      "size": 768140,
+      "sha256": "792b99f9a440f3f4858520718527db688f801abf6330d029484ee6d2aad83dac",
+      "members": [
+        {
+          "index": 0,
+          "name": "bc007.se",
+          "offset": 40,
+          "size": 214816,
+          "sha256": "49a60afdd024321e6c399728afb74b85e765c1fcf560c146e198e36a34608a06"
+        },
+        {
+          "index": 1,
+          "name": "bc007.AMD",
+          "offset": 214892,
+          "size": 553248,
+          "sha256": "b59ded295cfe43f4a623fdafcb8b0e986f48ccbb7bc16d4f31e2b20ed1e83c2e"
+        }
+      ]
+    },
+    {
+      "path": "data.cpk::model/pack/bc007_c1.pac",
+      "kind": "pak-v2",
+      "size": 749644,
+      "sha256": "2eb7708ac0b163237472575763bb0693d98d89b8e3654e53c065b1df0ff6ee30",
+      "members": [
+        {
+          "index": 0,
+          "name": "bc007_c1.se",
+          "offset": 40,
+          "size": 202432,
+          "sha256": "f83e3278b4109fa4a3a55f05cbaee031a3f15ceaca6b6af59d47243931c3716d"
+        },
+        {
+          "index": 1,
+          "name": "bc007_c1.AMD",
+          "offset": 202508,
+          "size": 547136,
+          "sha256": "6941d1007289fd103cbc987c28530d2934a31a9b4b10c13560186afe6e942f33"
+        }
+      ]
+    }
+  ],
+  "source_members": [
+    {
+      "path": "data.cpk::model/pack/bc007.pac::bc007.se",
+      "depth": 2,
+      "container": "pak-v2",
+      "stored": 214816,
+      "compressed": false,
+      "size": 214816,
+      "sha256": "49a60afdd024321e6c399728afb74b85e765c1fcf560c146e198e36a34608a06",
+      "signature": "magic:03000000",
+      "magic": "03000000",
+      "kind": "pak-v2",
+      "children": 3,
+      "trailer": {
+        "offset": 214800,
+        "size": 16,
+        "hex": "85082a40a0bc82412a7d200ce36ddd6c",
+        "sha256": "b028d8a569065b4e7e784923a16c78199b3398cb75f4b73b12e6ac6e5621afce"
+      }
+    },
+    {
+      "path": "data.cpk::model/pack/bc007.pac::bc007.se::bc007.acb",
+      "depth": 3,
+      "container": "pak-v2",
+      "stored": 82976,
+      "compressed": false,
+      "size": 82976,
+      "sha256": "fd53963dd7fe2650531dba07cb86e8e403daf903de54645180763eca53976ec8",
+      "signature": "cri-utf",
+      "magic": "40555446"
+    },
+    {
+      "path": "data.cpk::model/pack/bc007.pac::bc007.se::bc007.bin",
+      "depth": 3,
+      "container": "pak-v2",
+      "stored": 3072,
+      "compressed": false,
+      "size": 3072,
+      "sha256": "aa9a51aa3f395f2b282f22d767793cc8a7d0a883de0ca8b602d3f5f72a0196d5",
+      "signature": "magic:ffffff00",
+      "magic": "ffffff00"
+    },
+    {
+      "path": "data.cpk::model/pack/bc007.pac::bc007.se::bc007_e.acb",
+      "depth": 3,
+      "container": "pak-v2",
+      "stored": 128640,
+      "compressed": false,
+      "size": 128640,
+      "sha256": "83bdd3da80edcdd97803d05d11e11b58bd0fc9ceb3bf588913fb63f854892bbc",
+      "signature": "cri-utf",
+      "magic": "40555446"
+    },
+    {
+      "path": "data.cpk::model/pack/bc007_c1.pac::bc007_c1.se",
+      "depth": 2,
+      "container": "pak-v2",
+      "stored": 202432,
+      "compressed": false,
+      "size": 202432,
+      "sha256": "f83e3278b4109fa4a3a55f05cbaee031a3f15ceaca6b6af59d47243931c3716d",
+      "signature": "magic:03000000",
+      "magic": "03000000",
+      "kind": "pak-v2",
+      "children": 3,
+      "trailer": {
+        "offset": 202416,
+        "size": 16,
+        "hex": "00000064002702271000280400000064",
+        "sha256": "778fb821767dafe403fc9ea0121afb6cf2662c0220155840eeb7d5b8e088fde1"
+      }
+    },
+    {
+      "path": "data.cpk::model/pack/bc007_c1.pac::bc007_c1.se::bc007_c1.acb",
+      "depth": 3,
+      "container": "pak-v2",
+      "stored": 78144,
+      "compressed": false,
+      "size": 78144,
+      "sha256": "236e3204607dd0dc400f3d8169c739b55b3bf0081c2f365ed112347fd24dbdf6",
+      "signature": "cri-utf",
+      "magic": "40555446"
+    },
+    {
+      "path": "data.cpk::model/pack/bc007_c1.pac::bc007_c1.se::bc007_c1.bin",
+      "depth": 3,
+      "container": "pak-v2",
+      "stored": 3072,
+      "compressed": false,
+      "size": 3072,
+      "sha256": "12ed058756c8b2b1272dd411445b079f340174e885f76f2024e4217d1a5e5c62",
+      "signature": "magic:ffffff00",
+      "magic": "ffffff00"
+    },
+    {
+      "path": "data.cpk::model/pack/bc007_c1.pac::bc007_c1.se::bc007_c1_e.acb",
+      "depth": 3,
+      "container": "pak-v2",
+      "stored": 121088,
+      "compressed": false,
+      "size": 121088,
+      "sha256": "6982d8d741e38bbcbb5293bbfbc38a2a695557f5c694a4b140ad8c07ea19fb8f",
+      "signature": "cri-utf",
+      "magic": "40555446"
+    }
+  ],
+  "native_cell_layout": {
+    "row_count": 32,
+    "column_count": 8,
+    "cell_stride": 12,
+    "fields": [
+      {
+        "offset": 0,
+        "type": "s8[4]",
+        "consumed": "first3 variants; fourth byte is not a pointer"
+      },
+      {
+        "offset": 4,
+        "type": "u32flags"
+      },
+      {
+        "offset": 8,
+        "type": "s16slotId",
+        "sentinel": -1
+      },
+      {
+        "offset": 10,
+        "type": "s16padding"
+      }
+    ],
+    "owned_pointer": "native model+EA0 motionstate+16; backingrecord+8"
+  },
+  "negative_evidence": [
+    "bc008_c1 was visible only because the old parser accepted its zero trailer; bc007/bc007_c1/bc008 valid nonzero trailers hid their3declared children. Census coverage bias is NOT an actor-ID mapping.",
+    "Equal active-cell counts(15 for actor7,24 for actor8) and repeatedFFFF cells are consistency metadata only, not source evidence.",
+    "No raw legacy offset559..1313 projection into the3072-byte file is admitted. Old27-row ordinals are not assumed equal to native32-row animation IDs.",
+    "No claim that a missing bc009 CPK name proves actor9 has no Golden counterpart. Cross-actor00617461 remains OPEN."
+  ],
+  "required_seams": [
+    {
+      "owner": "real battle unit, model packet and model cache identity",
+      "requirement": "Bind every legacy reader/publisher for the selected actor7 bank to the actual unit and its actual adopted model, not a diagnostic table. Native5fcf0 supplies modelId=unit+0xa4;6bee0 defaults type=genus+1,id=modelId, with positively enemy-only5bd0 remapping.6bf90/6c070 use real model cache/request and publish unit+c60; SDK387130 stores type/id404/406 and clone388580 preserves them. Actor7 is model7 on the normal party path, NOT model008. Preserve real request success/readiness and failures; never fabricate a model/cache hit."
+    },
+    {
+      "owner": "actual equipment, date, mode, locale/mount and packed model resource producer",
+      "requirement": "Use the actual selected/adopted PAC model resource, whose native entry0 is SE and entry1 is AMD.280f20 positively selects packed types<3;280f30 derives model/pack/bc007[_cX].pac from280d60 actual model stem. Equipment112e90(modelId,3) is read from actual current character state (global9f8ac0,0x84-byte actor stride,field index3); equipment0x700 uses signed current dateC9D40 and(~CABA0(date))&1: default season1 is_c1. Otherwise costume=signed(equipment-(equipment>=0x701?0x701:0x6fa))>>3, truncatedu16; preserve hero1438 special and002050 model-mode override. Do not force equipment0x700, force one calendar branch, infer a +1 ID bias, select bc008 from incomplete census, or rebuild sidecar selection independently of the actual packed request. Real alternate model/costume states must follow their actual resource owner."
+    },
+    {
+      "owner": "native complete cue-bank ownership and asynchronous lifetime",
+      "requirement": "Native387c80 sends outer PAC entry0 to38f220;38f360 uses inner SE entry1 as the whole owned3072-byte native cue grid, independently of voice stream entry0/2. Preserve actual model+EA0 motion-state/backing-record, request+0x28 readiness/release, audio-slot+0x14 readiness, flags+0x22 and owned buffer+8 publication to state+16. Clones increment real refcount+0x18 through38f5e0; teardown38f640 releases last audio slot and stream/cue buffers. No pointer into temporary PAC memory, retained PS2 stream/grid, synthetic readiness or arbitrary zero bank."
+    },
+    {
+      "owner": "real Golden generic-motion to animation-row producer and typed consumer cutover",
+      "requirement": "This is a whole native logical-bank cutover, NOT a754-byte copy at legacy offset559 and NOT a27-to32 row-number bijection. Native6a3f0 and ordinary Steam.sharedc6a30 use real genus and generic motion through the complete3*34 table (Steam90ae60/NSO62d790), plus actual enemy/hero/forced-row overrides.38a130 passes the actual adopted layer0 animation ID into38f6a0, then38f800 reads native32*8*12 cells. Bind all old direct/translated/inlined bank publishers and readers, including mode4/encounter adoption and clone paths, to these actual native animation IDs and native complete bank; do not feed old generic motion ordinals or guessed shifted row indexes into it. Actual32-row Golden values and native sound-slot namespaces replace the old27-row interpretation."
+    },
+    {
+      "owner": "real audio state, RNG, frame progression and runtime qualification",
+      "requirement": "Preserve real enabled/ready/no-grid branches, actual current row/blend/retry/columns0..7, native float RNG33b010, signed variants/slot sentinel and flags, sound channel routing, repeated-motion rules(type1 includes native19 and14), and actual frame clock277bb0*0.5 through38fa70. Qualify active/suppressed cues, both default season packages, costume/mode selection, voice-language selection without changing cue-bank entry1, asynchronous ready/not-ready, clone ownership and final teardown through real gameplay consumers. Source proof is runtime pending-seam; no audio/gameplay execution or GoldenM6b binding is claimed."
+    }
+  ],
+  "admissions": [
+    {
+      "address": "0x0061646f",
+      "ps2_size": 754,
+      "role": "season1/party7 model animation sound-cue bank partition",
+      "golden": {
+        "kind": "native-model-sound-cue-bank",
+        "container": "data.cpk",
+        "member": "model/pack/bc007_c1.pac::bc007_c1.se::bc007_c1.bin",
+        "offset": 0,
+        "size": 3072,
+        "sha256": "12ed058756c8b2b1272dd411445b079f340174e885f76f2024e4217d1a5e5c62",
+        "source_build": 10836033,
+        "source_group": "L1-C5-native-model-sound-cue-bank-20261113",
+        "mapping_proven": true,
+        "selection": "Default season1/actor7 correspondence; actual runtime bank follows the actual adopted model PAC and real equipment/date/mode producer, never an old byte-window.",
+        "variants": [
+          {
+            "path": "data.cpk::model/pack/bc007.pac::bc007.se::bc007.bin",
+            "size": 3072,
+            "sha256": "aa9a51aa3f395f2b282f22d767793cc8a7d0a883de0ca8b602d3f5f72a0196d5",
+            "rows": 32,
+            "columns": 8,
+            "cell_stride": 12,
+            "active_cells": 15
+          },
+          {
+            "path": "data.cpk::model/pack/bc007_c1.pac::bc007_c1.se::bc007_c1.bin",
+            "size": 3072,
+            "sha256": "12ed058756c8b2b1272dd411445b079f340174e885f76f2024e4217d1a5e5c62",
+            "rows": 32,
+            "columns": 8,
+            "cell_stride": 12,
+            "active_cells": 15
+          }
+        ],
+        "native_shape": {
+          "rows": 32,
+          "columns": 8,
+          "cell_stride": 12
+        },
+        "legacy_projection": "none; required whole native logical-bank and real motion-input consumer cutover"
+      },
+      "layout": {
+        "kind": "native-complete-logical-cue-bank",
+        "old_grid": [
+          27,
+          8,
+          12
+        ],
+        "new_grid": [
+          32,
+          8,
+          12
+        ],
+        "selected_old_range": [
+          559,
+          1313
+        ],
+        "copy_policy": "No byte-copy projection; migrate complete native bank ownership and actual native model animation/audio consumers."
+      },
+      "required_seams": [
+        {
+          "owner": "real battle unit, model packet and model cache identity",
+          "requirement": "Bind every legacy reader/publisher for the selected actor7 bank to the actual unit and its actual adopted model, not a diagnostic table. Native5fcf0 supplies modelId=unit+0xa4;6bee0 defaults type=genus+1,id=modelId, with positively enemy-only5bd0 remapping.6bf90/6c070 use real model cache/request and publish unit+c60; SDK387130 stores type/id404/406 and clone388580 preserves them. Actor7 is model7 on the normal party path, NOT model008. Preserve real request success/readiness and failures; never fabricate a model/cache hit."
+        },
+        {
+          "owner": "actual equipment, date, mode, locale/mount and packed model resource producer",
+          "requirement": "Use the actual selected/adopted PAC model resource, whose native entry0 is SE and entry1 is AMD.280f20 positively selects packed types<3;280f30 derives model/pack/bc007[_cX].pac from280d60 actual model stem. Equipment112e90(modelId,3) is read from actual current character state (global9f8ac0,0x84-byte actor stride,field index3); equipment0x700 uses signed current dateC9D40 and(~CABA0(date))&1: default season1 is_c1. Otherwise costume=signed(equipment-(equipment>=0x701?0x701:0x6fa))>>3, truncatedu16; preserve hero1438 special and002050 model-mode override. Do not force equipment0x700, force one calendar branch, infer a +1 ID bias, select bc008 from incomplete census, or rebuild sidecar selection independently of the actual packed request. Real alternate model/costume states must follow their actual resource owner."
+        },
+        {
+          "owner": "native complete cue-bank ownership and asynchronous lifetime",
+          "requirement": "Native387c80 sends outer PAC entry0 to38f220;38f360 uses inner SE entry1 as the whole owned3072-byte native cue grid, independently of voice stream entry0/2. Preserve actual model+EA0 motion-state/backing-record, request+0x28 readiness/release, audio-slot+0x14 readiness, flags+0x22 and owned buffer+8 publication to state+16. Clones increment real refcount+0x18 through38f5e0; teardown38f640 releases last audio slot and stream/cue buffers. No pointer into temporary PAC memory, retained PS2 stream/grid, synthetic readiness or arbitrary zero bank."
+        },
+        {
+          "owner": "real Golden generic-motion to animation-row producer and typed consumer cutover",
+          "requirement": "This is a whole native logical-bank cutover, NOT a754-byte copy at legacy offset559 and NOT a27-to32 row-number bijection. Native6a3f0 and ordinary Steam.sharedc6a30 use real genus and generic motion through the complete3*34 table (Steam90ae60/NSO62d790), plus actual enemy/hero/forced-row overrides.38a130 passes the actual adopted layer0 animation ID into38f6a0, then38f800 reads native32*8*12 cells. Bind all old direct/translated/inlined bank publishers and readers, including mode4/encounter adoption and clone paths, to these actual native animation IDs and native complete bank; do not feed old generic motion ordinals or guessed shifted row indexes into it. Actual32-row Golden values and native sound-slot namespaces replace the old27-row interpretation."
+        },
+        {
+          "owner": "real audio state, RNG, frame progression and runtime qualification",
+          "requirement": "Preserve real enabled/ready/no-grid branches, actual current row/blend/retry/columns0..7, native float RNG33b010, signed variants/slot sentinel and flags, sound channel routing, repeated-motion rules(type1 includes native19 and14), and actual frame clock277bb0*0.5 through38fa70. Qualify active/suppressed cues, both default season packages, costume/mode selection, voice-language selection without changing cue-bank entry1, asynchronous ready/not-ready, clone ownership and final teardown through real gameplay consumers. Source proof is runtime pending-seam; no audio/gameplay execution or GoldenM6b binding is claimed."
+        }
+      ]
+    }
+  ],
+  "counts": {
+    "admitted_objects": 1,
+    "admitted_ps2_partition_bytes": 754,
+    "cohort_PROVEN_after": 61,
+    "cohort_PROVEN_bytes_after": 57223,
+    "cohort_OPEN_after": 16,
+    "cohort_OPEN_bytes_after": 2043,
+    "runtime_bound_objects": 0
+  },
+  "native_offsets": {
+    "battle_unit": {
+      "genus": "0xa2",
+      "character_id": "0xa4",
+      "adopted_model": "0xc60"
+    },
+    "model": {
+      "type": "0x404",
+      "id": "0x406",
+      "motion_state": "0xea0"
+    },
+    "motion_state": {
+      "backing_record": "0x0",
+      "current_row": "0x8",
+      "blend": "0xa",
+      "retry_column": "0xc",
+      "cue_grid_pointer": "0x10",
+      "flags": "0x18"
+    },
+    "backing_record": {
+      "stream_pointer": "0x0",
+      "cue_grid_pointer": "0x8",
+      "audio_slot": "0x14",
+      "reference_count": "0x18",
+      "model_type": "0x1c",
+      "model_id": "0x1e",
+      "mode": "0x20",
+      "ready_flags": "0x22",
+      "request": "0x28"
+    }
+  }
+}

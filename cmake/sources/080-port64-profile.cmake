@@ -180,9 +180,9 @@ if(P4_PORT64 AND NOT P4_WIN32 AND ((CMAKE_SYSTEM_NAME STREQUAL "Linux" AND (CMAK
       set(obj "${P4_G64}/units/${rel}.64.o")
       add_custom_command(OUTPUT "${obj}"
         COMMAND ${P4_PORT64_ENV} "${P4_PYTHON}" -W ignore "${CMAKE_SOURCE_DIR}/tools/port64/unit64.py" build --gen "${P4_GEN}" --root "${CMAKE_SOURCE_DIR}"
-                --unit "${rel}" --abi "${P4_G64}/abi.json" --out "${obj}" --clang "${CMAKE_C_COMPILER}" --check --opt "${P4_PORT64_OPT}"
+                --decomp "${P4_DECOMP}" --unit "${rel}" --abi "${P4_G64}/abi.json" --out "${obj}" --clang "${CMAKE_C_COMPILER}" --check --opt "${P4_PORT64_OPT}"
                 ${P4_PORT64_LAUNCHER} ${P4_AUTO_INIT_ARGS}
-        DEPENDS "${P4_GEN}/decomp/${rel}" "${P4_G64}/abi.json" ${P4_PORT64_TOOLS} DEPFILE "${obj}.d" JOB_POOL port64 VERBATIM)
+        DEPENDS "${P4_GEN}/decomp/${rel}" "${P4_G64}/abi.json" ${P4_PORT64_TOOLS} ${P4_DECOMP_SYMBOL_FILES} DEPFILE "${obj}.d" JOB_POOL port64 VERBATIM)
       list(APPEND P4_PORT64_OBJS "${obj}")
     endforeach()
     set(P4_CENSUS_STAMP)
@@ -202,8 +202,8 @@ if(P4_PORT64 AND NOT P4_WIN32 AND ((CMAKE_SYSTEM_NAME STREQUAL "Linux" AND (CMAK
       add_custom_command(OUTPUT "${generated}.i"
         BYPRODUCTS "${generated}.census" "${generated}.unsup"
         COMMAND ${P4_PORT64_ENV} "${P4_PYTHON}" -W ignore "${CMAKE_SOURCE_DIR}/tools/port64/unit64.py" build --gen "${P4_GEN}" --root "${CMAKE_SOURCE_DIR}"
-                --unit "${rel}" --abi "${P4_G64}/abi.json" --out "${generated}" --clang "${CMAKE_C_COMPILER}" --check --generate-only
-        DEPENDS "${P4_GEN}/decomp/${rel}" "${P4_G64}/abi.json" ${P4_PORT64_TOOLS} DEPFILE "${generated}.d" JOB_POOL port64 VERBATIM)
+                --decomp "${P4_DECOMP}" --unit "${rel}" --abi "${P4_G64}/abi.json" --out "${generated}" --clang "${CMAKE_C_COMPILER}" --check --generate-only
+        DEPENDS "${P4_GEN}/decomp/${rel}" "${P4_G64}/abi.json" ${P4_PORT64_TOOLS} ${P4_DECOMP_SYMBOL_FILES} DEPFILE "${generated}.d" JOB_POOL port64 VERBATIM)
       list(APPEND P4_PORT64_GENERATED "${generated}.i")
     endforeach()
     p4_census_check(P4_GENERATION_CENSUS_STAMP "${P4_G64_GENERATION}/units" "${P4_CENSUS_BASELINE}" "${P4_PORT64_UNITS}" ${P4_PORT64_GENERATED})
@@ -230,9 +230,9 @@ if(P4_PORT64 AND NOT P4_WIN32 AND ((CMAKE_SYSTEM_NAME STREQUAL "Linux" AND (CMAK
           add_custom_command(OUTPUT "${obj}"
             COMMAND "${CMAKE_COMMAND}" -E env "P4_PORT64_TARGET=--target=x86_64-w64-mingw32"
                     "${P4_PYTHON}" -W ignore "${CMAKE_SOURCE_DIR}/tools/port64/unit64.py" build --gen "${P4_GEN}" --root "${CMAKE_SOURCE_DIR}"
-                    --unit "${rel}" --abi "${P4_G64}/abi.json" --out "${obj}" --clang "${CMAKE_C_COMPILER}" --check --opt "${P4_PORT64W_OPT}"
+                    --decomp "${P4_DECOMP}" --unit "${rel}" --abi "${P4_G64}/abi.json" --out "${obj}" --clang "${CMAKE_C_COMPILER}" --check --opt "${P4_PORT64W_OPT}"
                     ${P4_PORT64W_LAUNCHER} ${P4_AUTO_INIT_ARGS}
-            DEPENDS "${P4_GEN}/decomp/${rel}" "${P4_G64}/abi.json" ${P4_PORT64_TOOLS} DEPFILE "${obj}.d" JOB_POOL port64 VERBATIM)
+            DEPENDS "${P4_GEN}/decomp/${rel}" "${P4_G64}/abi.json" ${P4_PORT64_TOOLS} ${P4_DECOMP_SYMBOL_FILES} DEPFILE "${obj}.d" JOB_POOL port64 VERBATIM)
           list(APPEND P4_PORT64W_OBJS "${obj}")
         endforeach()
         p4_census_check(P4_CENSUS_STAMPW "${P4_G64W}/units" "${CMAKE_SOURCE_DIR}/config/port64w_census.txt" "${P4_PORT64_UNITS}" ${P4_PORT64W_OBJS})

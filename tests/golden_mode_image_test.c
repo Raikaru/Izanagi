@@ -12,6 +12,7 @@
 #include "p4pc/package_boot.h"
 #include "p4pc/package_memory.h"
 #include "p4pc/mod_save.h"
+#include "golden_cache_fixture.h"
 #include "guest_test.h"
 #include "no_resource_work.h"
 #include "mod_save_internal.h"
@@ -255,13 +256,10 @@ int main(int argc,char **argv)
         const P4GoldenModeIdentitySource s={"fixture::fusion","bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"};
         assert(!p4_golden_mode_identity_build(&identity,"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",&s,1,reason,sizeof reason));
     }
-#ifdef _WIN32
-    /* Match the M5 pipeline fixture: Windows' profile Temp can itself have a
-     * checkout ancestor. CTest's build directory is outside the source tree. */
-    const char *temp=".";
-#else
-    const char *temp=getenv("TMPDIR"); if(!temp || !*temp) temp="/tmp";
-#endif
+    /* Same preference-directory rule as the other cache fixtures: the cache refuses a checkout ancestor, and the build
+     * tree can sit inside one (the public CI builds in <checkout>/build/..., so the working directory is not outside it);
+     * the fixture's TEMP/TMPDIR is. */
+    const char *temp=golden_cache_fixture_temp(); if(!temp) return 1;
     assert(snprintf(root,sizeof root,"%s/golden-image-%llu",temp,(unsigned long long)p4_os_now_ns())>0);
     assert(!p4_os_mkdir(root));
     snprintf(pref,sizeof pref,"%s/pref",root); assert(!p4_os_mkdir(pref));

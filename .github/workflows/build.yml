@@ -65,9 +65,9 @@ jobs:
         id: key
         run: |
           # everything the image is built from: the Dockerfile and what it copies in (the other files of ci/ are other images' and the macOS scripts')
-          sources=$(awk '$1 == "COPY" || $1 == "ADD" { print $2 }' ci/Dockerfile | grep -v '^win32/' || true)
+          sources=$(awk '$1 == "COPY" || $1 == "ADD" { print $2 }' ci/Dockerfile | grep -v -e '^win32/' -e '^ffmpeg-7.1.1-hca-window-alignment.patch$' || true)
           [ -z "$sources" ] || { echo "::error::ci/Dockerfile copies $sources: add it to the image key in build.yml (hashFiles below)"; exit 1; }
-          echo "key=${{ hashFiles('ci/Dockerfile', 'ci/win32/**') }}" >> "$GITHUB_OUTPUT"
+          echo "key=${{ hashFiles('ci/Dockerfile', 'ci/win32/**', 'ci/ffmpeg-7.1.1-hca-window-alignment.patch') }}" >> "$GITHUB_OUTPUT"
       - uses: ./.github/actions/ci-image
         with:
           name: izanagi-ci
